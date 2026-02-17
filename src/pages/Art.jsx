@@ -50,10 +50,11 @@ function ArtTradingCard({ art, user, onClick }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      onClick={onClick}
-      className="bg-white rounded-2xl border border-[#EDE9E3] overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    onClick={onClick}
+    className="rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+    style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}
     >
       <div className="aspect-square overflow-hidden relative">
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
@@ -64,14 +65,14 @@ function ArtTradingCard({ art, user, onClick }) {
         )}
       </div>
       <div className="p-3">
-        <p className="text-sm font-semibold text-[#2C2C2C] truncate">{art.title}</p>
-        <p className="text-[10px] text-[#9B9B9B] mt-0.5 truncate">{art.creator_name}</p>
+        <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+        <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
         {art.price > 0 && (
           <div className="flex items-center justify-between mt-2">
-            <span className="text-sm font-bold text-[#2C2C2C]">⬡ {art.price}</span>
+            <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>⬡ {art.price}</span>
             <div className="flex items-center gap-1.5">
               <Sparkline points={history} positive={positive} />
-              <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${positive ? "text-[#7C8C6E]" : "text-rose-500"}`}>
+              <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${positive ? "" : "text-rose-500"}`} style={positive ? { color: "var(--accent-primary)" } : {}}>
                 {positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {Math.abs(change)}%
               </span>
@@ -317,19 +318,19 @@ export default function Art() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)" }}>
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
-          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)" }}>Art Market</h1>
-          <p className="text-xs text-[#9B9B9B] mt-0.5">Trade digital art with coins</p>
+          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art Market</h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Trade digital art with coins</p>
         </div>
-        <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full bg-[#7C8C6E] text-white shadow-sm">
+        <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5">
-        <TabsList className="bg-[#F5F0EB] rounded-xl w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
+        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
           <TabsTrigger value="market" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Market</TabsTrigger>
           <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Gallery</TabsTrigger>
         </TabsList>
