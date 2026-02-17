@@ -233,6 +233,7 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
             )}
           </div>
         </div>
+        </div>
       </motion.div>
     </motion.div>
   );
