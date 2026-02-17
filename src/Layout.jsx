@@ -23,13 +23,13 @@ export default function Layout({ children, currentPageName }) {
   const hideNav = ["PostDetail", "LiveRoomView", "GamePlay"].includes(currentPageName);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
       <div className="max-w-lg mx-auto relative pb-20">
         {children}
       </div>
 
       {!hideNav && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)" }}>
+        <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)" }}>
           <div className="max-w-lg mx-auto flex justify-around items-center py-2 px-2">
             {navItems.map((item) => {
               const isActive = currentPageName === item.page;
@@ -37,11 +37,8 @@ export default function Layout({ children, currentPageName }) {
                 <Link
                   key={item.name}
                   to={createPageUrl(item.page)}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                    isActive 
-                      ? "text-[#7C8C6E]" 
-                      : "text-[#9B9B9B] hover:text-[#6B6B6B]"
-                  }`}
+                  className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200"
+                  style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}
                 >
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   <span className="text-[10px] font-medium">{item.name}</span>
