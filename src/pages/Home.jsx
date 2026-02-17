@@ -61,29 +61,31 @@ export default function Home() {
   const visiblePosts = filtered.slice(currentIndex);
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-warm)" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
-      <div className="px-5 pt-5 pb-3 shrink-0" style={{ backgroundColor: "rgba(250,248,245,0.97)", backdropFilter: "blur(12px)" }}>
+      <div className="px-5 pt-5 pb-3 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)" }}>Thoughts</h1>
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Thoughts</h1>
           <div className="flex items-center gap-2">
-            {/* View toggle */}
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
-              className="p-2 rounded-full bg-white border border-[#EDE9E3] text-[#6B6B6B]"
+              className="p-2 rounded-full border"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
               title={viewMode === "swipe" ? "Switch to list" : "Switch to swipe"}
             >
               {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
             </button>
             <button
               onClick={() => { setCurrentIndex(0); refetch(); }}
-              className="p-2 rounded-full bg-white border border-[#EDE9E3] text-[#6B6B6B]"
+              className="p-2 rounded-full border"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="p-2 rounded-full bg-[#7C8C6E] text-white shadow-sm"
+              className="p-2 rounded-full text-white shadow-sm"
+              style={{ backgroundColor: "var(--accent-primary)" }}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -96,11 +98,12 @@ export default function Home() {
             <button
               key={val}
               onClick={() => { setActiveFilter(val); setCurrentIndex(0); }}
-              className={`px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all ${
-                activeFilter === val
-                  ? "bg-[#7C8C6E] text-white border-[#7C8C6E]"
-                  : "bg-white text-[#6B6B6B] border-[#EDE9E3]"
-              }`}
+              className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+              style={{
+                backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
+                color: activeFilter === val ? "#fff" : "var(--text-secondary)",
+                borderColor: activeFilter === val ? "var(--accent-primary)" : "var(--border-light)",
+              }}
             >
               {label}
             </button>
@@ -108,11 +111,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content area - static background */}
-      <div className="flex-1 overflow-hidden px-4 pt-2 pb-4" style={{ backgroundColor: "var(--bg-warm)" }}>
+      {/* Content area */}
+      <div className="flex-1 overflow-hidden px-4 pt-2 pb-4" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
           </div>
         ) : viewMode === "swipe" ? (
           /* ---- SWIPE MODE ---- */
@@ -120,10 +123,11 @@ export default function Home() {
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
                 <p className="text-5xl mb-4">🌿</p>
-                <p className="text-lg text-[#6B6B6B]" style={{ fontFamily: "var(--font-serif)" }}>You've read everything</p>
+                <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>You've read everything</p>
                 <button
                   onClick={() => { setCurrentIndex(0); refetch(); }}
-                  className="mt-5 px-6 py-2.5 bg-[#7C8C6E] text-white rounded-full text-sm"
+                  className="mt-5 px-6 py-2.5 text-white rounded-full text-sm"
+                  style={{ backgroundColor: "var(--accent-primary)" }}
                 >
                   Start Over
                 </button>
@@ -160,17 +164,18 @@ export default function Home() {
                 <div
                   key={post.id}
                   onClick={() => handleReply(post)}
-                  className="bg-white rounded-2xl p-5 border border-[#EDE9E3] cursor-pointer hover:shadow-sm transition-shadow"
+                  className="rounded-2xl p-5 cursor-pointer hover:shadow-sm transition-shadow"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`w-2 h-2 rounded-full ${ts.dot}`} />
-                    <span className="text-xs font-medium text-[#9B9B9B] uppercase tracking-wide">{ts.label}</span>
-                    <span className="ml-auto text-xs text-[#9B9B9B]">{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+                    <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{ts.label}</span>
+                    <span className="ml-auto text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
                   </div>
-                  <p className="text-[#2C2C2C] leading-relaxed" style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                  <p className="leading-relaxed" style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--text-primary)" }}>
                     {post.text}
                   </p>
-                  <div className="flex gap-4 mt-3 text-xs text-[#9B9B9B]">
+                  <div className="flex gap-4 mt-3 text-xs" style={{ color: "var(--text-hint)" }}>
                     <span>♥ {post.like_count || 0}</span>
                     <span>💬 {post.reply_count || 0}</span>
                   </div>
