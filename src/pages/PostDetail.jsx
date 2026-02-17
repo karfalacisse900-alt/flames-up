@@ -90,7 +90,7 @@ export default function PostDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "80px" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "140px" }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3]">
         <Link to={createPageUrl("Home")} className="p-2 rounded-full hover:bg-gray-100">
