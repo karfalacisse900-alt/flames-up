@@ -108,8 +108,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content area - static background, no movement */}
-      <div className="flex-1 overflow-hidden px-4 py-3 pb-24" style={{ backgroundColor: "var(--bg-warm)" }}>
+      {/* Content area - static background */}
+      <div className="flex-1 overflow-hidden px-4 pt-2 pb-4" style={{ backgroundColor: "var(--bg-warm)" }}>
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
