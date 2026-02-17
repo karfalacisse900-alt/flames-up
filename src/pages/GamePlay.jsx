@@ -4,6 +4,11 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
+import RockPaperScissors from "../components/games/RockPaperScissors";
+import TicTacToeCompact from "../components/games/TicTacToe";
+import MemoryMatchCompact from "../components/games/MemoryMatch";
+import MathSpeedCompact from "../components/games/MathSpeed";
+import TriviaCompact from "../components/games/Trivia";
 
 // ============= MEMORY MATCH =============
 function MemoryMatchGame({ onEnd }) {
@@ -296,6 +301,9 @@ export default function GamePlay() {
       case "reaction": return <ReactionSpeedGame onEnd={handleGameEnd} />;
       case "tic-tac-toe": return <TicTacToeGame onEnd={handleGameEnd} />;
       case "math-speed": return <MathSpeedGame onEnd={handleGameEnd} />;
+      case "rock-paper-scissors": return <RockPaperScissors mode={mode} />;
+      case "color-connect": return <TriviaCompact />;
+      case "trivia": return <TriviaCompact />;
       default:
         return (
           <div className="text-center py-12">
