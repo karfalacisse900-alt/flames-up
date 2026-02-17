@@ -70,6 +70,11 @@ export default function PostDetail() {
     queryClient.invalidateQueries({ queryKey: ["post", postId] });
   };
 
+  const handleDeleteVoiceReply = async (replyId) => {
+    await base44.entities.VoiceReply.delete(replyId);
+    refetchVoice();
+  };
+
   // Merge text & voice replies by date
   const allReplies = [
     ...replies.map((r) => ({ ...r, kind: "text" })),

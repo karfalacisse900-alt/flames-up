@@ -47,31 +47,31 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Home from './pages/Home';
-import PostDetail from './pages/PostDetail';
-import Discover from './pages/Discover';
 import Art from './pages/Art';
+import Discover from './pages/Discover';
+import GamePlay from './pages/GamePlay';
+import Games from './pages/Games';
+import Home from './pages/Home';
 import Live from './pages/Live';
 import LiveRoomView from './pages/LiveRoomView';
-import Games from './pages/Games';
-import GamePlay from './pages/GamePlay';
-import Profile from './pages/Profile';
 import Messages from './pages/Messages';
+import PostDetail from './pages/PostDetail';
+import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "PostDetail": PostDetail,
-    "Discover": Discover,
     "Art": Art,
+    "Discover": Discover,
+    "GamePlay": GamePlay,
+    "Games": Games,
+    "Home": Home,
     "Live": Live,
     "LiveRoomView": LiveRoomView,
-    "Games": Games,
-    "GamePlay": GamePlay,
-    "Profile": Profile,
     "Messages": Messages,
+    "PostDetail": PostDetail,
+    "Profile": Profile,
     "Wallet": Wallet,
 }
 
