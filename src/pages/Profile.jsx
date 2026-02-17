@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet } from "lucide-react";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
-import { useQuery as useRQ } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
