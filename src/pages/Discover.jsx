@@ -91,7 +91,7 @@ export default function Discover() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["discover"],
-    queryFn: () => base44.entities.DiscoverItem.list("-created_date", 50),
+    queryFn: () => base44.entities.DiscoverItem.list("-created_date", 500),
   });
 
   const filtered = items.filter((item) => {
