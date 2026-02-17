@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, TrendingUp, TrendingDown, ArrowRight, X } from "lucide-react";
+import { Plus, Upload, TrendingUp, TrendingDown, X, AlertCircle } from "lucide-react";
+import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -282,12 +283,17 @@ export default function Art() {
 
   const handleBuy = async (art) => {
     if (!user) return;
+    const balance = await getBalance(user.email);
+    if (balance < art.price) { alert(`Not enough coins! You have ⬡${balance}, need ⬡${art.price}`); return; }
     await base44.entities.ArtPiece.update(art.id, {
-      owner_email: user.email, owner_name: user.full_name, is_for_sale: false,
+      owner_email: user.email, owner_name: user.full_name || user.email, is_for_sale: false,
     });
     await base44.entities.ArtTrade.create({
       art_id: art.id, buyer_email: user.email, seller_email: art.owner_email, price: art.price, trade_type: "buy",
     });
+    // Deduct from buyer, credit seller
+    await addCoins(user.email, -art.price, "art_purchase", `Bought "${art.title}"`, art.id);
+    if (art.owner_email) await addCoins(art.owner_email, art.price, "art_sale", `Sold "${art.title}"`, art.id);
     setSelectedArt(null);
     queryClient.invalidateQueries({ queryKey: ["art"] });
   };
