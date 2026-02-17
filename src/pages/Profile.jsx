@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, UserPlus, UserCheck, MessageSquare, Users } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet } from "lucide-react";
+import WalletWidget from "../components/coins/WalletWidget";
+import { getBalance } from "../components/coins/coinsHelper";
+import { useQuery as useRQ } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -19,6 +22,11 @@ export default function Profile() {
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const queryClient = useQueryClient();
+  const { data: coinBalance = 0 } = useQuery({
+    queryKey: ["coinBalance", user?.email],
+    queryFn: () => getBalance(user.email),
+    enabled: !!user?.email,
+  });
 
   useEffect(() => {
     base44.auth.me().then((u) => {
@@ -91,6 +99,9 @@ export default function Profile() {
             <Link to={createPageUrl("Messages")} className="p-2 rounded-full border border-[#EDE9E3] text-[#6B6B6B]">
               <MessageSquare className="w-4 h-4" />
             </Link>
+            <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border border-[#EDE9E3] text-amber-500">
+              <Wallet className="w-4 h-4" />
+            </Link>
             <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border border-[#EDE9E3] text-[#6B6B6B] hover:text-red-500">
               <LogOut className="w-4 h-4" />
             </button>
@@ -101,6 +112,11 @@ export default function Profile() {
         <h2 className="text-lg font-semibold text-[#2C2C2C]">{user.display_name || user.full_name}</h2>
         <p className="text-xs text-[#9B9B9B] mt-0.5">{user.email}</p>
         {user.bio && <p className="text-sm text-[#6B6B6B] mt-2 leading-relaxed">{user.bio}</p>}
+
+        {/* Coin balance */}
+        <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
+          <WalletWidget balance={coinBalance} />
+        </Link>
 
         {/* Stats row */}
         <div className="flex gap-5 mt-4">
