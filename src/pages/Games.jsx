@@ -4,16 +4,16 @@ import { createPageUrl } from "../utils";
 import { Gamepad2, Bot, Users, Shuffle, ChevronRight } from "lucide-react";
 
 const games = [
-  { id: "maze", name: "Maze Runner", desc: "Navigate the maze before time runs out", emoji: "🏃", color: "bg-amber-50 border-amber-200" },
-  { id: "color-connect", name: "Color Connect", desc: "Match and connect the right colors", emoji: "🎨", color: "bg-violet-50 border-violet-200" },
-  { id: "reaction", name: "Reaction Speed", desc: "Test your reflexes against the clock", emoji: "⚡", color: "bg-yellow-50 border-yellow-200" },
+  { id: "rock-paper-scissors", name: "Rock Paper Scissors", desc: "Beat the AI at the classic game", emoji: "🎲", color: "bg-amber-50 border-amber-200" },
+  { id: "tic-tac-toe", name: "Tic-Tac-Toe", desc: "Classic three in a row", emoji: "❌", color: "bg-indigo-50 border-indigo-200" },
   { id: "memory", name: "Memory Match", desc: "Flip and match pairs of cards", emoji: "🧠", color: "bg-blue-50 border-blue-200" },
   { id: "math-speed", name: "Math Speed", desc: "Solve equations faster than your opponent", emoji: "🔢", color: "bg-green-50 border-green-200" },
   { id: "trivia", name: "Trivia Battle", desc: "Test your knowledge across topics", emoji: "❓", color: "bg-pink-50 border-pink-200" },
-  { id: "tic-tac-toe", name: "Tic-Tac-Toe", desc: "Classic three in a row", emoji: "❌", color: "bg-indigo-50 border-indigo-200" },
+  { id: "reaction", name: "Reaction Speed", desc: "Test your reflexes against the clock", emoji: "⚡", color: "bg-yellow-50 border-yellow-200" },
+  { id: "maze", name: "Maze Runner", desc: "Navigate the maze before time runs out", emoji: "🏃", color: "bg-amber-50 border-amber-200" },
+  { id: "color-connect", name: "Color Connect", desc: "Match and connect the right colors", emoji: "🎨", color: "bg-violet-50 border-violet-200" },
   { id: "checkers", name: "Checkers", desc: "Strategic board game classic", emoji: "⬛", color: "bg-red-50 border-red-200" },
   { id: "chess", name: "Chess", desc: "The ultimate strategy game", emoji: "♟️", color: "bg-stone-100 border-stone-300" },
-  { id: "ping-pong", name: "Ping Pong", desc: "Simple and addictive table tennis", emoji: "🏓", color: "bg-emerald-50 border-emerald-200" },
 ];
 
 const modes = [
