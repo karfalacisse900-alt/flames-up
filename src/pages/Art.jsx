@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, TrendingUp, TrendingDown, X, AlertCircle } from "lucide-react";
+import { Plus, Upload, TrendingUp, TrendingDown, X } from "lucide-react";
+import ArtVoiceSection from "../components/art/ArtVoiceSection";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,10 +106,10 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        className="relative w-full max-w-lg bg-white rounded-t-3xl"
+        className="relative w-full max-w-lg rounded-t-3xl"
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
-        style={{ maxHeight: "90dvh", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+        style={{ maxHeight: "90dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", backgroundColor: "var(--bg-nav)" }}
       >
         {/* Image */}
         <div className="relative">
