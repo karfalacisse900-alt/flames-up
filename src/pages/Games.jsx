@@ -26,27 +26,27 @@ export default function Games() {
   const [expandedGame, setExpandedGame] = useState(null);
 
   return (
-    <div className="min-h-screen">
-      <div className="px-5 pt-5 pb-3">
-        <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>Games</h1>
-        <p className="text-xs text-[#9B9B9B] mt-0.5">Play, compete & have fun</p>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Games</h1>
+        <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Play, compete & have fun</p>
       </div>
 
-      <div className="px-5 space-y-3 pb-24 mt-2">
+      <div className="px-5 space-y-3 pb-24 mt-4">
         {games.map((game) => (
-          <div key={game.id} className="bg-white rounded-2xl border border-[#EDE9E3] overflow-hidden transition-all">
+          <div key={game.id} className="rounded-2xl overflow-hidden transition-all" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             <button
               onClick={() => setExpandedGame(expandedGame === game.id ? null : game.id)}
               className="w-full p-4 flex items-center gap-3 text-left"
             >
-              <div className={`w-12 h-12 rounded-xl ${game.color} border flex items-center justify-center text-xl`}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
                 {game.emoji}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-[#2C2C2C]">{game.name}</h3>
-                <p className="text-xs text-[#9B9B9B] mt-0.5">{game.desc}</p>
+                <h3 className="font-medium" style={{ color: "var(--text-primary)" }}>{game.name}</h3>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{game.desc}</p>
               </div>
-              <ChevronRight className={`w-4 h-4 text-[#9B9B9B] transition-transform ${expandedGame === game.id ? "rotate-90" : ""}`} />
+              <ChevronRight className="w-4 h-4 transition-transform" style={{ color: "var(--text-hint)", transform: expandedGame === game.id ? "rotate(90deg)" : "none" }} />
             </button>
 
             {expandedGame === game.id && (
@@ -55,10 +55,11 @@ export default function Games() {
                   <Link
                     key={mode.id}
                     to={createPageUrl("GamePlay") + `?game=${game.id}&mode=${mode.id}`}
-                    className="flex-1 flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[#EDE9E3] hover:border-[#7C8C6E] hover:bg-[#7C8C6E]/5 transition-all"
+                    className="flex-1 flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all"
+                    style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-nav)" }}
                   >
-                    <mode.icon className="w-5 h-5 text-[#7C8C6E]" />
-                    <span className="text-xs font-medium text-[#6B6B6B]">{mode.label}</span>
+                    <mode.icon className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{mode.label}</span>
                   </Link>
                 ))}
               </div>
