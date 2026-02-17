@@ -201,7 +201,7 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
           {/* Actions */}
           <div className="mt-5 space-y-2">
             {!isOwner && art.is_for_sale && (
-              <Button onClick={() => onBuy(art)} className="w-full bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl h-12 text-base">
+              <Button onClick={() => onBuy(art)} className="w-full rounded-xl h-12 text-base text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
                 Buy for ⬡ {art.price}
               </Button>
             )}
@@ -213,14 +213,15 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
                     placeholder="Set price"
                     value={sellPrice}
                     onChange={(e) => setSellPrice(e.target.value)}
-                    className="border-[#EDE9E3] rounded-xl"
+                    className="rounded-xl"
+                    style={{ borderColor: "var(--border-light)" }}
                   />
-                  <Button onClick={() => onList(art, parseFloat(sellPrice))} className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl px-5">
+                  <Button onClick={() => onList(art, parseFloat(sellPrice))} className="rounded-xl px-5 text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
                     List
                   </Button>
                 </div>
               ) : (
-                <Button onClick={() => setShowSellInput(true)} variant="outline" className="w-full rounded-xl h-12 border-[#7C8C6E] text-[#7C8C6E]">
+                <Button onClick={() => setShowSellInput(true)} variant="outline" className="w-full rounded-xl h-12" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)" }}>
                   List for Sale
                 </Button>
               )
@@ -231,6 +232,9 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
               </Button>
             )}
           </div>
+
+          {/* Voice comments */}
+          <ArtVoiceSection artId={art.id} user={user} />
         </div>
       </motion.div>
     </motion.div>
