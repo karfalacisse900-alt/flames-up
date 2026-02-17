@@ -60,7 +60,7 @@ function ArtTradingCard({ art, user, onClick }) {
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
         {art.is_for_sale && (
           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-1">
-            <span className="text-[10px] font-semibold text-[#7C8C6E]">FOR SALE</span>
+            <span className="text-[10px] font-semibold" style={{ color: "var(--accent-primary)" }}>FOR SALE</span>
           </div>
         )}
       </div>
