@@ -138,14 +138,15 @@ export default function Home() {
               <AnimatePresence mode="sync">
                 {visiblePosts.slice(0, 3).map((post, i) => (
                   <FullScreenSwipeCard
-                    key={post.id}
-                    post={post}
-                    isTop={i === 0}
-                    stackIndex={i}
-                    onLike={handleLike}
-                    onSkip={handleSkip}
-                    onReply={handleReply}
-                    onFavorite={() => {}}
+                  key={post.id}
+                  post={post}
+                  isTop={i === 0}
+                  stackIndex={i}
+                  onLike={handleLike}
+                  onSkip={handleSkip}
+                  onReply={handleReply}
+                  onFavorite={() => {}}
+                  user={user}
                   />
                 ))}
               </AnimatePresence>
