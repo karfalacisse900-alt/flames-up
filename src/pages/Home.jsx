@@ -130,8 +130,8 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="relative w-full" style={{ height: "100%" }}>
-              <AnimatePresence>
+            <div className="relative w-full h-full">
+              <AnimatePresence mode="sync">
                 {visiblePosts.slice(0, 3).map((post, i) => (
                   <FullScreenSwipeCard
                     key={post.id}
@@ -141,11 +141,12 @@ export default function Home() {
                     onLike={handleLike}
                     onSkip={handleSkip}
                     onReply={handleReply}
+                    onFavorite={() => {}}
                   />
                 ))}
               </AnimatePresence>
               {/* Card counter */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20 pb-1">
                 {currentIndex + 1} / {filtered.length}
               </div>
             </div>
