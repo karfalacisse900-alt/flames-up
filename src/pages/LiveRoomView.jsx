@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Heart, ThumbsUp, Users, X } from "lucide-react";
+import { ArrowLeft, Send, Users, Gift } from "lucide-react";
+import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,17 @@ export default function LiveRoomView() {
     });
     setMessageText("");
     queryClient.invalidateQueries({ queryKey: ["liveMessages", roomId] });
+  };
+
+  const sendGift = async (emoji, cost) => {
+    if (!user?.email) return;
+    const bal = await getBalance(user.email);
+    if (bal < cost) { alert(`Need ⬡${cost} coins to send this gift!`); return; }
+    await addCoins(user.email, -cost, "gift_sent", `Sent ${emoji} gift in live`, roomId);
+    if (room?.host_email && room.host_email !== user.email) {
+      await addCoins(room.host_email, cost, "gift_received", `Received ${emoji} gift from ${user.full_name || user.email}`, roomId);
+    }
+    sendReaction(emoji);
   };
 
   const sendReaction = (emoji) => {
@@ -137,14 +149,18 @@ export default function LiveRoomView() {
 
       {/* Bottom */}
       <div className="border-t border-[#EDE9E3] bg-white p-3">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-hide">
           {["❤️", "👍", "🔥", "😂", "🤔"].map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => sendReaction(emoji)}
-              className="w-9 h-9 rounded-full bg-[#F5F0EB] hover:bg-[#EDE9E3] flex items-center justify-center text-sm transition-colors"
-            >
+            <button key={emoji} onClick={() => sendReaction(emoji)}
+              className="w-8 h-8 rounded-full bg-[#F5F0EB] hover:bg-[#EDE9E3] flex items-center justify-center text-sm shrink-0">
               {emoji}
+            </button>
+          ))}
+          <div className="w-px h-6 bg-[#EDE9E3] mx-1 shrink-0" />
+          {[{ e: "🌹", c: 5 }, { e: "💎", c: 20 }, { e: "👑", c: 50 }].map(({ e, c }) => (
+            <button key={e} onClick={() => sendGift(e, c)}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs shrink-0">
+              {e}<span className="text-amber-600 font-medium">⬡{c}</span>
             </button>
           ))}
         </div>
