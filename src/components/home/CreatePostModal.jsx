@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2 } from "lucide-react";
+import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,10 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Answer type (for questions)
+  const [answerType, setAnswerType] = useState("open"); // "open" | "yes_no" | "multi"
+  const [multiOptions, setMultiOptions] = useState(["", ""]);
+
   // AI state
   const [aiTopic, setAiTopic] = useState("");
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -28,13 +32,30 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const handleSubmit = async () => {
     if (!text.trim()) return;
     setLoading(true);
+    // Build poll data for question posts
+    let pollData = {};
+    if (type === "question" && answerType !== "open") {
+      let opts = answerType === "yes_no" ? ["Yes", "No"] : multiOptions.filter(o => o.trim());
+      pollData = {
+        answer_type: answerType,
+        options: opts,
+        votes: Object.fromEntries(opts.map((_, i) => [i, 0])),
+        voted_by: {},
+        total_votes: 0,
+      };
+    } else {
+      pollData = { answer_type: "open", options: [], votes: {}, voted_by: {}, total_votes: 0 };
+    }
+
     await base44.entities.Post.create({
-      type, text: text.trim(), is_anonymous: isAnonymous,
-      author_name: isAnonymous ? "Anonymous" : (user?.full_name || "User"),
-      author_email: user?.email || "", like_count: 0, reply_count: 0, liked_by: [],
-    });
-    setText(""); setType("question"); setIsAnonymous(false);
-    setShowAiPanel(false); setAiTopic("");
+        type, text: text.trim(), is_anonymous: isAnonymous,
+        author_name: isAnonymous ? "Anonymous" : (user?.full_name || "User"),
+        author_email: user?.email || "", like_count: 0, reply_count: 0, liked_by: [],
+        ...pollData,
+      });
+      setText(""); setType("question"); setIsAnonymous(false);
+      setAnswerType("open"); setMultiOptions(["", ""]);
+      setShowAiPanel(false); setAiTopic("");
     setLoading(false); onCreated(); onClose();
   };
 
@@ -110,14 +131,87 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
 
           <Textarea
             placeholder={
-              type === "question" ? "What's on your mind?" :
+              type === "question" ? "What's your question?" :
               type === "quote" ? "Share a thought or quote..." : "What concerns you?"
             }
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="min-h-[120px] rounded-xl text-base resize-none"
+            className="min-h-[100px] rounded-xl text-base resize-none"
             style={{ fontFamily: "var(--font-serif)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
           />
+
+          {/* Answer type selector — only for questions */}
+          {type === "question" && (
+            <div>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Answer type</p>
+              <div className="flex gap-2">
+                {[
+                  { value: "open", label: "Open text" },
+                  { value: "yes_no", label: "Yes / No" },
+                  { value: "multi", label: "Multiple choice" },
+                ].map((at) => (
+                  <button
+                    key={at.value}
+                    onClick={() => setAnswerType(at.value)}
+                    className="flex-1 py-1.5 rounded-xl border text-xs font-medium transition-all"
+                    style={{
+                      borderColor: answerType === at.value ? "var(--accent-primary)" : "var(--border-light)",
+                      backgroundColor: answerType === at.value ? "rgba(60,110,90,0.07)" : "transparent",
+                      color: answerType === at.value ? "var(--accent-primary)" : "var(--text-secondary)",
+                    }}
+                  >
+                    {at.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Yes/No preview */}
+              {answerType === "yes_no" && (
+                <div className="flex gap-2 mt-3">
+                  {["Yes", "No"].map((opt) => (
+                    <div key={opt} className="flex-1 py-2 rounded-xl border text-center text-sm font-medium" style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)", backgroundColor: "var(--bg-app)" }}>
+                      {opt}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Multiple choice inputs */}
+              {answerType === "multi" && (
+                <div className="mt-3 space-y-2">
+                  {multiOptions.map((opt, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        placeholder={`Option ${idx + 1}`}
+                        value={opt}
+                        onChange={(e) => {
+                          const next = [...multiOptions];
+                          next[idx] = e.target.value;
+                          setMultiOptions(next);
+                        }}
+                        className="flex-1 rounded-xl text-sm"
+                        style={{ borderColor: "var(--border-light)" }}
+                      />
+                      {multiOptions.length > 2 && (
+                        <button onClick={() => setMultiOptions(multiOptions.filter((_, i) => i !== idx))} style={{ color: "var(--text-hint)" }}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {multiOptions.length < 5 && (
+                    <button
+                      onClick={() => setMultiOptions([...multiOptions, ""])}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border border-dashed transition-all"
+                      style={{ borderColor: "var(--border-medium)", color: "var(--text-hint)" }}
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add option
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* AI toolbar */}
           <div className="flex gap-2 mt-2">
