@@ -57,6 +57,7 @@ import Games from './pages/Games';
 import GamePlay from './pages/GamePlay';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "GamePlay": GamePlay,
     "Profile": Profile,
     "Messages": Messages,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {
