@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Heart, MessageCircle, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
+import PollOptions from "./PollOptions";
 
 const typeLabel = {
   question: "Question",
@@ -10,7 +11,7 @@ const typeLabel = {
   concern: "Concern",
 };
 
-export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex }) {
+export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex, user }) {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const navigate = useNavigate();
@@ -108,6 +109,11 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           >
             {post.type === "quote" ? `"${post.text}"` : post.text}
           </p>
+
+          {/* Poll options for question posts */}
+          {post.type === "question" && post.answer_type && post.answer_type !== "open" && (
+            <PollOptions post={post} user={user} compact={true} />
+          )}
 
           {/* Author attribution below — only if not anonymous */}
           {!post.is_anonymous && post.author_name && (
