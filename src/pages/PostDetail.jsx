@@ -90,7 +90,7 @@ export default function PostDetail() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-warm)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "80px" }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3]">
         <Link to={createPageUrl("Home")} className="p-2 rounded-full hover:bg-gray-100">
@@ -156,35 +156,38 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* Reply input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE9E3] p-4 z-50">
-        <div className="max-w-lg mx-auto flex items-center gap-2">
-          <button
-            onClick={() => setIsAnonymous(!isAnonymous)}
-            className={`p-2 rounded-full transition-colors shrink-0 ${isAnonymous ? "bg-[#7C8C6E]/10 text-[#7C8C6E]" : "text-[#9B9B9B] hover:bg-gray-100"}`}
-          >
-            <EyeOff className="w-4 h-4" />
-          </button>
-          <Input
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            placeholder="Reply..."
-            className="flex-1 border-[#EDE9E3] rounded-xl"
-            onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
-          />
-          <VoiceRecorder
-            postId={postId}
-            user={user}
-            onSent={() => { refetchVoice(); queryClient.invalidateQueries(["post", postId]); }}
-          />
-          <Button
-            onClick={handleSendReply}
-            disabled={!replyText.trim() || sending}
-            size="icon"
-            className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+      {/* Reply input - sits above nav bar */}
+      <div className="fixed left-0 right-0 bg-white border-t border-[#EDE9E3] p-3 z-50" style={{ bottom: "56px" }}>
+        <div className="max-w-lg mx-auto space-y-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsAnonymous(!isAnonymous)}
+              className={`p-2 rounded-full transition-colors shrink-0 ${isAnonymous ? "bg-[#7C8C6E]/10 text-[#7C8C6E]" : "text-[#9B9B9B] hover:bg-gray-100"}`}
+              title={isAnonymous ? "Anonymous" : "Public"}
+            >
+              <EyeOff className="w-4 h-4" />
+            </button>
+            <Input
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={isAnonymous ? "Reply anonymously..." : "Reply..."}
+              className="flex-1 border-[#EDE9E3] rounded-xl"
+              onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
+            />
+            <VoiceRecorder
+              postId={postId}
+              user={user}
+              onSent={() => { refetchVoice(); queryClient.invalidateQueries(["post", postId]); }}
+            />
+            <Button
+              onClick={handleSendReply}
+              disabled={!replyText.trim() || sending}
+              size="icon"
+              className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
