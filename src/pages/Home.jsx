@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
-import { Plus, RefreshCw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus, RefreshCw, List, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
-import SwipeCard from "../components/home/SwipeCard";
+import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
 import CreatePostModal from "../components/home/CreatePostModal";
+
+const typeStyles = {
+  question: { label: "Question", dot: "bg-amber-400" },
+  quote: { label: "Quote", dot: "bg-emerald-400" },
+  concern: { label: "Concern", dot: "bg-rose-400" },
+};
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [viewMode, setViewMode] = useState("swipe"); // "swipe" | "list"
+  const [activeFilter, setActiveFilter] = useState("all");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -22,6 +30,13 @@ export default function Home() {
     queryKey: ["posts"],
     queryFn: () => base44.entities.Post.list("-created_date", 50),
   });
+
+  const filtered = posts.filter((p) =>
+    activeFilter === "all" ? true :
+    activeFilter === "questions" ? p.type === "question" :
+    activeFilter === "quotes" ? p.type === "quote" :
+    p.type === "concern"
+  );
 
   const handleLike = async (post) => {
     const email = user?.email;
@@ -37,49 +52,55 @@ export default function Home() {
     setCurrentIndex((prev) => prev + 1);
   };
 
-  const handleSkip = () => {
-    setCurrentIndex((prev) => prev + 1);
-  };
+  const handleSkip = () => setCurrentIndex((prev) => prev + 1);
 
   const handleReply = (post) => {
     window.location.href = createPageUrl("PostDetail") + `?id=${post.id}`;
   };
 
-  const visiblePosts = posts.slice(currentIndex);
+  const visiblePosts = filtered.slice(currentIndex);
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-5 pb-3" style={{ backgroundColor: "rgba(250,248,245,0.95)", backdropFilter: "blur(10px)" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-warm)" }}>
+      {/* Compact Header */}
+      <div className="px-5 pt-5 pb-3 shrink-0" style={{ backgroundColor: "rgba(250,248,245,0.97)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>
-              Thoughts
-            </h1>
-            <p className="text-xs text-[#9B9B9B] mt-0.5">Swipe through what matters</p>
-          </div>
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)" }}>Thoughts</h1>
           <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <button
+              onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
+              className="p-2 rounded-full bg-white border border-[#EDE9E3] text-[#6B6B6B]"
+              title={viewMode === "swipe" ? "Switch to list" : "Switch to swipe"}
+            >
+              {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
+            </button>
             <button
               onClick={() => { setCurrentIndex(0); refetch(); }}
-              className="p-2.5 rounded-full bg-white border border-[#EDE9E3] text-[#6B6B6B] hover:text-[#2C2C2C] transition-colors"
+              className="p-2 rounded-full bg-white border border-[#EDE9E3] text-[#6B6B6B]"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="p-2.5 rounded-full bg-[#7C8C6E] text-white shadow-md hover:bg-[#6B7B5E] transition-colors"
+              className="p-2 rounded-full bg-[#7C8C6E] text-white shadow-sm"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Type filter pills */}
-        <div className="flex gap-2 mt-4">
-          {["All", "Questions", "Quotes", "Concerns"].map((label) => (
+        {/* Filter pills */}
+        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
+          {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) => (
             <button
-              key={label}
-              className="px-3 py-1.5 text-xs rounded-full border border-[#EDE9E3] bg-white text-[#6B6B6B] hover:border-[#7C8C6E] hover:text-[#7C8C6E] transition-all"
+              key={val}
+              onClick={() => { setActiveFilter(val); setCurrentIndex(0); }}
+              className={`px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all ${
+                activeFilter === val
+                  ? "bg-[#7C8C6E] text-white border-[#7C8C6E]"
+                  : "bg-white text-[#6B6B6B] border-[#EDE9E3]"
+              }`}
             >
               {label}
             </button>
@@ -87,44 +108,75 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Swipe area */}
-      <div className="relative mx-5 mt-4" style={{ height: "calc(100vh - 260px)" }}>
+      {/* Content area */}
+      <div className="flex-1 overflow-hidden px-4 py-3 pb-20">
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-8 h-8 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-sm text-[#9B9B9B] mt-3">Loading thoughts...</p>
-            </div>
+            <div className="w-8 h-8 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : visiblePosts.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-5xl mb-4">🌿</p>
-              <p className="font-serif text-lg text-[#6B6B6B]" style={{ fontFamily: "var(--font-serif)" }}>
-                You've seen everything
-              </p>
-              <p className="text-sm text-[#9B9B9B] mt-1">Pull to refresh or create a new post</p>
-              <button
-                onClick={() => { setCurrentIndex(0); refetch(); }}
-                className="mt-4 px-5 py-2 bg-[#7C8C6E] text-white rounded-full text-sm hover:bg-[#6B7B5E] transition-colors"
-              >
-                Start Over
-              </button>
+        ) : viewMode === "swipe" ? (
+          /* ---- SWIPE MODE ---- */
+          visiblePosts.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-5xl mb-4">🌿</p>
+                <p className="text-lg text-[#6B6B6B]" style={{ fontFamily: "var(--font-serif)" }}>You've read everything</p>
+                <button
+                  onClick={() => { setCurrentIndex(0); refetch(); }}
+                  className="mt-5 px-6 py-2.5 bg-[#7C8C6E] text-white rounded-full text-sm"
+                >
+                  Start Over
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative w-full" style={{ height: "100%" }}>
+              <AnimatePresence>
+                {visiblePosts.slice(0, 3).map((post, i) => (
+                  <FullScreenSwipeCard
+                    key={post.id}
+                    post={post}
+                    isTop={i === 0}
+                    stackIndex={i}
+                    onLike={handleLike}
+                    onSkip={handleSkip}
+                    onReply={handleReply}
+                  />
+                ))}
+              </AnimatePresence>
+              {/* Card counter */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20">
+                {currentIndex + 1} / {filtered.length}
+              </div>
+            </div>
+          )
         ) : (
-          <AnimatePresence>
-            {visiblePosts.slice(0, 3).map((post, i) => (
-              <SwipeCard
-                key={post.id}
-                post={post}
-                isTop={i === 0}
-                onLike={handleLike}
-                onSkip={handleSkip}
-                onReply={handleReply}
-              />
-            ))}
-          </AnimatePresence>
+          /* ---- LIST MODE ---- */
+          <div className="h-full overflow-y-auto space-y-3 pb-4">
+            {filtered.map((post) => {
+              const ts = typeStyles[post.type] || typeStyles.quote;
+              return (
+                <div
+                  key={post.id}
+                  onClick={() => handleReply(post)}
+                  className="bg-white rounded-2xl p-5 border border-[#EDE9E3] cursor-pointer hover:shadow-sm transition-shadow"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-2 h-2 rounded-full ${ts.dot}`} />
+                    <span className="text-xs font-medium text-[#9B9B9B] uppercase tracking-wide">{ts.label}</span>
+                    <span className="ml-auto text-xs text-[#9B9B9B]">{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+                  </div>
+                  <p className="text-[#2C2C2C] leading-relaxed" style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}>
+                    {post.text}
+                  </p>
+                  <div className="flex gap-4 mt-3 text-xs text-[#9B9B9B]">
+                    <span>♥ {post.like_count || 0}</span>
+                    <span>💬 {post.reply_count || 0}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
