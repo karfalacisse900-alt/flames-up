@@ -400,7 +400,7 @@ export default function Art() {
             <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
             <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="border-[#EDE9E3] rounded-xl resize-none" />
             <Input type="number" placeholder="Starting price in coins (0 = not for sale)" value={price} onChange={(e) => setPrice(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
-            <Button onClick={handleUpload} disabled={!selectedFile || !title.trim() || uploading} className="w-full bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl">
+            <Button onClick={handleUpload} disabled={!selectedFile || !title.trim() || uploading} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
               {uploading ? "Uploading..." : "Publish"}
             </Button>
           </div>
