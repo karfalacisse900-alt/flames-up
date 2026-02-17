@@ -65,15 +65,16 @@ export default function Live() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>Live</h1>
-          <p className="text-xs text-[#9B9B9B] mt-0.5">Join or start a live session</p>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Live</h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Join or start a live session</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#7C8C6E] text-white text-sm shadow-md hover:bg-[#6B7B5E] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm shadow-sm transition-colors"
+          style={{ backgroundColor: "var(--accent-primary)" }}
         >
           <Radio className="w-4 h-4" /> Go Live
         </button>
@@ -82,33 +83,34 @@ export default function Live() {
       <div className="px-5 space-y-3 pb-24 mt-2">
         {isLoading ? (
           <div className="flex justify-center py-16">
-            <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
           </div>
         ) : rooms.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🎙️</p>
-            <p className="font-serif text-lg text-[#6B6B6B]" style={{ fontFamily: "var(--font-serif)" }}>No live sessions right now</p>
-            <p className="text-sm text-[#9B9B9B] mt-1">Be the first to go live!</p>
+            <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>No live sessions right now</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-hint)" }}>Be the first to go live!</p>
           </div>
         ) : (
           rooms.map((room) => (
             <Link
               key={room.id}
               to={createPageUrl("LiveRoomView") + `?id=${room.id}`}
-              className="block bg-white rounded-2xl p-4 border border-[#EDE9E3] hover:shadow-sm transition-all"
+              className="block rounded-2xl p-4 hover:shadow-sm transition-all"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#F5F0EB] flex items-center justify-center text-xl">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: "var(--bg-app)" }}>
                   {categoryEmoji[room.category] || "🎙️"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-[#2C2C2C] truncate">{room.title}</h3>
+                  <h3 className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{room.title}</h3>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-[#9B9B9B]">{room.host_name}</span>
-                    <span className="text-xs text-[#9B9B9B] flex items-center gap-0.5">
+                    <span className="text-xs" style={{ color: "var(--text-hint)" }}>{room.host_name}</span>
+                    <span className="text-xs flex items-center gap-0.5" style={{ color: "var(--text-hint)" }}>
                       <Users className="w-3 h-3" /> {room.viewer_count || 0}
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F0EB] text-[#6B6B6B]">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>
                       {categoryLabel[room.category]}
                     </span>
                   </div>
@@ -140,7 +142,7 @@ export default function Live() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={handleCreateRoom} disabled={!title.trim() || creating} className="w-full bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl">
+            <Button onClick={handleCreateRoom} disabled={!title.trim() || creating} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
               {creating ? "Starting..." : "Go Live"}
             </Button>
           </div>
