@@ -105,11 +105,13 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        className="relative w-full max-w-lg bg-white rounded-t-3xl"
+        className="relative w-full max-w-lg bg-white rounded-t-3xl flex flex-col"
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
-        style={{ maxHeight: "90dvh", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+        style={{ maxHeight: "90dvh" }}
       >
+        {/* Single scrollable area — no nested scroll */}
+        <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch", flex: 1 }}>
         {/* Image */}
         <div className="relative">
           <img src={art.image_url} alt={art.title} className="w-full aspect-video object-cover" />
