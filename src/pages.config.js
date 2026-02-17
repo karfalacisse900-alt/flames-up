@@ -56,6 +56,7 @@ import LiveRoomView from './pages/LiveRoomView';
 import Games from './pages/Games';
 import GamePlay from './pages/GamePlay';
 import Profile from './pages/Profile';
+import Messages from './pages/Messages';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +70,7 @@ export const PAGES = {
     "Games": Games,
     "GamePlay": GamePlay,
     "Profile": Profile,
+    "Messages": Messages,
 }
 
 export const pagesConfig = {
