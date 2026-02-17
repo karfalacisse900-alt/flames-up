@@ -84,6 +84,39 @@ function ArtTradingCard({ art, user, onClick }) {
   );
 }
 
+function GalleryCard({ art, user, onClick, onLike }) {
+  const likedBy = art.liked_by || [];
+  const isLiked = user?.email && likedBy.includes(user.email);
+  return (
+    <div className="rounded-2xl overflow-hidden cursor-pointer" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}>
+      <div className="aspect-square overflow-hidden relative" onClick={onClick}>
+        <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
+      </div>
+      <div className="p-2.5">
+        <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+        <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
+        <div className="flex items-center justify-between mt-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); onLike(art); }}
+            className="flex items-center gap-1 text-xs transition-colors"
+            style={{ color: isLiked ? "#E07070" : "var(--text-hint)" }}
+          >
+            <span>{isLiked ? "♥" : "♡"}</span>
+            <span>{art.like_count || 0}</span>
+          </button>
+          <button
+            onClick={onClick}
+            className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+            style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}
+          >
+            💬 Comment
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
   const [sellPrice, setSellPrice] = useState(art.price?.toString() || "");
   const [showSellInput, setShowSellInput] = useState(false);
@@ -317,6 +350,17 @@ export default function Art() {
     queryClient.invalidateQueries({ queryKey: ["art"] });
   };
 
+  const handleLikeArt = async (art) => {
+    if (!user?.email) return;
+    const likedBy = art.liked_by || [];
+    if (likedBy.includes(user.email)) return;
+    await base44.entities.ArtPiece.update(art.id, {
+      like_count: (art.like_count || 0) + 1,
+      liked_by: [...likedBy, user.email],
+    });
+    queryClient.invalidateQueries({ queryKey: ["art"] });
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
@@ -357,7 +401,7 @@ export default function Art() {
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {gallery.map((art) => (
-                <ArtTradingCard key={art.id} art={art} user={user} onClick={() => setSelectedArt(art)} />
+                <GalleryCard key={art.id} art={art} user={user} onClick={() => setSelectedArt(art)} onLike={handleLikeArt} />
               ))}
             </div>
           )}
