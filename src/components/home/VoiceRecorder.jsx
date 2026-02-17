@@ -42,20 +42,38 @@ export default function VoiceRecorder({ postId, user, onSent }) {
       chunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onerror = (e) => {
+        setErrorMsg(`Recording error: ${e.error}`);
+        setState("error");
+        stream.getTracks().forEach((t) => t.stop());
       };
 
       recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        if (chunksRef.current.length === 0) {
+          setErrorMsg("No audio data recorded. Please try again.");
+          setState("error");
+          return;
+        }
         const finalMime = mimeType || "audio/webm";
         const blob = new Blob(chunksRef.current, { type: finalMime });
+        if (blob.size === 0) {
+          setErrorMsg("Failed to create audio file. Please try again.");
+          setState("error");
+          return;
+        }
         const url = URL.createObjectURL(blob);
         setAudioBlob(blob);
         setAudioUrl(url);
         setState("preview");
-        stream.getTracks().forEach((t) => t.stop());
       };
 
-      recorder.start(100); // collect every 100ms
+      recorder.start(100);
       setState("recording");
       setDuration(0);
       timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
