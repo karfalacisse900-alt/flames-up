@@ -105,10 +105,10 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        className="relative w-full max-w-lg bg-white rounded-t-3xl overflow-hidden"
+        className="relative w-full max-w-lg bg-white rounded-t-3xl"
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
-        style={{ maxHeight: "92vh", overflowY: "auto" }}
+        style={{ maxHeight: "90dvh", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
       >
         {/* Image */}
         <div className="relative">
