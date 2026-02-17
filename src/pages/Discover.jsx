@@ -18,6 +18,28 @@ const catColors = {
   developer_tools: "bg-[#F2F0EC] text-[#6E6E6E]",
 };
 
+function DiscoverLogo({ item, size = "md" }) {
+  const dim = size === "lg" ? "w-16 h-16" : "w-14 h-14";
+  const imgDim = size === "lg" ? "w-full h-full" : "w-full h-full";
+  const fallbackText = size === "lg" ? "text-2xl" : "text-xl";
+  const hostname = (() => { try { return item.link ? new URL(item.link).hostname : null; } catch { return null; } })();
+  const faviconUrl = hostname ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=64` : null;
+
+  const [imgSrc, setImgSrc] = React.useState(item.logo_url || faviconUrl);
+  const [failed, setFailed] = React.useState(false);
+
+  return (
+    <div className={`${dim} rounded-2xl overflow-hidden shrink-0 flex items-center justify-center font-bold ${fallbackText}`}
+      style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+      {imgSrc && !failed ? (
+        <img src={imgSrc} alt="" className={`${imgDim} object-cover`} onError={() => setFailed(true)} />
+      ) : (
+        <span style={{ color: "var(--accent-primary)" }}>{item.title?.[0]?.toUpperCase()}</span>
+      )}
+    </div>
+  );
+}
+
 function SwipeDiscoverCard({ item }) {
   return (
     <div className="h-full bg-white rounded-3xl p-7 flex flex-col" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.10)" }}>
@@ -27,13 +49,7 @@ function SwipeDiscoverCard({ item }) {
         </span>
       )}
       <div className="flex items-center gap-4 mb-5">
-        {item.logo_url ? (
-          <img src={item.logo_url} alt="" className="w-16 h-16 rounded-2xl object-cover" />
-        ) : (
-          <div className="w-16 h-16 rounded-2xl bg-[#F5F0EB] flex items-center justify-center text-2xl font-bold text-[#7C8C6E]">
-            {item.title?.[0]?.toUpperCase()}
-          </div>
-        )}
+        <DiscoverLogo item={item} size="lg" />
         <div>
           <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{item.title}</h2>
           <p className="text-sm text-[#9B9B9B]">{item.brand_name}</p>
@@ -188,24 +204,7 @@ export default function Discover() {
             filtered.map((item) => (
               <div key={item.id} className="rounded-2xl p-4 hover:shadow-sm transition-shadow" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <div className="flex items-start gap-3">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center text-xl font-bold" style={{ backgroundColor: "var(--bg-app)" }}>
-                    {item.logo_url ? (
-                      <img src={item.logo_url} alt={item.brand_name || item.title} className="w-full h-full object-cover" />
-                    ) : item.link ? (
-                      <img
-                        src={`https://www.google.com/s2/favicons?domain=${new URL(item.link).hostname}&sz=64`}
-                        alt={item.brand_name}
-                        className="w-10 h-10 object-contain"
-                        onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
-                      />
-                    ) : null}
-                    <span style={{ color: "var(--accent-primary)", display: item.logo_url || !item.link ? "none" : "none" }}>
-                      {item.title?.[0]?.toUpperCase()}
-                    </span>
-                    {!item.logo_url && !item.link && (
-                      <span style={{ color: "var(--accent-primary)" }}>{item.title?.[0]?.toUpperCase()}</span>
-                    )}
-                  </div>
+                  <DiscoverLogo item={item} size="md" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
