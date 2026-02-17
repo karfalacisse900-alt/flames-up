@@ -145,6 +145,8 @@ export default function PostDetail() {
                       duration={reply.duration_seconds}
                       authorName={reply.author_name}
                       isAnonymous={reply.is_anonymous}
+                      canDelete={user?.email === reply.author_email}
+                      onDelete={() => handleDeleteVoiceReply(reply.id)}
                     />
                   )}
                 </div>
