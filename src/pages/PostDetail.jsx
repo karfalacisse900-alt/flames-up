@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import VoiceRecorder from "../components/home/VoiceRecorder";
 import VoiceBubble from "../components/home/VoiceBubble";
+import PollOptions from "../components/home/PollOptions";
 
 const typeColors = {
   question: "bg-amber-50 text-amber-700 border-amber-200",
@@ -109,6 +110,12 @@ export default function PostDetail() {
           <p className="text-xl leading-relaxed text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>
             {post.text}
           </p>
+
+          {/* Poll results */}
+          {post.type === "question" && post.answer_type && post.answer_type !== "open" && (
+            <PollOptions post={post} user={user} compact={false} />
+          )}
+
           <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[#EDE9E3]">
             <span className="flex items-center gap-1 text-sm text-[#9B9B9B]">
               <Heart className="w-4 h-4" /> {post.like_count || 0}
