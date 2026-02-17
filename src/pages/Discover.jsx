@@ -188,13 +188,24 @@ export default function Discover() {
             filtered.map((item) => (
               <div key={item.id} className="rounded-2xl p-4 hover:shadow-sm transition-shadow" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <div className="flex items-start gap-3">
-                  {item.logo_url ? (
-                    <img src={item.logo_url} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
-                  ) : (
-                    <div className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
+                  <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center text-xl font-bold" style={{ backgroundColor: "var(--bg-app)" }}>
+                    {item.logo_url ? (
+                      <img src={item.logo_url} alt={item.brand_name || item.title} className="w-full h-full object-cover" />
+                    ) : item.link ? (
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${new URL(item.link).hostname}&sz=64`}
+                        alt={item.brand_name}
+                        className="w-10 h-10 object-contain"
+                        onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
+                      />
+                    ) : null}
+                    <span style={{ color: "var(--accent-primary)", display: item.logo_url || !item.link ? "none" : "none" }}>
                       {item.title?.[0]?.toUpperCase()}
-                    </div>
-                  )}
+                    </span>
+                    {!item.logo_url && !item.link && (
+                      <span style={{ color: "var(--accent-primary)" }}>{item.title?.[0]?.toUpperCase()}</span>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
