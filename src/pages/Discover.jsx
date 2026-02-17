@@ -8,14 +8,14 @@ import { motion, AnimatePresence } from "framer-motion";
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
 const catColors = {
-  productivity: "bg-blue-50 text-blue-700",
-  finance: "bg-emerald-50 text-emerald-700",
-  learning: "bg-violet-50 text-violet-700",
-  lifestyle: "bg-pink-50 text-pink-700",
-  entertainment: "bg-amber-50 text-amber-700",
-  health: "bg-green-50 text-green-700",
-  social: "bg-indigo-50 text-indigo-700",
-  developer_tools: "bg-gray-100 text-gray-700",
+  productivity: "bg-[#EEF3F0] text-[#3C6E5A]",
+  finance: "bg-[#EEF3F0] text-[#3C6E5A]",
+  learning: "bg-[#EDF2F7] text-[#5579A6]",
+  lifestyle: "bg-[#FDF3ED] text-[#D98B62]",
+  entertainment: "bg-[#FDF3ED] text-[#D98B62]",
+  health: "bg-[#EEF3F0] text-[#3C6E5A]",
+  social: "bg-[#EDF2F7] text-[#5579A6]",
+  developer_tools: "bg-[#F2F0EC] text-[#6E6E6E]",
 };
 
 function SwipeDiscoverCard({ item }) {
@@ -88,16 +88,17 @@ export default function Discover() {
   const nextCard = () => setSwipeIndex((i) => Math.min(filtered.length - 1, i + 1));
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
-          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)" }}>Discover</h1>
-          <p className="text-xs text-[#9B9B9B] mt-0.5">Curated tools, apps & services</p>
+          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Curated tools, apps & services</p>
         </div>
         <button
           onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#EDE9E3] text-xs text-[#6B6B6B]"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs"
+          style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
         >
           {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
         </button>
@@ -119,17 +120,18 @@ export default function Discover() {
       )}
 
       {/* Categories */}
-      <div className="px-5 mb-4 overflow-x-auto scrollbar-hide">
+      <div className="px-5 mb-4 overflow-x-auto scrollbar-hide mt-3">
         <div className="flex gap-2">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => { setActiveCategory(cat); setSwipeIndex(0); }}
-              className={`px-3 py-1.5 text-xs rounded-full border whitespace-nowrap transition-all ${
-                activeCategory === cat
-                  ? "bg-[#7C8C6E] text-white border-[#7C8C6E]"
-                  : "bg-white text-[#6B6B6B] border-[#EDE9E3]"
-              }`}
+              className="px-3 py-1.5 text-xs rounded-full border whitespace-nowrap transition-all"
+              style={{
+                backgroundColor: activeCategory === cat ? "var(--accent-primary)" : "var(--bg-nav)",
+                color: activeCategory === cat ? "#fff" : "var(--text-secondary)",
+                borderColor: activeCategory === cat ? "var(--accent-primary)" : "var(--border-light)",
+              }}
             >
               {cat === "all" ? "All" : cat.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
             </button>
@@ -139,7 +141,7 @@ export default function Discover() {
 
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
       ) : viewMode === "swipe" ? (
         /* ---- SWIPE VIEW ---- */
@@ -184,37 +186,37 @@ export default function Discover() {
             </div>
           ) : (
             filtered.map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl p-4 border border-[#EDE9E3] hover:shadow-sm transition-shadow">
+              <div key={item.id} className="rounded-2xl p-4 hover:shadow-sm transition-shadow" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <div className="flex items-start gap-3">
                   {item.logo_url ? (
                     <img src={item.logo_url} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
                   ) : (
-                    <div className="w-14 h-14 rounded-xl bg-[#F5F0EB] flex items-center justify-center text-xl font-bold text-[#7C8C6E] shrink-0">
+                    <div className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
                       {item.title?.[0]?.toUpperCase()}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-[#2C2C2C]">{item.title}</h3>
+                      <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
                       {item.is_sponsored && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200">Sponsored</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(217,139,98,0.1)", color: "var(--accent-secondary)", border: "1px solid rgba(217,139,98,0.3)" }}>Sponsored</span>
                       )}
                     </div>
-                    <p className="text-xs text-[#9B9B9B] mt-0.5">{item.brand_name}</p>
-                    <p className="text-sm text-[#6B6B6B] mt-1.5 line-clamp-2">{item.description}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
+                    <p className="text-sm mt-1.5 line-clamp-2" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-700"}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border ${catColors[item.category] || "bg-[#F2F0EC] text-[#6E6E6E]"}`} style={{ borderColor: "var(--border-medium)" }}>
                         {item.category?.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                       </span>
                       {item.promo && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.08)", color: "var(--accent-primary)", border: "1px solid rgba(60,110,90,0.2)" }}>
                           ✓ {item.promo}
                         </span>
                       )}
                     </div>
                   </div>
                   {item.link && (
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-2 text-[#9B9B9B] hover:text-[#7C8C6E] shrink-0">
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-2 shrink-0 transition-colors" style={{ color: "var(--text-hint)" }}>
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   )}
