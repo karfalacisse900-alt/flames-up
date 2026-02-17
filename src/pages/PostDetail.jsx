@@ -133,9 +133,11 @@ export default function PostDetail() {
           </div>
         </div>
 
-        {/* Replies */}
-        <div className="mt-5 space-y-3">
-          <h3 className="text-sm font-medium text-[#6B6B6B] px-1">Replies</h3>
+        {/* Replies Section */}
+         <div className="mt-6 space-y-3">
+           <h3 className="text-sm font-semibold text-[#2C2C2C] px-1 flex items-center gap-2">
+             💬 Replies <span className="text-xs font-normal" style={{ color: "var(--text-hint)" }}>({allReplies.length})</span>
+           </h3>
           {allReplies.length === 0 ? (
             <p className="text-sm text-[#9B9B9B] text-center py-8">No replies yet. Be the first.</p>
           ) : (
