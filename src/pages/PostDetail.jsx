@@ -111,9 +111,18 @@ export default function PostDetail() {
             {post.text}
           </p>
 
-          {/* Poll results */}
+          {/* Poll results for Yes/No and Multiple Choice */}
           {post.type === "question" && post.answer_type && post.answer_type !== "open" && (
-            <PollOptions post={post} user={user} compact={false} />
+            <>
+              <PollOptions post={post} user={user} compact={false} />
+            </>
+          )}
+
+          {/* Engagement stats */}
+          {post.type === "question" && post.answer_type === "open" && (
+            <p className="text-xs mt-4 px-2 py-2 rounded-lg" style={{ backgroundColor: "rgba(60,110,90,0.05)", color: "var(--text-hint)" }}>
+              💭 Open Discussion — Share your thoughts in the replies below
+            </p>
           )}
 
           <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[#EDE9E3]">
