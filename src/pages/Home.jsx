@@ -31,12 +31,19 @@ export default function Home() {
     queryFn: () => base44.entities.Post.list("-created_date", 50),
   });
 
-  const filtered = posts.filter((p) =>
+  const rawFiltered = posts.filter((p) =>
     activeFilter === "all" ? true :
     activeFilter === "questions" ? p.type === "question" :
     activeFilter === "quotes" ? p.type === "quote" :
     p.type === "concern"
   );
+
+  // Boosted posts (still active) float to top
+  const now = new Date();
+  const filtered = [
+    ...rawFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
+    ...rawFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now)),
+  ];
 
   const handleLike = async (post) => {
     const email = user?.email;
