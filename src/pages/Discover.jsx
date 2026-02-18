@@ -10,6 +10,11 @@ import FeaturedTool from "../components/discover/FeaturedTool";
 import NewNoteworthy from "../components/discover/NewNoteworthy";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
 import DiscoverAIAssistant from "../components/discover/DiscoverAIAssistant";
+import CompareBar from "../components/discover/CompareBar";
+import CompareModal from "../components/discover/CompareModal";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "../utils";
+import { Users } from "lucide-react";
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
