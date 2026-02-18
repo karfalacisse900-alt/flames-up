@@ -60,6 +60,7 @@ import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
 import Referral from './pages/Referral';
+import Notifications from './pages/Notifications';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +78,7 @@ export const PAGES = {
     "Profile": Profile,
     "Wallet": Wallet,
     "Referral": Referral,
+    "Notifications": Notifications,
 }
 
 export const pagesConfig = {
