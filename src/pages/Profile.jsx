@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift } from "lucide-react";
 import BoostPostModal from "../components/home/BoostPostModal";
-import { getBalance } from "../components/coins/coinsHelper";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
