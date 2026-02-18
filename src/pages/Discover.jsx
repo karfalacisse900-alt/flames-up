@@ -386,6 +386,7 @@ export default function Discover() {
                 <div className="px-5 space-y-3">
                   {filtered.map(item => (
                     <DiscoverListItem key={item.id} item={item}
+                      user={user}
                       onOpen={() => setSelectedItem(item)}
                       compareMode={compareMode}
                       isSelected={compareList.some(c => c.id === item.id)}
