@@ -94,7 +94,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       />
       <motion.div
         className="relative w-full max-w-lg rounded-t-3xl"
-        style={{ maxHeight: "90dvh", overflowY: "auto", backgroundColor: "var(--bg-nav)" }}
+        style={{ maxHeight: "92dvh", overflowY: "auto", backgroundColor: "var(--bg-nav)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
       >
