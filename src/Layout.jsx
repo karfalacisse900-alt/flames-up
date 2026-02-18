@@ -20,7 +20,7 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay"].includes(currentPageName);
+  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum"].includes(currentPageName);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
