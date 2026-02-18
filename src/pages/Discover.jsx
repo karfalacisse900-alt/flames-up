@@ -9,6 +9,7 @@ import StarRating from "../components/discover/StarRating";
 import FeaturedTool from "../components/discover/FeaturedTool";
 import NewNoteworthy from "../components/discover/NewNoteworthy";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
+import DiscoverAIAssistant from "../components/discover/DiscoverAIAssistant";
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
