@@ -78,14 +78,14 @@ export default function DiscoverItemModal({ item, user, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ backgroundColor: "rgba(0,0,0,0.65)" }} onClick={onClose}>
       <div
         className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl"
-        style={{ backgroundColor: "var(--bg-card)" }}
+        style={{ backgroundColor: "#FFFFFF", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 px-5 pt-5 pb-3 flex items-start justify-between" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="sticky top-0 z-10 px-5 pt-5 pb-3 flex items-start justify-between" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5DFD0" }}>
           <div className="flex items-center gap-3">
             <DiscoverLogo item={item} size="md" />
             <div>
