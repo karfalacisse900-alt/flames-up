@@ -237,6 +237,20 @@ export default function Discover() {
             {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
           </button>
         </div>
+        {/* Content type tabs */}
+        <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+          {[["apps","🛠 Apps & Tools"],["services","👤 Service People"]].map(([val, label]) => (
+            <button key={val} onClick={() => setContentTab(val)}
+              className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{
+                backgroundColor: contentTab === val ? "#fff" : "transparent",
+                color: contentTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+                boxShadow: contentTab === val ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+              }}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Search + Filter toggle */}
