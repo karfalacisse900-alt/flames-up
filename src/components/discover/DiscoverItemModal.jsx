@@ -195,10 +195,10 @@ export default function DiscoverItemModal({ item, user, onClose }) {
             {/* Reviews list */}
             <div className="space-y-3">
               {reviews.filter(r => r.user_email !== user?.email).map(review => (
-                <div key={review.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+                <div key={review.id} className="p-3 rounded-2xl bg-gray-50 border border-gray-200">
                   <div className="flex items-center justify-between mb-1">
                     <div>
-                      <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{review.user_name || "Anonymous"}</span>
+                      <span className="text-xs font-medium text-gray-800">{review.user_name || "Anonymous"}</span>
                       <StarRating value={review.rating} size="sm" />
                     </div>
                     <button
