@@ -153,6 +153,9 @@ export default function Profile() {
           <TabsTrigger value="art" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Palette className="w-3.5 h-3.5" /> Art
           </TabsTrigger>
+          <TabsTrigger value="reviews" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+            <Star className="w-3.5 h-3.5" /> Reviews
+          </TabsTrigger>
           <TabsTrigger value="games" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Trophy className="w-3.5 h-3.5" /> Games
           </TabsTrigger>
