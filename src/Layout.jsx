@@ -29,7 +29,7 @@ export default function Layout({ children, currentPageName }) {
     }).catch(() => {});
   }, []);
 
-  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum"].includes(currentPageName);
+  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "Notifications"].includes(currentPageName);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
