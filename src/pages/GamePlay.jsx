@@ -379,20 +379,22 @@ export default function GamePlay() {
   const renderGame = () => {
     switch (gameId) {
       case "memory": return <MemoryMatchGame onEnd={handleGameEnd} />;
-      case "reaction": return <ReactionSpeedGame onEnd={handleGameEnd} />;
+      case "reaction": return <ReactionSpeedGame2 onEnd={handleGameEnd} />;
       case "tic-tac-toe": return <TicTacToeGame onEnd={handleGameEnd} />;
       case "math-speed": return <MathSpeedGame onEnd={handleGameEnd} />;
       case "rock-paper-scissors": return <RockPaperScissors mode={mode} />;
-      case "color-connect": return <TriviaCompact />;
+      case "color-connect": return <ColorConnectGame onEnd={handleGameEnd} />;
       case "trivia": return <TriviaCompact />;
+      case "checkers": return <CheckersGame onEnd={handleGameEnd} />;
+      case "maze": return <MazeRunnerGame onEnd={handleGameEnd} />;
       default:
         return (
           <div className="text-center py-12">
             <p className="text-4xl mb-3">🎮</p>
-            <p className="font-serif text-lg text-[#6B6B6B]" style={{ fontFamily: "var(--font-serif)" }}>
+            <p className="text-lg font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>
               {gameNames[gameId] || "Game"} – Coming Soon
             </p>
-            <p className="text-sm text-[#9B9B9B] mt-1">This game is being built. Stay tuned!</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-hint)" }}>This game is being built. Stay tuned!</p>
           </div>
         );
     }
