@@ -418,9 +418,20 @@ export default function Discover() {
             </div>
           ) : (
             <div className="px-5 space-y-3">
-              {filtered.map(item => (
-                <DiscoverListItem key={item.id} item={item} onOpen={() => setSelectedItem(item)} />
-              ))}
+                  {filtered.map(item => (
+                    <DiscoverListItem
+                      key={item.id}
+                      item={item}
+                      onOpen={() => setSelectedItem(item)}
+                      compareMode={compareMode}
+                      isSelected={compareList.some(c => c.id === item.id)}
+                      onToggleCompare={() => {
+                        const already = compareList.some(c => c.id === item.id);
+                        if (already) setCompareList(prev => prev.filter(c => c.id !== item.id));
+                        else if (compareList.length < 3) setCompareList(prev => [...prev, item]);
+                      }}
+                    />
+                  ))}
             </div>
           )}
         </div>
