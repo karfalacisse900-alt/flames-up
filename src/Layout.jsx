@@ -10,7 +10,6 @@ const navItems = [
   { name: "Art", icon: Palette, page: "Art" },
   { name: "Live", icon: Radio, page: "Live" },
   { name: "Games", icon: Gamepad2, page: "Games" },
-  { name: "Alerts", icon: Bell, page: "Notifications" },
   { name: "Profile", icon: User, page: "Profile" },
 ];
 
