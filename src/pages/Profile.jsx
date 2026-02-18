@@ -47,6 +47,12 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
+  const { data: myReviews = [] } = useQuery({
+    queryKey: ["myReviews", user?.email],
+    queryFn: () => base44.entities.DiscoverReview.filter({ user_email: user.email }, "-created_date"),
+    enabled: !!user?.email,
+  });
+
   const { data: gameStats = [] } = useQuery({
     queryKey: ["gameStats", user?.email],
     queryFn: () => base44.entities.GameStats.filter({ player_email: user.email }),
