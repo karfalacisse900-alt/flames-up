@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
 import { ArrowLeft, RotateCcw, Trophy, Clock, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
