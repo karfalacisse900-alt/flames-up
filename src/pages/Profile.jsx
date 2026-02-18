@@ -363,6 +363,20 @@ export default function Profile() {
         </DialogContent>
       </Dialog>
 
+      {/* Boost post modal */}
+      {boostPost && (
+        <BoostPostModal
+          post={boostPost}
+          user={user}
+          balance={coinBalance}
+          onClose={() => setBoostPost(null)}
+          onBoosted={() => {
+            queryClient.invalidateQueries({ queryKey: ["myPosts", user?.email] });
+            queryClient.invalidateQueries({ queryKey: ["coinBalance", user?.email] });
+          }}
+        />
+      )}
+
       {/* Edit profile */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="max-w-sm rounded-2xl">
