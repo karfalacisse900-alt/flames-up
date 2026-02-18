@@ -24,7 +24,7 @@ const platformIcon = (p) => {
   return <Monitor className="w-3 h-3" />;
 };
 
-export default function DiscoverItemModal({ item, user, onClose, allItems = [] }) {
+export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, allItems = [] }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const qc = useQueryClient();
