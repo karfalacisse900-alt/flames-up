@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, RefreshCw, List, Layers, Zap, Users } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,8 +20,36 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [feedTab, setFeedTab] = useState("all"); // "all" | "following"
+  const [feedTab, setFeedTab] = useState("all");
+  const [pullY, setPullY] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const listRef = useRef(null);
   const queryClient = useQueryClient();
+
+  // Pull-to-refresh handlers
+  const handleTouchStart = useCallback((e) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    const el = listRef.current;
+    if (el && el.scrollTop > 0) return;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (dy > 0 && dy < 100) { setPullY(dy); setIsPulling(true); }
+  }, []);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (pullY > 60) {
+      setRefreshing(true);
+      await refetch();
+      setCurrentIndex(0);
+      setRefreshing(false);
+    }
+    setPullY(0);
+    setIsPulling(false);
+  }, [pullY]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -52,16 +80,31 @@ export default function Home() {
     ...rawFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now)),
   ];
 
-  const handleLike = async (post) => {
+  const likeMutation = useMutation({
+    mutationFn: ({ post, email }) => base44.entities.Post.update(post.id, {
+      like_count: (post.like_count || 0) + 1,
+      liked_by: [...(post.liked_by || []), email],
+    }),
+    onMutate: async ({ post, email }) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      const prev = queryClient.getQueryData(["posts"]);
+      queryClient.setQueryData(["posts"], (old = []) =>
+        old.map(p => p.id === post.id
+          ? { ...p, like_count: (p.like_count || 0) + 1, liked_by: [...(p.liked_by || []), email] }
+          : p)
+      );
+      return { prev };
+    },
+    onError: (_, __, ctx) => { queryClient.setQueryData(["posts"], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
+  const handleLike = (post) => {
     const email = user?.email;
     if (!email) return;
     const likedBy = post.liked_by || [];
     if (!likedBy.includes(email)) {
-      await base44.entities.Post.update(post.id, {
-        like_count: (post.like_count || 0) + 1,
-        liked_by: [...likedBy, email],
-      });
-      // Fire notification to post author
+      likeMutation.mutate({ post, email });
       if (post.author_email && post.author_email !== email) {
         base44.entities.Notification.create({
           recipient_email: post.author_email,
@@ -73,7 +116,6 @@ export default function Home() {
           is_read: false,
         }).catch(() => {});
       }
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
     setCurrentIndex((prev) => prev + 1);
   };
@@ -86,10 +128,12 @@ export default function Home() {
 
   const visiblePosts = filtered.slice(currentIndex);
 
+  // attach touch listeners to list in list mode — handled inline via onTouch* props
+
   return (
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
-      <div className="px-5 pt-5 pb-3 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+      <div className="px-5 pb-3 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
         <div className="flex items-center gap-3 mb-3">
           {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) => (
@@ -212,7 +256,22 @@ export default function Home() {
           )
         ) : (
           /* ---- LIST MODE ---- */
-          <div className="h-full overflow-y-auto space-y-3 pb-4">
+          <div
+            ref={listRef}
+            className="h-full overflow-y-auto space-y-3 pb-4"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Pull indicator */}
+            <motion.div
+              animate={{ height: pullY > 0 ? Math.min(pullY * 0.6, 56) : 0, opacity: pullY > 20 ? 1 : 0 }}
+              className="flex items-center justify-center overflow-hidden"
+            >
+              <motion.div animate={{ rotate: refreshing ? 360 : pullY * 3 }} transition={refreshing ? { repeat: Infinity, duration: 0.7, ease: "linear" } : {}}>
+                <RefreshCw className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+              </motion.div>
+            </motion.div>
             {filtered.map((post) => {
               const ts = typeStyles[post.type] || typeStyles.quote;
               return (
