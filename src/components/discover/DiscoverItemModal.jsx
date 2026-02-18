@@ -277,7 +277,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
                 {relatedItems.map(rel => (
                   <button
                     key={rel.id}
-                    onClick={() => { onClose(); setTimeout(() => onClose(rel), 50); }}
+                    onClick={() => onOpenRelated && onOpenRelated(rel)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors"
                     style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}
                     data-related-id={rel.id}
