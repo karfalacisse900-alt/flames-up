@@ -62,6 +62,8 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
+import Collections from './pages/Collections';
+import EditServiceProfile from './pages/EditServiceProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +83,8 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
+    "Collections": Collections,
+    "EditServiceProfile": EditServiceProfile,
 }
 
 export const pagesConfig = {
