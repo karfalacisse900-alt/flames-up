@@ -107,8 +107,8 @@ Only recommend from the provided list. If nothing matches well, say so nicely.`,
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-24 right-4 z-40 flex items-center gap-2 px-4 py-3 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: "var(--accent-primary)", color: "#fff", boxShadow: "0 4px 20px rgba(60,110,90,0.45)" }}
+            className="fixed bottom-24 right-4 z-40 flex items-center gap-2 px-4 py-3 rounded-full text-sm font-semibold border-2 border-white"
+            style={{ backgroundColor: "var(--accent-primary)", color: "#fff", boxShadow: "0 4px 24px rgba(60,110,90,0.55)" }}
           >
             <Sparkles className="w-4 h-4" />
             Ask AI
