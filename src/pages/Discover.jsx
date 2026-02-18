@@ -372,7 +372,41 @@ export default function Discover() {
         </div>
       </div>
 
-      {isLoading ? (
+      {/* ---- SERVICE PEOPLE TAB ---- */}
+      {contentTab === "services" && (
+        <div className="pb-24 mt-4">
+          {/* Search for services */}
+          <div className="px-5 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
+              <Input
+                placeholder="Search by name, skill, role..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm"
+              />
+            </div>
+          </div>
+          {spLoading ? (
+            <div className="flex justify-center py-16">
+              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+            </div>
+          ) : filteredServicePeople.length === 0 ? (
+            <div className="text-center py-16 px-5">
+              <p className="text-4xl mb-3">👤</p>
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>{search ? "No people found" : "No service people listed yet"}</p>
+            </div>
+          ) : (
+            <div className="px-5 space-y-3">
+              {filteredServicePeople.map(person => (
+                <ServicePersonCard key={person.id} person={person} onClick={() => setSelectedServicePerson(person)} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {contentTab === "apps" && isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
