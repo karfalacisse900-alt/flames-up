@@ -267,6 +267,32 @@ export default function DiscoverItemModal({ item, user, onClose, allItems = [] }
               )}
             </div>
           </div>
+
+          {/* Related Items */}
+          {relatedItems.length > 0 && (
+            <div>
+              <div style={{ borderTop: "1px solid var(--border-light)" }} className="mb-4" />
+              <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Related Tools</h3>
+              <div className="space-y-2">
+                {relatedItems.map(rel => (
+                  <button
+                    key={rel.id}
+                    onClick={() => { onClose(); setTimeout(() => onClose(rel), 50); }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors"
+                    style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}
+                    data-related-id={rel.id}
+                  >
+                    <DiscoverLogo item={rel} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{rel.title}</p>
+                      <p className="text-[11px] truncate" style={{ color: "var(--text-hint)" }}>{rel.description}</p>
+                    </div>
+                    <StarRating value={rel.avg_rating || 0} size="sm" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
