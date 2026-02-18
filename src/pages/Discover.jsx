@@ -138,6 +138,9 @@ export default function Discover() {
   const [filterPricing, setFilterPricing] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [user, setUser] = useState(null);
+  const [compareList, setCompareList] = useState([]);
+  const [showCompare, setShowCompare] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
