@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, TrendingUp, TrendingDown, X } from "lucide-react";
+import { Plus, Upload, TrendingUp, TrendingDown, X, Swords } from "lucide-react";
 import ArtVoiceSection from "../components/art/ArtVoiceSection";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
+import ArtFightArena from "../components/art/ArtFightArena";
+import ArtFightLeaderboard from "../components/art/ArtFightLeaderboard";
+import ArtFightUpload from "../components/art/ArtFightUpload";
+import ArtFightAdmin from "../components/art/ArtFightAdmin";
+import MyArtFightEntries from "../components/art/MyArtFightEntries";
 
 // Simulated price history per art (seeded by art id)
 function getPriceHistory(art) {
@@ -286,6 +291,7 @@ export default function Art() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [activeTab, setActiveTab] = useState("market");
+  const [showFightUpload, setShowFightUpload] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -365,18 +371,28 @@ export default function Art() {
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
-          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art Market</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Trade digital art with coins</p>
+          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Market · Gallery · Fight</p>
         </div>
-        <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
-          <Plus className="w-4 h-4" />
-        </button>
+        <div className="flex gap-2">
+          {activeTab === "fight" && (
+            <button onClick={() => setShowFightUpload(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white text-xs font-semibold shadow-sm" style={{ backgroundColor: "#E05C7A" }}>
+              <Swords className="w-3.5 h-3.5" /> Submit
+            </button>
+          )}
+          {activeTab !== "fight" && (
+            <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
           <TabsTrigger value="market" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Market</TabsTrigger>
           <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Gallery</TabsTrigger>
+          <TabsTrigger value="fight" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
         <TabsContent value="market" className="mt-4 pb-24">
@@ -406,7 +422,40 @@ export default function Art() {
             </div>
           )}
         </TabsContent>
+        <TabsContent value="fight" className="mt-4">
+          <Tabs defaultValue="arena">
+            <TabsList className="rounded-xl w-full mb-1" style={{ backgroundColor: "var(--bg-card)" }}>
+              <TabsTrigger value="arena" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">⚔️ Arena</TabsTrigger>
+              <TabsTrigger value="top" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🏆 Top Art</TabsTrigger>
+              <TabsTrigger value="mine" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">My Art</TabsTrigger>
+              {user?.role === "admin" && (
+                <TabsTrigger value="admin" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🛡 Review</TabsTrigger>
+              )}
+            </TabsList>
+            <TabsContent value="arena">
+              <ArtFightArena user={user} />
+            </TabsContent>
+            <TabsContent value="top">
+              <ArtFightLeaderboard />
+            </TabsContent>
+            <TabsContent value="mine">
+              <MyArtFightEntries user={user} />
+            </TabsContent>
+            {user?.role === "admin" && (
+              <TabsContent value="admin">
+                <ArtFightAdmin user={user} />
+              </TabsContent>
+            )}
+          </Tabs>
+        </TabsContent>
       </Tabs>
+
+      <ArtFightUpload
+        user={user}
+        open={showFightUpload}
+        onClose={() => setShowFightUpload(false)}
+        onUploaded={() => {}}
+      />
 
       {/* Art detail modal */}
       <AnimatePresence>
