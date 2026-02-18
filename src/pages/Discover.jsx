@@ -195,8 +195,14 @@ export default function Discover() {
   });
 
   const activeFiltersCount = [filterPlatform !== "all", filterPricing !== "all", sortBy !== "default"].filter(Boolean).length;
-
   const showSections = activeCategory === "all" && !search;
+
+  const filteredServicePeople = servicePeople.filter(p =>
+    !search || p.name?.toLowerCase().includes(search.toLowerCase()) ||
+    p.headline?.toLowerCase().includes(search.toLowerCase()) ||
+    p.short_description?.toLowerCase().includes(search.toLowerCase()) ||
+    p.skills?.some(s => s.toLowerCase().includes(search.toLowerCase()))
+  ).sort((a, b) => sortBy === "rating" ? (b.avg_rating || 0) - (a.avg_rating || 0) : 0);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
