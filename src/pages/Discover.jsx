@@ -406,12 +406,14 @@ export default function Discover() {
         </div>
       )}
 
-      {contentTab === "apps" && (isLoading ? (
+      {contentTab === "apps" && isLoading && (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
-      ) : viewMode === "swipe" && (
-        /* ---- SWIPE VIEW ---- */
+      )}
+
+      {/* ---- SWIPE VIEW ---- */}
+      {contentTab === "apps" && !isLoading && viewMode === "swipe" && (
         <div className="px-5 pb-24 mt-4">
           {filtered.length === 0 ? (
             <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
@@ -445,22 +447,19 @@ export default function Discover() {
             </>
           )}
         </div>
-      ) : (
-        /* ---- LIST VIEW ---- */
+      )}
+
+      {/* ---- LIST VIEW ---- */}
+      {contentTab === "apps" && !isLoading && viewMode === "list" && (
         <div className="pb-24 mt-4">
-          {/* Featured Tool of the Week */}
           {showSections && featuredItem && (
             <div className="mb-5">
               <FeaturedTool item={featuredItem} onClick={() => setSelectedItem(featuredItem)} />
             </div>
           )}
-
-          {/* New & Noteworthy */}
           {showSections && newItems.length > 0 && (
             <NewNoteworthy items={newItems} onItemClick={setSelectedItem} />
           )}
-
-          {/* All / Filtered items */}
           {showSections && (
             <div className="px-5 flex items-center gap-2 mb-3">
               <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
@@ -471,7 +470,6 @@ export default function Discover() {
               </span>
             </div>
           )}
-
           {filtered.length === 0 ? (
             <div className="text-center py-16 px-5">
               <p className="text-4xl mb-3">🔍</p>
@@ -479,20 +477,20 @@ export default function Discover() {
             </div>
           ) : (
             <div className="px-5 space-y-3">
-                  {filtered.map(item => (
-                    <DiscoverListItem
-                      key={item.id}
-                      item={item}
-                      onOpen={() => setSelectedItem(item)}
-                      compareMode={compareMode}
-                      isSelected={compareList.some(c => c.id === item.id)}
-                      onToggleCompare={() => {
-                        const already = compareList.some(c => c.id === item.id);
-                        if (already) setCompareList(prev => prev.filter(c => c.id !== item.id));
-                        else if (compareList.length < 3) setCompareList(prev => [...prev, item]);
-                      }}
-                    />
-                  ))}
+              {filtered.map(item => (
+                <DiscoverListItem
+                  key={item.id}
+                  item={item}
+                  onOpen={() => setSelectedItem(item)}
+                  compareMode={compareMode}
+                  isSelected={compareList.some(c => c.id === item.id)}
+                  onToggleCompare={() => {
+                    const already = compareList.some(c => c.id === item.id);
+                    if (already) setCompareList(prev => prev.filter(c => c.id !== item.id));
+                    else if (compareList.length < 3) setCompareList(prev => [...prev, item]);
+                  }}
+                />
+              ))}
             </div>
           )}
         </div>
