@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ShoppingBag, Zap, Star, Crown, Palette, CheckCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Zap, Star, Crown, Palette, CheckCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { getBalance, addCoins } from "../components/coins/coinsHelper";
+import { loadStripe } from "@stripe/stripe-js";
 
 const shopItems = [
   {
@@ -80,9 +81,9 @@ const shopItems = [
 ];
 
 const coinBundles = [
-  { id: "coins_100", coins: 100, label: "Starter", price: "$0.99", emoji: "💰" },
-  { id: "coins_500", coins: 500, label: "Popular", price: "$3.99", emoji: "💎", badge: "Best Value" },
-  { id: "coins_1500", coins: 1500, label: "Pro", price: "$9.99", emoji: "👑" },
+  { id: "coins_100", coins: 100, label: "Starter", price: "$0.99", emoji: "💰", priceId: "price_1T2Fuf5bPx2iiXNaPUaZa12n" },
+  { id: "coins_500", coins: 500, label: "Popular", price: "$3.99", emoji: "💎", badge: "Best Value", priceId: "price_1T2Fuf5bPx2iiXNanCtYX1oQ" },
+  { id: "coins_1500", coins: 1500, label: "Pro", price: "$9.99", emoji: "👑", priceId: "price_1T2Fuf5bPx2iiXNakD2rUJdx" },
 ];
 
 const categoryTabs = ["all", "badge", "boost", "theme"];
@@ -92,10 +93,16 @@ export default function Shop() {
   const [activeTab, setActiveTab] = useState("all");
   const [purchasing, setPurchasing] = useState(null);
   const [toast, setToast] = useState("");
+  const [stripeReady, setStripeReady] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    
+    // Check if we're in an iframe (not published)
+    if (window.self === window.top) {
+      setStripeReady(true);
+    }
   }, []);
 
   const { data: balance = 0, refetch: refetchBalance } = useQuery({
@@ -129,8 +136,26 @@ export default function Shop() {
     showToast(`🎉 ${item.name} unlocked!`);
   };
 
-  const handleBuyCoins = (bundle) => {
-    showToast(`💳 In-app purchase coming soon! Bundle: ${bundle.coins} coins for ${bundle.price}`);
+  const handleBuyCoins = async (bundle) => {
+    if (!stripeReady) {
+      showToast("❌ Publish the app to buy coins!");
+      return;
+    }
+    
+    setPurchasing(bundle.id);
+    try {
+      const response = await base44.functions.invoke("createCoinCheckout", {
+        priceId: bundle.priceId,
+      });
+
+      const stripe = await loadStripe(Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "");
+      await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+    } catch (error) {
+      console.error("Checkout error:", error);
+      showToast("❌ Something went wrong");
+    } finally {
+      setPurchasing(null);
+    }
   };
 
   const filtered = activeTab === "all" ? shopItems : shopItems.filter(i => i.category === activeTab);
@@ -175,14 +200,18 @@ export default function Shop() {
               {bundle.badge && (
                 <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] px-2 py-0.5 rounded-full font-bold text-white whitespace-nowrap" style={{ backgroundColor: "var(--accent-secondary)" }}>{bundle.badge}</span>
               )}
-              <span className="text-2xl">{bundle.emoji}</span>
+              {purchasing === bundle.id ? (
+                <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--accent-primary)" }} />
+              ) : (
+                <span className="text-2xl">{bundle.emoji}</span>
+              )}
               <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>{bundle.coins} ⬡</p>
               <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{bundle.label}</p>
               <p className="text-xs font-semibold mt-1" style={{ color: "var(--accent-primary)" }}>{bundle.price}</p>
             </button>
           ))}
         </div>
-        <p className="text-[10px] mt-2 text-center" style={{ color: "var(--text-hint)" }}>In-app purchases coming soon. Stay tuned!</p>
+        {!stripeReady && <p className="text-[10px] mt-2 text-center text-red-500">⚠️ Publish the app to purchase coins</p>}
       </div>
 
       {/* Category tabs */}
