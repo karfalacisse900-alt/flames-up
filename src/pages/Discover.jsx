@@ -210,47 +210,42 @@ export default function Discover() {
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              to={createPageUrl("DiscoverForum")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-            >
-              <Users className="w-3.5 h-3.5" /> Forum
-            </Link>
-            {contentTab === "apps" && (
-              <>
-                <button
-                  onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-                  style={{
-                    backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
-                    borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
-                    color: compareMode ? "#fff" : "var(--text-secondary)"
-                  }}
-                >
-                  Compare
-                </button>
-                <button
-                  onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-                >
-                  {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
-                </button>
-              </>
-            )}
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to={createPageUrl("DiscoverForum")}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+          >
+            <Users className="w-3.5 h-3.5" /> Forum
+          </Link>
+          <button
+            onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{
+              backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
+              borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
+              color: compareMode ? "#fff" : "var(--text-secondary)"
+            }}
+          >
+            Compare
+          </button>
+          <button
+            onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+          >
+            {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
+          </button>
         </div>
-        {/* Content tab switcher: Apps | Services */}
-        <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-app)" }}>
-          {[["apps", "🛠 Apps"], ["services", "👤 Services"]].map(([tab, label]) => (
-            <button key={tab} onClick={() => setContentTab(tab)}
-              className="flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all"
+        {/* Content type tabs */}
+        <div className="mt-3 flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+          {[["apps","🛠 Apps & Tools"],["services","👤 Service People"]].map(([val, label]) => (
+            <button key={val} onClick={() => setContentTab(val)}
+              className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
-                backgroundColor: contentTab === tab ? "var(--bg-nav)" : "transparent",
-                color: contentTab === tab ? "var(--accent-primary)" : "var(--text-hint)",
-                boxShadow: contentTab === tab ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                backgroundColor: contentTab === val ? "#fff" : "transparent",
+                color: contentTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+                boxShadow: contentTab === val ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}>
               {label}
             </button>
@@ -259,7 +254,7 @@ export default function Discover() {
       </div>
 
       {/* Search + Filter toggle */}
-      {(contentTab === "apps" ? viewMode === "list" : true) && (
+      {viewMode === "list" && contentTab === "apps" && (
         <div className="px-5 pt-3 space-y-2">
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -357,107 +352,41 @@ export default function Discover() {
         </div>
       )}
 
-      {/* Categories — only for Apps tab */}
-      {contentTab === "apps" && (
-        <div className="px-5 mb-2 overflow-x-auto scrollbar-hide mt-3">
-          <div className="flex gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => { setActiveCategory(cat); setSwipeIndex(0); }}
-                className="px-3 py-1.5 text-xs rounded-full border whitespace-nowrap transition-all"
-                style={{
-                  backgroundColor: activeCategory === cat ? "var(--accent-primary)" : "var(--bg-nav)",
-                  color: activeCategory === cat ? "#fff" : "var(--text-secondary)",
-                  borderColor: activeCategory === cat ? "var(--accent-primary)" : "var(--border-light)",
-                }}
-              >
-                {cat === "all" ? "All" : cat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-              </button>
-            ))}
-          </div>
+      {/* Categories — only for apps tab */}
+      {contentTab === "apps" && <div className="px-5 mb-2 overflow-x-auto scrollbar-hide mt-3">
+        <div className="flex gap-2">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => { setActiveCategory(cat); setSwipeIndex(0); }}
+              className="px-3 py-1.5 text-xs rounded-full border whitespace-nowrap transition-all"
+              style={{
+                backgroundColor: activeCategory === cat ? "var(--accent-primary)" : "var(--bg-nav)",
+                color: activeCategory === cat ? "#fff" : "var(--text-secondary)",
+                borderColor: activeCategory === cat ? "var(--accent-primary)" : "var(--border-light)",
+              }}
+            >
+              {cat === "all" ? "All" : cat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+            </button>
+          ))}
         </div>
-      )}
+      </div>}
 
-      {/* ===== APPS TAB ===== */}
-      {contentTab === "apps" && (
-        isLoading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          </div>
-        ) : viewMode === "swipe" ? (
-          <div className="px-5 pb-24 mt-4">
-            {filtered.length === 0 ? (
-              <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
-            ) : (
-              <>
-                <div style={{ height: "65vh" }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div key={filtered[swipeIndex]?.id} className="h-full"
-                      initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }}>
-                      {filtered[swipeIndex] && (
-                        <SwipeDiscoverCard item={filtered[swipeIndex]} onOpen={() => setSelectedItem(filtered[swipeIndex])} />
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-                <div className="flex items-center justify-center gap-6 mt-4">
-                  <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <span className="text-xs" style={{ color: "var(--text-hint)" }}>{swipeIndex + 1} / {filtered.length}</span>
-                  <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="pb-24 mt-4">
-            {showSections && featuredItem && (
-              <div className="mb-5"><FeaturedTool item={featuredItem} onClick={() => setSelectedItem(featuredItem)} /></div>
-            )}
-            {showSections && newItems.length > 0 && (
-              <NewNoteworthy items={newItems} onItemClick={setSelectedItem} />
-            )}
-            {showSections && (
-              <div className="px-5 flex items-center gap-2 mb-3">
-                <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                  {activeCategory === "all" ? "All Tools & Apps" : activeCategory.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                </h2>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
-                  {filtered.length}
-                </span>
-              </div>
-            )}
-            {filtered.length === 0 ? (
-              <div className="text-center py-16 px-5">
-                <p className="text-4xl mb-3">🔍</p>
-                <p className="text-sm" style={{ color: "var(--text-hint)" }}>No items found</p>
-              </div>
-            ) : (
-              <div className="px-5 space-y-3">
-                {filtered.map(item => (
-                  <DiscoverListItem
-                    key={item.id} item={item} onOpen={() => setSelectedItem(item)}
-                    compareMode={compareMode} isSelected={compareList.some(c => c.id === item.id)}
-                    onToggleCompare={() => {
-                      const already = compareList.some(c => c.id === item.id);
-                      if (already) setCompareList(prev => prev.filter(c => c.id !== item.id));
-                      else if (compareList.length < 3) setCompareList(prev => [...prev, item]);
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      )}
-
-      {/* ===== SERVICES TAB ===== */}
+      {/* ---- SERVICE PEOPLE TAB ---- */}
       {contentTab === "services" && (
         <div className="pb-24 mt-4">
+          {/* Search for services */}
+          <div className="px-5 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
+              <Input
+                placeholder="Search by name, skill, role..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm"
+              />
+            </div>
+          </div>
           {spLoading ? (
             <div className="flex justify-center py-16">
               <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
@@ -465,42 +394,118 @@ export default function Discover() {
           ) : filteredServicePeople.length === 0 ? (
             <div className="text-center py-16 px-5">
               <p className="text-4xl mb-3">👤</p>
-              <p className="text-sm font-medium mb-1" style={{ color: "var(--text-primary)" }}>No service people yet</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Curated freelancers & mentors will appear here</p>
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>{search ? "No people found" : "No service people listed yet"}</p>
             </div>
           ) : (
-            <>
-              <div className="px-5 flex items-center gap-2 mb-3">
-                <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Freelancers & Experts</h2>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
-                  {filteredServicePeople.length}
-                </span>
-              </div>
-              <div className="px-5 space-y-3">
-                {filteredServicePeople.map(person => (
-                  <ServicePersonCard key={person.id} person={person} onClick={() => setSelectedServicePerson(person)} />
-                ))}
-              </div>
-            </>
+            <div className="px-5 space-y-3">
+              {filteredServicePeople.map(person => (
+                <ServicePersonCard key={person.id} person={person} onClick={() => setSelectedServicePerson(person)} />
+              ))}
+            </div>
           )}
         </div>
       )}
 
-      {/* Item Detail Modal (Apps) */}
-      {selectedItem && !compareMode && (
-        <DiscoverItemModal
-          item={selectedItem} user={user} allItems={items}
-          onClose={() => setSelectedItem(null)}
-          onOpenRelated={(rel) => setSelectedItem(rel)}
-        />
+      {contentTab === "apps" && (isLoading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+        </div>
+      ) : viewMode === "swipe" ? (
+        /* ---- SWIPE VIEW ---- */
+        <div className="px-5 pb-24 mt-4">
+          {filtered.length === 0 ? (
+            <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
+          ) : (
+            <>
+              <div style={{ height: "65vh" }}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={filtered[swipeIndex]?.id}
+                    className="h-full"
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {filtered[swipeIndex] && (
+                      <SwipeDiscoverCard item={filtered[swipeIndex]} onOpen={() => setSelectedItem(filtered[swipeIndex])} />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <div className="flex items-center justify-center gap-6 mt-4">
+                <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-xs" style={{ color: "var(--text-hint)" }}>{swipeIndex + 1} / {filtered.length}</span>
+                <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        /* ---- LIST VIEW ---- */
+        <div className="pb-24 mt-4">
+          {/* Featured Tool of the Week */}
+          {showSections && featuredItem && (
+            <div className="mb-5">
+              <FeaturedTool item={featuredItem} onClick={() => setSelectedItem(featuredItem)} />
+            </div>
+          )}
+
+          {/* New & Noteworthy */}
+          {showSections && newItems.length > 0 && (
+            <NewNoteworthy items={newItems} onItemClick={setSelectedItem} />
+          )}
+
+          {/* All / Filtered items */}
+          {showSections && (
+            <div className="px-5 flex items-center gap-2 mb-3">
+              <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {activeCategory === "all" ? "All Tools & Services" : activeCategory.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
+                {filtered.length}
+              </span>
+            </div>
+          )}
+
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 px-5">
+              <p className="text-4xl mb-3">🔍</p>
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No items found</p>
+            </div>
+          ) : (
+            <div className="px-5 space-y-3">
+                  {filtered.map(item => (
+                    <DiscoverListItem
+                      key={item.id}
+                      item={item}
+                      onOpen={() => setSelectedItem(item)}
+                      compareMode={compareMode}
+                      isSelected={compareList.some(c => c.id === item.id)}
+                      onToggleCompare={() => {
+                        const already = compareList.some(c => c.id === item.id);
+                        if (already) setCompareList(prev => prev.filter(c => c.id !== item.id));
+                        else if (compareList.length < 3) setCompareList(prev => [...prev, item]);
+                      }}
+                    />
+                  ))}
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Service Person Modal */}
-      {selectedServicePerson && (
-        <ServicePersonModal
-          person={selectedServicePerson}
+      {/* Item Detail Modal */}
+      {selectedItem && !compareMode && (
+        <DiscoverItemModal
+          item={selectedItem}
           user={user}
-          onClose={() => setSelectedServicePerson(null)}
+          allItems={items}
+          onClose={() => setSelectedItem(null)}
+          onOpenRelated={(rel) => setSelectedItem(rel)}
         />
       )}
 
@@ -519,8 +524,8 @@ export default function Discover() {
         <CompareModal items={compareList} onClose={() => setShowCompare(false)} />
       )}
 
-      {/* AI Assistant (apps only) */}
-      {contentTab === "apps" && !isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
+      {/* AI Assistant */}
+      {!isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
     </div>
   );
 }
