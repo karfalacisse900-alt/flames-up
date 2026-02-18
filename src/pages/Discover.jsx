@@ -525,7 +525,16 @@ export default function Discover() {
       )}
 
       {/* AI Assistant */}
-      {!isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
+      {contentTab === "apps" && !isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
+
+      {/* Service Person Modal */}
+      {selectedServicePerson && (
+        <ServicePersonModal
+          person={selectedServicePerson}
+          user={user}
+          onClose={() => setSelectedServicePerson(null)}
+        />
+      )}
     </div>
   );
 }
