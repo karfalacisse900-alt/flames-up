@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const typeConfig = {
   daily_checkin: { icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-50", label: "Daily Check-in" },
+  boost_post: { icon: Zap, color: "text-amber-500", bg: "bg-amber-50", label: "Post Boosted" },
+  referral_bonus: { icon: Users, color: "text-violet-500", bg: "bg-violet-50", label: "Referral Bonus" },
   post_liked: { icon: Star, color: "text-amber-500", bg: "bg-amber-50", label: "Post Liked" },
   game_win: { icon: Gamepad2, color: "text-violet-500", bg: "bg-violet-50", label: "Game Won" },
   live_host: { icon: Radio, color: "text-blue-500", bg: "bg-blue-50", label: "Hosted Live" },
