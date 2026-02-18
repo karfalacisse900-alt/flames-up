@@ -352,8 +352,8 @@ export default function Discover() {
         </div>
       )}
 
-      {/* Categories */}
-      <div className="px-5 mb-2 overflow-x-auto scrollbar-hide mt-3">
+      {/* Categories — only for apps tab */}
+      {contentTab === "apps" && <div className="px-5 mb-2 overflow-x-auto scrollbar-hide mt-3">
         <div className="flex gap-2">
           {categories.map(cat => (
             <button
