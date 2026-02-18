@@ -410,7 +410,7 @@ export default function Discover() {
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
-      ) : viewMode === "swipe" ? (
+      ) : viewMode === "swipe" && (
         /* ---- SWIPE VIEW ---- */
         <div className="px-5 pb-24 mt-4">
           {filtered.length === 0 ? (
