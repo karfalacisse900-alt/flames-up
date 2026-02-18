@@ -12,8 +12,7 @@ css
   /* Base Neutrals - Warm Beige */
   --bg-app: #F4ECE4;
   --bg-card: #EADFD3;
-  --bg-nav: #FFFFFF;
-  --bg-warm: #F4ECE4;
+  --bg-nav: #F4ECE4;
   --bg-subtle: #F1E8DC;
 
   /* Text - Deep Warm Tones */
@@ -24,24 +23,15 @@ css
   /* Calm Green - Primary Brand Color */
   --accent-primary: #6F8F72;
   --accent-primary-hover: #5C7A5F;
+  
+  /* Muted Olive Gold - Elegant Accent */
   --accent-secondary: #B7A67A;
-  --accent-info: #6F8F72;
-  --accent-sage: #6F8F72;
-  --accent-warm: #B7A67A;
+  --accent-secondary-hover: #A6956B;
 
   /* Borders - Warm & Soft */
   --border-light: #E8DDD1;
   --border-medium: #DED1C5;
   --border-subtle: #F1E8DC;
-
-  /* Legacy aliases */
-  --bg-card-old: #FFFFFF;
-  --text-secondary-old: #8A7968;
-  --accent-olive: #6F8F72;
-  --accent-cream: #F4ECE4;
-  --accent-sage: #6F8F72;
-  --accent-warm: #B7A67A;
-  --accent-soft-green: #6F8F72;
 
   /* Safe area insets */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -52,8 +42,7 @@ css
   :root {
     --bg-app: #2D261C;
     --bg-card: #3A3228;
-    --bg-nav: #2F2822;
-    --bg-warm: #2D261C;
+    --bg-nav: #2D261C;
     --bg-subtle: #403A30;
 
     --text-primary: #E8DCD0;
@@ -63,17 +52,11 @@ css
     --accent-primary: #7FA57E;
     --accent-primary-hover: #6B9170;
     --accent-secondary: #C4B294;
-    --accent-info: #7FA57E;
-    --accent-sage: #7FA57E;
-    --accent-warm: #C4B294;
+    --accent-secondary-hover: #B3A183;
 
     --border-light: #463E34;
     --border-medium: #4E4640;
     --border-subtle: #484038;
-
-    --bg-card-old: #3A3228;
-    --text-secondary-old: #B8AFA3;
-    --accent-cream: #463E34;
   }
 }
 
@@ -123,16 +106,16 @@ nav, button, a[role="button"], .no-select {
 
 @layer base {
   * {
-    @apply border-[#E5DFD0];
-          }
+    @apply border-[var(--border-light)];
+  }
 
-          /* Organic smoothing for cards */
-          .organic-shadow {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
-          }
+  /* Organic smoothing for cards */
+  .organic-shadow {
+    box-shadow: 0 2px 8px rgba(74, 58, 42, 0.06), 0 4px 16px rgba(74, 58, 42, 0.04);
+  }
 
-          /* Smooth button transitions */
-          button, a {
-            transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
-          }
-        }
+  /* Smooth button transitions */
+  button, a {
+    transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
