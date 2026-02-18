@@ -58,6 +58,7 @@ import Messages from './pages/Messages';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
+import DiscoverForum from './pages/DiscoverForum';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +74,7 @@ export const PAGES = {
     "PostDetail": PostDetail,
     "Profile": Profile,
     "Wallet": Wallet,
+    "DiscoverForum": DiscoverForum,
 }
 
 export const pagesConfig = {
