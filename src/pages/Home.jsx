@@ -84,10 +84,10 @@ export default function Home() {
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="p-2 rounded-full text-white shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white shadow-md text-xs font-medium"
               style={{ backgroundColor: "var(--accent-primary)" }}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" /> Post
             </button>
           </div>
         </div>
