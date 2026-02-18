@@ -30,7 +30,7 @@ css
   --border-light: #E5DFD0;
   --border-medium: #DAD3C4;
 
-  /* Legacy aliases (keep for compatibility) */
+  /* Legacy aliases */
   --bg-card-old: #FFFFFF;
   --text-secondary-old: #6B6B6B;
   --accent-olive: #3C6E5A;
@@ -38,6 +38,35 @@ css
   --accent-sage: #A8B89E;
   --accent-warm: #C4A882;
   --accent-soft-green: #8BA888;
+
+  /* Safe area insets */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-app: #1A1916;
+    --bg-card: #242220;
+    --bg-nav: #1E1C1A;
+    --bg-warm: #1A1916;
+
+    --text-primary: #F0EDE6;
+    --text-secondary: #A8A49C;
+    --text-hint: #6B6762;
+
+    --accent-primary: #5A9E7A;
+    --accent-primary-hover: #4E8A6A;
+    --accent-secondary: #E09A72;
+    --accent-info: #7799C6;
+
+    --border-light: #2E2C28;
+    --border-medium: #3A3834;
+
+    --bg-card-old: #242220;
+    --text-secondary-old: #A8A49C;
+    --accent-cream: #2E2C28;
+  }
 }
 
 body {
@@ -72,6 +101,16 @@ input, textarea, select {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Safe area padding utilities */
+.safe-top { padding-top: env(safe-area-inset-top, 0px); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* Disable text selection on interactive UI */
+nav, button, a[role="button"], .no-select {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 @layer base {
