@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2 } from "lucide-react";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
@@ -23,6 +23,8 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("posts");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteInput, setDeleteInput] = useState("");
   const [boostPost, setBoostPost] = useState(null);
   const queryClient = useQueryClient();
   const { data: coinBalance = 0 } = useQuery({
@@ -145,6 +147,9 @@ export default function Profile() {
             </Link>
             <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border hover:text-red-500" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <LogOut className="w-4 h-4" />
+            </button>
+            <button onClick={() => setShowDeleteConfirm(true)} className="p-2 rounded-full border hover:bg-red-50" style={{ borderColor: "var(--border-light)", color: "#E53E3E" }}>
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -367,6 +372,37 @@ export default function Profile() {
                 </div>
               </div>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Account deletion dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-red-600" style={{ fontFamily: "var(--font-serif)" }}>Delete Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              This action is <strong>permanent</strong>. All your posts, art, and data will be deleted. Type <strong>DELETE</strong> to confirm.
+            </p>
+            <Input
+              placeholder="Type DELETE to confirm"
+              value={deleteInput}
+              onChange={e => setDeleteInput(e.target.value)}
+              className="border-red-200 rounded-xl"
+            />
+            <Button
+              onClick={async () => {
+                if (deleteInput !== "DELETE") return;
+                await base44.auth.updateMe({ account_deleted: true, email: `deleted_${Date.now()}@deleted.com` });
+                base44.auth.logout();
+              }}
+              disabled={deleteInput !== "DELETE"}
+              className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
+            >
+              Permanently Delete Account
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
