@@ -45,6 +45,17 @@ body {
   background-color: var(--bg-app);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+  overscroll-behavior: none;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea, select {
+  font-size: 16px !important;
 }
 
 .font-serif {
