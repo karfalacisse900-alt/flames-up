@@ -78,13 +78,25 @@ function SwipeDiscoverCard({ item, onOpen }) {
   );
 }
 
-function DiscoverListItem({ item, onOpen }) {
+function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompare }) {
   return (
     <div
-      onClick={onOpen}
-      className="rounded-2xl p-4 hover:shadow-sm transition-all cursor-pointer active:scale-[0.99]"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+      onClick={compareMode ? onToggleCompare : onOpen}
+      className="rounded-2xl p-4 hover:shadow-sm transition-all cursor-pointer active:scale-[0.99] relative"
+      style={{
+        backgroundColor: "var(--bg-card)",
+        border: isSelected ? "2px solid var(--accent-primary)" : "1px solid var(--border-light)"
+      }}
     >
+      {compareMode && (
+        <div className="absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+          style={{
+            borderColor: isSelected ? "var(--accent-primary)" : "var(--border-medium)",
+            backgroundColor: isSelected ? "var(--accent-primary)" : "transparent"
+          }}>
+          {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+        </div>
+      )}
       <div className="flex items-start gap-3">
         <DiscoverLogo item={item} size="md" />
         <div className="flex-1 min-w-0">
