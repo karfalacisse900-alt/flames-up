@@ -10,6 +10,10 @@ import TicTacToeCompact from "../components/games/TicTacToe";
 import MemoryMatchCompact from "../components/games/MemoryMatch";
 import MathSpeedCompact from "../components/games/MathSpeed";
 import TriviaCompact from "../components/games/Trivia";
+import CheckersGame from "../components/games/Checkers";
+import MazeRunnerGame from "../components/games/MazeRunner";
+import ReactionSpeedGame2 from "../components/games/ReactionSpeed";
+import ColorConnectGame from "../components/games/ColorConnect";
 
 // ============= MEMORY MATCH =============
 function MemoryMatchGame({ onEnd }) {
