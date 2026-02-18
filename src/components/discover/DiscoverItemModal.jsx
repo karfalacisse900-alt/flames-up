@@ -129,23 +129,8 @@ export default function DiscoverItemModal({ item, user, onClose }) {
 
           {/* Description */}
           <div>
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <h3 className="text-sm font-semibold text-gray-800">About</h3>
-              {!item.long_description && (
-                <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.08)", color: "var(--accent-primary)" }}>
-                  <Sparkles className="w-2.5 h-2.5" /> AI
-                </span>
-              )}
-            </div>
-            {loadingSummary ? (
-              <div className="space-y-1.5">
-                <div className="h-3 rounded-full bg-gray-100 animate-pulse w-full" />
-                <div className="h-3 rounded-full bg-gray-100 animate-pulse w-4/5" />
-                <div className="h-3 rounded-full bg-gray-100 animate-pulse w-3/5" />
-              </div>
-            ) : (
-              <p className="text-sm leading-relaxed text-gray-600">{aiSummary}</p>
-            )}
+            <h3 className="text-sm font-semibold text-gray-800 mb-1.5">About</h3>
+            <p className="text-sm leading-relaxed text-gray-600">{item.long_description || item.description || "—"}</p>
           </div>
 
           {/* Promo */}
