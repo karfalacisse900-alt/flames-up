@@ -27,7 +27,20 @@ const platformIcon = (p) => {
 export default function DiscoverItemModal({ item, user, onClose }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [aiSummary, setAiSummary] = useState(item.long_description || item.description || "");
+  const [loadingSummary, setLoadingSummary] = useState(false);
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (item.long_description) { setAiSummary(item.long_description); return; }
+    if (!item.description) return;
+    setLoadingSummary(true);
+    base44.integrations.Core.InvokeLLM({
+      prompt: `Write a clear, friendly 2-3 sentence summary explaining what "${item.title}" (by ${item.brand_name || "unknown"}) does and who it's best for. Keep it simple and helpful. Based on: "${item.description}"`,
+    }).then(res => {
+      setAiSummary(typeof res === "string" ? res : item.description);
+    }).finally(() => setLoadingSummary(false));
+  }, [item.id]);
 
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", item.id],
