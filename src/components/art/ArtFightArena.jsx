@@ -2,7 +2,9 @@ import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords } from "lucide-react";
+import { Swords, Heart } from "lucide-react";
+import ArtFightFavoriteBtn from "./ArtFightFavoriteBtn";
+import ArtFightProfile from "./ArtFightProfile";
 
 // Simple ELO calculation
 function calcElo(winnerScore, loserScore, k = 32) {
@@ -27,9 +29,10 @@ function pickPair(approved, votedPairKeys) {
 }
 
 export default function ArtFightArena({ user }) {
-  const [chosen, setChosen] = useState(null); // id of voted artwork
+  const [chosen, setChosen] = useState(null);
   const [pair, setPair] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
   const qc = useQueryClient();
 
   const { data: approved = [], isLoading } = useQuery({
@@ -78,6 +81,20 @@ export default function ArtFightArena({ user }) {
         winner_id: winner.id,
         loser_id: loser.id,
         pair_key: pairKey,
+      }),
+      base44.entities.ArtFightHistory.create({
+        entry_id: winner.id,
+        opponent_id: loser.id,
+        winner_id: winner.id,
+        score_before: winner.fight_score || 1000,
+        score_after: newWinner,
+      }),
+      base44.entities.ArtFightHistory.create({
+        entry_id: loser.id,
+        opponent_id: winner.id,
+        winner_id: winner.id,
+        score_before: loser.fight_score || 1000,
+        score_after: newLoser,
       }),
     ]);
 
@@ -139,38 +156,47 @@ export default function ArtFightArena({ user }) {
             const isChosen = chosen === entry.id;
             const isLost = chosen && chosen !== entry.id;
             return (
-              <motion.button
+              <motion.div
                 key={entry.id}
-                onClick={() => handleVote(entry.id)}
-                disabled={!!chosen}
                 animate={isChosen ? { scale: 1.02, borderColor: "var(--accent-primary)" } : isLost ? { opacity: 0.45, scale: 0.97 } : {}}
                 transition={{ duration: 0.2 }}
-                className="w-full rounded-2xl overflow-hidden text-left"
+                className="w-full rounded-2xl overflow-hidden"
                 style={{
                   border: `2px solid ${isChosen ? "var(--accent-primary)" : "var(--border-light)"}`,
                   backgroundColor: "var(--bg-card)",
                   boxShadow: isChosen ? "0 0 0 3px rgba(60,110,90,0.18)" : "none",
                 }}
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
-                  {isChosen && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <span className="text-3xl">✓</span>
+                <button
+                  onClick={() => handleVote(entry.id)}
+                  disabled={!!chosen}
+                  className="w-full text-left"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
+                    {isChosen && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <span className="text-3xl">✓</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{entry.title}</p>
+                      <p className="text-xs mt-0.5 cursor-pointer hover:underline" style={{ color: "var(--text-hint)" }} onClick={(e) => { e.stopPropagation(); setSelectedProfile(entry); }}>
+                        by {entry.owner_name}
+                      </p>
                     </div>
-                  )}
-                </div>
-                <div className="p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{entry.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>by {entry.owner_name}</p>
+                    <div className="text-right flex items-center gap-2">
+                      <div>
+                        <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>⚡ {entry.fight_score || 1000}</p>
+                        <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{entry.wins || 0}W {entry.losses || 0}L</p>
+                      </div>
+                      <ArtFightFavoriteBtn entry={entry} user={user} />
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>⚡ {entry.fight_score || 1000}</p>
-                    <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{entry.wins || 0}W {entry.losses || 0}L</p>
-                  </div>
-                </div>
-              </motion.button>
+                </button>
+              </motion.div>
             );
           })}
         </motion.div>
@@ -188,6 +214,8 @@ export default function ArtFightArena({ user }) {
           Skip pair
         </button>
       </div>
+
+      <ArtFightProfile entry={selectedProfile} user={user} open={!!selectedProfile} onClose={() => setSelectedProfile(null)} />
     </div>
   );
 }
