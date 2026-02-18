@@ -30,6 +30,8 @@ const earnWays = [
   { emoji: "🏆", title: "Win a game", desc: "+15 coins per win", amount: "+15" },
   { emoji: "🎙️", title: "Host a live session", desc: "+20 coins per session", amount: "+20" },
   { emoji: "🎨", title: "Sell art", desc: "Earn the listed price", amount: "varies" },
+  { emoji: "🤝", title: "Refer a friend", desc: "+50 coins each when they join", amount: "+50" },
+  { emoji: "⚡", title: "Boost a post", desc: "Costs coins, gets more views", amount: "-20~120" },
 ];
 
 export default function Wallet() {
