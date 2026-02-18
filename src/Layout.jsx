@@ -35,6 +35,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
+      <FloatingEditorButton />
       <div className="max-w-lg mx-auto relative pb-20">
         <AnimatePresence mode="wait">
           <motion.div
