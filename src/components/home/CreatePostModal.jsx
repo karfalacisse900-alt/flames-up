@@ -271,7 +271,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             )}
           </AnimatePresence>
 
-          <div className="flex items-center justify-between mt-5 pt-3 border-t" style={{ borderColor: "var(--border-light)" }}>
+          <div className="mt-5 pt-3 border-t space-y-3" style={{ borderColor: "var(--border-light)" }}>
             <div className="flex items-center gap-3">
               <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />
               <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -282,10 +282,10 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             <Button
               onClick={handleSubmit}
               disabled={!text.trim() || loading}
-              className="text-white rounded-xl px-7 font-semibold text-sm h-10"
-              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)", minWidth: "90px" }}
+              className="w-full text-white rounded-xl font-semibold text-sm h-12"
+              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)", fontSize: "1rem" }}
             >
-              {loading ? "Posting..." : "✦ Post"}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2 inline" />Posting...</> : "✦ Publish Post"}
             </Button>
           </div>
         </div>
