@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, Compass, Palette, Radio, Gamepad2, User, Plus } from "lucide-react";
+import { Home, Compass, Palette, Radio, Gamepad2, User, Bell } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { name: "Art", icon: Palette, page: "Art" },
   { name: "Live", icon: Radio, page: "Live" },
   { name: "Games", icon: Gamepad2, page: "Games" },
+  { name: "Alerts", icon: Bell, page: "Notifications" },
   { name: "Profile", icon: User, page: "Profile" },
 ];
 
