@@ -17,6 +17,7 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -34,7 +35,17 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
       <div className="max-w-lg mx-auto relative pb-20">
-        {children}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, x: 18 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -18 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {!hideNav && (
