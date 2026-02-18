@@ -9,30 +9,30 @@ css
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Backgrounds - Organic Palette */
-  --bg-app: #F7F5F2;
-  --bg-card: #FDFBF8;
+  /* Backgrounds - Warm Organic Palette */
+  --bg-app: #FBF9F6;
+  --bg-card: #FFFCF9;
   --bg-nav: #FFFFFF;
-  --bg-warm: #F7F5F2;
-  --bg-subtle: #F0EDEA;
+  --bg-warm: #FBF9F6;
+  --bg-subtle: #F5EFE8;
 
   /* Text - Soft Contrast */
   --text-primary: #3D3D3D;
   --text-secondary: #6B6B6B;
   --text-hint: #8F8F8F;
 
-  /* Accents - Natural & Warm */
-  --accent-primary: #8B6F47;
-  --accent-primary-hover: #704B2F;
-  --accent-secondary: #C9897B;
-  --accent-info: #9B8B7E;
+  /* Accents - Warm Organic */
+  --accent-primary: #B8956A;
+  --accent-primary-hover: #9B7D5A;
+  --accent-secondary: #D4A896;
+  --accent-info: #B59B8F;
   --accent-sage: #A89B8F;
-  --accent-warm: #D4B5A0;
+  --accent-warm: #E5C5B0;
 
   /* Borders - Soft & Organic */
-  --border-light: #E5DFD0;
-  --border-medium: #DAD3C4;
-  --border-subtle: #EDE9E3;
+  --border-light: #EFE8DC;
+  --border-medium: #E5D8CB;
+  --border-subtle: #F2EDE8;
 
   /* Legacy aliases */
   --bg-card-old: #FFFFFF;
@@ -50,22 +50,22 @@ css
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app: #1A1916;
-    --bg-card: #242220;
-    --bg-nav: #1E1C1A;
-    --bg-warm: #1A1916;
-    --bg-subtle: #2E2C28;
+    --bg-app: #1A1714;
+    --bg-card: #252219;
+    --bg-nav: #1F1D19;
+    --bg-warm: #1A1714;
+    --bg-subtle: #2A261F;
 
     --text-primary: #F0EDE6;
     --text-secondary: #A8A49C;
     --text-hint: #6B6762;
 
-    --accent-primary: #A08860;
-    --accent-primary-hover: #8B7550;
-    --accent-secondary: #D4A89A;
-    --accent-info: #9B9B8F;
-    --accent-sage: #A89B8F;
-    --accent-warm: #D9C4B0;
+    --accent-primary: #C9A883;
+    --accent-primary-hover: #B59570;
+    --accent-secondary: #E5B8A8;
+    --accent-info: #C5B5A0;
+    --accent-sage: #B8A89D;
+    --accent-warm: #E8D4C0;
 
     --border-light: #2E2C28;
     --border-medium: #3A3834;

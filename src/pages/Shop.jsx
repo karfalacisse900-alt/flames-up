@@ -137,25 +137,20 @@ export default function Shop() {
   };
 
   const handleBuyCoins = async (bundle) => {
-    if (!stripeReady) {
-      showToast("❌ Publish the app to buy coins!");
-      return;
-    }
-    
     setPurchasing(bundle.id);
     try {
       const response = await base44.functions.invoke("createCoinCheckout", {
         priceId: bundle.priceId,
       });
-
-      const stripe = await loadStripe(Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "pk_live_51SxzwC3vUrZIHCwo4WAd4Q5L0p4dZ3jhHWrCN6gLk6ofqeiXfN76tbPUQT0fHRWMhpHXkXWWzWvFycIZx0b3owbE000mxwkAKN");
+      
+      if (!response.data.sessionId) throw new Error("No session ID returned");
+      const stripe = await loadStripe("pk_live_51SxzwC3vUrZIHCwo4WAd4Q5L0p4dZ3jhHWrCN6gLk6ofqeiXfN76tbPUQT0fHRWMhpHXkXWWzWvFycIZx0b3owbE000mxwkAKN");
       if (!stripe) throw new Error("Stripe failed to load");
-      const { error } = await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
-      if (error) throw error;
+      const result = await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      if (result?.error) throw result.error;
     } catch (error) {
       console.error("Checkout error:", error);
-      showToast("❌ Something went wrong");
-    } finally {
+      showToast("❌ Checkout failed: " + (error?.message || "Unknown error"));
       setPurchasing(null);
     }
   };
