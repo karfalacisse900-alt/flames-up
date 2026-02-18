@@ -109,7 +109,7 @@ export default function DiscoverItemModal({ item, user, onClose }) {
               <span className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">{item.pricing}</span>
             )}
             {item.tags?.map(tag => (
-              <span key={tag} className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
                 {tag}
               </span>
             ))}
