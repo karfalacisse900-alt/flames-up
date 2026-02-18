@@ -5,8 +5,6 @@ import { ArrowLeft, CheckCircle, TrendingUp, TrendingDown, Gift, Gamepad2, Palet
 import { addCoins } from "../components/coins/coinsHelper";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
 import { getWallet, claimDailyCheckin } from "../components/coins/coinsHelper";
 import { motion, AnimatePresence } from "framer-motion";
 
