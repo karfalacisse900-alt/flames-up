@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search, List, Layers, ChevronLeft, ChevronRight, ExternalLink, SlidersHorizontal } from "lucide-react";
+import { Search, List, Layers, ChevronLeft, ChevronRight, ExternalLink, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import DiscoverLogo from "../components/discover/DiscoverLogo";
@@ -127,7 +127,10 @@ export default function Discover() {
   const [viewMode, setViewMode] = useState("list");
   const [swipeIndex, setSwipeIndex] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [sortBy, setSortBy] = useState("default"); // "default" | "rating" | "newest"
+  const [sortBy, setSortBy] = useState("default");
+  const [filterPlatform, setFilterPlatform] = useState("all");
+  const [filterPricing, setFilterPricing] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
   const [user, setUser] = useState(null);
 
   React.useEffect(() => {
