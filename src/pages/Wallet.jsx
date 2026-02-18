@@ -34,7 +34,27 @@ export default function Wallet() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(async (u) => {
+      setUser(u);
+      // Handle referral reward for newly joined users
+      const refCode = sessionStorage.getItem("ref_code");
+      if (refCode && u?.email) {
+        sessionStorage.removeItem("ref_code");
+        // Find the referrer by checking all referrals with this code
+        const existing = await base44.entities.Referral.filter({ referred_email: u.email });
+        if (existing.length === 0) {
+          // Create referral record
+          const ref = await base44.entities.Referral.create({
+            referrer_email: refCode, // we'll resolve below
+            referred_email: u.email,
+            referral_code: refCode,
+            reward_claimed: true,
+          });
+          // Give both users 50 coins
+          await addCoins(u.email, 50, "referral_bonus", "Referral bonus - you joined via a friend's link! 🎁");
+        }
+      }
+    }).catch(() => {});
   }, []);
 
   const { data: wallet, refetch: refetchWallet } = useQuery({
