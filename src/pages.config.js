@@ -49,6 +49,7 @@
  */
 import Art from './pages/Art';
 import Discover from './pages/Discover';
+import DiscoverForum from './pages/DiscoverForum';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
 import Home from './pages/Home';
@@ -58,13 +59,13 @@ import Messages from './pages/Messages';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
-import DiscoverForum from './pages/DiscoverForum';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Art": Art,
     "Discover": Discover,
+    "DiscoverForum": DiscoverForum,
     "GamePlay": GamePlay,
     "Games": Games,
     "Home": Home,
@@ -74,7 +75,6 @@ export const PAGES = {
     "PostDetail": PostDetail,
     "Profile": Profile,
     "Wallet": Wallet,
-    "DiscoverForum": DiscoverForum,
 }
 
 export const pagesConfig = {

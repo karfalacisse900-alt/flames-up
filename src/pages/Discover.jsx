@@ -439,7 +439,13 @@ export default function Discover() {
 
       {/* Item Detail Modal */}
       {selectedItem && !compareMode && (
-        <DiscoverItemModal item={selectedItem} user={user} onClose={() => setSelectedItem(null)} />
+        <DiscoverItemModal
+          item={selectedItem}
+          user={user}
+          allItems={items}
+          onClose={() => setSelectedItem(null)}
+          onOpenRelated={(rel) => setSelectedItem(rel)}
+        />
       )}
 
       {/* Compare bar */}
