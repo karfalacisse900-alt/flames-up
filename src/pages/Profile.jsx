@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass } from "lucide-react";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
