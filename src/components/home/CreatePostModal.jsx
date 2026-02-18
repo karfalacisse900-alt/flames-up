@@ -93,17 +93,17 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         onClick={onClose}
       />
       <motion.div
-        className="relative w-full max-w-lg rounded-t-3xl"
-        style={{ maxHeight: "92dvh", overflowY: "auto", backgroundColor: "var(--bg-nav)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        className="relative w-full max-w-lg rounded-t-3xl flex flex-col"
+        style={{ maxHeight: "92dvh", backgroundColor: "var(--bg-nav)" }}
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 320 }}
       >
         {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
+        <div className="flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
         </div>
 
-        <div className="px-5 pb-6 pt-2">
+        <div className="px-5 pt-2 overflow-y-auto flex-1">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Create Post</h2>
             <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
