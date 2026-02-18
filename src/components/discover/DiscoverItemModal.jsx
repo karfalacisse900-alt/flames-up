@@ -210,7 +210,7 @@ export default function DiscoverItemModal({ item, user, onClose }) {
                     </button>
                   </div>
                   {review.review_text && (
-                    <p className="text-xs leading-relaxed mt-1" style={{ color: "var(--text-secondary)" }}>{review.review_text}</p>
+                    <p className="text-xs leading-relaxed mt-1 text-gray-600">{review.review_text}</p>
                   )}
                 </div>
               ))}
