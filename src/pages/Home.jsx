@@ -178,7 +178,14 @@ export default function Home() {
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`w-2 h-2 rounded-full ${ts.dot}`} />
                     <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{ts.label}</span>
-                    <span className="ml-auto text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+                    <span className="ml-auto text-xs flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
+                    {post.is_boosted && post.boost_expires_at && new Date(post.boost_expires_at) > new Date() && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium flex items-center gap-0.5">
+                        <Zap className="w-2.5 h-2.5" /> Boosted
+                      </span>
+                    )}
+                    {post.is_anonymous ? "Anonymous" : post.author_name}
+                  </span>
                   </div>
                   <p className="leading-relaxed" style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--text-primary)" }}>
                     {post.text}
