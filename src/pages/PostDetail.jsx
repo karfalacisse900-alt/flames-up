@@ -56,14 +56,26 @@ export default function PostDetail() {
     await base44.entities.Reply.create({
       post_id: postId,
       text: replyText.trim(),
-      author_name: isAnonymous ? "Anonymous" : (user?.full_name || "User"),
-      author_email: user?.email || "",
+      author_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "User"),
+      author_email: isAnonymous ? "" : (user?.email || ""),
       is_anonymous: isAnonymous,
       like_count: 0,
       liked_by: [],
     });
     if (post) {
       await base44.entities.Post.update(postId, { reply_count: (post.reply_count || 0) + 1 });
+      // Notify post author
+      if (post.author_email && post.author_email !== user?.email) {
+        base44.entities.Notification.create({
+          recipient_email: post.author_email,
+          actor_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "Someone"),
+          actor_email: isAnonymous ? "" : (user?.email || ""),
+          type: "post_replied",
+          post_id: postId,
+          post_text: post.text?.slice(0, 80),
+          is_read: false,
+        }).catch(() => {});
+      }
     }
     setReplyText("");
     setSending(false);
