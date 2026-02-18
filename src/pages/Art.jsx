@@ -315,12 +315,21 @@ export default function Art() {
     if (!selectedFile || !title.trim()) return;
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file: selectedFile });
-    await base44.entities.ArtPiece.create({
+    
+    // AI moderation check
+    const modCheck = await checkContent(title + " " + description, file_url);
+    
+    const art = await base44.entities.ArtPiece.create({
       title: title.trim(), description: description.trim(), image_url: file_url,
       creator_email: user?.email || "", creator_name: user?.full_name || "Artist",
       owner_email: user?.email || "", owner_name: user?.full_name || "Artist",
       price: parseFloat(price) || 0, is_for_sale: parseFloat(price) > 0, like_count: 0,
     });
+    
+    if (!modCheck.safe) {
+      await createModerationReport("art", art.id, user?.email, user?.full_name, modCheck.flags, modCheck.confidence);
+    }
+    
     setTitle(""); setDescription(""); setPrice(""); setSelectedFile(null); setPreviewUrl(null);
     setShowUpload(false); setUploading(false);
     queryClient.invalidateQueries({ queryKey: ["art"] });
