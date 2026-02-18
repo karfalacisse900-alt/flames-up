@@ -138,9 +138,9 @@ export default function ArtFightArena({ user }) {
   const allVoted = !pickPair(approved, votedPairKeys);
 
   return (
-    <div className="pb-24">
-      <div className="px-4 py-3 text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-hint)" }}>Tap the one you like more</p>
+    <div className="pb-24 pt-2">
+      <div className="px-4 py-2 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-hint)" }}>Which one do you prefer?</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -150,7 +150,7 @@ export default function ArtFightArena({ user }) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.97 }}
           transition={{ duration: 0.22 }}
-          className="flex flex-col gap-3 px-4"
+          className="flex gap-3 px-4 h-[60vh]"
         >
           {[a, b].map((entry) => {
             const isChosen = chosen === entry.id;
@@ -160,37 +160,35 @@ export default function ArtFightArena({ user }) {
                 key={entry.id}
                 animate={isChosen ? { scale: 1.02, borderColor: "var(--accent-primary)" } : isLost ? { opacity: 0.45, scale: 0.97 } : {}}
                 transition={{ duration: 0.2 }}
-                className="w-full rounded-2xl overflow-hidden"
+                className="flex-1 rounded-3xl overflow-hidden flex flex-col"
                 style={{
                   border: `2px solid ${isChosen ? "var(--accent-primary)" : "var(--border-light)"}`,
                   backgroundColor: "var(--bg-card)",
-                  boxShadow: isChosen ? "0 0 0 3px rgba(60,110,90,0.18)" : "none",
+                  boxShadow: isChosen ? "0 0 0 4px rgba(60,110,90,0.12)" : "0 4px 16px rgba(0,0,0,0.05)",
                 }}
               >
                 <button
                   onClick={() => handleVote(entry.id)}
                   disabled={!!chosen}
-                  className="w-full text-left"
+                  className="flex-1 flex flex-col text-left relative overflow-hidden"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className="flex-1 relative overflow-hidden">
                     <img src={entry.image_url} alt={entry.title} className="w-full h-full object-cover" />
                     {isChosen && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                        <span className="text-3xl">✓</span>
+                        <span className="text-5xl">✓</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{entry.title}</p>
-                      <p className="text-xs mt-0.5 cursor-pointer hover:underline" style={{ color: "var(--text-hint)" }} onClick={(e) => { e.stopPropagation(); setSelectedProfile(entry); }}>
-                        by {entry.owner_name}
-                      </p>
-                    </div>
-                    <div className="text-right flex items-center gap-2">
-                      <div>
-                        <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>⚡ {entry.fight_score || 1000}</p>
-                        <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{entry.wins || 0}W {entry.losses || 0}L</p>
+                  <div className="p-3 bg-white/95 backdrop-blur-sm">
+                    <p className="text-xs font-semibold line-clamp-1" style={{ color: "var(--text-primary)" }}>{entry.title}</p>
+                    <p className="text-[10px] mt-0.5 cursor-pointer hover:underline line-clamp-1" style={{ color: "var(--text-hint)" }} onClick={(e) => { e.stopPropagation(); setSelectedProfile(entry); }}>
+                      {entry.owner_name}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-right">
+                        <p className="text-[10px] font-medium" style={{ color: "var(--accent-primary)" }}>⚡ {entry.fight_score || 1000}</p>
+                        <p className="text-[9px]" style={{ color: "var(--text-hint)" }}>{entry.wins || 0}W {entry.losses || 0}L</p>
                       </div>
                       <ArtFightFavoriteBtn entry={entry} user={user} />
                     </div>
