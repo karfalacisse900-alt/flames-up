@@ -60,10 +60,16 @@ export default function ServicePersonCard({ person, onClick, user }) {
           )}
         </div>
       </div>
-      <button className="mt-3 w-full py-2 rounded-xl text-xs font-semibold text-white"
-        style={{ backgroundColor: "var(--accent-primary)" }}>
-        View Profile
-      </button>
+      <div className="mt-3 flex gap-2">
+        <button className="flex-1 py-2 rounded-xl text-xs font-semibold text-white"
+          style={{ backgroundColor: "var(--accent-primary)" }}>
+          View Profile
+        </button>
+        {user && (
+          <BookmarkButton user={user} itemType="service_person" itemId={person.id}
+            itemTitle={person.name} itemSubtitle={person.headline} itemImageUrl={person.image_url} />
+        )}
+      </div>
     </motion.div>
   );
 }
