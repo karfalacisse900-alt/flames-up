@@ -105,8 +105,12 @@ export default function Profile() {
       <div className="px-5 pt-6 pb-5" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-start justify-between mb-4">
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-semibold" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
-            {(user.display_name || user.full_name || "U")[0]?.toUpperCase()}
+          <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
+            {user.avatar_url ? (
+              <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              (user.display_name || user.full_name || "U")[0]?.toUpperCase()
+            )}
           </div>
           {/* Action buttons */}
           <div className="flex gap-2">
