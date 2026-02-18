@@ -148,8 +148,10 @@ export default function Shop() {
         priceId: bundle.priceId,
       });
 
-      const stripe = await loadStripe("pk_live_51SxzwC3vUrZIHCwo4WAd4Q5L0p4dZ3jhHWrCN6gLk6ofqeiXfN76tbPUQT0fHRWMhpHXkXWWzWvFycIZx0b3owbE000mxwkAKN");
-      await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      const stripe = await loadStripe(Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "pk_live_51SxzwC3vUrZIHCwo4WAd4Q5L0p4dZ3jhHWrCN6gLk6ofqeiXfN76tbPUQT0fHRWMhpHXkXWWzWvFycIZx0b3owbE000mxwkAKN");
+      if (!stripe) throw new Error("Stripe failed to load");
+      const { error } = await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      if (error) throw error;
     } catch (error) {
       console.error("Checkout error:", error);
       showToast("❌ Something went wrong");

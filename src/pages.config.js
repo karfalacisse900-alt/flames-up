@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
 import Collections from './pages/Collections';
 import Discover from './pages/Discover';
@@ -64,11 +65,11 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import AdminModeration from './pages/AdminModeration';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminModeration": AdminModeration,
     "Art": Art,
     "Collections": Collections,
     "Discover": Discover,
@@ -86,7 +87,6 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "AdminModeration": AdminModeration,
 }
 
 export const pagesConfig = {

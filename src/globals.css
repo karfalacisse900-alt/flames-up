@@ -10,24 +10,24 @@ css
   --font-sans: 'Inter', system-ui, sans-serif;
 
   /* Backgrounds - Organic Palette */
-  --bg-app: #F5F2E8;
-  --bg-card: #FAF7F0;
+  --bg-app: #F7F5F2;
+  --bg-card: #FDFBF8;
   --bg-nav: #FFFFFF;
-  --bg-warm: #F5F2E8;
-  --bg-subtle: #EEF3F0;
+  --bg-warm: #F7F5F2;
+  --bg-subtle: #F0EDEA;
 
   /* Text - Soft Contrast */
-  --text-primary: #2F2F2F;
-  --text-secondary: #6E6E6E;
-  --text-hint: #A8A8A8;
+  --text-primary: #3D3D3D;
+  --text-secondary: #6B6B6B;
+  --text-hint: #8F8F8F;
 
   /* Accents - Natural & Warm */
-  --accent-primary: #3C6E5A;
-  --accent-primary-hover: #2E5A47;
-  --accent-secondary: #D98B62;
-  --accent-info: #5579A6;
-  --accent-sage: #7C8C6E;
-  --accent-warm: #C4A882;
+  --accent-primary: #8B6F47;
+  --accent-primary-hover: #704B2F;
+  --accent-secondary: #C9897B;
+  --accent-info: #9B8B7E;
+  --accent-sage: #A89B8F;
+  --accent-warm: #D4B5A0;
 
   /* Borders - Soft & Organic */
   --border-light: #E5DFD0;
@@ -60,12 +60,12 @@ css
     --text-secondary: #A8A49C;
     --text-hint: #6B6762;
 
-    --accent-primary: #5A9E7A;
-    --accent-primary-hover: #4E8A6A;
-    --accent-secondary: #E09A72;
-    --accent-info: #7799C6;
-    --accent-sage: #8BA888;
-    --accent-warm: #D4B399;
+    --accent-primary: #A08860;
+    --accent-primary-hover: #8B7550;
+    --accent-secondary: #D4A89A;
+    --accent-info: #9B9B8F;
+    --accent-sage: #A89B8F;
+    --accent-warm: #D9C4B0;
 
     --border-light: #2E2C28;
     --border-medium: #3A3834;
