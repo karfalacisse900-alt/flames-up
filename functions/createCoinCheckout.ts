@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import Stripe from 'npm:stripe@15.4.0';
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
+const stripe = new Stripe("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");
 
 const coinBundles = [
   { priceId: "price_1T2Fuf5bPx2iiXNaPUaZa12n", coins: 100 },
