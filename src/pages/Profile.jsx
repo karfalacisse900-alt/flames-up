@@ -56,6 +56,12 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
+  const { data: savedItems = [] } = useQuery({
+    queryKey: ["savedItems", user?.email],
+    queryFn: () => base44.entities.SavedItem.filter({ user_email: user.email }, "-created_date", 100),
+    enabled: !!user?.email,
+  });
+
   const { data: gameStats = [] } = useQuery({
     queryKey: ["gameStats", user?.email],
     queryFn: () => base44.entities.GameStats.filter({ player_email: user.email }),
