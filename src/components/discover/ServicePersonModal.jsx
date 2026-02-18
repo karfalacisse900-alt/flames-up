@@ -222,11 +222,16 @@ export default function ServicePersonModal({ person, user, onClose }) {
   const initials = person.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
   const links = [
-    person.fiverr_url && { label: "Fiverr", url: person.fiverr_url, color: "#1dbf73" },
-    person.upwork_url && { label: "Upwork", url: person.upwork_url, color: "#14a800" },
-    person.website_url && { label: "Website", url: person.website_url, color: "#3C6E5A" },
-    person.instagram_url && { label: "Instagram", url: person.instagram_url, color: "#E1306C" },
-    person.twitter_url && { label: "Twitter/X", url: person.twitter_url, color: "#1DA1F2" },
+    person.fiverr_url && { label: "Fiverr", url: person.fiverr_url, color: "#1dbf73", emoji: "🟢" },
+    person.upwork_url && { label: "Upwork", url: person.upwork_url, color: "#14a800", emoji: "🟩" },
+    person.website_url && { label: "Website", url: person.website_url, color: "#3C6E5A", emoji: "🌐" },
+    person.instagram_url && { label: "Instagram", url: person.instagram_url, color: "#E1306C", emoji: "📸" },
+    person.twitter_url && { label: "Twitter/X", url: person.twitter_url, color: "#1DA1F2", emoji: "🐦" },
+    person.tiktok_url && { label: "TikTok", url: person.tiktok_url, color: "#010101", emoji: "🎵" },
+    person.youtube_url && { label: "YouTube", url: person.youtube_url, color: "#FF0000", emoji: "▶️" },
+    person.shopify_url && { label: "Shopify", url: person.shopify_url, color: "#96bf48", emoji: "🛒" },
+    person.linkedin_url && { label: "LinkedIn", url: person.linkedin_url, color: "#0077B5", emoji: "💼" },
+    person.github_url && { label: "GitHub", url: person.github_url, color: "#333", emoji: "💻" },
   ].filter(Boolean);
 
   return (
@@ -318,14 +323,17 @@ export default function ServicePersonModal({ person, user, onClose }) {
                 </div>
               )}
               {links.length > 0 && (
-                <div className="grid grid-cols-2 gap-2">
-                  {links.map(l => (
-                    <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white"
-                      style={{ backgroundColor: l.color }}>
-                      {l.label} <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  ))}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#A8A8A8" }}>Links & Socials</p>
+                  <div className="flex flex-wrap gap-2">
+                    {links.map(l => (
+                      <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white"
+                        style={{ backgroundColor: l.color }}>
+                        <span>{l.emoji}</span> {l.label}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
