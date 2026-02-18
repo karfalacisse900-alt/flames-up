@@ -178,6 +178,32 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="reviews" className="mt-4 space-y-2">
+          {myReviews.length === 0 ? (
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No reviews yet</p>
+          ) : (
+            myReviews.map((review) => (
+              <div key={review.id} className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1">
+                    <Compass className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
+                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{review.item_id}</span>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className="text-xs" style={{ color: i < review.rating ? "#F59E0B" : "#D1D5DB" }}>★</span>
+                    ))}
+                  </div>
+                </div>
+                {review.review_text && (
+                  <p className="text-sm leading-relaxed mt-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{review.review_text}</p>
+                )}
+                <p className="text-[10px] mt-2" style={{ color: "var(--text-hint)" }}>{new Date(review.created_date).toLocaleDateString()}</p>
+              </div>
+            ))
+          )}
+        </TabsContent>
+
         <TabsContent value="art" className="mt-4">
           {myArt.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No art created yet</p>
