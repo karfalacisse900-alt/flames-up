@@ -122,21 +122,8 @@ function GalleryCard({ art, user, onClick, onLike }) {
   );
 }
 
-function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
-  const [sellPrice, setSellPrice] = useState(art.price?.toString() || "");
-  const [showSellInput, setShowSellInput] = useState(false);
-  const history = useMemo(() => getPriceHistory(art), [art.id, art.price]);
-  const prevPrice = history[history.length - 2] || art.price;
-  const change = art.price > 0 ? ((art.price - prevPrice) / prevPrice * 100).toFixed(1) : 0;
-  const positive = parseFloat(change) >= 0;
-  const isOwner = art.owner_email === user?.email;
+function ArtDetailModal({ art, user, onClose }) {
   const isCreator = art.creator_email === user?.email;
-
-  const { data: trades = [] } = useQuery({
-    queryKey: ["artTrades", art.id],
-    queryFn: () => base44.entities.ArtTrade.filter({ art_id: art.id }, "-created_date", 10),
-    enabled: !!art.id,
-  });
 
   return (
     <motion.div
@@ -165,111 +152,18 @@ function ArtDetailModal({ art, user, onClose, onBuy, onSell, onList }) {
               <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{art.title}</h2>
               <p className="text-xs text-[#9B9B9B] mt-0.5">by {art.creator_name}</p>
             </div>
-            {art.price > 0 && (
-              <div className="text-right">
-                <p className="text-2xl font-bold text-[#2C2C2C]">⬡ {art.price}</p>
-                <span className={`text-xs font-semibold flex items-center gap-0.5 justify-end ${positive ? "text-[#7C8C6E]" : "text-rose-500"}`}>
-                  {positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  {Math.abs(change)}% 24h
-                </span>
-              </div>
-            )}
           </div>
 
-          {/* Price chart */}
-          {art.price > 0 && (
-            <div className="mt-4 p-4 bg-[#FAF8F5] rounded-2xl">
-              <p className="text-xs text-[#9B9B9B] mb-3">Price history</p>
-              <div className="flex items-end justify-between h-12 gap-1">
-                {history.map((p, i) => {
-                  const max = Math.max(...history);
-                  const pct = (p / max) * 100;
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center justify-end">
-                      <div
-                        className="w-full rounded-sm"
-                        style={{
-                          height: `${pct}%`,
-                          backgroundColor: i === history.length - 1 ? (positive ? "#7C8C6E" : "#E07B6A") : "#EDE9E3",
-                          minHeight: "4px",
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-[10px] text-[#9B9B9B]">7d ago</span>
-                <span className="text-[10px] text-[#9B9B9B]">Now</span>
-              </div>
-            </div>
-          )}
-
           {/* Stats row */}
-          <div className="flex gap-4 mt-4">
-            <div className="flex-1 bg-[#FAF8F5] rounded-xl p-3 text-center">
-              <p className="text-sm font-bold text-[#2C2C2C]">{trades.length}</p>
-              <p className="text-[10px] text-[#9B9B9B]">Trades</p>
-            </div>
-            <div className="flex-1 bg-[#FAF8F5] rounded-xl p-3 text-center">
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            <div className="bg-[#FAF8F5] rounded-xl p-3 text-center">
               <p className="text-sm font-bold text-[#2C2C2C]">{art.like_count || 0}</p>
               <p className="text-[10px] text-[#9B9B9B]">Likes</p>
             </div>
-            <div className="flex-1 bg-[#FAF8F5] rounded-xl p-3 text-center">
-              <p className="text-xs font-bold text-[#2C2C2C] truncate">{isOwner ? "You" : art.owner_name}</p>
-              <p className="text-[10px] text-[#9B9B9B]">Owner</p>
+            <div className="bg-[#FAF8F5] rounded-xl p-3 text-center">
+              <p className="text-[10px] text-[#3C6E5A] font-semibold">Earns {Math.floor((art.like_count || 0) / 10) * 2} ⬡</p>
+              <p className="text-[9px] text-[#9B9B9B]">per 10 likes</p>
             </div>
-          </div>
-
-          {/* Recent activity */}
-          {trades.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs font-medium text-[#9B9B9B] mb-2">Recent Activity</p>
-              <div className="space-y-1.5">
-                {trades.slice(0, 3).map((t) => (
-                  <div key={t.id} className="flex items-center justify-between text-xs">
-                    <span className="text-[#6B6B6B] capitalize">{t.trade_type}</span>
-                    <span className="font-medium text-[#2C2C2C]">⬡ {t.price}</span>
-                    <span className="text-[#9B9B9B]">{new Date(t.created_date).toLocaleDateString()}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="mt-5 space-y-2">
-            {!isOwner && art.is_for_sale && (
-              <Button onClick={() => onBuy(art)} className="w-full rounded-xl h-12 text-base text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
-                Buy for ⬡ {art.price}
-              </Button>
-            )}
-            {isOwner && !art.is_for_sale && (
-              showSellInput ? (
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Set price"
-                    value={sellPrice}
-                    onChange={(e) => setSellPrice(e.target.value)}
-                    className="rounded-xl"
-                    style={{ borderColor: "var(--border-light)" }}
-                  />
-                  <Button onClick={() => onList(art, parseFloat(sellPrice))} className="rounded-xl px-5 text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
-                    List
-                  </Button>
-                </div>
-              ) : (
-                <Button onClick={() => setShowSellInput(true)} variant="outline" className="w-full rounded-xl h-12" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)" }}>
-                  List for Sale
-                </Button>
-              )
-            )}
-            {isOwner && art.is_for_sale && (
-              <Button onClick={() => onSell(art)} variant="outline" className="w-full rounded-xl h-12 border-rose-300 text-rose-600">
-                Remove Listing
-              </Button>
-            )}
           </div>
 
           {/* Voice comments */}
@@ -286,11 +180,10 @@ export default function Art() {
   const [selectedArt, setSelectedArt] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [activeTab, setActiveTab] = useState("market");
+  const [activeTab, setActiveTab] = useState("gallery");
   const [showFightUpload, setShowFightUpload] = useState(false);
   const queryClient = useQueryClient();
 
@@ -303,7 +196,6 @@ export default function Art() {
     queryFn: () => base44.entities.ArtPiece.list("-created_date", 50),
   });
 
-  const marketplace = artPieces.filter((a) => a.is_for_sale || (a.price > 0));
   const gallery = artPieces;
 
   const handleFileSelect = (e) => {
@@ -316,63 +208,37 @@ export default function Art() {
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file: selectedFile });
     
-    // AI moderation check
-    const modCheck = await checkContent(title + " " + description, file_url);
-    
     const art = await base44.entities.ArtPiece.create({
       title: title.trim(), description: description.trim(), image_url: file_url,
       creator_email: user?.email || "", creator_name: user?.full_name || "Artist",
       owner_email: user?.email || "", owner_name: user?.full_name || "Artist",
-      price: parseFloat(price) || 0, is_for_sale: parseFloat(price) > 0, like_count: 0,
+      like_count: 0,
     });
     
-    if (!modCheck.safe) {
-      await createModerationReport("art", art.id, user?.email, user?.full_name, modCheck.flags, modCheck.confidence);
-    }
-    
-    setTitle(""); setDescription(""); setPrice(""); setSelectedFile(null); setPreviewUrl(null);
+    setTitle(""); setDescription(""); setSelectedFile(null); setPreviewUrl(null);
     setShowUpload(false); setUploading(false);
     queryClient.invalidateQueries({ queryKey: ["art"] });
   };
 
-  const handleBuy = async (art) => {
-    if (!user) return;
-    const balance = await getBalance(user.email);
-    if (balance < art.price) { alert(`Not enough coins! You have ⬡${balance}, need ⬡${art.price}`); return; }
-    await base44.entities.ArtPiece.update(art.id, {
-      owner_email: user.email, owner_name: user.full_name || user.email, is_for_sale: false,
-    });
-    await base44.entities.ArtTrade.create({
-      art_id: art.id, buyer_email: user.email, seller_email: art.owner_email, price: art.price, trade_type: "buy",
-    });
-    // Deduct from buyer, credit seller
-    await addCoins(user.email, -art.price, "art_purchase", `Bought "${art.title}"`, art.id);
-    if (art.owner_email) await addCoins(art.owner_email, art.price, "art_sale", `Sold "${art.title}"`, art.id);
-    setSelectedArt(null);
-    queryClient.invalidateQueries({ queryKey: ["art"] });
-  };
 
-  const handleList = async (art, price) => {
-    await base44.entities.ArtPiece.update(art.id, { price, is_for_sale: true });
-    await base44.entities.ArtTrade.create({ art_id: art.id, seller_email: user.email, price, trade_type: "list" });
-    setSelectedArt(null);
-    queryClient.invalidateQueries({ queryKey: ["art"] });
-  };
-
-  const handleDelist = async (art) => {
-    await base44.entities.ArtPiece.update(art.id, { is_for_sale: false });
-    setSelectedArt(null);
-    queryClient.invalidateQueries({ queryKey: ["art"] });
-  };
 
   const handleLikeArt = async (art) => {
     if (!user?.email) return;
     const likedBy = art.liked_by || [];
     if (likedBy.includes(user.email)) return;
+    
+    const newLikeCount = (art.like_count || 0) + 1;
+    const coinsReward = newLikeCount % 10 === 0 ? 2 : 0;
+    
     await base44.entities.ArtPiece.update(art.id, {
-      like_count: (art.like_count || 0) + 1,
+      like_count: newLikeCount,
       liked_by: [...likedBy, user.email],
     });
+    
+    if (coinsReward > 0 && art.creator_email) {
+      await addCoins(art.creator_email, coinsReward, "post_liked", `Your art received 10 likes!`, art.id);
+    }
+    
     queryClient.invalidateQueries({ queryKey: ["art"] });
   };
 
@@ -381,7 +247,7 @@ export default function Art() {
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Market · Gallery · Fight</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Gallery · Fight</p>
         </div>
         <div className="flex gap-2">
           {activeTab === "fight" && (
@@ -399,24 +265,9 @@ export default function Art() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="market" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Market</TabsTrigger>
           <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Gallery</TabsTrigger>
           <TabsTrigger value="fight" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="market" className="mt-4 pb-24">
-          {isLoading ? (
-            <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" /></div>
-          ) : marketplace.length === 0 ? (
-            <div className="text-center py-16"><p className="text-4xl mb-3">📈</p><p className="text-sm text-[#9B9B9B]">No art listed yet. Upload and set a price.</p></div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {marketplace.map((art) => (
-                <ArtTradingCard key={art.id} art={art} user={user} onClick={() => setSelectedArt(art)} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
 
         <TabsContent value="gallery" className="mt-4 pb-24">
           {isLoading ? (
@@ -473,9 +324,6 @@ export default function Art() {
             art={selectedArt}
             user={user}
             onClose={() => setSelectedArt(null)}
-            onBuy={handleBuy}
-            onSell={handleDelist}
-            onList={handleList}
           />
         )}
       </AnimatePresence>
@@ -501,7 +349,6 @@ export default function Art() {
             )}
             <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
             <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="border-[#EDE9E3] rounded-xl resize-none" />
-            <Input type="number" placeholder="Starting price in coins (0 = not for sale)" value={price} onChange={(e) => setPrice(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
             <Button onClick={handleUpload} disabled={!selectedFile || !title.trim() || uploading} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
               {uploading ? "Uploading..." : "Publish"}
             </Button>
