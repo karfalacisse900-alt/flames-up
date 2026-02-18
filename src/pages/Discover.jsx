@@ -210,42 +210,47 @@ export default function Discover() {
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-        <div className="flex items-center gap-2 shrink-0">
-          <Link
-            to={createPageUrl("DiscoverForum")}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-          >
-            <Users className="w-3.5 h-3.5" /> Forum
-          </Link>
-          <button
-            onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-            style={{
-              backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
-              borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
-              color: compareMode ? "#fff" : "var(--text-secondary)"
-            }}
-          >
-            Compare
-          </button>
-          <button
-            onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-          >
-            {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to={createPageUrl("DiscoverForum")}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+            >
+              <Users className="w-3.5 h-3.5" /> Forum
+            </Link>
+            {contentTab === "apps" && (
+              <>
+                <button
+                  onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+                  style={{
+                    backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
+                    borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
+                    color: compareMode ? "#fff" : "var(--text-secondary)"
+                  }}
+                >
+                  Compare
+                </button>
+                <button
+                  onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
+                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+                >
+                  {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        {/* Content type tabs */}
-        <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps","🛠 Apps & Tools"],["services","👤 Service People"]].map(([val, label]) => (
-            <button key={val} onClick={() => setContentTab(val)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
+        {/* Content tab switcher: Apps | Services */}
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-app)" }}>
+          {[["apps", "🛠 Apps"], ["services", "👤 Services"]].map(([tab, label]) => (
+            <button key={tab} onClick={() => setContentTab(tab)}
+              className="flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all"
               style={{
-                backgroundColor: contentTab === val ? "#fff" : "transparent",
-                color: contentTab === val ? "var(--accent-primary)" : "var(--text-hint)",
-                boxShadow: contentTab === val ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                backgroundColor: contentTab === tab ? "var(--bg-nav)" : "transparent",
+                color: contentTab === tab ? "var(--accent-primary)" : "var(--text-hint)",
+                boxShadow: contentTab === tab ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}>
               {label}
             </button>
@@ -372,41 +377,7 @@ export default function Discover() {
         </div>
       </div>
 
-      {/* ---- SERVICE PEOPLE TAB ---- */}
-      {contentTab === "services" && (
-        <div className="pb-24 mt-4">
-          {/* Search for services */}
-          <div className="px-5 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
-              <Input
-                placeholder="Search by name, skill, role..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm"
-              />
-            </div>
-          </div>
-          {spLoading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-            </div>
-          ) : filteredServicePeople.length === 0 ? (
-            <div className="text-center py-16 px-5">
-              <p className="text-4xl mb-3">👤</p>
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>{search ? "No people found" : "No service people listed yet"}</p>
-            </div>
-          ) : (
-            <div className="px-5 space-y-3">
-              {filteredServicePeople.map(person => (
-                <ServicePersonCard key={person.id} person={person} onClick={() => setSelectedServicePerson(person)} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {contentTab === "apps" && isLoading ? (
+      {isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
