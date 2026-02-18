@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Star, Flag, MapPin, Send, Plus, Image, Link2, Play, Trash2, Upload, Lock } from "lucide-react";
+import { X, ExternalLink, Star, Flag, MapPin, Send, Plus, Image, Link2, Trash2, Upload, Lock, MessageSquare } from "lucide-react";
+import BookmarkButton from "./BookmarkButton";
+import { createPageUrl } from "../../utils";
 import StarRating from "./StarRating";
 
 const platformColors = {

@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import StarRating from "./StarRating";
 import { MapPin } from "lucide-react";
+import BookmarkButton from "./BookmarkButton";
 
 const platformColors = {
   Fiverr: { bg: "#e8f7f0", text: "#1dbf73" },
