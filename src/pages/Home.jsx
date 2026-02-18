@@ -61,6 +61,18 @@ export default function Home() {
         like_count: (post.like_count || 0) + 1,
         liked_by: [...likedBy, email],
       });
+      // Fire notification to post author
+      if (post.author_email && post.author_email !== email) {
+        base44.entities.Notification.create({
+          recipient_email: post.author_email,
+          actor_name: user?.display_name || user?.full_name || "Someone",
+          actor_email: email,
+          type: "post_liked",
+          post_id: post.id,
+          post_text: post.text?.slice(0, 80),
+          is_read: false,
+        }).catch(() => {});
+      }
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
     setCurrentIndex((prev) => prev + 1);
