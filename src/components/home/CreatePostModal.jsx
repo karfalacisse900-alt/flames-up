@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,45 +17,35 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [text, setText] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Answer type (for questions)
-  const [answerType, setAnswerType] = useState("open"); // "open" | "yes_no" | "multi"
+  const [answerType, setAnswerType] = useState("open");
   const [multiOptions, setMultiOptions] = useState(["", ""]);
-
-  // AI state
   const [aiTopic, setAiTopic] = useState("");
   const [showAiPanel, setShowAiPanel] = useState(false);
-  const [aiMode, setAiMode] = useState(null); // "generate" | "rephrase"
   const [aiLoading, setAiLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || loading) return;
     setLoading(true);
-    // Build poll data for question posts
     let pollData = {};
     if (type === "question" && answerType !== "open") {
       let opts = answerType === "yes_no" ? ["Yes", "No"] : multiOptions.filter(o => o.trim());
-      pollData = {
-        answer_type: answerType,
-        options: opts,
-        votes: Object.fromEntries(opts.map((_, i) => [i, 0])),
-        voted_by: {},
-        total_votes: 0,
-      };
+      pollData = { answer_type: answerType, options: opts, votes: Object.fromEntries(opts.map((_, i) => [i, 0])), voted_by: {}, total_votes: 0 };
     } else {
       pollData = { answer_type: "open", options: [], votes: {}, voted_by: {}, total_votes: 0 };
     }
-
     await base44.entities.Post.create({
-        type, text: text.trim(), is_anonymous: isAnonymous,
-        author_name: isAnonymous ? "Anonymous" : (user?.full_name || "User"),
-        author_email: user?.email || "", like_count: 0, reply_count: 0, liked_by: [],
-        ...pollData,
-      });
-      setText(""); setType("question"); setIsAnonymous(false);
-      setAnswerType("open"); setMultiOptions(["", ""]);
-      setShowAiPanel(false); setAiTopic("");
-    setLoading(false); onCreated(); onClose();
+      type, text: text.trim(), is_anonymous: isAnonymous,
+      author_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "User"),
+      author_email: isAnonymous ? "" : (user?.email || ""),
+      like_count: 0, reply_count: 0, liked_by: [],
+      ...pollData,
+    });
+    setText(""); setType("question"); setIsAnonymous(false);
+    setAnswerType("open"); setMultiOptions(["", ""]);
+    setShowAiPanel(false); setAiTopic("");
+    setLoading(false);
+    onCreated();
+    onClose();
   };
 
   const handleAiGenerate = async () => {
@@ -64,7 +53,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     setAiLoading(true);
     const typeMap = { question: "a thoughtful question", quote: "an inspiring quote or thought", concern: "a heartfelt concern" };
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Write ${typeMap[type]} about the topic: "${aiTopic}". It should be concise (1-3 sentences), personal, and feel authentic — like something a real person would post on a reflective social app. Output only the text, no quotes or labels.`,
+      prompt: `Write ${typeMap[type]} about the topic: "${aiTopic}". It should be concise (1-3 sentences), personal, and feel authentic. Output only the text, no quotes or labels.`,
     });
     setText(result);
     setShowAiPanel(false);
@@ -76,136 +65,128 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     if (!text.trim()) return;
     setAiLoading(true);
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Rephrase the following text for better clarity and tone. Keep it authentic and human. Output only the rephrased text, no quotes or labels.\n\nOriginal: "${text}"`,
+      prompt: `Rephrase the following text for better clarity and tone. Keep it authentic and human. Output only the rephrased text.\n\nOriginal: "${text}"`,
     });
     setText(result);
-    setAiMode(null);
     setAiLoading(false);
   };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <motion.div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    >
+      {/* Backdrop */}
+      <div
+        style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
         onClick={onClose}
       />
-      <motion.div
-        className="relative w-full max-w-lg rounded-t-3xl flex flex-col"
-        style={{ maxHeight: "92dvh", backgroundColor: "var(--bg-nav)" }}
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 28, stiffness: 320 }}
+
+      {/* Sheet */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: "512px",
+          borderRadius: "24px 24px 0 0",
+          backgroundColor: "var(--bg-nav)",
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "90vh",
+        }}
       >
         {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 99, backgroundColor: "var(--border-medium)" }} />
         </div>
 
-        <div className="px-5 pt-2 overflow-y-auto flex-1">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Create Post</h2>
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
-              <X className="w-5 h-5" style={{ color: "var(--text-hint)" }} />
-            </button>
-          </div>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 12px", flexShrink: 0 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, fontFamily: "var(--font-serif)", color: "var(--text-primary)", margin: 0 }}>New Post</h2>
+          <button onClick={onClose} style={{ padding: 8, borderRadius: 99, background: "var(--bg-app)", border: "none", cursor: "pointer", display: "flex" }}>
+            <X style={{ width: 18, height: 18, color: "var(--text-hint)" }} />
+          </button>
+        </div>
 
+        {/* Scrollable body */}
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px" }}>
           {/* Type selector */}
-          <div className="flex gap-2 mb-4">
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {postTypes.map((pt) => (
               <button
                 key={pt.value}
                 onClick={() => setType(pt.value)}
-                className="flex-1 flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all"
                 style={{
-                  borderColor: type === pt.value ? "var(--accent-primary)" : "var(--border-light)",
-                  backgroundColor: type === pt.value ? "rgba(60,110,90,0.06)" : "transparent",
+                  flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                  padding: "12px 4px", borderRadius: 12,
+                  border: `2px solid ${type === pt.value ? "var(--accent-primary)" : "var(--border-light)"}`,
+                  backgroundColor: type === pt.value ? "rgba(60,110,90,0.07)" : "transparent",
+                  cursor: "pointer",
                 }}
               >
-                <span className="text-xl">{pt.emoji}</span>
-                <span className="text-xs font-medium" style={{ color: type === pt.value ? "var(--accent-primary)" : "var(--text-secondary)" }}>{pt.label}</span>
+                <span style={{ fontSize: 20 }}>{pt.emoji}</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: type === pt.value ? "var(--accent-primary)" : "var(--text-secondary)" }}>{pt.label}</span>
               </button>
             ))}
           </div>
 
+          {/* Text area */}
           <Textarea
-            placeholder={
-              type === "question" ? "What's your question?" :
-              type === "quote" ? "Share a thought or quote..." : "What concerns you?"
-            }
+            placeholder={type === "question" ? "What's your question?" : type === "quote" ? "Share a thought or quote..." : "What concerns you?"}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="min-h-[100px] rounded-xl text-base resize-none"
-            style={{ fontFamily: "var(--font-serif)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
+            className="rounded-xl resize-none"
+            style={{ minHeight: 110, fontFamily: "var(--font-serif)", borderColor: "var(--border-light)", color: "var(--text-primary)", fontSize: 15, width: "100%", boxSizing: "border-box" }}
           />
 
-          {/* Answer type selector — only for questions */}
+          {/* Answer type */}
           {type === "question" && (
-            <div>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Answer type</p>
-              <div className="flex gap-2">
-                {[
-                  { value: "open", label: "Open text" },
-                  { value: "yes_no", label: "Yes / No" },
-                  { value: "multi", label: "Multiple choice" },
-                ].map((at) => (
+            <div style={{ marginTop: 12 }}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-secondary)", marginBottom: 8 }}>Answer type</p>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[{ value: "open", label: "Open" }, { value: "yes_no", label: "Yes/No" }, { value: "multi", label: "Multi" }].map((at) => (
                   <button
                     key={at.value}
                     onClick={() => setAnswerType(at.value)}
-                    className="flex-1 py-1.5 rounded-xl border text-xs font-medium transition-all"
                     style={{
-                      borderColor: answerType === at.value ? "var(--accent-primary)" : "var(--border-light)",
+                      flex: 1, padding: "6px 4px", borderRadius: 10,
+                      border: `1px solid ${answerType === at.value ? "var(--accent-primary)" : "var(--border-light)"}`,
                       backgroundColor: answerType === at.value ? "rgba(60,110,90,0.07)" : "transparent",
                       color: answerType === at.value ? "var(--accent-primary)" : "var(--text-secondary)",
+                      fontSize: 11, fontWeight: 500, cursor: "pointer",
                     }}
-                  >
-                    {at.label}
-                  </button>
+                  >{at.label}</button>
                 ))}
               </div>
-
-              {/* Yes/No preview */}
               {answerType === "yes_no" && (
-                <div className="flex gap-2 mt-3">
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                   {["Yes", "No"].map((opt) => (
-                    <div key={opt} className="flex-1 py-2 rounded-xl border text-center text-sm font-medium" style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)", backgroundColor: "var(--bg-app)" }}>
-                      {opt}
-                    </div>
+                    <div key={opt} style={{ flex: 1, padding: "8px", borderRadius: 10, border: "1px solid var(--border-medium)", textAlign: "center", fontSize: 13, color: "var(--text-secondary)", backgroundColor: "var(--bg-app)" }}>{opt}</div>
                   ))}
                 </div>
               )}
-
-              {/* Multiple choice inputs */}
               {answerType === "multi" && (
-                <div className="mt-3 space-y-2">
+                <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
                   {multiOptions.map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
+                    <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <Input
                         placeholder={`Option ${idx + 1}`}
                         value={opt}
-                        onChange={(e) => {
-                          const next = [...multiOptions];
-                          next[idx] = e.target.value;
-                          setMultiOptions(next);
-                        }}
-                        className="flex-1 rounded-xl text-sm"
+                        onChange={(e) => { const next = [...multiOptions]; next[idx] = e.target.value; setMultiOptions(next); }}
+                        className="rounded-xl text-sm flex-1"
                         style={{ borderColor: "var(--border-light)" }}
                       />
                       {multiOptions.length > 2 && (
-                        <button onClick={() => setMultiOptions(multiOptions.filter((_, i) => i !== idx))} style={{ color: "var(--text-hint)" }}>
-                          <Trash2 className="w-4 h-4" />
+                        <button onClick={() => setMultiOptions(multiOptions.filter((_, i) => i !== idx))} style={{ color: "var(--text-hint)", background: "none", border: "none", cursor: "pointer" }}>
+                          <Trash2 style={{ width: 16, height: 16 }} />
                         </button>
                       )}
                     </div>
                   ))}
                   {multiOptions.length < 5 && (
-                    <button
-                      onClick={() => setMultiOptions([...multiOptions, ""])}
-                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border border-dashed transition-all"
-                      style={{ borderColor: "var(--border-medium)", color: "var(--text-hint)" }}
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Add option
+                    <button onClick={() => setMultiOptions([...multiOptions, ""])} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-hint)", padding: "6px 12px", borderRadius: 10, border: "1px dashed var(--border-medium)", background: "none", cursor: "pointer" }}>
+                      <Plus style={{ width: 14, height: 14 }} /> Add option
                     </button>
                   )}
                 </div>
@@ -214,87 +195,83 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
           )}
 
           {/* AI toolbar */}
-          <div className="flex gap-2 mt-2">
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button
-              onClick={() => { setShowAiPanel(!showAiPanel); setAiMode("generate"); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all"
+              onClick={() => setShowAiPanel(!showAiPanel)}
               style={{
-                borderColor: showAiPanel && aiMode === "generate" ? "var(--accent-primary)" : "var(--border-light)",
-                color: showAiPanel && aiMode === "generate" ? "var(--accent-primary)" : "var(--text-secondary)",
-                backgroundColor: showAiPanel && aiMode === "generate" ? "rgba(60,110,90,0.06)" : "transparent",
+                display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 99,
+                border: `1px solid ${showAiPanel ? "var(--accent-primary)" : "var(--border-light)"}`,
+                color: showAiPanel ? "var(--accent-primary)" : "var(--text-secondary)",
+                backgroundColor: showAiPanel ? "rgba(60,110,90,0.06)" : "transparent",
+                fontSize: 12, fontWeight: 500, cursor: "pointer",
               }}
             >
-              <Sparkles className="w-3.5 h-3.5" /> Generate from topic
+              <Sparkles style={{ width: 13, height: 13 }} /> AI Generate
             </button>
-
             {text.trim() && (
               <button
                 onClick={handleAiRephrase}
                 disabled={aiLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all"
-                style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 99, border: "1px solid var(--border-light)", color: "var(--text-secondary)", fontSize: 12, fontWeight: 500, cursor: "pointer", background: "transparent" }}
               >
-                {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                {aiLoading ? <Loader2 style={{ width: 13, height: 13 }} className="animate-spin" /> : <RefreshCw style={{ width: 13, height: 13 }} />}
                 Rephrase
               </button>
             )}
           </div>
 
-          {/* AI generate panel */}
-          <AnimatePresence>
-            {showAiPanel && aiMode === "generate" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
+          {showAiPanel && (
+            <div style={{ marginTop: 10, padding: 12, borderRadius: 12, border: "1px solid var(--border-light)", backgroundColor: "var(--bg-card)", display: "flex", gap: 8 }}>
+              <Input
+                placeholder="Topic: e.g. loneliness, growth…"
+                value={aiTopic}
+                onChange={(e) => setAiTopic(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAiGenerate()}
+                className="flex-1 rounded-xl border-0 bg-transparent text-sm"
+                style={{ color: "var(--text-primary)" }}
+              />
+              <button
+                onClick={handleAiGenerate}
+                disabled={!aiTopic.trim() || aiLoading}
+                style={{ padding: "6px 14px", borderRadius: 10, backgroundColor: "var(--accent-primary)", color: "#fff", fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", opacity: !aiTopic.trim() || aiLoading ? 0.5 : 1 }}
               >
-                <div className="mt-3 p-3 rounded-xl border flex gap-2" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-card)" }}>
-                  <Input
-                    placeholder="Enter a topic (e.g. loneliness, motivation, growth)…"
-                    value={aiTopic}
-                    onChange={(e) => setAiTopic(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAiGenerate()}
-                    className="flex-1 rounded-xl border-0 bg-transparent text-sm"
-                    style={{ color: "var(--text-primary)" }}
-                  />
-                  <button
-                    onClick={handleAiGenerate}
-                    disabled={!aiTopic.trim() || aiLoading}
-                    className="px-3 py-1.5 rounded-xl text-xs font-medium text-white transition-opacity disabled:opacity-50"
-                    style={{ backgroundColor: "var(--accent-primary)" }}
-                  >
-                    {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Go"}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {aiLoading ? <Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> : "Go"}
+              </button>
+            </div>
+          )}
 
+          {/* Spacer at bottom of scroll area */}
+          <div style={{ height: 16 }} />
         </div>
 
-        {/* Sticky footer with submit — always visible */}
-        <div className="shrink-0 px-5 pb-6 pt-3 border-t" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-nav)" }}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+        {/* ─── STICKY FOOTER — always visible ─── */}
+        <div style={{ flexShrink: 0, padding: "12px 20px 28px", borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-nav)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />
-              <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>
-                {isAnonymous ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-secondary)" }}>
+                {isAnonymous ? <EyeOff style={{ width: 15, height: 15 }} /> : <Eye style={{ width: 15, height: 15 }} />}
                 <span>{isAnonymous ? "Anonymous" : "Public"}</span>
               </div>
             </div>
-            <span className="text-xs" style={{ color: "var(--text-hint)" }}>{text.length} chars</span>
+            <span style={{ fontSize: 11, color: "var(--text-hint)" }}>{text.length} chars</span>
           </div>
-          <Button
+          <button
             onClick={handleSubmit}
             disabled={!text.trim() || loading}
-            className="w-full text-white rounded-2xl font-bold h-14 text-base"
-            style={{ backgroundColor: text.trim() ? "var(--accent-primary)" : "var(--border-medium)", boxShadow: text.trim() ? "0 4px 14px rgba(60,110,90,0.4)" : "none", transition: "all 0.2s" }}
+            style={{
+              width: "100%", height: 56, borderRadius: 16, border: "none", cursor: text.trim() ? "pointer" : "not-allowed",
+              backgroundColor: text.trim() ? "var(--accent-primary)" : "#ccc",
+              color: "#fff", fontSize: 16, fontWeight: 700,
+              boxShadow: text.trim() ? "0 4px 16px rgba(60,110,90,0.45)" : "none",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "all 0.2s",
+            }}
           >
-            {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2 inline" />Publishing...</> : "✦ Publish Post"}
-          </Button>
+            {loading ? <><Loader2 style={{ width: 20, height: 20 }} className="animate-spin" /> Publishing...</> : "✦ Publish Post"}
+          </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
