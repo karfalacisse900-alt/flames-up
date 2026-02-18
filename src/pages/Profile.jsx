@@ -17,6 +17,8 @@ export default function Profile() {
   const [showEdit, setShowEdit] = useState(false);
   const [bio, setBio] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
