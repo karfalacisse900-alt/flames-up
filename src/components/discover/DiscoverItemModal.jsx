@@ -24,7 +24,7 @@ const platformIcon = (p) => {
   return <Monitor className="w-3 h-3" />;
 };
 
-export default function DiscoverItemModal({ item, user, onClose }) {
+export default function DiscoverItemModal({ item, user, onClose, allItems = [] }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const qc = useQueryClient();
@@ -33,6 +33,39 @@ export default function DiscoverItemModal({ item, user, onClose }) {
     queryKey: ["reviews", item.id],
     queryFn: () => base44.entities.DiscoverReview.filter({ item_id: item.id }, "-created_date", 50),
   });
+
+  // Saved items
+  const { data: savedItems = [] } = useQuery({
+    queryKey: ["savedItems", user?.email],
+    queryFn: () => base44.entities.SavedItem.filter({ user_email: user?.email }, "-created_date", 200),
+    enabled: !!user?.email,
+  });
+
+  const isSaved = savedItems.some(s => s.item_id === item.id);
+
+  const toggleSave = useMutation({
+    mutationFn: async () => {
+      if (isSaved) {
+        const record = savedItems.find(s => s.item_id === item.id);
+        await base44.entities.SavedItem.delete(record.id);
+      } else {
+        await base44.entities.SavedItem.create({
+          user_email: user.email,
+          item_id: item.id,
+          item_title: item.title,
+          item_category: item.category,
+          item_logo_url: item.logo_url || "",
+          item_description: item.description || "",
+        });
+      }
+    },
+    onSuccess: () => qc.invalidateQueries(["savedItems", user?.email]),
+  });
+
+  // Related items: same category, exclude current
+  const relatedItems = allItems
+    .filter(i => i.id !== item.id && i.category === item.category)
+    .slice(0, 4);
 
   const userReview = reviews.find(r => r.user_email === user?.email);
 
