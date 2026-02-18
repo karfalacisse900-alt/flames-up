@@ -18,8 +18,9 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [viewMode, setViewMode] = useState("swipe"); // "swipe" | "list"
+  const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [feedTab, setFeedTab] = useState("all"); // "all" | "following"
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -29,6 +30,12 @@ export default function Home() {
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["posts"],
     queryFn: () => base44.entities.Post.list("-created_date", 50),
+  });
+
+  const { data: following = [] } = useQuery({
+    queryKey: ["following", user?.email],
+    queryFn: () => base44.entities.Follow.filter({ follower_email: user.email }),
+    enabled: !!user?.email,
   });
 
   const rawFiltered = posts.filter((p) =>
