@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase } from "lucide-react";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
@@ -136,6 +136,12 @@ export default function Profile() {
             </Link>
             <Link to={createPageUrl("Shop")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
               <ShoppingBag className="w-4 h-4" />
+            </Link>
+            <Link to={createPageUrl("Collections")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
+              <FolderOpen className="w-4 h-4" />
+            </Link>
+            <Link to={createPageUrl("EditServiceProfile")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
+              <Briefcase className="w-4 h-4" />
             </Link>
             <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border hover:text-red-500" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <LogOut className="w-4 h-4" />
