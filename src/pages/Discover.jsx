@@ -390,6 +390,9 @@ export default function Discover() {
       {selectedItem && (
         <DiscoverItemModal item={selectedItem} user={user} onClose={() => setSelectedItem(null)} />
       )}
+
+      {/* AI Assistant */}
+      {!isLoading && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
     </div>
   );
 }
