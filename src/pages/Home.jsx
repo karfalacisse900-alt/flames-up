@@ -124,6 +124,7 @@ export default function Home() {
         </div>
 
         {/* Filter pills */}
+
         <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) => (
             <button
