@@ -438,12 +438,27 @@ export default function Discover() {
       )}
 
       {/* Item Detail Modal */}
-      {selectedItem && (
+      {selectedItem && !compareMode && (
         <DiscoverItemModal item={selectedItem} user={user} onClose={() => setSelectedItem(null)} />
       )}
 
+      {/* Compare bar */}
+      {compareMode && (
+        <CompareBar
+          selected={compareList}
+          onRemove={id => setCompareList(prev => prev.filter(c => c.id !== id))}
+          onCompare={() => setShowCompare(true)}
+          onClear={() => setCompareList([])}
+        />
+      )}
+
+      {/* Compare modal */}
+      {showCompare && compareList.length >= 2 && (
+        <CompareModal items={compareList} onClose={() => setShowCompare(false)} />
+      )}
+
       {/* AI Assistant */}
-      {!isLoading && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
+      {!isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
     </div>
   );
 }
