@@ -147,7 +147,6 @@ export default function Discover() {
 
   const pricingOptions = ["all", "Free", "Freemium", "Paid"];
   const platformOptions = ["all", "Web", "iOS", "Android", "Desktop"];
-
   const filtered = items.filter(item => {
     const catMatch = activeCategory === "all" || item.category === activeCategory;
     const searchMatch = !search ||
