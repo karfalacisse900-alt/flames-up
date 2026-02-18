@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle, TrendingUp, TrendingDown, Gift, Gamepad2, Palette, Radio, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle, TrendingUp, TrendingDown, Gift, Gamepad2, Palette, Radio, Star, Zap, Users } from "lucide-react";
+import { addCoins } from "../components/coins/coinsHelper";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "../utils";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { getWallet, claimDailyCheckin } from "../components/coins/coinsHelper";
