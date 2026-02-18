@@ -116,5 +116,15 @@ nav, button, a[role="button"], .no-select {
 @layer base {
   * {
     @apply border-[#E5DFD0];
-  }
-}
+          }
+
+          /* Organic smoothing for cards */
+          .organic-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+          }
+
+          /* Smooth button transitions */
+          button, a {
+            transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+          }
+        }
