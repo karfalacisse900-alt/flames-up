@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, Compass, Palette, Radio, Gamepad2, User, Bell } from "lucide-react";
+import { Home, Compass, Palette, Radio, Gamepad2, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
@@ -28,7 +28,7 @@ export default function Layout({ children, currentPageName }) {
     }).catch(() => {});
   }, []);
 
-  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "Notifications"].includes(currentPageName);
+  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop"].includes(currentPageName);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
