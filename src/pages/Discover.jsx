@@ -180,18 +180,38 @@ export default function Discover() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        <div>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between gap-2" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Curated tools, apps & services</p>
         </div>
-        <button
-          onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs"
-          style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-        >
-          {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to={createPageUrl("DiscoverForum")}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+          >
+            <Users className="w-3.5 h-3.5" /> Forum
+          </Link>
+          <button
+            onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{
+              backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
+              borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
+              color: compareMode ? "#fff" : "var(--text-secondary)"
+            }}
+          >
+            Compare
+          </button>
+          <button
+            onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+          >
+            {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
+          </button>
+        </div>
       </div>
 
       {/* Search + Filter toggle */}
