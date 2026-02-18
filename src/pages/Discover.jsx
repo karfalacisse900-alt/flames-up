@@ -15,6 +15,8 @@ import CompareModal from "../components/discover/CompareModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Users } from "lucide-react";
+import ServicePersonCard from "../components/discover/ServicePersonCard";
+import ServicePersonModal from "../components/discover/ServicePersonModal";
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
