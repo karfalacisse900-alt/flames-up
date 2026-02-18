@@ -162,8 +162,8 @@ export default function DiscoverItemModal({ item, user, onClose }) {
 
             {/* Write review */}
             {user && !userReview && (
-              <div className="p-4 rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-                <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Rate & Review</p>
+              <div className="p-4 rounded-2xl mb-4 bg-gray-50 border border-gray-200">
+                <p className="text-xs font-medium mb-2 text-gray-600">Rate & Review</p>
                 <StarRating value={rating} onRate={setRating} size="lg" />
                 <Textarea
                   className="mt-3 text-sm resize-none"
