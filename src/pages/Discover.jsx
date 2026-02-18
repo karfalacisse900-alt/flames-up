@@ -145,6 +145,9 @@ export default function Discover() {
   const featuredItem = items.find(i => i.is_featured);
   const newItems = items.filter(i => i.is_new && !i.is_featured).slice(0, 10);
 
+  const pricingOptions = ["all", "Free", "Freemium", "Paid"];
+  const platformOptions = ["all", "Web", "iOS", "Android", "Desktop"];
+
   const filtered = items.filter(item => {
     const catMatch = activeCategory === "all" || item.category === activeCategory;
     const searchMatch = !search ||
@@ -152,12 +155,17 @@ export default function Discover() {
       item.description?.toLowerCase().includes(search.toLowerCase()) ||
       item.brand_name?.toLowerCase().includes(search.toLowerCase()) ||
       item.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()));
-    return catMatch && searchMatch;
+    const platformMatch = filterPlatform === "all" || item.platforms?.includes(filterPlatform);
+    const pricingMatch = filterPricing === "all" ||
+      (filterPricing === "Paid" ? (item.pricing && !["Free","Freemium"].includes(item.pricing)) : item.pricing === filterPricing);
+    return catMatch && searchMatch && platformMatch && pricingMatch;
   }).sort((a, b) => {
     if (sortBy === "rating") return (b.avg_rating || 0) - (a.avg_rating || 0);
     if (sortBy === "newest") return (b.is_new ? 1 : 0) - (a.is_new ? 1 : 0);
     return 0;
   });
+
+  const activeFiltersCount = [filterPlatform !== "all", filterPricing !== "all", sortBy !== "default"].filter(Boolean).length;
 
   const showSections = activeCategory === "all" && !search;
 
