@@ -271,23 +271,28 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             )}
           </AnimatePresence>
 
-          <div className="mt-5 pt-3 border-t space-y-3" style={{ borderColor: "var(--border-light)" }}>
-            <div className="flex items-center gap-3">
+        </div>
+
+        {/* Sticky footer with submit — always visible */}
+        <div className="shrink-0 px-5 pb-6 pt-3 border-t" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-nav)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
               <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />
               <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--text-secondary)" }}>
                 {isAnonymous ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                {isAnonymous ? "Anonymous" : "Public"}
+                <span>{isAnonymous ? "Anonymous" : "Public"}</span>
               </div>
             </div>
-            <Button
-              onClick={handleSubmit}
-              disabled={!text.trim() || loading}
-              className="w-full text-white rounded-xl font-semibold text-sm h-12"
-              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)", fontSize: "1rem" }}
-            >
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2 inline" />Posting...</> : "✦ Publish Post"}
-            </Button>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>{text.length} chars</span>
           </div>
+          <Button
+            onClick={handleSubmit}
+            disabled={!text.trim() || loading}
+            className="w-full text-white rounded-2xl font-bold h-14 text-base"
+            style={{ backgroundColor: text.trim() ? "var(--accent-primary)" : "var(--border-medium)", boxShadow: text.trim() ? "0 4px 14px rgba(60,110,90,0.4)" : "none", transition: "all 0.2s" }}
+          >
+            {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2 inline" />Publishing...</> : "✦ Publish Post"}
+          </Button>
         </div>
       </motion.div>
     </div>
