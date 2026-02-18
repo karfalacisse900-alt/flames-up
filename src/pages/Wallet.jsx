@@ -113,6 +113,12 @@ export default function Wallet() {
           >
             {claimLoading ? "Claiming..." : "Daily Check-in (+10 ⬡)"}
           </button>
+          <Link
+            to={createPageUrl("Referral")}
+            className="mt-3 inline-block px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-2xl text-sm font-medium transition-all border border-white/30"
+          >
+            🎁 Refer Friends (+50 ⬡ each)
+          </Link>
           <AnimatePresence>
             {claimMsg && (
               <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-white text-xs mt-2">
