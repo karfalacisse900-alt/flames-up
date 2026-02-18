@@ -78,8 +78,25 @@ export default function Home() {
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
       <div className="px-5 pt-5 pb-3 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        {/* Feed tabs */}
+        <div className="flex items-center gap-3 mb-3">
+          {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => { setFeedTab(val); setCurrentIndex(0); }}
+              className="flex items-center gap-1.5 text-sm font-semibold pb-1 transition-all"
+              style={{
+                color: feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+                borderBottom: feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent",
+              }}
+            >
+              {val === "following" && <Users className="w-3.5 h-3.5" />}
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Thoughts</h1>
+          <span />
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
