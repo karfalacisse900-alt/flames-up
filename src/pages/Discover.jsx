@@ -207,11 +207,9 @@ export default function Discover() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between gap-2" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="min-w-0">
+      <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-
-        </div>
         <div className="flex items-center gap-2 shrink-0">
           <Link
             to={createPageUrl("DiscoverForum")}
