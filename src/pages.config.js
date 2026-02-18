@@ -58,8 +58,8 @@ import LiveRoomView from './pages/LiveRoomView';
 import Messages from './pages/Messages';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
-import Wallet from './pages/Wallet';
 import Referral from './pages/Referral';
+import Wallet from './pages/Wallet';
 import Notifications from './pages/Notifications';
 import Shop from './pages/Shop';
 import __Layout from './Layout.jsx';
@@ -77,8 +77,8 @@ export const PAGES = {
     "Messages": Messages,
     "PostDetail": PostDetail,
     "Profile": Profile,
-    "Wallet": Wallet,
     "Referral": Referral,
+    "Wallet": Wallet,
     "Notifications": Notifications,
     "Shop": Shop,
 }

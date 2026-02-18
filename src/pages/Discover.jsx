@@ -195,7 +195,7 @@ export default function Discover() {
       <div className="px-5 pt-5 pb-3 flex items-center justify-between gap-2" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Curated tools, apps & services</p>
+
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Link
