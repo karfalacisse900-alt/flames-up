@@ -75,9 +75,18 @@ export default function Profile() {
   });
 
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, display_name: displayName });
-    setUser((prev) => ({ ...prev, bio, display_name: displayName }));
+    await base44.auth.updateMe({ bio, display_name: displayName, avatar_url: avatarUrl });
+    setUser((prev) => ({ ...prev, bio, display_name: displayName, avatar_url: avatarUrl }));
     setShowEdit(false);
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setAvatarUrl(file_url);
+    setAvatarUploading(false);
   };
 
   const totalGames = gameStats.reduce((s, g) => s + (g.games_played || 0), 0);
