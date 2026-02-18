@@ -229,6 +229,31 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="saved" className="mt-4 space-y-2">
+          {savedItems.length === 0 ? (
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No saved items yet. Bookmark tools from the Discover page!</p>
+          ) : (
+            savedItems.map((s) => (
+              <div key={s.id} className="rounded-xl p-4 flex items-center gap-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                {s.item_logo_url ? (
+                  <img src={s.item_logo_url} alt={s.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
+                    {s.item_title?.[0]?.toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{s.item_title}</p>
+                  <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{s.item_description}</p>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full capitalize mt-1 inline-block" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>
+                    {s.item_category?.replace(/_/g, " ")}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </TabsContent>
+
         <TabsContent value="art" className="mt-4">
           {myArt.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No art created yet</p>
