@@ -370,7 +370,7 @@ export default function Discover() {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* ---- SERVICE PEOPLE TAB ---- */}
       {contentTab === "services" && (
