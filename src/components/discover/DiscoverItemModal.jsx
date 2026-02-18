@@ -127,9 +127,24 @@ export default function DiscoverItemModal({ item, user, onClose, allItems = [] }
               <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
-            <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-          </button>
+          <div className="flex items-center gap-2">
+            {user && (
+              <button
+                onClick={() => toggleSave.mutate()}
+                className="p-2 rounded-full transition-colors"
+                style={{ backgroundColor: isSaved ? "rgba(60,110,90,0.1)" : "var(--bg-app)" }}
+                title={isSaved ? "Unsave" : "Save"}
+              >
+                {isSaved
+                  ? <BookmarkCheck className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                  : <Bookmark className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+                }
+              </button>
+            )}
+            <button onClick={onClose} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
+              <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
         </div>
 
         <div className="px-5 pb-8 space-y-5 mt-4" style={{ backgroundColor: "#FFFFFF" }}>
