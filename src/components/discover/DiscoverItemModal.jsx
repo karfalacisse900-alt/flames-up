@@ -166,12 +166,11 @@ export default function DiscoverItemModal({ item, user, onClose }) {
                 <p className="text-xs font-medium mb-2 text-gray-600">Rate & Review</p>
                 <StarRating value={rating} onRate={setRating} size="lg" />
                 <Textarea
-                  className="mt-3 text-sm resize-none"
+                  className="mt-3 text-sm resize-none bg-white border-gray-200"
                   placeholder="Share your experience... (optional)"
                   rows={3}
                   value={reviewText}
                   onChange={e => setReviewText(e.target.value)}
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}
                 />
                 <Button
                   size="sm"
