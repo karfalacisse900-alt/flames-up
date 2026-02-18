@@ -147,6 +147,7 @@ export default function Discover() {
   const [viewMode, setViewMode] = useState("list");
   const [swipeIndex, setSwipeIndex] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedServicePerson, setSelectedServicePerson] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   const [filterPlatform, setFilterPlatform] = useState("all");
   const [filterPricing, setFilterPricing] = useState("all");
@@ -155,6 +156,7 @@ export default function Discover() {
   const [compareList, setCompareList] = useState([]);
   const [showCompare, setShowCompare] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const [contentTab, setContentTab] = useState("apps"); // "apps" | "services"
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
