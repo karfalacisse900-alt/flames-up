@@ -129,16 +129,16 @@ export default function DiscoverItemModal({ item, user, onClose }) {
 
           {/* Description */}
           <div>
-            <h3 className="text-sm font-semibold mb-1.5" style={{ color: "var(--text-primary)" }}>About</h3>
-            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <h3 className="text-sm font-semibold mb-1.5 text-gray-800">About</h3>
+            <p className="text-sm leading-relaxed text-gray-600">
               {item.long_description || item.description}
             </p>
           </div>
 
           {/* Promo */}
           {item.promo && (
-            <div className="p-3 rounded-2xl" style={{ backgroundColor: "rgba(60,110,90,0.07)", border: "1px dashed rgba(60,110,90,0.3)" }}>
-              <p className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>🎁 {item.promo}</p>
+            <div className="p-3 rounded-2xl bg-green-50 border border-green-200">
+              <p className="text-sm font-medium text-green-700">🎁 {item.promo}</p>
             </div>
           )}
 
