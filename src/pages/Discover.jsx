@@ -186,28 +186,102 @@ export default function Discover() {
         </button>
       </div>
 
-      {/* Search + Sort */}
+      {/* Search + Filter toggle */}
       {viewMode === "list" && (
-        <div className="px-5 pt-3 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
-            <Input
-              placeholder="Search tools, apps, services..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setSwipeIndex(0); }}
-              className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm"
-            />
+        <div className="px-5 pt-3 space-y-2">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
+              <Input
+                placeholder="Search tools, apps, services..."
+                value={search}
+                onChange={e => { setSearch(e.target.value); setSwipeIndex(0); }}
+                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(f => !f)}
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-colors"
+              style={{
+                backgroundColor: showFilters ? "var(--accent-primary)" : "var(--bg-card)",
+                borderColor: showFilters ? "var(--accent-primary)" : "var(--border-light)",
+                color: showFilters ? "#fff" : "var(--text-secondary)"
+              }}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              Filters
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center"
+                  style={{ backgroundColor: "var(--accent-secondary)", color: "#fff" }}>
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
           </div>
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="text-xs px-3 py-2 rounded-xl border outline-none"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-          >
-            <option value="default">Default</option>
-            <option value="rating">Top Rated</option>
-            <option value="newest">Newest</option>
-          </select>
+
+          {/* Filter panel */}
+          {showFilters && (
+            <div className="p-3 rounded-2xl space-y-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+              {/* Sort */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-hint)" }}>Sort by</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {[["default","Default"],["rating","Top Rated"],["newest","Newest"]].map(([val, label]) => (
+                    <button key={val} onClick={() => setSortBy(val)}
+                      className="text-xs px-3 py-1 rounded-full border transition-colors"
+                      style={{
+                        backgroundColor: sortBy === val ? "var(--accent-primary)" : "var(--bg-nav)",
+                        color: sortBy === val ? "#fff" : "var(--text-secondary)",
+                        borderColor: sortBy === val ? "var(--accent-primary)" : "var(--border-light)"
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Platform */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-hint)" }}>Platform</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {platformOptions.map(p => (
+                    <button key={p} onClick={() => setFilterPlatform(p)}
+                      className="text-xs px-3 py-1 rounded-full border transition-colors"
+                      style={{
+                        backgroundColor: filterPlatform === p ? "var(--accent-primary)" : "var(--bg-nav)",
+                        color: filterPlatform === p ? "#fff" : "var(--text-secondary)",
+                        borderColor: filterPlatform === p ? "var(--accent-primary)" : "var(--border-light)"
+                      }}>
+                      {p === "all" ? "All" : p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Pricing */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-hint)" }}>Pricing</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {pricingOptions.map(p => (
+                    <button key={p} onClick={() => setFilterPricing(p)}
+                      className="text-xs px-3 py-1 rounded-full border transition-colors"
+                      style={{
+                        backgroundColor: filterPricing === p ? "var(--accent-primary)" : "var(--bg-nav)",
+                        color: filterPricing === p ? "#fff" : "var(--text-secondary)",
+                        borderColor: filterPricing === p ? "var(--accent-primary)" : "var(--border-light)"
+                      }}>
+                      {p === "all" ? "All" : p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Reset */}
+              {activeFiltersCount > 0 && (
+                <button onClick={() => { setSortBy("default"); setFilterPlatform("all"); setFilterPricing("all"); }}
+                  className="flex items-center gap-1 text-xs" style={{ color: "var(--accent-secondary)" }}>
+                  <X className="w-3 h-3" /> Reset filters
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
