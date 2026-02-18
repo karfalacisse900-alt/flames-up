@@ -109,13 +109,19 @@ function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompa
             <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
           </div>
         </div>
-        {item.link && (
-          <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-            className="p-2 shrink-0 transition-colors rounded-full"
-            style={{ color: "var(--text-hint)", backgroundColor: "var(--bg-app)" }}>
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {user && (
+            <BookmarkButton user={user} itemType="app" itemId={item.id}
+              itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
+          )}
+          {item.link && (
+            <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+              className="p-2 shrink-0 transition-colors rounded-full"
+              style={{ color: "var(--text-hint)", backgroundColor: "var(--bg-app)" }}>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
