@@ -129,8 +129,10 @@ export default function DiscoverItemModal({ item, user, onClose }) {
 
           {/* Description */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-1.5">About</h3>
-            <p className="text-sm leading-relaxed text-gray-600">{item.long_description || item.description || "—"}</p>
+            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>About</h3>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)", lineHeight: "1.75" }}>
+              {item.long_description || item.description || "No description available."}
+            </p>
           </div>
 
           {/* Promo */}
