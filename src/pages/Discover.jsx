@@ -254,7 +254,7 @@ export default function Discover() {
       </div>
 
       {/* Search + Filter toggle */}
-      {viewMode === "list" && (
+      {viewMode === "list" && contentTab === "apps" && (
         <div className="px-5 pt-3 space-y-2">
           <div className="flex gap-2">
             <div className="relative flex-1">
