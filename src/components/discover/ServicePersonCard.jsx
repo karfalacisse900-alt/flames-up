@@ -12,7 +12,7 @@ const platformColors = {
   Other: { bg: "#f5f2e8", text: "#6e6e6e" },
 };
 
-export default function ServicePersonCard({ person, onClick }) {
+export default function ServicePersonCard({ person, onClick, user }) {
   const initials = person.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const plt = platformColors[person.platform] || platformColors.Other;
 

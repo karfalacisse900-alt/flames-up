@@ -255,6 +255,21 @@ export default function ServicePersonModal({ person, user, onClose }) {
                 {person.location && <span className="text-xs flex items-center gap-0.5" style={{ color: "#A8A8A8" }}><MapPin className="w-3 h-3" />{person.location}</span>}
               </div>
               <StarRating value={person.avg_rating || 0} showCount count={person.review_count || 0} />
+              {/* Message + Bookmark row */}
+              <div className="flex items-center gap-2 mt-2">
+                {user && user.email !== person.created_by && (
+                  <a href={createPageUrl(`Messages?with=${encodeURIComponent(person.created_by || person.name)}&name=${encodeURIComponent(person.name)}`)}
+                    onClick={onClose}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white"
+                    style={{ backgroundColor: "#3C6E5A" }}>
+                    <MessageSquare className="w-3.5 h-3.5" /> Message
+                  </a>
+                )}
+                {user && (
+                  <BookmarkButton user={user} itemType="service_person" itemId={person.id}
+                    itemTitle={person.name} itemSubtitle={person.headline} itemImageUrl={person.image_url} size="sm" />
+                )}
+              </div>
             </div>
             <button onClick={onClose} className="p-2 rounded-full shrink-0" style={{ backgroundColor: "#EDE9E3", color: "#6E6E6E" }}>
               <X className="w-4 h-4" />
