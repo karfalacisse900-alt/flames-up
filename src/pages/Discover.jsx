@@ -14,6 +14,7 @@ import CompareBar from "../components/discover/CompareBar";
 import CompareModal from "../components/discover/CompareModal";
 import ServicePersonCard from "../components/discover/ServicePersonCard";
 import ServicePersonModal from "../components/discover/ServicePersonModal";
+import BookmarkButton from "../components/discover/BookmarkButton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Users } from "lucide-react";
@@ -430,7 +431,7 @@ export default function Discover() {
           ) : (
             <div className="px-5 space-y-3">
               {filteredServicePeople.map(person => (
-                <ServicePersonCard key={person.id} person={person} onClick={() => setSelectedServicePerson(person)} />
+                <ServicePersonCard key={person.id} person={person} user={user} onClick={() => setSelectedServicePerson(person)} />
               ))}
             </div>
           )}
