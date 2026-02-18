@@ -166,15 +166,25 @@ export default function Home() {
           visiblePosts.length === 0 ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
-                <p className="text-5xl mb-4">🌿</p>
-                <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>You've read everything</p>
-                <button
-                  onClick={() => { setCurrentIndex(0); refetch(); }}
-                  className="mt-5 px-6 py-2.5 text-white rounded-full text-sm"
-                  style={{ backgroundColor: "var(--accent-primary)" }}
-                >
-                  Start Over
-                </button>
+                {feedTab === "following" && following.length === 0 ? (
+                  <>
+                    <p className="text-5xl mb-4">👥</p>
+                    <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>Follow people to see their posts</p>
+                    <p className="text-sm mt-2" style={{ color: "var(--text-hint)" }}>Visit someone's profile to follow them</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-5xl mb-4">🌿</p>
+                    <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>You've read everything</p>
+                    <button
+                      onClick={() => { setCurrentIndex(0); refetch(); }}
+                      className="mt-5 px-6 py-2.5 text-white rounded-full text-sm"
+                      style={{ backgroundColor: "var(--accent-primary)" }}
+                    >
+                      Start Over
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ) : (
