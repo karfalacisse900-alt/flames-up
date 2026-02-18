@@ -318,38 +318,48 @@ export default function GamePlay() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="px-4 py-3 flex items-center gap-3 border-b border-[#EDE9E3] bg-white">
-        <Link to={createPageUrl("Games")} className="p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Header */}
+      <div className="px-4 py-3 flex items-center gap-3 sticky top-0 z-40" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <Link to={createPageUrl("Games")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
         </Link>
-        <div>
-          <h2 className="font-medium text-sm">{gameNames[gameId] || "Game"}</h2>
-          <span className="text-xs text-[#9B9B9B]">{mode === "ai" ? "vs AI" : mode === "friend" ? "vs Friend" : "vs Random"}</span>
+        <div className="flex-1">
+          <h2 className="font-semibold text-sm" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{gameNames[gameId] || "Game"}</h2>
+          <span className="text-xs" style={{ color: "var(--text-hint)" }}>{mode === "ai" ? "🤖 vs AI" : mode === "friend" ? "👥 vs Friend" : "🔀 vs Random"}</span>
         </div>
       </div>
 
-      <div className="p-5 mt-4">
+      <div className="p-5">
         {renderGame()}
       </div>
 
+      {/* Result overlay */}
       {result && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE9E3] p-5 z-50">
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-0 left-0 right-0 z-50 p-5"
+          style={{ backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)" }}
+        >
           <div className="max-w-lg mx-auto text-center">
-            <Trophy className="w-8 h-8 mx-auto text-[#C4A882] mb-2" />
-            <p className="font-serif text-lg" style={{ fontFamily: "var(--font-serif)" }}>
-              {result.won ? "Well done!" : "Nice try!"}
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.1 }}>
+              <Trophy className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--accent-secondary)" }} />
+            </motion.div>
+            <p className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+              {result.won ? "🎉 Well done!" : "💪 Nice try!"}
             </p>
             <div className="flex gap-3 mt-4 justify-center">
-              <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl gap-2 border-[#EDE9E3]">
+              <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl gap-2"
+                style={{ borderColor: "var(--border-light)" }}>
                 <RotateCcw className="w-4 h-4" /> Play Again
               </Button>
               <Link to={createPageUrl("Games")}>
-                <Button className="rounded-xl bg-[#7C8C6E] hover:bg-[#6B7B5E]">Back to Games</Button>
+                <Button className="rounded-xl" style={{ backgroundColor: "var(--accent-primary)" }}>Back to Games</Button>
               </Link>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
