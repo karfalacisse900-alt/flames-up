@@ -4,7 +4,6 @@ import { createPageUrl } from "./utils";
 import { Home, Compass, Palette, Radio, Gamepad2, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
-import FloatingEditorButton from "@/components/editor/FloatingEditorButton";
 
 const navItems = [
   { name: "Home", icon: Home, page: "Home" },
@@ -35,7 +34,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
-      <FloatingEditorButton />
       <div className="max-w-lg mx-auto relative pb-20">
         <AnimatePresence mode="wait">
           <motion.div
