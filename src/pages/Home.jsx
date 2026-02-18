@@ -38,14 +38,14 @@ export default function Home() {
     enabled: !!user?.email,
   });
 
-  const rawFiltered = posts.filter((p) =>
-    activeFilter === "all" ? true :
-    activeFilter === "questions" ? p.type === "question" :
-    activeFilter === "quotes" ? p.type === "quote" :
-    p.type === "concern"
-  );
+  const followingEmails = new Set((following || []).map(f => f.following_email));
 
-  // Boosted posts (still active) float to top
+  const rawFiltered = posts.filter((p) => {
+    const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
+    const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
+    return typeMatch && feedMatch;
+  });
+
   const now = new Date();
   const filtered = [
     ...rawFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
