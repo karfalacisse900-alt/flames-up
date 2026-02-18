@@ -4,6 +4,7 @@ import { createPageUrl } from "./utils";
 import { Home, Compass, Palette, Radio, Gamepad2, User } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
+import FloatingEditorButton from "@/components/editor/FloatingEditorButton";
 
 const navItems = [
   { name: "Home", icon: Home, page: "Home" },
