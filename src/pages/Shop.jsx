@@ -170,7 +170,7 @@ export default function Shop() {
             <p className="text-xs" style={{ color: "var(--text-hint)" }}>Spend your coins</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.1)" }}>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(111,143,114,0.12)" }}>
           <span className="text-sm">⬡</span>
           <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>{balance}</span>
         </div>

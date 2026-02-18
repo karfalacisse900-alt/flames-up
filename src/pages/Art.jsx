@@ -149,19 +149,19 @@ function ArtDetailModal({ art, user, onClose }) {
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{art.title}</h2>
-              <p className="text-xs text-[#9B9B9B] mt-0.5">by {art.creator_name}</p>
+              <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{art.title}</h2>
+               <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>by {art.creator_name}</p>
             </div>
           </div>
 
           {/* Stats row */}
           <div className="grid grid-cols-2 gap-2 mt-4">
-            <div className="bg-[#FAF8F5] rounded-xl p-3 text-center">
-              <p className="text-sm font-bold text-[#2C2C2C]">{art.like_count || 0}</p>
-              <p className="text-[10px] text-[#9B9B9B]">Likes</p>
+            <div className="rounded-xl p-3 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
+              <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{art.like_count || 0}</p>
+              <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>Likes</p>
             </div>
-            <div className="bg-[#FAF8F5] rounded-xl p-3 text-center">
-              <p className="text-[10px] text-[#3C6E5A] font-semibold">Earns {Math.floor((art.like_count || 0) / 10) * 2} ⬡</p>
+            <div className="rounded-xl p-3 text-center" style={{ backgroundColor: "var(--bg-card)" }}>
+              <p className="text-[10px] font-semibold" style={{ color: "var(--accent-primary)" }}>Earns {Math.floor((art.like_count || 0) / 10) * 2} ⬡</p>
               <p className="text-[9px] text-[#9B9B9B]">per 10 likes</p>
             </div>
           </div>
@@ -251,7 +251,7 @@ export default function Art() {
         </div>
         <div className="flex gap-2">
           {activeTab === "fight" && (
-            <button onClick={() => setShowFightUpload(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white text-xs font-semibold shadow-sm" style={{ backgroundColor: "#E05C7A" }}>
+            <button onClick={() => setShowFightUpload(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white text-xs font-semibold shadow-md" style={{ backgroundColor: "var(--accent-secondary)" }}>
               <Swords className="w-3.5 h-3.5" /> Submit
             </button>
           )}
@@ -271,9 +271,9 @@ export default function Art() {
 
         <TabsContent value="gallery" className="mt-4 pb-24">
           {isLoading ? (
-            <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" /></div>
+            <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} /></div>
           ) : gallery.length === 0 ? (
-            <div className="text-center py-16"><p className="text-4xl mb-3">🎨</p><p className="text-sm text-[#9B9B9B]">No art yet.</p></div>
+            <div className="text-center py-16"><p className="text-4xl mb-3">🎨</p><p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet.</p></div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {gallery.map((art) => (
@@ -341,14 +341,14 @@ export default function Art() {
                 <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full">✕</button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-[#EDE9E3] rounded-xl cursor-pointer hover:border-[#7C8C6E] transition-colors">
-                <Upload className="w-8 h-8 text-[#9B9B9B] mb-2" />
-                <span className="text-sm text-[#9B9B9B]">Tap to upload</span>
+              <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors" style={{ borderColor: "var(--border-light)" }}>
+                <Upload className="w-8 h-8 mb-2" style={{ color: "var(--text-hint)" }} />
+                <span className="text-sm" style={{ color: "var(--text-hint)" }}>Tap to upload</span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
               </label>
             )}
-            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
-            <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="border-[#EDE9E3] rounded-xl resize-none" />
+            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-xl" style={{ borderColor: "var(--border-light)" }} />
+            <Textarea placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="rounded-xl resize-none" style={{ borderColor: "var(--border-light)" }} />
             <Button onClick={handleUpload} disabled={!selectedFile || !title.trim() || uploading} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
               {uploading ? "Uploading..." : "Publish"}
             </Button>
