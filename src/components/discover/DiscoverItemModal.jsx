@@ -118,9 +118,9 @@ export default function DiscoverItemModal({ item, user, onClose }) {
           {/* Platforms */}
           {item.platforms?.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>Available on:</span>
+              <span className="text-xs font-medium text-gray-400">Available on:</span>
               {item.platforms.map(p => (
-                <span key={p} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+                <span key={p} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
                   {platformIcon(p)} {p}
                 </span>
               ))}
