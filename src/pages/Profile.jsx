@@ -34,6 +34,7 @@ export default function Profile() {
       setUser(u);
       setBio(u?.bio || "");
       setDisplayName(u?.display_name || u?.full_name || "");
+      setAvatarUrl(u?.avatar_url || "");
     }).catch(() => {});
   }, []);
 
