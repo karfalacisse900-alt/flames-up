@@ -75,7 +75,7 @@ function SwipeDiscoverCard({ item, onOpen }) {
   );
 }
 
-function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompare }) {
+function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompare, user }) {
   return (
     <div onClick={compareMode ? onToggleCompare : onOpen}
       className="rounded-2xl p-4 hover:shadow-sm transition-all cursor-pointer active:scale-[0.99] relative"

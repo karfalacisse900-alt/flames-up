@@ -48,8 +48,10 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Art from './pages/Art';
+import Collections from './pages/Collections';
 import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
+import EditServiceProfile from './pages/EditServiceProfile';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
 import Home from './pages/Home';
@@ -62,15 +64,15 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import Collections from './pages/Collections';
-import EditServiceProfile from './pages/EditServiceProfile';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Art": Art,
+    "Collections": Collections,
     "Discover": Discover,
     "DiscoverForum": DiscoverForum,
+    "EditServiceProfile": EditServiceProfile,
     "GamePlay": GamePlay,
     "Games": Games,
     "Home": Home,
@@ -83,8 +85,6 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "Collections": Collections,
-    "EditServiceProfile": EditServiceProfile,
 }
 
 export const pagesConfig = {
