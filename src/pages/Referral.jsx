@@ -44,13 +44,17 @@ export default function Referral() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (navigator.share) {
-      navigator.share({
-        title: "Join me on this app!",
-        text: "Check out this awesome community app. Use my referral link and we both get 50 coins!",
-        url: referralLink,
-      });
+      try {
+        await navigator.share({
+          title: "Join me on this app!",
+          text: "Check out this awesome community app. Use my referral link and we both get 50 coins!",
+          url: referralLink,
+        });
+      } catch {
+        handleCopy();
+      }
     } else {
       handleCopy();
     }
