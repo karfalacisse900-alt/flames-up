@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { base44 } from "@/api/base44Client";
+import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 
 const postTypes = [
   { value: "question", label: "Question", emoji: "❓" },
@@ -26,6 +27,10 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
     setLoading(true);
+    
+    // AI moderation check
+    const modCheck = await checkContent(text);
+    
     let pollData = {};
     if (type === "question" && answerType !== "open") {
       let opts = answerType === "yes_no" ? ["Yes", "No"] : multiOptions.filter(o => o.trim());
@@ -33,13 +38,19 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     } else {
       pollData = { answer_type: "open", options: [], votes: {}, voted_by: {}, total_votes: 0 };
     }
-    await base44.entities.Post.create({
+    const post = await base44.entities.Post.create({
       type, text: text.trim(), is_anonymous: isAnonymous,
       author_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "User"),
       author_email: isAnonymous ? "" : (user?.email || ""),
       like_count: 0, reply_count: 0, liked_by: [],
       ...pollData,
     });
+    
+    // Create moderation report if flagged
+    if (!modCheck.safe) {
+      await createModerationReport("post", post.id, user?.email || "", user?.display_name || "Unknown", modCheck.flags, modCheck.confidence);
+    }
+    
     setText(""); setType("question"); setIsAnonymous(false);
     setAnswerType("open"); setMultiOptions(["", ""]);
     setShowAiPanel(false); setAiTopic("");
