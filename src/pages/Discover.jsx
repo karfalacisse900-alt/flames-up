@@ -251,6 +251,7 @@ export default function Discover() {
             </button>
           ))}
         </div>
+        </div>
       </div>
 
       {/* Search + Filter toggle */}
