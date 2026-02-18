@@ -134,6 +134,9 @@ export default function Profile() {
             <Link to={createPageUrl("Referral")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "#D98B62" }}>
               <Gift className="w-4 h-4" />
             </Link>
+            <Link to={createPageUrl("Shop")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
+              <ShoppingBag className="w-4 h-4" />
+            </Link>
             <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border hover:text-red-500" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <LogOut className="w-4 h-4" />
             </button>
