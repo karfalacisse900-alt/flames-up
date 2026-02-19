@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import DiscoverLogo from "../components/discover/DiscoverLogo";
 import StarRating from "../components/discover/StarRating";
-import FeaturedTool from "../components/discover/FeaturedTool";
+import DiscoverBillboard from "../components/discover/DiscoverBillboard";
 import NewNoteworthy from "../components/discover/NewNoteworthy";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
 import DiscoverAIAssistant from "../components/discover/DiscoverAIAssistant";
