@@ -16,6 +16,7 @@ const typeLabel = {
 export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex, user }) {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const navigate = useNavigate();
 
   const x = useMotionValue(0);
