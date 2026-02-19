@@ -158,8 +158,7 @@ export default function Discover() {
     queryFn: () => base44.entities.ServicePerson.list("-created_date", 200),
   });
 
-  const featuredItem = items.find(i => i.is_featured);
-  const newItems = items.filter(i => i.is_new && !i.is_featured).slice(0, 10);
+  const newItems = items.filter(i => i.is_new).slice(0, 10);
 
   const pricingOptions = ["all", "Free", "Freemium", "Paid"];
   const platformOptions = ["all", "Web", "iOS", "Android", "Desktop"];
