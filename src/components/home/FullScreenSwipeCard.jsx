@@ -82,22 +82,19 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         }}>
 
         {/* Top: type label only, small + low-contrast */}
-        <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
-          <span className="text-[#4A3A2A] uppercase tracking-widest opacity-100"
-
-          style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
-
+        <div className="px-6 pt-4 pb-1 shrink-0 flex items-center justify-between">
+          <span
+            className="text-[11px] uppercase tracking-widest"
+            style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
             {typeLabel[post.type] || "Post"}
           </span>
           {isTop &&
-          <span className="text-[#4A3A2A]" style={{ color: "#CACACA" }}>
-              ↑ comments · swipe →
-            </span>
+            <span className="text-[10px]" style={{ color: "#CACACA" }}>↑ comments · swipe →</span>
           }
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-8 py-20 flex-1 flex flex-col items-center justify-center">
+        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center overflow-hidden">
           <p
             className="text-center w-full"
             style={{
