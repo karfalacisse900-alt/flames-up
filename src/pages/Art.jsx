@@ -256,8 +256,8 @@ export default function Art() {
             </button>
           )}
           {activeTab !== "fight" && (
-            <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
-              <Plus className="w-4 h-4" />
+            <button onClick={() => setShowUpload(true)} title="Upload new art" className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white text-xs font-semibold shadow-sm active:scale-95 transition-transform" style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Plus className="w-3.5 h-3.5" /> Upload
             </button>
           )}
         </div>

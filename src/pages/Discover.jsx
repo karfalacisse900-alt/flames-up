@@ -199,12 +199,14 @@ export default function Discover() {
             {contentTab === "apps" && (
               <>
                 <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
+                  title="Compare multiple tools side by side"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs transition-colors active:scale-95"
                   style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)", borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)", color: compareMode ? "#fff" : "var(--text-secondary)" }}>
                   Compare
                 </button>
                 <button onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
+                  title={viewMode === "list" ? "Switch to swipe mode" : "Switch to list mode"}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs transition-colors active:scale-95"
                   style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                   {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
                 </button>
@@ -427,8 +429,19 @@ export default function Discover() {
             </div>
           </div>
           {spLoading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+            <div className="px-5 space-y-3">
+              {[1,2,3].map(i => (
+                <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 88 }}>
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-full shrink-0" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3.5 rounded-full w-1/2" style={{ backgroundColor: "var(--border-medium)" }} />
+                      <div className="h-3 rounded-full w-3/4" style={{ backgroundColor: "var(--border-light)" }} />
+                      <div className="h-3 rounded-full w-full" style={{ backgroundColor: "var(--border-light)" }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filteredServicePeople.length === 0 ? (
             <div className="text-center py-16 px-5">
