@@ -89,7 +89,7 @@ export default function Games() {
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${mode.color}18` }}>
                           <mode.icon className="w-4 h-4" style={{ color: mode.color }} />
                         </div>
-                        <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{mode.label}</span>
+                        <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{mode.label}</span>
                       </Link>
                     ))}
                   </div>
