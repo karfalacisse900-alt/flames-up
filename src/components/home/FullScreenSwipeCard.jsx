@@ -136,7 +136,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="absolute top-1/3 right-5 pointer-events-none"
             style={{ opacity: likeOpacity }}>
 
-              <div className="border-2 border-emerald-400 text-emerald-600 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm rotate-12 backdrop-blur-sm">
+              <div className="border-2 border-[#6F8F72] text-[#6F8F72] px-4 py-2 rounded-2xl font-semibold text-sm rotate-12" style={{ backgroundColor: "rgba(240,236,228,0.92)" }}>
                 ♥ Yes
               </div>
             </motion.div>
@@ -144,7 +144,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="absolute top-1/3 left-5 pointer-events-none"
             style={{ opacity: skipOpacity }}>
 
-              <div className="border-2 border-gray-300 text-gray-400 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm -rotate-12 backdrop-blur-sm">
+              <div className="border-2 px-4 py-2 rounded-2xl font-semibold text-sm -rotate-12" style={{ borderColor: "var(--border-medium)", color: "var(--text-hint)", backgroundColor: "rgba(240,236,228,0.92)" }}>
                 Skip
               </div>
             </motion.div>
