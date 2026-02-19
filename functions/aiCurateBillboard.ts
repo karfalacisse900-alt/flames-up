@@ -23,19 +23,27 @@ Deno.serve(async (req) => {
         base44.entities.GameStats.filter({ player_email: user.email }),
         base44.entities.ArtPiece.filter({ creator_email: user.email }),
         base44.entities.CoinTransaction.filter({ user_email: user.email }, '-created_date', 30),
+        base44.entities.DiscoverFeedback.filter({ user_email: user.email }, '-created_date', 50),
       ]);
 
       const totalGames = gameStats.reduce((s, g) => s + (g.games_played || 0), 0);
       const activityTypes = [...new Set(transactions.map(t => t.type))];
+      const likedCategories = feedbacks.filter(f => f.vote === 'up').map(f => f.item_category).filter(Boolean);
+      const dislikedItemIds = feedbacks.filter(f => f.vote === 'down').map(f => f.item_id);
 
       if (totalGames > 3) behaviorSignals.interests.push('gaming', 'entertainment');
       if (artPieces.length > 0) behaviorSignals.interests.push('art', 'design', 'creative');
       if (activityTypes.includes('daily_checkin')) behaviorSignals.interests.push('productivity');
       if (activityTypes.includes('live_host')) behaviorSignals.interests.push('social', 'streaming');
 
+      // Add profile interests if set
+      if (user.interests?.length) behaviorSignals.interests.push(...user.interests);
+
       behaviorSignals.activityTypes = activityTypes;
       behaviorSignals.gamesPlayed = totalGames;
       behaviorSignals.artCount = artPieces.length;
+      behaviorSignals.likedCategories = [...new Set(likedCategories)];
+      behaviorSignals.dislikedItemIds = dislikedItemIds;
     }
 
     // Slim item catalog for the prompt
