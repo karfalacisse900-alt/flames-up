@@ -272,7 +272,13 @@ export default function PostDetail() {
               <Heart className="w-4 h-4" /> {post.like_count || 0}
             </span>
             <span className="text-sm" style={{ color: "var(--text-hint)" }}>{sortedTopLevel.length} replies</span>
+            {user && (
+              <button onClick={() => setShowReportPost(true)} className="ml-auto flex items-center gap-1 text-xs" style={{ color: "var(--text-hint)" }}>
+                <Flag className="w-3.5 h-3.5" /> Report
+              </button>
+            )}
           </div>
+          <ReportModal open={showReportPost} onClose={() => setShowReportPost(false)} contentType="post" contentId={post.id} user={user} />
         </div>
 
         {/* Replies */}
