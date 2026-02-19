@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Heart, Send, EyeOff, Reply, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Heart, Send, EyeOff, Reply, ChevronDown, ChevronUp, Flag } from "lucide-react";
+import ReportModal from "../components/moderation/ReportModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
