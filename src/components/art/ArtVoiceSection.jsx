@@ -122,7 +122,9 @@ export default function ArtVoiceSection({ artId, user }) {
   const sendComment = async () => {
     if (!blob) return;
     setUploading(true);
-    const file = new File([blob], "art_voice.webm", { type: "audio/webm" });
+    const mimeType = blob.type || "audio/webm";
+    const ext = mimeType.includes("mp4") ? "mp4" : mimeType.includes("ogg") ? "ogg" : mimeType.includes("wav") ? "wav" : "webm";
+    const file = new File([blob], `art_voice.${ext}`, { type: mimeType });
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     await base44.entities.ArtVoiceComment.create({
       art_id: artId,
