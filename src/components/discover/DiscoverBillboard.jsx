@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
 
 const catColors = {
@@ -14,7 +15,7 @@ const catColors = {
   developer_tools: { bg: "rgba(183,166,122,0.15)", text: "#8A7060" },
 };
 
-// Simple seeded shuffle — same order per user, different across users
+// Fallback: seeded shuffle for when AI is loading or fails
 function seededShuffle(arr, seed) {
   const out = [...arr];
   let s = seed;
@@ -27,41 +28,31 @@ function seededShuffle(arr, seed) {
 }
 
 function emailToSeed(email) {
-  if (!email) return Math.floor(Date.now() / 86400000); // changes daily for anon users
+  if (!email) return Math.floor(Date.now() / 86400000);
   let h = 0;
   for (let i = 0; i < email.length; i++) h = (Math.imul(31, h) + email.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 
-// Pick billboard candidates
-function pickBillboardItems(items, user, count = 7) {
+function fallbackPick(items, user, count = 8) {
   if (!items.length) return [];
-
   const seed = emailToSeed(user?.email);
-
-  // Prioritize: sponsored > featured > new > approved, then shuffle per user
   const sponsored = items.filter(i => i.is_sponsored);
   const featured = items.filter(i => i.is_featured && !i.is_sponsored);
   const newOnes = items.filter(i => i.is_new && !i.is_featured && !i.is_sponsored);
   const rest = items.filter(i => !i.is_sponsored && !i.is_featured && !i.is_new && i.is_approved);
-
-  // Shuffle each tier with user seed
   const pool = [
     ...seededShuffle(sponsored, seed),
     ...seededShuffle(featured, seed + 1),
     ...seededShuffle(newOnes, seed + 2),
     ...seededShuffle(rest, seed + 3),
   ];
-
-  // Deduplicate and cap
   const seen = new Set();
   const result = [];
   for (const item of pool) {
     if (!seen.has(item.id)) { seen.add(item.id); result.push(item); }
     if (result.length >= count) break;
   }
-
-  // If still too few, fill with any approved items
   if (result.length < 3) {
     const fallback = seededShuffle(items.filter(i => !seen.has(i.id)), seed + 4);
     for (const item of fallback) {
@@ -69,18 +60,40 @@ function pickBillboardItems(items, user, count = 7) {
       result.push(item);
     }
   }
-
   return result;
 }
 
 export default function DiscoverBillboard({ items, user, onItemClick }) {
+  const [slides, setSlides] = useState([]);
+  const [isPersonalized, setIsPersonalized] = useState(false);
+  const [aiLoading, setAiLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [direction, setDirection] = useState(1);
   const timerRef = useRef(null);
   const touchStartX = useRef(null);
+  const hasFetched = useRef(false);
 
-  const slides = React.useMemo(() => pickBillboardItems(items, user), [items, user?.email]);
+  // Load AI-curated billboard once items are ready
+  useEffect(() => {
+    if (!items.length || hasFetched.current) return;
+    hasFetched.current = true;
+
+    // Show fallback immediately while AI loads
+    setSlides(fallbackPick(items, user));
+    setAiLoading(true);
+
+    base44.functions.invoke("aiCurateBillboard", {})
+      .then(res => {
+        const data = res?.data;
+        if (data?.items?.length >= 3) {
+          setSlides(data.items);
+          setIsPersonalized(!!data.personalized);
+        }
+      })
+      .catch(() => {/* keep fallback */})
+      .finally(() => setAiLoading(false));
+  }, [items.length]);
 
   const go = useCallback((newDir, newIndex) => {
     setDirection(newDir);
@@ -98,7 +111,6 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
     go(1, (index + 1) % slides.length);
   }, [index, slides.length, go]);
 
-  // Auto-rotate
   useEffect(() => {
     if (paused || slides.length < 2) return;
     const id = setTimeout(() => {
@@ -108,7 +120,6 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
     return () => clearTimeout(id);
   }, [index, paused, slides.length]);
 
-  // Touch swipe
   const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e) => {
     if (touchStartX.current === null) return;
@@ -131,6 +142,16 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
 
   return (
     <div className="px-5 mb-4">
+      {/* Personalized label */}
+      {isPersonalized && (
+        <div className="flex items-center gap-1.5 mb-2 px-1">
+          <Sparkles className="w-3 h-3" style={{ color: "var(--accent-secondary)" }} />
+          <span className="text-[10px] font-medium" style={{ color: "var(--text-hint)" }}>
+            Curated for you
+          </span>
+        </div>
+      )}
+
       <div
         className="relative overflow-hidden rounded-3xl"
         style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)" }}
@@ -149,7 +170,6 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
             exit="exit"
             transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            {/* Slide Content */}
             <div className="p-5">
               {/* Top badges */}
               <div className="flex items-center gap-2 mb-4">
@@ -233,16 +253,28 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
           </motion.div>
         </AnimatePresence>
 
+        {/* AI loading shimmer bar */}
+        {aiLoading && (
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 overflow-hidden" style={{ backgroundColor: "var(--border-light)" }}>
+            <motion.div
+              className="h-full"
+              style={{ backgroundColor: "var(--accent-primary)", width: "40%" }}
+              animate={{ x: ["-100%", "300%"] }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+        )}
+
         {/* Left / Right nav arrows */}
         {slides.length > 1 && (
           <>
             <button onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-opacity"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(244,236,228,0.9)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-opacity"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(244,236,228,0.9)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
