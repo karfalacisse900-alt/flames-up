@@ -159,6 +159,13 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
                 }
               </button>
             )}
+            <button
+              onClick={() => setShowShare(s => !s)}
+              className="p-2 rounded-full transition-colors"
+              style={{ backgroundColor: showShare ? "rgba(60,110,90,0.1)" : "var(--bg-app)" }}
+            >
+              <Share2 className="w-4 h-4" style={{ color: showShare ? "var(--accent-primary)" : "var(--text-secondary)" }} />
+            </button>
             <button onClick={onClose} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
               <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
             </button>
