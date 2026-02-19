@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock, Settings, Copy, Check, MoreVertical, X } from "lucide-react";
 import InterestsSection from "../components/profile/InterestsSection";
 import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
@@ -18,8 +18,10 @@ import { createPageUrl } from "../utils";
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [bio, setBio] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
@@ -28,7 +30,9 @@ export default function Profile() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [boostPost, setBoostPost] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
   const queryClient = useQueryClient();
+
   const { data: coinBalance = 0 } = useQuery({
     queryKey: ["coinBalance", user?.email],
     queryFn: () => getBalance(user.email),
@@ -40,6 +44,7 @@ export default function Profile() {
       setUser(u);
       setBio(u?.bio || "");
       setDisplayName(u?.display_name || u?.full_name || "");
+      setUsername(u?.username || "");
       setAvatarUrl(u?.avatar_url || "");
     }).catch(() => {});
   }, []);
@@ -53,12 +58,6 @@ export default function Profile() {
   const { data: myArt = [] } = useQuery({
     queryKey: ["myArt", user?.email],
     queryFn: () => base44.entities.ArtPiece.filter({ creator_email: user.email }, "-created_date"),
-    enabled: !!user?.email,
-  });
-
-  const { data: myReviews = [] } = useQuery({
-    queryKey: ["myReviews", user?.email],
-    queryFn: () => base44.entities.DiscoverReview.filter({ user_email: user.email }, "-created_date"),
     enabled: !!user?.email,
   });
 
@@ -87,8 +86,10 @@ export default function Profile() {
   });
 
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, display_name: displayName, avatar_url: avatarUrl });
-    setUser((prev) => ({ ...prev, bio, display_name: displayName, avatar_url: avatarUrl }));
+    const updates = { bio, display_name: displayName, avatar_url: avatarUrl };
+    if (username && username !== user?.username) updates.username = username;
+    await base44.auth.updateMe(updates);
+    setUser(prev => ({ ...prev, ...updates }));
     setShowEdit(false);
   };
 
@@ -101,73 +102,65 @@ export default function Profile() {
     setAvatarUploading(false);
   };
 
+  const copyReferralCode = () => {
+    if (user?.referral_code) {
+      navigator.clipboard.writeText(user.referral_code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
   const totalGames = gameStats.reduce((s, g) => s + (g.games_played || 0), 0);
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Profile header */}
+      {/* Profile Header */}
       <div className="px-5 pt-6 pb-5" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
+          <div className="w-18 h-18 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ width: 72, height: 72, backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
             {user.avatar_url ? (
               <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
             ) : (
               (user.display_name || user.full_name || "U")[0]?.toUpperCase()
             )}
           </div>
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <button onClick={() => setShowEdit(true)} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <Link to={createPageUrl("Messages")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <MessageSquare className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
-              <Wallet className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Referral")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "#D98B62" }}>
-              <Gift className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Shop")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
-              <ShoppingBag className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Collections")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
-              <FolderOpen className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("EditServiceProfile")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
-              <Briefcase className="w-4 h-4" />
-            </Link>
-            <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border hover:text-red-500" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <LogOut className="w-4 h-4" />
-            </button>
-            <button onClick={() => setShowDeleteConfirm(true)} className="p-2 rounded-full border hover:bg-red-50" style={{ borderColor: "var(--border-light)", color: "#E53E3E" }}>
-              <Trash2 className="w-4 h-4" />
-            </button>
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
+                  {user.display_name || user.full_name}
+                </h2>
+                {user.username && (
+                  <p className="text-xs mt-0.5" style={{ color: "var(--accent-primary)" }}>@{user.username}</p>
+                )}
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{user.email}</p>
+              </div>
+              {/* Single gear button */}
+              <button onClick={() => setShowSettings(true)} className="p-2 rounded-full border ml-2 shrink-0" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
+            {user.bio && <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
           </div>
         </div>
 
-        {/* Name & bio */}
-        <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>{user.display_name || user.full_name}</h2>
-        <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{user.email}</p>
-        {user.bio && <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
-
-        {/* Coin balance */}
+        {/* Wallet */}
         <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
           <WalletWidget balance={coinBalance} />
         </Link>
 
-        {/* Stats row */}
-        <div className="flex gap-5 mt-4">
+        {/* Stats */}
+        <div className="flex gap-6 mt-4">
           <div className="text-center">
             <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{myPosts.length}</p>
             <p className="text-xs" style={{ color: "var(--text-hint)" }}>Posts</p>
@@ -185,31 +178,30 @@ export default function Profile() {
             <p className="text-xs" style={{ color: "var(--text-hint)" }}>Games</p>
           </div>
         </div>
+
+        {/* Edit Profile button */}
+        <button onClick={() => setShowEdit(true)} className="mt-4 w-full py-2 rounded-xl text-sm font-medium border" style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)", backgroundColor: "var(--bg-app)" }}>
+          Edit Profile
+        </button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
-        <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+        <TabsList className="rounded-xl w-full p-1" style={{ backgroundColor: "var(--bg-card)" }}>
+          <TabsTrigger value="posts" className="flex-1 rounded-lg text-xs gap-1">
             <BookOpen className="w-3.5 h-3.5" /> Posts
           </TabsTrigger>
-          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+          <TabsTrigger value="saved" className="flex-1 rounded-lg text-xs gap-1">
             <Bookmark className="w-3.5 h-3.5" /> Saved
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
-            <Star className="w-3.5 h-3.5" /> Reviews
-          </TabsTrigger>
-          <TabsTrigger value="art" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+          <TabsTrigger value="art" className="flex-1 rounded-lg text-xs gap-1">
             <Palette className="w-3.5 h-3.5" /> Art
           </TabsTrigger>
-          <TabsTrigger value="games" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+          <TabsTrigger value="games" className="flex-1 rounded-lg text-xs gap-1">
             <Trophy className="w-3.5 h-3.5" /> Games
           </TabsTrigger>
-          <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
+          <TabsTrigger value="interests" className="flex-1 rounded-lg text-xs gap-1">
             <Sparkles className="w-3.5 h-3.5" /> Interests
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
-            <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
         </TabsList>
 
@@ -220,21 +212,12 @@ export default function Profile() {
             myPosts.map((post) => (
               <div key={post.id} className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>{post.type}</span>
-                    {post.is_boosted && new Date(post.boost_expires_at) > new Date() && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium flex items-center gap-1">
-                        <Zap className="w-2.5 h-2.5" /> Boosted
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setBoostPost(post)}
-                    className="text-[10px] px-2.5 py-1 rounded-full border flex items-center gap-1 transition-all hover:bg-amber-50"
-                    style={{ borderColor: "#F59E0B", color: "#F59E0B" }}
-                  >
-                    <Zap className="w-2.5 h-2.5" /> Boost
-                  </button>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>{post.type}</span>
+                  {post.author_email === user.email && (
+                    <button onClick={() => setBoostPost(post)} className="text-[10px] px-2.5 py-1 rounded-full border flex items-center gap-1" style={{ borderColor: "#F59E0B", color: "#F59E0B" }}>
+                      <Zap className="w-2.5 h-2.5" /> Boost
+                    </button>
+                  )}
                 </div>
                 <p className="text-sm" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{post.text}</p>
                 <div className="flex gap-3 mt-2 text-xs" style={{ color: "var(--text-hint)" }}>
@@ -246,35 +229,9 @@ export default function Profile() {
           )}
         </TabsContent>
 
-        <TabsContent value="reviews" className="mt-4 space-y-2">
-          {myReviews.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No reviews yet</p>
-          ) : (
-            myReviews.map((review) => (
-              <div key={review.id} className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1">
-                    <Compass className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
-                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{review.item_id}</span>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className="text-xs" style={{ color: i < review.rating ? "#F59E0B" : "#D1D5DB" }}>★</span>
-                    ))}
-                  </div>
-                </div>
-                {review.review_text && (
-                  <p className="text-sm leading-relaxed mt-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{review.review_text}</p>
-                )}
-                <p className="text-[10px] mt-2" style={{ color: "var(--text-hint)" }}>{new Date(review.created_date).toLocaleDateString()}</p>
-              </div>
-            ))
-          )}
-        </TabsContent>
-
         <TabsContent value="saved" className="mt-4 space-y-2">
           {savedItems.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No saved items yet. Bookmark tools from the Discover page!</p>
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No saved items yet. Bookmark tools from Discover!</p>
           ) : (
             savedItems.map((s) => (
               <div key={s.id} className="rounded-xl p-4 flex items-center gap-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
@@ -318,10 +275,6 @@ export default function Profile() {
           <InterestsSection user={user} onUpdated={setUser} />
         </TabsContent>
 
-        <TabsContent value="activity" className="mt-4">
-          <ActivityHistory user={user} />
-        </TabsContent>
-
         <TabsContent value="games" className="mt-4 space-y-2">
           {gameStats.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No games played yet</p>
@@ -344,23 +297,61 @@ export default function Profile() {
         </TabsContent>
       </Tabs>
 
+      {/* Settings sheet */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-sm rounded-2xl" style={{ backgroundColor: "var(--bg-card)" }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1">
+            {/* Referral code */}
+            {user.referral_code && (
+              <div className="p-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+                <div>
+                  <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Your Referral Code</p>
+                  <p className="text-base font-mono font-semibold mt-0.5" style={{ color: "var(--accent-primary)" }}>{user.referral_code}</p>
+                </div>
+                <button onClick={copyReferralCode} className="p-2 rounded-lg" style={{ backgroundColor: "var(--bg-card)" }}>
+                  {copiedCode ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" style={{ color: "var(--text-hint)" }} />}
+                </button>
+              </div>
+            )}
+            <SettingsLink icon={<MessageSquare className="w-4 h-4" />} label="Messages" page="Messages" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<Wallet className="w-4 h-4" />} label="Wallet" page="Wallet" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<Gift className="w-4 h-4" />} label="Referrals" page="Referral" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<ShoppingBag className="w-4 h-4" />} label="Shop" page="Shop" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<FolderOpen className="w-4 h-4" />} label="Collections" page="Collections" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<Briefcase className="w-4 h-4" />} label="Service Profile" page="EditServiceProfile" onClose={() => setShowSettings(false)} />
+            <SettingsLink icon={<Clock className="w-4 h-4" />} label="Activity History" isActivity onUser={user} onClose={() => setShowSettings(false)} />
+            <div className="pt-2 border-t" style={{ borderColor: "var(--border-light)" }}>
+              <button onClick={() => base44.auth.logout()} className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-sm" style={{ color: "var(--text-secondary)" }}>
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+              <button onClick={() => { setShowSettings(false); setShowDeleteConfirm(true); }} className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-sm text-red-500">
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Followers dialog */}
       <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
-        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh]">
+        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh]" style={{ backgroundColor: "var(--bg-card)" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Followers ({followers.length})</DialogTitle>
+            <DialogTitle style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Followers ({followers.length})</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {followers.length === 0 ? (
-              <p className="text-sm text-center text-[#9B9B9B] py-4">No followers yet</p>
+              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
             ) : followers.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
                   {f.follower_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{f.follower_name}</p>
-                  <p className="text-xs text-[#9B9B9B]">{f.follower_email}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.follower_name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.follower_email}</p>
                 </div>
               </div>
             ))}
@@ -370,21 +361,21 @@ export default function Profile() {
 
       {/* Following dialog */}
       <Dialog open={showFollowing} onOpenChange={setShowFollowing}>
-        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh]">
+        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh]" style={{ backgroundColor: "var(--bg-card)" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Following ({following.length})</DialogTitle>
+            <DialogTitle style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Following ({following.length})</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {following.length === 0 ? (
-              <p className="text-sm text-center text-[#9B9B9B] py-4">Not following anyone yet</p>
+              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p>
             ) : following.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
                   {f.following_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{f.following_name}</p>
-                  <p className="text-xs text-[#9B9B9B]">{f.following_email}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.following_name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.following_email}</p>
                 </div>
               </div>
             ))}
@@ -392,83 +383,63 @@ export default function Profile() {
         </DialogContent>
       </Dialog>
 
-      {/* Account deletion dialog */}
+      {/* Delete dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="max-w-sm rounded-2xl">
+        <DialogContent className="max-w-sm rounded-2xl" style={{ backgroundColor: "var(--bg-card)" }}>
           <DialogHeader>
             <DialogTitle className="text-red-600" style={{ fontFamily: "var(--font-serif)" }}>Delete Account</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              This action is <strong>permanent</strong>. All your posts, art, and data will be deleted. Type <strong>DELETE</strong> to confirm.
+              This is <strong>permanent</strong>. All your data will be deleted. Type <strong>DELETE</strong> to confirm.
             </p>
-            <Input
-              placeholder="Type DELETE to confirm"
-              value={deleteInput}
-              onChange={e => setDeleteInput(e.target.value)}
-              className="border-red-200 rounded-xl"
-            />
-            <Button
-              onClick={async () => {
-                if (deleteInput !== "DELETE") return;
-                await base44.auth.updateMe({ account_deleted: true, email: `deleted_${Date.now()}@deleted.com` });
-                base44.auth.logout();
-              }}
-              disabled={deleteInput !== "DELETE"}
-              className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
-            >
+            <Input placeholder="Type DELETE to confirm" value={deleteInput} onChange={e => setDeleteInput(e.target.value)} className="border-red-200 rounded-xl" />
+            <Button onClick={async () => { if (deleteInput !== "DELETE") return; await base44.auth.updateMe({ account_deleted: true }); base44.auth.logout(); }} disabled={deleteInput !== "DELETE"} className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white">
               Permanently Delete Account
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Boost post modal */}
-      {boostPost && (
-        <BoostPostModal
-          post={boostPost}
-          user={user}
-          balance={coinBalance}
-          onClose={() => setBoostPost(null)}
-          onBoosted={() => {
-            queryClient.invalidateQueries({ queryKey: ["myPosts", user?.email] });
-            queryClient.invalidateQueries({ queryKey: ["coinBalance", user?.email] });
-          }}
-        />
-      )}
-
       {/* Edit profile */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent className="max-w-sm rounded-2xl">
+        <DialogContent className="max-w-sm rounded-2xl" style={{ backgroundColor: "var(--bg-card)" }}>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Edit Profile</DialogTitle>
+            <DialogTitle style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Edit Profile</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            {/* Avatar upload */}
+          <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center text-2xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  (displayName || user?.full_name || "U")[0]?.toUpperCase()
-                )}
+                {avatarUrl ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" /> : (displayName || user?.full_name || "U")[0]?.toUpperCase()}
               </div>
               <div>
                 <label className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                   <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                   {avatarUploading ? "Uploading..." : "Change Photo"}
                 </label>
-                {avatarUrl && (
-                  <button onClick={() => setAvatarUrl("")} className="mt-1 text-[11px]" style={{ color: "var(--accent-secondary)" }}>Remove</button>
-                )}
+                {avatarUrl && <button onClick={() => setAvatarUrl("")} className="mt-1 text-[11px]" style={{ color: "var(--accent-secondary)" }}>Remove</button>}
               </div>
             </div>
-            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
-            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="border-[#EDE9E3] rounded-xl resize-none" rows={3} />
-            <Button onClick={handleSaveProfile} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save Changes</Button>
+            <Input placeholder="Display name" value={displayName} onChange={e => setDisplayName(e.target.value)} className="rounded-xl" style={{ borderColor: "var(--border-light)" }} />
+            <Input placeholder="Username (e.g. moonwalker483)" value={username} onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))} className="rounded-xl" style={{ borderColor: "var(--border-light)" }} />
+            <Textarea placeholder="Bio" value={bio} onChange={e => setBio(e.target.value)} className="rounded-xl resize-none" style={{ borderColor: "var(--border-light)" }} rows={3} />
+            <Button onClick={handleSaveProfile} className="w-full rounded-xl">Save Changes</Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      {boostPost && (
+        <BoostPostModal post={boostPost} user={user} balance={coinBalance} onClose={() => setBoostPost(null)}
+          onBoosted={() => { queryClient.invalidateQueries({ queryKey: ["myPosts", user?.email] }); queryClient.invalidateQueries({ queryKey: ["coinBalance", user?.email] }); }} />
+      )}
     </div>
+  );
+}
+
+function SettingsLink({ icon, label, page, onClose }) {
+  return (
+    <Link to={createPageUrl(page)} onClick={onClose} className="flex items-center gap-3 p-3 rounded-xl text-sm w-full" style={{ color: "var(--text-secondary)" }}>
+      <span style={{ color: "var(--accent-primary)" }}>{icon}</span> {label}
+    </Link>
   );
 }
