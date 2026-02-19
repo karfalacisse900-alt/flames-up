@@ -269,7 +269,7 @@ export default function Art() {
           <TabsTrigger value="fight" className="flex-1 rounded-lg text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="gallery" className="mt-4 pb-24">
+        <TabsContent value="gallery" className="mt-4 pb-28">
           {isLoading ? (
             <div className="grid grid-cols-2 gap-3">
               {[1,2,3,4,5,6].map(i => (
@@ -283,7 +283,10 @@ export default function Art() {
               ))}
             </div>
           ) : gallery.length === 0 ? (
-            <div className="text-center py-16"><p className="text-4xl mb-3">🎨</p><p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet.</p></div>
+            <div className="text-center py-16">
+              <p className="text-4xl mb-3">🎨</p>
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet. Upload your first piece!</p>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {gallery.map((art) => (

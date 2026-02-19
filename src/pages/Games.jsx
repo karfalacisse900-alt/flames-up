@@ -41,7 +41,7 @@ export default function Games() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 pb-28 space-y-3">
+      <div className="px-4 pt-4 pb-32 space-y-3">
         {games.map((game, gi) => (
           <motion.div
             key={game.id}
