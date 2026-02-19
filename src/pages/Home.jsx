@@ -273,7 +273,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold active:scale-95 transition-transform"
               style={{ backgroundColor: "var(--accent-primary)" }}>
               <Plus className="w-4 h-4" /> Post
             </button>
@@ -392,7 +392,7 @@ export default function Home() {
               <div
                 key={post.id}
                 onClick={() => handleReply(post)}
-                className="rounded-2xl p-5 cursor-pointer hover:shadow-sm transition-shadow"
+                className="rounded-2xl p-5 cursor-pointer active:scale-[0.99] transition-all"
                 style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
 
                   <div className="flex items-center gap-2 mb-3">
@@ -413,6 +413,7 @@ export default function Home() {
                   <div className="flex gap-4 mt-3 text-xs" style={{ color: "var(--text-hint)" }}>
                     <span>♥ {post.like_count || 0}</span>
                     <span>💬 {post.reply_count || 0}</span>
+                    <span className="ml-auto text-[10px] opacity-60">Tap to read &amp; reply</span>
                   </div>
                 </div>);
 
