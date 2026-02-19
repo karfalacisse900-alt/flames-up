@@ -23,6 +23,7 @@ function ReplyItem({ reply, user, postId, allReplies, depth = 0, onReplyAdded })
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [sending, setSending] = useState(false);
   const [showChildren, setShowChildren] = useState(true);
+  const [showReport, setShowReport] = useState(false);
   const queryClient = useQueryClient();
 
   const children = allReplies.filter(r => r.parent_reply_id === reply.id && r.kind === "text");
