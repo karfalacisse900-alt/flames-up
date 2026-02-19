@@ -186,8 +186,8 @@ export default function Home() {
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="bg-[#6F8F72] text-[#FFFFFF] px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
-
+                  onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
+            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
               color: activeFilter === val ? "#fff" : "var(--text-secondary)",
