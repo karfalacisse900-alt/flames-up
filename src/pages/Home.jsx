@@ -75,7 +75,13 @@ export default function Home() {
 
   const followingEmails = new Set((following || []).map((f) => f.following_email));
 
+  const mutedOrBlocked = new Set([
+    ...(user?.muted_users || []),
+    ...(user?.blocked_users || []),
+  ]);
+
   const rawFiltered = posts.filter((p) => {
+    if (p.author_email && mutedOrBlocked.has(p.author_email)) return false;
     const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
     const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
     return typeMatch && feedMatch;
