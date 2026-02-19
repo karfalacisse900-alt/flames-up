@@ -8,7 +8,7 @@ import PollOptions from "./PollOptions";
 const typeLabel = {
   question: "Question",
   quote: "Quote",
-  concern: "Concern",
+  concern: "Concern"
 };
 
 export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex, user }) {
@@ -27,9 +27,9 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
   const handleDragEnd = (e, info) => {
     const { offset, velocity } = info;
-    const swipedRight = offset.x > 90 || (offset.x > 40 && velocity.x > 400);
-    const swipedLeft = offset.x < -90 || (offset.x < -40 && velocity.x < -400);
-    const swipedUp = offset.y < -80 || (offset.y < -40 && velocity.y < -400);
+    const swipedRight = offset.x > 90 || offset.x > 40 && velocity.x > 400;
+    const swipedLeft = offset.x < -90 || offset.x < -40 && velocity.x < -400;
+    const swipedUp = offset.y < -80 || offset.y < -40 && velocity.y < -400;
 
     if (swipedUp) {
       navigate(createPageUrl("PostDetail") + `?id=${post.id}`);
@@ -65,38 +65,38 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         rotate: isTop ? rotate : 0,
         scale: isTop ? 1 : 1 - stackIndex * 0.03,
         zIndex: 10 - stackIndex,
-        top: `${stackIndex * 6}px`,
+        top: `${stackIndex * 6}px`
       }}
       drag={isTop ? true : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={{ left: 0.6, right: 0.6, top: 0.8, bottom: 0.1 }}
       onDragEnd={handleDragEnd}
-      exit={{ x: 600, opacity: 0, transition: { duration: 0.22 } }}
-    >
+      exit={{ x: 600, opacity: 0, transition: { duration: 0.22 } }}>
+
       <div
         className="h-full rounded-3xl flex flex-col overflow-hidden"
         style={{
           backgroundColor: bgColor,
-          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)",
-        }}
-      >
+          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)"
+        }}>
+
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
           <span
             className="text-[11px] tracking-widest uppercase"
-            style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}
-          >
+            style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
+
             {typeLabel[post.type] || "Post"}
           </span>
-          {isTop && (
-            <span className="text-[10px]" style={{ color: "#CACACA" }}>
+          {isTop &&
+          <span className="text-[10px]" style={{ color: "#CACACA" }}>
               ↑ comments · swipe →
             </span>
-          )}
+          }
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-4">
+        <div className="bg-[#EADFD3] px-8 py-4 flex-1 flex flex-col items-center justify-center">
           <p
             className="text-center w-full"
             style={{
@@ -104,65 +104,65 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
               fontSize: post.text?.length > 220 ? "1.1rem" : post.text?.length > 120 ? "1.35rem" : "1.6rem",
               lineHeight: "1.75",
               color: "#1E1E1E",
-              fontWeight: 400,
-            }}
-          >
+              fontWeight: 400
+            }}>
+
             {post.type === "quote" ? `"${post.text}"` : post.text}
           </p>
 
           {/* Poll options for question posts */}
-          {post.type === "question" && post.answer_type && post.answer_type !== "open" && (
-            <PollOptions post={post} user={user} compact={true} />
-          )}
+          {post.type === "question" && post.answer_type && post.answer_type !== "open" &&
+          <PollOptions post={post} user={user} compact={true} />
+          }
 
           {/* Author attribution below — only if not anonymous */}
-          {!post.is_anonymous && post.author_name && (
-            <p
-              className="text-center mt-8"
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "1rem",
-                color: "#888",
-                fontStyle: "italic",
-              }}
-            >
+          {!post.is_anonymous && post.author_name &&
+          <p
+            className="text-center mt-8"
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "1rem",
+              color: "#888",
+              fontStyle: "italic"
+            }}>
+
               — {post.author_name}
             </p>
-          )}
+          }
         </div>
 
         {/* Swipe indicators — only on top card */}
-        {isTop && (
-          <>
+        {isTop &&
+        <>
             <motion.div
-              className="absolute top-1/3 right-5 pointer-events-none"
-              style={{ opacity: likeOpacity }}
-            >
+            className="absolute top-1/3 right-5 pointer-events-none"
+            style={{ opacity: likeOpacity }}>
+
               <div className="border-2 border-emerald-400 text-emerald-600 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm rotate-12 backdrop-blur-sm">
                 ♥ Yes
               </div>
             </motion.div>
             <motion.div
-              className="absolute top-1/3 left-5 pointer-events-none"
-              style={{ opacity: skipOpacity }}
-            >
+            className="absolute top-1/3 left-5 pointer-events-none"
+            style={{ opacity: skipOpacity }}>
+
               <div className="border-2 border-gray-300 text-gray-400 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm -rotate-12 backdrop-blur-sm">
                 Skip
               </div>
             </motion.div>
           </>
-        )}
+        }
 
         {/* Bottom action bar */}
         <div
           className="px-8 pb-6 pt-3 shrink-0 flex items-center justify-between"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
-        >
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+
           <button
             onClick={handleLike}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: liked ? "#E07070" : "#C0B9B0" }}
-          >
+            style={{ color: liked ? "#E07070" : "#C0B9B0" }}>
+
             <Heart className="w-5 h-5" fill={liked ? "#E07070" : "none"} strokeWidth={liked ? 0 : 1.5} />
             <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {(post.like_count || 0) + (liked ? 1 : 0)}
@@ -173,8 +173,8 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             to={createPageUrl("PostDetail") + `?id=${post.id}`}
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: "#C0B9B0" }}
-          >
+            style={{ color: "#C0B9B0" }}>
+
             <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
             <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {post.reply_count || 0}
@@ -184,12 +184,12 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           <button
             onClick={handleFavorite}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}
-          >
+            style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
+
             <Star className="w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
           </button>
         </div>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
