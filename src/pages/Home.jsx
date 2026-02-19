@@ -157,23 +157,19 @@ export default function Home() {
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
               className="p-2 rounded-full border"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-              title={viewMode === "swipe" ? "Switch to list" : "Switch to swipe"}>
-
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
             </button>
             <button
               onClick={() => {setCurrentIndex(0);refetch();}}
               className="p-2 rounded-full border"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold"
-              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)" }}>
-
+              style={{ backgroundColor: "var(--accent-primary)" }}>
               <Plus className="w-4 h-4" /> Post
             </button>
           </div>
