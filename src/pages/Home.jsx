@@ -53,7 +53,13 @@ export default function Home() {
   }, [pullY]);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      // Auto-generate username + referral code if missing
+      if (u && (!u.username || !u.referral_code)) {
+        base44.functions.invoke("onSignup", {}).catch(() => {});
+      }
+    }).catch(() => {});
   }, []);
 
   const { data: posts = [], isLoading, refetch } = useQuery({
