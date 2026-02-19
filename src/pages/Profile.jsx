@@ -436,7 +436,15 @@ export default function Profile() {
   );
 }
 
-function SettingsLink({ icon, label, page, onClose }) {
+function SettingsLink({ icon, label, page, onClose, isActivity, onUser }) {
+  if (isActivity) {
+    return (
+      <div className="flex items-center gap-3 p-3 rounded-xl text-sm w-full" style={{ color: "var(--text-secondary)" }}>
+        <span style={{ color: "var(--accent-primary)" }}>{icon}</span>
+        <ActivityHistory user={onUser} />
+      </div>
+    );
+  }
   return (
     <Link to={createPageUrl(page)} onClick={onClose} className="flex items-center gap-3 p-3 rounded-xl text-sm w-full" style={{ color: "var(--text-secondary)" }}>
       <span style={{ color: "var(--accent-primary)" }}>{icon}</span> {label}
