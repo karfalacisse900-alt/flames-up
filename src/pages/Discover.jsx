@@ -34,21 +34,21 @@ const catColors = {
 
 function SwipeDiscoverCard({ item, onOpen }) {
   return (
-    <div className="h-full bg-white rounded-3xl p-6 flex flex-col cursor-pointer" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.10)" }} onClick={onOpen}>
+    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)" }} onClick={onOpen}>
       {item.is_sponsored && (
         <span className="self-start text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-3">Sponsored</span>
       )}
       <div className="flex items-center gap-4 mb-4">
         <DiscoverLogo item={item} size="lg" />
         <div>
-          <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{item.title}</h2>
-          <p className="text-sm text-[#9B9B9B]">{item.brand_name}</p>
+          <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{item.title}</h2>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
           <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
         </div>
       </div>
-      <p className="text-sm text-[#6B6B6B] leading-relaxed flex-1">{item.description}</p>
+      <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
       {item.long_description && (
-        <p className="text-xs text-[#9B9B9B] mt-2 line-clamp-2 leading-relaxed">{item.long_description}</p>
+        <p className="text-xs mt-2 line-clamp-2 leading-relaxed" style={{ color: "var(--text-hint)" }}>{item.long_description}</p>
       )}
       <div className="flex flex-wrap gap-2 mt-4">
         <span className={`text-xs px-3 py-1 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-700"}`}>
