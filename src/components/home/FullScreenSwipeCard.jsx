@@ -91,7 +91,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             {typeLabel[post.type] || "Post"}
           </span>
           {isTop &&
-            <span className="text-[10px]" style={{ color: "#CACACA" }}>↑ comments · swipe →</span>
+          <span className="text-[10px]" style={{ color: "#CACACA" }}>↑ comments · swipe →</span>
           }
         </div>
 
@@ -189,10 +189,10 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
+            onClick={(e) => {e.stopPropagation();setShowReport(true);}}
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: "#C0B9B0" }}>
-            <Flag className="w-4 h-4" strokeWidth={1.5} />
+            <Flag className="text-[#6F8F72] lucide lucide-flag w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>
