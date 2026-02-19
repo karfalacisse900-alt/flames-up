@@ -187,22 +187,73 @@ export default function Home() {
       {/* Compact Header */}
       <div className="px-4 pb-2 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
-        <div className="flex items-center gap-3 mb-3">
-          {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) =>
-          <button
-            key={val}
-            onClick={() => {setFeedTab(val);setCurrentIndex(0);}}
-            className="flex items-center gap-1.5 text-sm font-semibold pb-1 transition-all"
-            style={{
-              color: feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
-              borderBottom: feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent"
-            }}>
-
-              {val === "following" && <Users className="w-3.5 h-3.5" />}
-              {label}
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+          {[
+            { val: "for_you", label: "For You", icon: <Sparkles className="w-3 h-3" /> },
+            { val: "trending", label: "Trending", icon: <TrendingUp className="w-3 h-3" /> },
+            { val: "following", label: "Following", icon: <Users className="w-3 h-3" /> },
+            { val: "all", label: "All", icon: null },
+          ].map(({ val, label, icon }) =>
+            <button key={val} onClick={() => { setFeedTab(val); setCurrentIndex(0); }}
+              className="flex items-center gap-1 text-xs font-semibold pb-1 pr-2 transition-all whitespace-nowrap shrink-0"
+              style={{
+                color: feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+                borderBottom: feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent"
+              }}>
+              {icon}{label}
             </button>
           )}
+          <button onClick={() => setShowTopicPrefs(p => !p)}
+            className="ml-auto p-1.5 rounded-full shrink-0 transition-all"
+            style={{
+              backgroundColor: showTopicPrefs ? "var(--accent-primary)" : "var(--bg-card)",
+              color: showTopicPrefs ? "#fff" : "var(--text-hint)",
+              border: "1px solid var(--border-light)"
+            }}>
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+          </button>
         </div>
+        {/* Topic prefs panel */}
+        {showTopicPrefs && (
+          <div className="rounded-2xl p-3 mb-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-hint)" }}>Preferred Topics (see more of)</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {["question", "quote", "concern"].map(t => {
+                const on = preferredTopics.includes(t);
+                return (
+                  <button key={t} onClick={async () => {
+                    const updated = on ? preferredTopics.filter(x => x !== t) : [...preferredTopics, t];
+                    await base44.auth.updateMe({ preferred_topics: updated });
+                    setUser(u => ({ ...u, preferred_topics: updated }));
+                  }} className="px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize"
+                    style={{
+                      backgroundColor: on ? "var(--accent-primary)" : "var(--bg-app)",
+                      color: on ? "#fff" : "var(--text-secondary)",
+                      borderColor: on ? "var(--accent-primary)" : "var(--border-light)"
+                    }}>{t}s</button>
+                );
+              })}
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-hint)" }}>Muted Topics (see less of)</p>
+            <div className="flex gap-2 flex-wrap">
+              {["question", "quote", "concern"].map(t => {
+                const on = mutedTopics.includes(t);
+                return (
+                  <button key={t} onClick={async () => {
+                    const updated = on ? mutedTopics.filter(x => x !== t) : [...mutedTopics, t];
+                    await base44.auth.updateMe({ muted_topics: updated });
+                    setUser(u => ({ ...u, muted_topics: updated }));
+                  }} className="px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize"
+                    style={{
+                      backgroundColor: on ? "#EF444422" : "var(--bg-app)",
+                      color: on ? "#EF4444" : "var(--text-secondary)",
+                      borderColor: on ? "#EF444466" : "var(--border-light)"
+                    }}>{t}s</button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
