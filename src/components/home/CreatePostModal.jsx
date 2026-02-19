@@ -17,6 +17,7 @@ const postTypes = [
 export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [type, setType] = useState("question");
   const [text, setText] = useState("");
+  const [fontFamily, setFontFamily] = useState("serif");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [answerType, setAnswerType] = useState("open");
