@@ -185,11 +185,19 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             onClick={handleFavorite}
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
-
             <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
+          </button>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
+            className="flex items-center gap-2 transition-all active:scale-110"
+            style={{ color: "#C0B9B0" }}>
+            <Flag className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>
+
+      <ReportModal open={showReport} onClose={() => setShowReport(false)} contentType="post" contentId={post.id} user={user} />
     </motion.div>);
 
 }
