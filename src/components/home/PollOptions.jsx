@@ -35,7 +35,7 @@ export default function PollOptions({ post, user, compact = false }) {
     await base44.entities.Post.update(post.id, {
       votes: newVotes,
       voted_by: newVotedBy,
-      total_votes: newTotal,
+      total_votes: newTotal
     });
     queryClient.invalidateQueries({ queryKey: ["posts"] });
     queryClient.invalidateQueries({ queryKey: ["post", post.id] });
@@ -47,7 +47,7 @@ export default function PollOptions({ post, user, compact = false }) {
       <div className="flex flex-col gap-2 w-full mt-4" onClick={(e) => e.stopPropagation()}>
         {post.options.map((opt, idx) => {
           const count = votes[idx] || 0;
-          const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+          const pct = totalVotes > 0 ? Math.round(count / totalVotes * 100) : 0;
           const isSelected = myVote === idx;
           return (
             <button
@@ -56,38 +56,38 @@ export default function PollOptions({ post, user, compact = false }) {
               className="relative rounded-xl text-left overflow-hidden transition-all"
               style={{
                 border: `1.5px solid ${isSelected ? "var(--accent-primary)" : "rgba(0,0,0,0.1)"}`,
-                backgroundColor: isSelected ? "rgba(60,110,90,0.08)" : "rgba(255,255,255,0.6)",
-              }}
-            >
-              {hasVoted && (
-                <div
-                  className="absolute inset-0 rounded-xl transition-all duration-500"
-                  style={{
-                    width: `${pct}%`,
-                    backgroundColor: isSelected ? "rgba(60,110,90,0.15)" : "rgba(0,0,0,0.04)",
-                  }}
-                />
-              )}
-              <div className="relative flex items-center justify-between px-3 py-2">
+                backgroundColor: isSelected ? "rgba(60,110,90,0.08)" : "rgba(255,255,255,0.6)"
+              }}>
+
+              {hasVoted &&
+              <div
+                className="absolute inset-0 rounded-xl transition-all duration-500"
+                style={{
+                  width: `${pct}%`,
+                  backgroundColor: isSelected ? "rgba(60,110,90,0.15)" : "rgba(0,0,0,0.04)"
+                }} />
+
+              }
+              <div className="bg-[#F7F2EC] text-[#4A3A2A] px-3 py-2 relative flex items-center justify-between">
                 <span className="text-sm font-medium" style={{ color: isSelected ? "var(--accent-primary)" : "#333" }}>
                   {opt}
                 </span>
-                {hasVoted && (
-                  <span className="text-xs font-semibold ml-2 shrink-0" style={{ color: isSelected ? "var(--accent-primary)" : "#999" }}>
+                {hasVoted &&
+                <span className="text-xs font-semibold ml-2 shrink-0" style={{ color: isSelected ? "var(--accent-primary)" : "#999" }}>
                     {pct}%
                   </span>
-                )}
+                }
               </div>
-            </button>
-          );
+            </button>);
+
         })}
-        {totalVotes > 0 && (
-          <p className="text-center text-[10px] mt-0.5" style={{ color: "#AAA" }}>
+        {totalVotes > 0 &&
+        <p className="text-center text-[10px] mt-0.5" style={{ color: "#AAA" }}>
             {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
           </p>
-        )}
-      </div>
-    );
+        }
+      </div>);
+
   }
 
   // Full version for detail view
@@ -98,7 +98,7 @@ export default function PollOptions({ post, user, compact = false }) {
       </h4>
       {post.options.map((opt, idx) => {
         const count = votes[idx] || 0;
-        const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+        const pct = totalVotes > 0 ? Math.round(count / totalVotes * 100) : 0;
         const isSelected = myVote === idx;
         return (
           <button
@@ -107,28 +107,28 @@ export default function PollOptions({ post, user, compact = false }) {
             className="relative rounded-xl text-left overflow-hidden transition-all hover:shadow-sm active:scale-98"
             style={{
               border: `2px solid ${isSelected ? "var(--accent-primary)" : "var(--border-light)"}`,
-              backgroundColor: isSelected ? "rgba(60,110,90,0.1)" : "var(--bg-nav)",
-            }}
-          >
+              backgroundColor: isSelected ? "rgba(60,110,90,0.1)" : "var(--bg-nav)"
+            }}>
+
             {/* Progress bar background */}
             <div
               className="absolute inset-0 rounded-xl transition-all duration-300"
               style={{
                 width: `${pct}%`,
-                backgroundColor: isSelected ? "rgba(60,110,90,0.15)" : "rgba(60,110,90,0.06)",
-              }}
-            />
+                backgroundColor: isSelected ? "rgba(60,110,90,0.15)" : "rgba(60,110,90,0.06)"
+              }} />
+
             
             {/* Content */}
             <div className="relative flex items-center justify-between px-4 py-3 gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Checkmark indicator */}
-                {isSelected && (
-                  <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" 
-                    style={{ backgroundColor: "var(--accent-primary)" }}>
+                {isSelected &&
+                <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                style={{ backgroundColor: "var(--accent-primary)" }}>
                     ✓
                   </span>
-                )}
+                }
                 <span className="text-sm font-medium truncate" style={{ color: isSelected ? "var(--accent-primary)" : "var(--text-primary)" }}>
                   {opt}
                 </span>
@@ -146,8 +146,8 @@ export default function PollOptions({ post, user, compact = false }) {
                 </div>
               </div>
             </div>
-          </button>
-        );
+          </button>);
+
       })}
       
       {/* Footer info */}
@@ -159,11 +159,11 @@ export default function PollOptions({ post, user, compact = false }) {
           {hasVoted ? "✓ voted" : "no vote yet"}
         </p>
       </div>
-      {hasVoted && (
-        <p className="text-xs text-center font-medium" style={{ color: "var(--accent-primary)" }}>
+      {hasVoted &&
+      <p className="text-xs text-center font-medium" style={{ color: "var(--accent-primary)" }}>
           Tap another option to change your vote
         </p>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
