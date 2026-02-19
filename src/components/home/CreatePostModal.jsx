@@ -53,7 +53,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       await createModerationReport("post", post.id, user?.email || "", user?.display_name || "Unknown", modCheck.flags, modCheck.confidence);
     }
     
-    setText(""); setType("question"); setIsAnonymous(false);
+    setText(""); setType("question"); setIsAnonymous(false); setFontFamily("serif");
     setAnswerType("open"); setMultiOptions(["", ""]);
     setShowAiPanel(false); setAiTopic("");
     setLoading(false);
