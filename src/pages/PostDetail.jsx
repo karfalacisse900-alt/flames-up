@@ -98,6 +98,11 @@ function ReplyItem({ reply, user, postId, allReplies, depth = 0, onReplyAdded })
                 <Reply className="w-3.5 h-3.5" /> Reply
               </button>
             )}
+            {user && (
+              <button onClick={() => setShowReport(true)} className="flex items-center gap-1 text-xs" style={{ color: "var(--text-hint)" }}>
+                <Flag className="w-3 h-3" />
+              </button>
+            )}
             {children.length > 0 && (
               <button onClick={() => setShowChildren(v => !v)} className="flex items-center gap-1 text-xs ml-auto" style={{ color: "var(--text-hint)" }}>
                 {showChildren ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
