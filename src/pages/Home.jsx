@@ -188,7 +188,7 @@ export default function Home() {
       {/* Compact Header — fixed height so content never shifts */}
       <div className="px-4 pb-2 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
-        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide pb-0.5">
           {[
             { val: "for_you", label: "For You", icon: <Sparkles className="w-3 h-3" /> },
             { val: "trending", label: "Trending", icon: <TrendingUp className="w-3 h-3" /> },
@@ -260,11 +260,13 @@ export default function Home() {
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
               className="p-2 rounded-full border"
+              title={viewMode === "swipe" ? "Switch to list view" : "Switch to swipe view"}
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
             </button>
             <button
               onClick={() => {setCurrentIndex(0);refetch();}}
+              title="Refresh feed"
               className="p-2 rounded-full border"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <RefreshCw className="w-4 h-4" />
@@ -279,19 +281,17 @@ export default function Home() {
         </div>
 
         {/* Filter pills */}
-
-        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-0.5">
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-                  onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
-            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
+            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap shrink-0 transition-all"
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
               color: activeFilter === val ? "#fff" : "var(--text-secondary)",
               borderColor: activeFilter === val ? "var(--accent-primary)" : "var(--border-light)"
             }}>
-
               {label}
             </button>
           )}
@@ -363,7 +363,7 @@ export default function Home() {
             )}
               </AnimatePresence>
               {/* Card counter */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20 pb-1">
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs z-20 px-3 py-1 rounded-full" style={{ color: "var(--text-hint)", backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", opacity: 0.85 }}>
                 {currentIndex + 1} / {filtered.length}
               </div>
             </div>) : (
