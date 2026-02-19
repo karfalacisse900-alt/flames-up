@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, TrendingUp, TrendingDown, X, Swords } from "lucide-react";
+import { Plus, Upload, TrendingUp, TrendingDown, X, Swords, MessageCircle } from "lucide-react";
 import ArtVoiceSection from "../components/art/ArtVoiceSection";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
