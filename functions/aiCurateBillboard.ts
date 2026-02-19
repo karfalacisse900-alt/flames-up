@@ -58,6 +58,10 @@ Deno.serve(async (req) => {
       pricing: i.pricing || 'Unknown',
     }));
 
+    // Exclude disliked items from catalog
+    const dislikedSet = new Set(behaviorSignals.dislikedItemIds || []);
+    const filteredCatalog = allItems.filter(i => !dislikedSet.has(i.id));
+
     const prompt = `You are a content curation AI for a discovery platform called "Discover".
 
 User behavior signals:
