@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { Heart, MessageCircle, Star } from "lucide-react";
+import { Heart, MessageCircle, Star, Flag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import PollOptions from "./PollOptions";
 import { getFontStyle } from "./FontPicker";
+import ReportModal from "../moderation/ReportModal";
 
 const typeLabel = {
   question: "Question",
