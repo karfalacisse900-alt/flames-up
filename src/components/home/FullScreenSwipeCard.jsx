@@ -153,7 +153,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Bottom action bar */}
         <div
-          className="px-8 pb-6 pt-3 shrink-0 flex items-center justify-between"
+          className="px-6 pb-4 pt-3 shrink-0 flex items-center justify-between"
           style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
 
           <button
