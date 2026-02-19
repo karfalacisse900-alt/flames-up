@@ -80,17 +80,56 @@ export default function Home() {
     ...(user?.blocked_users || []),
   ]);
 
-  const rawFiltered = posts.filter((p) => {
-    if (p.author_email && mutedOrBlocked.has(p.author_email)) return false;
-    const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
-    const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
-    return typeMatch && feedMatch;
-  });
+  // Muted topics from user prefs
+  const mutedTopics = user?.muted_topics || [];
+  const preferredTopics = user?.preferred_topics || [];
 
   const now = new Date();
-  const filtered = [
-  ...rawFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
-  ...rawFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now))];
+
+  // Engagement score for trending
+  const engagementScore = (p) => {
+    const ageHours = (now - new Date(p.created_date)) / 3600000;
+    const decay = Math.max(0.1, 1 - ageHours / 72); // decays over 72h
+    return ((p.like_count || 0) * 2 + (p.reply_count || 0) * 3 + (p.total_votes || 0)) * decay;
+  };
+
+  const typeOfPost = (p) => p.type; // "question" | "quote" | "concern"
+
+  const baseFilter = (p) => {
+    if (p.author_email && mutedOrBlocked.has(p.author_email)) return false;
+    const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
+    if (!typeMatch) return false;
+    if (mutedTopics.includes(p.type)) return false;
+    return true;
+  };
+
+  const boosted = (arr) => [
+    ...arr.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
+    ...arr.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now)),
+  ];
+
+  let filtered;
+  if (feedTab === "for_you") {
+    // Personalised: preferred topics boosted, following authors boosted, liked types boosted
+    const likedTypes = new Set(posts.filter(p => p.liked_by?.includes(user?.email)).map(p => p.type));
+    const scored = posts.filter(baseFilter).map(p => {
+      let score = 0;
+      if (followingEmails.has(p.author_email)) score += 5;
+      if (preferredTopics.includes(p.type)) score += 4;
+      if (likedTypes.has(p.type)) score += 2;
+      score += Math.min(3, (p.like_count || 0) / 5);
+      const ageHours = (now - new Date(p.created_date)) / 3600000;
+      score -= ageHours / 24;
+      return { post: p, score };
+    });
+    filtered = boosted(scored.sort((a, b) => b.score - a.score).map(s => s.post));
+  } else if (feedTab === "trending") {
+    filtered = boosted(posts.filter(baseFilter).sort((a, b) => engagementScore(b) - engagementScore(a)));
+  } else if (feedTab === "following") {
+    filtered = boosted(posts.filter(p => baseFilter(p) && followingEmails.has(p.author_email)));
+  } else {
+    filtered = boosted(posts.filter(baseFilter));
+  }
 
 
   const likeMutation = useMutation({
