@@ -372,7 +372,7 @@ export default function Home() {
         /* ---- LIST MODE ---- */
         <div
           ref={listRef}
-          className="h-full overflow-y-auto space-y-3 pb-4"
+          className="h-full overflow-y-auto space-y-3 pb-24"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}>
