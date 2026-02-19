@@ -201,7 +201,7 @@ export default function Home() {
       </div>
 
       {/* Content area */}
-      <div className="bg-[#F7F2EC] pt-2 pb-4 px-4 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="pt-2 pb-2 px-3 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
