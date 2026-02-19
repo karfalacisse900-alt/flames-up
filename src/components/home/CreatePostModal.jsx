@@ -41,7 +41,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       pollData = { answer_type: "open", options: [], votes: {}, voted_by: {}, total_votes: 0 };
     }
     const post = await base44.entities.Post.create({
-      type, text: text.trim(), is_anonymous: isAnonymous,
+      type, text: text.trim(), font_family: fontFamily, is_anonymous: isAnonymous,
       author_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "User"),
       author_email: isAnonymous ? "" : (user?.email || ""),
       like_count: 0, reply_count: 0, liked_by: [],
