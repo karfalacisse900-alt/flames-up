@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { base44 } from "@/api/base44Client";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
+import FontPicker, { getFontStyle } from "./FontPicker";
 
 const postTypes = [
   { value: "question", label: "Question", emoji: "❓" },
