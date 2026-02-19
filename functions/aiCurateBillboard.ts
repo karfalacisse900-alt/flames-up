@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     // Slim item catalog for the prompt
-    const catalog = allItems.map(i => ({
+    const catalog = filteredCatalog.map(i => ({
       id: i.id,
       title: i.title,
       category: i.category,
