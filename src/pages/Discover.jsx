@@ -226,7 +226,7 @@ export default function Discover() {
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
-                backgroundColor: contentTab === val ? "#fff" : "transparent",
+                backgroundColor: contentTab === val ? "var(--bg-card)" : "transparent",
                 color: contentTab === val ? "var(--accent-primary)" : "var(--text-hint)",
                 boxShadow: contentTab === val ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}>
