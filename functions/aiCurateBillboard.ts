@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     let behaviorSignals = { isAnonymous: !user, interests: [], activityTypes: [] };
 
     if (user?.email) {
-      const [gameStats, artPieces, transactions] = await Promise.all([
+      const [gameStats, artPieces, transactions, feedbacks] = await Promise.all([
         base44.entities.GameStats.filter({ player_email: user.email }),
         base44.entities.ArtPiece.filter({ creator_email: user.email }),
         base44.entities.CoinTransaction.filter({ user_email: user.email }, '-created_date', 30),
