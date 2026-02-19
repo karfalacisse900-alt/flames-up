@@ -22,6 +22,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
   const [feedTab, setFeedTab] = useState("for_you");
+  const [showTopicPrefs, setShowTopicPrefs] = useState(false);
   const [pullY, setPullY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
