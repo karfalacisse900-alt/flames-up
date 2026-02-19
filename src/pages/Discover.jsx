@@ -189,9 +189,9 @@ export default function Discover() {
   const showSections = activeCategory === "all" && !search;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
 
-      {/* Header */}
+      {/* Header — stable height, no reflow */}
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
@@ -317,8 +317,19 @@ export default function Discover() {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+            <div className="px-5 pt-4 space-y-3">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 88 }}>
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-xl shrink-0" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3.5 rounded-full w-2/3" style={{ backgroundColor: "var(--border-medium)" }} />
+                      <div className="h-3 rounded-full w-full" style={{ backgroundColor: "var(--border-light)" }} />
+                      <div className="h-3 rounded-full w-4/5" style={{ backgroundColor: "var(--border-light)" }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : viewMode === "swipe" ? (
             <div className="px-5 pb-24 mt-4">
