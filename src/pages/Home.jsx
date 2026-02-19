@@ -294,7 +294,7 @@ export default function Home() {
                     {post.is_anonymous ? "Anonymous" : post.author_name}
                   </span>
                   </div>
-                  <p className="leading-relaxed" style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--text-primary)" }}>
+                  <p className="leading-relaxed" style={{ fontFamily: getFontStyle(post.font_family || "serif"), fontSize: "1rem", color: "var(--text-primary)" }}>
                     {post.text}
                   </p>
                   <div className="flex gap-4 mt-3 text-xs" style={{ color: "var(--text-hint)" }}>
