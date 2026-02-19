@@ -345,12 +345,12 @@ export default function Discover() {
                     </AnimatePresence>
                   </div>
                   <div className="flex items-center justify-center gap-6 mt-4">
-                    <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                      <ChevronLeft className="w-5 h-5" />
+                    <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                      <ChevronLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
                     </button>
                     <span className="text-xs" style={{ color: "var(--text-hint)" }}>{swipeIndex + 1} / {filtered.length}</span>
-                    <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                      <ChevronRight className="w-5 h-5" />
+                    <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                      <ChevronRight className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
                     </button>
                   </div>
                 </>
