@@ -111,10 +111,10 @@ function GalleryCard({ art, user, onClick, onLike }) {
           </button>
           <button
             onClick={onClick}
-            className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors"
             style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}
           >
-            💬 Comment
+            <MessageCircle className="w-3 h-3" /> View
           </button>
         </div>
       </div>
