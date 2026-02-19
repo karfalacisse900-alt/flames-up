@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import PollOptions from "./PollOptions";
+import { getFontStyle } from "./FontPicker";
 
 const typeLabel = {
   question: "Question",
