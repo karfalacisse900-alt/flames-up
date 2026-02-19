@@ -152,8 +152,7 @@ export default function Home() {
             </button>
           )}
         </div>
-        <div className="flex items-center justify-between">
-          <span />
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
