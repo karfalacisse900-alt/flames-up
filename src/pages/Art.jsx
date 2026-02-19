@@ -103,19 +103,13 @@ function GalleryCard({ art, user, onClick, onLike }) {
         <div className="flex items-center justify-between mt-2">
           <button
             onClick={(e) => { e.stopPropagation(); onLike(art); }}
-            className="flex items-center gap-1 text-xs transition-colors"
+            className="flex items-center gap-1.5 min-h-[28px] text-xs transition-colors active:scale-110"
             style={{ color: isLiked ? "#E07070" : "var(--text-hint)" }}
           >
-            <span>{isLiked ? "♥" : "♡"}</span>
-            <span>{art.like_count || 0}</span>
+            <span style={{ fontSize: "0.95rem" }}>{isLiked ? "♥" : "♡"}</span>
+            <span className="tabular-nums">{art.like_count || 0}</span>
           </button>
-          <button
-            onClick={onClick}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors"
-            style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}
-          >
-            <MessageCircle className="w-3 h-3" /> View
-          </button>
+          <span className="text-[10px]" style={{ color: "var(--text-hint)", opacity: 0.7 }}>tap to view</span>
         </div>
       </div>
     </div>
