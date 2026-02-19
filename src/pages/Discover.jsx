@@ -358,10 +358,8 @@ export default function Discover() {
             </div>
           ) : (
             <div className="pb-24 mt-4">
-              {showSections && featuredItem && (
-                <div className="mb-5">
-                  <FeaturedTool item={featuredItem} onClick={() => setSelectedItem(featuredItem)} />
-                </div>
+              {showSections && (
+                <DiscoverBillboard items={items} user={user} onItemClick={setSelectedItem} />
               )}
               {showSections && newItems.length > 0 && (
                 <NewNoteworthy items={newItems} onItemClick={setSelectedItem} />
