@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
 import CreatePostModal from "../components/home/CreatePostModal";
+import { getFontStyle } from "../components/home/FontPicker";
 
 const typeStyles = {
   question: { label: "Question", dot: "bg-amber-400" },
