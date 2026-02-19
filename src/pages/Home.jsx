@@ -21,7 +21,7 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [feedTab, setFeedTab] = useState("all");
+  const [feedTab, setFeedTab] = useState("for_you");
   const [pullY, setPullY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
