@@ -314,6 +314,14 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="interests" className="mt-4">
+          <InterestsSection user={user} onUpdated={setUser} />
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-4">
+          <ActivityHistory user={user} />
+        </TabsContent>
+
         <TabsContent value="games" className="mt-4 space-y-2">
           {gameStats.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No games played yet</p>
