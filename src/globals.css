@@ -115,7 +115,12 @@ nav, button, a[role="button"], .no-select {
   }
 
   /* Smooth button transitions */
-  button, a {
-    transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
-  }
+      button, a {
+        transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      /* Prevent ghost click areas — all tappable elements must have min tap target */
+      button:not([disabled]), a {
+        min-height: 32px;
+      }
 }
