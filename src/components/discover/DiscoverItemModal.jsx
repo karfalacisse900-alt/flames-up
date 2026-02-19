@@ -172,6 +172,56 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
           </div>
         </div>
 
+        {/* Share Panel */}
+        {showShare && (
+          <div className="px-5 py-3 border-b" style={{ backgroundColor: "#F9F6F2", borderColor: "#E5DFD0" }}>
+            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-hint)" }}>Share this tool</p>
+            <div className="flex gap-2 flex-wrap">
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                style={{ backgroundColor: "#1DA1F2" }}
+              >
+                <Twitter className="w-3 h-3" /> Twitter / X
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                style={{ backgroundColor: "#1877F2" }}
+              >
+                <span className="font-bold text-xs">f</span> Facebook
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                style={{ backgroundColor: "#0A66C2" }}
+              >
+                <span className="font-bold text-xs">in</span> LinkedIn
+              </a>
+              <button
+                onClick={handleCopyLink}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                style={{ backgroundColor: copied ? "rgba(60,110,90,0.08)" : "var(--bg-card)", borderColor: copied ? "var(--accent-primary)" : "var(--border-medium)", color: copied ? "var(--accent-primary)" : "var(--text-secondary)" }}
+              >
+                {copied ? <Check className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+                {copied ? "Copied!" : "Copy link"}
+              </button>
+              {typeof navigator.share === "function" && (
+                <button
+                  onClick={handleNativeShare}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border"
+                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-medium)", color: "var(--text-secondary)" }}
+                >
+                  <Share2 className="w-3 h-3" /> More
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="px-5 pb-8 space-y-5 mt-4" style={{ backgroundColor: "#FFFFFF" }}>
           {/* Tags row */}
           <div className="flex flex-wrap gap-2">
