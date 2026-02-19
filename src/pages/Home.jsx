@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, RefreshCw, List, Layers, Zap, Users } from "lucide-react";
+import { Plus, RefreshCw, List, Layers, Zap, Users, Sparkles, TrendingUp, SlidersHorizontal, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
