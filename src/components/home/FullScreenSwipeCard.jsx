@@ -83,21 +83,21 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
-          <span
-            className="text-[11px] tracking-widest uppercase"
-            style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
+          <span className="text-[#4A3A2A] uppercase tracking-widest opacity-100"
+
+          style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
 
             {typeLabel[post.type] || "Post"}
           </span>
           {isTop &&
-          <span className="text-[10px]" style={{ color: "#CACACA" }}>
+          <span className="text-[#4A3A2A]" style={{ color: "#CACACA" }}>
               ↑ comments · swipe →
             </span>
           }
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-8 py-4 flex-1 flex flex-col items-center justify-center">
+        <div className="bg-[#EADFD3] my-5 px-8 py-20 flex-1 flex flex-col items-center justify-center">
           <p
             className="text-center w-full"
             style={{
@@ -164,7 +164,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: liked ? "#E07070" : "#C0B9B0" }}>
 
-            <Heart className="w-5 h-5" fill={liked ? "#E07070" : "none"} strokeWidth={liked ? 0 : 1.5} />
+            <Heart className="text-[#6F8F72] lucide lucide-heart w-5 h-5" fill={liked ? "#E07070" : "none"} strokeWidth={liked ? 0 : 1.5} />
             <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {(post.like_count || 0) + (liked ? 1 : 0)}
             </span>
@@ -176,7 +176,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: "#C0B9B0" }}>
 
-            <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
+            <MessageCircle className="text-[#6F8F72] lucide lucide-message-circle w-5 h-5" strokeWidth={1.5} />
             <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {post.reply_count || 0}
             </span>
@@ -187,7 +187,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
 
-            <Star className="w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
+            <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
           </button>
         </div>
       </div>
