@@ -27,7 +27,7 @@ export default function Games() {
   const [expanded, setExpanded] = useState(null);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="px-5 pt-6 pb-4" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center gap-3">
@@ -45,9 +45,9 @@ export default function Games() {
         {games.map((game, gi) => (
           <motion.div
             key={game.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: gi * 0.04, duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: gi * 0.02, duration: 0.2 }}
             className="rounded-2xl overflow-hidden"
             style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
           >
