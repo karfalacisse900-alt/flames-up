@@ -73,14 +73,14 @@ export default function Live() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm shadow-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm shadow-sm active:scale-95 transition-all"
           style={{ backgroundColor: "var(--accent-primary)" }}
         >
           <Radio className="w-4 h-4" /> Go Live
         </button>
       </div>
 
-      <div className="px-5 space-y-3 pb-24 mt-4">
+      <div className="px-5 space-y-3 pb-28 mt-4">
         {isLoading ? (
           <>
             {[1,2,3].map(i => (
@@ -125,9 +125,9 @@ export default function Live() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                  <ChevronRight className="w-4 h-4 text-[#9B9B9B]" />
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" title="Live" />
+                  <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
                 </div>
               </div>
             </Link>
