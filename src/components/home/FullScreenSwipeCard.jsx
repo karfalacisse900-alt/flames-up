@@ -101,7 +101,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           <p
             className="text-center w-full"
             style={{
-              fontFamily: "var(--font-serif)",
+              fontFamily: getFontStyle(post.font_family || "serif"),
               fontSize: post.text?.length > 220 ? "1.1rem" : post.text?.length > 120 ? "1.35rem" : "1.6rem",
               lineHeight: "1.75",
               color: "#1E1E1E",
