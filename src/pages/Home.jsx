@@ -184,8 +184,8 @@ export default function Home() {
   // attach touch listeners to list in list mode — handled inline via onTouch* props
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
-      {/* Compact Header */}
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)", overflow: "hidden" }}>
+      {/* Compact Header — fixed height so content never shifts */}
       <div className="px-4 pb-2 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
         <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
@@ -298,11 +298,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content area */}
-      <div className="pt-2 pb-2 px-3 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Content area — takes remaining space, no overflow at top level */}
+      <div className="pt-2 pb-2 px-3 flex-1 min-h-0" style={{ backgroundColor: "var(--bg-app)", overflow: "hidden" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+            {/* Skeleton cards to prevent layout shift */}
+            <div className="w-full h-full flex flex-col gap-3 pt-2">
+              {[1,2,3].map(i => (
+                <div key={i} className="rounded-2xl p-5 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 100 }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="h-3 w-16 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 rounded-full w-full" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="h-4 rounded-full w-4/5" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="h-4 rounded-full w-3/5" style={{ backgroundColor: "var(--border-medium)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div> :
         viewMode === "swipe" ? (
         /* ---- SWIPE MODE ---- */
