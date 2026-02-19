@@ -28,7 +28,24 @@ const platformIcon = (p) => {
 export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, allItems = [] }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
   const qc = useQueryClient();
+
+  const shareUrl = item.link || window.location.href;
+  const shareText = `Check out ${item.title}${item.brand_name ? ` by ${item.brand_name}` : ""} — ${item.description || ""}`;
+
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleNativeShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: item.title, text: shareText, url: shareUrl });
+    }
+  };
 
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", item.id],
