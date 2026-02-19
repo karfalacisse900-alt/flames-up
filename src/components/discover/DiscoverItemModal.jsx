@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, ExternalLink, ThumbsUp, Send, Globe, Smartphone, Monitor, Bookmark, BookmarkCheck } from "lucide-react";
+import { X, ExternalLink, ThumbsUp, Send, Globe, Smartphone, Monitor, Bookmark, BookmarkCheck, Share2, Twitter, Link2, Check } from "lucide-react";
 import ItemFeedback from "./ItemFeedback";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

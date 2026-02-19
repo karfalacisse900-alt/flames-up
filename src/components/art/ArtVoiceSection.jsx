@@ -82,14 +82,27 @@ export default function ArtVoiceSection({ artId, user }) {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
+  const getMimeType = () => {
+    const types = ["audio/webm", "audio/mp4", "audio/ogg", "audio/wav"];
+    return types.find(t => MediaRecorder.isTypeSupported(t)) || "";
+  };
+
   const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mr = new MediaRecorder(stream);
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      alert("Microphone access denied. Please allow microphone access and try again.");
+      return;
+    }
+    const mimeType = getMimeType();
+    const options = mimeType ? { mimeType } : {};
+    const mr = new MediaRecorder(stream, options);
     mediaRef.current = mr;
     chunksRef.current = [];
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
     mr.onstop = () => {
-      const b = new Blob(chunksRef.current, { type: "audio/webm" });
+      const b = new Blob(chunksRef.current, { type: mimeType || "audio/webm" });
       setBlob(b);
       setPreviewUrl(URL.createObjectURL(b));
       stream.getTracks().forEach((t) => t.stop());
