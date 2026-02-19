@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2 } from "lucide-react";
+import { LogOut, Edit2, BookOpen, Palette, Trophy, MessageSquare, Wallet, Star, Compass, Bookmark, Zap, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock } from "lucide-react";
+import InterestsSection from "../components/profile/InterestsSection";
+import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
