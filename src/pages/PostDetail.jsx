@@ -110,6 +110,8 @@ function ReplyItem({ reply, user, postId, allReplies, depth = 0, onReplyAdded })
               </button>
             )}
           </div>
+          <ReportModal open={showReport} onClose={() => setShowReport(false)} contentType="reply" contentId={reply.id} user={user} />
+
           {showReplyInput && (
             <div className="flex gap-2 mt-2">
               <button onClick={() => setIsAnonymous(v => !v)} className="p-1.5 rounded-full shrink-0 transition-colors" style={{ color: isAnonymous ? "var(--accent-primary)" : "var(--text-hint)" }}>
