@@ -55,7 +55,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
   };
 
   // Background color varies slightly by type, all very light
-  const bgColor = post.type === "question" ? "#F9F7F2" : post.type === "concern" ? "#F9F5F5" : "#F7F9F5";
+  const bgColor = post.type === "question" ? "#F5EFE8" : post.type === "concern" ? "#F2EAE4" : "#EDF2EC";
 
   return (
     <motion.div
