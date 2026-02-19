@@ -243,7 +243,7 @@ export default function Art() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
@@ -264,14 +264,24 @@ export default function Art() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
-        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
+        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <TabsTrigger value="gallery" className="flex-1 rounded-lg text-sm" style={{ "--tw-bg-opacity": 1 }}>Gallery</TabsTrigger>
           <TabsTrigger value="fight" className="flex-1 rounded-lg text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
         <TabsContent value="gallery" className="mt-4 pb-24">
           {isLoading ? (
-            <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <div className="aspect-square" style={{ backgroundColor: "var(--border-medium)" }} />
+                  <div className="p-2.5 space-y-1.5">
+                    <div className="h-3 rounded-full w-3/4" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <div className="h-2.5 rounded-full w-1/2" style={{ backgroundColor: "var(--border-light)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : gallery.length === 0 ? (
             <div className="text-center py-16"><p className="text-4xl mb-3">🎨</p><p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet.</p></div>
           ) : (
