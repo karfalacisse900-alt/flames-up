@@ -74,13 +74,15 @@ Your task: select exactly 8 item IDs for this user's personalized billboard caro
 
 Rules:
 1. If user has gaming interests → prioritize entertainment/gaming category items
-2. If user creates art → prioritize design, creative tools (Figma, Midjourney, Adobe Firefly, etc.)
+2. If user creates art → prioritize design, creative tools
 3. If user is active (daily_checkin) → mix productivity + developer_tools
-4. Always include 1-2 sponsored items (is_sponsored=true) if available
-5. Always include 1-2 editor picks (is_featured=true) if available
-6. Always include 1-2 new items (is_new=true) for freshness
-7. Ensure VARIETY: do NOT pick 8 items from the same category
-8. For anonymous users: pick a general mix of top tools across all categories
+4. IMPORTANT: Boost items in categories the user has previously liked (likedCategories)
+5. NEVER include items the user has disliked (they are already excluded from catalog)
+6. Always include 1-2 sponsored items (is_sponsored=true) if available
+7. Always include 1-2 editor picks (is_featured=true) if available
+8. Always include 1-2 new items (is_new=true) for freshness
+9. Ensure VARIETY: do NOT pick 8 items from the same category
+10. For anonymous users: pick a general mix of top tools across all categories
 
 Return item_ids in the order they should appear (best match first).`;
 
