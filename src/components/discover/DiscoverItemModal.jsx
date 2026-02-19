@@ -200,6 +200,9 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
             </a>
           )}
 
+          {/* Feedback */}
+          <ItemFeedback item={item} user={user} />
+
           {/* Divider */}
           <div style={{ borderTop: "1px solid var(--border-light)" }} />
 
