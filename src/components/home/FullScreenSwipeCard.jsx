@@ -83,7 +83,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
-          <span className="text-[#4A3A2A] uppercase tracking-widest opacity-100"
+          <span className="text-[#6F8F72] uppercase tracking-widest opacity-100"
 
           style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
 
@@ -97,7 +97,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-6 py-20 flex-1 flex flex-col items-center justify-center">
+        <div className="bg-[#EADFD3] px-6 py-16 flex-1 flex flex-col items-center justify-center">
           <p
             className="text-center w-full"
             style={{
