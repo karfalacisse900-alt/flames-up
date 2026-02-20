@@ -33,7 +33,7 @@ export default function Layout({ children, currentPageName }) {
   const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop"].includes(currentPageName);
 
   return (
-    <div className="bg-[#F4ECE4] min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
+    <div className="bg-[#F4ECE4] text-[#8A7968] min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
       <div className="max-w-lg mx-auto relative pb-20">
         <AnimatePresence mode="wait">
           <motion.div
