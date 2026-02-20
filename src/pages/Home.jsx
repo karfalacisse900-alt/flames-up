@@ -73,9 +73,9 @@ export default function Home() {
 
   const followingEmails = new Set((following || []).map((f) => f.following_email));
 
-  const rawFiltered = posts.filter((p) => {
+  const rawFiltered = (likedTab ? likedPosts : posts).filter((p) => {
     const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
-    const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
+    const feedMatch = likedTab || feedTab === "all" ? true : followingEmails.has(p.author_email);
     return typeMatch && feedMatch;
   });
 
