@@ -98,7 +98,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
-          <span className="bg-[#8A7968] text-[#6F8F72] uppercase tracking-widest opacity-100"
+          <span className="bg-[#] text-[#6F8F72] uppercase tracking-widest opacity-100"
           style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
             {typeLabel[post.type] || "Post"}
           </span>
