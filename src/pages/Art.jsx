@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Upload, TrendingUp, TrendingDown, X, Swords, MessageCircle } from "lucide-react";
+import { Plus, Upload, TrendingUp, TrendingDown, X, Swords } from "lucide-react";
 import ArtVoiceSection from "../components/art/ArtVoiceSection";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Button } from "@/components/ui/button";
@@ -111,10 +111,10 @@ function GalleryCard({ art, user, onClick, onLike }) {
           </button>
           <button
             onClick={onClick}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors"
+            className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
             style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}
           >
-            <MessageCircle className="w-3 h-3" /> View
+            💬 Comment
           </button>
         </div>
       </div>
@@ -265,8 +265,8 @@ export default function Art() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="gallery" className="flex-1 rounded-lg text-sm" style={{ "--tw-bg-opacity": 1 }}>Gallery</TabsTrigger>
-          <TabsTrigger value="fight" className="flex-1 rounded-lg text-sm">⚔️ Fight</TabsTrigger>
+          <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Gallery</TabsTrigger>
+          <TabsTrigger value="fight" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
         <TabsContent value="gallery" className="mt-4 pb-24">
@@ -285,11 +285,11 @@ export default function Art() {
         <TabsContent value="fight" className="mt-4">
           <Tabs defaultValue="arena">
             <TabsList className="rounded-xl w-full mb-1" style={{ backgroundColor: "var(--bg-card)" }}>
-              <TabsTrigger value="arena" className="flex-1 rounded-lg text-xs">⚔️ Arena</TabsTrigger>
-              <TabsTrigger value="top" className="flex-1 rounded-lg text-xs">🏆 Top Art</TabsTrigger>
-              <TabsTrigger value="mine" className="flex-1 rounded-lg text-xs">My Art</TabsTrigger>
+              <TabsTrigger value="arena" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">⚔️ Arena</TabsTrigger>
+              <TabsTrigger value="top" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🏆 Top Art</TabsTrigger>
+              <TabsTrigger value="mine" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">My Art</TabsTrigger>
               {user?.role === "admin" && (
-                <TabsTrigger value="admin" className="flex-1 rounded-lg text-xs">🛡 Review</TabsTrigger>
+                <TabsTrigger value="admin" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🛡 Review</TabsTrigger>
               )}
             </TabsList>
             <TabsContent value="arena">

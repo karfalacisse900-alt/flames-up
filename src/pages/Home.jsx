@@ -53,13 +53,7 @@ export default function Home() {
   }, [pullY]);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      setUser(u);
-      // Auto-generate username + referral code if missing
-      if (u && (!u.username || !u.referral_code)) {
-        base44.functions.invoke("onSignup", {}).catch(() => {});
-      }
-    }).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const { data: posts = [], isLoading, refetch } = useQuery({
@@ -75,13 +69,7 @@ export default function Home() {
 
   const followingEmails = new Set((following || []).map((f) => f.following_email));
 
-  const mutedOrBlocked = new Set([
-    ...(user?.muted_users || []),
-    ...(user?.blocked_users || []),
-  ]);
-
   const rawFiltered = posts.filter((p) => {
-    if (p.author_email && mutedOrBlocked.has(p.author_email)) return false;
     const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
     const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
     return typeMatch && feedMatch;
@@ -146,7 +134,7 @@ export default function Home() {
   return (
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
-      <div className="px-4 pb-2 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+      <div className="px-5 pb-3 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
         <div className="flex items-center gap-3 mb-3">
           {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) =>
@@ -164,24 +152,29 @@ export default function Home() {
             </button>
           )}
         </div>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <span />
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
               className="p-2 rounded-full border"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+              title={viewMode === "swipe" ? "Switch to list" : "Switch to swipe"}>
+
               {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
             </button>
             <button
               onClick={() => {setCurrentIndex(0);refetch();}}
               className="p-2 rounded-full border"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
+              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)" }}>
+
               <Plus className="w-4 h-4" /> Post
             </button>
           </div>
@@ -193,8 +186,8 @@ export default function Home() {
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-                  onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
-            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="bg-[#6F8F72] text-[#FFFFFF] px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
               color: activeFilter === val ? "#fff" : "var(--text-secondary)",
@@ -208,7 +201,7 @@ export default function Home() {
       </div>
 
       {/* Content area */}
-      <div className="pt-2 pb-2 px-3 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="bg-[#F7F2EC] pt-2 pb-4 px-4 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />

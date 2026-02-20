@@ -1,11 +1,10 @@
 import React, { useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { Heart, MessageCircle, Star, Flag } from "lucide-react";
+import { Heart, MessageCircle, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import PollOptions from "./PollOptions";
 import { getFontStyle } from "./FontPicker";
-import ReportModal from "../moderation/ReportModal";
 
 const typeLabel = {
   question: "Question",
@@ -16,7 +15,6 @@ const typeLabel = {
 export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex, user }) {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
-  const [showReport, setShowReport] = useState(false);
   const navigate = useNavigate();
 
   const x = useMotionValue(0);
@@ -57,7 +55,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
   };
 
   // Background color varies slightly by type, all very light
-  const bgColor = post.type === "question" ? "#F5EFE8" : post.type === "concern" ? "#F2EAE4" : "#EDF2EC";
+  const bgColor = post.type === "question" ? "#F9F7F2" : post.type === "concern" ? "#F9F5F5" : "#F7F9F5";
 
   return (
     <motion.div
@@ -84,26 +82,29 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         }}>
 
         {/* Top: type label only, small + low-contrast */}
-        <div className="px-6 pt-4 pb-1 shrink-0 flex items-center justify-between">
-          <span
-            className="text-[11px] uppercase tracking-widest"
-            style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
+        <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
+          <span className="text-[#4A3A2A] uppercase tracking-widest opacity-100"
+
+          style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
+
             {typeLabel[post.type] || "Post"}
           </span>
           {isTop &&
-            <span className="text-[10px]" style={{ color: "#CACACA" }}>↑ comments · swipe →</span>
+          <span className="text-[#4A3A2A]" style={{ color: "#CACACA" }}>
+              ↑ comments · swipe →
+            </span>
           }
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center overflow-hidden">
+        <div className="bg-[#EADFD3] px-8 py-20 flex-1 flex flex-col items-center justify-center">
           <p
             className="text-center w-full"
             style={{
               fontFamily: getFontStyle(post.font_family || "serif"),
               fontSize: post.text?.length > 220 ? "1.1rem" : post.text?.length > 120 ? "1.35rem" : "1.6rem",
               lineHeight: "1.75",
-              color: "var(--text-primary)",
+              color: "#1E1E1E",
               fontWeight: 400
             }}>
 
@@ -138,7 +139,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="absolute top-1/3 right-5 pointer-events-none"
             style={{ opacity: likeOpacity }}>
 
-              <div className="border-2 border-[#6F8F72] text-[#6F8F72] px-4 py-2 rounded-2xl font-semibold text-sm rotate-12" style={{ backgroundColor: "rgba(240,236,228,0.92)" }}>
+              <div className="border-2 border-emerald-400 text-emerald-600 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm rotate-12 backdrop-blur-sm">
                 ♥ Yes
               </div>
             </motion.div>
@@ -146,7 +147,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             className="absolute top-1/3 left-5 pointer-events-none"
             style={{ opacity: skipOpacity }}>
 
-              <div className="border-2 px-4 py-2 rounded-2xl font-semibold text-sm -rotate-12" style={{ borderColor: "var(--border-medium)", color: "var(--text-hint)", backgroundColor: "rgba(240,236,228,0.92)" }}>
+              <div className="border-2 border-gray-300 text-gray-400 bg-white/80 px-4 py-2 rounded-2xl font-semibold text-sm -rotate-12 backdrop-blur-sm">
                 Skip
               </div>
             </motion.div>
@@ -155,7 +156,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Bottom action bar */}
         <div
-          className="px-6 pb-4 pt-3 shrink-0 flex items-center justify-between"
+          className="px-8 pb-6 pt-3 shrink-0 flex items-center justify-between"
           style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
 
           <button
@@ -185,19 +186,11 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             onClick={handleFavorite}
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
-            <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
-          </button>
 
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
-            className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: "#C0B9B0" }}>
-            <Flag className="w-4 h-4" strokeWidth={1.5} />
+            <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
           </button>
         </div>
       </div>
-
-      <ReportModal open={showReport} onClose={() => setShowReport(false)} contentType="post" contentId={post.id} user={user} />
     </motion.div>);
 
 }
