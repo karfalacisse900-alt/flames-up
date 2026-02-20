@@ -69,7 +69,7 @@ export default function Home() {
   });
 
   // Liked posts = posts the user has liked
-  const likedPosts = posts.filter(p => user?.email && (p.liked_by || []).includes(user.email));
+  const likedPosts = posts.filter((p) => user?.email && (p.liked_by || []).includes(user.email));
 
   const followingEmails = new Set((following || []).map((f) => f.following_email));
 
@@ -198,7 +198,7 @@ export default function Home() {
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="bg-[#6F8F72] text-[#FFFFFF] px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="bg-[#6F8F72] text-[#6F8F72] px-3 py-1 text-xs opacity-100 rounded-full border whitespace-nowrap transition-all"
 
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
@@ -213,7 +213,7 @@ export default function Home() {
       </div>
 
       {/* Content area */}
-      <div className="bg-[#F7F2EC] my-10 px-5 py-5 flex-1 overflow-visible" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="bg-[#8A7968] text-[#000000] my-10 px-5 py-5 opacity-100 flex-1 overflow-visible" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
