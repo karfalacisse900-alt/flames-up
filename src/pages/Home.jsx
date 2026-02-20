@@ -68,6 +68,9 @@ export default function Home() {
     enabled: !!user?.email
   });
 
+  // Liked posts = posts the user has liked
+  const likedPosts = posts.filter(p => user?.email && (p.liked_by || []).includes(user.email));
+
   const followingEmails = new Set((following || []).map((f) => f.following_email));
 
   const rawFiltered = posts.filter((p) => {
