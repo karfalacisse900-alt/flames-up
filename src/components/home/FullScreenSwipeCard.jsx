@@ -77,10 +77,11 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
       exit={{ x: 600, opacity: 0, transition: { duration: 0.22 } }}>
 
       <div
-        className="h-full rounded-3xl flex flex-col overflow-hidden"
+        className="h-full rounded-3xl flex flex-col"
         style={{
           backgroundColor: bgColor,
-          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)"
+          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)",
+          overflow: "hidden"
         }}>
 
         {/* Top: type label only, small + low-contrast */}
@@ -96,7 +97,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center overflow-hidden">
+        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center" style={{ overflowY: "auto", minHeight: 0 }}>
           <p
             className="text-center w-full"
             style={{
@@ -153,10 +154,10 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           </>
         }
 
-        {/* Bottom action bar */}
+        {/* Bottom action bar — always visible, never clipped */}
         <div
-          className="px-6 pb-4 pt-3 shrink-0 flex items-center justify-between"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+          className="px-6 pb-5 pt-3 shrink-0 flex items-center justify-between"
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)", backgroundColor: bgColor }}>
 
           <button
             onClick={handleLike}
