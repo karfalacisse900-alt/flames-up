@@ -99,16 +99,18 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
           <span className="text-[#6F8F72] uppercase tracking-widest opacity-100"
-
           style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
-
             {typeLabel[post.type] || "Post"}
           </span>
-          {isTop &&
-          <span className="text-[#4A3A2A]" style={{ color: "#CACACA" }}>
-              ↑ comments · swipe →
-            </span>
-          }
+          <div className="flex items-center gap-3">
+            {isTop && <span style={{ color: "#CACACA", fontSize: "0.7rem" }}>↑ comments · swipe →</span>}
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
+              className="transition-all active:scale-110"
+              style={{ color: "#CACACA" }}>
+              <Flag className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
