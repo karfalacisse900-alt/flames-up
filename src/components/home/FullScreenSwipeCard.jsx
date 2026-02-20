@@ -98,17 +98,17 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
 
         {/* Top: type label only, small + low-contrast */}
         <div className="px-8 pt-7 pb-2 shrink-0 flex items-center justify-between">
-          <span className="text-[#6F8F72] uppercase tracking-widest opacity-100"
+          <span className="bg-[#8A7968] text-[#6F8F72] uppercase tracking-widest opacity-100"
           style={{ color: "#ACACAC", fontFamily: "var(--font-sans)", letterSpacing: "0.12em" }}>
             {typeLabel[post.type] || "Post"}
           </span>
           <div className="flex items-center gap-3">
             {isTop && <span style={{ color: "#CACACA", fontSize: "0.7rem" }}>↑ comments · swipe →</span>}
             <button
-              onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
+              onClick={(e) => {e.stopPropagation();setShowReport(true);}}
               className="transition-all active:scale-110"
               style={{ color: "#CACACA" }}>
-              <Flag className="w-4 h-4" />
+              <Flag className="text-[#6F8F72] lucide lucide-flag w-4 h-4" />
             </button>
           </div>
         </div>
@@ -203,14 +203,14 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             onClick={handleFavorite}
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
-            <Star className="w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
+            <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
           </button>
 
           <button
             onClick={handleShare}
             className="flex items-center gap-2 transition-all active:scale-110"
             style={{ color: shareCopied ? "var(--accent-primary)" : "#C0B9B0" }}>
-            <Share2 className="w-5 h-5" strokeWidth={1.5} />
+            <Share2 className="text-[#6F8F72] lucide lucide-share2 w-5 h-5" strokeWidth={1.5} />
             {shareCopied && <span className="text-xs" style={{ color: "var(--accent-primary)" }}>Copied!</span>}
           </button>
         </div>
@@ -221,8 +221,8 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         onClose={() => setShowReport(false)}
         contentType="post"
         contentId={post.id}
-        user={user}
-      />
+        user={user} />
+
     </motion.div>);
 
 }
