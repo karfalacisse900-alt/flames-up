@@ -31,7 +31,7 @@ const catColors = {
 
 function SwipeDiscoverCard({ item, onOpen }) {
   return (
-    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)" }} onClick={onOpen}>
+    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)", overflow: "hidden" }} onClick={onOpen}>
       {item.is_sponsored && (
         <span className="self-start text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-3">Sponsored</span>
       )}
@@ -189,7 +189,7 @@ export default function Discover() {
   const showSections = activeCategory === "all" && !search;
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
 
       {/* Header — stable height, no reflow */}
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
@@ -334,12 +334,12 @@ export default function Discover() {
               ))}
             </div>
           ) : viewMode === "swipe" ? (
-            <div className="px-5 pb-24 mt-4">
+            <div className="px-5 pb-32 mt-4">
               {filtered.length === 0 ? (
                 <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
               ) : (
                 <>
-                  <div style={{ height: "65vh" }}>
+                  <div style={{ height: "60vh", minHeight: 320 }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={filtered[swipeIndex]?.id} className="h-full"
                         initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }}>
@@ -362,7 +362,7 @@ export default function Discover() {
               )}
             </div>
           ) : (
-            <div className="pb-24 mt-4">
+            <div className="pb-32 mt-4">
               {showSections && (
                 <DiscoverBillboard items={items} user={user} onItemClick={setSelectedItem} />
               )}
