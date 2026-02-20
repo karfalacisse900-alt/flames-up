@@ -16,7 +16,21 @@ const typeLabel = {
 export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, isTop, stackIndex, user }) {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const navigate = useNavigate();
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}${createPageUrl("PostDetail")}?id=${post.id}`;
+    if (navigator.share) {
+      navigator.share({ title: "Check this post", text: post.text?.slice(0, 100), url });
+    } else {
+      navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
