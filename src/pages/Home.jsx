@@ -134,7 +134,7 @@ export default function Home() {
   return (
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
-      <div className="px-5 pb-3 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+      <div className="px-5 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
         <div className="flex items-center gap-3 mb-3">
           {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) =>
@@ -201,7 +201,7 @@ export default function Home() {
       </div>
 
       {/* Content area */}
-      <div className="bg-[#F7F2EC] pt-2 pb-4 px-4 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="bg-[#F7F2EC] my-10 px-4 py-6 flex-1 overflow-visible" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
