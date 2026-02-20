@@ -58,10 +58,10 @@ function ArtTradingCard({ art, user, onClick }) {
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     onClick={onClick}
-    className="rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-    style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}
+    className="rounded-2xl cursor-pointer hover:shadow-md transition-shadow"
+    style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", overflow: "hidden" }}
     >
-      <div className="aspect-square overflow-hidden relative">
+      <div className="aspect-square relative" style={{ overflow: "hidden" }}>
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
         {art.is_for_sale && (
           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-1">
@@ -93,14 +93,14 @@ function GalleryCard({ art, user, onClick, onLike }) {
   const likedBy = art.liked_by || [];
   const isLiked = user?.email && likedBy.includes(user.email);
   return (
-    <div className="rounded-2xl overflow-hidden cursor-pointer" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}>
-      <div className="aspect-square overflow-hidden relative" onClick={onClick}>
+    <div className="rounded-2xl cursor-pointer" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
+      <div className="aspect-square relative" style={{ overflow: "hidden" }} onClick={onClick}>
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
       </div>
-      <div className="p-2.5">
-        <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
-        <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
-        <div className="flex items-center justify-between mt-2">
+      <div className="p-2.5" style={{ backgroundColor: "var(--bg-nav)" }}>
+      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+      <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
+      <div className="flex items-center justify-between mt-2" style={{ minHeight: 32 }}>
           <button
             onClick={(e) => { e.stopPropagation(); onLike(art); }}
             className="flex items-center gap-1.5 min-h-[28px] text-xs transition-colors active:scale-110"
@@ -237,7 +237,7 @@ export default function Art() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
