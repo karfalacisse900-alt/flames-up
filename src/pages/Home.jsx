@@ -298,8 +298,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content area — takes remaining space, no overflow at top level */}
-      <div className="pt-2 pb-2 px-3 flex-1 min-h-0" style={{ backgroundColor: "var(--bg-app)", overflow: "hidden" }}>
+      {/* Content area — takes remaining space */}
+      <div className="pt-2 pb-2 px-3 flex-1 min-h-0" style={{ backgroundColor: "var(--bg-app)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             {/* Skeleton cards to prevent layout shift */}
@@ -346,7 +346,7 @@ export default function Home() {
               </div>
             </div> :
 
-        <div className="relative w-full h-full">
+        <div className="relative w-full flex-1 min-h-0">
               <AnimatePresence mode="sync">
                 {visiblePosts.slice(0, 3).map((post, i) =>
             <FullScreenSwipeCard
