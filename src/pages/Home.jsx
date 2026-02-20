@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, RefreshCw, List, Layers, Zap, Users, Sparkles, TrendingUp, SlidersHorizontal, X } from "lucide-react";
+import { Plus, RefreshCw, List, Layers, Zap, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
@@ -21,8 +21,7 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [feedTab, setFeedTab] = useState("for_you");
-  const [showTopicPrefs, setShowTopicPrefs] = useState(false);
+  const [feedTab, setFeedTab] = useState("all");
   const [pullY, setPullY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -81,56 +80,17 @@ export default function Home() {
     ...(user?.blocked_users || []),
   ]);
 
-  // Muted topics from user prefs
-  const mutedTopics = user?.muted_topics || [];
-  const preferredTopics = user?.preferred_topics || [];
-
-  const now = new Date();
-
-  // Engagement score for trending
-  const engagementScore = (p) => {
-    const ageHours = (now - new Date(p.created_date)) / 3600000;
-    const decay = Math.max(0.1, 1 - ageHours / 72); // decays over 72h
-    return ((p.like_count || 0) * 2 + (p.reply_count || 0) * 3 + (p.total_votes || 0)) * decay;
-  };
-
-  const typeOfPost = (p) => p.type; // "question" | "quote" | "concern"
-
-  const baseFilter = (p) => {
+  const rawFiltered = posts.filter((p) => {
     if (p.author_email && mutedOrBlocked.has(p.author_email)) return false;
     const typeMatch = activeFilter === "all" ? true : activeFilter === "questions" ? p.type === "question" : activeFilter === "quotes" ? p.type === "quote" : p.type === "concern";
-    if (!typeMatch) return false;
-    if (mutedTopics.includes(p.type)) return false;
-    return true;
-  };
+    const feedMatch = feedTab === "all" ? true : followingEmails.has(p.author_email);
+    return typeMatch && feedMatch;
+  });
 
-  const boosted = (arr) => [
-    ...arr.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
-    ...arr.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now)),
-  ];
-
-  let filtered;
-  if (feedTab === "for_you") {
-    // Personalised: preferred topics boosted, following authors boosted, liked types boosted
-    const likedTypes = new Set(posts.filter(p => p.liked_by?.includes(user?.email)).map(p => p.type));
-    const scored = posts.filter(baseFilter).map(p => {
-      let score = 0;
-      if (followingEmails.has(p.author_email)) score += 5;
-      if (preferredTopics.includes(p.type)) score += 4;
-      if (likedTypes.has(p.type)) score += 2;
-      score += Math.min(3, (p.like_count || 0) / 5);
-      const ageHours = (now - new Date(p.created_date)) / 3600000;
-      score -= ageHours / 24;
-      return { post: p, score };
-    });
-    filtered = boosted(scored.sort((a, b) => b.score - a.score).map(s => s.post));
-  } else if (feedTab === "trending") {
-    filtered = boosted(posts.filter(baseFilter).sort((a, b) => engagementScore(b) - engagementScore(a)));
-  } else if (feedTab === "following") {
-    filtered = boosted(posts.filter(p => baseFilter(p) && followingEmails.has(p.author_email)));
-  } else {
-    filtered = boosted(posts.filter(baseFilter));
-  }
+  const now = new Date();
+  const filtered = [
+  ...rawFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
+  ...rawFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now))];
 
 
   const likeMutation = useMutation({
@@ -184,96 +144,43 @@ export default function Home() {
   // attach touch listeners to list in list mode — handled inline via onTouch* props
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)", overflow: "hidden" }}>
-      {/* Compact Header — fixed height so content never shifts */}
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+      {/* Compact Header */}
       <div className="px-4 pb-2 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
-        <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide pb-0.5">
-          {[
-            { val: "for_you", label: "For You", icon: <Sparkles className="w-3 h-3" /> },
-            { val: "trending", label: "Trending", icon: <TrendingUp className="w-3 h-3" /> },
-            { val: "following", label: "Following", icon: <Users className="w-3 h-3" /> },
-            { val: "all", label: "All", icon: null },
-          ].map(({ val, label, icon }) =>
-            <button key={val} onClick={() => { setFeedTab(val); setCurrentIndex(0); }}
-              className="flex items-center gap-1 text-xs font-semibold pb-1 pr-2 transition-all whitespace-nowrap shrink-0"
-              style={{
-                color: feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
-                borderBottom: feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent"
-              }}>
-              {icon}{label}
+        <div className="flex items-center gap-3 mb-3">
+          {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) =>
+          <button
+            key={val}
+            onClick={() => {setFeedTab(val);setCurrentIndex(0);}}
+            className="flex items-center gap-1.5 text-sm font-semibold pb-1 transition-all"
+            style={{
+              color: feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+              borderBottom: feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent"
+            }}>
+
+              {val === "following" && <Users className="w-3.5 h-3.5" />}
+              {label}
             </button>
           )}
-          <button onClick={() => setShowTopicPrefs(p => !p)}
-            className="ml-auto p-1.5 rounded-full shrink-0 transition-all"
-            style={{
-              backgroundColor: showTopicPrefs ? "var(--accent-primary)" : "var(--bg-card)",
-              color: showTopicPrefs ? "#fff" : "var(--text-hint)",
-              border: "1px solid var(--border-light)"
-            }}>
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-          </button>
         </div>
-        {/* Topic prefs panel */}
-        {showTopicPrefs && (
-          <div className="rounded-2xl p-3 mb-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-hint)" }}>Preferred Topics (see more of)</p>
-            <div className="flex gap-2 flex-wrap mb-3">
-              {["question", "quote", "concern"].map(t => {
-                const on = preferredTopics.includes(t);
-                return (
-                  <button key={t} onClick={async () => {
-                    const updated = on ? preferredTopics.filter(x => x !== t) : [...preferredTopics, t];
-                    await base44.auth.updateMe({ preferred_topics: updated });
-                    setUser(u => ({ ...u, preferred_topics: updated }));
-                  }} className="px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize"
-                    style={{
-                      backgroundColor: on ? "var(--accent-primary)" : "var(--bg-app)",
-                      color: on ? "#fff" : "var(--text-secondary)",
-                      borderColor: on ? "var(--accent-primary)" : "var(--border-light)"
-                    }}>{t}s</button>
-                );
-              })}
-            </div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-hint)" }}>Muted Topics (see less of)</p>
-            <div className="flex gap-2 flex-wrap">
-              {["question", "quote", "concern"].map(t => {
-                const on = mutedTopics.includes(t);
-                return (
-                  <button key={t} onClick={async () => {
-                    const updated = on ? mutedTopics.filter(x => x !== t) : [...mutedTopics, t];
-                    await base44.auth.updateMe({ muted_topics: updated });
-                    setUser(u => ({ ...u, muted_topics: updated }));
-                  }} className="px-3 py-1 rounded-full text-xs font-medium border transition-all capitalize"
-                    style={{
-                      backgroundColor: on ? "#EF444422" : "var(--bg-app)",
-                      color: on ? "#EF4444" : "var(--text-secondary)",
-                      borderColor: on ? "#EF444466" : "var(--border-light)"
-                    }}>{t}s</button>
-                );
-              })}
-            </div>
-          </div>
-        )}
         <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
               className="p-2 rounded-full border"
-              title={viewMode === "swipe" ? "Switch to list view" : "Switch to swipe view"}
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
             </button>
             <button
               onClick={() => {setCurrentIndex(0);refetch();}}
-              title="Refresh feed"
               className="p-2 rounded-full border"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold active:scale-95 transition-transform"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold"
               style={{ backgroundColor: "var(--accent-primary)" }}>
               <Plus className="w-4 h-4" /> Post
             </button>
@@ -281,43 +188,30 @@ export default function Home() {
         </div>
 
         {/* Filter pills */}
-        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-0.5">
+
+        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
-            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap shrink-0 transition-all"
+                  onClick={() => {setActiveFilter(val);setCurrentIndex(0);}}
+            className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
               color: activeFilter === val ? "#fff" : "var(--text-secondary)",
               borderColor: activeFilter === val ? "var(--accent-primary)" : "var(--border-light)"
             }}>
+
               {label}
             </button>
           )}
         </div>
       </div>
 
-      {/* Content area — takes remaining space */}
-      <div className="pt-2 pb-2 px-3 flex-1 min-h-0" style={{ backgroundColor: "var(--bg-app)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      {/* Content area */}
+      <div className="pt-2 pb-2 px-3 flex-1 overflow-hidden" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
-            {/* Skeleton cards to prevent layout shift */}
-            <div className="w-full h-full flex flex-col gap-3 pt-2">
-              {[1,2,3].map(i => (
-                <div key={i} className="rounded-2xl p-5 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 100 }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="h-3 w-16 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 rounded-full w-full" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="h-4 rounded-full w-4/5" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="h-4 rounded-full w-3/5" style={{ backgroundColor: "var(--border-medium)" }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
           </div> :
         viewMode === "swipe" ? (
         /* ---- SWIPE MODE ---- */
@@ -346,7 +240,7 @@ export default function Home() {
               </div>
             </div> :
 
-        <div className="relative w-full flex-1 min-h-0">
+        <div className="relative w-full h-full">
               <AnimatePresence mode="sync">
                 {visiblePosts.slice(0, 3).map((post, i) =>
             <FullScreenSwipeCard
@@ -363,7 +257,7 @@ export default function Home() {
             )}
               </AnimatePresence>
               {/* Card counter */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs z-20 px-3 py-1 rounded-full" style={{ color: "var(--text-hint)", backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", opacity: 0.85 }}>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20 pb-1">
                 {currentIndex + 1} / {filtered.length}
               </div>
             </div>) : (
@@ -372,7 +266,7 @@ export default function Home() {
         /* ---- LIST MODE ---- */
         <div
           ref={listRef}
-          className="h-full overflow-y-auto space-y-3 pb-24"
+          className="h-full overflow-y-auto space-y-3 pb-4"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}>
@@ -392,7 +286,7 @@ export default function Home() {
               <div
                 key={post.id}
                 onClick={() => handleReply(post)}
-                className="rounded-2xl p-5 cursor-pointer active:scale-[0.99] transition-all"
+                className="rounded-2xl p-5 cursor-pointer hover:shadow-sm transition-shadow"
                 style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
 
                   <div className="flex items-center gap-2 mb-3">
@@ -413,7 +307,6 @@ export default function Home() {
                   <div className="flex gap-4 mt-3 text-xs" style={{ color: "var(--text-hint)" }}>
                     <span>♥ {post.like_count || 0}</span>
                     <span>💬 {post.reply_count || 0}</span>
-                    <span className="ml-auto text-[10px] opacity-60">Tap to read &amp; reply</span>
                   </div>
                 </div>);
 

@@ -31,7 +31,7 @@ const catColors = {
 
 function SwipeDiscoverCard({ item, onOpen }) {
   return (
-    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)", overflow: "hidden" }} onClick={onOpen}>
+    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 4px 20px rgba(74,58,42,0.07)" }} onClick={onOpen}>
       {item.is_sponsored && (
         <span className="self-start text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-3">Sponsored</span>
       )}
@@ -189,9 +189,9 @@ export default function Discover() {
   const showSections = activeCategory === "all" && !search;
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
 
-      {/* Header — stable height, no reflow */}
+      {/* Header */}
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
@@ -199,14 +199,12 @@ export default function Discover() {
             {contentTab === "apps" && (
               <>
                 <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-                  title="Compare multiple tools side by side"
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs transition-colors active:scale-95"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
                   style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)", borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)", color: compareMode ? "#fff" : "var(--text-secondary)" }}>
                   Compare
                 </button>
                 <button onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-                  title={viewMode === "list" ? "Switch to swipe mode" : "Switch to list mode"}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs transition-colors active:scale-95"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
                   style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                   {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
                 </button>
@@ -319,27 +317,16 @@ export default function Discover() {
           </div>
 
           {isLoading ? (
-            <div className="px-5 pt-4 space-y-3">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 88 }}>
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl shrink-0" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3.5 rounded-full w-2/3" style={{ backgroundColor: "var(--border-medium)" }} />
-                      <div className="h-3 rounded-full w-full" style={{ backgroundColor: "var(--border-light)" }} />
-                      <div className="h-3 rounded-full w-4/5" style={{ backgroundColor: "var(--border-light)" }} />
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="flex justify-center py-16">
+              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
             </div>
           ) : viewMode === "swipe" ? (
-            <div className="px-5 pb-32 mt-4">
+            <div className="px-5 pb-24 mt-4">
               {filtered.length === 0 ? (
                 <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
               ) : (
                 <>
-                  <div style={{ height: "60vh", minHeight: 320 }}>
+                  <div style={{ height: "65vh" }}>
                     <AnimatePresence mode="wait">
                       <motion.div key={filtered[swipeIndex]?.id} className="h-full"
                         initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }}>
@@ -362,7 +349,7 @@ export default function Discover() {
               )}
             </div>
           ) : (
-            <div className="pb-32 mt-4">
+            <div className="pb-24 mt-4">
               {showSections && (
                 <DiscoverBillboard items={items} user={user} onItemClick={setSelectedItem} />
               )}
@@ -429,19 +416,8 @@ export default function Discover() {
             </div>
           </div>
           {spLoading ? (
-            <div className="px-5 space-y-3">
-              {[1,2,3].map(i => (
-                <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 88 }}>
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full shrink-0" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3.5 rounded-full w-1/2" style={{ backgroundColor: "var(--border-medium)" }} />
-                      <div className="h-3 rounded-full w-3/4" style={{ backgroundColor: "var(--border-light)" }} />
-                      <div className="h-3 rounded-full w-full" style={{ backgroundColor: "var(--border-light)" }} />
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="flex justify-center py-16">
+              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
             </div>
           ) : filteredServicePeople.length === 0 ? (
             <div className="text-center py-16 px-5">

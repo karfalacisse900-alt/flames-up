@@ -58,10 +58,10 @@ function ArtTradingCard({ art, user, onClick }) {
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     onClick={onClick}
-    className="rounded-2xl cursor-pointer hover:shadow-md transition-shadow"
-    style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", overflow: "hidden" }}
+    className="rounded-2xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+    style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}
     >
-      <div className="aspect-square relative" style={{ overflow: "hidden" }}>
+      <div className="aspect-square overflow-hidden relative">
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
         {art.is_for_sale && (
           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-1">
@@ -93,23 +93,29 @@ function GalleryCard({ art, user, onClick, onLike }) {
   const likedBy = art.liked_by || [];
   const isLiked = user?.email && likedBy.includes(user.email);
   return (
-    <div className="rounded-2xl cursor-pointer" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
-      <div className="aspect-square relative" style={{ overflow: "hidden" }} onClick={onClick}>
+    <div className="rounded-2xl overflow-hidden cursor-pointer" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}>
+      <div className="aspect-square overflow-hidden relative" onClick={onClick}>
         <img src={art.image_url} alt={art.title} className="w-full h-full object-cover" />
       </div>
-      <div className="p-2.5" style={{ backgroundColor: "var(--bg-nav)" }}>
-      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
-      <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
-      <div className="flex items-center justify-between mt-2" style={{ minHeight: 32 }}>
+      <div className="p-2.5">
+        <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+        <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
+        <div className="flex items-center justify-between mt-2">
           <button
             onClick={(e) => { e.stopPropagation(); onLike(art); }}
-            className="flex items-center gap-1.5 min-h-[28px] text-xs transition-colors active:scale-110"
+            className="flex items-center gap-1 text-xs transition-colors"
             style={{ color: isLiked ? "#E07070" : "var(--text-hint)" }}
           >
-            <span style={{ fontSize: "0.95rem" }}>{isLiked ? "♥" : "♡"}</span>
-            <span className="tabular-nums">{art.like_count || 0}</span>
+            <span>{isLiked ? "♥" : "♡"}</span>
+            <span>{art.like_count || 0}</span>
           </button>
-          <span className="text-[10px]" style={{ color: "var(--text-hint)", opacity: 0.7 }}>tap to view</span>
+          <button
+            onClick={onClick}
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors"
+            style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}
+          >
+            <MessageCircle className="w-3 h-3" /> View
+          </button>
         </div>
       </div>
     </div>
@@ -237,7 +243,7 @@ export default function Art() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
@@ -250,37 +256,24 @@ export default function Art() {
             </button>
           )}
           {activeTab !== "fight" && (
-            <button onClick={() => setShowUpload(true)} title="Upload new art" className="flex items-center gap-1.5 px-3 py-2 rounded-full text-white text-xs font-semibold shadow-sm active:scale-95 transition-transform" style={{ backgroundColor: "var(--accent-primary)" }}>
-              <Plus className="w-3.5 h-3.5" /> Upload
+            <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Plus className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
-        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
           <TabsTrigger value="gallery" className="flex-1 rounded-lg text-sm" style={{ "--tw-bg-opacity": 1 }}>Gallery</TabsTrigger>
           <TabsTrigger value="fight" className="flex-1 rounded-lg text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="gallery" className="mt-4 pb-28">
+        <TabsContent value="gallery" className="mt-4 pb-24">
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {[1,2,3,4,5,6].map(i => (
-                <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                  <div className="aspect-square" style={{ backgroundColor: "var(--border-medium)" }} />
-                  <div className="p-2.5 space-y-1.5">
-                    <div className="h-3 rounded-full w-3/4" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="h-2.5 rounded-full w-1/2" style={{ backgroundColor: "var(--border-light)" }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} /></div>
           ) : gallery.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-4xl mb-3">🎨</p>
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet. Upload your first piece!</p>
-            </div>
+            <div className="text-center py-16"><p className="text-4xl mb-3">🎨</p><p className="text-sm" style={{ color: "var(--text-hint)" }}>No art yet.</p></div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {gallery.map((art) => (

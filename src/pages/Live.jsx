@@ -65,7 +65,7 @@ export default function Live() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Live</h1>
@@ -73,28 +73,18 @@ export default function Live() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm shadow-sm active:scale-95 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm shadow-sm transition-colors"
           style={{ backgroundColor: "var(--accent-primary)" }}
         >
           <Radio className="w-4 h-4" /> Go Live
         </button>
       </div>
 
-      <div className="px-4 space-y-3 pb-32 mt-4">
+      <div className="px-5 space-y-3 pb-24 mt-2">
         {isLoading ? (
-          <>
-            {[1,2,3].map(i => (
-              <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 80 }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl shrink-0" style={{ backgroundColor: "var(--border-medium)" }} />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3.5 rounded-full w-3/4" style={{ backgroundColor: "var(--border-medium)" }} />
-                    <div className="h-3 rounded-full w-1/2" style={{ backgroundColor: "var(--border-light)" }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </>
+          <div className="flex justify-center py-16">
+            <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+          </div>
         ) : rooms.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🎙️</p>
@@ -106,11 +96,11 @@ export default function Live() {
             <Link
               key={room.id}
               to={createPageUrl("LiveRoomView") + `?id=${room.id}`}
-              className="block rounded-2xl p-4 active:scale-[0.99] transition-all"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+              className="block rounded-2xl p-4 hover:shadow-sm transition-all"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: "var(--bg-app)" }}>
                   {categoryEmoji[room.category] || "🎙️"}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -125,9 +115,9 @@ export default function Live() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" title="Live" />
-                  <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                  <ChevronRight className="w-4 h-4 text-[#9B9B9B]" />
                 </div>
               </div>
             </Link>

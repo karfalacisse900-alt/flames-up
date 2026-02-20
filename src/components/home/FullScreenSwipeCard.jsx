@@ -77,11 +77,10 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
       exit={{ x: 600, opacity: 0, transition: { duration: 0.22 } }}>
 
       <div
-        className="h-full rounded-3xl flex flex-col"
+        className="h-full rounded-3xl flex flex-col overflow-hidden"
         style={{
           backgroundColor: bgColor,
-          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)",
-          overflow: "hidden"
+          boxShadow: isTop ? "0 4px 24px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)"
         }}>
 
         {/* Top: type label only, small + low-contrast */}
@@ -92,12 +91,12 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             {typeLabel[post.type] || "Post"}
           </span>
           {isTop &&
-          <span className="text-[10px] select-none" style={{ color: "var(--text-hint)", opacity: 0.6 }}>← skip · like →</span>
+            <span className="text-[10px]" style={{ color: "#CACACA" }}>↑ comments · swipe →</span>
           }
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center" style={{ overflowY: "auto", minHeight: 0 }}>
+        <div className="bg-[#EADFD3] px-6 py-6 flex-1 flex flex-col items-center justify-center overflow-hidden">
           <p
             className="text-center w-full"
             style={{
@@ -154,17 +153,18 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           </>
         }
 
-        {/* Bottom action bar — always visible, never clipped */}
+        {/* Bottom action bar */}
         <div
-          className="px-6 pb-5 pt-3 shrink-0 flex items-center justify-between"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.05)", backgroundColor: bgColor }}>
+          className="px-6 pb-4 pt-3 shrink-0 flex items-center justify-between"
+          style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
 
           <button
             onClick={handleLike}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: liked ? "#E07070" : "var(--text-hint)" }}>
-            <Heart className="w-5 h-5" fill={liked ? "#E07070" : "none"} stroke={liked ? "#E07070" : "var(--text-hint)"} strokeWidth={1.5} />
-            <span className="text-sm font-medium tabular-nums">
+            style={{ color: liked ? "#E07070" : "#C0B9B0" }}>
+
+            <Heart className="text-[#6F8F72] lucide lucide-heart w-5 h-5" fill={liked ? "#E07070" : "none"} strokeWidth={liked ? 0 : 1.5} />
+            <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {(post.like_count || 0) + (liked ? 1 : 0)}
             </span>
           </button>
@@ -173,9 +173,10 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             to={createPageUrl("PostDetail") + `?id=${post.id}`}
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: "var(--text-hint)" }}>
-            <MessageCircle className="w-5 h-5" strokeWidth={1.5} />
-            <span className="text-sm font-medium tabular-nums">
+            style={{ color: "#C0B9B0" }}>
+
+            <MessageCircle className="text-[#6F8F72] lucide lucide-message-circle w-5 h-5" strokeWidth={1.5} />
+            <span className="text-sm" style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
               {post.reply_count || 0}
             </span>
           </Link>
@@ -183,15 +184,14 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
           <button
             onClick={handleFavorite}
             className="flex items-center gap-2 transition-all active:scale-110"
-            style={{ color: favorited ? "#C9A84C" : "var(--text-hint)" }}>
-            <Star className="w-5 h-5" fill={favorited ? "#C9A84C" : "none"} stroke={favorited ? "#C9A84C" : "var(--text-hint)"} strokeWidth={1.5} />
-            <span className="text-xs font-medium">{favorited ? "Saved" : "Save"}</span>
+            style={{ color: favorited ? "#C9A84C" : "#C0B9B0" }}>
+            <Star className="text-[#6F8F72] lucide lucide-star w-5 h-5" fill={favorited ? "#C9A84C" : "none"} strokeWidth={favorited ? 0 : 1.5} />
           </button>
 
           <button
             onClick={(e) => { e.stopPropagation(); setShowReport(true); }}
-            className="flex items-center gap-1.5 transition-all active:scale-110"
-            style={{ color: "var(--text-hint)" }}>
+            className="flex items-center gap-2 transition-all active:scale-110"
+            style={{ color: "#C0B9B0" }}>
             <Flag className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>

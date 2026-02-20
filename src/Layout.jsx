@@ -33,15 +33,15 @@ export default function Layout({ children, currentPageName }) {
   const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop"].includes(currentPageName);
 
   return (
-    <div style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)", minHeight: "100dvh", overflowX: "hidden" }}>
-      <div className="max-w-lg mx-auto relative" style={{ minHeight: "100dvh" }}>
+    <div className="bg-[#F4ECE4] min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
+      <div className="max-w-lg mx-auto relative pb-20">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}>
+            initial={{ opacity: 0, x: 18 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -18 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}>
 
             {children}
           </motion.div>
@@ -58,10 +58,10 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.name}
                 to={createPageUrl(item.page)}
-                className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 relative"
-                    style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
+                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}>
 
-                  <item.icon className={`w-5 h-5 transition-all duration-200 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
+                  <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   {showBadge &&
                 <span style={{ position: "absolute", top: 2, right: 4, width: 8, height: 8, borderRadius: "50%", backgroundColor: "#E05C7A", border: "2px solid var(--bg-nav)" }} />
                 }

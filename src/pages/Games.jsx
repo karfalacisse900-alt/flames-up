@@ -27,7 +27,7 @@ export default function Games() {
   const [expanded, setExpanded] = useState(null);
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="px-5 pt-6 pb-4" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center gap-3">
@@ -41,13 +41,13 @@ export default function Games() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 pb-32 space-y-3">
+      <div className="px-4 pt-4 pb-28 space-y-3">
         {games.map((game, gi) => (
           <motion.div
             key={game.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: gi * 0.02, duration: 0.2 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: gi * 0.04, duration: 0.3 }}
             className="rounded-2xl overflow-hidden"
             style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
           >
@@ -89,7 +89,7 @@ export default function Games() {
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${mode.color}18` }}>
                           <mode.icon className="w-4 h-4" style={{ color: mode.color }} />
                         </div>
-                        <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{mode.label}</span>
+                        <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{mode.label}</span>
                       </Link>
                     ))}
                   </div>
