@@ -65,7 +65,7 @@ export default function Live() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div style={{ minHeight: "100dvh", backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Live</h1>
@@ -80,7 +80,7 @@ export default function Live() {
         </button>
       </div>
 
-      <div className="px-5 space-y-3 pb-28 mt-4">
+      <div className="px-4 space-y-3 pb-32 mt-4">
         {isLoading ? (
           <>
             {[1,2,3].map(i => (
@@ -106,8 +106,8 @@ export default function Live() {
             <Link
               key={room.id}
               to={createPageUrl("LiveRoomView") + `?id=${room.id}`}
-              className="block rounded-2xl p-4 hover:shadow-sm transition-all"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+              className="block rounded-2xl p-4 active:scale-[0.99] transition-all"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
             >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
