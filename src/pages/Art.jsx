@@ -285,11 +285,11 @@ export default function Art() {
         <TabsContent value="fight" className="mt-4">
           <Tabs defaultValue="arena">
             <TabsList className="rounded-xl w-full mb-1" style={{ backgroundColor: "var(--bg-card)" }}>
-              <TabsTrigger value="arena" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">⚔️ Arena</TabsTrigger>
-              <TabsTrigger value="top" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🏆 Top Art</TabsTrigger>
-              <TabsTrigger value="mine" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">My Art</TabsTrigger>
+              <TabsTrigger value="arena" className="flex-1 rounded-lg text-xs">⚔️ Arena</TabsTrigger>
+              <TabsTrigger value="top" className="flex-1 rounded-lg text-xs">🏆 Top Art</TabsTrigger>
+              <TabsTrigger value="mine" className="flex-1 rounded-lg text-xs">My Art</TabsTrigger>
               {user?.role === "admin" && (
-                <TabsTrigger value="admin" className="flex-1 rounded-lg data-[state=active]:bg-white text-xs">🛡 Review</TabsTrigger>
+                <TabsTrigger value="admin" className="flex-1 rounded-lg text-xs">🛡 Review</TabsTrigger>
               )}
             </TabsList>
             <TabsContent value="arena">
