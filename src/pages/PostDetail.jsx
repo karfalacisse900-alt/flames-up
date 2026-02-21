@@ -23,6 +23,8 @@ export default function PostDetail() {
   const [replyText, setReplyText] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [sending, setSending] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
