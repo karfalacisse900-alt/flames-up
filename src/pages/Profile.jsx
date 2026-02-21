@@ -472,8 +472,8 @@ export default function Profile() {
                 )}
               </div>
             </div>
-            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="border-[#EDE9E3] rounded-xl" />
-            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="border-[#EDE9E3] rounded-xl resize-none" rows={3} />
+            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" style={{ borderColor: "var(--border-light)" }} />
+            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" style={{ borderColor: "var(--border-light)" }} rows={3} />
             <Button onClick={handleSaveProfile} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save Changes</Button>
           </div>
         </DialogContent>
