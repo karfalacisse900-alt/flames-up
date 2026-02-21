@@ -106,7 +106,7 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+        <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -199,25 +199,25 @@ export default function Profile() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:text-[--accent-primary] gap-1 text-xs" style={{ "--accent-primary": "var(--accent-primary)" }}>
+          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <BookOpen className="w-3.5 h-3.5" /> Posts
           </TabsTrigger>
-          <TabsTrigger value="saved" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Bookmark className="w-3.5 h-3.5" /> Saved
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="reviews" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Star className="w-3.5 h-3.5" /> Reviews
           </TabsTrigger>
-          <TabsTrigger value="art" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="art" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Palette className="w-3.5 h-3.5" /> Art
           </TabsTrigger>
-          <TabsTrigger value="games" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="games" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Trophy className="w-3.5 h-3.5" /> Games
           </TabsTrigger>
-          <TabsTrigger value="interests" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-1 rounded-lg gap-1 text-xs">
+          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-white gap-1 text-xs">
             <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
         </TabsList>
@@ -364,11 +364,11 @@ export default function Profile() {
               <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
             ) : followers.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
                   {f.follower_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{f.follower_name}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.follower_name}</p>
                   <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.follower_email}</p>
                 </div>
               </div>
@@ -385,10 +385,10 @@ export default function Profile() {
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {following.length === 0 ? (
-              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p>
+              <p className="text-sm text-center text-[#9B9B9B] py-4">Not following anyone yet</p>
             ) : following.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
+                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
                   {f.following_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
