@@ -10,20 +10,26 @@ const TabsList = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-9 items-center justify-center rounded-lg p-1 text-[var(--text-hint)] bg-[var(--bg-subtle)]",
+      "inline-flex h-9 items-center justify-center rounded-lg p-1",
       className
     )}
+    style={{ backgroundColor: "var(--bg-card)" }}
     {...props} />
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
 
-const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => (
+const TabsTrigger = React.forwardRef(({ className, style, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--accent-primary)] data-[state=active]:shadow data-[state=active]:font-semibold",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm",
       className
     )}
+    style={{
+      color: "var(--text-secondary)",
+      ...style,
+    }}
+    data-active-style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}
     {...props} />
 ))
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
