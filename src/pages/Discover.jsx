@@ -420,7 +420,7 @@ export default function Discover() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
               <Input placeholder="Search by name, skill, role..." value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm" />
+                className="pl-10 rounded-xl text-sm" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-card)", color: "var(--text-primary)" }} />
             </div>
           </div>
           {spLoading ? (
