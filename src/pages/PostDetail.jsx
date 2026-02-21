@@ -11,9 +11,14 @@ import VoiceBubble from "../components/home/VoiceBubble";
 import PollOptions from "../components/home/PollOptions";
 
 const typeColors = {
-  question: "bg-amber-50 text-amber-700 border-amber-200",
-  quote: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  concern: "bg-rose-50 text-rose-700 border-rose-200",
+  question: "",
+  quote: "",
+  concern: "",
+};
+const typeColorStyles = {
+  question: { backgroundColor: "rgba(217,139,98,0.10)", color: "#B8712E", borderColor: "rgba(217,139,98,0.25)" },
+  quote: { backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "rgba(60,110,90,0.25)" },
+  concern: { backgroundColor: "rgba(200,107,107,0.10)", color: "#C86B6B", borderColor: "rgba(200,107,107,0.25)" },
 };
 
 export default function PostDetail() {
