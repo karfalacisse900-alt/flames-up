@@ -246,7 +246,8 @@ export default function PostDetail() {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder={isAnonymous ? "Reply anonymously..." : "Reply..."}
-              className="flex-1 border-[#EDE9E3] rounded-xl"
+              className="flex-1 rounded-xl"
+              style={{ borderColor: "var(--border-light)" }}
               onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
             />
             <VoiceRecorder
