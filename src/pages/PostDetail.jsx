@@ -168,7 +168,7 @@ export default function PostDetail() {
                     </span>
                   </div>
                   {reply.kind === "text" ? (
-                    <p className="text-sm text-[#2C2C2C] leading-relaxed">{reply.text}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{reply.text}</p>
                   ) : (
                     <VoiceBubble
                       audioUrl={reply.audio_url}
