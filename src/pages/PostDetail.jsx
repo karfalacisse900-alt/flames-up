@@ -105,21 +105,21 @@ export default function PostDetail() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "140px" }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3]">
-        <Link to={createPageUrl("Home")} className="p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5 text-[#2C2C2C]" />
+      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <Link to={createPageUrl("Home")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-card)" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </Link>
-        <span className="text-sm font-medium text-[#6B6B6B]">Thread</span>
+        <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Thread</span>
       </div>
 
       {/* Post */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-2xl p-6 border border-[#EDE9E3]">
+        <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-4">
             <span className={`text-xs px-3 py-1 rounded-full border capitalize ${typeColors[post.type]}`}>{post.type}</span>
-            <span className="text-xs text-[#9B9B9B]">{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
           </div>
-          <p className="text-xl leading-relaxed text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>
+          <p className="text-xl leading-relaxed" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
             {post.text}
           </p>
 
