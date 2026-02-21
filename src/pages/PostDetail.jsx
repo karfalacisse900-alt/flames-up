@@ -137,33 +137,33 @@ export default function PostDetail() {
             </p>
           )}
 
-          <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[#EDE9E3]">
-            <span className="flex items-center gap-1 text-sm text-[#9B9B9B]">
+          <div className="flex items-center gap-4 mt-5 pt-4" style={{ borderTop: "1px solid var(--border-light)" }}>
+            <span className="flex items-center gap-1 text-sm" style={{ color: "var(--text-hint)" }}>
               <Heart className="w-4 h-4" /> {post.like_count || 0}
             </span>
-            <span className="text-sm text-[#9B9B9B]">{allReplies.length} replies</span>
+            <span className="text-sm" style={{ color: "var(--text-hint)" }}>{allReplies.length} replies</span>
           </div>
         </div>
 
         {/* Replies Section */}
          <div className="mt-6 space-y-3">
-           <h3 className="text-sm font-semibold text-[#2C2C2C] px-1 flex items-center gap-2">
+           <h3 className="text-sm font-semibold px-1 flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
              💬 Replies <span className="text-xs font-normal" style={{ color: "var(--text-hint)" }}>({allReplies.length})</span>
            </h3>
           {allReplies.length === 0 ? (
-            <p className="text-sm text-[#9B9B9B] text-center py-8">No replies yet. Be the first.</p>
+            <p className="text-sm text-center py-8" style={{ color: "var(--text-hint)" }}>No replies yet. Be the first.</p>
           ) : (
             allReplies.map((reply) => (
-              <div key={reply.id} className="bg-white rounded-xl p-4 border border-[#EDE9E3] flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#F5F0EB] flex items-center justify-center text-xs font-medium shrink-0">
+              <div key={reply.id} className="rounded-xl p-4 flex gap-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
                   {reply.is_anonymous ? "?" : (reply.author_name?.[0]?.toUpperCase() || "U")}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-medium text-[#6B6B6B]">
+                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
                       {reply.is_anonymous ? "Anonymous" : reply.author_name}
                     </span>
-                    <span className="text-[10px] text-[#9B9B9B]">
+                    <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>
                       {new Date(reply.created_date).toLocaleDateString()}
                     </span>
                   </div>
