@@ -46,7 +46,7 @@ function SwipeDiscoverCard({ item, onOpen }) {
           <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
         </div>
       </div>
-      <p className="text-sm text-[#6B6B6B] leading-relaxed flex-1">{item.description}</p>
+      <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
       {item.long_description && (
         <p className="text-xs text-[#9B9B9B] mt-2 line-clamp-2 leading-relaxed">{item.long_description}</p>
       )}
