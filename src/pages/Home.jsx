@@ -183,8 +183,8 @@ export default function Home() {
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-xs font-semibold"
+              onClick={() => setShowCreate(true)} className="text-slate-900 px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5"
+
               style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)" }}>
 
               <Plus className="w-4 h-4" /> Post
@@ -198,7 +198,7 @@ export default function Home() {
           {[["all", "All"], ["questions", "Questions"], ["quotes", "Quotes"], ["concerns", "Concerns"]].map(([val, label]) =>
           <button
             key={val}
-            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition-all"
+            onClick={() => {setActiveFilter(val);setCurrentIndex(0);}} className="bg-[#6F8F72] text-[#6F8F72] px-3 py-1 text-xs opacity-100 rounded-full border whitespace-nowrap transition-all"
 
             style={{
               backgroundColor: activeFilter === val ? "var(--accent-primary)" : "var(--bg-nav)",
@@ -213,7 +213,7 @@ export default function Home() {
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-hidden px-5 py-5" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="bg-[#8A7968] text-[#000000] my-10 px-5 py-5 opacity-100 flex-1 overflow-visible" style={{ backgroundColor: "var(--bg-app)" }}>
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
