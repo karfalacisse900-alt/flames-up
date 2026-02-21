@@ -361,10 +361,10 @@ export default function Profile() {
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {followers.length === 0 ? (
-              <p className="text-sm text-center text-[#9B9B9B] py-4">No followers yet</p>
+              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
             ) : followers.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
                   {f.follower_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
