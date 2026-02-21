@@ -11,9 +11,9 @@ import VoiceBubble from "../components/home/VoiceBubble";
 import PollOptions from "../components/home/PollOptions";
 
 const typeColors = {
-  question: "bg-amber-50 text-amber-700 border-amber-200",
-  quote: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  concern: "bg-rose-50 text-rose-700 border-rose-200",
+  question: "border",
+  quote: "border",
+  concern: "border",
 };
 
 export default function PostDetail() {
