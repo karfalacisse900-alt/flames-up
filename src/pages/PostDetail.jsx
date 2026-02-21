@@ -187,7 +187,7 @@ export default function PostDetail() {
       </div>
 
       {/* Reply input - sits above nav bar */}
-      <div className="fixed left-0 right-0 bg-white border-t border-[#EDE9E3] p-3 z-50" style={{ bottom: "56px" }}>
+      <div className="fixed left-0 right-0 p-3 z-50" style={{ bottom: "56px", backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)" }}>
         <div className="max-w-lg mx-auto space-y-2">
           <div className="flex items-center gap-2">
             <button
