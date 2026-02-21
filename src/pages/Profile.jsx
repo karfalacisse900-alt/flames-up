@@ -369,7 +369,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">{f.follower_name}</p>
-                  <p className="text-xs text-[#9B9B9B]">{f.follower_email}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.follower_email}</p>
                 </div>
               </div>
             ))}
