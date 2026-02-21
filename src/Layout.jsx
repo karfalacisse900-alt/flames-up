@@ -59,7 +59,7 @@ export default function Layout({ children, currentPageName }) {
                 key={item.name}
                 to={createPageUrl(item.page)}
                 className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
-                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: isActive ? 600 : 400 }}>
 
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   {showBadge &&
