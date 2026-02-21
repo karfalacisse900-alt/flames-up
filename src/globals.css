@@ -79,43 +79,6 @@ body {
   overscroll-behavior: none;
 }
 
-/* Global input/textarea theming */
-input, textarea, select {
-  background-color: var(--bg-input) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-light) !important;
-}
-input::placeholder, textarea::placeholder {
-  color: var(--text-hint) !important;
-}
-
-/* Card surface */
-.surface-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-light);
-}
-
-/* Switch component green tint */
-[data-state="checked"] {
-  background-color: var(--accent-primary) !important;
-}
-
-/* Tabs active state */
-[data-state="active"] {
-  background-color: var(--bg-app) !important;
-  color: var(--accent-primary) !important;
-}
-
-/* Dialog / modal backgrounds */
-[data-radix-dialog-content] {
-  background-color: var(--bg-card) !important;
-}
-
-/* General card backgrounds — override any white */
-.rounded-2xl, .rounded-xl, .rounded-3xl {
-  background-color: inherit;
-}
-
 * {
   -webkit-tap-highlight-color: transparent;
 }

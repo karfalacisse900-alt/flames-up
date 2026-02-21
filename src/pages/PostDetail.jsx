@@ -11,14 +11,9 @@ import VoiceBubble from "../components/home/VoiceBubble";
 import PollOptions from "../components/home/PollOptions";
 
 const typeColors = {
-  question: "",
-  quote: "",
-  concern: "",
-};
-const typeColorStyles = {
-  question: { backgroundColor: "rgba(217,139,98,0.10)", color: "#B8712E", borderColor: "rgba(217,139,98,0.25)" },
-  quote: { backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "rgba(60,110,90,0.25)" },
-  concern: { backgroundColor: "rgba(200,107,107,0.10)", color: "#C86B6B", borderColor: "rgba(200,107,107,0.25)" },
+  question: "bg-amber-50 text-amber-700 border-amber-200",
+  quote: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  concern: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 export default function PostDetail() {
@@ -114,13 +109,13 @@ export default function PostDetail() {
   if (!post) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+        <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", paddingBottom: "140px" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "140px" }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <Link to={createPageUrl("Home")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-card)" }}>
@@ -241,8 +236,7 @@ export default function PostDetail() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsAnonymous(!isAnonymous)}
-              className="p-2 rounded-full transition-colors shrink-0"
-              style={{ backgroundColor: isAnonymous ? "var(--accent-primary-light)" : "transparent", color: isAnonymous ? "var(--accent-primary)" : "var(--text-hint)" }}
+              className={`p-2 rounded-full transition-colors shrink-0 ${isAnonymous ? "bg-[#7C8C6E]/10 text-[#7C8C6E]" : "text-[#9B9B9B] hover:bg-gray-100"}`}
               title={isAnonymous ? "Anonymous" : "Public"}
             >
               <EyeOff className="w-4 h-4" />
@@ -251,7 +245,7 @@ export default function PostDetail() {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder={isAnonymous ? "Reply anonymously..." : "Reply..."}
-              className="flex-1 rounded-xl" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-input)" }}
+              className="flex-1 border-[#EDE9E3] rounded-xl"
               onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
             />
             <VoiceRecorder
@@ -263,7 +257,7 @@ export default function PostDetail() {
               onClick={handleSendReply}
               disabled={!replyText.trim() || sending}
               size="icon"
-              className="rounded-xl shrink-0" style={{ backgroundColor: "var(--accent-primary)" }}
+              className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>
