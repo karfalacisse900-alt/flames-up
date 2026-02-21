@@ -28,8 +28,18 @@ export default function PostDetail() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+    base44.auth.me().then(async (u) => {
+      setUser(u);
+      if (u?.email && postId) {
+        const posts = await base44.entities.Post.filter({ id: postId });
+        const p = posts[0];
+        if (p?.author_email && p.author_email !== u.email) {
+          const existing = await base44.entities.Follow.filter({ follower_email: u.email, following_email: p.author_email });
+          setFollowing(existing.length > 0);
+        }
+      }
+    }).catch(() => {});
+  }, [postId]);
 
   const { data: post } = useQuery({
     queryKey: ["post", postId],
