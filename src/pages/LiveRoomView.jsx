@@ -55,10 +55,33 @@ export default function LiveRoomView() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!messageText.trim()) return;
+    const text = messageText.trim();
+    if (!text) return;
+
+    // Check if user is muted or banned
+    const muted = room?.muted_users || [];
+    const banned = room?.banned_users || [];
+    if (banned.includes(user?.email)) {
+      alert("You have been banned from this room.");
+      return;
+    }
+    if (muted.includes(user?.email)) {
+      alert("You are muted in this room.");
+      return;
+    }
+
+    // Keyword filter check
+    const filters = room?.keyword_filters || [];
+    const lowerText = text.toLowerCase();
+    const blocked = filters.some((kw) => lowerText.includes(kw));
+    if (blocked) {
+      alert("Your message contains blocked content.");
+      return;
+    }
+
     await base44.entities.LiveMessage.create({
       room_id: roomId,
-      text: messageText.trim(),
+      text,
       author_email: user?.email || "",
       author_name: user?.full_name || "User",
       type: "message",
