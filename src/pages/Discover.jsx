@@ -34,7 +34,7 @@ const catColors = {
 
 function SwipeDiscoverCard({ item, onOpen }) {
   return (
-    <div className="h-full bg-white rounded-3xl p-6 flex flex-col cursor-pointer" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.10)" }} onClick={onOpen}>
+    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }} onClick={onOpen}>
       {item.is_sponsored && (
         <span className="self-start text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-3">Sponsored</span>
       )}
