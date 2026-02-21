@@ -114,7 +114,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="bg-[#EADFD3] px-6 py-16 flex-1 flex flex-col items-center justify-center">
+        <div className="px-6 py-16 flex-1 flex flex-col items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
           <p
             className="text-center w-full"
             style={{
