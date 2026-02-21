@@ -136,7 +136,7 @@ export default function Home() {
   // attach touch listeners to list in list mode — handled inline via onTouch* props
 
   return (
-    <div className="py-1 flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
       <div className="px-4 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
