@@ -9,12 +9,12 @@ css
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* ── Toasted Almond × Deep Forest Palette ── */
-  --bg-app:     #DCCBB8;   /* main app background */
-  --bg-card:    #E8DDD0;   /* card surface */
-  --bg-nav:     #DCCBB8;   /* nav bar */
-  --bg-subtle:  #D0C0AB;   /* inputs / divider areas */
-  --bg-modal:   #E8DDD0;   /* modal / sheet background */
+  /* ── Warm Cream Palette ── */
+  --bg-app:     #EDE8DF;   /* main app background */
+  --bg-card:    #F5F1EA;   /* card surface */
+  --bg-nav:     #EDE8DF;   /* nav bar */
+  --bg-subtle:  #E4DDD3;   /* inputs / divider areas */
+  --bg-modal:   #F5F1EA;   /* modal / sheet background */
 
   /* ── Text ── */
   --text-primary:   #1E1C19;   /* deep warm near-black */
