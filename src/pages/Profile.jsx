@@ -124,35 +124,44 @@ export default function Profile() {
               (user.display_name || user.full_name || "U")[0]?.toUpperCase()
             )}
           </div>
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <button onClick={() => setShowEdit(true)} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <Edit2 className="w-4 h-4" />
+          {/* Action buttons — compact */}
+          <div className="flex gap-2 items-center">
+            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
+              <Edit2 className="w-3.5 h-3.5" /> Edit
             </button>
-            <Link to={createPageUrl("Messages")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+            <Link to={createPageUrl("Messages")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <MessageSquare className="w-4 h-4" />
             </Link>
-            <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
+            <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
               <Wallet className="w-4 h-4" />
             </Link>
-            <Link to={createPageUrl("Referral")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "#D98B62" }}>
-              <Gift className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Shop")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
-              <ShoppingBag className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("Collections")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
-              <FolderOpen className="w-4 h-4" />
-            </Link>
-            <Link to={createPageUrl("EditServiceProfile")} className="p-2 rounded-full border" style={{ borderColor: "var(--border-light)", color: "var(--accent-primary)" }}>
-              <Briefcase className="w-4 h-4" />
-            </Link>
-            <button onClick={() => base44.auth.logout()} className="p-2 rounded-full border hover:text-red-500" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <LogOut className="w-4 h-4" />
-            </button>
-            <button onClick={() => setShowDeleteConfirm(true)} className="p-2 rounded-full border hover:bg-red-50" style={{ borderColor: "var(--border-light)", color: "#E53E3E" }}>
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {/* More dropdown */}
+            <div className="relative group">
+              <button className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              <div className="absolute right-0 top-10 z-50 w-48 rounded-2xl shadow-lg overflow-hidden opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                {[
+                  { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
+                  { to: createPageUrl("Shop"), icon: <ShoppingBag className="w-4 h-4" />, label: "Shop", color: "var(--accent-secondary)" },
+                  { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
+                  { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
+                ].map(({ to, icon, label, color }) => (
+                  <Link key={label} to={to} className="flex items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95"
+                    style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                    <span style={{ color }}>{icon}</span>
+                    {label}
+                  </Link>
+                ))}
+                <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "var(--text-secondary)" }}>
+                  <LogOut className="w-4 h-4" /> Sign Out
+                </button>
+                <button onClick={() => setShowDeleteConfirm(true)} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "#E53E3E" }}>
+                  <Trash2 className="w-4 h-4" /> Delete Account
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
