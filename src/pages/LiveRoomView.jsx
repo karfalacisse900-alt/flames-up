@@ -187,15 +187,20 @@ export default function LiveRoomView() {
             </div>
           </div>
         </div>
-        {isHost && (
-          <button
-            onClick={endSession}
-            className="text-xs px-3 py-1.5 rounded-full font-medium transition-colors text-white"
-            style={{ backgroundColor: "#C0392B" }}
-          >
-            End
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {isHost && (
+            <HostModerationPanel room={room} onRoomUpdated={refetchRoom} />
+          )}
+          {isHost && (
+            <button
+              onClick={endSession}
+              className="text-xs px-3 py-1.5 rounded-full font-medium transition-colors text-white"
+              style={{ backgroundColor: "#C0392B" }}
+            >
+              End
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Top Supporters + entry price bar */}
