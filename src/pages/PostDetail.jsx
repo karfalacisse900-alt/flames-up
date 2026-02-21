@@ -129,7 +129,39 @@ export default function PostDetail() {
         <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-4">
             <span className={`text-xs px-3 py-1 rounded-full border capitalize ${typeColors[post.type]}`}>{post.type}</span>
-            <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+              {!post.is_anonymous && post.author_email && user?.email && post.author_email !== user.email && (
+                <button
+                  onClick={async () => {
+                    setFollowLoading(true);
+                    if (following) {
+                      const existing = await base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email });
+                      if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
+                      setFollowing(false);
+                    } else {
+                      await base44.entities.Follow.create({
+                        follower_email: user.email,
+                        follower_name: user.display_name || user.full_name || user.email,
+                        following_email: post.author_email,
+                        following_name: post.author_name || post.author_email,
+                      });
+                      setFollowing(true);
+                    }
+                    setFollowLoading(false);
+                  }}
+                  disabled={followLoading}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium transition-all border"
+                  style={{
+                    backgroundColor: following ? "var(--accent-primary)" : "transparent",
+                    color: following ? "#fff" : "var(--accent-primary)",
+                    borderColor: "var(--accent-primary)"
+                  }}>
+                  {following ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
+                  {following ? "Following" : "Follow"}
+                </button>
+              )}
+            </div>
           </div>
           <p className="text-xl leading-relaxed" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
             {post.text}
