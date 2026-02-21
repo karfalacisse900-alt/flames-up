@@ -41,8 +41,8 @@ function SwipeDiscoverCard({ item, onOpen }) {
       <div className="flex items-center gap-4 mb-4">
         <DiscoverLogo item={item} size="lg" />
         <div>
-          <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{item.title}</h2>
-          <p className="text-sm text-[#9B9B9B]">{item.brand_name}</p>
+          <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{item.title}</h2>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
           <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
         </div>
       </div>
