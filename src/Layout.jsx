@@ -51,15 +51,15 @@ export default function Layout({ children, currentPageName }) {
       {!hideNav &&
       <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
           <div className="max-w-lg mx-auto flex justify-around items-center py-2 px-2">
-            {navItems.map((item) => {
-            const isActive = currentPageName === item.page;
-            const showBadge = item.page === "Notifications" && unreadCount > 0;
-            return (
-              <Link
-                key={item.name}
-                to={createPageUrl(item.page)}
-                className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
-                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                {navItems.map((item) => {
+                const isActive = currentPageName === item.page;
+                const showBadge = item.page === "Notifications" && unreadCount > 0;
+                return (
+                  <Link
+                    key={item.name}
+                    to={createPageUrl(item.page)}
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
+                    style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: isActive ? 600 : 400 }}>
 
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   {showBadge &&
