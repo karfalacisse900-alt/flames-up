@@ -141,25 +141,24 @@ export default function Home() {
       <div className="px-4 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Feed tabs */}
         <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide">
-          {[["all", "All Thoughts"], ["following", "Following"]].map(([val, label]) =>
+          {[["all", "✦ All Thoughts"], ["following", "👥 Following"]].map(([val, label]) =>
           <button
             key={val}
             onClick={() => {setFeedTab(val);setLikedTab(false);setCurrentIndex(0);}}
-            className="flex items-center gap-1.5 text-sm font-semibold pb-1 transition-all whitespace-nowrap shrink-0"
+            className="flex items-center gap-1.5 text-sm font-semibold pb-1.5 transition-all whitespace-nowrap shrink-0"
             style={{
               color: !likedTab && feedTab === val ? "var(--accent-primary)" : "var(--text-hint)",
-              borderBottom: !likedTab && feedTab === val ? "2px solid var(--accent-primary)" : "2px solid transparent"
+              borderBottom: !likedTab && feedTab === val ? "2.5px solid var(--accent-primary)" : "2.5px solid transparent"
             }}>
-              {val === "following" && <Users className="w-3.5 h-3.5" />}
               {label}
             </button>
           )}
           <button
             onClick={() => {setLikedTab(true);setCurrentIndex(0);}}
-            className="flex items-center gap-1.5 text-sm font-semibold pb-1 transition-all whitespace-nowrap shrink-0"
+            className="flex items-center gap-1.5 text-sm font-semibold pb-1.5 transition-all whitespace-nowrap shrink-0"
             style={{
-              color: likedTab ? "#E07070" : "var(--text-hint)",
-              borderBottom: likedTab ? "2px solid #E07070" : "2px solid transparent"
+              color: likedTab ? "#C86B6B" : "var(--text-hint)",
+              borderBottom: likedTab ? "2.5px solid #C86B6B" : "2.5px solid transparent"
             }}>
             ♥ Liked
           </button>
