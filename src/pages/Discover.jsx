@@ -34,29 +34,29 @@ const catColors = {
 
 function SwipeDiscoverCard({ item, onOpen }) {
   return (
-    <div className="h-full bg-white rounded-3xl p-6 flex flex-col cursor-pointer" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.10)" }} onClick={onOpen}>
+    <div className="h-full rounded-3xl p-6 flex flex-col cursor-pointer" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 40px rgba(0,0,0,0.08)" }} onClick={onOpen}>
       {item.is_sponsored && (
-        <span className="self-start text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 mb-3">Sponsored</span>
+        <span className="self-start text-[10px] px-2 py-0.5 rounded-full mb-3" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>Sponsored</span>
       )}
       <div className="flex items-center gap-4 mb-4">
         <DiscoverLogo item={item} size="lg" />
         <div>
-          <h2 className="text-xl font-semibold text-[#2C2C2C]" style={{ fontFamily: "var(--font-serif)" }}>{item.title}</h2>
-          <p className="text-sm text-[#9B9B9B]">{item.brand_name}</p>
+          <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{item.title}</h2>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
           <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
         </div>
       </div>
-      <p className="text-sm text-[#6B6B6B] leading-relaxed flex-1">{item.description}</p>
+      <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
       {item.long_description && (
-        <p className="text-xs text-[#9B9B9B] mt-2 line-clamp-2 leading-relaxed">{item.long_description}</p>
+        <p className="text-xs mt-2 line-clamp-2 leading-relaxed" style={{ color: "var(--text-hint)" }}>{item.long_description}</p>
       )}
       <div className="flex flex-wrap gap-2 mt-4">
         <span className={`text-xs px-3 py-1 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-700"}`}>
           {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
         </span>
-        {item.pricing && <span className="text-xs px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">{item.pricing}</span>}
+        {item.pricing && <span className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>{item.pricing}</span>}
         {item.promo && (
-          <span className="text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">✓ {item.promo}</span>
+          <span className="text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--border-light)" }}>✓ {item.promo}</span>
         )}
       </div>
       <div className="flex gap-2 mt-4">
@@ -247,7 +247,7 @@ export default function Discover() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
                   <Input placeholder="Search tools, apps, services..." value={search}
                     onChange={e => { setSearch(e.target.value); setSwipeIndex(0); }}
-                    className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm" />
+                    className="pl-10 rounded-xl text-sm" />
                 </div>
                 <button onClick={() => setShowFilters(f => !f)}
                   className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-colors"
@@ -345,12 +345,12 @@ export default function Discover() {
                     </AnimatePresence>
                   </div>
                   <div className="flex items-center justify-center gap-6 mt-4">
-                    <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                      <ChevronLeft className="w-5 h-5" />
+                    <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                      <ChevronLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
                     </button>
                     <span className="text-xs" style={{ color: "var(--text-hint)" }}>{swipeIndex + 1} / {filtered.length}</span>
-                    <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full bg-white border border-[#EDE9E3] disabled:opacity-30">
-                      <ChevronRight className="w-5 h-5" />
+                    <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                      <ChevronRight className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
                     </button>
                   </div>
                 </>
@@ -419,8 +419,8 @@ export default function Discover() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
               <Input placeholder="Search by name, skill, role..." value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-10 border-[#EDE9E3] rounded-xl bg-white text-sm" />
+               onChange={e => setSearch(e.target.value)}
+               className="pl-10 rounded-xl text-sm" />
             </div>
           </div>
           {spLoading ? (
