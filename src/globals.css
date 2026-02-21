@@ -1,4 +1,3 @@
-css
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -9,54 +8,59 @@ css
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Base Neutrals - Warm Beige */
-  --bg-app: #F4ECE4;
-  --bg-card: #EADFD3;
-  --bg-nav: #F4ECE4;
-  --bg-subtle: #F1E8DC;
+  /* ── Toasted Almond Palette ── */
+  --bg-app:     #EDE8DF;   /* warm cream — the Collections page bg */
+  --bg-card:    #F5F1EA;   /* slightly lighter card surface */
+  --bg-nav:     #EDE8DF;   /* nav bar matches app bg */
+  --bg-subtle:  #E6E0D5;   /* slightly darker for inputs / divider areas */
+  --bg-modal:   #F5F1EA;   /* modal / sheet background */
 
-  /* Text - Deep Warm Tones */
-  --text-primary: #4A3A2A;
-  --text-secondary: #8A7968;
-  --text-hint: #A69B8F;
+  /* ── Text ── */
+  --text-primary:   #1C1C1A;   /* near-black, warm */
+  --text-secondary: #5C5750;   /* medium warm gray */
+  --text-hint:      #9E9790;   /* muted placeholder */
 
-  /* Calm Green - Primary Brand Color */
-  --accent-primary: #6F8F72;
-  --accent-primary-hover: #5C7A5F;
-  
-  /* Muted Olive Gold - Elegant Accent */
-  --accent-secondary: #B7A67A;
-  --accent-secondary-hover: #A6956B;
+  /* ── Forest Green — primary brand ── */
+  --accent-primary:       #2D6A4F;   /* rich forest green (Collections "+" button) */
+  --accent-primary-hover: #235840;   /* pressed / hover state */
+  --accent-primary-light: #E8F0EB;   /* very soft green tint for ghost/outlined use */
 
-  /* Borders - Warm & Soft */
-  --border-light: #E8DDD1;
-  --border-medium: #DED1C5;
-  --border-subtle: #F1E8DC;
+  /* ── Warm Gold — secondary accent (subtle) ── */
+  --accent-secondary:       #A08C5B;
+  --accent-secondary-hover: #8C7A4E;
 
-  /* Safe area insets */
-  --safe-top: env(safe-area-inset-top, 0px);
+  /* ── Borders ── */
+  --border-light:  #E0D9CE;   /* very subtle divider */
+  --border-medium: #D4CCBF;   /* slightly more visible */
+  --border-subtle: #EAE4D9;   /* almost invisible */
+
+  /* Safe area */
+  --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app: #2D261C;
-    --bg-card: #3A3228;
-    --bg-nav: #2D261C;
-    --bg-subtle: #403A30;
+    --bg-app:    #2A2520;
+    --bg-card:   #342E28;
+    --bg-nav:    #2A2520;
+    --bg-subtle: #3D3730;
+    --bg-modal:  #342E28;
 
-    --text-primary: #E8DCD0;
-    --text-secondary: #B8AFA3;
-    --text-hint: #8F8680;
+    --text-primary:   #F0EBE3;
+    --text-secondary: #B5ADA4;
+    --text-hint:      #857E77;
 
-    --accent-primary: #7FA57E;
-    --accent-primary-hover: #6B9170;
-    --accent-secondary: #C4B294;
-    --accent-secondary-hover: #B3A183;
+    --accent-primary:       #4C9A74;
+    --accent-primary-hover: #3D8562;
+    --accent-primary-light: #1E3329;
 
-    --border-light: #463E34;
-    --border-medium: #4E4640;
-    --border-subtle: #484038;
+    --accent-secondary:       #B8A06A;
+    --accent-secondary-hover: #A08C58;
+
+    --border-light:  #3E3830;
+    --border-medium: #4A4438;
+    --border-subtle: #38322C;
   }
 }
 
@@ -76,29 +80,26 @@ body {
 
 input, textarea, select {
   font-size: 16px !important;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+input::placeholder, textarea::placeholder {
+  color: var(--text-hint);
 }
 
-.font-sans {
-  font-family: var(--font-sans);
-}
+.font-serif { font-family: var(--font-serif); }
+.font-sans  { font-family: var(--font-sans); }
 
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
-/* Safe area padding utilities */
-.safe-top { padding-top: env(safe-area-inset-top, 0px); }
+.safe-top    { padding-top: env(safe-area-inset-top, 0px); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Disable text selection on interactive UI */
 nav, button, a[role="button"], .no-select {
   -webkit-user-select: none;
   user-select: none;
@@ -109,13 +110,40 @@ nav, button, a[role="button"], .no-select {
     @apply border-[var(--border-light)];
   }
 
-  /* Organic smoothing for cards */
   .organic-shadow {
-    box-shadow: 0 2px 8px rgba(74, 58, 42, 0.06), 0 4px 16px rgba(74, 58, 42, 0.04);
+    box-shadow: 0 2px 8px rgba(28, 28, 26, 0.06), 0 4px 16px rgba(28, 28, 26, 0.04);
   }
 
-  /* Smooth button transitions */
   button, a {
     transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
   }
+}
+
+/* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
+
+/* Cards / sheets that use bg-white → warm card */
+.bg-white  { background-color: var(--bg-card) !important; }
+
+/* Very light grays → subtle bg */
+.bg-gray-50 { background-color: var(--bg-subtle) !important; }
+.bg-gray-100 { background-color: var(--bg-card) !important; }
+
+/* Text grays → warm equivalents */
+.text-gray-400 { color: var(--text-hint) !important; }
+.text-gray-500 { color: var(--text-hint) !important; }
+.text-gray-600 { color: var(--text-secondary) !important; }
+.text-gray-700 { color: var(--text-secondary) !important; }
+.text-gray-800 { color: var(--text-primary) !important; }
+.text-gray-900 { color: var(--text-primary) !important; }
+
+/* Border grays → warm borders */
+.border-gray-100 { border-color: var(--border-subtle) !important; }
+.border-gray-200 { border-color: var(--border-light) !important; }
+.border-gray-300 { border-color: var(--border-medium) !important; }
+
+/* Radix / shadcn dialog & sheet portals */
+[data-radix-popper-content-wrapper] > *,
+[role="dialog"] > * {
+  background-color: var(--bg-modal);
+  color: var(--text-primary);
 }
