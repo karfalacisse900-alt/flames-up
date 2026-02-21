@@ -33,7 +33,7 @@ export default function Layout({ children, currentPageName }) {
   const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop"].includes(currentPageName);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
+    <div className="bg-[#F4ECE4] text-[#000000] min-h-screen" style={{ backgroundColor: "var(--bg-app)", fontFamily: "var(--font-sans)" }}>
       <div className="max-w-lg mx-auto relative pb-20">
         <AnimatePresence mode="wait">
           <motion.div
@@ -59,7 +59,7 @@ export default function Layout({ children, currentPageName }) {
                 key={item.name}
                 to={createPageUrl(item.page)}
                 className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
-                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: isActive ? 600 : 400 }}>
+                style={{ color: isActive ? "var(--accent-primary)" : "var(--text-hint)" }}>
 
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   {showBadge &&

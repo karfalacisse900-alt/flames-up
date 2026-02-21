@@ -70,7 +70,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
   };
 
   // Background color varies slightly by type, all very light
-  const bgColor = "var(--bg-card)";
+  const bgColor = post.type === "question" ? "#F9F7F2" : post.type === "concern" ? "#F9F5F5" : "#F7F9F5";
 
   return (
     <motion.div
@@ -114,14 +114,14 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
         </div>
 
         {/* Main text — centered, clean, Napkin-style */}
-        <div className="px-6 py-16 flex-1 flex flex-col items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+        <div className="bg-[#EADFD3] px-6 py-16 flex-1 flex flex-col items-center justify-center">
           <p
             className="text-center w-full"
             style={{
               fontFamily: getFontStyle(post.font_family || "serif"),
               fontSize: post.text?.length > 220 ? "1.1rem" : post.text?.length > 120 ? "1.35rem" : "1.6rem",
               lineHeight: "1.75",
-              color: "var(--text-primary)",
+              color: "#1E1E1E",
               fontWeight: 400
             }}>
 
@@ -140,7 +140,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             style={{
               fontFamily: "var(--font-serif)",
               fontSize: "1rem",
-              color: "var(--text-hint)",
+              color: "#888",
               fontStyle: "italic"
             }}>
 
