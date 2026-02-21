@@ -48,7 +48,7 @@ function SwipeDiscoverCard({ item, onOpen }) {
       </div>
       <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
       {item.long_description && (
-        <p className="text-xs text-[#9B9B9B] mt-2 line-clamp-2 leading-relaxed">{item.long_description}</p>
+        <p className="text-xs mt-2 line-clamp-2 leading-relaxed" style={{ color: "var(--text-hint)" }}>{item.long_description}</p>
       )}
       <div className="flex flex-wrap gap-2 mt-4">
         <span className={`text-xs px-3 py-1 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-700"}`}>
