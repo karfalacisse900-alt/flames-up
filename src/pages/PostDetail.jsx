@@ -11,9 +11,9 @@ import VoiceBubble from "../components/home/VoiceBubble";
 import PollOptions from "../components/home/PollOptions";
 
 const typeColors = {
-  question: "border",
-  quote: "border",
-  concern: "border",
+  question: "bg-amber-50 text-amber-700 border-amber-200",
+  quote: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  concern: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 export default function PostDetail() {
@@ -115,7 +115,7 @@ export default function PostDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", paddingBottom: "140px" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "140px" }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <Link to={createPageUrl("Home")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-card)" }}>
@@ -128,7 +128,7 @@ export default function PostDetail() {
       <div className="px-5 mt-4">
         <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs px-3 py-1 rounded-full border capitalize" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{post.type}</span>
+            <span className={`text-xs px-3 py-1 rounded-full border capitalize ${typeColors[post.type]}`}>{post.type}</span>
             <div className="flex items-center gap-2">
               <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
               {!post.is_anonymous && post.author_email && user?.email && post.author_email !== user.email && (
@@ -246,8 +246,7 @@ export default function PostDetail() {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder={isAnonymous ? "Reply anonymously..." : "Reply..."}
-              className="flex-1 rounded-xl"
-              style={{ borderColor: "var(--border-light)" }}
+              className="flex-1 border-[#EDE9E3] rounded-xl"
               onKeyDown={(e) => e.key === "Enter" && handleSendReply()}
             />
             <VoiceRecorder
@@ -259,8 +258,7 @@ export default function PostDetail() {
               onClick={handleSendReply}
               disabled={!replyText.trim() || sending}
               size="icon"
-              className="rounded-xl shrink-0"
-              style={{ backgroundColor: "var(--accent-primary)" }}
+              className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>
