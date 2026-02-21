@@ -265,7 +265,7 @@ export default function Home() {
             )}
               </AnimatePresence>
               {/* Card counter */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-[#9B9B9B] z-20 pb-1">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs z-20 pb-1" style={{ color: "var(--text-hint)" }}>
                 {currentIndex + 1} / {filtered.length}
               </div>
             </div>) : (
