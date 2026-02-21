@@ -140,7 +140,7 @@ export default function FullScreenSwipeCard({ post, onLike, onSkip, onFavorite, 
             style={{
               fontFamily: "var(--font-serif)",
               fontSize: "1rem",
-              color: "#888",
+              color: "var(--text-hint)",
               fontStyle: "italic"
             }}>
 
