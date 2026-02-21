@@ -227,29 +227,14 @@ export default function LiveRoomView() {
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 relative">
         {messages.map((msg) => (
-          <div
+          <ChatMessage
             key={msg.id}
-            className={`flex items-start gap-2 ${msg.type === "reaction" ? "opacity-70" : ""}`}
-          >
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium shrink-0"
-              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}
-            >
-              {msg.author_name?.[0]?.toUpperCase() || "?"}
-            </div>
-            <div>
-              <span className="text-xs font-medium" style={{ color: "var(--accent-secondary)" }}>{msg.author_name}</span>
-              <p
-                className="text-sm mt-0.5"
-                style={{
-                  color: msg.type === "reaction" ? "var(--accent-secondary)" : "var(--text-primary)",
-                  fontStyle: msg.type === "reaction" ? "italic" : "normal",
-                }}
-              >
-                {msg.text}
-              </p>
-            </div>
-          </div>
+            msg={msg}
+            isHost={isHost}
+            currentUser={user}
+            room={room}
+            onRoomUpdated={refetchRoom}
+          />
         ))}
         <div ref={chatEndRef} />
 
