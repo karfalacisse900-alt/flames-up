@@ -259,7 +259,8 @@ export default function PostDetail() {
               onClick={handleSendReply}
               disabled={!replyText.trim() || sending}
               size="icon"
-              className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0"
+              className="rounded-xl shrink-0"
+              style={{ backgroundColor: "var(--accent-primary)" }}
             >
               <Send className="w-4 h-4" />
             </Button>
