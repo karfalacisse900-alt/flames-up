@@ -42,26 +42,26 @@ css
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app:    #2A2520;
-    --bg-card:   #342E28;
-    --bg-nav:    #2A2520;
-    --bg-subtle: #3D3730;
-    --bg-modal:  #342E28;
+    --bg-app:    #2A241E;
+    --bg-card:   #342C24;
+    --bg-nav:    #2A241E;
+    --bg-subtle: #3D342A;
+    --bg-modal:  #342C24;
 
-    --text-primary:   #F0EBE3;
-    --text-secondary: #B5ADA4;
-    --text-hint:      #857E77;
+    --text-primary:   #EDE4D8;
+    --text-secondary: #B0A496;
+    --text-hint:      #7A7068;
 
-    --accent-primary:       #4C9A74;
-    --accent-primary-hover: #3D8562;
-    --accent-primary-light: #1E3329;
+    --accent-primary:       #3A6050;
+    --accent-primary-hover: #2D4D3F;
+    --accent-primary-light: #1A2E26;
 
-    --accent-secondary:       #B8A06A;
-    --accent-secondary-hover: #A08C58;
+    --accent-secondary:       #BF9E79;
+    --accent-secondary-hover: #A8885F;
 
-    --border-light:  #3E3830;
-    --border-medium: #4A4438;
-    --border-subtle: #38322C;
+    --border-light:  #4A3E32;
+    --border-medium: #5A4E40;
+    --border-subtle: #3E3428;
   }
 }
 
