@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import TopSupportersTicker from "../components/live/TopSupportersTicker";
 import GiftPanel from "../components/live/GiftPanel";
+import HostModerationPanel from "../components/live/HostModerationPanel";
+import ChatMessage from "../components/live/ChatMessage";
 
 export default function LiveRoomView() {
   const params = new URLSearchParams(window.location.search);
