@@ -1,34 +1,44 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Users, Gift } from "lucide-react";
+import { ArrowLeft, Send, Users } from "lucide-react";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import TopSupportersTicker from "../components/live/TopSupportersTicker";
+import GiftPanel from "../components/live/GiftPanel";
 
 export default function LiveRoomView() {
   const params = new URLSearchParams(window.location.search);
   const roomId = params.get("id");
   const [user, setUser] = useState(null);
+  const [userBalance, setUserBalance] = useState(0);
   const [messageText, setMessageText] = useState("");
-  const [floatingReactions, setFloatingReactions] = useState([]);
+  const [floatingGifts, setFloatingGifts] = useState([]);
   const chatEndRef = useRef(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(async (u) => {
+      setUser(u);
+      if (u?.email) {
+        const bal = await getBalance(u.email);
+        setUserBalance(bal);
+      }
+    }).catch(() => {});
   }, []);
 
-  const { data: room } = useQuery({
+  const { data: room, refetch: refetchRoom } = useQuery({
     queryKey: ["room", roomId],
     queryFn: async () => {
       const rooms = await base44.entities.LiveRoom.filter({ id: roomId });
       return rooms[0];
     },
     enabled: !!roomId,
+    refetchInterval: 8000,
   });
 
   const { data: messages = [] } = useQuery({
@@ -55,24 +65,64 @@ export default function LiveRoomView() {
     queryClient.invalidateQueries({ queryKey: ["liveMessages", roomId] });
   };
 
-  const sendGift = async (emoji, cost) => {
-    if (!user?.email) return;
-    const bal = await getBalance(user.email);
-    if (bal < cost) { alert(`Need ⬡${cost} coins to send this gift!`); return; }
-    await addCoins(user.email, -cost, "gift_sent", `Sent ${emoji} gift in live`, roomId);
-    if (room?.host_email && room.host_email !== user.email) {
-      await addCoins(room.host_email, cost, "gift_received", `Received ${emoji} gift from ${user.full_name || user.email}`, roomId);
-    }
-    sendReaction(emoji);
+  const spawnFloatingGift = (emoji) => {
+    const id = Date.now() + Math.random();
+    const x = 20 + Math.random() * 60; // percent from left
+    setFloatingGifts((prev) => [...prev, { id, emoji, x }]);
+    setTimeout(() => {
+      setFloatingGifts((prev) => prev.filter((r) => r.id !== id));
+    }, 2200);
   };
 
-  const sendReaction = (emoji) => {
-    const id = Date.now();
-    setFloatingReactions((prev) => [...prev, { id, emoji }]);
-    setTimeout(() => {
-      setFloatingReactions((prev) => prev.filter((r) => r.id !== id));
-    }, 2000);
+  const handleSendGift = async (emoji, cost, label) => {
+    if (!user?.email) return;
+    const bal = await getBalance(user.email);
+    if (bal < cost) {
+      alert(`You need ⬡${cost} coins to send ${label}. You have ⬡${bal}.`);
+      return;
+    }
+
+    // Deduct from sender
+    await addCoins(user.email, -cost, "gift_sent", `Sent ${label} ${emoji} in live room`, roomId);
+
+    // Award to host
+    if (room?.host_email && room.host_email !== user.email) {
+      await addCoins(room.host_email, cost, "gift_received", `${label} ${emoji} gift from ${user.full_name || user.email}`, roomId);
+    }
+
+    // Update top supporters on the room
+    const existingSupports = room?.top_supporters || [];
+    const idx = existingSupports.findIndex((s) => s.email === user.email);
+    let updated;
+    if (idx >= 0) {
+      updated = existingSupports.map((s, i) => i === idx ? { ...s, total_coins: (s.total_coins || 0) + cost } : s);
+    } else {
+      updated = [...existingSupports, { email: user.email, name: user.full_name || user.email, total_coins: cost }];
+    }
+    updated.sort((a, b) => (b.total_coins || 0) - (a.total_coins || 0));
+    const top5 = updated.slice(0, 5);
+
+    await base44.entities.LiveRoom.update(roomId, {
+      top_supporters: top5,
+      total_gifts_received: (room?.total_gifts_received || 0) + cost,
+    });
+
+    // Post gift message in chat
+    await base44.entities.LiveMessage.create({
+      room_id: roomId,
+      text: `${emoji} ${user.full_name || "Someone"} sent a ${label}! (⬡${cost})`,
+      author_email: user?.email || "",
+      author_name: user?.full_name || "User",
+      type: "reaction",
+    });
+
+    setUserBalance((prev) => prev - cost);
+    spawnFloatingGift(emoji);
+    queryClient.invalidateQueries({ queryKey: ["liveMessages", roomId] });
+    refetchRoom();
   };
+
+  const handleReaction = (emoji) => spawnFloatingGift(emoji);
 
   const endSession = async () => {
     if (room && user?.email === room.host_email) {
@@ -83,8 +133,8 @@ export default function LiveRoomView() {
 
   if (!room) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
       </div>
     );
   }
@@ -92,54 +142,98 @@ export default function LiveRoomView() {
   const isHost = user?.email === room.host_email;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ height: "100dvh" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+
       {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between bg-white border-b border-[#EDE9E3]">
+      <div
+        className="px-4 py-3 flex items-center justify-between shrink-0"
+        style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}
+      >
         <div className="flex items-center gap-3">
-          <Link to={createPageUrl("Live")} className="p-2 rounded-full hover:bg-gray-100">
-            <ArrowLeft className="w-5 h-5" />
+          <Link to={createPageUrl("Live")} className="p-2 rounded-full transition-colors" style={{ backgroundColor: "var(--bg-app)" }}>
+            <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
           </Link>
-          <div>
-            <h2 className="font-medium text-sm">{room.title}</h2>
-            <div className="flex items-center gap-2 text-xs text-[#9B9B9B]">
+          <div className="min-w-0">
+            <h2 className="font-medium text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{room.title}</h2>
+            <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-hint)" }}>
               <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              <span>Live • {room.host_name}</span>
+              <span>Live · {room.host_name}</span>
               <span className="flex items-center gap-0.5"><Users className="w-3 h-3" /> {room.viewer_count || 0}</span>
             </div>
           </div>
         </div>
         {isHost && (
-          <Button size="sm" variant="destructive" onClick={endSession} className="h-8 text-xs rounded-lg">
+          <button
+            onClick={endSession}
+            className="text-xs px-3 py-1.5 rounded-full font-medium transition-colors text-white"
+            style={{ backgroundColor: "#C0392B" }}
+          >
             End
-          </Button>
+          </button>
         )}
       </div>
 
+      {/* Top Supporters + entry price bar */}
+      <div
+        className="px-4 py-2 flex items-center justify-between shrink-0"
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)" }}
+      >
+        <TopSupportersTicker supporters={room.top_supporters || []} />
+        <div className="flex items-center gap-2">
+          {room.entry_price > 0 && (
+            <span className="text-[10px] px-2 py-1 rounded-full font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>
+              ⬡{room.entry_price} entry
+            </span>
+          )}
+          {room.total_gifts_received > 0 && (
+            <span className="text-[10px] px-2 py-1 rounded-full" style={{ color: "var(--text-hint)" }}>
+              🎁 ⬡{room.total_gifts_received}
+            </span>
+          )}
+          <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>You: ⬡{userBalance}</span>
+        </div>
+      </div>
+
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 relative">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 relative">
         {messages.map((msg) => (
-          <div key={msg.id} className="flex items-start gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-xs font-medium">
+          <div
+            key={msg.id}
+            className={`flex items-start gap-2 ${msg.type === "reaction" ? "opacity-70" : ""}`}
+          >
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium shrink-0"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}
+            >
               {msg.author_name?.[0]?.toUpperCase() || "?"}
             </div>
             <div>
-              <span className="text-xs font-medium text-[#7C8C6E]">{msg.author_name}</span>
-              <p className="text-sm text-[#2C2C2C] mt-0.5">{msg.text}</p>
+              <span className="text-xs font-medium" style={{ color: "var(--accent-secondary)" }}>{msg.author_name}</span>
+              <p
+                className="text-sm mt-0.5"
+                style={{
+                  color: msg.type === "reaction" ? "var(--accent-secondary)" : "var(--text-primary)",
+                  fontStyle: msg.type === "reaction" ? "italic" : "normal",
+                }}
+              >
+                {msg.text}
+              </p>
             </div>
           </div>
         ))}
         <div ref={chatEndRef} />
 
-        {/* Floating reactions */}
+        {/* Floating gift animations */}
         <AnimatePresence>
-          {floatingReactions.map((r) => (
+          {floatingGifts.map((r) => (
             <motion.div
               key={r.id}
-              className="absolute bottom-4 right-4 text-2xl pointer-events-none"
+              className="absolute text-3xl pointer-events-none"
+              style={{ left: `${r.x}%`, bottom: "16px" }}
               initial={{ opacity: 1, y: 0, scale: 1 }}
-              animate={{ opacity: 0, y: -120, scale: 1.5 }}
+              animate={{ opacity: 0, y: -160, scale: 2 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              transition={{ duration: 2, ease: "easeOut" }}
             >
               {r.emoji}
             </motion.div>
@@ -147,32 +241,22 @@ export default function LiveRoomView() {
         </AnimatePresence>
       </div>
 
-      {/* Bottom */}
-      <div className="border-t border-[#EDE9E3] bg-white p-3">
-        <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-hide">
-          {["❤️", "👍", "🔥", "😂", "🤔"].map((emoji) => (
-            <button key={emoji} onClick={() => sendReaction(emoji)}
-              className="w-8 h-8 rounded-full bg-[#F5F0EB] hover:bg-[#EDE9E3] flex items-center justify-center text-sm shrink-0">
-              {emoji}
-            </button>
-          ))}
-          <div className="w-px h-6 bg-[#EDE9E3] mx-1 shrink-0" />
-          {[{ e: "🌹", c: 5 }, { e: "💎", c: 20 }, { e: "👑", c: 50 }].map(({ e, c }) => (
-            <button key={e} onClick={() => sendGift(e, c)}
-              className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs shrink-0">
-              {e}<span className="text-amber-600 font-medium">⬡{c}</span>
-            </button>
-          ))}
-        </div>
+      {/* Bottom panel */}
+      <div
+        className="shrink-0 px-4 pb-4 pt-3 space-y-3"
+        style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}
+      >
+        <GiftPanel onSendGift={handleSendGift} onReaction={handleReaction} userBalance={userBalance} />
+
         <div className="flex gap-2">
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             placeholder="Say something..."
-            className="border-[#EDE9E3] rounded-xl"
+            className="rounded-xl flex-1"
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <Button onClick={sendMessage} size="icon" className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0">
+          <Button onClick={sendMessage} size="icon" className="rounded-xl shrink-0">
             <Send className="w-4 h-4" />
           </Button>
         </div>
