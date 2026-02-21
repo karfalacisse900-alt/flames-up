@@ -105,8 +105,8 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
       </div>
     );
   }
@@ -361,15 +361,15 @@ export default function Profile() {
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {followers.length === 0 ? (
-              <p className="text-sm text-center text-[#9B9B9B] py-4">No followers yet</p>
+              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
             ) : followers.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
                   {f.follower_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{f.follower_name}</p>
-                  <p className="text-xs text-[#9B9B9B]">{f.follower_email}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.follower_name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.follower_email}</p>
                 </div>
               </div>
             ))}
@@ -385,15 +385,15 @@ export default function Profile() {
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
             {following.length === 0 ? (
-              <p className="text-sm text-center text-[#9B9B9B] py-4">Not following anyone yet</p>
+              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p>
             ) : following.map((f) => (
               <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-medium">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
                   {f.following_name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{f.following_name}</p>
-                  <p className="text-xs text-[#9B9B9B]">{f.following_email}</p>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.following_name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.following_email}</p>
                 </div>
               </div>
             ))}
