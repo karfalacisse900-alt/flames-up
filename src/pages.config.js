@@ -48,45 +48,45 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminModeration from './pages/AdminModeration';
+import Art from './pages/Art';
 import Collections from './pages/Collections';
+import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
+import Home from './pages/Home';
 import Live from './pages/Live';
 import LiveRoomView from './pages/LiveRoomView';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
+import PostDetail from './pages/PostDetail';
+import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import Art from './pages/Art';
-import Profile from './pages/Profile';
-import Home from './pages/Home';
-import Discover from './pages/Discover';
-import PostDetail from './pages/PostDetail';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminModeration": AdminModeration,
+    "Art": Art,
     "Collections": Collections,
+    "Discover": Discover,
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
     "GamePlay": GamePlay,
     "Games": Games,
+    "Home": Home,
     "Live": Live,
     "LiveRoomView": LiveRoomView,
     "Messages": Messages,
     "Notifications": Notifications,
+    "PostDetail": PostDetail,
+    "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "Art": Art,
-    "Profile": Profile,
-    "Home": Home,
-    "Discover": Discover,
-    "PostDetail": PostDetail,
 }
 
 export const pagesConfig = {
