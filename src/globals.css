@@ -1,3 +1,4 @@
+css
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -8,31 +9,31 @@
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* ── Toasted Almond Palette ── */
-  --bg-app:     #EDE8DF;   /* warm cream — the Collections page bg */
-  --bg-card:    #F5F1EA;   /* slightly lighter card surface */
-  --bg-nav:     #EDE8DF;   /* nav bar matches app bg */
-  --bg-subtle:  #E6E0D5;   /* slightly darker for inputs / divider areas */
-  --bg-modal:   #F5F1EA;   /* modal / sheet background */
+  /* ── Toasted Almond × Deep Forest Palette ── */
+  --bg-app:     #DCCBB8;   /* main app background */
+  --bg-card:    #E8DDD0;   /* card surface */
+  --bg-nav:     #DCCBB8;   /* nav bar */
+  --bg-subtle:  #D0C0AB;   /* inputs / divider areas */
+  --bg-modal:   #E8DDD0;   /* modal / sheet background */
 
   /* ── Text ── */
-  --text-primary:   #1C1C1A;   /* near-black, warm */
-  --text-secondary: #5C5750;   /* medium warm gray */
-  --text-hint:      #9E9790;   /* muted placeholder */
+  --text-primary:   #1E1C19;   /* deep warm near-black */
+  --text-secondary: #6E645B;   /* medium warm brown-gray */
+  --text-hint:      #8A8075;   /* muted placeholder */
 
-  /* ── Forest Green — primary brand ── */
-  --accent-primary:       #2D6A4F;   /* rich forest green (Collections "+" button) */
-  --accent-primary-hover: #235840;   /* pressed / hover state */
-  --accent-primary-light: #E8F0EB;   /* very soft green tint for ghost/outlined use */
+  /* ── Deep Forest Green — primary brand (buttons only) ── */
+  --accent-primary:       #243D33;
+  --accent-primary-hover: #1B2E27;
+  --accent-primary-light: #D5E3DC;   /* very soft green tint */
 
-  /* ── Warm Gold — secondary accent (subtle) ── */
-  --accent-secondary:       #A08C5B;
-  --accent-secondary-hover: #8C7A4E;
+  /* ── Caramel — secondary accent ── */
+  --accent-secondary:       #BF9E79;
+  --accent-secondary-hover: #A8885F;
 
   /* ── Borders ── */
-  --border-light:  #E0D9CE;   /* very subtle divider */
-  --border-medium: #D4CCBF;   /* slightly more visible */
-  --border-subtle: #EAE4D9;   /* almost invisible */
+  --border-light:  #CDBBA7;
+  --border-medium: #BCA898;
+  --border-subtle: #D8CCBC;   /* almost invisible */
 
   /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
