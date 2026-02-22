@@ -43,11 +43,14 @@ export default function Live() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const { data: rooms = [], isLoading } = useQuery({
+  const { data: rooms = [], isLoading, refetch } = useQuery({
     queryKey: ["liveRooms"],
     queryFn: () => base44.entities.LiveRoom.filter({ is_active: true }, "-created_date"),
     refetchInterval: 5000,
   });
+
+  const handleRefresh = useCallback(async () => { await refetch(); }, [refetch]);
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
 
   const handleCreateRoom = async () => {
     if (!title.trim()) return;
