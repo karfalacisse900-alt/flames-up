@@ -206,6 +206,9 @@ export default function Profile() {
                       {label}
                     </Link>
                   ))}
+                  <button onClick={() => setShowExport(true)} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+                    <Download className="w-4 h-4" /> Export Data
+                  </button>
                   <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "var(--text-secondary)" }}>
                     <LogOut className="w-4 h-4" /> Sign Out
                   </button>
