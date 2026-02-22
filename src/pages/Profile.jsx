@@ -97,9 +97,19 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
+  const THEMES = {
+    default: { label: "Default", bg: "var(--bg-card)", accent: "var(--accent-primary)", banner: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" },
+    forest: { label: "Forest", bg: "#1a2e1e", accent: "#4ade80", banner: "linear-gradient(135deg, #1a3a20, #2d5a35)" },
+    ocean: { label: "Ocean", bg: "#0f1e2e", accent: "#38bdf8", banner: "linear-gradient(135deg, #0f2a3f, #1e4060)" },
+    sunset: { label: "Sunset", bg: "#2e1a0e", accent: "#fb923c", banner: "linear-gradient(135deg, #3d1f0a, #5a2e10)" },
+    lavender: { label: "Lavender", bg: "#1e1a2e", accent: "#c084fc", banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" },
+  };
+
+  const activeTheme = THEMES[user?.profile_theme || "default"] || THEMES.default;
+
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills });
-    setUser((prev) => ({ ...prev, bio, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills }));
+    await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills, profile_theme: profileTheme });
+    setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills, profile_theme: profileTheme }));
     setShowEdit(false);
   };
 
