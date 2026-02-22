@@ -266,9 +266,6 @@ export default function Profile() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <BookOpen className="w-3.5 h-3.5" /> Posts
-          </TabsTrigger>
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Medal className="w-3.5 h-3.5" /> Badges
           </TabsTrigger>
@@ -280,9 +277,6 @@ export default function Profile() {
           </TabsTrigger>
           <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Bookmark className="w-3.5 h-3.5" /> Saved
-          </TabsTrigger>
-          <TabsTrigger value="games" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Trophy className="w-3.5 h-3.5" /> Games
           </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
