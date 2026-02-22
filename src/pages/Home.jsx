@@ -82,9 +82,12 @@ export default function Home() {
   });
 
   const now = new Date();
+  const searchFiltered = searchQuery.trim()
+    ? rawFiltered.filter((p) => p.text?.toLowerCase().includes(searchQuery.toLowerCase()) || p.author_name?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : rawFiltered;
   const filtered = [
-  ...rawFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
-  ...rawFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now))];
+  ...searchFiltered.filter((p) => p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now),
+  ...searchFiltered.filter((p) => !(p.is_boosted && p.boost_expires_at && new Date(p.boost_expires_at) > now))];
 
 
   const likeMutation = useMutation({
