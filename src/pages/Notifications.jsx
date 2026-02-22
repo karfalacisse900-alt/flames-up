@@ -62,11 +62,16 @@ export default function Notifications() {
             {unreadCount > 0 && <p className="text-xs" style={{ color: "var(--accent-secondary)" }}>{unreadCount} unread</p>}
           </div>
         </div>
-        {unreadCount > 0 && (
-          <button onClick={markAllRead} className="text-xs font-medium px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.1)", color: "var(--accent-primary)" }}>
-            Mark all read
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button onClick={markAllRead} className="text-xs font-medium px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.1)", color: "var(--accent-primary)" }}>
+              Mark all read
+            </button>
+          )}
+          <Link to={createPageUrl("NotificationSettings")} className="p-2 rounded-full" style={{ color: "var(--text-secondary)", backgroundColor: "var(--bg-subtle)" }}>
+            <Settings className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
 
       {isLoading ? (
