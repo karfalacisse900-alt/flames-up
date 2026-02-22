@@ -26,7 +26,18 @@ export default function Notifications() {
     queryKey: ["notifications", user?.email],
     queryFn: () => base44.entities.Notification.filter({ recipient_email: user.email }, "-created_date", 50),
     enabled: !!user?.email,
+    refetchInterval: 15000,
   });
+
+  useEffect(() => {
+    if (!user?.email) return;
+    const unsub = base44.entities.Notification.subscribe((event) => {
+      if (event.data?.recipient_email === user.email) {
+        queryClient.invalidateQueries({ queryKey: ["notifications", user.email] });
+      }
+    });
+    return unsub;
+  }, [user?.email]);
 
   const markRead = useMutation({
     mutationFn: (id) => base44.entities.Notification.update(id, { is_read: true }),
