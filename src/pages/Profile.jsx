@@ -94,8 +94,8 @@ export default function Profile() {
   });
 
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, display_name: displayName, avatar_url: avatarUrl });
-    setUser((prev) => ({ ...prev, bio, display_name: displayName, avatar_url: avatarUrl }));
+    await base44.auth.updateMe({ bio, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills });
+    setUser((prev) => ({ ...prev, bio, display_name: displayName, avatar_url: avatarUrl, banner_url: bannerUrl, skills }));
     setShowEdit(false);
   };
 
@@ -107,6 +107,26 @@ export default function Profile() {
     setAvatarUrl(file_url);
     setAvatarUploading(false);
   };
+
+  const handleBannerUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setBannerUrl(file_url);
+    setBannerUploading(false);
+  };
+
+  // Compute earned badges automatically
+  const computedBadges = (() => {
+    const b = new Set(user?.badges || []);
+    if (myPosts.length >= 1) b.add("first_post");
+    if (myPosts.some(p => (p.like_count || 0) >= 10)) b.add("popular_post");
+    if (myArt.length >= 1) b.add("art_creator");
+    const totalWins = gameStats.reduce((s, g) => s + (g.wins || 0), 0);
+    if (totalWins >= 10) b.add("game_champion");
+    return Array.from(b);
+  })();
 
   const totalGames = gameStats.reduce((s, g) => s + (g.games_played || 0), 0);
 
