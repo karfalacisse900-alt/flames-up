@@ -265,8 +265,8 @@ export default function Art() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">Gallery</TabsTrigger>
-          <TabsTrigger value="fight" className="flex-1 rounded-lg data-[state=active]:bg-white text-sm">⚔️ Fight</TabsTrigger>
+          <TabsTrigger value="gallery" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] text-sm">Gallery</TabsTrigger>
+          <TabsTrigger value="fight" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] text-sm">⚔️ Fight</TabsTrigger>
         </TabsList>
 
         <TabsContent value="gallery" className="mt-4 pb-24">
