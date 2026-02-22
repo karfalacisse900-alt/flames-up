@@ -157,12 +157,7 @@ nav, button, a[role="button"], .no-select {
 /* Tabs active state override — white was bleeding through */
 [role="tabpanel"] { background-color: transparent !important; }
 
-/* Active tab button — theme-aware */
-[role="tab"][data-state="active"] {
-  background-color: #EEF3F0 !important;
-  color: #3C6E5A !important;
-  border: 2px solid rgba(229, 223, 208, 1) !important;
-}
+/* removed — handled directly in TabsTrigger component */
 
 /* Tabs list container */
 [role="tablist"] {
