@@ -638,7 +638,28 @@ export default function Profile() {
               </div>
             </div>
             <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
-            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={3} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
+            <Textarea placeholder="Short bio (one-liner)" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={2} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
+            <Textarea placeholder="About Me — tell your story, share your passions…" value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} className="rounded-xl resize-none" rows={4} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
+            {/* Theme picker */}
+            <div>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Profile Theme</p>
+              <div className="flex gap-2 flex-wrap">
+                {Object.entries(THEMES).map(([key, theme]) => (
+                  <button
+                    key={key}
+                    onClick={() => setProfileTheme(key)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all"
+                    style={{
+                      background: theme.banner,
+                      color: theme.accent,
+                      borderColor: profileTheme === key ? theme.accent : "transparent",
+                    }}
+                  >
+                    {theme.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Button onClick={handleSaveProfile} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save Changes</Button>
           </div>
         </DialogContent>
