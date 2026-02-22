@@ -168,32 +168,41 @@ export default function Home() {
             ♥ Liked
           </button>
         </div>
-        <div className="flex items-center justify-between">
-          <span />
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")}
-              className="p-2 rounded-full border"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-              title={viewMode === "swipe" ? "Switch to list" : "Switch to swipe"}>
-
-              {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => {setCurrentIndex(0);refetch();}}
-              className="p-2 rounded-full border"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setShowCreate(true)} className="bg-green-900 text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
-
-              <Plus className="w-4 h-4" /> Post
-            </button>
+        {showSearch ? (
+          <div className="flex items-center gap-2 mb-1">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentIndex(0); }}
+                placeholder="Search posts..."
+                className="flex-1 bg-transparent outline-none text-sm"
+                style={{ color: "var(--text-primary)", border: "none" }}
+              />
+              {searchQuery && <button onClick={() => setSearchQuery("")}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
+            </div>
+            <button onClick={() => { setShowSearch(false); setSearchQuery(""); }} className="text-xs font-medium px-2" style={{ color: "var(--accent-primary)" }}>Cancel</button>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span />
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowSearch(true)} className="p-2 rounded-full border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                <Search className="w-4 h-4" />
+              </button>
+              <button onClick={() => setViewMode(viewMode === "swipe" ? "list" : "swipe")} className="p-2 rounded-full border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                {viewMode === "swipe" ? <List className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
+              </button>
+              <button onClick={() => { setCurrentIndex(0); refetch(); }} className="p-2 rounded-full border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button onClick={() => setShowCreate(true)} className="px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5 text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
+                <Plus className="w-4 h-4" /> Post
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Filter pills */}
 
