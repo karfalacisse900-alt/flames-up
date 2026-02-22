@@ -144,7 +144,36 @@ nav, button, a[role="button"], .no-select {
 
 /* Radix / shadcn dialog & sheet portals */
 [data-radix-popper-content-wrapper] > *,
-[role="dialog"] > * {
-  background-color: var(--bg-modal);
-  color: var(--text-primary);
+[role="dialog"],
+[role="dialog"] > *,
+[data-radix-dialog-content],
+[data-state="open"][role="dialog"] {
+  background-color: var(--bg-modal) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Force all inputs/textareas/selects inside modals/dialogs to use theme colors */
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select,
+[role="dialog"] [data-radix-select-trigger] {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[role="dialog"] [data-radix-select-content],
+[data-radix-select-content] {
+  background-color: var(--bg-modal) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-radix-select-item] {
+  color: var(--text-primary) !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: var(--accent-primary-light) !important;
 }
