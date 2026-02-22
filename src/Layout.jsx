@@ -53,7 +53,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="max-w-lg mx-auto flex justify-around items-center py-2 px-2">
                 {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
-                const showBadge = item.page === "Notifications" && unreadCount > 0;
+                const showBadge = (item.page === "Notifications" || item.page === "Notifications") && unreadCount > 0;
                 return (
                   <Link
                     key={item.name}
