@@ -2,8 +2,7 @@ import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swords, Heart } from "lucide-react";
-import ArtFightFavoriteBtn from "./ArtFightFavoriteBtn";
+import { Swords } from "lucide-react";
 import ArtFightProfile from "./ArtFightProfile";
 
 // Simple ELO calculation
