@@ -310,6 +310,85 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="badges" className="mt-4">
+          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Earned by being active in the community</p>
+          <BadgesSection badges={computedBadges} />
+          {computedBadges.length < Object.keys(BADGE_DEFINITIONS).length && (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-semibold px-1" style={{ color: "var(--text-hint)" }}>Locked badges</p>
+              {Object.entries(BADGE_DEFINITIONS).filter(([k]) => !computedBadges.includes(k)).map(([key, badge]) => (
+                <div key={key} className="flex items-center gap-3 p-3 rounded-xl opacity-40" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <span className="text-xl grayscale">{badge.emoji}</span>
+                  <div>
+                    <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{badge.label}</p>
+                    <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{badge.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="skills" className="mt-4">
+          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Showcase your skills & services</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {(user.skills || []).map((skill, i) => (
+              <span key={i} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)" }}>
+                {skill}
+              </span>
+            ))}
+            {(user.skills || []).length === 0 && (
+              <p className="text-sm py-4 text-center w-full" style={{ color: "var(--text-hint)" }}>No skills added yet</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <input
+              placeholder="Add a skill or service…"
+              value={newSkill}
+              onChange={e => setNewSkill(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && newSkill.trim()) {
+                  const updated = [...(user.skills || []), newSkill.trim()];
+                  base44.auth.updateMe({ skills: updated });
+                  setUser(prev => ({ ...prev, skills: updated }));
+                  setNewSkill("");
+                }
+              }}
+              className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+            />
+            <button
+              onClick={() => {
+                if (!newSkill.trim()) return;
+                const updated = [...(user.skills || []), newSkill.trim()];
+                base44.auth.updateMe({ skills: updated });
+                setUser(prev => ({ ...prev, skills: updated }));
+                setNewSkill("");
+              }}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-white"
+              style={{ backgroundColor: "var(--accent-primary)" }}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {(user.skills || []).length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              {user.skills.map((skill, i) => (
+                <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <span className="text-sm" style={{ color: "var(--text-primary)" }}>{skill}</span>
+                  <button onClick={() => {
+                    const updated = user.skills.filter((_, j) => j !== i);
+                    base44.auth.updateMe({ skills: updated });
+                    setUser(prev => ({ ...prev, skills: updated }));
+                  }} style={{ color: "var(--text-hint)" }}>
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="reviews" className="mt-4 space-y-2">
           {myReviews.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No reviews yet</p>
