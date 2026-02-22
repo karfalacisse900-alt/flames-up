@@ -178,14 +178,15 @@ export default function Live() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="rounded-xl"
+              style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
             />
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent style={{ backgroundColor: "var(--bg-modal)", borderColor: "var(--border-light)" }}>
                 {Object.entries(categoryLabel).map(([val, label]) => (
-                  <SelectItem key={val} value={val}>{categoryEmoji[val]} {label}</SelectItem>
+                  <SelectItem key={val} value={val} style={{ color: "var(--text-primary)" }}>{categoryEmoji[val]} {label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -198,6 +199,7 @@ export default function Live() {
                 value={entryPrice}
                 onChange={(e) => setEntryPrice(Math.max(0, parseInt(e.target.value) || 0))}
                 className="rounded-xl"
+                style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
               />
             </div>
             <Button onClick={handleCreateRoom} disabled={!title.trim() || creating} className="w-full rounded-xl">
