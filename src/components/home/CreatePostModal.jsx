@@ -150,7 +150,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="rounded-xl resize-none"
-            style={{ minHeight: 110, fontFamily: getFontStyle(fontFamily), borderColor: "var(--border-light)", color: "var(--text-primary)", fontSize: 15, width: "100%", boxSizing: "border-box" }}
+            style={{ minHeight: 110, fontFamily: getFontStyle(fontFamily), borderColor: "var(--border-light)", color: "var(--text-primary)", backgroundColor: "var(--bg-subtle)", fontSize: 15, width: "100%", boxSizing: "border-box" }}
           />
 
           {/* Font picker */}
