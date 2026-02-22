@@ -199,7 +199,15 @@ export default function Discover() {
   const showSections = activeCategory === "all" && !search;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div
+      ref={containerRef}
+      className="min-h-screen overflow-y-auto"
+      style={{ backgroundColor: "var(--bg-app)" }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <PullIndicator />
 
       {/* Header */}
       <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
