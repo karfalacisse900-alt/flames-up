@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell, AtSign, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
