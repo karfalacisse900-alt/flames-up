@@ -236,9 +236,14 @@ export default function Profile() {
             <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
             <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
           </button>
-          <div className="text-center">
-            <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{totalGames}</p>
-            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Games</p>
+            <div className="text-center">
+              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{totalGames}</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Games</p>
+            </div>
+            <div className="text-center">
+              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{computedBadges.length}</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Badges</p>
+            </div>
           </div>
         </div>
       </div>
