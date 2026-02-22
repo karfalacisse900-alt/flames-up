@@ -149,15 +149,21 @@ export default function Discover() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, refetch: refetchItems } = useQuery({
     queryKey: ["discover"],
     queryFn: () => base44.entities.DiscoverItem.list("-created_date", 500),
   });
 
-  const { data: servicePeople = [], isLoading: spLoading } = useQuery({
+  const { data: servicePeople = [], isLoading: spLoading, refetch: refetchPeople } = useQuery({
     queryKey: ["servicepeople"],
     queryFn: () => base44.entities.ServicePerson.list("-created_date", 200),
   });
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchItems(), refetchPeople()]);
+  }, [refetchItems, refetchPeople]);
+
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
 
   const newItems = items.filter(i => i.is_new).slice(0, 10);
 
