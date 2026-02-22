@@ -46,10 +46,12 @@ export default function Profile() {
     base44.auth.me().then((u) => {
       setUser(u);
       setBio(u?.bio || "");
+      setAboutMe(u?.about_me || "");
       setDisplayName(u?.display_name || u?.full_name || "");
       setAvatarUrl(u?.avatar_url || "");
       setBannerUrl(u?.banner_url || "");
       setSkills(u?.skills || []);
+      setProfileTheme(u?.profile_theme || "default");
     }).catch(() => {});
   }, []);
 
