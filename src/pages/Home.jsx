@@ -26,11 +26,6 @@ export default function Home() {
   const [likedTab, setLikedTab] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [pullY, setPullY] = useState(0);
-  const [isPulling, setIsPulling] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const touchStartY = useRef(0);
-  const listRef = useRef(null);
   const queryClient = useQueryClient();
 
   // Pull-to-refresh handlers
