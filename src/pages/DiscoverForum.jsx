@@ -135,7 +135,7 @@ function PostDetail({ post, user, onBack }) {
       {/* Reply input */}
       {user && (
         <div className="fixed bottom-20 left-0 right-0 max-w-lg mx-auto px-4 pb-3">
-          <div className="flex gap-2 p-2 rounded-2xl bg-white" style={{ border: "1px solid var(--border-light)", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
+          <div className="flex gap-2 p-2 rounded-2xl" style={{ backgroundColor: "var(--bg-modal)", border: "1px solid var(--border-light)", boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
             <input
               className="flex-1 text-sm outline-none bg-transparent px-2"
               placeholder="Write a reply..."
