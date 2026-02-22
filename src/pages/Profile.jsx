@@ -29,7 +29,7 @@ export default function Profile() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("badges");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
