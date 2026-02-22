@@ -587,6 +587,18 @@ export default function Profile() {
             <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Edit Profile</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Banner upload */}
+            <div className="relative w-full h-24 rounded-xl overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
+              {bannerUrl ? (
+                <img src={bannerUrl} alt="banner" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: "var(--text-hint)" }}>Banner image</div>
+              )}
+              <label className="absolute inset-0 flex items-center justify-center cursor-pointer" style={{ background: "rgba(0,0,0,0.3)" }}>
+                <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+                <span className="text-white text-xs font-medium">{bannerUploading ? "Uploading..." : "Change Banner"}</span>
+              </label>
+            </div>
             {/* Avatar upload */}
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center text-2xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
@@ -606,8 +618,8 @@ export default function Profile() {
                 )}
               </div>
             </div>
-            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" />
-            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={3} />
+            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
+            <Textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={3} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
             <Button onClick={handleSaveProfile} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save Changes</Button>
           </div>
         </DialogContent>
