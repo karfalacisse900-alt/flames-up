@@ -137,9 +137,6 @@ nav, button, a[role="button"], .no-select {
 
 /* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
 
-/* Cards / sheets that use bg-white → warm card */
-.bg-white  { background-color: var(--bg-card) !important; }
-
 /* Very light grays → subtle bg */
 .bg-gray-50 { background-color: var(--bg-subtle) !important; }
 .bg-gray-100 { background-color: var(--bg-card) !important; }
