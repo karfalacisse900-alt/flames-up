@@ -129,6 +129,14 @@ nav, button, a[role="button"], .no-select {
   user-select: none;
 }
 
+/* Legibility on high-density (iOS) displays — floor tiny text at 11px */
+.text-\[10px\] { font-size: 11px !important; }
+.text-\[9px\]  { font-size: 11px !important; }
+.text-\[8px\]  { font-size: 11px !important; }
+/* Slightly increase weight of hint/secondary text at small sizes for crispness */
+.text-\[10px\].font-medium,
+.text-\[11px\].font-medium { font-weight: 600 !important; }
+
 @layer base {
   * {
     @apply border-[var(--border-light)];
