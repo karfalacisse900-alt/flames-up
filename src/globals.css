@@ -143,17 +143,17 @@ nav, button, a[role="button"], .no-select {
 .bg-gray-100 { background-color: var(--bg-card) !important; }
 
 /* Text grays → warm equivalents */
-.text-gray-400 { color: var(--text-hint) !important; }
-.text-gray-500 { color: var(--text-hint) !important; }
-.text-gray-600 { color: var(--text-secondary) !important; }
-.text-gray-700 { color: var(--text-secondary) !important; }
-.text-gray-800 { color: var(--text-primary) !important; }
-.text-gray-900 { color: var(--text-primary) !important; }
+.text-gray-400 { color: var(--text-hint); }
+.text-gray-500 { color: var(--text-hint); }
+.text-gray-600 { color: var(--text-secondary); }
+.text-gray-700 { color: var(--text-secondary); }
+.text-gray-800 { color: var(--text-primary); }
+.text-gray-900 { color: var(--text-primary); }
 
 /* Border grays → warm borders */
-.border-gray-100 { border-color: var(--border-subtle) !important; }
-.border-gray-200 { border-color: var(--border-light) !important; }
-.border-gray-300 { border-color: var(--border-medium) !important; }
+.border-gray-100 { border-color: var(--border-subtle); }
+.border-gray-200 { border-color: var(--border-light); }
+.border-gray-300 { border-color: var(--border-medium); }
 
 /* Tabs active state override — white was bleeding through */
 [role="tabpanel"] { background-color: transparent !important; }
