@@ -330,21 +330,29 @@ export default function EditServiceProfile() {
           {fieldEl("location", "Location", "e.g. New York, USA")}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide block mb-1" style={{ color: "#A8A8A8" }}>Platform</label>
-            <select value={form.platform || "Independent"} onChange={e => handleChange("platform", e.target.value)}
-              className="w-full text-sm px-3 py-2.5 rounded-xl outline-none"
-              style={{ backgroundColor: "#fff", border: "1px solid #E5DFD0", color: "#2F2F2F" }}>
-              {["Fiverr","Upwork","Independent","Coach","Other"].map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <Select value={form.platform || "Independent"} onValueChange={v => handleChange("platform", v)}>
+              <SelectTrigger className="w-full rounded-xl text-sm" style={{ backgroundColor: "#fff", border: "1px solid #E5DFD0", color: "#2F2F2F" }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {["Fiverr","Upwork","Independent","Coach","Other"].map(p => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide block mb-1" style={{ color: "#A8A8A8" }}>Category</label>
-            <select value={form.category || "other"} onChange={e => handleChange("category", e.target.value)}
-              className="w-full text-sm px-3 py-2.5 rounded-xl outline-none"
-              style={{ backgroundColor: "#fff", border: "1px solid #E5DFD0", color: "#2F2F2F" }}>
-              {["design","development","music","marketing","writing","video","coaching","other"].map(c => (
-                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-              ))}
-            </select>
+            <Select value={form.category || "other"} onValueChange={v => handleChange("category", v)}>
+              <SelectTrigger className="w-full rounded-xl text-sm" style={{ backgroundColor: "#fff", border: "1px solid #E5DFD0", color: "#2F2F2F" }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {["design","development","music","marketing","writing","video","coaching","other"].map(c => (
+                  <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
