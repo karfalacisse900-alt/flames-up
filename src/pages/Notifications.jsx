@@ -103,9 +103,14 @@ export default function Notifications() {
             return (
               <div
                 key={n.id}
-                onClick={() => { if (!n.is_read) markRead.mutate(n.id); }}
-                className="flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors"
-                style={{ backgroundColor: n.is_read ? "var(--bg-nav)" : "rgba(60,110,90,0.04)" }}
+                onClick={() => {
+                  if (!n.is_read) markRead.mutate(n.id);
+                  if (n.ref_id && (n.type === "post_liked" || n.type === "post_replied" || n.type === "post_boosted")) {
+                    window.location.href = createPageUrl("PostDetail") + `?id=${n.ref_id}`;
+                  }
+                }}
+                className="flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors active:opacity-80"
+                style={{ backgroundColor: n.is_read ? "var(--bg-nav)" : "rgba(60,110,90,0.06)" }}
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: cfg.bg }}>
                   <Icon className="w-5 h-5" style={{ color: cfg.color }} />
