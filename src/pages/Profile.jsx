@@ -20,6 +20,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [bio, setBio] = useState("");
+  const [aboutMe, setAboutMe] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
@@ -27,6 +28,7 @@ export default function Profile() {
   const [newSkill, setNewSkill] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [profileTheme, setProfileTheme] = useState("default");
   const [activeTab, setActiveTab] = useState("posts");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
