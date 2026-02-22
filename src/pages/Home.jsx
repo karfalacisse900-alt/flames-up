@@ -183,7 +183,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => setShowCreate(true)} className="bg-green-900 text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5"
-              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)" }}>
+              style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(28, 71, 53, 0.4)" }}>
 
               <Plus className="w-4 h-4" /> Post
             </button>
