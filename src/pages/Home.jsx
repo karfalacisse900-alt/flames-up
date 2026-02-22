@@ -182,7 +182,7 @@ export default function Home() {
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setShowCreate(true)} className="text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5"
+              onClick={() => setShowCreate(true)} className="bg-green-900 text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5"
               style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 4px 14px rgba(60,110,90,0.4)" }}>
 
               <Plus className="w-4 h-4" /> Post
@@ -226,7 +226,7 @@ export default function Home() {
                     <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>Follow people to see their posts</p>
                     <p className="text-sm mt-2" style={{ color: "var(--text-hint)" }}>Visit a post author's profile to follow them</p>
                   </> :
-                likedTab && likedPosts.length === 0 ?
+            likedTab && likedPosts.length === 0 ?
             <>
                     <p className="text-5xl mb-4">♥</p>
                     <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>No liked posts yet</p>
