@@ -95,7 +95,15 @@ export default function Live() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div
+      ref={containerRef}
+      className="min-h-screen pb-24 overflow-y-auto"
+      style={{ backgroundColor: "var(--bg-app)" }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <PullIndicator />
       {/* Header */}
       <div className="px-5 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-light)" }}>
         <div>
