@@ -247,7 +247,15 @@ export default function Art() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div
+      ref={containerRef}
+      className="min-h-screen overflow-y-auto"
+      style={{ backgroundColor: "var(--bg-app)" }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <PullIndicator />
       <div className="px-5 pt-5 pb-3 flex items-center justify-between" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Art</h1>
