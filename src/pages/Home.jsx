@@ -23,6 +23,8 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [feedTab, setFeedTab] = useState("all");
   const [likedTab, setLikedTab] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const [pullY, setPullY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
