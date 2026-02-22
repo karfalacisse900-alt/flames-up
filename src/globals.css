@@ -154,6 +154,9 @@ nav, button, a[role="button"], .no-select {
 .border-gray-200 { border-color: var(--border-light) !important; }
 .border-gray-300 { border-color: var(--border-medium) !important; }
 
+/* Tabs active state override — white was bleeding through */
+[role="tabpanel"] { background-color: transparent !important; }
+
 /* Radix / shadcn dialog & sheet portals */
 [data-radix-popper-content-wrapper] > *,
 [role="dialog"],
