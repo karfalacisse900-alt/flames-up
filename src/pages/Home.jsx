@@ -28,13 +28,6 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
   const queryClient = useQueryClient();
 
-  const handleRefresh = useCallback(async () => {
-    await refetch();
-    setCurrentIndex(0);
-  }, [refetch]);
-
-  const { containerRef: listRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
-
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
@@ -43,6 +36,13 @@ export default function Home() {
     queryKey: ["posts"],
     queryFn: () => base44.entities.Post.list("-created_date", 50)
   });
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    setCurrentIndex(0);
+  }, [refetch]);
+
+  const { containerRef: listRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
 
   const { data: following = [] } = useQuery({
     queryKey: ["following", user?.email],
