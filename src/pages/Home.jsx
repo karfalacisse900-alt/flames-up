@@ -28,28 +28,12 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
   const queryClient = useQueryClient();
 
-  // Pull-to-refresh handlers
-  const handleTouchStart = useCallback((e) => {
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    setCurrentIndex(0);
+  }, [refetch]);
 
-  const handleTouchMove = useCallback((e) => {
-    const el = listRef.current;
-    if (el && el.scrollTop > 0) return;
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (dy > 0 && dy < 100) {setPullY(dy);setIsPulling(true);}
-  }, []);
-
-  const handleTouchEnd = useCallback(async () => {
-    if (pullY > 60) {
-      setRefreshing(true);
-      await refetch();
-      setCurrentIndex(0);
-      setRefreshing(false);
-    }
-    setPullY(0);
-    setIsPulling(false);
-  }, [pullY]);
+  const { containerRef: listRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
