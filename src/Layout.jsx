@@ -23,9 +23,17 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then((u) => {
       setUser(u);
       if (u?.email) {
-        base44.entities.Notification.filter({ recipient_email: u.email, is_read: false }, "-created_date", 50).
-        then((ns) => setUnreadCount(ns.length)).
-        catch(() => {});
+        const fetchUnread = () =>
+          base44.entities.Notification.filter({ recipient_email: u.email, is_read: false }, "-created_date", 50)
+            .then((ns) => setUnreadCount(ns.length))
+            .catch(() => {});
+        fetchUnread();
+        const unsub = base44.entities.Notification.subscribe((event) => {
+          if (event.data?.recipient_email === u.email || event.type === "update") {
+            fetchUnread();
+          }
+        });
+        return unsub;
       }
     }).catch(() => {});
   }, []);
