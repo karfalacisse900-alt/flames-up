@@ -46,6 +46,8 @@ export default function Profile() {
       setBio(u?.bio || "");
       setDisplayName(u?.display_name || u?.full_name || "");
       setAvatarUrl(u?.avatar_url || "");
+      setBannerUrl(u?.banner_url || "");
+      setSkills(u?.skills || []);
     }).catch(() => {});
   }, []);
 
