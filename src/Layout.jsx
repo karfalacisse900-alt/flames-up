@@ -90,7 +90,7 @@ export default function Layout({ children, currentPageName }) {
                   {showBadge &&
                 <span style={{ position: "absolute", top: 2, right: 4, width: 8, height: 8, borderRadius: "50%", backgroundColor: "#E05C7A", border: "2px solid var(--bg-nav)" }} />
                 }
-                  <span className="text-[10px] font-medium">{item.name}</span>
+                  <span className="text-[11px] font-semibold tracking-wide">{item.name}</span>
                 </Link>);
 
           })}
