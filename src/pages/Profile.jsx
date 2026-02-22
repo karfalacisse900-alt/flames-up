@@ -515,6 +515,9 @@ export default function Profile() {
         />
       )}
 
+      {/* Export data modal */}
+      <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
+
       {/* Edit profile */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="max-w-sm rounded-2xl">
