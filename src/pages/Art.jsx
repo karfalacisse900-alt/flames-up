@@ -192,10 +192,13 @@ export default function Art() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const { data: artPieces = [], isLoading } = useQuery({
+  const { data: artPieces = [], isLoading, refetch } = useQuery({
     queryKey: ["art"],
     queryFn: () => base44.entities.ArtPiece.list("-created_date", 50),
   });
+
+  const handleRefresh = useCallback(async () => { await refetch(); }, [refetch]);
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
 
   const gallery = artPieces;
 
