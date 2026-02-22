@@ -415,26 +415,6 @@ export default function Profile() {
           <ActivityHistory user={user} />
         </TabsContent>
 
-        <TabsContent value="games" className="mt-4 space-y-2">
-          {gameStats.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No games played yet</p>
-          ) : (
-            gameStats.map((stat) => (
-              <div key={stat.id} className="rounded-xl p-4 flex items-center justify-between" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <div>
-                  <p className="text-sm font-medium capitalize" style={{ color: "var(--text-primary)" }}>{stat.game_name?.replace(/-/g, " ")}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{stat.games_played} played</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>{stat.wins}W / {stat.losses}L</p>
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-                    {stat.games_played > 0 ? Math.round((stat.wins / stat.games_played) * 100) : 0}% win rate
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-        </TabsContent>
       </Tabs>
 
       {/* Followers dialog */}
