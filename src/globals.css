@@ -81,12 +81,27 @@ body {
 
 input, textarea, select {
   font-size: 16px !important;
-  background-color: var(--bg-card);
-  color: var(--text-primary);
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--text-hint);
+  color: var(--text-hint) !important;
+}
+
+/* shadcn Input component uses bg-transparent — override globally */
+input.flex,
+input[class*="rounded"],
+textarea.flex,
+textarea[class*="rounded"] {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+/* All buttons that aren't explicitly styled get forest green */
+button:not([style*="background"]):not([class*="bg-"]):not([class*="hover:bg-"]) {
+  color: inherit;
 }
 
 .font-serif { font-family: var(--font-serif); }
