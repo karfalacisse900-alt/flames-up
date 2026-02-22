@@ -274,14 +274,7 @@ export default function Home() {
           onTouchEnd={handleTouchEnd}>
 
             {/* Pull indicator */}
-            <motion.div
-            animate={{ height: pullY > 0 ? Math.min(pullY * 0.6, 56) : 0, opacity: pullY > 20 ? 1 : 0 }}
-            className="flex items-center justify-center overflow-hidden">
-
-              <motion.div animate={{ rotate: refreshing ? 360 : pullY * 3 }} transition={refreshing ? { repeat: Infinity, duration: 0.7, ease: "linear" } : {}}>
-                <RefreshCw className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              </motion.div>
-            </motion.div>
+            <PullIndicator />
             {filtered.map((post) => {
             const ts = typeStyles[post.type] || typeStyles.quote;
             return (
