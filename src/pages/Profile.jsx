@@ -242,23 +242,19 @@ export default function Profile() {
           </Link>
 
           {/* Stats row */}
-          <div className="flex gap-4 mt-4 flex-wrap">
+          <div className="flex gap-5 mt-4">
             <div className="text-center">
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{myPosts.length}</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Posts</p>
             </div>
-            <button onClick={() => setShowFollowers(true)} className="text-center">
+            <button onClick={() => setShowFollowers(true)} className="text-center" style={{ boxShadow: "none" }}>
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
             </button>
-            <button onClick={() => setShowFollowing(true)} className="text-center">
+            <button onClick={() => setShowFollowing(true)} className="text-center" style={{ boxShadow: "none" }}>
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
             </button>
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{totalGames}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Games</p>
-            </div>
             <div className="text-center">
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{computedBadges.length}</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Badges</p>
