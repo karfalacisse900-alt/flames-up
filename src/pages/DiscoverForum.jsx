@@ -180,18 +180,24 @@ function CreatePostModal({ user, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={onClose}>
-      <div className="w-full max-w-lg rounded-t-3xl bg-white p-5" onClick={e => e.stopPropagation()}>
+      <div className="w-full max-w-lg rounded-t-3xl p-5" style={{ backgroundColor: "var(--bg-modal)", borderTop: "1px solid var(--border-light)" }} onClick={e => e.stopPropagation()}>
+        <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-base" style={{ fontFamily: "var(--font-serif)" }}>New Post</h3>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400" /></button>
+          <h3 className="font-semibold text-base" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>New Post</h3>
+          <button onClick={onClose} className="p-1.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>
         </div>
         {/* Type selector */}
         <div className="flex gap-2 mb-3">
-          {Object.entries(TYPE_STYLES).map(([key, { label, color }]) => (
+          {Object.entries(TYPE_STYLES).map(([key, { label }]) => (
             <button
               key={key}
               onClick={() => setType(key)}
-              className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${type === key ? color : "bg-gray-50 text-gray-500 border-gray-200"}`}
+              className="text-xs px-3 py-1.5 rounded-full border font-medium transition-all"
+              style={{
+                backgroundColor: type === key ? "var(--accent-primary)" : "var(--bg-subtle)",
+                color: type === key ? "#fff" : "var(--text-secondary)",
+                borderColor: type === key ? "var(--accent-primary)" : "var(--border-light)",
+              }}
             >
               {label}
             </button>
@@ -201,20 +207,21 @@ function CreatePostModal({ user, onClose, onCreated }) {
           placeholder="Title..."
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="mb-3 text-sm border-gray-200 bg-gray-50"
+          className="mb-3 text-sm rounded-xl"
+          style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
         />
         <Textarea
           placeholder="Share your thoughts, tip, or question..."
           value={body}
           onChange={e => setBody(e.target.value)}
           rows={4}
-          className="text-sm resize-none border-gray-200 bg-gray-50 mb-3"
+          className="text-sm resize-none mb-3 rounded-xl"
+          style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
         />
         <Button
           onClick={() => create.mutate()}
           disabled={!title.trim() || !body.trim() || create.isPending}
           className="w-full"
-          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
         >
           Post
         </Button>
