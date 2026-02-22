@@ -36,6 +36,7 @@ export default function Profile() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [boostPost, setBoostPost] = useState(null);
+  const [showExport, setShowExport] = useState(false);
   const queryClient = useQueryClient();
   const { data: coinBalance = 0 } = useQuery({
     queryKey: ["coinBalance", user?.email],
