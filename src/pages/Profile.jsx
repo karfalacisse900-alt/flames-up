@@ -141,16 +141,26 @@ export default function Profile() {
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Profile header */}
-      <div className="px-5 pt-6 pb-5" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-start justify-between mb-4">
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
-            {user.avatar_url ? (
-              <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-            ) : (
-              (user.display_name || user.full_name || "U")[0]?.toUpperCase()
-            )}
-          </div>
+      <div style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        {/* Banner */}
+        <div className="w-full h-32 relative overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          {user.banner_url ? (
+            <img src={user.banner_url} alt="banner" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" }} />
+          )}
+        </div>
+
+        <div className="px-5 pb-5">
+          <div className="flex items-end justify-between -mt-10 mb-3">
+            {/* Avatar */}
+            <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-card)" }}>
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                (user.display_name || user.full_name || "U")[0]?.toUpperCase()
+              )}
+            </div>
           {/* Action buttons — compact */}
           <div className="flex gap-2 items-center">
             <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
