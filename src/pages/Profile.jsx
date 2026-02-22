@@ -155,13 +155,13 @@ export default function Profile() {
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Profile header */}
-      <div style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+      <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
         {/* Banner */}
         <div className="w-full h-32 relative overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
           {user.banner_url ? (
             <img src={user.banner_url} alt="banner" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" }} />
+            <div className="w-full h-full" style={{ background: activeTheme.banner }} />
           )}
         </div>
 
