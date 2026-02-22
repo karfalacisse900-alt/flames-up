@@ -10,6 +10,8 @@ const typeConfig = {
   post_liked: { icon: Heart, color: "#E05C7A", bg: "rgba(224,92,122,0.1)", label: "liked your post" },
   post_replied: { icon: MessageSquare, color: "#5579A6", bg: "rgba(85,121,166,0.1)", label: "replied to your post" },
   post_boosted: { icon: Zap, color: "#F59E0B", bg: "rgba(245,158,11,0.1)", label: "boosted your post" },
+  mention: { icon: AtSign, color: "#8B5CF6", bg: "rgba(139,92,246,0.1)", label: "mentioned you" },
+  direct_message: { icon: MessageSquare, color: "#F59E0B", bg: "rgba(245,158,11,0.1)", label: "sent you a message" },
 };
 
 export default function Notifications() {
