@@ -161,11 +161,11 @@ export default function Profile() {
                 (user.display_name || user.full_name || "U")[0]?.toUpperCase()
               )}
             </div>
-          {/* Action buttons — compact */}
-          <div className="flex gap-2 items-center">
-            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
-              <Edit2 className="w-3.5 h-3.5" /> Edit
-            </button>
+            {/* Action buttons */}
+            <div className="flex gap-2 items-center">
+              <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
+                <Edit2 className="w-3.5 h-3.5" /> Edit
+              </button>
             <Link to={createPageUrl("Messages")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               <MessageSquare className="w-4 h-4" />
             </Link>
