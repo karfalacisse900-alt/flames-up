@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Upload, Save, X, Sparkles, Loader2, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, Plus, Upload, Save, X, Sparkles, Loader2, MessageSquare, Send, ChevronDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
