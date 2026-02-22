@@ -59,13 +59,13 @@ import Home from './pages/Home';
 import Live from './pages/Live';
 import LiveRoomView from './pages/LiveRoomView';
 import Messages from './pages/Messages';
+import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import NotificationSettings from './pages/NotificationSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -82,13 +82,13 @@ export const PAGES = {
     "Live": Live,
     "LiveRoomView": LiveRoomView,
     "Messages": Messages,
+    "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
     "PostDetail": PostDetail,
     "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "NotificationSettings": NotificationSettings,
 }
 
 export const pagesConfig = {

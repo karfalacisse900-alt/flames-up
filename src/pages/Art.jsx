@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { usePullToRefresh } from "../components/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Upload, TrendingUp, TrendingDown, X, Swords } from "lucide-react";

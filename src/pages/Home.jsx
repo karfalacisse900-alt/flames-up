@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, RefreshCw, List, Layers, Zap, Search, X } from "lucide-react";
+import { usePullToRefresh } from "../components/hooks/usePullToRefresh";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
