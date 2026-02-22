@@ -286,39 +286,6 @@ export default function Profile() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="posts" className="mt-4 space-y-2">
-          {myPosts.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
-          ) : (
-            myPosts.map((post) => (
-              <div key={post.id} className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>{post.type}</span>
-                    {post.is_boosted && new Date(post.boost_expires_at) > new Date() && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium flex items-center gap-1">
-                        <Zap className="w-2.5 h-2.5" /> Boosted
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setBoostPost(post)}
-                    className="text-[10px] px-2.5 py-1 rounded-full border flex items-center gap-1 transition-all hover:bg-amber-50"
-                    style={{ borderColor: "#F59E0B", color: "#F59E0B" }}
-                  >
-                    <Zap className="w-2.5 h-2.5" /> Boost
-                  </button>
-                </div>
-                <p className="text-sm" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{post.text}</p>
-                <div className="flex gap-3 mt-2 text-xs" style={{ color: "var(--text-hint)" }}>
-                  <span>♥ {post.like_count || 0}</span>
-                  <span>💬 {post.reply_count || 0}</span>
-                </div>
-              </div>
-            ))
-          )}
-        </TabsContent>
-
         <TabsContent value="badges" className="mt-4">
           <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Earned by being active in the community</p>
           <BadgesSection badges={computedBadges} />
