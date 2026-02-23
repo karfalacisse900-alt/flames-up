@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TYPE_STYLES = {
-  question: { label: "Question", color: "bg-blue-50 text-blue-600 border-blue-100" },
-  tip: { label: "Tip", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-  discussion: { label: "Discussion", color: "bg-purple-50 text-purple-600 border-purple-100" },
+  question: { label: "Question", color: "" },
+  tip: { label: "Tip", color: "" },
+  discussion: { label: "Discussion", color: "" },
 };
 
 function PostCard({ post, user, onClick }) {
