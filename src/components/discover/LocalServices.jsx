@@ -83,7 +83,6 @@ export default function LocalServices() {
   };
 
   const handleCategoryClick = (cat) => {
-    setActiveCategory(cat);
     openInGoogleMaps(cat.key, location?.lat, location?.lng);
   };
 
