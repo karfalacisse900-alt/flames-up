@@ -210,7 +210,7 @@ export default function Discover() {
       <PullIndicator />
 
       {/* Header */}
-      <div className="px-5 pt-5 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+      <div className="px-4 pt-3 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
           <div className="flex items-center gap-2 shrink-0">
