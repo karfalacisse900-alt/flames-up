@@ -177,7 +177,7 @@ export default function Home() {
               <button onClick={() => {setCurrentIndex(0);refetch();}} className="p-2 rounded-full border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                 <RefreshCw className="w-4 h-4" />
               </button>
-              <button onClick={() => setShowCreate(true)} className="bg-yellow-400 text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5" style={{ backgroundColor: "var(--accent-primary)" }}>
+              <button onClick={() => setShowCreate(true)} className="bg-green-900 text-white px-4 py-2 text-xs font-semibold rounded-full flex items-center gap-1.5" style={{ backgroundColor: "var(--accent-primary)" }}>
                 <Plus className="w-4 h-4" /> Post
               </button>
             </div>
