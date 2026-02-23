@@ -189,34 +189,43 @@ export default function Profile() {
               <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
                 <Wallet className="w-4 h-4" />
               </Link>
-              <div className="relative group">
-                <button className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+              <div className="relative">
+                <button
+                  onClick={() => setShowMore(v => !v)}
+                  className="p-2 rounded-full border transition-all"
+                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+                >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
-                <div className="absolute right-0 top-10 z-50 w-48 rounded-2xl shadow-lg overflow-hidden opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
-                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                  {[
-                    { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                    { to: createPageUrl("Shop"), icon: <ShoppingBag className="w-4 h-4" />, label: "Shop", color: "var(--accent-secondary)" },
-                    { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
-                    { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
-                  ].map(({ to, icon, label, color }) => (
-                    <Link key={label} to={to} className="flex items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95"
-                      style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
-                      <span style={{ color }}>{icon}</span>
-                      {label}
-                    </Link>
-                  ))}
-                  <button onClick={() => setShowExport(true)} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
-                    <Download className="w-4 h-4" /> Export Data
-                  </button>
-                  <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "var(--text-secondary)" }}>
-                    <LogOut className="w-4 h-4" /> Sign Out
-                  </button>
-                  <button onClick={() => setShowDeleteConfirm(true)} className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-all hover:brightness-95" style={{ color: "#E53E3E" }}>
-                    <Trash2 className="w-4 h-4" /> Delete Account
-                  </button>
-                </div>
+                {showMore && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
+                    <div className="absolute right-0 top-10 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
+                      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                      {[
+                        { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
+                        { to: createPageUrl("Shop"), icon: <ShoppingBag className="w-4 h-4" />, label: "Shop", color: "var(--accent-secondary)" },
+                        { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
+                        { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
+                      ].map(({ to, icon, label, color }) => (
+                        <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
+                          style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                          <span style={{ color }}>{icon}</span>
+                          {label}
+                        </Link>
+                      ))}
+                      <button onClick={() => { setShowMore(false); setShowExport(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+                        <Download className="w-4 h-4" /> Export Data
+                      </button>
+                      <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </button>
+                      <button onClick={() => { setShowMore(false); setShowDeleteConfirm(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#E53E3E" }}>
+                        <Trash2 className="w-4 h-4" /> Delete Account
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
