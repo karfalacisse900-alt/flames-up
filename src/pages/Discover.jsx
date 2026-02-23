@@ -16,6 +16,7 @@ import CompareModal from "../components/discover/CompareModal";
 import ServicePersonCard from "../components/discover/ServicePersonCard";
 import ServicePersonModal from "../components/discover/ServicePersonModal";
 import BookmarkButton from "../components/discover/BookmarkButton";
+import LocalServices from "../components/discover/LocalServices";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Users } from "lucide-react";
