@@ -89,11 +89,13 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   return (
     <div
       style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      onTouchMove={e => e.stopPropagation()}
     >
       {/* Backdrop */}
       <div
         style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
         onClick={onClose}
+        onTouchMove={e => e.stopPropagation()}
       />
 
       {/* Sheet */}
