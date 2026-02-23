@@ -212,8 +212,8 @@ export default function Messages() {
   }, []);
 
   if (!user) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-6 h-6 border-2 border-[#7C8C6E] border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
     </div>
   );
 
@@ -222,12 +222,12 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-warm)" }}>
-      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3]">
-        <Link to={createPageUrl("Profile")} className="p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </Link>
-        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)" }}>Messages</h2>
+        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Messages</h2>
       </div>
       <ConversationList user={user} onSelect={setActiveConversation} />
     </div>
