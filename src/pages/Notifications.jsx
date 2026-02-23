@@ -110,7 +110,7 @@ export default function Notifications() {
                   }
                 }}
                 className="flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors active:opacity-80"
-                style={{ backgroundColor: n.is_read ? "var(--bg-nav)" : "rgba(60,110,90,0.06)" }}
+                style={{ backgroundColor: n.is_read ? "var(--bg-nav)" : "var(--accent-primary-light)" }}
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: cfg.bg }}>
                   <Icon className="w-5 h-5" style={{ color: cfg.color }} />
