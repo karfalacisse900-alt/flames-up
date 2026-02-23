@@ -236,7 +236,8 @@ export default function PostDetail() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsAnonymous(!isAnonymous)}
-              className={`p-2 rounded-full transition-colors shrink-0 ${isAnonymous ? "bg-[#7C8C6E]/10 text-[#7C8C6E]" : "text-[#9B9B9B] hover:bg-gray-100"}`}
+              className="p-2 rounded-full transition-colors shrink-0"
+            style={{ backgroundColor: isAnonymous ? "var(--accent-primary-light)" : "transparent", color: isAnonymous ? "var(--accent-primary)" : "var(--text-hint)" }}
               title={isAnonymous ? "Anonymous" : "Public"}
             >
               <EyeOff className="w-4 h-4" />
