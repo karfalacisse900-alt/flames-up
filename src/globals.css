@@ -10,11 +10,11 @@ css
   --font-sans: 'Inter', system-ui, sans-serif;
 
   /* ── Warm Cream Palette ── */
-  --bg-app:     #EDE8DF;   /* main app background */
-  --bg-card:    #F5F1EA;   /* card surface */
-  --bg-nav:     #EDE8DF;   /* nav bar */
-  --bg-subtle:  #E4DDD3;   /* inputs / divider areas */
-  --bg-modal:   #F5F1EA;   /* modal / sheet background */
+  --bg-app:     #DCCBB8;   /* main app background */
+  --bg-card:    #E6EFEA;   /* card surface */
+  --bg-nav:     #DCCBB8;   /* nav bar */
+  --bg-subtle:  #D4C0AA;   /* inputs / divider areas */
+  --bg-modal:   #E6EFEA;   /* modal / sheet background */
 
   /* ── Text ── */
   --text-primary:   #1E1C19;   /* deep warm near-black */
@@ -22,18 +22,18 @@ css
   --text-hint:      #8A8075;   /* muted placeholder */
 
   /* ── Deep Forest Green — primary brand (buttons only) ── */
-  --accent-primary:       #2D5A45;
-  --accent-primary-hover: #1e3f30;
-  --accent-primary-light: #D5E3DC;   /* very soft green tint */
+  --accent-primary:       #243D33;
+  --accent-primary-hover: #162B23;
+  --accent-primary-light: #E6EFEA;   /* very soft green tint */
 
   /* ── Caramel — secondary accent ── */
   --accent-secondary:       #BF9E79;
   --accent-secondary-hover: #A8885F;
 
   /* ── Borders ── */
-  --border-light:  #CDBBA7;
-  --border-medium: #BCA898;
-  --border-subtle: #D8CCBC;   /* almost invisible */
+  --border-light:  #C4AA92;
+  --border-medium: #B09880;
+  --border-subtle: #CDB9A4;   /* almost invisible */
 
   /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
@@ -80,11 +80,11 @@ body {
 }
 
 button, a[role="button"] {
-  box-shadow: 0 2px 8px rgba(45, 90, 69, 0.18);
+  box-shadow: 0 2px 8px rgba(36, 61, 51, 0.15);
 }
 
 button:active, a[role="button"]:active {
-  box-shadow: 0 1px 3px rgba(45, 90, 69, 0.12);
+  box-shadow: 0 1px 3px rgba(36, 61, 51, 0.10);
 }
 
 input, textarea, select {
@@ -154,26 +154,30 @@ nav, button, a[role="button"], .no-select {
 /* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
 
 /* Very light grays → subtle bg */
-.bg-gray-50 { background-color: var(--bg-subtle); }
-.bg-gray-100 { background-color: var(--bg-card); }
+.bg-gray-50 { background-color: var(--bg-subtle) !important; }
+.bg-gray-100 { background-color: var(--bg-card) !important; }
+.bg-white { background-color: var(--bg-card) !important; }
 
 /* Text grays → warm equivalents */
-.text-gray-400 { color: var(--text-hint); }
-.text-gray-500 { color: var(--text-hint); }
-.text-gray-600 { color: var(--text-secondary); }
-.text-gray-700 { color: var(--text-secondary); }
-.text-gray-800 { color: var(--text-primary); }
-.text-gray-900 { color: var(--text-primary); }
+.text-gray-400 { color: var(--text-hint) !important; }
+.text-gray-500 { color: var(--text-hint) !important; }
+.text-gray-600 { color: var(--text-secondary) !important; }
+.text-gray-700 { color: var(--text-secondary) !important; }
+.text-gray-800 { color: var(--text-primary) !important; }
+.text-gray-900 { color: var(--text-primary) !important; }
 
 /* Border grays → warm borders */
-.border-gray-100 { border-color: var(--border-subtle); }
-.border-gray-200 { border-color: var(--border-light); }
-.border-gray-300 { border-color: var(--border-medium); }
+.border-gray-100 { border-color: var(--border-subtle) !important; }
+.border-gray-200 { border-color: var(--border-light) !important; }
+.border-gray-300 { border-color: var(--border-medium) !important; }
+
+/* Amber pricing pills → use theme secondary */
+.bg-amber-50 { background-color: var(--accent-primary-light) !important; }
+.text-amber-700 { color: var(--accent-primary) !important; }
+.border-amber-100 { border-color: var(--border-light) !important; }
 
 /* Tabs active state override — white was bleeding through */
 [role="tabpanel"] { background-color: transparent !important; }
-
-/* removed — handled directly in TabsTrigger component */
 
 /* Tabs list container */
 [role="tablist"] {
