@@ -88,18 +88,18 @@ export default function Wallet() {
   const balance = wallet?.balance ?? 0;
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-warm)" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3]">
-        <Link to={createPageUrl("Profile")} className="p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5" />
+      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </Link>
-        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)" }}>My Wallet</h2>
+        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>My Wallet</h2>
       </div>
 
       {/* Balance card */}
       <div className="mx-5 mt-5">
-        <div className="rounded-3xl p-6 text-center" style={{ background: "linear-gradient(135deg, #7C8C6E 0%, #A8B89E 100%)" }}>
+        <div className="rounded-3xl p-6 text-center" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%)" }}>
           <p className="text-white/70 text-sm font-medium">Coin Balance</p>
           <p className="text-5xl font-bold text-white mt-1">⬡ {balance}</p>
           <p className="text-white/60 text-xs mt-2">Use coins to buy art or send gifts in live</p>
