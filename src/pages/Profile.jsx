@@ -225,7 +225,7 @@ export default function Profile() {
           <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{user.email}</p>
           {user.bio && <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
           {user.about_me && (
-            <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "rgba(0,0,0,0.1)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
+            <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
               {user.about_me}
             </div>
           )}
