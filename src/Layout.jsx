@@ -13,27 +13,10 @@ const navItems = [
 { name: "Profile", icon: User, page: "Profile" }];
 
 
-// Persist scroll positions per page
-const scrollPositions = {};
-
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
-  const contentRef = useRef(null);
-
-  // Save scroll on leaving a page, restore on arriving
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    // Restore
-    const saved = scrollPositions[currentPageName] || 0;
-    el.scrollTop = saved;
-    // Save on unmount
-    return () => {
-      if (el) scrollPositions[currentPageName] = el.scrollTop;
-    };
-  }, [currentPageName]);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
