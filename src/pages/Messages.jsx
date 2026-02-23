@@ -135,15 +135,15 @@ function ChatView({ user, conversation, onBack }) {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh" }}>
-      <div className="px-4 py-3 flex items-center gap-3 bg-white border-b border-[#EDE9E3] shrink-0">
-        <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+      <div className="px-4 py-3 flex items-center gap-3 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <button onClick={onBack} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </button>
-        <div className="w-8 h-8 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-semibold">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
           {conversation.name?.[0]?.toUpperCase() || "?"}
         </div>
-        <p className="font-medium text-sm">{conversation.name}</p>
+        <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{conversation.name}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
@@ -152,9 +152,12 @@ function ChatView({ user, conversation, onBack }) {
           return (
             <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                  isMe ? "bg-[#7C8C6E] text-white" : "bg-white border border-[#EDE9E3] text-[#2C2C2C]"
-                }`}
+                className="max-w-[75%] rounded-2xl px-4 py-2.5"
+                style={{
+                  backgroundColor: isMe ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: isMe ? "#fff" : "var(--text-primary)",
+                  border: isMe ? "none" : "1px solid var(--border-light)",
+                }}
               >
                 {msg.audio_url ? (
                   <audio src={msg.audio_url} controls className="h-8" style={{ filter: isMe ? "invert(1)" : "none" }} />
@@ -168,22 +171,23 @@ function ChatView({ user, conversation, onBack }) {
         <div ref={endRef} />
       </div>
 
-      <div className="border-t border-[#EDE9E3] bg-white p-3 flex gap-2 shrink-0">
+      <div className="p-3 flex gap-2 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)" }}>
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Message..."
-          className="flex-1 border-[#EDE9E3] rounded-xl"
+          className="flex-1 rounded-xl"
           onKeyDown={(e) => e.key === "Enter" && sendText()}
         />
         <button
           onPointerDown={startRecording}
           onPointerUp={stopRecording}
-          className={`p-2.5 rounded-xl transition-colors ${recording ? "bg-rose-100 text-rose-500 animate-pulse" : "bg-[#F5F0EB] text-[#6B6B6B]"}`}
+          className={`p-2.5 rounded-xl transition-colors ${recording ? "animate-pulse" : ""}`}
+          style={{ backgroundColor: recording ? "rgba(224,92,122,0.15)" : "var(--bg-subtle)", color: recording ? "#E05C7A" : "var(--text-secondary)" }}
         >
           {recording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
         </button>
-        <Button onClick={sendText} disabled={!text.trim() || sending} size="icon" className="bg-[#7C8C6E] hover:bg-[#6B7B5E] rounded-xl shrink-0">
+        <Button onClick={sendText} disabled={!text.trim() || sending} size="icon" className="rounded-xl shrink-0" style={{ backgroundColor: "var(--accent-primary)" }}>
           <Send className="w-4 h-4" />
         </Button>
       </div>
