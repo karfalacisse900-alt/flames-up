@@ -107,8 +107,8 @@ function PostDetail({ post, user, onBack }) {
         {/* Post */}
         <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${t.color}`}>{t.label}</span>
-            {post.item_title && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{post.item_title}</span>}
+            <span className="text-[10px] px-2 py-0.5 rounded-full border font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{t.label}</span>
+            {post.item_title && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.item_title}</span>}
           </div>
           <h2 className="font-semibold text-base mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{post.title}</h2>
           <p className="text-sm leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>{post.body}</p>
