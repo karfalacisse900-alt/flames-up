@@ -235,17 +235,23 @@ export default function ServicePersonModal({ person, user, onClose }) {
   ].filter(Boolean);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "rgba(0,0,0,0.65)" }} onClick={onClose}>
-      <div className="mt-auto max-h-[93vh] overflow-y-auto rounded-t-3xl"
-        style={{ backgroundColor: "#F5F2E8" }}
-        onClick={e => e.stopPropagation()}>
-
-        {/* Drag handle */}
-        <div className="sticky top-0 z-10 pt-3 pb-2 flex justify-center" style={{ backgroundColor: "#F5F2E8" }}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+      onClick={onClose}
+      onTouchMove={e => e.stopPropagation()}
+    >
+      <div
+        className="mt-auto rounded-t-3xl flex flex-col"
+        style={{ backgroundColor: "#F5F2E8", maxHeight: "93dvh" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Drag handle — fixed */}
+        <div className="shrink-0 pt-3 pb-2 flex justify-center" style={{ backgroundColor: "#F5F2E8" }}>
           <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "#DAD3C4" }} />
         </div>
 
-        <div className="px-5 pb-10 space-y-5">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-10 space-y-5">
           {/* Header */}
           <div className="flex items-start gap-4">
             <div className="w-20 h-20 rounded-2xl shrink-0 overflow-hidden flex items-center justify-center text-2xl font-bold"
