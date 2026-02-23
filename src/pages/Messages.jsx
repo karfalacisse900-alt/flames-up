@@ -40,21 +40,22 @@ function ConversationList({ user, onSelect }) {
       {convList.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-3xl mb-3">💬</p>
-          <p className="text-sm text-[#9B9B9B]">No conversations yet</p>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>No conversations yet</p>
         </div>
       ) : (
         convList.map((conv) => (
           <button
             key={conv.email}
             onClick={() => onSelect(conv)}
-            className="w-full flex items-center gap-3 bg-white rounded-xl p-4 border border-[#EDE9E3] text-left hover:shadow-sm transition-shadow"
+            className="w-full flex items-center gap-3 rounded-xl p-4 text-left hover:shadow-sm transition-shadow"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
           >
-            <div className="w-10 h-10 rounded-full bg-[#F5F0EB] flex items-center justify-center text-sm font-semibold shrink-0">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
               {conv.name?.[0]?.toUpperCase() || "?"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#2C2C2C] truncate">{conv.name}</p>
-              <p className="text-xs text-[#9B9B9B] truncate mt-0.5">
+              <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{conv.name}</p>
+              <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
                 {conv.lastMessage.audio_url ? "🎤 Voice message" : conv.lastMessage.text}
               </p>
             </div>
