@@ -59,19 +59,9 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
-      <div className="max-w-lg mx-auto relative pb-20">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, x: 18 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -18 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}>
-
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+        <div className="max-w-lg mx-auto relative" style={{ paddingBottom: hideNav ? 0 : "64px" }}>
+          {children}
+        </div>
 
       {!hideNav &&
       <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
