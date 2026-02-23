@@ -23,14 +23,14 @@ import { Users } from "lucide-react";
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
 const catColors = {
-  productivity: "bg-[#EEF3F0] text-[#3C6E5A]",
-  finance: "bg-[#EEF3F0] text-[#3C6E5A]",
-  learning: "bg-[#EDF2F7] text-[#5579A6]",
-  lifestyle: "bg-[#FDF3ED] text-[#D98B62]",
-  entertainment: "bg-[#FDF3ED] text-[#D98B62]",
-  health: "bg-[#EEF3F0] text-[#3C6E5A]",
-  social: "bg-[#EDF2F7] text-[#5579A6]",
-  developer_tools: "bg-[#F2F0EC] text-[#6E6E6E]",
+  productivity: "",
+  finance: "",
+  learning: "",
+  lifestyle: "",
+  entertainment: "",
+  health: "",
+  social: "",
+  developer_tools: "",
 };
 
 function SwipeDiscoverCard({ item, onOpen }) {
