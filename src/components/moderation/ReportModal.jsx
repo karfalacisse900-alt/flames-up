@@ -32,17 +32,33 @@ export default function ReportModal({ open, onClose, contentType, contentId, use
     setTimeout(() => { setDone(false); setReason(""); onClose(); }, 1500);
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={() => { setReason(""); setDone(false); onClose(); }}>
-      <DialogContent className="max-w-sm rounded-2xl" style={{ backgroundColor: "var(--bg-card)" }}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-            <Flag className="w-4 h-4 text-rose-500" /> Report Content
-          </DialogTitle>
-        </DialogHeader>
+    <div
+      className="fixed inset-0 z-[9999] flex items-end justify-center sm:items-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+      onClick={() => { setReason(""); setDone(false); onClose(); }}
+      onTouchMove={e => e.stopPropagation()}
+    >
+      <div
+        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5"
+        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Flag className="w-4 h-4 text-rose-500" />
+            <span className="font-semibold text-base" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Report Content</span>
+          </div>
+          <button onClick={() => { setReason(""); setDone(false); onClose(); }} className="p-1.5 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
+            <X className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+          </button>
+        </div>
+
         {done ? (
           <div className="text-center py-6">
-            <p className="text-2xl mb-2">✅</p>
+            <p className="text-3xl mb-2">✅</p>
             <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Thank you for reporting</p>
             <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Our team will review this soon.</p>
           </div>
@@ -54,7 +70,7 @@ export default function ReportModal({ open, onClose, contentType, contentId, use
                 <button key={r} onClick={() => setReason(r)}
                   className="w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all"
                   style={{
-                    backgroundColor: reason === r ? "rgba(111,143,114,0.12)" : "var(--bg-app)",
+                    backgroundColor: reason === r ? "rgba(60,110,90,0.10)" : "var(--bg-app)",
                     border: `1px solid ${reason === r ? "var(--accent-primary)" : "var(--border-light)"}`,
                     color: reason === r ? "var(--accent-primary)" : "var(--text-secondary)",
                     fontWeight: reason === r ? 500 : 400,
@@ -68,7 +84,7 @@ export default function ReportModal({ open, onClose, contentType, contentId, use
             </Button>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
