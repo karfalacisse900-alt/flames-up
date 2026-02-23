@@ -117,7 +117,7 @@ function ReactionSpeedGame({ onEnd }) {
   };
 
   const bgMap = {
-    waiting: "var(--bg-card)", ready: "#fff0f0", go: "#f0fff8", done: "var(--bg-card)",
+    waiting: "var(--bg-card)", ready: "rgba(224,92,122,0.08)", go: "rgba(60,110,90,0.08)", done: "var(--bg-card)",
   };
   const borderMap = {
     waiting: "var(--border-light)", ready: "#fca5a5", go: "#6ee7b7", done: "var(--accent-primary)",
