@@ -326,7 +326,7 @@ function MathSpeedGame({ onEnd }) {
         <input ref={inputRef} type="number" value={answer} onChange={e => setAnswer(e.target.value)}
           placeholder="Answer…" autoFocus
           className="flex-1 px-4 py-3.5 rounded-2xl border text-center text-xl font-bold outline-none"
-          style={{ borderColor: "var(--border-medium)", backgroundColor: "white", color: "var(--text-primary)" }} />
+          style={{ borderColor: "var(--border-medium)", backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
         <Button type="submit" className="px-5 rounded-2xl" style={{ backgroundColor: "var(--accent-primary)" }}>✓</Button>
       </form>
     </div>
