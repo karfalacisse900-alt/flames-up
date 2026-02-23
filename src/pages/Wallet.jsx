@@ -129,16 +129,16 @@ export default function Wallet() {
 
       {/* Ways to earn */}
       <div className="mx-5 mt-5">
-        <h3 className="text-sm font-semibold text-[#2C2C2C] mb-3">Ways to Earn</h3>
-        <div className="bg-white rounded-2xl border border-[#EDE9E3] divide-y divide-[#EDE9E3]">
+        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Ways to Earn</h3>
+        <div className="rounded-2xl divide-y" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", borderColor: "var(--border-light)" }}>
           {earnWays.map((way, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <div key={i} className="flex items-center gap-3 px-4 py-3" style={{ borderColor: "var(--border-light)" }}>
               <span className="text-xl">{way.emoji}</span>
               <div className="flex-1">
-                <p className="text-sm font-medium text-[#2C2C2C]">{way.title}</p>
-                <p className="text-xs text-[#9B9B9B]">{way.desc}</p>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{way.title}</p>
+                <p className="text-xs" style={{ color: "var(--text-hint)" }}>{way.desc}</p>
               </div>
-              <span className="text-sm font-bold text-[#7C8C6E]">{way.amount}</span>
+              <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>{way.amount}</span>
             </div>
           ))}
         </div>
@@ -146,28 +146,28 @@ export default function Wallet() {
 
       {/* Transaction history */}
       <div className="mx-5 mt-5">
-        <h3 className="text-sm font-semibold text-[#2C2C2C] mb-3">Transaction History</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Transaction History</h3>
         {transactions.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#EDE9E3] p-8 text-center">
+          <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             <p className="text-3xl mb-2">💰</p>
-            <p className="text-sm text-[#9B9B9B]">No transactions yet</p>
+            <p className="text-sm" style={{ color: "var(--text-hint)" }}>No transactions yet</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-[#EDE9E3] divide-y divide-[#EDE9E3]">
+          <div className="rounded-2xl divide-y" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             {transactions.map((txn) => {
               const cfg = typeConfig[txn.type] || { icon: Star, color: "text-gray-400", bg: "bg-gray-50", label: txn.type };
               const Icon = cfg.icon;
               const isPositive = txn.amount > 0;
               return (
-                <div key={txn.id} className="flex items-center gap-3 px-4 py-3">
-                  <div className={`w-9 h-9 rounded-full ${cfg.bg} flex items-center justify-center shrink-0`}>
+                <div key={txn.id} className="flex items-center gap-3 px-4 py-3" style={{ borderColor: "var(--border-light)" }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
                     <Icon className={`w-4 h-4 ${cfg.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#2C2C2C]">{txn.description || cfg.label}</p>
-                    <p className="text-xs text-[#9B9B9B]">{new Date(txn.created_date).toLocaleDateString()}</p>
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{txn.description || cfg.label}</p>
+                    <p className="text-xs" style={{ color: "var(--text-hint)" }}>{new Date(txn.created_date).toLocaleDateString()}</p>
                   </div>
-                  <span className={`text-sm font-bold ${isPositive ? "text-emerald-600" : "text-rose-500"}`}>
+                  <span className="text-sm font-bold" style={{ color: isPositive ? "var(--accent-primary)" : "#E05C7A" }}>
                     {isPositive ? "+" : ""}{txn.amount} ⬡
                   </span>
                 </div>
