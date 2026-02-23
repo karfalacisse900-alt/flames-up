@@ -139,8 +139,9 @@ export default function LocalServices() {
             {location.city ? `Near ${location.city}` : `📍 ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`}
           </p>
         </div>
-        <button onClick={() => { setLocation(null); setLocationError(""); }} className="p-1.5 rounded-full"
-          style={{ backgroundColor: "rgba(60,110,90,0.12)" }}>
+        <button onClick={clearLocation} className="p-1.5 rounded-full"
+          style={{ backgroundColor: "rgba(60,110,90,0.12)" }}
+          title="Change location">
           <RefreshCw className="w-3 h-3" style={{ color: "var(--accent-primary)" }} />
         </button>
       </div>
