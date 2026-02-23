@@ -36,9 +36,9 @@ function PostCard({ post, user, onClick }) {
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
     >
       <div className="flex items-start gap-2 mb-2">
-        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium shrink-0 ${t.color}`}>{t.label}</span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full border font-medium shrink-0" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{t.label}</span>
         {post.item_title && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200 truncate">{post.item_title}</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full truncate" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>{post.item_title}</span>
         )}
       </div>
       <h3 className="font-semibold text-sm mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{post.title}</h3>
