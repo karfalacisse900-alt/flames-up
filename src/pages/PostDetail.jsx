@@ -115,7 +115,7 @@ export default function PostDetail() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm)", paddingBottom: "140px" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", paddingBottom: "140px" }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <Link to={createPageUrl("Home")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-card)" }}>
