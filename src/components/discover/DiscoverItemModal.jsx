@@ -129,10 +129,15 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ backgroundColor: "rgba(0,0,0,0.65)" }} onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+      onClick={onClose}
+      onTouchMove={e => e.stopPropagation()}
+    >
       <div
-        className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl"
-        style={{ backgroundColor: "#FFFFFF", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
+        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col"
+        style={{ backgroundColor: "#FFFFFF", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)", maxHeight: "90dvh" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
