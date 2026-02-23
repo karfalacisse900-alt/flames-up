@@ -227,7 +227,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
           </div>
         )}
 
-        <div className="px-5 pb-8 space-y-5 mt-4" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 space-y-5 mt-4" style={{ backgroundColor: "#FFFFFF" }}>
           {/* Tags row */}
           <div className="flex flex-wrap gap-2">
             <span className={`text-xs px-2.5 py-1 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-600"}`}>
