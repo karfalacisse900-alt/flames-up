@@ -97,8 +97,8 @@ export default function Live() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen pb-24 overflow-y-auto"
-      style={{ backgroundColor: "var(--bg-app)" }}
+      className="overflow-y-auto overscroll-contain"
+      style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
