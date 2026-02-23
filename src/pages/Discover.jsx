@@ -201,8 +201,8 @@ export default function Discover() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen overflow-y-auto"
-      style={{ backgroundColor: "var(--bg-app)" }}
+      className="overflow-y-auto"
+      style={{ backgroundColor: "var(--bg-app)", minHeight: "100%" }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
