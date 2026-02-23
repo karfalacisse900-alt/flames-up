@@ -458,6 +458,20 @@ export default function Discover() {
         </div>
       )}
 
+      {/* ===== LOCAL SERVICES TAB ===== */}
+      {contentTab === "local" && (
+        <div className="pb-24 mt-4">
+          <div className="px-5 mb-4">
+            <div className="rounded-2xl p-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                🗺️ Discover everyday local services in your neighborhood — tapping any category opens <span className="font-semibold">Google Maps</span> with nearby results.
+              </p>
+            </div>
+          </div>
+          <LocalServices />
+        </div>
+      )}
+
       {/* Item Detail Modal */}
       {selectedItem && !compareMode && (
         <DiscoverItemModal item={selectedItem} user={user} allItems={items}
