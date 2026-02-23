@@ -31,7 +31,7 @@ export default function Games() {
       {/* Header */}
       <div className="px-5 pt-6 pb-4" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(60,110,90,0.12)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-primary-light)" }}>
             <Gamepad2 className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
           </div>
           <div>
