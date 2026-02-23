@@ -52,7 +52,7 @@ function SwipeDiscoverCard({ item, onOpen }) {
         <p className="text-xs mt-2 line-clamp-2 leading-relaxed" style={{ color: "var(--text-hint)" }}>{item.long_description}</p>
       )}
       <div className="flex flex-wrap gap-2 mt-4">
-        <span className={`text-xs px-3 py-1 rounded-full ${catColors[item.category] || "bg-gray-100 text-gray-700"}`}>
+        <span className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--border-light)" }}>
           {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
         </span>
         {item.pricing && <span className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>{item.pricing}</span>}
