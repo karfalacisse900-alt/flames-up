@@ -9,60 +9,35 @@ css
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* ── Warm Cream Palette ── */
-  --bg-app:     #DCCBB8;   /* main app background */
-  --bg-card:    #E6EFEA;   /* card surface */
-  --bg-nav:     #DCCBB8;   /* nav bar */
-  --bg-subtle:  #D4C0AA;   /* inputs / divider areas */
-  --bg-modal:   #E6EFEA;   /* modal / sheet background */
+  /* ── Official Design Tokens (Collections Aesthetic) ── */
+  --bg-app:     #F5F2E8;   /* main app background */
+  --bg-card:    #FAF7F0;   /* card surface */
+  --bg-nav:     #FAF7F0;   /* nav bar */
+  --bg-subtle:  #EDE9E3;   /* inputs / divider areas */
+  --bg-modal:   #FAF7F0;   /* modal / sheet background */
 
   /* ── Text ── */
-  --text-primary:   #1E1C19;   /* deep warm near-black */
-  --text-secondary: #6E645B;   /* medium warm brown-gray */
-  --text-hint:      #8A8075;   /* muted placeholder */
+  --text-primary:   #2F2F2F;   /* near-black */
+  --text-secondary: #6B6B6B;   /* medium gray */
+  --text-hint:      #A8A8A8;   /* muted placeholder */
 
-  /* ── Deep Forest Green — primary brand (buttons only) ── */
-  --accent-primary:       #243D33;
-  --accent-primary-hover: #162B23;
-  --accent-primary-light: #E6EFEA;   /* very soft green tint */
+  /* ── Primary Brand Green ── */
+  --accent-primary:       #3C6E5A;
+  --accent-primary-hover: #2D5244;
+  --accent-primary-light: #EEF3F0;   /* very soft green tint */
 
-  /* ── Caramel — secondary accent ── */
-  --accent-secondary:       #BF9E79;
-  --accent-secondary-hover: #A8885F;
+  /* ── Secondary / Caramel ── */
+  --accent-secondary:       #D98B62;
+  --accent-secondary-hover: #C07A52;
 
   /* ── Borders ── */
-  --border-light:  #C4AA92;
-  --border-medium: #B09880;
-  --border-subtle: #CDB9A4;   /* almost invisible */
+  --border-light:  #EDE9E3;
+  --border-medium: #D8D3C8;
+  --border-subtle: #F0EDE5;   /* almost invisible */
 
   /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-app:    #2A241E;
-    --bg-card:   #342C24;
-    --bg-nav:    #2A241E;
-    --bg-subtle: #3D342A;
-    --bg-modal:  #342C24;
-
-    --text-primary:   #EDE4D8;
-    --text-secondary: #B0A496;
-    --text-hint:      #7A7068;
-
-    --accent-primary:       #3A6050;
-    --accent-primary-hover: #2D4D3F;
-    --accent-primary-light: #1A2E26;
-
-    --accent-secondary:       #BF9E79;
-    --accent-secondary-hover: #A8885F;
-
-    --border-light:  #4A3E32;
-    --border-medium: #5A4E40;
-    --border-subtle: #3E3428;
-  }
 }
 
 body {
@@ -80,11 +55,11 @@ body {
 }
 
 button, a[role="button"] {
-  box-shadow: 0 2px 8px rgba(36, 61, 51, 0.15);
+  box-shadow: 0 2px 8px rgba(60, 110, 90, 0.10);
 }
 
 button:active, a[role="button"]:active {
-  box-shadow: 0 1px 3px rgba(36, 61, 51, 0.10);
+  box-shadow: 0 1px 3px rgba(60, 110, 90, 0.06);
 }
 
 input, textarea, select {
@@ -105,11 +80,6 @@ textarea.flex,
 textarea[class*="rounded"] {
   background-color: var(--bg-subtle) !important;
   color: var(--text-primary) !important;
-}
-
-/* All buttons that aren't explicitly styled get forest green */
-button:not([style*="background"]):not([class*="bg-"]):not([class*="hover:bg-"]) {
-  color: inherit;
 }
 
 .font-serif { font-family: var(--font-serif); }
@@ -142,10 +112,6 @@ nav, button, a[role="button"], .no-select {
     @apply border-[var(--border-light)];
   }
 
-  .organic-shadow {
-    box-shadow: none;
-  }
-
   button, a {
     transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
   }
@@ -154,9 +120,9 @@ nav, button, a[role="button"], .no-select {
 /* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
 
 /* Very light grays → subtle bg */
-.bg-gray-50 { background-color: var(--bg-subtle) !important; }
+.bg-gray-50  { background-color: var(--bg-subtle) !important; }
 .bg-gray-100 { background-color: var(--bg-card) !important; }
-.bg-white { background-color: var(--bg-card) !important; }
+.bg-white    { background-color: var(--bg-card) !important; }
 
 /* Text grays → warm equivalents */
 .text-gray-400 { color: var(--text-hint) !important; }
@@ -172,7 +138,7 @@ nav, button, a[role="button"], .no-select {
 .border-gray-300 { border-color: var(--border-medium) !important; }
 
 /* Amber pricing pills → use theme secondary */
-.bg-amber-50 { background-color: var(--accent-primary-light) !important; }
+.bg-amber-50   { background-color: var(--accent-primary-light) !important; }
 .text-amber-700 { color: var(--accent-primary) !important; }
 .border-amber-100 { border-color: var(--border-light) !important; }
 
@@ -180,9 +146,7 @@ nav, button, a[role="button"], .no-select {
 [role="tabpanel"] { background-color: transparent !important; }
 
 /* Tabs list container */
-[role="tablist"] {
-  background-color: var(--bg-card) !important;
-}
+[role="tablist"]  { background-color: var(--bg-card) !important; }
 
 /* Radix / shadcn dialog & sheet portals */
 [data-radix-popper-content-wrapper] > *,
