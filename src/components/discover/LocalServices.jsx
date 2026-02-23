@@ -20,11 +20,16 @@ const SERVICE_CATEGORIES = [
 ];
 
 function openInGoogleMaps(query, lat, lng) {
-  const encoded = encodeURIComponent(`${query} near me`);
   if (lat && lng) {
-    window.open(`https://www.google.com/maps/search/${encoded}/@${lat},${lng},14z`, "_blank");
+    // Use the maps search API with coordinates so it opens centered on the user
+    const encoded = encodeURIComponent(query);
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encoded}&near=${lat},${lng}`,
+      "_blank"
+    );
   } else {
-    window.open(`https://www.google.com/maps/search/${encoded}`, "_blank");
+    const encoded = encodeURIComponent(`${query} near me`);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, "_blank");
   }
 }
 
