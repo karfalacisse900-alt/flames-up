@@ -238,7 +238,7 @@ export default function Discover() {
         </div>
         {/* Content type tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps", "🛠 Apps & Tools"], ["services", "👤 Service People"]].map(([val, label]) => (
+          {[["apps", "🛠 Apps & Tools"], ["services", "👤 Service People"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
