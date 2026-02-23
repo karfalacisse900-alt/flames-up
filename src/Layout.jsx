@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { Home, Compass, Palette, Radio, Gamepad2, User, Bell } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { AnimatePresence, motion } from "framer-motion";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
