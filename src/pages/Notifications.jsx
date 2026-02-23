@@ -75,7 +75,7 @@ export default function Notifications() {
         </div>
         <div className="flex items-center gap-2">
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="text-xs font-medium px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.1)", color: "var(--accent-primary)" }}>
+            <button onClick={markAllRead} className="text-xs font-medium px-3 py-1.5 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
               Mark all read
             </button>
           )}
