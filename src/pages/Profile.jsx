@@ -156,7 +156,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Profile header */}
       <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
         {/* Banner */}
