@@ -33,11 +33,17 @@ function openInGoogleMaps(query, lat, lng) {
   }
 }
 
+const LOC_KEY = "local_services_location";
+
 export default function LocalServices() {
-  const [location, setLocation] = useState(null); // { lat, lng, city }
+  const [location, setLocation] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LOC_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
   const [locationError, setLocationError] = useState("");
   const [locating, setLocating] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(null);
   const [customSearch, setCustomSearch] = useState("");
 
   const requestLocation = () => {
@@ -50,23 +56,30 @@ export default function LocalServices() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
-        // Reverse geocode using a free API
         let city = "";
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
           const data = await res.json();
           city = data.address?.city || data.address?.town || data.address?.village || data.address?.suburb || "";
         } catch (_) {}
-        setLocation({ lat, lng, city });
+        const loc = { lat, lng, city };
+        setLocation(loc);
+        localStorage.setItem(LOC_KEY, JSON.stringify(loc));
         setLocating(false);
       },
       (err) => {
         setLocating(false);
-        if (err.code === 1) setLocationError("Location access denied. Please allow location in your browser settings.");
+        if (err.code === 1) setLocationError("Location access denied. Please enable location in your browser settings, then try again.");
         else setLocationError("Could not get your location. Please try again.");
       },
-      { timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 12000 }
     );
+  };
+
+  const clearLocation = () => {
+    setLocation(null);
+    localStorage.removeItem(LOC_KEY);
+    setLocationError("");
   };
 
   const handleCategoryClick = (cat) => {
