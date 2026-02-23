@@ -125,22 +125,22 @@ export default function Collections() {
   const getCount = (collId) => allItems.filter(i => i.collection_id === collId).length;
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#F5F2E8" }}>
-      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 border-b" style={{ backgroundColor: "#FAF7F0", borderColor: "#E5DFD0" }}>
-        <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "#EDE9E3" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "#6E6E6E" }} />
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-nav)", borderColor: "var(--border-light)" }}>
+        <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
         </Link>
-        <h2 className="font-semibold flex-1" style={{ fontFamily: "var(--font-serif)", color: "#2F2F2F" }}>My Collections</h2>
+        <h2 className="font-semibold flex-1" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>My Collections</h2>
         <button onClick={() => setShowNew(s => !s)}
           className="p-2 rounded-full text-white"
-          style={{ backgroundColor: "#3C6E5A" }}>
+          style={{ backgroundColor: "var(--accent-primary)" }}>
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
       <div className="px-5 mt-4 space-y-3">
         {showNew && (
-          <div className="rounded-2xl p-3 flex gap-2" style={{ backgroundColor: "#FAF7F0", border: "1px solid #E5DFD0" }}>
+          <div className="rounded-2xl p-3 flex gap-2" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             <input
               value={newName}
               onChange={e => setNewName(e.target.value)}
@@ -148,11 +148,11 @@ export default function Collections() {
               placeholder="Collection name…"
               autoFocus
               className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none"
-              style={{ backgroundColor: "#fff", border: "1px solid #E5DFD0", color: "#2F2F2F" }}
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
             />
             <button onClick={handleCreate} disabled={!newName.trim() || creating}
               className="px-4 py-1.5 rounded-xl text-white text-sm font-medium disabled:opacity-50"
-              style={{ backgroundColor: "#3C6E5A" }}>
+              style={{ backgroundColor: "var(--accent-primary)" }}>
               Create
             </button>
           </div>
@@ -160,21 +160,21 @@ export default function Collections() {
 
         {collections.length === 0 && !showNew ? (
           <div className="text-center py-16">
-            <Bookmark className="w-12 h-12 mx-auto mb-4" style={{ color: "#DAD3C4" }} />
-            <p className="text-base font-semibold" style={{ color: "#6E6E6E" }}>No collections yet</p>
-            <p className="text-sm mt-1" style={{ color: "#A8A8A8" }}>Tap + to create your first collection</p>
+            <Bookmark className="w-12 h-12 mx-auto mb-4" style={{ color: "var(--border-medium)" }} />
+            <p className="text-base font-semibold" style={{ color: "var(--text-secondary)" }}>No collections yet</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-hint)" }}>Tap + to create your first collection</p>
           </div>
         ) : (
           collections.map(c => (
             <button key={c.id} onClick={() => setActiveCollection(c)}
               className="w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all hover:shadow-sm"
-              style={{ backgroundColor: "#FAF7F0", border: "1px solid #E5DFD0" }}>
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
               <span className="text-2xl">{c.emoji}</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: "#2F2F2F" }}>{c.name}</p>
-                <p className="text-xs mt-0.5" style={{ color: "#A8A8A8" }}>{getCount(c.id)} item{getCount(c.id) !== 1 ? "s" : ""}</p>
+                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{c.name}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{getCount(c.id)} item{getCount(c.id) !== 1 ? "s" : ""}</p>
               </div>
-              <ChevronRight className="w-4 h-4" style={{ color: "#A8A8A8" }} />
+              <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
             </button>
           ))
         )}
