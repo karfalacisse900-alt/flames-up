@@ -51,25 +51,25 @@ function CollectionDetail({ collection, user, onBack, onDelete }) {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#F5F2E8" }}>
-      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 border-b" style={{ backgroundColor: "#FAF7F0", borderColor: "#E5DFD0" }}>
-        <button onClick={onBack} className="p-2 rounded-full" style={{ backgroundColor: "#EDE9E3" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "#6E6E6E" }} />
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="sticky top-0 z-40 px-4 py-3 flex items-center gap-3 border-b" style={{ backgroundColor: "var(--bg-nav)", borderColor: "var(--border-light)" }}>
+        <button onClick={onBack} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
         </button>
         <span className="text-xl">{collection.emoji}</span>
-        <h2 className="font-semibold flex-1" style={{ fontFamily: "var(--font-serif)", color: "#2F2F2F" }}>{collection.name}</h2>
-        <button onClick={handleDeleteCollection} className="p-2 rounded-full hover:bg-red-50 transition-colors">
-          <Trash2 className="w-4 h-4" style={{ color: "#A8A8A8" }} />
+        <h2 className="font-semibold flex-1" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{collection.name}</h2>
+        <button onClick={handleDeleteCollection} className="p-2 rounded-full transition-colors" style={{ color: "var(--text-hint)" }}>
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
       <div className="px-5 mt-4">
         {items.length === 0 ? (
           <div className="text-center py-16">
-            <Bookmark className="w-10 h-10 mx-auto mb-3" style={{ color: "#DAD3C4" }} />
-            <p className="text-sm" style={{ color: "#A8A8A8" }}>No items saved yet</p>
+            <Bookmark className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--border-medium)" }} />
+            <p className="text-sm" style={{ color: "var(--text-hint)" }}>No items saved yet</p>
           </div>
         ) : (
-          <div className="rounded-2xl px-4" style={{ backgroundColor: "#FAF7F0", border: "1px solid #E5DFD0" }}>
+          <div className="rounded-2xl px-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             {items.map(item => (
               <CollectionItemCard key={item.id} item={item} onRemove={handleRemoveItem} />
             ))}
