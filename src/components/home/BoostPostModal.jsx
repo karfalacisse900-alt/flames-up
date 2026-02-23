@@ -36,6 +36,7 @@ export default function BoostPostModal({ post, user, balance, onClose, onBoosted
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        onTouchMove={e => e.stopPropagation()}
       >
         <div className="absolute inset-0 bg-black/40" onClick={onClose} onTouchMove={e => e.stopPropagation()} />
         <motion.div
