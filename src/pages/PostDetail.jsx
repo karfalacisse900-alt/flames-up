@@ -128,7 +128,7 @@ export default function PostDetail() {
       <div className="px-5 mt-4">
         <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-4">
-            <span className={`text-xs px-3 py-1 rounded-full border capitalize ${typeColors[post.type]}`}>{post.type}</span>
+            <span className="text-xs px-3 py-1 rounded-full border capitalize" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{post.type}</span>
             <div className="flex items-center gap-2">
               <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
               {!post.is_anonymous && post.author_email && user?.email && post.author_email !== user.email && (
