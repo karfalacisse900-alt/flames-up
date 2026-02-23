@@ -37,7 +37,7 @@ export default function BoostPostModal({ post, user, balance, onClose, onBoosted
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+        <div className="absolute inset-0 bg-black/40" onClick={onClose} onTouchMove={e => e.stopPropagation()} />
         <motion.div
           className="relative w-full max-w-lg rounded-t-3xl p-6"
           style={{ backgroundColor: "var(--bg-nav)" }}
