@@ -98,10 +98,10 @@ function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompa
           <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
           <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${catColors[item.category] || "bg-[#F2F0EC] text-[#6E6E6E]"}`} style={{ borderColor: "var(--border-medium)" }}>
+            <span className="text-[10px] px-2 py-0.5 rounded-full border" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-medium)" }}>
               {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
             </span>
-            {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">{item.pricing}</span>}
+            {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>{item.pricing}</span>}
             {item.promo && (
               <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.08)", color: "var(--accent-primary)", border: "1px solid rgba(60,110,90,0.2)" }}>
                 ✓ {item.promo}
