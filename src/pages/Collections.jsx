@@ -7,25 +7,25 @@ import { createPageUrl } from "../utils";
 
 function CollectionItemCard({ item, onRemove }) {
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b last:border-b-0" style={{ borderColor: "#E5DFD0" }}>
+    <div className="flex items-center gap-3 py-2.5 border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
       {item.item_image_url ? (
         <img src={item.item_image_url} alt={item.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" />
       ) : (
         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
-          style={{ backgroundColor: "#EEF3F0", color: "#3C6E5A" }}>
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
           {item.item_title?.[0]?.toUpperCase()}
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: "#2F2F2F" }}>{item.item_title}</p>
-        {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "#A8A8A8" }}>{item.item_subtitle}</p>}
+        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{item.item_title}</p>
+        {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.item_subtitle}</p>}
         <span className="text-[10px] px-2 py-0.5 rounded-full mt-1 inline-block capitalize"
-          style={{ backgroundColor: item.item_type === "app" ? "#EEF3F0" : "#FDF3ED", color: item.item_type === "app" ? "#3C6E5A" : "#D98B62" }}>
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
           {item.item_type === "app" ? "App" : "Service Person"}
         </span>
       </div>
-      <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full hover:bg-red-50 transition-colors">
-        <Trash2 className="w-3.5 h-3.5" style={{ color: "#A8A8A8" }} />
+      <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full transition-colors" style={{ color: "var(--text-hint)" }}>
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );
