@@ -6,12 +6,12 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
 const typeConfig = {
-  new_follower: { icon: UserPlus, color: "#3C6E5A", bg: "rgba(60,110,90,0.1)", label: "followed you" },
+  new_follower: { icon: UserPlus, color: "var(--accent-primary)", bg: "var(--accent-primary-light)", label: "followed you" },
   post_liked: { icon: Heart, color: "#E05C7A", bg: "rgba(224,92,122,0.1)", label: "liked your post" },
-  post_replied: { icon: MessageSquare, color: "#5579A6", bg: "rgba(85,121,166,0.1)", label: "replied to your post" },
-  post_boosted: { icon: Zap, color: "#F59E0B", bg: "rgba(245,158,11,0.1)", label: "boosted your post" },
-  mention: { icon: AtSign, color: "#8B5CF6", bg: "rgba(139,92,246,0.1)", label: "mentioned you" },
-  direct_message: { icon: MessageSquare, color: "#F59E0B", bg: "rgba(245,158,11,0.1)", label: "sent you a message" },
+  post_replied: { icon: MessageSquare, color: "var(--accent-primary)", bg: "var(--accent-primary-light)", label: "replied to your post" },
+  post_boosted: { icon: Zap, color: "var(--accent-secondary)", bg: "rgba(191,158,121,0.12)", label: "boosted your post" },
+  mention: { icon: AtSign, color: "var(--accent-secondary)", bg: "rgba(191,158,121,0.12)", label: "mentioned you" },
+  direct_message: { icon: MessageSquare, color: "var(--accent-secondary)", bg: "rgba(191,158,121,0.12)", label: "sent you a message" },
 };
 
 export default function Notifications() {
