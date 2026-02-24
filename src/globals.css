@@ -112,8 +112,13 @@ nav, button, a[role="button"], .no-select {
     @apply border-[var(--border-light)];
   }
 
-  button, a {
+  button {
     transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* prevent layout shift on route change */
+  #root > * {
+    overflow-x: hidden;
   }
 }
 
