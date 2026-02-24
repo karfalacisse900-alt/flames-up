@@ -177,6 +177,61 @@ function ArtDetailModal({ art, user, onClose }) {
   );
 }
 
+function StudioGalleryTab({ navigate, user, handleLikeArt }) {
+  const qc = useQueryClient();
+  const { data: artworks = [], isLoading } = useQuery({
+    queryKey: ["artworks", "published"],
+    queryFn: () => base44.entities.Artwork.filter({ status: "published" }, "-created_date", 40),
+  });
+
+  const handleLike = async (art) => {
+    if (!user?.email) return;
+    if (art.liked_by?.includes(user.email)) return;
+    await base44.entities.Artwork.update(art.id, {
+      like_count: (art.like_count || 0) + 1,
+      liked_by: [...(art.liked_by || []), user.email],
+    });
+    qc.invalidateQueries({ queryKey: ["artworks", "published"] });
+  };
+
+  if (isLoading) return <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} /></div>;
+
+  if (artworks.length === 0) return (
+    <div className="text-center py-16">
+      <p className="text-4xl mb-3">🎨</p>
+      <p className="text-sm mb-4" style={{ color: "var(--text-hint)" }}>No studio artworks yet</p>
+      <button onClick={() => navigate(createPageUrl("ArtStudio"))} className="px-5 py-2 rounded-full text-white text-sm font-semibold" style={{ backgroundColor: "var(--accent-primary)" }}>
+        Open Art Studio
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {artworks.map(art => {
+        const isLiked = art.liked_by?.includes(user?.email);
+        return (
+          <div key={art.id} className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}>
+            <div className="aspect-square overflow-hidden" onClick={() => navigate(createPageUrl("Gallery"))}>
+              <img src={art.image_url} alt={art.title} className="w-full h-full object-cover cursor-pointer" />
+            </div>
+            <div className="p-2.5">
+              <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+              <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{art.user_name}</p>
+              <div className="flex items-center justify-between mt-2">
+                <button onClick={() => handleLike(art)} className="flex items-center gap-1 text-xs" style={{ color: isLiked ? "#E07070" : "var(--text-hint)" }}>
+                  <span>{isLiked ? "♥" : "♡"}</span> {art.like_count || 0}
+                </button>
+                <button onClick={() => navigate(createPageUrl("Gallery"))} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-hint)" }}>View</button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Art() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
