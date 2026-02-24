@@ -134,12 +134,8 @@ export default function Profile() {
     if (myPosts.length >= 1) b.add("first_post");
     if (myPosts.some(p => (p.like_count || 0) >= 10)) b.add("popular_post");
     if (myArt.length >= 1) b.add("art_creator");
-    const totalWins = gameStats.reduce((s, g) => s + (g.wins || 0), 0);
-    if (totalWins >= 10) b.add("game_champion");
     return Array.from(b);
   })();
-
-  const totalGames = gameStats.reduce((s, g) => s + (g.games_played || 0), 0);
 
   if (!user) {
     return (
