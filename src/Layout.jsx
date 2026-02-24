@@ -10,7 +10,8 @@ const navItems = [
 { name: "Art", icon: Palette, page: "Art" },
 { name: "Live", icon: Radio, page: "Live" },
 { name: "Alerts", icon: Bell, page: "Notifications" },
-{ name: "Profile", icon: User, page: "Profile" }];
+{ name: "Profile", icon: User, page: "Profile" },
+];
 
 
 export default function Layout({ children, currentPageName }) {
