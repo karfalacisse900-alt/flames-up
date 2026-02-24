@@ -6,9 +6,7 @@ export default function WelcomePopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Show with a short delay for a smooth entrance
     const showTimer = setTimeout(() => setVisible(true), 800);
-    // Auto-hide after 7 seconds if not dismissed
     const hideTimer = setTimeout(() => setVisible(false), 7800);
     return () => {
       clearTimeout(showTimer);
@@ -16,66 +14,90 @@ export default function WelcomePopup() {
     };
   }, []);
 
+  if (!visible) return null;
+
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 16, scale: 0.95 }}
-          transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-40px)] max-w-sm"
-          style={{ pointerEvents: "auto" }}
-        >
-          <div
-            className="relative rounded-2xl px-5 py-4"
-            style={{
-              background: "linear-gradient(135deg, #E6EFEA 0%, #d4e8dc 100%)",
-              border: "1px solid rgba(36,61,51,0.13)",
-              boxShadow: "0 8px 32px rgba(36,61,51,0.18), 0 2px 8px rgba(36,61,51,0.10)",
-            }}
+        <>
+          {/* Full-screen touch dismiss overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+            onTouchStart={() => setVisible(false)}
+            onClick={() => setVisible(false)}
+          />
+
+          {/* Centered popup */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 10 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-50 flex items-center justify-center px-8"
+            style={{ pointerEvents: "none" }}
           >
-            {/* Decorative dot */}
-            <div className="absolute top-4 left-4 w-2 h-2 rounded-full" style={{ backgroundColor: "#BF9E79", opacity: 0.8 }} />
-
-            {/* Close button */}
-            <button
-              onClick={() => setVisible(false)}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90"
-              style={{ backgroundColor: "rgba(36,61,51,0.1)", color: "#243D33" }}
+            <div
+              className="relative rounded-3xl px-8 py-8 text-center w-full max-w-xs"
+              style={{
+                background: "linear-gradient(145deg, #E6EFEA 0%, #dceee5 60%, #e8f0ea 100%)",
+                border: "1px solid rgba(36,61,51,0.12)",
+                boxShadow: "0 24px 60px rgba(36,61,51,0.22), 0 4px 16px rgba(36,61,51,0.10)",
+                pointerEvents: "auto",
+              }}
+              onClick={e => e.stopPropagation()}
             >
-              <X className="w-3.5 h-3.5" />
-            </button>
+              {/* Decorative top accent */}
+              <div className="flex justify-center gap-1.5 mb-5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#BF9E79" }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#3C6E5A" }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#BF9E79" }} />
+              </div>
 
-            {/* Content */}
-            <div className="pl-5">
+              {/* Close button */}
+              <button
+                onClick={() => setVisible(false)}
+                className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90"
+                style={{ backgroundColor: "rgba(36,61,51,0.1)", color: "#243D33" }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Text */}
               <p
-                className="text-base leading-snug font-semibold"
+                className="text-xl leading-snug font-semibold mb-1"
                 style={{ color: "#243D33", fontFamily: "var(--font-serif)" }}
               >
                 Here, we listen.
               </p>
               <p
-                className="text-base leading-snug font-semibold"
+                className="text-xl leading-snug font-semibold mb-3"
                 style={{ color: "#243D33", fontFamily: "var(--font-serif)" }}
               >
                 We don't judge.
               </p>
               <p
-                className="text-sm mt-1.5 leading-relaxed"
-                style={{ color: "#3C6449", fontFamily: "var(--font-sans)" }}
+                className="text-sm leading-relaxed"
+                style={{ color: "#4a7a62", fontFamily: "var(--font-sans)" }}
               >
                 Explore freely. ✦
               </p>
-            </div>
 
-            {/* Bottom accent bar */}
-            <div
-              className="absolute bottom-0 left-5 right-5 h-0.5 rounded-full"
-              style={{ background: "linear-gradient(90deg, #BF9E79, transparent)" }}
-            />
-          </div>
-        </motion.div>
+              {/* Tap to dismiss hint */}
+              <p className="text-[10px] mt-4" style={{ color: "rgba(36,61,51,0.35)" }}>
+                Tap anywhere to dismiss
+              </p>
+
+              {/* Bottom accent line */}
+              <div
+                className="absolute bottom-0 left-8 right-8 h-0.5 rounded-full"
+                style={{ background: "linear-gradient(90deg, transparent, #BF9E79, transparent)" }}
+              />
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
