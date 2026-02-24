@@ -117,15 +117,6 @@ export default function Profile() {
     setAvatarUploading(false);
   };
 
-  const handleBannerUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setBannerUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setBannerUrl(file_url);
-    setBannerUploading(false);
-  };
-
   // Compute earned badges automatically
   const computedBadges = (() => {
     const b = new Set(user?.badges || []);
