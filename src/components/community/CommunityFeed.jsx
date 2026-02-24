@@ -70,7 +70,6 @@ export default function CommunityFeed({ user }) {
 
   const filteredPosts = useMemo(() => {
     let list = posts.filter(p => !p.is_daily_spotlight && p.type !== "review");
-    if (mediaFilter !== "all") list = list.filter(p => p.media_type === mediaFilter);
 
     switch (filter) {
       case "trending":  list = [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0)); break;
