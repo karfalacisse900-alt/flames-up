@@ -207,40 +207,13 @@ export default function CommunityFeed({ user }) {
 
       {/* ====== SWIPE MODE ====== */}
       {viewMode === "swipe" && (
-        <div className="px-4 pb-24">
-          {filteredPosts.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-4xl mb-3">💬</p>
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No posts found</p>
-            </div>
-          ) : (
-            <>
-              <AnimatePresence mode="wait">
-                <motion.div key={filteredPosts[swipeIndex]?.id}
-                  initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.2 }}>
-                  {filteredPosts[swipeIndex] && renderPostCard(filteredPosts[swipeIndex])}
-                </motion.div>
-              </AnimatePresence>
-              {/* Swipe nav */}
-              <div className="flex items-center justify-center gap-4 mt-4">
-                <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0}
-                  className="p-2.5 rounded-full border disabled:opacity-30 transition-all"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
-                  <ChevronLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-                </button>
-                <span className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>
-                  {swipeIndex + 1} / {filteredPosts.length}
-                </span>
-                <button onClick={() => setSwipeIndex(i => Math.min(filteredPosts.length - 1, i + 1))} disabled={swipeIndex === filteredPosts.length - 1}
-                  className="p-2.5 rounded-full border disabled:opacity-30 transition-all"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
-                  <ChevronRight className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <SwipeModeView
+          posts={filteredPosts}
+          debates={debates}
+          user={user}
+          onUpvote={(post) => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+          onClose={() => setViewMode("list")}
+        />
       )}
 
       <AnimatePresence>
