@@ -49,10 +49,12 @@
  */
 import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
+import ArtStudio from './pages/ArtStudio';
 import Collections from './pages/Collections';
 import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
+import Gallery from './pages/Gallery';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
 import HelpCenter from './pages/HelpCenter';
@@ -67,18 +69,18 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import ArtStudio from './pages/ArtStudio';
-import Gallery from './pages/Gallery';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminModeration": AdminModeration,
     "Art": Art,
+    "ArtStudio": ArtStudio,
     "Collections": Collections,
     "Discover": Discover,
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
+    "Gallery": Gallery,
     "GamePlay": GamePlay,
     "Games": Games,
     "HelpCenter": HelpCenter,
@@ -93,8 +95,6 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "ArtStudio": ArtStudio,
-    "Gallery": Gallery,
 }
 
 export const pagesConfig = {
