@@ -112,16 +112,17 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
         </div>
 
         {user && (
-          <div className="px-4 pb-safe-bottom py-3 flex gap-2" style={{ borderTop: "1px solid #DCCBB8", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#E6EFEA" }}>
+          <div className="px-4 py-3 flex gap-2 items-center" style={{ borderTop: "1px solid #DCCBB8", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#E6EFEA" }}>
             <input value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
               placeholder="Add a comment…" className="flex-1 text-sm px-3 py-2 rounded-xl outline-none"
               style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
             <button onClick={() => commentText.trim() && commentMut.mutate()}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ backgroundColor: "#3C6E5A", color: "#fff" }}>
               <Send className="w-4 h-4" />
             </button>
+            <ArtVoiceComment artworkId={artwork.id} user={user} onSent={() => { }} />
           </div>
         )}
       </motion.div>
