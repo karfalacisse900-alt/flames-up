@@ -456,6 +456,13 @@ export default function Discover() {
         </>
       )}
 
+      {/* ===== PRODUCTS TAB ===== */}
+      {contentTab === "products" && (
+        <div className="mt-4">
+          <ProductsTab />
+        </div>
+      )}
+
       {/* ===== SERVICE PEOPLE TAB ===== */}
       {contentTab === "services" && (
         <div className="pb-24 mt-4">
