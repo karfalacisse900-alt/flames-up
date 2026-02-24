@@ -4,12 +4,12 @@ import { base44 } from "@/api/base44Client";
 import { X, Plus, Minus } from "lucide-react";
 
 const POST_TYPES = [
-  { key: "opinion",  label: "Opinion",  emoji: "💬", desc: "Share your take on anything" },
-  { key: "question", label: "Question", emoji: "❓", desc: "Ask the community anything" },
-  { key: "review",   label: "Review",   emoji: "⭐", desc: "Review a movie, book, game, etc." },
-  { key: "debate",   label: "Debate",   emoji: "⚔️", desc: "Create a two-sided debate" },
-  { key: "list",     label: "List",     emoji: "📋", desc: "Share a ranked list" },
-  { key: "quote_of_day", label: "Quote", emoji: "✦", desc: "Share an inspiring quote" },
+  { key: "opinion",      label: "Opinion",    emoji: "💬", desc: "Share your take on anything" },
+  { key: "question",     label: "Question",   emoji: "❓", desc: "Ask the community anything" },
+  { key: "debate",       label: "Debate",     emoji: "⚔️", desc: "Create a two-sided debate" },
+  { key: "list",         label: "List",       emoji: "📋", desc: "Share a ranked list" },
+  { key: "quote_of_day", label: "Quote",      emoji: "✦",  desc: "Share an inspiring quote" },
+  { key: "discussion",   label: "Discussion", emoji: "🗣", desc: "Start a general discussion" },
 ];
 
 const MEDIA_TYPES = [
@@ -22,14 +22,13 @@ const MEDIA_TYPES = [
 ];
 
 export default function CreateCommunityPost({ user, onClose, onCreated }) {
-  const [step, setStep] = useState("type"); // type → compose
+  const [step, setStep] = useState("type");
   const [type, setType] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mediaType, setMediaType] = useState("general");
   const [mediaRef, setMediaRef] = useState("");
   const [isAnon, setIsAnon] = useState(false);
-  const [starRating, setStarRating] = useState(0);
   const [listItems, setListItems] = useState(["", ""]);
   const [sideA, setSideA] = useState("");
   const [sideB, setSideB] = useState("");
@@ -51,7 +50,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       media_ref_title: mediaRef.trim() || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
-      star_rating: type === "review" ? starRating : undefined,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
     };
 
@@ -140,26 +138,12 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                 )}
               </div>
 
-              {/* Title (for debate/list/review) */}
-              {(type === "debate" || type === "list" || type === "review") && (
+              {/* Title (for debate/list) */}
+              {(type === "debate" || type === "list") && (
                 <input value={title} onChange={e => setTitle(e.target.value)}
-                  placeholder={type === "debate" ? "Debate topic..." : type === "list" ? "List title..." : "Review title..."}
+                  placeholder={type === "debate" ? "Debate topic..." : "List title..."}
                   className="w-full px-3 py-2.5 rounded-xl text-sm outline-none font-semibold"
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-              )}
-
-              {/* Star rating for review */}
-              {type === "review" && (
-                <div>
-                  <p className="text-[11px] font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Rating</p>
-                  <div className="flex gap-1">
-                    {[1,2,3,4,5].map(n => (
-                      <button key={n} onClick={() => setStarRating(n)} className="text-2xl">
-                        {n <= starRating ? "⭐" : "☆"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               )}
 
               {/* Body */}
