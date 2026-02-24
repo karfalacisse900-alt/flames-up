@@ -236,11 +236,7 @@ export default function Discover() {
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
           <div className="flex items-center gap-2 shrink-0">
-            <Link to={createPageUrl("DiscoverForum")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              <Users className="w-3.5 h-3.5" /> Forum
-            </Link>
+  
             {contentTab === "apps" && (
               <>
                 <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
