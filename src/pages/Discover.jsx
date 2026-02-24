@@ -22,9 +22,7 @@ import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
 import ProductsTab from "../components/discover/ProductsTab";
 import MediaTab from "../components/discover/MediaTab";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
-import { Users } from "lucide-react";
+
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
 
