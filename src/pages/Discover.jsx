@@ -176,6 +176,20 @@ export default function Discover() {
   const pricingOptions = ["all", "Free", "Freemium", "Paid"];
   const platformOptions = ["all", "Web", "iOS", "Android", "Desktop"];
 
+  const applySmartFilter = (item) => {
+    switch (smartFilter) {
+      case "trending": return item.is_boosted || (item.avg_rating >= 4);
+      case "community_favorite": return (item.review_count || 0) >= 3;
+      case "underrated": return (item.avg_rating || 0) < 3.5 && (item.review_count || 0) >= 1;
+      case "just_launched": return !!item.is_new;
+      case "highly_debated": return (item.review_count || 0) >= 5;
+      case "low_cost": return item.pricing === "Free" || item.pricing === "Freemium";
+      case "no_subscription": return item.pricing === "Free" || (item.pricing && !item.pricing.includes("/"));
+      case "hidden_gems": return !item.is_featured && !item.is_sponsored && (item.avg_rating || 0) >= 3.5;
+      default: return true;
+    }
+  };
+
   const filtered = items.filter(item => {
     const catMatch = activeCategory === "all" || item.category === activeCategory;
     const searchMatch = !search ||
@@ -186,7 +200,7 @@ export default function Discover() {
     const platformMatch = filterPlatform === "all" || item.platforms?.includes(filterPlatform);
     const pricingMatch = filterPricing === "all" ||
       (filterPricing === "Paid" ? (item.pricing && !["Free","Freemium"].includes(item.pricing)) : item.pricing === filterPricing);
-    return catMatch && searchMatch && platformMatch && pricingMatch;
+    return catMatch && searchMatch && platformMatch && pricingMatch && applySmartFilter(item);
   }).sort((a, b) => {
     if (sortBy === "rating") return (b.avg_rating || 0) - (a.avg_rating || 0);
     if (sortBy === "newest") return (b.is_new ? 1 : 0) - (a.is_new ? 1 : 0);
