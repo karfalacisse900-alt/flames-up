@@ -250,7 +250,10 @@ export default function ArtStudio() {
   };
 
   const getBlob = (type = "image/png", q = 1) =>
-    new Promise(res => canvasRef.current.toBlob(res, type, q));
+    new Promise(res => canvasRef.current.toBlob(blob => {
+      const ext = type.includes("jpeg") ? "jpg" : "png";
+      res(new File([blob], `artwork.${ext}`, { type }));
+    }, type, q));
 
   const doExport = (fmt, q = 1) => {
     const c = canvasRef.current;
