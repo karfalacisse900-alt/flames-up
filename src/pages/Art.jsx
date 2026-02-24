@@ -271,7 +271,7 @@ export default function Art() {
             </button>
           )}
           {activeTab !== "fight" && (
-            <button onClick={() => setShowUpload(true)} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
+            <button onClick={() => navigate(createPageUrl("ArtStudio"))} className="p-2.5 rounded-full text-white shadow-sm" style={{ backgroundColor: "var(--accent-primary)" }}>
               <Plus className="w-4 h-4" />
             </button>
           )}
