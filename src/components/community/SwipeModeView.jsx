@@ -380,7 +380,7 @@ export default function SwipeModeView({ posts, debates, user, onUpvote, onClose 
       </div>
 
       {/* Card stack */}
-      <div className="absolute inset-0" style={{ paddingTop: 80 }}>
+      <div className="absolute inset-0" style={{ paddingTop: 80, paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 100px)" }}>
         {/* Background card */}
         {next && (
           <div className="absolute inset-4 rounded-[28px]" style={{ bottom: "104px" }}
