@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Send, Flag } from "lucide-react";
+import { ChevronDown, Send } from "lucide-react";
+import MuteBlockMenu from "./MuteBlockMenu";
 
 const TYPE_CONFIG = {
   opinion:         { label: "Opinion",     emoji: "💬", color: "#3C6E5A", bg: "#EEF3F0" },
