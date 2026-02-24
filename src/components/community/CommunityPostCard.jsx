@@ -35,6 +35,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
 
   const commentMut = useMutation({
     mutationFn: async () => {
+      if (!requireVerified(user)) throw new Error("Email not verified");
       const mod = await checkContent(commentText.trim());
       const comment = await base44.entities.CommunityComment.create({
         post_id: post.id,
