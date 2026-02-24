@@ -103,9 +103,12 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
                 style={{ backgroundColor: "#DCCBB8", color: "#243D33" }}>
                 {c.user_name?.[0]?.toUpperCase() || "?"}
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-semibold" style={{ color: "#6B6B6B" }}>{c.user_name}</p>
-                <p className="text-sm" style={{ color: "#2F2F2F" }}>{c.text}</p>
+                {c.audio_url
+                  ? <audio src={c.audio_url} controls className="h-8 w-full mt-1" style={{ maxWidth: 220 }} />
+                  : <p className="text-sm" style={{ color: "#2F2F2F" }}>{c.text}</p>
+                }
               </div>
             </div>
           ))}
