@@ -218,15 +218,18 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
       </div>
 
       <Tabs defaultValue="user" className="px-4 mt-4">
-        <TabsList className="rounded-xl w-full" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="user" className="flex-1 rounded-lg text-xs data-[state=active]:bg-white">
-            <Flag className="w-3 h-3 mr-1" /> User Reports ({userPending.length})
+        <TabsList className="rounded-xl w-full overflow-x-auto" style={{ backgroundColor: "var(--bg-card)" }}>
+          <TabsTrigger value="user" className="flex-1 rounded-lg text-xs">
+            <Flag className="w-3 h-3 mr-1" /> Reports ({userPending.length})
           </TabsTrigger>
-          <TabsTrigger value="ai" className="flex-1 rounded-lg text-xs data-[state=active]:bg-white">
-            <Zap className="w-3 h-3 mr-1" /> AI Flagged ({aiFlagged.length})
+          <TabsTrigger value="ai" className="flex-1 rounded-lg text-xs">
+            <Zap className="w-3 h-3 mr-1" /> AI ({aiFlagged.length})
           </TabsTrigger>
-          <TabsTrigger value="resolved" className="flex-1 rounded-lg text-xs data-[state=active]:bg-white">
+          <TabsTrigger value="resolved" className="flex-1 rounded-lg text-xs">
             <CheckCircle className="w-3 h-3 mr-1" /> Resolved
+          </TabsTrigger>
+          <TabsTrigger value="rules" className="flex-1 rounded-lg text-xs">
+            <Settings2 className="w-3 h-3 mr-1" /> Rules
           </TabsTrigger>
         </TabsList>
 
