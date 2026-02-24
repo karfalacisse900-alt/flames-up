@@ -85,6 +85,9 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </nav>
       }
+      {showVerifyBanner && (
+        <EmailVerificationBanner onDismiss={() => setShowVerifyBanner(false)} />
+      )}
     </div>);
 
 }
