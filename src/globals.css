@@ -10,11 +10,11 @@ css
   --font-sans: 'Inter', system-ui, sans-serif;
 
   /* ── Official Design Tokens (Collections Aesthetic) ── */
-  --bg-app:     #F5F2E8;   /* main app background */
-  --bg-card:    #FAF7F0;   /* card surface */
-  --bg-nav:     #FAF7F0;   /* nav bar */
-  --bg-subtle:  #EDE9E3;   /* inputs / divider areas */
-  --bg-modal:   #FAF7F0;   /* modal / sheet background */
+  --bg-app:     #E8EDE6;   /* main app background – forest green mix */
+  --bg-card:    #EEF3F0;   /* card surface */
+  --bg-nav:     #EEF3F0;   /* nav bar */
+  --bg-subtle:  #E5DFD0;   /* inputs / divider areas */
+  --bg-modal:   #EEF3F0;   /* modal / sheet background */
 
   /* ── Text ── */
   --text-primary:   #2F2F2F;   /* near-black */
