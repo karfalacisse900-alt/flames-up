@@ -158,7 +158,7 @@ function DatingCard({ post, debate, user, onLike, onSkip, onNext, isTop }) {
       )}
 
       {/* Card */}
-      <div className="absolute inset-4 bottom-28 rounded-[28px] overflow-hidden flex flex-col"
+      <div className="absolute inset-4 rounded-[28px] overflow-hidden flex flex-col" style={{ bottom: "104px" }}
         style={{ background: `linear-gradient(160deg, ${gradients[0]} 0%, ${gradients[1]} 100%)`, boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(255,255,255,0.8)" }}>
 
         {/* Color strip at top */}
