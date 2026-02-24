@@ -169,7 +169,7 @@ export default function Gallery() {
 
   const isLoading = loadingArtworks || loadingPieces;
 
-  const sorted = [...artworks].sort((a, b) => {
+  const sorted = [...allArtworks].sort((a, b) => {
     if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
     if (sort === "trending") {
       const cutoff = Date.now() - 86400000;
