@@ -383,7 +383,7 @@ export default function SwipeModeView({ posts, debates, user, onUpvote, onClose 
       <div className="absolute inset-0" style={{ paddingTop: 80 }}>
         {/* Background card */}
         {next && (
-          <div className="absolute inset-4 bottom-28 rounded-[28px]"
+          <div className="absolute inset-4 rounded-[28px]" style={{ bottom: "104px" }}
             style={{
               background: `linear-gradient(160deg, ${(CARD_GRADIENTS[next.type] || CARD_GRADIENTS.opinion)[0]} 0%, ${(CARD_GRADIENTS[next.type] || CARD_GRADIENTS.opinion)[1]} 100%)`,
               transform: "scale(0.93) translateY(16px)",
