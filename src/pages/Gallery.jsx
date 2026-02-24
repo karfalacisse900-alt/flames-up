@@ -137,10 +137,37 @@ export default function Gallery() {
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
-  const { data: artworks = [], isLoading } = useQuery({
+  const { data: artworks = [], isLoading: loadingArtworks } = useQuery({
     queryKey: ["artworks"],
     queryFn: () => base44.entities.Artwork.filter({ status: "published" }, "-created_date", 60),
   });
+
+  // Also load legacy ArtPiece records
+  const { data: artPieces = [], isLoading: loadingPieces } = useQuery({
+    queryKey: ["artPieces"],
+    queryFn: () => base44.entities.ArtPiece.list("-created_date", 60),
+  });
+
+  // Merge both into a unified list
+  const allArtworks = [
+    ...artworks,
+    ...artPieces.map(p => ({
+      id: `piece_${p.id}`,
+      _raw_id: p.id,
+      _type: "ArtPiece",
+      title: p.title,
+      image_url: p.image_url,
+      user_name: p.creator_name || p.owner_name,
+      user_email: p.creator_email || p.owner_email,
+      like_count: p.like_count || 0,
+      liked_by: p.liked_by || [],
+      comment_count: 0,
+      description: p.description,
+      created_date: p.created_date,
+    }))
+  ];
+
+  const isLoading = loadingArtworks || loadingPieces;
 
   const sorted = [...artworks].sort((a, b) => {
     if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
