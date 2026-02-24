@@ -120,6 +120,13 @@ nav, button, a[role="button"], .no-select {
   #root > * {
     overflow-x: hidden;
   }
+
+  /* no page-transition slide/shift */
+  .page-transition-enter,
+  .page-transition-exit {
+    position: absolute !important;
+    width: 100%;
+  }
 }
 
 /* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
