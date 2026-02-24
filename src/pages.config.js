@@ -55,6 +55,7 @@ import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
+import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
 import Live from './pages/Live';
 import LiveRoomView from './pages/LiveRoomView';
@@ -66,7 +67,6 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import HelpCenter from './pages/HelpCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +79,7 @@ export const PAGES = {
     "EditServiceProfile": EditServiceProfile,
     "GamePlay": GamePlay,
     "Games": Games,
+    "HelpCenter": HelpCenter,
     "Home": Home,
     "Live": Live,
     "LiveRoomView": LiveRoomView,
@@ -90,7 +91,6 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "HelpCenter": HelpCenter,
 }
 
 export const pagesConfig = {
