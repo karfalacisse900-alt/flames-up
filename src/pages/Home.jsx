@@ -333,8 +333,6 @@ export default function Home() {
         }
       </div>
 
-      {/* Close the thoughts content div */}
-      </div>
       <CreatePostModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
