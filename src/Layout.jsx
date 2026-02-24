@@ -42,6 +42,12 @@ export default function Layout({ children, currentPageName }) {
   const [swipeMode, setSwipeMode] = useState(false);
 
   useEffect(() => {
+    const handler = () => { setShowVerifyBanner(true); setTimeout(() => setShowVerifyBanner(false), 5000); };
+    window.addEventListener("show_verify_banner", handler);
+    return () => window.removeEventListener("show_verify_banner", handler);
+  }, []);
+
+  useEffect(() => {
     const handler = (e) => setSwipeMode(e.detail?.active ?? false);
     window.addEventListener("swipemode", handler);
     return () => window.removeEventListener("swipemode", handler);
