@@ -22,19 +22,10 @@ const FILTER_OPTIONS = [
   { key: "quotes",    label: "✦ Quotes" },
 ];
 
-const MEDIA_FILTERS = [
-  { key: "all",     label: "All Topics" },
-  { key: "movie",   label: "🎬 Movies" },
-  { key: "show",    label: "📺 Shows" },
-  { key: "book",    label: "📚 Books" },
-  { key: "game",    label: "🎮 Games" },
-  { key: "music",   label: "🎵 Music" },
-  { key: "general", label: "💬 General" },
-];
+
 
 export default function CommunityFeed({ user }) {
   const [filter, setFilter] = useState("all");
-  const [mediaFilter, setMediaFilter] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [viewMode, setViewMode] = useState("list"); // "list" | "swipe"
