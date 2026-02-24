@@ -183,12 +183,15 @@ export default function Gallery() {
   const handleLike = async (art) => {
     if (!user?.email) return;
     if (art.liked_by?.includes(user.email)) return;
-    await base44.entities.Artwork.update(art.id, {
-      like_count: (art.like_count || 0) + 1,
-      liked_by: [...(art.liked_by || []), user.email],
-    });
-    qc.invalidateQueries({ queryKey: ["artworks"] });
-    if (selected?.id === art.id) setSelected({ ...selected, like_count: (selected.like_count || 0) + 1, liked_by: [...(selected.liked_by || []), user.email] });
+    const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
+    if (art._type === "ArtPiece") {
+      await base44.entities.ArtPiece.update(art._raw_id, updated);
+      qc.invalidateQueries({ queryKey: ["artPieces"] });
+    } else {
+      await base44.entities.Artwork.update(art.id, updated);
+      qc.invalidateQueries({ queryKey: ["artworks"] });
+    }
+    if (selected?.id === art.id) setSelected({ ...selected, ...updated });
   };
 
   return (
