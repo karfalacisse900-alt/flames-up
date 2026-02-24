@@ -24,6 +24,7 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewMode, setViewMode] = useState("swipe");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [mainTab, setMainTab] = useState("thoughts"); // "thoughts" | "community"
   const [feedTab, setFeedTab] = useState("all");
   const [likedTab, setLikedTab] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
