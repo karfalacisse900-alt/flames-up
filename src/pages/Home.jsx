@@ -317,6 +317,7 @@ export default function Home() {
         onCreated={() => {refetch();setCurrentIndex(0);}}
         user={user} />
 
+      <WelcomePopup />
     </div>);
 
 }
