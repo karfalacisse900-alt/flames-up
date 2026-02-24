@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, Compass, Palette, Radio, User, Bell } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import EmailVerificationBanner from "./components/auth/EmailVerificationGate";
+import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react";
 
 const navItems = [
-{ name: "Home", icon: Home, page: "Home" },
-{ name: "Discover", icon: Compass, page: "Discover" },
+{ name: "Home",    icon: Home,    page: "Home" },
+{ name: "Explore", icon: Search,  page: "Explore" },
 { name: "Gallery", icon: Palette, page: "Gallery" },
-{ name: "Live", icon: Radio, page: "Live" },
-{ name: "Alerts", icon: Bell, page: "Notifications" },
-{ name: "Profile", icon: User, page: "Profile" },
+{ name: "Live",    icon: Radio,   page: "Live" },
+{ name: "Alerts",  icon: Bell,    page: "Notifications" },
+{ name: "Profile", icon: User,    page: "Profile" },
 ];
 
 
