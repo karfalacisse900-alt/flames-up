@@ -145,7 +145,7 @@ export default function CommunityFeed({ user }) {
       <div className="px-4 pt-2 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="flex gap-1.5 pb-1" style={{ width: "max-content" }}>
           {FILTER_OPTIONS.map(f => (
-            <button key={f.key} onClick={() => { setFilter(f.key); setSwipeIndex(0); }}
+            <button key={f.key} onClick={() => { setFilter(f.key); }}
               className="px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap transition-all"
               style={{
                 backgroundColor: filter === f.key ? "var(--accent-primary)" : "var(--bg-card)",
