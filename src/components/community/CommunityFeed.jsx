@@ -130,7 +130,7 @@ export default function CommunityFeed({ user }) {
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               {viewMode === "list" ? <Layers className="w-4 h-4" /> : <List className="w-4 h-4" />}
             </button>
-            <button onClick={() => setShowCreate(true)}
+            <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white"
               style={{ backgroundColor: "var(--accent-primary)" }}>
               <Plus className="w-3.5 h-3.5" /> Post
