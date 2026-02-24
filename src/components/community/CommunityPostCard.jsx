@@ -35,13 +35,20 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
   });
 
   const commentMut = useMutation({
-    mutationFn: () => base44.entities.CommunityComment.create({
-      post_id: post.id,
-      author_email: user?.email || "",
-      author_name: user?.display_name || user?.full_name || "Anonymous",
-      is_anonymous: false,
-      body: commentText.trim(),
-    }),
+    mutationFn: async () => {
+      const mod = await checkContent(commentText.trim());
+      const comment = await base44.entities.CommunityComment.create({
+        post_id: post.id,
+        author_email: user?.email || "",
+        author_name: user?.display_name || user?.full_name || "Anonymous",
+        is_anonymous: false,
+        body: commentText.trim(),
+      });
+      if (!mod.safe) {
+        await createModerationReport("reply", comment.id, user?.email, user?.display_name || user?.full_name, mod.flags, mod.confidence);
+      }
+      return comment;
+    },
     onSuccess: async () => {
       setCommentText("");
       await base44.entities.CommunityPost.update(post.id, { comment_count: (post.comment_count || 0) + 1 });
