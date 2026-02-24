@@ -328,23 +328,23 @@ export default function SwipeModeView({ posts, debates, user, onUpvote, onClose 
   const handleUndo = () => setIndex(i => Math.max(0, i - 1));
 
   if (posts.length === 0) return (
-    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" style={{ backgroundColor: "#F5F0E6" }}>
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" style={{ backgroundColor: "#E8EDE6" }}>
       <p className="text-5xl mb-4">💬</p>
-      <p className="font-semibold mb-6" style={{ color: "#4A3520" }}>No posts to swipe</p>
-      <button onClick={onClose} className="px-5 py-2.5 rounded-full text-white font-semibold" style={{ backgroundColor: "#B07843" }}>Go back</button>
+      <p className="font-semibold mb-6" style={{ color: "#2F2F2F" }}>No posts to swipe</p>
+      <button onClick={onClose} className="px-5 py-2.5 rounded-full text-white font-semibold" style={{ backgroundColor: "#3C6E5A" }}>Go back</button>
     </div>
   );
 
   if (index >= posts.length) return (
-    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" style={{ backgroundColor: "#F5F0E6" }}>
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center" style={{ backgroundColor: "#E8EDE6" }}>
       <p className="text-5xl mb-4">🎉</p>
-      <p className="text-lg font-bold mb-1" style={{ color: "#2C1A00", fontFamily: "var(--font-serif)" }}>You've seen it all!</p>
-      <p className="text-sm mb-6" style={{ color: "#A08060" }}>Come back later for more</p>
+      <p className="text-lg font-bold mb-1" style={{ color: "#2F2F2F", fontFamily: "var(--font-serif)" }}>You've seen it all!</p>
+      <p className="text-sm mb-6" style={{ color: "#6B6B6B" }}>Come back later for more</p>
       <div className="flex gap-3">
-        <button onClick={handleUndo} className="flex items-center gap-1.5 px-5 py-2.5 rounded-full font-semibold" style={{ backgroundColor: "#EDE0C8", color: "#8B6914" }}>
+        <button onClick={handleUndo} className="flex items-center gap-1.5 px-5 py-2.5 rounded-full font-semibold" style={{ backgroundColor: "#EEF3F0", color: "#3C6E5A", border: "1px solid #C4D4CC" }}>
           <RotateCcw className="w-4 h-4" /> Undo
         </button>
-        <button onClick={onClose} className="px-5 py-2.5 rounded-full text-white font-semibold" style={{ backgroundColor: "#B07843" }}>Back to feed</button>
+        <button onClick={onClose} className="px-5 py-2.5 rounded-full text-white font-semibold" style={{ backgroundColor: "#3C6E5A" }}>Back to feed</button>
       </div>
     </div>
   );
