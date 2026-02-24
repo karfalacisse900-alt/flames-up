@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, Compass, Palette, Radio, Gamepad2, User, Bell } from "lucide-react";
+import { Home, Compass, Palette, Radio, User, Bell } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import EmailVerificationBanner from "./components/auth/EmailVerificationGate";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
