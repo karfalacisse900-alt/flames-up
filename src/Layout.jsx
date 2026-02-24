@@ -8,7 +8,7 @@ import EmailVerificationBanner from "./components/auth/EmailVerificationGate";
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
 { name: "Discover", icon: Compass, page: "Discover" },
-{ name: "Art", icon: Palette, page: "Art" },
+{ name: "Gallery", icon: Palette, page: "Gallery" },
 { name: "Live", icon: Radio, page: "Live" },
 { name: "Alerts", icon: Bell, page: "Notifications" },
 { name: "Profile", icon: User, page: "Profile" },
