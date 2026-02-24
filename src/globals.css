@@ -124,10 +124,15 @@ nav, button, a[role="button"], .no-select {
 
 /* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
 
-/* Very light grays → subtle bg */
+/* Very light grays → forest green theme bg */
 .bg-gray-50  { background-color: var(--bg-subtle) !important; }
 .bg-gray-100 { background-color: var(--bg-card) !important; }
 .bg-white    { background-color: var(--bg-card) !important; }
+
+/* All primary buttons default to forest green */
+button.bg-primary, [class*="bg-primary"] { background-color: #3C6E5A !important; }
+button.bg-blue-500, button.bg-blue-600, button.bg-blue-700 { background-color: #3C6E5A !important; }
+button.bg-indigo-500, button.bg-indigo-600 { background-color: #3C6E5A !important; }
 
 /* Text grays → warm equivalents */
 .text-gray-400 { color: var(--text-hint) !important; }
