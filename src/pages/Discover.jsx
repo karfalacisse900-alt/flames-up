@@ -114,6 +114,7 @@ function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompa
             )}
             <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
           </div>
+          <QuickVote item={item} />
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {user && (
