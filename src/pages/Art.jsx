@@ -92,7 +92,7 @@ function ArtTradingCard({ art, user, onClick }) {
   );
 }
 
-function GalleryCard({ art, user, onClick, onLike }) {
+function GalleryCard({ art, user, onClick, onLike, onLikeClick }) {
   const likedBy = art.liked_by || [];
   const isLiked = user?.email && likedBy.includes(user.email);
   return (
@@ -105,7 +105,7 @@ function GalleryCard({ art, user, onClick, onLike }) {
         <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{art.creator_name}</p>
         <div className="flex items-center justify-between mt-2">
           <button
-            onClick={(e) => { e.stopPropagation(); onLike(art); }}
+            onClick={(e) => { e.stopPropagation(); onLikeClick ? onLikeClick(art) : onLike(art); }}
             className="flex items-center gap-1 text-xs transition-colors"
             style={{ color: isLiked ? "#E07070" : "var(--text-hint)" }}
           >
