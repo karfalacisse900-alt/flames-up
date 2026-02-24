@@ -230,26 +230,27 @@ function DatingCard({ post, debate, user, onLike, onSkip, onNext, isTop }) {
 
       {/* Action buttons (outside card, below) */}
       {isTop && (
-        <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6 z-10 px-4">
+        <div className="absolute left-0 right-0 flex items-center justify-center gap-6 z-10 px-4"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)", height: "80px" }}>
           {/* Nope */}
           <button onClick={onSkip}
             className="w-16 h-16 rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform"
-            style={{ backgroundColor: "#fff", border: "2px solid #FECACA", boxShadow: "0 8px 24px rgba(200,107,107,0.25)" }}>
+            style={{ backgroundColor: "#EEF3F0", border: "2px solid #FECACA", boxShadow: "0 8px 24px rgba(200,107,107,0.25)" }}>
             <X className="w-7 h-7" style={{ color: "#EF4444" }} />
           </button>
 
           {/* Comments */}
           <button onClick={() => setShowComments(true)}
             className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-            style={{ backgroundColor: "#fff", border: "2px solid #E8D8BE", boxShadow: "0 6px 16px rgba(0,0,0,0.1)" }}>
-            <MessageCircle className="w-5 h-5" style={{ color: "#8B6914" }} />
+            style={{ backgroundColor: "#EEF3F0", border: "2px solid #C4D4CC", boxShadow: "0 6px 16px rgba(0,0,0,0.1)" }}>
+            <MessageCircle className="w-5 h-5" style={{ color: "#3C6E5A" }} />
           </button>
 
           {/* Like */}
           <button onClick={handleLike}
             className="w-16 h-16 rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform"
-            style={{ backgroundColor: liked ? "#3C6E5A" : "#fff", border: `2px solid ${liked ? "#3C6E5A" : "#BBF7D0"}`, boxShadow: "0 8px 24px rgba(60,110,90,0.25)" }}>
-            <Heart className={`w-7 h-7 ${liked ? "fill-white text-white" : ""}`} style={{ color: liked ? "#fff" : "#22C55E" }} />
+            style={{ backgroundColor: liked ? "#3C6E5A" : "#EEF3F0", border: `2px solid ${liked ? "#3C6E5A" : "#3C6E5A"}`, boxShadow: "0 8px 24px rgba(60,110,90,0.25)" }}>
+            <Heart className={`w-7 h-7`} style={{ color: liked ? "#fff" : "#3C6E5A", fill: liked ? "#fff" : "none" }} />
           </button>
         </div>
       )}
