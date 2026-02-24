@@ -298,6 +298,10 @@ export default function Art() {
             </div>
           )}
         </TabsContent>
+        <TabsContent value="studio_gallery" className="mt-4 pb-24">
+          <StudioGalleryTab navigate={navigate} user={user} handleLikeArt={handleLikeArt} />
+        </TabsContent>
+
         <TabsContent value="fight" className="mt-4">
           <Tabs defaultValue="arena">
             <TabsList className="rounded-xl w-full mb-1" style={{ backgroundColor: "var(--bg-card)" }}>
