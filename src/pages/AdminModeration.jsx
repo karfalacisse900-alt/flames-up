@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Eye, MessageSquare, Flag, AlertTriangle, Zap, User, Palette, Radio, Star } from "lucide-react";
+import { CheckCircle, XCircle, MessageSquare, Flag, AlertTriangle, Zap, User, Palette, Radio, Settings2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import ModerationRulesPanel from "../components/moderation/ModerationRulesPanel";
 
 const flagColors = {
   nsfw: { bg: "#FEE2E2", text: "#991B1B", label: "NSFW" },
