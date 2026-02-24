@@ -37,7 +37,15 @@ export default function Layout({ children, currentPageName }) {
     }).catch(() => {});
   }, []);
 
-  const hideNav = ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe"].includes(currentPageName);
+  const [swipeMode, setSwipeMode] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => setSwipeMode(e.detail?.active ?? false);
+    window.addEventListener("swipemode", handler);
+    return () => window.removeEventListener("swipemode", handler);
+  }, []);
+
+  const hideNav = swipeMode || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe"].includes(currentPageName);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
