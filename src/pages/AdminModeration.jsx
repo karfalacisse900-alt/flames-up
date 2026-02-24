@@ -262,6 +262,11 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
             <ReportCard key={r.id} report={r} source="ai" onClick={handleOpen} />
           ))}
         </TabsContent>
+
+        {/* Rules */}
+        <TabsContent value="rules" className="mt-4">
+          <ModerationRulesPanel />
+        </TabsContent>
       </Tabs>
 
       {/* Detail dialog */}
