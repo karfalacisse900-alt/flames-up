@@ -139,7 +139,7 @@ export default function Profile() {
       {/* Profile header */}
       <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
         <div className="px-5 pb-5 pt-4">
-          <div className="flex items-end justify-between mb-3">
+          <div className="flex items-start justify-between mb-3">
             {/* Avatar */}
             <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-card)" }}>
               {user.avatar_url ? (
