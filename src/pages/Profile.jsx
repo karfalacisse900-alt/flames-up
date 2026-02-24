@@ -82,12 +82,6 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
-  const { data: gameStats = [] } = useQuery({
-    queryKey: ["gameStats", user?.email],
-    queryFn: () => base44.entities.GameStats.filter({ player_email: user.email }),
-    enabled: !!user?.email,
-  });
-
   const { data: followers = [] } = useQuery({
     queryKey: ["followers", user?.email],
     queryFn: () => base44.entities.Follow.filter({ following_email: user.email }),
