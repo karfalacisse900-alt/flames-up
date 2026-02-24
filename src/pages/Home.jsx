@@ -226,8 +226,10 @@ export default function Home() {
             <CommunityFeed user={user} />
           </div>
         )}
-      </div>
-      <div className="flex-1 overflow-hidden px-4 py-3" style={{ backgroundColor: "var(--bg-app)", display: mainTab === "thoughts" ? "block" : "none" }}>
+
+        {/* Thoughts Feed */}
+        {mainTab === "thoughts" && (
+        <div className="h-full px-4 py-3">
         {isLoading ?
         <div className="h-full flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
