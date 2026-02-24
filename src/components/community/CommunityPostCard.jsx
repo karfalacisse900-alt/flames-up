@@ -76,9 +76,19 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
               {MEDIA_EMOJI[post.media_type]} {post.media_ref_title || post.media_type}
             </span>
           )}
-          <span className="ml-auto text-[11px]" style={{ color: "var(--text-hint)" }}>
-            {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
-          </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>
+              {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
+            </span>
+            {!post.is_anonymous && post.author_email && (
+              <MuteBlockMenu
+                targetEmail={post.author_email}
+                targetName={post.author_name}
+                user={user}
+                onReport={handleReport}
+              />
+            )}
+          </div>
         </div>
 
         {/* Title */}
