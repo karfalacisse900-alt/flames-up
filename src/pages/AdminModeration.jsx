@@ -184,6 +184,10 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
       }
       if (action === "reject" && report.content_type === "post") {
         await base44.entities.Post.delete(report.content_id).catch(() => {});
+        await base44.entities.CommunityPost.delete(report.content_id).catch(() => {});
+      }
+      if (action === "reject" && report.content_type === "reply") {
+        await base44.entities.CommunityComment.delete(report.content_id).catch(() => {});
       }
       qc.invalidateQueries({ queryKey: ["moderation-flagged"] });
       qc.invalidateQueries({ queryKey: ["moderation-resolved"] });
