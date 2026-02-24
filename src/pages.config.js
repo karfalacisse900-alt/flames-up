@@ -68,6 +68,7 @@ import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
 import ArtStudio from './pages/ArtStudio';
+import Gallery from './pages/Gallery';
 import __Layout from './Layout.jsx';
 
 
@@ -93,6 +94,7 @@ export const PAGES = {
     "Shop": Shop,
     "Wallet": Wallet,
     "ArtStudio": ArtStudio,
+    "Gallery": Gallery,
 }
 
 export const pagesConfig = {
