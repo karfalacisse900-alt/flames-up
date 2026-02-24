@@ -10,6 +10,7 @@ import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
 import CreatePostModal from "../components/home/CreatePostModal";
 import { getFontStyle } from "../components/home/FontPicker";
 import WelcomePopup from "../components/home/WelcomePopup";
+import CommunityFeed from "../components/community/CommunityFeed";
 
 const typeStyles = {
   question: { label: "Question", dot: "bg-amber-400" },
