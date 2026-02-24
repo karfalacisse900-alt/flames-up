@@ -457,6 +457,13 @@ export default function Discover() {
         </>
       )}
 
+      {/* ===== MEDIA TAB ===== */}
+      {contentTab === "media" && (
+        <div className="mt-3">
+          <MediaTab user={user} />
+        </div>
+      )}
+
       {/* ===== PRODUCTS TAB ===== */}
       {contentTab === "products" && (
         <div className="mt-4">
