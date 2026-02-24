@@ -158,23 +158,6 @@ export default function CommunityFeed({ user }) {
         </div>
       </div>
 
-      {/* Media topic filter */}
-      <div className="px-4 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
-        <div className="flex gap-1.5 pt-1 pb-2" style={{ width: "max-content" }}>
-          {MEDIA_FILTERS.map(f => (
-            <button key={f.key} onClick={() => { setMediaFilter(f.key); setSwipeIndex(0); }}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium border whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: mediaFilter === f.key ? "var(--accent-primary-light)" : "transparent",
-                color: mediaFilter === f.key ? "var(--accent-primary)" : "var(--text-hint)",
-                borderColor: mediaFilter === f.key ? "var(--accent-primary)" : "transparent",
-              }}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Post count */}
       <p className="px-5 pb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
         {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""}
