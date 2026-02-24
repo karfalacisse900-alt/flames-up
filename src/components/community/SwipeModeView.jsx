@@ -177,14 +177,14 @@ function DatingCard({ post, debate, user, onLike, onSkip, onNext, isTop }) {
             </span>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 flex flex-col justify-center">
+          {/* Content — always centered */}
+          <div className="flex-1 flex flex-col justify-center items-center text-center">
             {post.title && (
-              <p className="text-2xl font-bold leading-tight mb-4" style={{ color: "#1C0E00", fontFamily: "var(--font-serif)" }}>
+              <p className="text-2xl font-bold leading-tight mb-4 w-full text-center" style={{ color: "#1C0E00", fontFamily: "var(--font-serif)" }}>
                 {post.title}
               </p>
             )}
-            <p className="text-lg leading-relaxed" style={{
+            <p className="text-lg leading-relaxed w-full text-center" style={{
               color: "#3A2000",
               fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
               fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
