@@ -345,6 +345,17 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
             </div>
 
             {/* Actions */}
+            {selected?.report.matched_keywords?.length > 0 && (
+              <div className="rounded-xl p-3" style={{ backgroundColor: "#FEF9C3", border: "1px solid #FDE68A" }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: "#92400E" }}>🔑 Matched Keywords</p>
+                <div className="flex flex-wrap gap-1">
+                  {selected.report.matched_keywords.map(kw => (
+                    <span key={kw} className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>{kw}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {(selected?.report.status === "pending" || selected?.report.status === "flagged") && (
               <div className="flex gap-2">
                 <Button
