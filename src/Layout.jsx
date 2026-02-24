@@ -18,6 +18,7 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showVerifyBanner, setShowVerifyBanner] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
