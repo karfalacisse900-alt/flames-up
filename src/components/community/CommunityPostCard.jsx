@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Send } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
+import { requireVerified } from "../auth/EmailVerificationGate";
 
 const TYPE_CONFIG = {
   opinion:         { label: "Opinion",     emoji: "💬", color: "#8B6914", bg: "#FBF5E6" },
