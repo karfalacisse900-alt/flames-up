@@ -185,7 +185,10 @@ export default function ProductsTab() {
                 {CATEGORY_ICONS[product.category] || "📦"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{product.name}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{product.name}</p>
+                  {product.price && <span className="text-[10px] font-semibold shrink-0 px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{product.price}</span>}
+                </div>
                 <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{product.description}</p>
                 {product.insight && (
                   <p className="text-[10px] mt-1.5 italic" style={{ color: "var(--accent-primary)" }}>💡 {product.insight}</p>
