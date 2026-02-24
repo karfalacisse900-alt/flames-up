@@ -149,6 +149,7 @@ export default function Discover() {
   const [showCompare, setShowCompare] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [contentTab, setContentTab] = useState("apps");
+  const [smartFilter, setSmartFilter] = useState("all");
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
