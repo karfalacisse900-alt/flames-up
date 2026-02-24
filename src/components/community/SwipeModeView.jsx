@@ -354,7 +354,7 @@ export default function SwipeModeView({ posts, debates, user, onUpvote, onClose 
   const next = posts[index + 1];
 
   return (
-    <div className="fixed inset-0 z-40" style={{ backgroundColor: "#F0E8D8" }}>
+    <div className="fixed inset-0 z-40" style={{ backgroundColor: "#E8EDE6" }}>
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-5 pt-12 pb-2">
         <button onClick={onClose}
