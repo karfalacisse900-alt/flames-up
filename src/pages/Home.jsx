@@ -9,6 +9,7 @@ import { createPageUrl } from "../utils";
 import FullScreenSwipeCard from "../components/home/FullScreenSwipeCard";
 import CreatePostModal from "../components/home/CreatePostModal";
 import { getFontStyle } from "../components/home/FontPicker";
+import WelcomePopup from "../components/home/WelcomePopup";
 
 const typeStyles = {
   question: { label: "Question", dot: "bg-amber-400" },
