@@ -178,6 +178,7 @@ function ArtDetailModal({ art, user, onClose }) {
 }
 
 export default function Art() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [selectedArt, setSelectedArt] = useState(null);
