@@ -185,7 +185,7 @@ export default function CommunityFeed({ user }) {
           debates={debates}
           user={user}
           onUpvote={(post) => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
-          onClose={() => setViewMode("list")}
+          onClose={() => { setViewMode("list"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } })); }}
         />
       )}
 
