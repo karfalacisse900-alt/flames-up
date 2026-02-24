@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { AnimatePresence, motion } from "framer-motion";
-import { Plus, Layers, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Plus, Layers, List } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DailySpotlight from "./DailySpotlight";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
+import SwipeModeView from "./SwipeModeView";
 
 const FILTER_OPTIONS = [
   { key: "all",       label: "✦ All" },
