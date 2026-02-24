@@ -51,16 +51,20 @@ export default function CommunityFeed({ user }) {
       upvotes: (post.upvotes || 0) + 1,
       upvoted_by: [...(post.upvoted_by || []), user.email],
       engagement_score: (post.upvotes || 0) + 1 + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
-    }),
+    });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["communityPosts"] }),
   });
 
   const downvoteMut = useMutation({
-    mutationFn: ({ post }) => base44.entities.CommunityPost.update(post.id, {
+    mutationFn: ({ post }) => {
+      if (!requireVerified(user)) throw new Error("Email not verified");
+      return base44.entities.CommunityPost.update(post.id, {
       downvotes: (post.downvotes || 0) + 1,
       downvoted_by: [...(post.downvoted_by || []), user.email],
       engagement_score: (post.upvotes || 0) + ((post.comment_count || 0) * 2) - ((post.downvotes || 0) + 1),
-    }),
+    });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["communityPosts"] }),
   });
 
