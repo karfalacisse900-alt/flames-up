@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Pencil, Square, Circle, Undo2, Redo2,
   Trash2, Download, Sparkles, ChevronLeft,
-  Eraser, X, Check, Upload, Palette, Mic, MicOff, Send
+  Eraser, X, Check, Upload, Palette
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,34 +19,45 @@ const COLORS = [
 ];
 const BG_COLORS = ["#FFFFFF","#FFF9F0","#F0F8F0","#1a1a1a","#243D33","#0a0a2a"];
 const BRUSHES   = [2, 5, 10, 18, 28];
+const CW = 800, CH = 600;
 
 export default function ArtStudio() {
-  const navigate   = useNavigate();
-  const canvasRef  = useRef(null);
-  const fileRef    = useRef(null);
+  const navigate  = useNavigate();
+  const canvasRef = useRef(null);
+  const fileRef   = useRef(null);
 
-  // Canvas logical size — always 800×600, display scales via CSS
-  const CW = 800, CH = 600;
+  const [user, setUser] = useState(null);
 
-  const [user, setUser]     = useState(null);
-  const [tool, setTool]     = useState("pencil");
-  const [color, setColor]   = useState("#000000");
-  const [bg, setBg]         = useState("#FFFFFF");
-  const [size, setSize]     = useState(5);
-  const [alpha, setAlpha]   = useState(100);
+  // Keep all drawing params in refs so event handlers never go stale
+  const toolRef  = useRef("pencil");
+  const colorRef = useRef("#000000");
+  const bgRef    = useRef("#FFFFFF");
+  const sizeRef  = useRef(5);
+  const alphaRef = useRef(100);
 
-  // Use refs for all drawing state to avoid stale-closure bugs
-  const drawing   = useRef(false);
-  const lastP     = useRef(null);
-  const startP    = useRef(null);
-  const snap      = useRef(null);
+  // Mirror refs into state for UI reactivity
+  const [tool,  setToolS]  = useState("pencil");
+  const [color, setColorS] = useState("#000000");
+  const [bg,    setBgS]    = useState("#FFFFFF");
+  const [size,  setSizeS]  = useState(5);
+  const [alpha, setAlphaS] = useState(100);
 
-  const histArr   = useRef([]);
-  const histIdx   = useRef(-1);
+  const setTool  = v => { toolRef.current  = v; setToolS(v); };
+  const setColor = v => { colorRef.current = v; setColorS(v); };
+  const setBg    = v => { bgRef.current    = v; setBgS(v); };
+  const setSize  = v => { sizeRef.current  = v; setSizeS(v); };
+  const setAlpha = v => { alphaRef.current = v; setAlphaS(v); };
+
+  const drawing = useRef(false);
+  const lastP   = useRef(null);
+  const startP  = useRef(null);
+  const snap    = useRef(null);
+
+  const histArr = useRef([]);
+  const histIdx = useRef(-1);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
 
-  // UI state
   const [showBg,      setShowBg]      = useState(false);
   const [showPublish, setShowPublish] = useState(false);
   const [showExport,  setShowExport]  = useState(false);
@@ -62,6 +73,18 @@ export default function ArtStudio() {
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
+  const saveSnap = useCallback(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const d = c.toDataURL();
+    const h = histArr.current.slice(0, histIdx.current + 1);
+    h.push(d);
+    histArr.current = h;
+    histIdx.current = h.length - 1;
+    setCanUndo(histIdx.current > 0);
+    setCanRedo(false);
+  }, []);
+
   // Init canvas
   useEffect(() => {
     const c = canvasRef.current;
@@ -72,22 +95,10 @@ export default function ArtStudio() {
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, CW, CH);
     saveSnap();
-  }, []); // eslint-disable-line
-
-  const saveSnap = () => {
-    const c = canvasRef.current;
-    if (!c) return;
-    const d = c.toDataURL();
-    const h = histArr.current.slice(0, histIdx.current + 1);
-    h.push(d);
-    histArr.current = h;
-    histIdx.current = h.length - 1;
-    setCanUndo(histIdx.current > 0);
-    setCanRedo(false);
-  };
+  }, [saveSnap]);
 
   const applySnap = (url) => {
-    const c = canvasRef.current;
+    const c   = canvasRef.current;
     const ctx = c.getContext("2d");
     const img = new Image();
     img.onload = () => { ctx.clearRect(0,0,CW,CH); ctx.drawImage(img,0,0); };
@@ -109,40 +120,42 @@ export default function ArtStudio() {
     setCanRedo(histIdx.current < histArr.current.length - 1);
   };
 
-  // Convert pointer event → canvas coords (accounts for CSS scaling)
+  // Convert pointer → canvas logical coords (handles CSS scaling)
   const getPos = (e) => {
     const c    = canvasRef.current;
     const rect = c.getBoundingClientRect();
-    const pt   = e.touches?.[0] ?? e;
+    const pt   = e.touches ? e.touches[0] : e;
     return {
-      x: ((pt.clientX - rect.left) / rect.width)  * CW,
-      y: ((pt.clientY - rect.top)  / rect.height) * CH,
+      x: ((pt.clientX - rect.left)  / rect.width)  * CW,
+      y: ((pt.clientY - rect.top)   / rect.height) * CH,
     };
   };
 
-  const onDown = (e) => {
+  // Use useCallback so the same function ref is attached/removed on canvas
+  const onDown = useCallback((e) => {
     e.preventDefault();
     const p = getPos(e);
-    lastP.current  = p;
-    startP.current = p;
+    lastP.current   = p;
+    startP.current  = p;
     drawing.current = true;
-    if (tool === "rect" || tool === "circle") {
+    if (toolRef.current === "rect" || toolRef.current === "circle") {
       snap.current = canvasRef.current.toDataURL();
     }
-  };
+  }, []);
 
-  const onMove = (e) => {
+  const onMove = useCallback((e) => {
     e.preventDefault();
     if (!drawing.current) return;
     const p   = getPos(e);
     const c   = canvasRef.current;
     const ctx = c.getContext("2d");
-    ctx.globalAlpha = alpha / 100;
+    const t   = toolRef.current;
 
-    if (tool === "pencil") {
+    if (t === "pencil") {
+      ctx.globalAlpha              = alphaRef.current / 100;
       ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = size;
+      ctx.strokeStyle = colorRef.current;
+      ctx.lineWidth   = sizeRef.current;
       ctx.lineCap     = "round";
       ctx.lineJoin    = "round";
       ctx.beginPath();
@@ -151,10 +164,10 @@ export default function ArtStudio() {
       ctx.stroke();
       lastP.current = p;
 
-    } else if (tool === "eraser") {
+    } else if (t === "eraser") {
       ctx.globalAlpha              = 1;
       ctx.globalCompositeOperation = "destination-out";
-      ctx.lineWidth = size * 2.5;
+      ctx.lineWidth = sizeRef.current * 2.5;
       ctx.lineCap   = "round";
       ctx.lineJoin  = "round";
       ctx.beginPath();
@@ -168,17 +181,14 @@ export default function ArtStudio() {
       img.onload = () => {
         ctx.clearRect(0, 0, CW, CH);
         ctx.drawImage(img, 0, 0);
-        ctx.globalAlpha              = alpha / 100;
+        ctx.globalAlpha              = alphaRef.current / 100;
         ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = color;
-        ctx.lineWidth   = size;
+        ctx.strokeStyle = colorRef.current;
+        ctx.lineWidth   = sizeRef.current;
         ctx.lineCap     = "round";
-        if (tool === "rect") {
-          ctx.beginPath();
-          ctx.strokeRect(
-            startP.current.x, startP.current.y,
-            p.x - startP.current.x, p.y - startP.current.y
-          );
+        if (t === "rect") {
+          ctx.strokeRect(startP.current.x, startP.current.y,
+            p.x - startP.current.x, p.y - startP.current.y);
         } else {
           const rx = Math.abs(p.x - startP.current.x) / 2;
           const ry = Math.abs(p.y - startP.current.y) / 2;
@@ -191,9 +201,9 @@ export default function ArtStudio() {
       };
       img.src = snap.current;
     }
-  };
+  }, []);
 
-  const onUp = (e) => {
+  const onUp = useCallback((e) => {
     e.preventDefault();
     if (!drawing.current) return;
     drawing.current = false;
@@ -201,13 +211,36 @@ export default function ArtStudio() {
     ctx.globalAlpha              = 1;
     ctx.globalCompositeOperation = "source-over";
     saveSnap();
-  };
+  }, [saveSnap]);
+
+  // Attach events directly to canvas element (avoids React synthetic event lag on mobile)
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const opts = { passive: false };
+    c.addEventListener("mousedown",  onDown, opts);
+    c.addEventListener("mousemove",  onMove, opts);
+    c.addEventListener("mouseup",    onUp,   opts);
+    c.addEventListener("mouseleave", onUp,   opts);
+    c.addEventListener("touchstart", onDown, opts);
+    c.addEventListener("touchmove",  onMove, opts);
+    c.addEventListener("touchend",   onUp,   opts);
+    return () => {
+      c.removeEventListener("mousedown",  onDown);
+      c.removeEventListener("mousemove",  onMove);
+      c.removeEventListener("mouseup",    onUp);
+      c.removeEventListener("mouseleave", onUp);
+      c.removeEventListener("touchstart", onDown);
+      c.removeEventListener("touchmove",  onMove);
+      c.removeEventListener("touchend",   onUp);
+    };
+  }, [onDown, onMove, onUp]);
 
   const clearCanvas = () => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.globalAlpha              = 1;
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = bg;
+    ctx.fillStyle = bgRef.current;
     ctx.fillRect(0, 0, CW, CH);
     saveSnap();
   };
@@ -217,7 +250,7 @@ export default function ArtStudio() {
     const c   = canvasRef.current;
     const ctx = c.getContext("2d");
     const d   = c.toDataURL();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha              = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = newBg;
     ctx.fillRect(0, 0, CW, CH);
@@ -234,9 +267,9 @@ export default function ArtStudio() {
     img.onload = () => {
       const c   = canvasRef.current;
       const ctx = c.getContext("2d");
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha              = 1;
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = bg;
+      ctx.fillStyle = bgRef.current;
       ctx.fillRect(0, 0, CW, CH);
       const s  = Math.min(CW / img.naturalWidth, CH / img.naturalHeight);
       const sw = img.naturalWidth  * s;
@@ -256,7 +289,7 @@ export default function ArtStudio() {
     }, type, q));
 
   const doExport = (fmt, q = 1) => {
-    const c = canvasRef.current;
+    const c  = canvasRef.current;
     const dl = (blob, ext) => {
       const url = URL.createObjectURL(blob);
       Object.assign(document.createElement("a"), { href: url, download: `artwork-${Date.now()}.${ext}` }).click();
@@ -366,7 +399,6 @@ export default function ArtStudio() {
 
       {/* MAIN */}
       <div className="flex flex-1 overflow-hidden">
-
         {/* LEFT SIDEBAR */}
         <div className="flex flex-col items-center gap-2 py-3 shrink-0 overflow-y-auto" style={{ width: 58, backgroundColor: "#1E3028", borderRight: "1px solid #2D5244" }}>
           {TOOLS.map(t => (
@@ -396,7 +428,7 @@ export default function ArtStudio() {
           ))}
         </div>
 
-        {/* CANVAS */}
+        {/* CANVAS — no React event handlers, attached via useEffect */}
         <div className="flex-1 flex items-center justify-center overflow-hidden" style={{ backgroundColor: "#2a2e2b" }}>
           <canvas
             ref={canvasRef}
@@ -404,19 +436,11 @@ export default function ArtStudio() {
               display: "block",
               touchAction: "none",
               cursor: tool === "eraser" ? "cell" : "crosshair",
-              /* Fit within container keeping 4:3 ratio */
               width:  "min(calc((100dvh - 120px) * 4/3), calc(100% - 16px))",
               height: "min(calc(100dvh - 120px), calc((100% - 16px) * 3/4))",
               boxShadow: "0 6px 32px rgba(0,0,0,0.6)",
               borderRadius: 2,
             }}
-            onMouseDown={onDown}
-            onMouseMove={onMove}
-            onMouseUp={onUp}
-            onMouseLeave={onUp}
-            onTouchStart={onDown}
-            onTouchMove={onMove}
-            onTouchEnd={onUp}
           />
         </div>
       </div>
@@ -479,11 +503,19 @@ export default function ArtStudio() {
                 <h2 className="text-lg font-bold" style={{ fontFamily:"var(--font-serif)", color:"#243D33" }}>Export</h2>
                 <button onClick={() => setShowExport(false)}><X className="w-5 h-5" style={{ color:"#6B6B6B" }} /></button>
               </div>
-              {[{ f:"png",label:"PNG",desc:"Lossless · transparent background" },{ f:"jpg",label:"JPG High",desc:"90% quality · white bg" },{ f:"jpg_med",label:"JPG Medium",desc:"70% quality · smaller file" },{ f:"svg",label:"SVG",desc:"Vector wrapper + embedded image" }].map(({ f,label,desc }) => (
-                <button key={f} onClick={() => f === "jpg" ? doExport("jpg",.9) : f === "jpg_med" ? doExport("jpg",.7) : doExport(f)}
+              {[
+                { f:"png",    label:"PNG",        desc:"Lossless · transparent background" },
+                { f:"jpg",    label:"JPG High",   desc:"90% quality · white bg" },
+                { f:"jpg_med",label:"JPG Medium", desc:"70% quality · smaller file" },
+                { f:"svg",    label:"SVG",        desc:"Vector wrapper + embedded image" },
+              ].map(({ f,label,desc }) => (
+                <button key={f} onClick={() => f==="jpg" ? doExport("jpg",.9) : f==="jpg_med" ? doExport("jpg",.7) : doExport(f)}
                   className="w-full flex justify-between items-center px-4 py-3 rounded-xl text-left"
                   style={{ backgroundColor:"#DCCBB8", border:"1px solid #BF9E7960" }}>
-                  <div><p className="text-sm font-semibold" style={{ color:"#243D33" }}>{label}</p><p className="text-[11px]" style={{ color:"#6B6B6B" }}>{desc}</p></div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color:"#243D33" }}>{label}</p>
+                    <p className="text-[11px]" style={{ color:"#6B6B6B" }}>{desc}</p>
+                  </div>
                   <Download className="w-4 h-4" style={{ color:"#3C6E5A" }} />
                 </button>
               ))}
