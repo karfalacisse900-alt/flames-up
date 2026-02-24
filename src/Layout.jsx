@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
+import { base44 } from "@/api/base44Client";
 import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react";
 
 const navItems = [
