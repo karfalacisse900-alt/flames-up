@@ -37,6 +37,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
+    if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
     setSaving(true);
