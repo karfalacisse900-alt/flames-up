@@ -127,8 +127,20 @@ export default function Home() {
     <div className="flex flex-col" style={{ height: "calc(100dvh - 64px)", backgroundColor: "var(--bg-app)" }}>
       {/* Compact Header */}
       <div className="px-4 shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)", backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        {/* Feed tabs */}
-        <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide">
+        {/* Main tabs: Thoughts / Community */}
+        <div className="flex gap-0 mb-3 rounded-xl overflow-hidden" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+          {[["thoughts","✦ Thoughts"],["community","🔥 Community"]].map(([val,label]) => (
+            <button key={val} onClick={() => setMainTab(val)}
+              className="flex-1 py-2 text-xs font-semibold transition-all"
+              style={{
+                backgroundColor: mainTab === val ? "var(--bg-card)" : "transparent",
+                color: mainTab === val ? "var(--accent-primary)" : "var(--text-hint)",
+                boxShadow: mainTab === val ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+              }}>{label}</button>
+          ))}
+        </div>
+        {/* Feed tabs (only for Thoughts) */}
+        <div className="flex items-center gap-3 mb-3 overflow-x-auto scrollbar-hide" style={{ display: mainTab === "thoughts" ? "flex" : "none" }}>
           {[["all", "✦ All Thoughts"], ["following", "👥 Following"]].map(([val, label]) =>
           <button
             key={val}
