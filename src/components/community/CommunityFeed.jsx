@@ -1,30 +1,33 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Flame, Sparkles, MessageSquare, ChevronDown, Star, Flag } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Plus, Sparkles } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DailySpotlight from "./DailySpotlight";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 
 const FILTER_OPTIONS = [
-  { key: "all", label: "✦ All" },
-  { key: "trending", label: "🔥 Trending" },
-  { key: "newest", label: "🆕 Newest" },
-  { key: "debated", label: "⚔️ Debates" },
-  { key: "reviews", label: "⭐ Reviews" },
+  { key: "all",       label: "✦ All" },
+  { key: "trending",  label: "🔥 Trending" },
+  { key: "newest",    label: "🆕 Newest" },
+  { key: "upvoted",   label: "▲ Most Upvoted" },
+  { key: "commented", label: "💬 Most Commented" },
+  { key: "debated",   label: "⚔️ Debates" },
   { key: "questions", label: "❓ Questions" },
-  { key: "lists", label: "📋 Lists" },
+  { key: "lists",     label: "📋 Lists" },
+  { key: "opinions",  label: "💬 Opinions" },
+  { key: "quotes",    label: "✦ Quotes" },
 ];
 
 const MEDIA_FILTERS = [
-  { key: "all", label: "All Topics" },
-  { key: "movie", label: "🎬 Movies" },
-  { key: "show", label: "📺 Shows" },
-  { key: "book", label: "📚 Books" },
-  { key: "game", label: "🎮 Games" },
-  { key: "music", label: "🎵 Music" },
+  { key: "all",     label: "All Topics" },
+  { key: "movie",   label: "🎬 Movies" },
+  { key: "show",    label: "📺 Shows" },
+  { key: "book",    label: "📚 Books" },
+  { key: "game",    label: "🎮 Games" },
+  { key: "music",   label: "🎵 Music" },
   { key: "general", label: "💬 General" },
 ];
 
@@ -68,12 +71,12 @@ export default function CommunityFeed({ user }) {
     const today = new Date().toISOString().split("T")[0];
     const todaySpotlights = posts.filter(p => p.spotlight_date === today && p.is_daily_spotlight);
     if (todaySpotlights.length > 0) return todaySpotlights;
-    // fallback: pick 3 high-engagement posts as spotlight
     return [...posts].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0)).slice(0, 3);
   }, [posts]);
 
   const filteredPosts = useMemo(() => {
-    let list = posts.filter(p => !p.is_daily_spotlight);
+    // Exclude review type and spotlight posts from main feed
+    let list = posts.filter(p => !p.is_daily_spotlight && p.type !== "review");
 
     if (mediaFilter !== "all") {
       list = list.filter(p => p.media_type === mediaFilter);
@@ -84,18 +87,27 @@ export default function CommunityFeed({ user }) {
         list = [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
         break;
       case "newest":
-        break; // already sorted by created_date desc
+        break;
+      case "upvoted":
+        list = [...list].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+        break;
+      case "commented":
+        list = [...list].sort((a, b) => (b.comment_count || 0) - (a.comment_count || 0));
+        break;
       case "debated":
         list = list.filter(p => p.type === "debate");
-        break;
-      case "reviews":
-        list = list.filter(p => p.type === "review");
         break;
       case "questions":
         list = list.filter(p => p.type === "question");
         break;
       case "lists":
         list = list.filter(p => p.type === "list");
+        break;
+      case "opinions":
+        list = list.filter(p => p.type === "opinion");
+        break;
+      case "quotes":
+        list = list.filter(p => p.type === "quote_of_day" || p.type === "discussion");
         break;
     }
 
@@ -114,6 +126,19 @@ export default function CommunityFeed({ user }) {
 
   return (
     <div className="pb-24">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Community</h1>
+          <button onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white"
+            style={{ backgroundColor: "var(--accent-primary)" }}>
+            <Plus className="w-3.5 h-3.5" /> Post
+          </button>
+        </div>
+        <p className="text-[11px] pb-2" style={{ color: "var(--text-hint)" }}>Share opinions, ask questions, start debates</p>
+      </div>
+
       {/* Daily Spotlight */}
       {spotlight.length > 0 && <DailySpotlight posts={spotlight} user={user} />}
 
@@ -186,14 +211,6 @@ export default function CommunityFeed({ user }) {
           ))
         )}
       </div>
-
-      {/* FAB */}
-      <button
-        onClick={() => setShowCreate(true)}
-        className="fixed bottom-20 right-5 w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-40 active:scale-90 transition-all"
-        style={{ backgroundColor: "var(--accent-primary)" }}>
-        <Plus className="w-6 h-6 text-white" />
-      </button>
 
       <AnimatePresence>
         {showCreate && (
