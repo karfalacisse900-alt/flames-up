@@ -83,7 +83,7 @@ export default function CommunityFeed({ user }) {
       case "quotes":    list = list.filter(p => p.type === "quote_of_day" || p.type === "discussion"); break;
     }
     return list;
-  }, [posts, filter, mediaFilter]);
+  }, [posts, filter]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
