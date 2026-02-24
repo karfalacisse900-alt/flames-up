@@ -236,9 +236,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
               </div>
 
               <button onClick={handleSubmit} disabled={saving}
-                className="w-full py-3 rounded-2xl text-sm font-semibold text-white transition-all active:scale-95 disabled:opacity-60"
-                style={{ backgroundColor: "var(--accent-primary)" }}>
-                {saving ? "Posting..." : "Post to Community"}
+                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+                style={{ backgroundColor: "#3C6E5A", boxShadow: "0 4px 16px rgba(60,110,90,0.35)", letterSpacing: "0.02em" }}>
+                {saving ? "⏳ Posting..." : "✦ Post to Community"}
               </button>
             </div>
           )}
