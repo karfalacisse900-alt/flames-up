@@ -45,7 +45,9 @@ export default function CommunityFeed({ user }) {
   });
 
   const upvoteMut = useMutation({
-    mutationFn: ({ post }) => base44.entities.CommunityPost.update(post.id, {
+    mutationFn: ({ post }) => {
+      if (!requireVerified(user)) throw new Error("Email not verified");
+      return base44.entities.CommunityPost.update(post.id, {
       upvotes: (post.upvotes || 0) + 1,
       upvoted_by: [...(post.upvoted_by || []), user.email],
       engagement_score: (post.upvotes || 0) + 1 + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
