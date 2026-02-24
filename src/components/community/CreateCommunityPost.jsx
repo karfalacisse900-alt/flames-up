@@ -133,9 +133,16 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
           {/* Step 2: Compose */}
           {step === "compose" && (
             <div className="space-y-3 pb-6">
-              <button onClick={() => setStep("type")} className="text-xs" style={{ color: "var(--accent-primary)" }}>
+              <button onClick={() => setStep("type")} className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
                 ← Change type
               </button>
+              <div className="flex items-center gap-2 py-2 px-3 rounded-xl mb-1" style={{ backgroundColor: "#3C6E5A14" }}>
+                <span className="text-xl">{POST_TYPES.find(t => t.key === type)?.emoji}</span>
+                <div>
+                  <p className="text-xs font-bold" style={{ color: "#3C6E5A" }}>{POST_TYPES.find(t => t.key === type)?.label}</p>
+                  <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>{POST_TYPES.find(t => t.key === type)?.desc}</p>
+                </div>
+              </div>
 
               {/* Media topic */}
               <div>
