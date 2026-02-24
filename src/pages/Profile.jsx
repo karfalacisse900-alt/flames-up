@@ -159,17 +159,8 @@ export default function Profile() {
     <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Profile header */}
       <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
-        {/* Banner */}
-        <div className="w-full h-32 relative overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          {user.banner_url ? (
-            <img src={user.banner_url} alt="banner" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full" style={{ background: activeTheme.banner }} />
-          )}
-        </div>
-
-        <div className="px-5 pb-5">
-          <div className="flex items-end justify-between -mt-10 mb-3">
+        <div className="px-5 pb-5 pt-4">
+          <div className="flex items-end justify-between mb-3">
             {/* Avatar */}
             <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-card)" }}>
               {user.avatar_url ? (
