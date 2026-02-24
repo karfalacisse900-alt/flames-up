@@ -133,12 +133,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
             💬 {post.comment_count || 0}
             <ChevronDown className="w-3.5 h-3.5 transition-transform" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
           </button>
-
-          <button onClick={handleReport} title="Report post"
-            className="p-1 rounded-full transition-all"
-            style={{ color: reported ? "#C86B6B" : "var(--text-hint)" }}>
-            <Flag className="w-3.5 h-3.5" />
-          </button>
         </div>
 
         {/* Comments section */}
