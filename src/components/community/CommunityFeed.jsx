@@ -8,6 +8,7 @@ import DailySpotlight from "./DailySpotlight";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import SwipeModeView from "./SwipeModeView";
+import { requireVerified } from "../auth/EmailVerificationGate";
 
 const FILTER_OPTIONS = [
   { key: "all",       label: "✦ All" },
