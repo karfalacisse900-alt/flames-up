@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Send } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
+import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 
 const TYPE_CONFIG = {
   opinion:         { label: "Opinion",     emoji: "💬", color: "#3C6E5A", bg: "#EEF3F0" },
