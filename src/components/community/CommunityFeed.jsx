@@ -124,7 +124,7 @@ export default function CommunityFeed({ user }) {
           </div>
           <div className="flex items-center gap-2">
             {/* View mode toggle */}
-            <button onClick={() => { setViewMode(v => v === "list" ? "swipe" : "list"); setExpandedPost(null); }}
+            <button onClick={() => { const next = viewMode === "list" ? "swipe" : "list"; setViewMode(next); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: next === "swipe" } })); }}
               className="p-2 rounded-full border transition-all"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
               {viewMode === "list" ? <Layers className="w-4 h-4" /> : <List className="w-4 h-4" />}
