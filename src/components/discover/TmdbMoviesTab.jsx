@@ -128,6 +128,9 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSearch, setIsSearch] = useState(false);
+  const [sortBy, setSortBy] = useState("popularity");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const sortByRef = useRef("popularity");
 
   const genres = tab === "movie" ? MOVIE_GENRES : TV_GENRES;
 
