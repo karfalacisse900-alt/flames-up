@@ -7,12 +7,10 @@ const API_KEY = Deno.env.get("TMDB_API_KEY");
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json();
+    const { query, type = "movie", page = 1, genre_id, sort_mode } = body;
 
-    console.log("TMDb request body:", JSON.stringify({ user: user?.email }));
-
-    const { query, type = "movie", page = 1, genre_id, sort_mode } = await req.json();
+    console.log("TMDb params:", JSON.stringify({ type, query, genre_id, sort_mode }));
 
     const mediaType = type === "tv" ? "tv" : "movie";
     let url;
