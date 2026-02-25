@@ -34,7 +34,23 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [listItems, setListItems] = useState(["", ""]);
   const [sideA, setSideA] = useState("");
   const [sideB, setSideB] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = React.useRef(null);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setImageUrl(file_url);
+    } catch (err) {
+      console.error(err);
+    }
+    setUploading(false);
+  };
 
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
@@ -71,6 +87,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
+      image_url: imageUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
@@ -183,6 +200,29 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                   rows={4}
                   className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+              )}
+
+              {/* Photo/GIF upload */}
+              {type !== "debate" && type !== "list" && (
+                <div>
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  {imageUrl ? (
+                    <div className="relative rounded-xl overflow-hidden">
+                      <img src={imageUrl} alt="Upload" className="w-full max-h-64 object-cover" />
+                      <button onClick={() => setImageUrl("")}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                      className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
+                      style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                      <ImageIcon className="w-4 h-4" />
+                      {uploading ? "Uploading..." : "Add Photo/GIF"}
+                    </button>
+                  )}
+                </div>
               )}
 
               {/* Debate sides */}

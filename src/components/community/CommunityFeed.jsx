@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, ImageIcon, Smile } from "lucide-react";
+import { Plus, ImageIcon, Smile, ArrowUp, Layers } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
@@ -31,13 +31,48 @@ export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [viewMode, setViewMode] = useState("list");
+  const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const qc = useQueryClient();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
-    refetchInterval: 30000,
   });
+
+  // Real-time subscription
+  useEffect(() => {
+    const unsub = base44.entities.CommunityPost.subscribe((event) => {
+      if (event.type === "create") {
+        setNewPostsAvailable(n => n + 1);
+      } else if (event.type === "update" || event.type === "delete") {
+        qc.invalidateQueries({ queryKey: ["communityPosts"] });
+      }
+    });
+    return unsub;
+  }, [qc]);
+
+  // Real-time comment updates
+  useEffect(() => {
+    const unsub = base44.entities.CommunityComment.subscribe((event) => {
+      if (event.type === "create" && expandedPost === event.data?.post_id) {
+        qc.invalidateQueries({ queryKey: ["communityComments", event.data.post_id] });
+      }
+    });
+    return unsub;
+  }, [expandedPost, qc]);
+
+  // Real-time debate updates
+  useEffect(() => {
+    const unsub = base44.entities.CommunityDebate.subscribe(() => {
+      qc.invalidateQueries({ queryKey: ["communityDebates"] });
+    });
+    return unsub;
+  }, [qc]);
+
+  const loadNewPosts = () => {
+    refetch();
+    setNewPostsAvailable(0);
+  };
 
   const { data: debates = [] } = useQuery({
     queryKey: ["communityDebates"],
@@ -97,13 +132,22 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const renderPostCard = (post) => (
-    <CommunityPostCard key={post.id} post={post} user={user}
-      onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
-      isExpanded={expandedPost === post.id}
-      onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-    />
-  );
+  const renderPostCard = (post) => {
+    const debate = getDebateForPost(post.id);
+    return post.type === "debate" || post.type === "question" ? (
+      <DebateCard key={post.id} post={post} debate={debate} user={user}
+        onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+        isExpanded={expandedPost === post.id}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+      />
+    ) : (
+      <CommunityPostCard key={post.id} post={post} user={user}
+        onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+        isExpanded={expandedPost === post.id}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+      />
+    );
+  };
 
   if (isLoading) {
     return (
@@ -133,6 +177,19 @@ export default function CommunityFeed({ user }) {
         </div>
       </div>
 
+      {/* ── New posts indicator ── */}
+      <AnimatePresence>
+        {newPostsAvailable > 0 && (
+          <motion.button initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            onClick={loadNewPosts}
+            className="fixed top-14 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold shadow-lg"
+            style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+            <ArrowUp className="w-3.5 h-3.5" />
+            {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* ── Quick compose row ── */}
       {viewMode === "list" && (
         <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
@@ -146,12 +203,16 @@ export default function CommunityFeed({ user }) {
             What's on your mind?
           </button>
           <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="p-2 rounded-full" style={{ color: "var(--accent-primary)" }}>
+            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
             <ImageIcon className="w-4 h-4" />
           </button>
           <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="p-2 rounded-full" style={{ color: "var(--accent-primary)" }}>
+            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
             <Smile className="w-4 h-4" />
+          </button>
+          <button onClick={() => { setViewMode("swipe"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
+            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
+            <Layers className="w-4 h-4" />
           </button>
         </div>
       )}
