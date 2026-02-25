@@ -25,7 +25,6 @@ const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avat
 export default function CommunityPostCard({ post, user, onUpvote }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
-  const [showComments, setShowComments] = useState(false);
   const [saved, setSaved] = useState(false);
   const [reported, setReported] = useState(false);
   const [likeBounce, setLikeBounce] = useState(false);
