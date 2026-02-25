@@ -7,7 +7,7 @@ import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-function ConversationList({ user, onSelect }) {
+function ConversationList({ user, onSelect, unreadCounts }) {
   const { data: sentMessages = [] } = useQuery({
     queryKey: ["dmSent", user?.email],
     queryFn: () => base44.entities.DirectMessage.filter({ sender_email: user.email }, "-created_date", 100),
@@ -18,6 +18,20 @@ function ConversationList({ user, onSelect }) {
     queryFn: () => base44.entities.DirectMessage.filter({ receiver_email: user.email }, "-created_date", 100),
     enabled: !!user?.email,
   });
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!user?.email) return;
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.data?.receiver_email === user.email || event.data?.sender_email === user.email) {
+        queryClient.invalidateQueries({ queryKey: ["dmSent", user.email] });
+        queryClient.invalidateQueries({ queryKey: ["dmReceived", user.email] });
+      }
+    });
+    return unsub;
+  }, [user?.email]);
+
+  const queryClient = useQueryClient();
 
   // Derive unique conversations
   const conversations = {};
@@ -43,24 +57,32 @@ function ConversationList({ user, onSelect }) {
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>No conversations yet</p>
         </div>
       ) : (
-        convList.map((conv) => (
-          <button
-            key={conv.email}
-            onClick={() => onSelect(conv)}
-            className="w-full flex items-center gap-3 rounded-xl p-4 text-left hover:shadow-sm transition-shadow"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-          >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
-              {conv.name?.[0]?.toUpperCase() || "?"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{conv.name}</p>
-              <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
-                {conv.lastMessage.audio_url ? "🎤 Voice message" : conv.lastMessage.text}
-              </p>
-            </div>
-          </button>
-        ))
+        convList.map((conv) => {
+          const unread = unreadCounts[conv.email] || 0;
+          return (
+            <button
+              key={conv.email}
+              onClick={() => onSelect(conv)}
+              className="w-full flex items-center gap-3 rounded-xl p-4 text-left hover:shadow-sm transition-shadow relative"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+            >
+              {unread > 0 && (
+                <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
+                  {unread > 9 ? "9+" : unread}
+                </div>
+              )}
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
+                {conv.name?.[0]?.toUpperCase() || "?"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{conv.name}</p>
+                <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
+                  {conv.lastMessage.audio_url ? "🎤 Voice message" : conv.lastMessage.text}
+                </p>
+              </div>
+            </button>
+          );
+        })
       )}
     </div>
   );
@@ -223,10 +245,23 @@ function ChatView({ user, conversation, onBack }) {
 export default function Messages() {
   const [user, setUser] = useState(null);
   const [activeConversation, setActiveConversation] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Compute unread message counts
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.DirectMessage.filter({ receiver_email: user.email, is_read: false }).then((msgs) => {
+      const counts = {};
+      msgs.forEach((m) => {
+        counts[m.sender_email] = (counts[m.sender_email] || 0) + 1;
+      });
+      setUnreadCounts(counts);
+    });
+  }, [user?.email]);
 
   // Support deep-linking to a specific user via ?with=email&name=name
   useEffect(() => {
@@ -254,7 +289,7 @@ export default function Messages() {
         </Link>
         <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Messages</h2>
       </div>
-      <ConversationList user={user} onSelect={setActiveConversation} />
+      <ConversationList user={user} onSelect={setActiveConversation} unreadCounts={unreadCounts} />
     </div>
   );
 }
