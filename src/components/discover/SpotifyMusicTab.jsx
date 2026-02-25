@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Music, ExternalLink, Disc, Mic2, X } from "lucide-react";
+import { Search, Music, Disc, Mic2, X, Play, Pause, Square } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const SPOTIFY_ICON = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+  </svg>
+);
 
 function formatDuration(ms) {
   if (!ms) return "";
@@ -17,31 +23,134 @@ function formatFollowers(n) {
   return `${n} followers`;
 }
 
+// Global audio manager — only one preview at a time
+let globalAudio = null;
+let globalSetPlaying = null;
+
+function PreviewButton({ previewUrl }) {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) audioRef.current.pause();
+      clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    if (!previewUrl) return;
+
+    // Stop any other playing preview
+    if (globalAudio && globalAudio !== audioRef.current) {
+      globalAudio.pause();
+      globalAudio.currentTime = 0;
+      if (globalSetPlaying) globalSetPlaying(false);
+    }
+
+    if (playing) {
+      audioRef.current.pause();
+      clearInterval(intervalRef.current);
+      setPlaying(false);
+      setProgress(0);
+      audioRef.current.currentTime = 0;
+      globalAudio = null;
+      globalSetPlaying = null;
+    } else {
+      if (!audioRef.current) audioRef.current = new Audio(previewUrl);
+      audioRef.current.src = previewUrl;
+      audioRef.current.play();
+      globalAudio = audioRef.current;
+      globalSetPlaying = setPlaying;
+      setPlaying(true);
+      intervalRef.current = setInterval(() => {
+        if (audioRef.current) {
+          setProgress((audioRef.current.currentTime / 30) * 100);
+        }
+      }, 200);
+      audioRef.current.onended = () => {
+        setPlaying(false);
+        setProgress(0);
+        clearInterval(intervalRef.current);
+        globalAudio = null;
+        globalSetPlaying = null;
+      };
+    }
+  };
+
+  if (!previewUrl) return null;
+
+  return (
+    <button onClick={handleToggle}
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 relative overflow-hidden shrink-0"
+      style={{ backgroundColor: playing ? "#1a1a1a" : "var(--bg-subtle)", color: playing ? "#1DB954" : "var(--text-secondary)", border: "1px solid var(--border-light)", minWidth: 64 }}>
+      {playing && (
+        <div className="absolute left-0 top-0 bottom-0 rounded-xl opacity-20 transition-all"
+          style={{ width: `${progress}%`, backgroundColor: "#1DB954" }} />
+      )}
+      <span className="relative z-10 flex items-center gap-1">
+        {playing ? <Square className="w-3 h-3" fill="currentColor" /> : <Play className="w-3 h-3" fill="currentColor" />}
+        {playing ? "Stop" : "Preview"}
+      </span>
+    </button>
+  );
+}
+
 function TrackCard({ item }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 p-3 rounded-2xl"
+      className="rounded-2xl overflow-hidden"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      {item.cover_url ? (
-        <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
-      ) : (
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <Music className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
+      <div className="flex items-center gap-3 p-3">
+        {item.cover_url ? (
+          <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+        ) : (
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
+            <Music className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
+          <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
+          {item.album && (
+            <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
+              💿 {item.album}
+            </p>
+          )}
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            {item.release_year && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+                {item.release_year}
+              </span>
+            )}
+            {item.duration_ms && (
+              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{formatDuration(item.duration_ms)}</span>
+            )}
+          </div>
         </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
-        <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.album} {item.release_year ? `· ${item.release_year}` : ""}</p>
-        {item.duration_ms && <p className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{formatDuration(item.duration_ms)}</p>}
+        <div className="flex flex-col gap-1.5 items-end shrink-0">
+          {item.preview_url && <PreviewButton previewUrl={item.preview_url} />}
+          {item.spotify_url && (
+            <a href={item.spotify_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all"
+              style={{ backgroundColor: "#1DB954", color: "#fff" }}>
+              {SPOTIFY_ICON} Listen
+            </a>
+          )}
+        </div>
       </div>
-      {item.spotify_url && (
-        <a href={item.spotify_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95"
-          style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-          Listen
-        </a>
+      {/* Album page link */}
+      {item.album_url && (
+        <div className="px-3 pb-2.5">
+          <a href={item.album_url} target="_blank" rel="noopener noreferrer"
+            className="text-[10px] flex items-center gap-1 hover:underline"
+            style={{ color: "#1DB954" }}>
+            View album on Spotify →
+          </a>
+        </div>
       )}
     </motion.div>
   );
@@ -73,10 +182,9 @@ function ArtistCard({ item }) {
       </div>
       {item.spotify_url && (
         <a href={item.spotify_url} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0"
           style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-          Open
+          {SPOTIFY_ICON} Open
         </a>
       )}
     </motion.div>
@@ -86,30 +194,38 @@ function ArtistCard({ item }) {
 function AlbumCard({ item }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 p-3 rounded-2xl"
+      className="rounded-2xl overflow-hidden"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      {item.cover_url ? (
-        <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
-      ) : (
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <Disc className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
+      <div className="flex items-center gap-3 p-3">
+        {item.cover_url ? (
+          <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+        ) : (
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
+            <Disc className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
+          <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            {item.release_date && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+                📅 {item.release_date}
+              </span>
+            )}
+            {item.total_tracks && (
+              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{item.total_tracks} tracks</span>
+            )}
+          </div>
         </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
-        <p className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>
-          {item.release_year}{item.total_tracks ? ` · ${item.total_tracks} tracks` : ""}
-        </p>
+        {item.spotify_url && (
+          <a href={item.spotify_url} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0"
+            style={{ backgroundColor: "#1DB954", color: "#fff" }}>
+            {SPOTIFY_ICON} Open
+          </a>
+        )}
       </div>
-      {item.spotify_url && (
-        <a href={item.spotify_url} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
-          style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-          Open
-        </a>
-      )}
     </motion.div>
   );
 }
@@ -158,7 +274,7 @@ export default function SpotifyMusicTab({ user }) {
         <svg width="28" height="28" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
         <div>
           <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Spotify Music</p>
-          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Search tracks, artists & albums</p>
+          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Search tracks, artists & albums · 30-sec previews</p>
         </div>
       </div>
 
@@ -205,6 +321,15 @@ export default function SpotifyMusicTab({ user }) {
         </div>
       </form>
 
+      {/* Preview note */}
+      {searchType === "track" && !results && (
+        <div className="mx-5 mb-3 flex items-center gap-2 p-2.5 rounded-xl text-[11px]"
+          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+          <Play className="w-3 h-3 shrink-0" style={{ color: "#1DB954" }} />
+          Search tracks to hear 30-second previews directly in the app (where available).
+        </div>
+      )}
+
       {/* Quick search chips */}
       {!results && (
         <div className="px-5 mb-4 overflow-x-auto scrollbar-hide">
@@ -228,7 +353,7 @@ export default function SpotifyMusicTab({ user }) {
       {/* Results */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "#1DB954", borderTopColor: "transparent" }} />
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "#1DB954", borderTopColor: "transparent" }} />
         </div>
       ) : items.length > 0 ? (
         <div className="px-5 space-y-2">
@@ -256,7 +381,7 @@ export default function SpotifyMusicTab({ user }) {
 
       {/* Spotify attribution */}
       <p className="text-[10px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
-        Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. This app is not affiliated with Spotify.
+        Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. 30-second previews provided by the Spotify API. This app is not affiliated with Spotify.
       </p>
     </div>
   );
