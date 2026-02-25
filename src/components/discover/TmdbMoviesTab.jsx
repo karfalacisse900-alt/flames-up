@@ -119,8 +119,8 @@ function MovieCard({ item }) {
   );
 }
 
-export default function TmdbMoviesTab() {
-  const [tab, setTab] = useState("movie"); // "movie" | "tv"
+export default function TmdbMoviesTab({ defaultTab = "movie" }) {
+  const [tab, setTab] = useState(defaultTab === "show" ? "tv" : "movie"); // "movie" | "tv"
   const [genre, setGenre] = useState(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
