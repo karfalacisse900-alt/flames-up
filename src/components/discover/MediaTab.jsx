@@ -627,7 +627,7 @@ export default function MediaTab({ user }) {
       )}
 
       {/* Results count */}
-      {!isMusicView && !isBookView && (
+      {!isMusicView && !isBookView && !isMovieShowView && (
         <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
           {`${filtered.length} item${filtered.length !== 1 ? "s" : ""}`}
         </p>
@@ -638,6 +638,8 @@ export default function MediaTab({ user }) {
         <SpotifyMusicTab user={user} />
       ) : isBookView ? (
         <OpenLibraryBooksTab />
+      ) : isMovieShowView ? (
+        <TMDbMoviesTab defaultType={activeType === "show" ? "tv" : "movie"} />
       ) : (
         <div className="px-5 space-y-3">
           {filtered.length === 0 ? (
