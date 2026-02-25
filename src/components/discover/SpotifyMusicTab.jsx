@@ -1,295 +1,332 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Music, Disc, Mic2, X, Play, Pause, Square } from "lucide-react";
+import { Search, Music, X, Play, Square, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const SPOTIFY_ICON = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-  </svg>
-);
+// ── Preloaded trending songs ──────────────────────────────────────────────
+const PRELOADED_SONGS = [
+  { title: "Achour", artist: "Innoss'B", duration: "3:51" },
+  { title: "Yo Pe", artist: "Innoss'B", duration: "4:33" },
+  { title: "Careless Whisper", artist: "George Michael", duration: "5:01" },
+  { title: "Until I Found You", artist: "Stephen Sanchez", duration: "2:57" },
+  { title: "Gangsta's Paradise", artist: "Coolio", duration: "4:01" },
+  { title: "Yellow", artist: "Coldplay", duration: "4:27" },
+  { title: "On the Low", artist: "Burna Boy", duration: "3:06" },
+  { title: "I Wanna Be Yours", artist: "Arctic Monkeys", duration: "3:04" },
+  { title: "Die With A Smile", artist: "Lady Gaga & Bruno Mars", duration: "4:12" },
+  { title: "Save Your Tears", artist: "The Weeknd", duration: "3:36" },
+  { title: "Somewhere Only We Know", artist: "Keane", duration: "3:59" },
+  { title: "In Da Club", artist: "50 Cent", duration: "3:14" },
+  { title: "Diamonds", artist: "Rihanna", duration: "3:46" },
+  { title: "Take on Me", artist: "a-ha", duration: "3:46" },
+  { title: "Those Eyes", artist: "New West", duration: "3:41" },
+  { title: "Sailor Song", artist: "Gigi Perez", duration: "3:32" },
+  { title: "One Of The Girls", artist: "The Weeknd, JENNIE & Lily Rose Depp", duration: "4:05" },
+  { title: "Arcade", artist: "Duncan Laurence", duration: "3:04" },
+  { title: "Billie Jean", artist: "Michael Jackson", duration: "4:54" },
+  { title: "Every Breath You Take", artist: "The Police", duration: "4:14" },
+  { title: "Show Me Love", artist: "WizTheMc & bees & honey", duration: "2:57" },
+  { title: "Beautiful Things", artist: "Benson Boone", duration: "3:01" },
+  { title: "Gasolina", artist: "Daddy Yankee", duration: "3:13" },
+  { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", duration: "3:59" },
+  { title: "blue", artist: "yung kai", duration: "3:35" },
+  { title: "Never Gonna Give You Up", artist: "Rick Astley", duration: "3:34" },
+  { title: "Right Here Waiting", artist: "Richard Marx", duration: "4:25" },
+  { title: "Yeah!", artist: "Usher feat. Lil Jon & Ludacris", duration: "4:11" },
+  { title: "I Want to Know What Love Is", artist: "Foreigner", duration: "5:05" },
+  { title: "Dear Mama", artist: "2Pac", duration: "4:40" },
+  { title: "It Must Have Been Love", artist: "Roxette", duration: "4:20" },
+  { title: "Sweet Dreams (Are Made of This)", artist: "Eurythmics", duration: "3:38" },
+  { title: "Perfect", artist: "Ed Sheeran", duration: "4:24" },
+  { title: "Cinnamon Girl", artist: "Lana Del Rey", duration: "5:01" },
+  { title: "How Deep Is Your Love", artist: "Bee Gees", duration: "4:04" },
+  { title: "Smack That", artist: "Akon feat. Eminem", duration: "3:33" },
+  { title: "Pretty Little Baby", artist: "Connie Francis", duration: "2:23" },
+  { title: "Dandelions", artist: "Ruth B.", duration: "3:54" },
+  { title: "Karma Chameleon", artist: "Culture Club", duration: "4:13" },
+  { title: "APT.", artist: "ROSÉ & Bruno Mars", duration: "2:50" },
+  { title: "End of Beginning", artist: "Djo", duration: "2:40" },
+  { title: "Another Day in Paradise", artist: "Phil Collins", duration: "5:24" },
+  { title: "Way Down We Go", artist: "KALEO", duration: "3:34" },
+  { title: "The Night We Met", artist: "Lord Huron", duration: "3:29" },
+  { title: "Empire State Of Mind", artist: "JAY-Z feat. Alicia Keys", duration: "4:37" },
+  { title: "Dancing Queen", artist: "ABBA", duration: "3:51" },
+  { title: "Wake Me Up Before You Go-Go", artist: "Wham!", duration: "3:52" },
+  { title: "Someone You Loved", artist: "Lewis Capaldi", duration: "3:03" },
+  { title: "Shekini", artist: "P-Square", duration: "3:39" },
+  { title: "Another Love", artist: "Tom Odell", duration: "4:11" },
+  { title: "Time After Time", artist: "Cyndi Lauper", duration: "4:02" },
+  { title: "Ms. Jackson", artist: "Outkast", duration: "4:31" },
+  { title: "Eye of the Tiger", artist: "Survivor", duration: "4:04" },
+  { title: "lovely", artist: "Billie Eilish & Khalid", duration: "3:21" },
+  { title: "Blinding Lights", artist: "The Weeknd", duration: "3:22" },
+  { title: "My Heart Will Go On", artist: "Céline Dion", duration: "4:40" },
+  { title: "Butter", artist: "BTS", duration: "2:45" },
+  { title: "TOKYO DRIFT", artist: "Teriyaki Boyz", duration: "4:16" },
+  { title: "Ooh Ahh (My Life Be Like)", artist: "Grits feat. TobyMac", duration: "3:54" },
+  { title: "Nothing's Gonna Stop Us Now", artist: "Starship", duration: "4:31" },
+  { title: "Baby", artist: "Justin Bieber feat. Ludacris", duration: "3:35" },
+  { title: "Y Que Fue?", artist: "Don Miguelo", duration: "2:44" },
+  { title: "Hoist The Colours", artist: "Samuel Kim", duration: "4:49" },
+];
 
-function formatDuration(ms) {
-  if (!ms) return "";
-  const mins = Math.floor(ms / 60000);
-  const secs = Math.floor((ms % 60000) / 1000);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
+const GENRE_FILTERS = ["All", "Pop", "Hip-Hop", "R&B", "Rock", "Afrobeats", "Latin", "K-Pop", "Classic", "Dance", "Emotional"];
 
-function formatFollowers(n) {
-  if (!n) return "";
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M followers`;
-  if (n >= 1000) return `${(n / 1000).toFixed(0)}K followers`;
-  return `${n} followers`;
-}
-
-// Global audio manager — only one preview at a time
-let globalAudio = null;
-let globalSetPlaying = null;
+// ── Global audio singleton ─────────────────────────────────────────────────
+let _activeAudio = null;
+let _activeStop = null;
 
 function PreviewButton({ previewUrl }) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
-  const intervalRef = useRef(null);
+  const tickRef = useRef(null);
 
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) audioRef.current.pause();
-      clearInterval(intervalRef.current);
-    };
+  useEffect(() => () => {
+    if (audioRef.current) audioRef.current.pause();
+    clearInterval(tickRef.current);
   }, []);
 
-  const handleToggle = (e) => {
+  const toggle = (e) => {
     e.stopPropagation();
     if (!previewUrl) return;
-
-    // Stop any other playing preview
-    if (globalAudio && globalAudio !== audioRef.current) {
-      globalAudio.pause();
-      globalAudio.currentTime = 0;
-      if (globalSetPlaying) globalSetPlaying(false);
-    }
-
     if (playing) {
-      audioRef.current.pause();
-      clearInterval(intervalRef.current);
+      audioRef.current?.pause();
+      clearInterval(tickRef.current);
       setPlaying(false);
       setProgress(0);
-      audioRef.current.currentTime = 0;
-      globalAudio = null;
-      globalSetPlaying = null;
+      _activeAudio = null;
+      _activeStop = null;
     } else {
-      if (!audioRef.current) audioRef.current = new Audio(previewUrl);
-      audioRef.current.src = previewUrl;
-      audioRef.current.play();
-      globalAudio = audioRef.current;
-      globalSetPlaying = setPlaying;
+      // Stop previous
+      if (_activeAudio) { _activeAudio.pause(); _activeAudio.currentTime = 0; }
+      if (_activeStop) { _activeStop(); }
+      const audio = new Audio(previewUrl);
+      audioRef.current = audio;
+      _activeAudio = audio;
+      _activeStop = () => { setPlaying(false); setProgress(0); };
+      audio.play();
       setPlaying(true);
-      intervalRef.current = setInterval(() => {
-        if (audioRef.current) {
-          setProgress((audioRef.current.currentTime / 30) * 100);
-        }
-      }, 200);
-      audioRef.current.onended = () => {
-        setPlaying(false);
-        setProgress(0);
-        clearInterval(intervalRef.current);
-        globalAudio = null;
-        globalSetPlaying = null;
+      tickRef.current = setInterval(() => {
+        setProgress(((audio.currentTime || 0) / 30) * 100);
+      }, 150);
+      audio.onended = () => {
+        setPlaying(false); setProgress(0);
+        clearInterval(tickRef.current);
+        _activeAudio = null; _activeStop = null;
       };
     }
   };
 
   if (!previewUrl) return null;
-
   return (
-    <button onClick={handleToggle}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95 relative overflow-hidden shrink-0"
-      style={{ backgroundColor: playing ? "#1a1a1a" : "var(--bg-subtle)", color: playing ? "#1DB954" : "var(--text-secondary)", border: "1px solid var(--border-light)", minWidth: 64 }}>
-      {playing && (
-        <div className="absolute left-0 top-0 bottom-0 rounded-xl opacity-20 transition-all"
-          style={{ width: `${progress}%`, backgroundColor: "#1DB954" }} />
-      )}
+    <button onClick={toggle}
+      className="relative flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium overflow-hidden transition-all active:scale-95 shrink-0"
+      style={{ backgroundColor: playing ? "#111" : "var(--bg-subtle)", color: playing ? "#1DB954" : "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+      {playing && <div className="absolute inset-0 rounded-lg opacity-20" style={{ width: `${progress}%`, backgroundColor: "#1DB954", transition: "width 0.15s" }} />}
       <span className="relative z-10 flex items-center gap-1">
-        {playing ? <Square className="w-3 h-3" fill="currentColor" /> : <Play className="w-3 h-3" fill="currentColor" />}
+        {playing ? <Square className="w-2.5 h-2.5" fill="currentColor" /> : <Play className="w-2.5 h-2.5" fill="currentColor" />}
         {playing ? "Stop" : "Preview"}
       </span>
     </button>
   );
 }
 
-function TrackCard({ item }) {
+// ── Single song card (mirrors BookCard layout) ─────────────────────────────
+function SongCard({ track }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden"
+      className="flex gap-3 p-3 rounded-2xl"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      <div className="flex items-center gap-3 p-3">
-        {item.cover_url ? (
-          <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+      {/* Album cover */}
+      <div className="shrink-0">
+        {track.cover_url ? (
+          <img src={track.cover_url} alt={track.title}
+            className="w-16 rounded-xl object-cover" style={{ height: 72 }} />
         ) : (
-          <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
-            <Music className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
+          <div className="w-16 rounded-xl flex items-center justify-center"
+            style={{ height: 72, backgroundColor: "var(--bg-subtle)" }}>
+            <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-          <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
-          {item.album && (
-            <p className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
-              💿 {item.album}
-            </p>
-          )}
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {item.release_year && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-                {item.release_year}
-              </span>
-            )}
-            {item.duration_ms && (
-              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{formatDuration(item.duration_ms)}</span>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-col gap-1.5 items-end shrink-0">
-          {item.preview_url && <PreviewButton previewUrl={item.preview_url} />}
-          {item.spotify_url && (
-            <a href={item.spotify_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all"
-              style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-              {SPOTIFY_ICON} Listen
-            </a>
-          )}
-        </div>
       </div>
-      {/* Album page link */}
-      {item.album_url && (
-        <div className="px-3 pb-2.5">
-          <a href={item.album_url} target="_blank" rel="noopener noreferrer"
-            className="text-[10px] flex items-center gap-1 hover:underline"
-            style={{ color: "#1DB954" }}>
-            View album on Spotify →
-          </a>
-        </div>
-      )}
-    </motion.div>
-  );
-}
 
-function ArtistCard({ item }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 p-3 rounded-2xl"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      {item.cover_url ? (
-        <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-full object-cover shrink-0" />
-      ) : (
-        <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <Mic2 className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
-        </div>
-      )}
+      {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{formatFollowers(item.followers)}</p>
-        {item.genres?.length > 0 && (
-          <div className="flex gap-1 mt-1 flex-wrap">
-            {item.genres.map(g => (
-              <span key={g} className="text-[10px] px-2 py-0.5 rounded-full capitalize"
-                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{g}</span>
-            ))}
-          </div>
-        )}
-      </div>
-      {item.spotify_url && (
-        <a href={item.spotify_url} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0"
-          style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-          {SPOTIFY_ICON} Open
-        </a>
-      )}
-    </motion.div>
-  );
-}
-
-function AlbumCard({ item }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      <div className="flex items-center gap-3 p-3">
-        {item.cover_url ? (
-          <img src={item.cover_url} alt={item.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
-        ) : (
-          <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
-            <Disc className="w-6 h-6" style={{ color: "var(--text-hint)" }} />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-          <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.artist}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {item.release_date && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-                📅 {item.release_date}
-              </span>
-            )}
-            {item.total_tracks && (
-              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{item.total_tracks} tracks</span>
-            )}
-          </div>
+        <p className="text-sm font-semibold leading-snug truncate" style={{ color: "var(--text-primary)" }}>
+          {track.title}
+        </p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
+          🎤 {track.artist}
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+          {track.album && (
+            <span className="text-[10px] truncate max-w-[120px]" style={{ color: "var(--text-hint)" }}>
+              💿 {track.album}
+            </span>
+          )}
+          {(track.duration || track.duration_str) && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+              {track.duration || track.duration_str}
+            </span>
+          )}
+          {track.release_year && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+              {track.release_year}
+            </span>
+          )}
         </div>
-        {item.spotify_url && (
-          <a href={item.spotify_url} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold shrink-0"
-            style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-            {SPOTIFY_ICON} Open
-          </a>
-        )}
+        <div className="flex items-center gap-2 mt-2">
+          {track.preview_url && <PreviewButton previewUrl={track.preview_url} />}
+          {track.spotify_url ? (
+            <a href={track.spotify_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
+              style={{ backgroundColor: "#1DB954", color: "#fff" }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+              Listen on Spotify
+            </a>
+          ) : (
+            <span className="text-[10px] italic" style={{ color: "var(--text-hint)" }}>Searching…</span>
+          )}
+        </div>
       </div>
     </motion.div>
   );
 }
 
-const SEARCH_TYPES = [
-  { key: "track", label: "Tracks", icon: Music },
-  { key: "artist", label: "Artists", icon: Mic2 },
-  { key: "album", label: "Albums", icon: Disc },
-];
-
-const QUICK_SEARCHES = ["Hip-Hop", "Afrobeats", "R&B", "Pop hits", "Indie", "Classical", "Jazz", "Rock classics"];
-
-export default function SpotifyMusicTab({ user }) {
+// ── Main component ─────────────────────────────────────────────────────────
+export default function SpotifyMusicTab() {
   const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState("track");
-  const [results, setResults] = useState(null);
+  const [genre, setGenre] = useState("All");
+  const [searchResults, setSearchResults] = useState(null);
+  const [enriched, setEnriched] = useState({}); // keyed by "title|artist"
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [enriching, setEnriching] = useState(false);
 
-  const doSearch = async (q, type) => {
-    if (!q.trim()) return;
+  // Enrich preloaded list on mount (batch: fetch first 20 quickly)
+  useEffect(() => {
+    let cancelled = false;
+    const enrichBatch = async () => {
+      setEnriching(true);
+      const batch = PRELOADED_SONGS.slice(0, 30);
+      for (const song of batch) {
+        if (cancelled) break;
+        const key = `${song.title}|${song.artist}`;
+        try {
+          const res = await base44.functions.invoke("spotifySearch", {
+            query: `${song.title} ${song.artist}`, type: "track", limit: 1,
+          });
+          const track = res.data?.tracks?.[0];
+          if (track && !cancelled) {
+            setEnriched(prev => ({ ...prev, [key]: track }));
+          }
+        } catch (_) { /* skip */ }
+        // Small delay to avoid rate limit
+        await new Promise(r => setTimeout(r, 120));
+      }
+      if (!cancelled) setEnriching(false);
+    };
+    enrichBatch();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Live search
+  const doSearch = async (q) => {
+    if (!q.trim()) { setSearchResults(null); return; }
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type, limit: 20 });
-      setResults(res.data);
-    } catch (e) {
-      setError("Search failed. Please try again.");
+      const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type: "track", limit: 20 });
+      setSearchResults(res.data?.tracks || []);
+    } catch {
+      setError("Search failed. Try again.");
     }
     setLoading(false);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    doSearch(query, searchType);
+  const handleSearch = (e) => { e.preventDefault(); doSearch(query); };
+
+  // Build display list
+  const preloadedMerged = PRELOADED_SONGS.map(s => {
+    const key = `${s.title}|${s.artist}`;
+    const spotify = enriched[key];
+    return {
+      id: key,
+      title: s.title,
+      artist: s.artist,
+      duration_str: s.duration,
+      cover_url: spotify?.cover_url || null,
+      spotify_url: spotify?.spotify_url || null,
+      preview_url: spotify?.preview_url || null,
+      album: spotify?.album || null,
+      release_year: spotify?.release_year || null,
+    };
+  });
+
+  // Genre filter applied to preloaded list (client-side keyword match)
+  const GENRE_KEYWORDS = {
+    "Pop": ["pop","katy","taylor","dua","ed sheeran","bts","rose","bruno","justin","billie","sheeran","wham","abba","cyndi","rick","phil","celine","lewis","benson","duncan","stephen"],
+    "Hip-Hop": ["50 cent","usher","coolio","2pac","outkast","jay-z","jay z","eminem","ludacris","lil jon","toby","grits","teriyaki"],
+    "R&B": ["the weeknd","rihanna","khalid","lady gaga"],
+    "Rock": ["arctic monkeys","coldplay","keane","foreigner","survivor","police","a-ha","eurythmics","roxette","kaleo","lord huron","starship"],
+    "Afrobeats": ["burna boy","p-square","innoss","innossb"],
+    "Latin": ["daddy yankee","don miguelo","gasolina"],
+    "K-Pop": ["bts","rosé","jennie"],
+    "Classic": ["george michael","michael jackson","bee gees","abba","cyndi lauper","rick astley","richard marx","phil collins","connie francis","culture club","foreigner","roxette","eurythmics","police","a-ha","wham","starship"],
+    "Dance": ["abba","wham","gasolina","yeah","usher","dancing","wake me up"],
+    "Emotional": ["dandelions","someone you loved","another love","the night we met","lovely","arcade","end of beginning","right here waiting","my heart"],
   };
 
-  const items = results
-    ? (searchType === "track" ? results.tracks : searchType === "artist" ? results.artists : results.albums) || []
-    : [];
+  const filteredPreloaded = genre === "All"
+    ? preloadedMerged
+    : preloadedMerged.filter(s => {
+        const keywords = GENRE_KEYWORDS[genre] || [];
+        const hay = (s.title + " " + s.artist).toLowerCase();
+        return keywords.some(k => hay.includes(k));
+      });
+
+  const displayList = searchResults
+    ? searchResults.map(t => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        cover_url: t.cover_url,
+        spotify_url: t.spotify_url,
+        preview_url: t.preview_url,
+        album: t.album,
+        release_year: t.release_year,
+        duration_str: t.duration_ms ? `${Math.floor(t.duration_ms/60000)}:${String(Math.floor((t.duration_ms%60000)/1000)).padStart(2,"0")}` : null,
+      }))
+    : filteredPreloaded;
 
   return (
     <div className="pb-10">
-      {/* Spotify branding header */}
+      {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center gap-2">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#1DB954">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
         <div>
           <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Spotify Music</p>
-          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Search tracks, artists & albums · 30-sec previews</p>
+          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>
+            {enriching ? "Loading song details…" : `${PRELOADED_SONGS.length} curated tracks · search for more`}
+          </p>
         </div>
       </div>
 
-      {/* Type selector */}
-      <div className="px-5 mb-3">
-        <div className="flex gap-1 p-0.5 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
-          {SEARCH_TYPES.map(t => (
-            <button key={t.key} onClick={() => { setSearchType(t.key); if (query) doSearch(query, t.key); }}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all"
+      {/* Genre filter chips */}
+      <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 w-max pb-1">
+          {GENRE_FILTERS.map(g => (
+            <button key={g} onClick={() => { setGenre(g); setSearchResults(null); setQuery(""); }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
               style={{
-                backgroundColor: searchType === t.key ? "var(--bg-card)" : "transparent",
-                color: searchType === t.key ? "var(--accent-primary)" : "var(--text-hint)",
-                boxShadow: searchType === t.key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                backgroundColor: genre === g ? "#1DB954" : "var(--bg-card)",
+                color: genre === g ? "#fff" : "var(--text-secondary)",
+                borderColor: genre === g ? "#1DB954" : "var(--border-light)",
               }}>
-              <t.icon className="w-3.5 h-3.5" /> {t.label}
+              {g}
             </button>
           ))}
         </div>
@@ -303,12 +340,12 @@ export default function SpotifyMusicTab({ user }) {
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder={`Search ${searchType === "track" ? "songs" : searchType === "artist" ? "artists" : "albums"}...`}
+              placeholder="Search by title or artist…"
               className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm outline-none"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
             />
             {query && (
-              <button type="button" onClick={() => { setQuery(""); setResults(null); }} className="absolute right-3 top-1/2 -translate-y-1/2">
+              <button type="button" onClick={() => { setQuery(""); setSearchResults(null); }} className="absolute right-3 top-1/2 -translate-y-1/2">
                 <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
               </button>
             )}
@@ -316,72 +353,48 @@ export default function SpotifyMusicTab({ user }) {
           <button type="submit" disabled={!query.trim() || loading}
             className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-40"
             style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-            {loading ? "..." : "Go"}
+            {loading ? "…" : "Go"}
           </button>
         </div>
       </form>
-
-      {/* Preview note */}
-      {searchType === "track" && !results && (
-        <div className="mx-5 mb-3 flex items-center gap-2 p-2.5 rounded-xl text-[11px]"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-          <Play className="w-3 h-3 shrink-0" style={{ color: "#1DB954" }} />
-          Search tracks to hear 30-second previews directly in the app (where available).
-        </div>
-      )}
-
-      {/* Quick search chips */}
-      {!results && (
-        <div className="px-5 mb-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 w-max pb-1">
-            {QUICK_SEARCHES.map(q => (
-              <button key={q} onClick={() => { setQuery(q); doSearch(q, searchType); }}
-                className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                {q}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Error */}
       {error && (
         <div className="mx-5 mb-3 p-3 rounded-xl text-xs text-center" style={{ backgroundColor: "#FEF0E6", color: "#D98B62" }}>{error}</div>
       )}
 
+      {/* Count */}
+      <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
+        {searchResults ? `${displayList.length} result${displayList.length !== 1 ? "s" : ""} for "${query}"` : `${displayList.length} track${displayList.length !== 1 ? "s" : ""}`}
+      </p>
+
       {/* Results */}
       {loading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "#1DB954", borderTopColor: "transparent" }} />
         </div>
-      ) : items.length > 0 ? (
+      ) : displayList.length > 0 ? (
         <div className="px-5 space-y-2">
-          <p className="text-[11px] mb-2" style={{ color: "var(--text-hint)" }}>{items.length} result{items.length !== 1 ? "s" : ""} for "{query}"</p>
           <AnimatePresence>
-            {items.map(item => (
-              searchType === "track" ? <TrackCard key={item.id} item={item} /> :
-              searchType === "artist" ? <ArtistCard key={item.id} item={item} /> :
-              <AlbumCard key={item.id} item={item} />
-            ))}
+            {displayList.map(track => <SongCard key={track.id} track={track} />)}
           </AnimatePresence>
-        </div>
-      ) : results && items.length === 0 ? (
-        <div className="py-12 text-center px-5">
-          <p className="text-3xl mb-3">🎵</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No results found for "{query}"</p>
+          {searchResults && (
+            <button onClick={() => { setSearchResults(null); setQuery(""); }}
+              className="w-full py-2 text-xs font-medium text-center" style={{ color: "var(--text-hint)" }}>
+              ← Back to all songs
+            </button>
+          )}
         </div>
       ) : (
-        <div className="py-10 text-center px-5">
-          <p className="text-4xl mb-3">🎧</p>
-          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Search anything on Spotify</p>
-          <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Tracks, artists, albums — all in one place</p>
+        <div className="py-12 text-center px-5">
+          <p className="text-3xl mb-3">🎵</p>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No tracks match "{genre}"</p>
         </div>
       )}
 
-      {/* Spotify attribution */}
+      {/* Footer */}
       <p className="text-[10px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
-        Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. 30-second previews provided by the Spotify API. This app is not affiliated with Spotify.
+        Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. No music is hosted in this app. All links go to official Spotify pages.
       </p>
     </div>
   );
