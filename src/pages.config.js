@@ -70,6 +70,7 @@ import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
+import PostComments from './pages/PostComments';
 import __Layout from './Layout.jsx';
 
 
@@ -97,6 +98,7 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
+    "PostComments": PostComments,
 }
 
 export const pagesConfig = {
