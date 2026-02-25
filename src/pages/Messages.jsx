@@ -87,6 +87,16 @@ function ChatView({ user, conversation, onBack }) {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Real-time subscriptions
+  useEffect(() => {
+    const unsub = base44.entities.DirectMessage.subscribe((event) => {
+      if (event.data?.conversation_id === convId) {
+        queryClient.invalidateQueries({ queryKey: ["dm", convId] });
+      }
+    });
+    return unsub;
+  }, [convId, queryClient]);
+
   const sendText = async () => {
     if (!text.trim()) return;
     setSending(true);
@@ -105,28 +115,38 @@ function ChatView({ user, conversation, onBack }) {
   };
 
   const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRef.current = new MediaRecorder(stream);
-    chunksRef.current = [];
-    mediaRef.current.ondataavailable = (e) => chunksRef.current.push(e.data);
-    mediaRef.current.onstop = async () => {
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      const file = new File([blob], "voice.webm", { type: "audio/webm" });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.DirectMessage.create({
-        conversation_id: convId,
-        sender_email: user.email,
-        sender_name: user.full_name || user.email,
-        receiver_email: conversation.email,
-        text: "",
-        audio_url: file_url,
-        is_read: false,
-      });
-      stream.getTracks().forEach((t) => t.stop());
-      queryClient.invalidateQueries({ queryKey: ["dm", convId] });
-    };
-    mediaRef.current.start();
-    setRecording(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRef.current = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mediaRef.current.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mediaRef.current.onstop = async () => {
+        try {
+          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const file = new File([blob], "voice.webm", { type: "audio/webm" });
+          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+          await base44.entities.DirectMessage.create({
+            conversation_id: convId,
+            sender_email: user.email,
+            sender_name: user.full_name || user.email,
+            receiver_email: conversation.email,
+            text: "",
+            audio_url: file_url,
+            is_read: false,
+          });
+          queryClient.invalidateQueries({ queryKey: ["dm", convId] });
+        } catch (err) {
+          console.error("Voice message error:", err);
+        } finally {
+          stream.getTracks().forEach((t) => t.stop());
+        }
+      };
+      mediaRef.current.start();
+      setRecording(true);
+    } catch (err) {
+      alert("Microphone access denied. Please enable permissions.");
+      console.error("Microphone error:", err);
+    }
   };
 
   const stopRecording = () => {
