@@ -123,25 +123,27 @@ export default function CommunityFeed({ user }) {
   return (
     <div style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-4 pt-4 pb-2 sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-center justify-between mb-1">
-          <div>
-            <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Community</h1>
-            <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Share opinions, ask questions, start debates</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* View mode toggle */}
-            <button onClick={() => { const next = viewMode === "list" ? "swipe" : "list"; setViewMode(next); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: next === "swipe" } })); }}
-              className="p-2 rounded-full border transition-all"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-              {viewMode === "list" ? <Layers className="w-4 h-4" /> : <List className="w-4 h-4" />}
-            </button>
-            <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
-              <Plus className="w-3.5 h-3.5" /> Post
-            </button>
-          </div>
+      <div className="px-4 pt-4 pb-3 sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Community</h1>
+          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white"
+            style={{ backgroundColor: "var(--accent-primary)" }}>
+            <Plus className="w-4 h-4" /> Post
+          </button>
+        </div>
+        {/* View toggle as subtle text tabs */}
+        <div className="flex gap-1 mt-2.5">
+          <button onClick={() => { setViewMode("list"); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } })); }}
+            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+            style={{ backgroundColor: viewMode === "list" ? "var(--accent-primary-light)" : "transparent", color: viewMode === "list" ? "var(--accent-primary)" : "var(--text-hint)" }}>
+            Feed
+          </button>
+          <button onClick={() => { setViewMode("swipe"); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
+            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+            style={{ backgroundColor: viewMode === "swipe" ? "var(--accent-primary-light)" : "transparent", color: viewMode === "swipe" ? "var(--accent-primary)" : "var(--text-hint)" }}>
+            Swipe
+          </button>
         </div>
       </div>
 
