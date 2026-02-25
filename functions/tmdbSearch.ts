@@ -7,32 +7,41 @@ const API_KEY = Deno.env.get("TMDB_API_KEY");
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
-    const { query, type = "movie", page = 1, genre_id, sort_mode } = body;
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-    console.log("TMDb params:", JSON.stringify({ type, query, genre_id, sort_mode }));
+    const { query, type = "movie", page = 1, genre_id, sort_mode = "popularity" } = await req.json();
 
     const mediaType = type === "tv" ? "tv" : "movie";
     let url;
 
     if (query) {
-      // Text search
       const endpoint = type === "tv" ? "search/tv" : "search/movie";
-      url = `${TMDB_BASE}/${endpoint}?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
+      url = `${TMDB_BASE}/${endpoint}?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
     } else {
-      // Discover with sort/filter
       let tmdbSort = "popularity.desc";
       if (sort_mode === "vote_average") tmdbSort = "vote_average.desc";
-      else if (sort_mode === "release_date_desc") tmdbSort = "primary_release_date.desc";
-      else if (sort_mode === "release_date_asc") tmdbSort = "primary_release_date.asc";
+      else if (sort_mode === "release_date_desc") {
+        tmdbSort = type === "tv" ? "first_air_date.desc" : "primary_release_date.desc";
+      } else if (sort_mode === "release_date_asc") {
+        tmdbSort = type === "tv" ? "first_air_date.asc" : "primary_release_date.asc";
+      }
 
-      let discoverUrl = `${TMDB_BASE}/discover/${mediaType}?api_key=${API_KEY}&sort_by=${tmdbSort}&page=${page}&vote_count.gte=50`;
+      let discoverUrl = `${TMDB_BASE}/discover/${mediaType}?api_key=${API_KEY}&sort_by=${tmdbSort}&page=${page}&vote_count.gte=100&include_adult=false`;
       if (genre_id) discoverUrl += `&with_genres=${genre_id}`;
+      if (sort_mode === "vote_average") discoverUrl += `&vote_count.gte=500`;
       url = discoverUrl;
     }
 
+    console.log("Fetching TMDb URL:", url.replace(API_KEY, "***"));
+
     const res = await fetch(url);
     const data = await res.json();
+
+    if (data.status_message) {
+      console.error("TMDb API error:", data.status_message);
+      return Response.json({ error: data.status_message }, { status: 400 });
+    }
 
     const results = (data.results || []).map(item => {
       const isTV = item.media_type === "tv" || type === "tv";
@@ -42,7 +51,7 @@ Deno.serve(async (req) => {
       return {
         id: item.id,
         title,
-        media_type: item.media_type || type,
+        media_type: isTV ? "tv" : "movie",
         overview: item.overview,
         poster_url: item.poster_path ? `${TMDB_IMAGE}${item.poster_path}` : null,
         backdrop_url: item.backdrop_path ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}` : null,
@@ -59,7 +68,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ results, total_results: data.total_results, total_pages: data.total_pages });
   } catch (error) {
-    console.error("TMDb error:", error);
+    console.error("TMDb error:", error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
