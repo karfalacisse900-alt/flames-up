@@ -238,7 +238,7 @@ export default function Gallery() {
           <p className="text-sm mb-4" style={{ color: "#6B6B6B" }}>No artworks yet. Be the first!</p>
           <button onClick={() => navigate(createPageUrl("ArtStudio"))}
             className="px-5 py-2.5 rounded-full font-semibold text-sm"
-            style={{ backgroundColor: "#3C6E5A", color: "#E6EFEA" }}>
+            style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
             Open Art Studio
           </button>
         </div>
