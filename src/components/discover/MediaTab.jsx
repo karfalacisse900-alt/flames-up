@@ -5,7 +5,6 @@ import { base44 } from "@/api/base44Client";
 import { Search, Bookmark, BookmarkCheck, Star, ChevronDown, X, TrendingUp, Flame, Shuffle } from "lucide-react";
 import SpotifyMusicTab from "./SpotifyMusicTab";
 import OpenLibraryBooksTab from "./OpenLibraryBooksTab";
-import TMDbMoviesTab from "./TMDbMoviesTab";
 
 // ─── Static Catalogue ──────────────────────────────────────────────────────
 
@@ -495,7 +494,6 @@ export default function MediaTab({ user }) {
 
   const isMusicView = activeType === "music";
   const isBookView = activeType === "book";
-  const isMovieShowView = activeType === "movie" || activeType === "show";
   const activeFilterCount = [selectedGenre !== "all", selectedMood !== "all", sortBy !== "default"].filter(Boolean).length;
 
   return (
@@ -627,7 +625,7 @@ export default function MediaTab({ user }) {
       )}
 
       {/* Results count */}
-      {!isMusicView && !isBookView && !isMovieShowView && (
+      {!isMusicView && !isBookView && (
         <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
           {`${filtered.length} item${filtered.length !== 1 ? "s" : ""}`}
         </p>
@@ -638,8 +636,6 @@ export default function MediaTab({ user }) {
         <SpotifyMusicTab user={user} />
       ) : isBookView ? (
         <OpenLibraryBooksTab />
-      ) : isMovieShowView ? (
-        <TMDbMoviesTab defaultType={activeType === "show" ? "tv" : "movie"} />
       ) : (
         <div className="px-5 space-y-3">
           {filtered.length === 0 ? (
