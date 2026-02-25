@@ -39,8 +39,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
 
   const [commentText, setCommentText] = useState("");
   const [reported, setReported] = useState(false);
-  const [showReactions, setShowReactions] = useState(false);
-  const [savedLocally, setSavedLocally] = useState(false);
 
   const { data: comments = [] } = useQuery({
     queryKey: ["communityComments", post.id],
