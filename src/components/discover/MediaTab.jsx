@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { Search, Bookmark, BookmarkCheck, Star, ChevronDown, X, TrendingUp, Flame, Shuffle } from "lucide-react";
 import SpotifyMusicTab from "./SpotifyMusicTab";
 import OpenLibraryBooksTab from "./OpenLibraryBooksTab";
+import TmdbMoviesTab from "./TmdbMoviesTab";
 
 // ─── Static Catalogue ──────────────────────────────────────────────────────
 
