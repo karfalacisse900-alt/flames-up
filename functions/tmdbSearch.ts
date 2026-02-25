@@ -10,6 +10,8 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
+    console.log("TMDb request body:", JSON.stringify({ user: user?.email }));
+
     const { query, type = "movie", page = 1, genre_id, sort_mode } = await req.json();
 
     const mediaType = type === "tv" ? "tv" : "movie";
