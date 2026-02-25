@@ -204,6 +204,7 @@ export default function SpotifyMusicTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [enriching, setEnriching] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // Enrich preloaded list on mount (batch: fetch first 20 quickly)
   useEffect(() => {

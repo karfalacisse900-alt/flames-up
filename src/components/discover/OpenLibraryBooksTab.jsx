@@ -82,6 +82,7 @@ export default function OpenLibraryBooksTab() {
   const [books, setBooks] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const doSearch = async (q, subj) => {
     if (!q.trim()) return;
@@ -193,7 +194,23 @@ export default function OpenLibraryBooksTab() {
         <div className="px-5 space-y-2">
           <p className="text-[11px] mb-2" style={{ color: "var(--text-hint)" }}>{books.length} result{books.length !== 1 ? "s" : ""} for "{query}"</p>
           <AnimatePresence>
-            {books.map((book, i) => <BookCard key={book.key || i} book={book} />)}
+            {books.map((book, i) => {
+              const coverUrl = book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : null;
+              const enriched = {
+                title: book.title,
+                author: book.author_name?.[0],
+                year: book.first_publish_year,
+                cover_url: coverUrl,
+                subjects: book.subject?.slice(0, 8),
+                description: typeof book.first_sentence === "string" ? book.first_sentence : book.first_sentence?.value,
+                ol_url: `https://openlibrary.org${book.key}`,
+              };
+              return (
+                <div key={book.key || i} onClick={() => setSelectedItem(enriched)} className="cursor-pointer">
+                  <BookCard book={book} />
+                </div>
+              );
+            })}
           </AnimatePresence>
         </div>
       ) : books && books.length === 0 ? (
@@ -214,6 +231,10 @@ export default function OpenLibraryBooksTab() {
         Powered by <span style={{ color: "var(--accent-primary)", fontWeight: 600 }}>Open Library</span> (openlibrary.org).
         Book data © Internet Archive & contributors. This app does not host any books or PDFs.
       </p>
+
+      <AnimatePresence>
+        {selectedItem && <MediaDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />}
+      </AnimatePresence>
     </div>
   );
 }
