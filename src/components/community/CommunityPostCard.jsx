@@ -83,9 +83,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
     setReported(true);
   };
 
-  const [showReactions, setShowReactions] = useState(false);
-  const [savedLocally, setSavedLocally] = useState(false);
-
   const initials = post.is_anonymous ? "?" : (post.author_name?.[0] || "U").toUpperCase();
   const avatarColors = ["#7C69C4","#D98B62","#3C6E5A","#E05C7A","#4A7FC1","#B07843"];
   const avatarColor = avatarColors[(post.author_name || "U").charCodeAt(0) % avatarColors.length];
