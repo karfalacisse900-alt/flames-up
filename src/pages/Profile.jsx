@@ -413,14 +413,21 @@ export default function Profile() {
             {followers.length === 0 ? (
               <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
             ) : followers.map((f) => (
-              <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
-                  {f.follower_name?.[0]?.toUpperCase() || "?"}
-                </div>
-                <div>
+              <div key={f.id} className="flex items-center gap-3 justify-between py-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
+                    {f.follower_name?.[0]?.toUpperCase() || "?"}
+                  </div>
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.follower_name}</p>
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.follower_email}</p>
                 </div>
+                <button onClick={async () => {
+                  const alreadyFollowing = following.some(x => x.following_email === f.follower_email);
+                  if (alreadyFollowing) {
+                    await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.follower_email }).then(recs => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
+                  }
+                }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: following.some(x => x.following_email === f.follower_email) ? "var(--text-secondary)" : "var(--accent-primary)", borderColor: "var(--border-light)" }}>
+                  {following.some(x => x.following_email === f.follower_email) ? "Following" : "Follow"}
+                </button>
               </div>
             ))}
           </div>
@@ -437,14 +444,18 @@ export default function Profile() {
             {following.length === 0 ? (
               <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p>
             ) : following.map((f) => (
-              <div key={f.id} className="flex items-center gap-3 py-2">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
-                  {f.following_name?.[0]?.toUpperCase() || "?"}
-                </div>
-                <div>
+              <div key={f.id} className="flex items-center gap-3 justify-between py-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
+                    {f.following_name?.[0]?.toUpperCase() || "?"}
+                  </div>
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.following_name}</p>
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.following_email}</p>
                 </div>
+                <button onClick={async () => {
+                  await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.following_email }).then(recs => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
+                }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
+                  Unfollow
+                </button>
               </div>
             ))}
           </div>
