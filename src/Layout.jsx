@@ -6,7 +6,7 @@ import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react"
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
-{ name: "Explore", icon: Search,  page: "Explore" },
+{ name: "Discover", icon: Search,  page: "Discover" },
 { name: "Gallery", icon: Palette, page: "Gallery" },
 { name: "Live",    icon: Radio,   page: "Live" },
 { name: "Alerts",  icon: Bell,    page: "Notifications" },
