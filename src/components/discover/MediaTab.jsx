@@ -493,6 +493,7 @@ export default function MediaTab({ user }) {
   ].includes(i.title));
 
   const isMusicView = activeType === "music";
+  const isBookView = activeType === "book";
   const activeFilterCount = [selectedGenre !== "all", selectedMood !== "all", sortBy !== "default"].filter(Boolean).length;
 
   return (
