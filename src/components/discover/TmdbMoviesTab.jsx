@@ -134,13 +134,16 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
   const fetchContent = async ({ q, gid, type, trending, sort } = {}) => {
     setLoading(true);
     setError(null);
+    const activeSortBy = sort || sortByRef.current;
     try {
       const res = await base44.functions.invoke("tmdbSearch", {
         query: q || undefined,
         type: type || tab,
         genre_id: gid || undefined,
-        trending: trending || (!q && !gid && !sort),
-        sort_by: sort || (q || gid ? undefined : sortBy),
+        trending: !q && !gid && !sort ? false : undefined,
+        sort_by: (!q && !sort) ? undefined : activeSortBy,
+        popular: !q && !gid && !sort ? true : undefined,
+        sort_mode: activeSortBy,
         page: 1,
       });
       setResults(res.data?.results || []);
