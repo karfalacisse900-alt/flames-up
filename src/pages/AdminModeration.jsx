@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, MessageSquare, Flag, AlertTriangle, Zap, User, Palette, Radio, Settings2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle, XCircle, MessageSquare, Flag, AlertTriangle, Zap, User, Palette, Radio, Settings2, Bell, Eye, Trash2, EyeOff } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,12 +91,50 @@ function ReportCard({ report, source, onClick }) {
   );
 }
 
+function ContentPreview({ report }) {
+  const { data: content } = useQuery({
+    queryKey: ["content-preview", report.content_type, report.content_id],
+    queryFn: async () => {
+      if (report.content_type === "post") {
+        return base44.entities.CommunityPost.filter({ id: report.content_id }).then(r => r[0]).catch(() => null);
+      }
+      if (report.content_type === "reply") {
+        return base44.entities.CommunityComment.filter({ id: report.content_id }).then(r => r[0]).catch(() => null);
+      }
+      return null;
+    },
+    enabled: !!report.content_id,
+  });
+
+  if (!content) return (
+    <p className="text-xs italic" style={{ color: "var(--text-hint)" }}>
+      ID: {report.content_id}
+    </p>
+  );
+
+  return (
+    <div className="p-3 rounded-xl text-xs leading-relaxed" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+      <p className="font-semibold mb-1" style={{ color: "var(--text-hint)" }}>
+        by {content.author_name || content.author_email || "Unknown"}
+      </p>
+      <p style={{ color: "var(--text-primary)" }}>
+        {content.body || content.text || content.title || "—"}
+      </p>
+      {content.image_url && (
+        <img src={content.image_url} alt="" className="mt-2 rounded-lg max-h-24 object-cover" />
+      )}
+    </div>
+  );
+}
+
 export default function AdminModeration() {
   const [user, setUser] = useState(null);
   const [selected, setSelected] = useState(null); // { report, source }
   const [adminNotes, setAdminNotes] = useState("");
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
+  const [warningMsg, setWarningMsg] = useState("");
+  const [sendingWarning, setSendingWarning] = useState(false);
   const qc = useQueryClient();
 
   React.useEffect(() => {
@@ -183,8 +221,7 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
       if (action === "reject" && report.content_type === "art") {
         await base44.entities.ArtFightEntry.update(report.content_id, { status: "rejected" }).catch(() => {});
       }
-      if (action === "reject" && report.content_type === "post") {
-        await base44.entities.Post.delete(report.content_id).catch(() => {});
+      if (action === "reject" && (report.content_type === "post")) {
         await base44.entities.CommunityPost.delete(report.content_id).catch(() => {});
       }
       if (action === "reject" && report.content_type === "reply") {
@@ -196,6 +233,46 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
     setSelected(null);
     setAdminNotes("");
     setAiAnalysis("");
+    setWarningMsg("");
+  };
+
+  const removeContent = async () => {
+    if (!selected) return;
+    const { report } = selected;
+    if (report.content_type === "post") {
+      await base44.entities.CommunityPost.delete(report.content_id).catch(() => {});
+    } else if (report.content_type === "reply") {
+      await base44.entities.CommunityComment.delete(report.content_id).catch(() => {});
+    }
+    await resolveReport("reject");
+  };
+
+  const sendWarning = async () => {
+    if (!selected || !warningMsg.trim()) return;
+    const { report } = selected;
+    const targetEmail = report.reporter_email !== report.author_email
+      ? (report.author_email || report.author_email)
+      : null;
+    setSendingWarning(true);
+    // Create a notification for the content author
+    if (targetEmail) {
+      await base44.entities.Notification.create({
+        recipient_email: targetEmail,
+        type: "warning",
+        message: `⚠️ Warning from moderators: ${warningMsg.trim()}`,
+        is_read: false,
+      }).catch(() => {});
+    }
+    await base44.entities.Report.update(report.id, {
+      status: "reviewed",
+      admin_notes: `Warning sent: ${warningMsg.trim()}`,
+      resolved_by: user.email,
+      resolved_at: new Date().toISOString(),
+    }).catch(() => {});
+    setSendingWarning(false);
+    setWarningMsg("");
+    qc.invalidateQueries({ queryKey: ["reports"] });
+    setSelected(null);
   };
 
   const totalPending = userPending.length + aiFlagged.length;
@@ -279,9 +356,15 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+            {/* Reported content preview */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: "var(--text-hint)" }}>Reported Content</p>
+              {selected && <ContentPreview report={selected.report} />}
+            </div>
+
             {/* Details */}
-            <div className="rounded-xl p-3 space-y-2" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+            <div className="rounded-xl p-3 space-y-1.5" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
                   {selected?.source === "user" ? "Reason:" : "AI Flags:"}
@@ -356,21 +439,52 @@ Recommend: Should this be removed (Reject) or kept (Approve)? Be concise.`;
               </div>
             )}
 
+            {/* Warn user */}
             {(selected?.report.status === "pending" || selected?.report.status === "flagged") && (
-              <div className="flex gap-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: "var(--text-hint)" }}>Warn User</p>
+                <div className="flex gap-2">
+                  <input
+                    value={warningMsg}
+                    onChange={e => setWarningMsg(e.target.value)}
+                    placeholder="Warning message..."
+                    className="flex-1 text-xs px-3 py-2 rounded-xl outline-none"
+                    style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+                  />
+                  <button
+                    onClick={sendWarning}
+                    disabled={!warningMsg.trim() || sendingWarning}
+                    className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold disabled:opacity-40"
+                    style={{ backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" }}>
+                    <Bell className="w-3.5 h-3.5" /> {sendingWarning ? "…" : "Send"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {(selected?.report.status === "pending" || selected?.report.status === "flagged") && (
+              <div className="grid grid-cols-3 gap-2">
                 <Button
                   onClick={() => resolveReport("approve")}
-                  className="flex-1 h-10 text-sm rounded-xl text-white"
+                  className="h-10 text-xs rounded-xl text-white"
                   style={{ backgroundColor: "#10B981" }}
                 >
-                  <CheckCircle className="w-4 h-4 mr-1.5" /> Approve
+                  <CheckCircle className="w-3.5 h-3.5 mr-1" /> Keep
+                </Button>
+                <Button
+                  onClick={removeContent}
+                  className="h-10 text-xs rounded-xl text-white"
+                  style={{ backgroundColor: "#EF4444" }}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
                 </Button>
                 <Button
                   onClick={() => resolveReport("reject")}
-                  className="flex-1 h-10 text-sm rounded-xl text-white"
-                  style={{ backgroundColor: "#EF4444" }}
+                  variant="outline"
+                  className="h-10 text-xs rounded-xl"
+                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
                 >
-                  <XCircle className="w-4 h-4 mr-1.5" /> Remove
+                  <EyeOff className="w-3.5 h-3.5 mr-1" /> Dismiss
                 </Button>
               </div>
             )}
