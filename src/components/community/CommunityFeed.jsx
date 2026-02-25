@@ -147,9 +147,6 @@ export default function CommunityFeed({ user }) {
         </div>
       </div>
 
-      {/* Daily Spotlight */}
-      {spotlight.length > 0 && <DailySpotlight posts={spotlight} user={user} />}
-
       {/* Filter strip */}
       <div className="px-4 pt-2 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="flex gap-1.5 pb-1" style={{ width: "max-content" }}>

@@ -6,6 +6,9 @@ export default function WelcomePopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // Only show once per session
+    if (sessionStorage.getItem("welcome_shown")) return;
+    sessionStorage.setItem("welcome_shown", "1");
     const showTimer = setTimeout(() => setVisible(true), 800);
     const hideTimer = setTimeout(() => setVisible(false), 7800);
     return () => {
