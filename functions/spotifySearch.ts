@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
         cover_url: a.images?.[0]?.url,
         spotify_url: a.external_urls?.spotify,
         release_year: a.release_date?.split("-")[0],
+        release_date: a.release_date,
         total_tracks: a.total_tracks,
       })) || [],
     };
