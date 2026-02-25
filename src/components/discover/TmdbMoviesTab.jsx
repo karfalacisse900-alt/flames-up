@@ -270,7 +270,11 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
       ) : results.length > 0 ? (
         <div className="px-5 space-y-2">
           <AnimatePresence>
-            {results.map(item => <MovieCard key={item.id} item={item} />)}
+            {results.map(item => (
+              <div key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer">
+                <MovieCard item={item} />
+              </div>
+            ))}
           </AnimatePresence>
         </div>
       ) : (
@@ -279,6 +283,10 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No results found</p>
         </div>
       )}
+
+      <AnimatePresence>
+        {selectedItem && <MediaDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />}
+      </AnimatePresence>
 
       {/* TMDb Attribution (required) */}
       <div className="px-5 mt-6 flex items-center justify-center gap-2">
