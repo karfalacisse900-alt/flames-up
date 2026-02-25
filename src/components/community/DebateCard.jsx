@@ -165,6 +165,6 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
       </div>
 
       <div style={{ height: 1, backgroundColor: "var(--border-subtle)", marginLeft: 60 }} />
-    </div>
+    </motion.div>
   );
 }
