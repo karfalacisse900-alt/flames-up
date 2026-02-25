@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { MessageCircle, Share2, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MuteBlockMenu from "./MuteBlockMenu";
-import CommentModal from "./CommentModal";
+import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
