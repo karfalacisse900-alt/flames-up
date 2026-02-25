@@ -70,8 +70,8 @@ import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
-import Wallet from './pages/Wallet';
 import UserProfile from './pages/UserProfile';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
@@ -99,8 +99,8 @@ export const PAGES = {
     "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
-    "Wallet": Wallet,
     "UserProfile": UserProfile,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {

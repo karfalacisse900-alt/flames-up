@@ -255,7 +255,7 @@ export default function Discover() {
         </div>
         {/* Content type tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["services", "👤 Services"], ["local", "📍 Local"]].map(([val, label]) => (
+          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["media", "🎬 Media"], ["services", "👤 Services"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
@@ -459,6 +459,13 @@ export default function Discover() {
       {contentTab === "products" && (
         <div className="mt-4">
           <ProductsTab />
+        </div>
+      )}
+
+      {/* ===== MEDIA TAB ===== */}
+      {contentTab === "media" && (
+        <div className="mt-3">
+          <MediaTab user={user} />
         </div>
       )}
 
