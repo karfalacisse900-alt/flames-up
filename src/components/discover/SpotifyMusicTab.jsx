@@ -377,7 +377,11 @@ export default function SpotifyMusicTab() {
       ) : displayList.length > 0 ? (
         <div className="px-5 space-y-2">
           <AnimatePresence>
-            {displayList.map(track => <SongCard key={track.id} track={track} />)}
+            {displayList.map(track => (
+              <div key={track.id} onClick={() => setSelectedItem(track)} className="cursor-pointer">
+                <SongCard track={track} />
+              </div>
+            ))}
           </AnimatePresence>
           {searchResults && (
             <button onClick={() => { setSearchResults(null); setQuery(""); }}
@@ -397,6 +401,10 @@ export default function SpotifyMusicTab() {
       <p className="text-[10px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
         Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. No music is hosted in this app. All links go to official Spotify pages.
       </p>
+
+      <AnimatePresence>
+        {selectedItem && <MediaDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />}
+      </AnimatePresence>
     </div>
   );
 }
