@@ -491,7 +491,7 @@ export default function MediaTab({ user }) {
     "Inception","Breaking Bad","Elden Ring","Blinding Lights","Parasite","Stardew Valley","Fleabag","Atomic Habits","Calm Down","Arcane"
   ].includes(i.title));
 
-  const isMusicView = activeType === "music" && !search && selectedGenre === "all" && selectedMood === "all";
+  const isMusicView = activeType === "music";
   const activeFilterCount = [selectedGenre !== "all", selectedMood !== "all", sortBy !== "default"].filter(Boolean).length;
 
   return (
