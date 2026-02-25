@@ -105,7 +105,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
           width: "100%",
           maxWidth: "512px",
           borderRadius: "24px 24px 0 0",
-          backgroundColor: "var(--bg-nav)",
+          backgroundColor: "var(--bg-app)",
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",
@@ -125,7 +125,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px" }}>
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px", backgroundColor: "var(--bg-app)" }}>
           {/* Type selector */}
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {postTypes.map((pt) => (
@@ -265,7 +265,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         </div>
 
         {/* ─── STICKY FOOTER — always visible ─── */}
-        <div style={{ flexShrink: 0, padding: "12px 20px 28px", borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-nav)" }}>
+        <div style={{ flexShrink: 0, padding: "12px 20px 28px", borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-app)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />

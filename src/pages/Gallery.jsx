@@ -218,10 +218,10 @@ export default function Gallery() {
       <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Gallery</h1>
-          <button onClick={() => navigate(createPageUrl("ArtStudio"))}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+          <button onClick={() => {}}
+            className="flex items-center justify-center w-10 h-10 rounded-full text-lg font-semibold"
             style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
-            🎨 Create
+            +
           </button>
         </div>
 
@@ -268,11 +268,7 @@ export default function Gallery() {
         <div className="text-center py-20">
           <p className="text-5xl mb-3">🎨</p>
           <p className="text-sm mb-4" style={{ color: "#6B6B6B" }}>No artworks yet. Be the first!</p>
-          <button onClick={() => navigate(createPageUrl("ArtStudio"))}
-            className="px-5 py-2.5 rounded-full font-semibold text-sm"
-            style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
-            Open Art Studio
-          </button>
+
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 px-4 pt-4">
