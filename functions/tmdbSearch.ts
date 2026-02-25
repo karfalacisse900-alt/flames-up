@@ -10,24 +10,25 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { query, type = "multi", page = 1, genre_id, trending } = await req.json();
+    const { query, type = "movie", page = 1, genre_id, sort_mode } = await req.json();
 
+    const mediaType = type === "tv" ? "tv" : "movie";
     let url;
 
-    if (trending) {
-      // Fetch trending movies or shows
-      const mediaType = type === "tv" ? "tv" : "movie";
-      url = `${TMDB_BASE}/trending/${mediaType}/week?api_key=${API_KEY}&page=${page}`;
-    } else if (query) {
-      const endpoint = type === "tv" ? "search/tv" : type === "movie" ? "search/movie" : "search/multi";
+    if (query) {
+      // Text search
+      const endpoint = type === "tv" ? "search/tv" : "search/movie";
       url = `${TMDB_BASE}/${endpoint}?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
-    } else if (genre_id) {
-      const mediaType = type === "tv" ? "tv" : "movie";
-      url = `${TMDB_BASE}/discover/${mediaType}?api_key=${API_KEY}&with_genres=${genre_id}&sort_by=popularity.desc&page=${page}`;
     } else {
-      // Default: popular
-      const mediaType = type === "tv" ? "tv" : "movie";
-      url = `${TMDB_BASE}/${mediaType}/popular?api_key=${API_KEY}&page=${page}`;
+      // Discover with sort/filter
+      let tmdbSort = "popularity.desc";
+      if (sort_mode === "vote_average") tmdbSort = "vote_average.desc";
+      else if (sort_mode === "release_date_desc") tmdbSort = "primary_release_date.desc";
+      else if (sort_mode === "release_date_asc") tmdbSort = "primary_release_date.asc";
+
+      let discoverUrl = `${TMDB_BASE}/discover/${mediaType}?api_key=${API_KEY}&sort_by=${tmdbSort}&page=${page}&vote_count.gte=50`;
+      if (genre_id) discoverUrl += `&with_genres=${genre_id}`;
+      url = discoverUrl;
     }
 
     const res = await fetch(url);
