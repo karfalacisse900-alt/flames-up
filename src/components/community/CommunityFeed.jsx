@@ -11,15 +11,38 @@ import { requireVerified } from "../auth/EmailVerificationGate";
 
 
 
+const TABS = [
+  { key: "foryou", label: "For You" },
+  { key: "following", label: "Following" },
+];
+
+const FILTER_OPTIONS = [
+  { key: "all",       label: "✦ All" },
+  { key: "trending",  label: "🔥 Hot" },
+  { key: "questions", label: "❓ Q&A" },
+  { key: "debated",   label: "⚔️ Debates" },
+  { key: "quotes",    label: "✦ Quotes" },
+];
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
 export default function CommunityFeed({ user }) {
+  const [tab, setTab] = useState("foryou");
   const [filter, setFilter] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
-  const [viewMode, setViewMode] = useState("list"); // "list" | "swipe"
-  const [swipeIndex, setSwipeIndex] = useState(0);
+  const [viewMode, setViewMode] = useState("list");
   const qc = useQueryClient();
 
-  const { data: posts = [], isLoading } = useQuery({
+  const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
     refetchInterval: 30000,
@@ -29,6 +52,14 @@ export default function CommunityFeed({ user }) {
     queryKey: ["communityDebates"],
     queryFn: () => base44.entities.CommunityDebate.list("-created_date", 50),
   });
+
+  const { data: follows = [] } = useQuery({
+    queryKey: ["myFollows", user?.email],
+    queryFn: () => base44.entities.Follow.filter({ follower_email: user?.email }),
+    enabled: !!user?.email,
+  });
+
+  const followingEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
 
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
@@ -54,29 +85,21 @@ export default function CommunityFeed({ user }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["communityPosts"] }),
   });
 
-  const spotlight = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const todaySpotlights = posts.filter(p => p.spotlight_date === today && p.is_daily_spotlight);
-    if (todaySpotlights.length > 0) return todaySpotlights;
-    return [...posts].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0)).slice(0, 3);
-  }, [posts]);
-
   const filteredPosts = useMemo(() => {
-    let list = posts.filter(p => !p.is_daily_spotlight && p.type !== "review");
+    let list = posts.filter(p => p.type !== "review");
+
+    if (tab === "following" && followingEmails.length > 0) {
+      list = list.filter(p => followingEmails.includes(p.author_email));
+    }
 
     switch (filter) {
       case "trending":  list = [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0)); break;
-      case "newest":    break;
-      case "upvoted":   list = [...list].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0)); break;
-      case "commented": list = [...list].sort((a, b) => (b.comment_count || 0) - (a.comment_count || 0)); break;
       case "debated":   list = list.filter(p => p.type === "debate"); break;
       case "questions": list = list.filter(p => p.type === "question"); break;
-      case "lists":     list = list.filter(p => p.type === "list"); break;
-      case "opinions":  list = list.filter(p => p.type === "opinion"); break;
       case "quotes":    list = list.filter(p => p.type === "quote_of_day" || p.type === "discussion"); break;
     }
     return list;
-  }, [posts, filter]);
+  }, [posts, filter, tab, followingEmails]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
@@ -101,59 +124,83 @@ export default function CommunityFeed({ user }) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+        <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
       </div>
     );
   }
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3 sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Community</h1>
-          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white"
-            style={{ backgroundColor: "var(--accent-primary)" }}>
-            <Plus className="w-4 h-4" /> Post
-          </button>
+      {/* ── Header ── */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <h1 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Community</h1>
+          <div className="flex items-center gap-2">
+            <button onClick={() => { setViewMode(v => v === "swipe" ? "list" : "swipe"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: viewMode !== "swipe" } })); }}
+              className="px-3 py-1 rounded-full text-xs font-semibold border transition-all"
+              style={{ backgroundColor: viewMode === "swipe" ? "var(--accent-primary)" : "transparent", color: viewMode === "swipe" ? "#fff" : "var(--text-hint)", borderColor: viewMode === "swipe" ? "var(--accent-primary)" : "var(--border-light)" }}>
+              {viewMode === "swipe" ? "✕ Swipe" : "↕ Swipe"}
+            </button>
+            <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-semibold text-white"
+              style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Plus className="w-3.5 h-3.5" /> Post
+            </button>
+          </div>
         </div>
-        {/* View toggle as subtle text tabs */}
-        <div className="flex gap-1 mt-2.5">
-          <button onClick={() => { setViewMode("list"); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } })); }}
-            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-            style={{ backgroundColor: viewMode === "list" ? "var(--accent-primary-light)" : "transparent", color: viewMode === "list" ? "var(--accent-primary)" : "var(--text-hint)" }}>
-            Feed
-          </button>
-          <button onClick={() => { setViewMode("swipe"); setExpandedPost(null); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
-            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-            style={{ backgroundColor: viewMode === "swipe" ? "var(--accent-primary-light)" : "transparent", color: viewMode === "swipe" ? "var(--accent-primary)" : "var(--text-hint)" }}>
-            Swipe
-          </button>
-        </div>
-      </div>
 
-      {/* Filter strip */}
-      <div className="px-4 pt-2 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
-        <div className="flex gap-1.5 pb-1" style={{ width: "max-content" }}>
-          {FILTER_OPTIONS.map(f => (
-            <button key={f.key} onClick={() => { setFilter(f.key); }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: filter === f.key ? "var(--accent-primary)" : "var(--bg-card)",
-                color: filter === f.key ? "#fff" : "var(--text-secondary)",
-                borderColor: filter === f.key ? "var(--accent-primary)" : "var(--border-light)",
-              }}>
-              {f.label}
+        {/* Tabs: For You / Following */}
+        <div className="flex border-b" style={{ borderColor: "var(--border-light)" }}>
+          {TABS.map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className="flex-1 py-2.5 text-sm font-semibold relative transition-all"
+              style={{ color: tab === t.key ? "var(--accent-primary)" : "var(--text-hint)" }}>
+              {t.label}
+              {tab === t.key && (
+                <motion.div layoutId="feedTab" className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full"
+                  style={{ backgroundColor: "var(--accent-primary)" }} />
+              )}
             </button>
           ))}
         </div>
+
+        {/* Filter chips */}
+        <div className="px-3 py-2 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-1.5" style={{ width: "max-content" }}>
+            {FILTER_OPTIONS.map(f => (
+              <button key={f.key} onClick={() => setFilter(f.key)}
+                className="px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap transition-all"
+                style={{
+                  backgroundColor: filter === f.key ? "var(--accent-primary)" : "transparent",
+                  color: filter === f.key ? "#fff" : "var(--text-secondary)",
+                  borderColor: filter === f.key ? "var(--accent-primary)" : "var(--border-light)",
+                }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Post count */}
-      <p className="px-5 pb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
-        {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""}
-      </p>
+      {/* ── Quick compose row ── */}
+      {viewMode === "list" && (
+        <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+            {user?.full_name?.[0]?.toUpperCase() || "?"}
+          </div>
+          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+            className="flex-1 text-left px-4 py-2.5 rounded-full text-sm transition-all"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
+            What's on your mind?
+          </button>
+          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+            className="p-2 rounded-full" style={{ color: "var(--accent-primary)" }}>
+            <ImageIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* ====== LIST MODE ====== */}
       {viewMode === "list" && (
@@ -161,8 +208,11 @@ export default function CommunityFeed({ user }) {
           {filteredPosts.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-4xl mb-3">💬</p>
-              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No posts yet</p>
-              <button onClick={() => setShowCreate(true)} className="mt-3 text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
+              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                {tab === "following" ? "Follow people to see their posts here" : "No posts yet"}
+              </p>
+              <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+                className="mt-3 text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
                 Be the first to post
               </button>
             </div>
@@ -187,10 +237,6 @@ export default function CommunityFeed({ user }) {
             onCreated={() => { qc.invalidateQueries({ queryKey: ["communityPosts"] }); qc.invalidateQueries({ queryKey: ["communityDebates"] }); }} />
         )}
       </AnimatePresence>
-
-      <p className="text-[10px] text-center px-5 pb-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
-        Opinions expressed are those of community members.
-      </p>
     </div>
   );
 }
