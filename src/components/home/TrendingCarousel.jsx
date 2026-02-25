@@ -50,11 +50,11 @@ function TrendingCard({ post }) {
         {(post.comment_count || 0) > 0 && (
           <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>💬 {post.comment_count}</span>
         )}
-        <Link to={createPageUrl(`PostDetail?id=${post.id}`)}
+        <Link to={createPageUrl(`Home?post=${post.id}`)}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold transition-all active:scale-95"
           style={{ backgroundColor: cfg.color, color: "#fff" }}
           onClick={e => e.stopPropagation()}>
-          <Users className="w-3 h-3" /> Join
+          <Users className="w-3 h-3" /> Discuss
         </Link>
       </div>
     </motion.div>

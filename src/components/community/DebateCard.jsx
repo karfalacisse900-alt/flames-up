@@ -109,39 +109,38 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
 
           {debate && (
             <div className="mb-2">
-              <div className="h-1.5 rounded-full overflow-hidden flex mb-2" style={{ backgroundColor: "var(--bg-subtle)" }}>
-                <div className="h-full" style={{ width: `${pctA}%`, backgroundColor: "#3C6E5A" }} />
-                <div className="h-full" style={{ width: `${pctB}%`, backgroundColor: "#D98B62" }} />
+              {/* Slim progress bar */}
+              <div className="h-1 rounded-full overflow-hidden flex mb-1.5" style={{ backgroundColor: "var(--border-subtle)" }}>
+                <div style={{ width: `${pctA}%`, backgroundColor: "#3C6E5A" }} />
+                <div style={{ width: `${pctB}%`, backgroundColor: "#D98B62" }} />
               </div>
-              <div className="flex gap-2">
+              {/* Inline vote buttons */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => user && !hasVoted && voteDebateMut.mutate("a")}
                   disabled={hasVoted}
-                  className="flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border"
                   style={{
-                    backgroundColor: hasVotedA ? "#3C6E5A" : "var(--bg-subtle)",
-                    color: hasVotedA ? "#fff" : "var(--text-secondary)",
-                    border: hasVotedA ? "none" : "1px solid var(--border-light)"
+                    backgroundColor: hasVotedA ? "#3C6E5A15" : "transparent",
+                    color: hasVotedA ? "#3C6E5A" : "var(--text-secondary)",
+                    borderColor: hasVotedA ? "#3C6E5A" : "var(--border-light)",
                   }}>
-                  <p className="text-sm mb-0.5">🟢 {debate.side_a_label}</p>
-                  <p className="font-bold" style={{ color: hasVotedA ? "#fff" : "#3C6E5A" }}>{pctA}%</p>
+                  {debate.side_a_label} <span style={{ color: "#3C6E5A", fontWeight: 700 }}>{pctA}%</span>
                 </button>
+                <span className="text-xs" style={{ color: "var(--text-hint)" }}>vs</span>
                 <button
                   onClick={() => user && !hasVoted && voteDebateMut.mutate("b")}
                   disabled={hasVoted}
-                  className="flex-1 py-2 px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border"
                   style={{
-                    backgroundColor: hasVotedB ? "#D98B62" : "var(--bg-subtle)",
-                    color: hasVotedB ? "#fff" : "var(--text-secondary)",
-                    border: hasVotedB ? "none" : "1px solid var(--border-light)"
+                    backgroundColor: hasVotedB ? "#D98B6215" : "transparent",
+                    color: hasVotedB ? "#D98B62" : "var(--text-secondary)",
+                    borderColor: hasVotedB ? "#D98B62" : "var(--border-light)",
                   }}>
-                  <p className="text-sm mb-0.5">🟠 {debate.side_b_label}</p>
-                  <p className="font-bold" style={{ color: hasVotedB ? "#fff" : "#D98B62" }}>{pctB}%</p>
+                  {debate.side_b_label} <span style={{ color: "#D98B62", fontWeight: 700 }}>{pctB}%</span>
                 </button>
+                <span className="ml-auto text-[10px]" style={{ color: "var(--text-hint)" }}>{totalVotes} votes</span>
               </div>
-              <p className="text-[10px] text-center mt-1" style={{ color: "var(--text-hint)" }}>
-                {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
-              </p>
             </div>
           )}
 

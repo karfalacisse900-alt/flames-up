@@ -178,23 +178,26 @@ function DatingCard({ post, debate, user, onLike, onSkip, onNext, isTop }) {
           </div>
 
           {/* Content — always centered */}
-          <div className="flex-1 flex flex-col justify-center items-center text-center">
-            {post.title && (
-              <p className="text-2xl font-bold leading-tight mb-4 w-full text-center" style={{ color: "#1C0E00", fontFamily: "var(--font-serif)" }}>
-                {post.title}
-              </p>
-            )}
-            <p className="text-lg leading-relaxed w-full text-center" style={{
-              color: "#3A2000",
-              fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
-              fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
-              fontSize: (post.body?.length || 0) > 120 ? "1rem" : "1.1rem",
-            }}>
-              {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
+          <div className="flex-1 flex flex-col justify-center items-center text-center overflow-hidden">
+          {post.image_url && (
+            <img src={post.image_url} alt="" className="w-full rounded-2xl mb-3 object-cover max-h-40" />
+          )}
+          {post.title && (
+            <p className="text-2xl font-bold leading-tight mb-4 w-full text-center" style={{ color: "#1C0E00", fontFamily: "var(--font-serif)" }}>
+              {post.title}
             </p>
+          )}
+          <p className="text-lg leading-relaxed w-full text-center" style={{
+            color: "#3A2000",
+            fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
+            fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+            fontSize: (post.body?.length || 0) > 120 ? "1rem" : "1.1rem",
+          }}>
+            {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
+          </p>
 
-            {/* List items */}
-            {post.type === "list" && post.list_items?.length > 0 && (
+          {/* List items */}
+          {post.type === "list" && post.list_items?.length > 0 && (
               <ol className="mt-4 space-y-2">
                 {post.list_items.map((item, i) => (
                   <li key={i} className="flex gap-3 text-sm" style={{ color: "#3A2000" }}>

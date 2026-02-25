@@ -258,12 +258,10 @@ export default function LiveRoomView() {
 
       {/* Bottom panel */}
       <div
-        className="shrink-0 px-4 pb-4 pt-3 space-y-3"
+        className="shrink-0 px-4 pb-4 pt-2"
         style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}
       >
-        <GiftPanel onSendGift={handleSendGift} onReaction={handleReaction} userBalance={userBalance} />
-
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-2">
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
@@ -275,6 +273,7 @@ export default function LiveRoomView() {
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        <GiftPanel onSendGift={handleSendGift} onReaction={handleReaction} userBalance={userBalance} />
       </div>
     </div>
   );
