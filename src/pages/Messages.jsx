@@ -100,18 +100,23 @@ function ChatView({ user, conversation, onBack }) {
   const sendText = async () => {
     if (!text.trim()) return;
     setSending(true);
-    await base44.entities.DirectMessage.create({
-      conversation_id: convId,
-      sender_email: user.email,
-      sender_name: user.full_name || user.email,
-      receiver_email: conversation.email,
-      text: text.trim(),
-      is_read: false,
-    });
-    setText("");
-    setSending(false);
-    queryClient.invalidateQueries({ queryKey: ["dm", convId] });
-    queryClient.invalidateQueries({ queryKey: ["dmSent", user.email] });
+    try {
+      await base44.entities.DirectMessage.create({
+        conversation_id: convId,
+        sender_email: user.email,
+        sender_name: user.full_name || user.email,
+        receiver_email: conversation.email,
+        text: text.trim(),
+        is_read: false,
+      });
+      setText("");
+    } catch (err) {
+      console.error("Send error:", err);
+    } finally {
+      setSending(false);
+      queryClient.invalidateQueries({ queryKey: ["dm", convId] });
+      queryClient.invalidateQueries({ queryKey: ["dmSent", user.email] });
+    }
   };
 
   const startRecording = async () => {
