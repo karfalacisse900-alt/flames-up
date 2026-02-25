@@ -77,10 +77,14 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
     >
       <div className="flex gap-3 px-4 py-4">
         <div className="shrink-0 flex flex-col items-center">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-            style={{ backgroundColor: `${avatarColor}22`, color: avatarColor, border: `2px solid ${avatarColor}33` }}>
-            {initials}
-          </div>
+          {post.author_avatar_url ? (
+            <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover" />
+          ) : (
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
+              style={{ backgroundColor: `${avatarColor}22`, color: avatarColor, border: `2px solid ${avatarColor}33` }}>
+              {initials}
+            </div>
+          )}
         </div>
 
         <div className="flex-1 min-w-0">

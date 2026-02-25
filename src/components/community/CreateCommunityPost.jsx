@@ -66,6 +66,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       const newPost = await base44.entities.CommunityPost.create({
         type, title: title.trim() || undefined, body: body.trim() || title.trim(),
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
+        author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
@@ -84,6 +85,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       body: body.trim() || title.trim(),
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
+      author_avatar_url: user?.avatar_url || "",
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
