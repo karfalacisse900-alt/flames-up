@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Share2, X, Send, Flame, Clock } from "lucide-react";
+import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from "@/utils";
 import { useNavigate } from "react-router-dom";
+import ArtVoteArena from "@/components/gallery/ArtVoteArena";
 
 const SORTS = [
   { key: "newest", label: "Newest", icon: Clock },
   { key: "liked", label: "Most Liked", icon: Heart },
   { key: "trending", label: "Trending", icon: Flame },
+  { key: "top_rated", label: "Top Voted", icon: Star },
 ];
 
 function timeAgo(dateStr) {
@@ -137,6 +139,7 @@ export default function Gallery() {
   const [user, setUser] = useState(null);
   const [sort, setSort] = useState("newest");
   const [selected, setSelected] = useState(null);
+  const [tab, setTab] = useState("gallery"); // "gallery" | "vote"
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -176,6 +179,7 @@ export default function Gallery() {
 
   const sorted = [...allArtworks].sort((a, b) => {
     if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
+    if (sort === "top_rated") return (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0);
     if (sort === "trending") {
       const cutoff = Date.now() - 86400000;
       const aRecent = new Date(a.created_date) > cutoff ? (a.like_count || 0) : 0;
@@ -212,27 +216,46 @@ export default function Gallery() {
           </button>
         </div>
 
-        {/* Sort pills */}
-        <div className="flex gap-2">
-          {SORTS.map(s => (
-            <button key={s.key} onClick={() => setSort(s.key)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-              style={{
-                backgroundColor: sort === s.key ? "#243D33" : "#DCCBB8",
-                color: sort === s.key ? "#E6EFEA" : "#6B6B6B",
-              }}>
-              <s.icon className="w-3 h-3" /> {s.label}
-            </button>
-          ))}
+        {/* Tab toggle */}
+        <div className="flex gap-1 p-1 rounded-xl mb-3" style={{ backgroundColor: "#DCCBB8" }}>
+          <button onClick={() => setTab("gallery")}
+            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={{ backgroundColor: tab === "gallery" ? "#243D33" : "transparent", color: tab === "gallery" ? "#E6EFEA" : "#6B6B6B" }}>
+            🖼 Gallery
+          </button>
+          <button onClick={() => setTab("vote")}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "#6B6B6B" }}>
+            <Swords className="w-3 h-3" /> Vote Arena
+          </button>
         </div>
+
+        {/* Sort pills — only in gallery tab */}
+        {tab === "gallery" && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {SORTS.map(s => (
+              <button key={s.key} onClick={() => setSort(s.key)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0"
+                style={{
+                  backgroundColor: sort === s.key ? "#243D33" : "#DCCBB8",
+                  color: sort === s.key ? "#E6EFEA" : "#6B6B6B",
+                }}>
+                <s.icon className="w-3 h-3" /> {s.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* Vote Arena */}
+      {tab === "vote" && <ArtVoteArena user={user} />}
+
       {/* Grid */}
-      {isLoading ? (
+      {tab === "gallery" && isLoading ? (
         <div className="flex justify-center py-20">
           <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#3C6E5A", borderTopColor: "transparent" }} />
         </div>
-      ) : sorted.length === 0 ? (
+      tab === "gallery") : sorted.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-5xl mb-3">🎨</p>
           <p className="text-sm mb-4" style={{ color: "#6B6B6B" }}>No artworks yet. Be the first!</p>
