@@ -1,4 +1,3 @@
-css
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -9,35 +8,83 @@ css
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* ── Official Design Tokens (Collections Aesthetic) ── */
-  --bg-app:     #E8EDE6;   /* main app background – forest green mix */
-  --bg-card:    #EEF3F0;   /* card surface */
-  --bg-nav:     #EEF3F0;   /* nav bar */
-  --bg-subtle:  #E5DFD0;   /* inputs / divider areas */
-  --bg-modal:   #EEF3F0;   /* modal / sheet background */
+  /* ── Design Tokens ── */
+  --bg-app:     #F2EDE4;
+  --bg-card:    #FAFAF8;
+  --bg-nav:     #FAFAF8;
+  --bg-subtle:  #EDE8DF;
+  --bg-modal:   #FAFAF8;
 
   /* ── Text ── */
-  --text-primary:   #2F2F2F;   /* near-black */
-  --text-secondary: #6B6B6B;   /* medium gray */
-  --text-hint:      #A8A8A8;   /* muted placeholder */
+  --text-primary:   #1E1E1E;
+  --text-secondary: #5C5C5C;
+  --text-hint:      #A0A0A0;
 
   /* ── Primary Brand Green ── */
-  --accent-primary:       #3C6E5A;
-  --accent-primary-hover: #2D5244;
-  --accent-primary-light: #EEF3F0;   /* very soft green tint */
+  --accent-primary:       #2E6B4F;
+  --accent-primary-hover: #224F3A;
+  --accent-primary-light: #E8F2EC;
 
   /* ── Secondary / Caramel ── */
   --accent-secondary:       #D98B62;
   --accent-secondary-hover: #C07A52;
 
   /* ── Borders ── */
-  --border-light:  #EDE9E3;
-  --border-medium: #D8D3C8;
-  --border-subtle: #F0EDE5;   /* almost invisible */
+  --border-light:  #E5DFD5;
+  --border-medium: #CEC8BC;
+  --border-subtle: #EDE9E3;
 
   /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ── shadcn/ui HSL variables (mapped to our theme) ── */
+  --background:       42 30% 94%;      /* #F2EDE4 */
+  --foreground:       0 0% 12%;        /* #1E1E1E */
+
+  --card:             45 20% 97%;      /* #FAFAF8 */
+  --card-foreground:  0 0% 12%;
+
+  --popover:          45 20% 97%;
+  --popover-foreground: 0 0% 12%;
+
+  --primary:          155 40% 30%;     /* #2E6B4F green */
+  --primary-foreground: 0 0% 98%;
+
+  --secondary:        40 25% 88%;      /* soft beige */
+  --secondary-foreground: 0 0% 12%;
+
+  --muted:            40 20% 90%;
+  --muted-foreground: 0 0% 36%;
+
+  --accent:           155 40% 30%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive:      0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border:           38 20% 86%;      /* warm border */
+  --input:            38 20% 86%;
+  --ring:             155 40% 30%;
+
+  --radius: 0.75rem;
+
+  /* Charts */
+  --chart-1: 155 40% 30%;
+  --chart-2: 25 65% 62%;
+  --chart-3: 42 30% 70%;
+  --chart-4: 200 40% 50%;
+  --chart-5: 0 60% 55%;
+
+  /* Sidebar */
+  --sidebar-background:          45 20% 97%;
+  --sidebar-foreground:          0 0% 12%;
+  --sidebar-primary:             155 40% 30%;
+  --sidebar-primary-foreground:  0 0% 98%;
+  --sidebar-accent:              40 25% 88%;
+  --sidebar-accent-foreground:   0 0% 12%;
+  --sidebar-border:              38 20% 86%;
+  --sidebar-ring:                155 40% 30%;
 }
 
 body {
@@ -46,7 +93,6 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   touch-action: pan-y;
-  -ms-touch-action: pan-y;
   overscroll-behavior: none;
 }
 
@@ -55,11 +101,10 @@ body {
 }
 
 button, a[role="button"] {
-  box-shadow: 0 2px 8px rgba(60, 110, 90, 0.10);
+  box-shadow: 0 2px 8px rgba(46, 107, 79, 0.10);
 }
-
 button:active, a[role="button"]:active {
-  box-shadow: 0 1px 3px rgba(60, 110, 90, 0.06);
+  box-shadow: 0 1px 3px rgba(46, 107, 79, 0.06);
 }
 
 input, textarea, select {
@@ -68,16 +113,11 @@ input, textarea, select {
   color: var(--text-primary) !important;
   border-color: var(--border-light) !important;
 }
-
 input::placeholder, textarea::placeholder {
   color: var(--text-hint) !important;
 }
-
-/* shadcn Input component uses bg-transparent — override globally */
-input.flex,
-input[class*="rounded"],
-textarea.flex,
-textarea[class*="rounded"] {
+input.flex, input[class*="rounded"],
+textarea.flex, textarea[class*="rounded"] {
   background-color: var(--bg-subtle) !important;
   color: var(--text-primary) !important;
 }
@@ -99,11 +139,9 @@ nav, button, a[role="button"], .no-select {
   user-select: none;
 }
 
-/* Legibility on high-density (iOS) displays — floor tiny text at 11px */
 .text-\[10px\] { font-size: 11px !important; }
 .text-\[9px\]  { font-size: 11px !important; }
 .text-\[8px\]  { font-size: 11px !important; }
-/* Slightly increase weight of hint/secondary text at small sizes for crispness */
 .text-\[10px\].font-medium,
 .text-\[11px\].font-medium { font-weight: 600 !important; }
 
@@ -111,37 +149,24 @@ nav, button, a[role="button"], .no-select {
   * {
     @apply border-[var(--border-light)];
   }
-
   button {
     transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
   }
-
-  /* prevent layout shift on route change */
   #root > * {
     overflow-x: hidden;
   }
-
-  /* no page-transition slide/shift */
-  .page-transition-enter,
-  .page-transition-exit {
-    position: absolute !important;
-    width: 100%;
-  }
 }
 
-/* ── Global overrides so Tailwind white/gray utilities respect our theme ── */
-
-/* Very light grays → forest green theme bg */
+/* ── Global Tailwind utility overrides ── */
+.bg-white    { background-color: var(--bg-card) !important; }
 .bg-gray-50  { background-color: var(--bg-subtle) !important; }
 .bg-gray-100 { background-color: var(--bg-card) !important; }
-.bg-white    { background-color: var(--bg-card) !important; }
 
-/* All primary buttons default to forest green */
-button.bg-primary, [class*="bg-primary"] { background-color: #3C6E5A !important; }
-button.bg-blue-500, button.bg-blue-600, button.bg-blue-700 { background-color: #3C6E5A !important; }
-button.bg-indigo-500, button.bg-indigo-600 { background-color: #3C6E5A !important; }
+button.bg-primary, [class*="bg-primary"]    { background-color: var(--accent-primary) !important; }
+button.bg-blue-500, button.bg-blue-600,
+button.bg-blue-700                          { background-color: var(--accent-primary) !important; }
+button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-primary) !important; }
 
-/* Text grays → warm equivalents */
 .text-gray-400 { color: var(--text-hint) !important; }
 .text-gray-500 { color: var(--text-hint) !important; }
 .text-gray-600 { color: var(--text-secondary) !important; }
@@ -149,23 +174,17 @@ button.bg-indigo-500, button.bg-indigo-600 { background-color: #3C6E5A !importan
 .text-gray-800 { color: var(--text-primary) !important; }
 .text-gray-900 { color: var(--text-primary) !important; }
 
-/* Border grays → warm borders */
 .border-gray-100 { border-color: var(--border-subtle) !important; }
 .border-gray-200 { border-color: var(--border-light) !important; }
 .border-gray-300 { border-color: var(--border-medium) !important; }
 
-/* Amber pricing pills → use theme secondary */
-.bg-amber-50   { background-color: var(--accent-primary-light) !important; }
+.bg-amber-50    { background-color: var(--accent-primary-light) !important; }
 .text-amber-700 { color: var(--accent-primary) !important; }
 .border-amber-100 { border-color: var(--border-light) !important; }
 
-/* Tabs active state override — white was bleeding through */
 [role="tabpanel"] { background-color: transparent !important; }
-
-/* Tabs list container */
 [role="tablist"]  { background-color: var(--bg-card) !important; }
 
-/* Radix / shadcn dialog & sheet portals */
 [data-radix-popper-content-wrapper] > *,
 [role="dialog"],
 [role="dialog"] > *,
@@ -175,7 +194,6 @@ button.bg-indigo-500, button.bg-indigo-600 { background-color: #3C6E5A !importan
   color: var(--text-primary) !important;
 }
 
-/* Force all inputs/textareas/selects inside modals/dialogs to use theme colors */
 [role="dialog"] input,
 [role="dialog"] textarea,
 [role="dialog"] select,
@@ -192,10 +210,7 @@ button.bg-indigo-500, button.bg-indigo-600 { background-color: #3C6E5A !importan
   border-color: var(--border-light) !important;
 }
 
-[data-radix-select-item] {
-  color: var(--text-primary) !important;
-}
-
+[data-radix-select-item] { color: var(--text-primary) !important; }
 [data-radix-select-item]:hover,
 [data-radix-select-item][data-highlighted] {
   background-color: var(--accent-primary-light) !important;
