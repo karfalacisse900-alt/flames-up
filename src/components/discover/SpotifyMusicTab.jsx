@@ -72,6 +72,13 @@ const PRELOADED_SONGS = [
 ];
 
 const GENRE_FILTERS = ["All", "Pop", "Hip-Hop", "R&B", "Rock", "Afrobeats", "Latin", "K-Pop", "Classic", "Dance", "Emotional"];
+const SORT_OPTIONS = [
+  { key: "default", label: "Default" },
+  { key: "az", label: "A → Z" },
+  { key: "artist", label: "By Artist" },
+  { key: "year_desc", label: "Year ↓" },
+  { key: "year_asc", label: "Year ↑" },
+];
 
 // ── Global audio singleton ─────────────────────────────────────────────────
 let _activeAudio = null;
@@ -205,6 +212,7 @@ export default function SpotifyMusicTab() {
   const [error, setError] = useState(null);
   const [enriching, setEnriching] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [sortBy, setSortBy] = useState("default");
 
   // Enrich preloaded list on mount (batch: fetch first 20 quickly)
   useEffect(() => {
@@ -288,19 +296,23 @@ export default function SpotifyMusicTab() {
         return keywords.some(k => hay.includes(k));
       });
 
-  const displayList = searchResults
-    ? searchResults.map(t => ({
-        id: t.id,
-        title: t.title,
-        artist: t.artist,
-        cover_url: t.cover_url,
-        spotify_url: t.spotify_url,
-        preview_url: t.preview_url,
-        album: t.album,
-        release_year: t.release_year,
-        duration_str: t.duration_ms ? `${Math.floor(t.duration_ms/60000)}:${String(Math.floor((t.duration_ms%60000)/1000)).padStart(2,"0")}` : null,
-      }))
-    : filteredPreloaded;
+  const toDisplayTrack = (t) => ({
+    ...t,
+    media_type: "music",
+    duration_str: t.duration_str || (t.duration_ms ? `${Math.floor(t.duration_ms/60000)}:${String(Math.floor((t.duration_ms%60000)/1000)).padStart(2,"0")}` : null),
+  });
+
+  const applySort = (list) => {
+    if (sortBy === "az") return [...list].sort((a, b) => a.title.localeCompare(b.title));
+    if (sortBy === "artist") return [...list].sort((a, b) => a.artist?.localeCompare(b.artist || ""));
+    if (sortBy === "year_desc") return [...list].sort((a, b) => (b.release_year || 0) - (a.release_year || 0));
+    if (sortBy === "year_asc") return [...list].sort((a, b) => (a.release_year || 0) - (b.release_year || 0));
+    return list;
+  };
+
+  const displayList = applySort(searchResults
+    ? searchResults.map(t => toDisplayTrack({ id: t.id, title: t.title, artist: t.artist, cover_url: t.cover_url, spotify_url: t.spotify_url, preview_url: t.preview_url, album: t.album, release_year: t.release_year }))
+    : filteredPreloaded.map(toDisplayTrack));
 
   return (
     <div className="pb-10">
