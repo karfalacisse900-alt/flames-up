@@ -27,12 +27,11 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const [showComments, setShowComments] = useState(false);
   const [saved, setSaved] = useState(false);
   const [reported, setReported] = useState(false);
+  const [likeBounce, setLikeBounce] = useState(false);
   const longPressTimer = useRef(null);
 
   const avatarColor = getAvatarColor(post.author_name);
   const initials = post.is_anonymous ? "?" : (post.author_name?.[0] || "U").toUpperCase();
-
-
 
   const handleReport = async () => {
     if (!user || reported) return;
@@ -47,21 +46,29 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
     else navigator.clipboard.writeText(url);
   };
 
-  // Long press for reactions
+  const handleLike = () => {
+    if (hasLiked) return;
+    setLikeBounce(true);
+    setTimeout(() => setLikeBounce(false), 500);
+    onUpvote();
+  };
+
   const handlePressStart = () => { longPressTimer.current = setTimeout(() => setShowReactions(true), 400); };
   const handlePressEnd = () => { clearTimeout(longPressTimer.current); };
 
   return (
-    <div>
-      {/* ── Post row ── */}
-      <div className="flex gap-3 px-4 py-4">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+    >
+      <div className="flex gap-3 px-4 py-3.5">
         {/* Avatar */}
-        <div className="shrink-0 flex flex-col items-center">
+        <div className="shrink-0">
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-            style={{ backgroundColor: `${avatarColor}22`, color: avatarColor, border: `2px solid ${avatarColor}33` }}>
+            style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
             {initials}
           </div>
-
         </div>
 
         {/* Content */}
@@ -72,11 +79,13 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               <span className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
                 {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
               </span>
-              <span className="text-xs shrink-0" style={{ color: "var(--text-hint)" }}>· {timeAgo(post.created_date)}</span>
+              <span className="text-[11px] shrink-0" style={{ color: "var(--text-hint)" }}>· {timeAgo(post.created_date)}</span>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button onClick={() => setSaved(v => !v)} className="p-1 rounded-full transition-all active:scale-90">
-                <Bookmark className="w-3.5 h-3.5" style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)", fill: saved ? "var(--accent-primary)" : "none" }} />
+            <div className="flex items-center gap-0.5 shrink-0">
+              <button onClick={() => setSaved(v => !v)}
+                className="p-1.5 rounded-full transition-all chip"
+                style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                <Bookmark className="w-3.5 h-3.5" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
               </button>
               {!post.is_anonymous && post.author_email && (
                 <MuteBlockMenu targetEmail={post.author_email} targetName={post.author_name} user={user} onReport={handleReport} />
@@ -84,30 +93,32 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </div>
           </div>
 
-          {/* Text content */}
+          {/* Title */}
           {post.title && (
             <p className="font-bold text-sm mb-1 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
               {post.title}
             </p>
           )}
-          <p className="text-sm leading-relaxed mb-2" style={{
-            color: "var(--text-primary)",
+
+          {/* Body */}
+          <p className="text-sm leading-relaxed mb-2.5" style={{
+            color: "var(--text-secondary)",
             fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
             fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
           }}>
             {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
           </p>
 
-          {/* Media */}
+          {/* Image */}
           {post.image_url && (
             <img src={post.image_url} alt="" loading="lazy"
-              className="w-full rounded-2xl mb-2 object-cover max-h-72"
-              style={{ border: "1px solid var(--border-subtle)" }} />
+              className="w-full rounded-2xl mb-2.5 object-cover"
+              style={{ maxHeight: 280, border: "1px solid var(--border-subtle)" }} />
           )}
 
           {/* List items */}
           {post.type === "list" && post.list_items?.length > 0 && (
-            <ol className="mb-2 space-y-1">
+            <ol className="mb-2.5 space-y-1">
               {post.list_items.map((item, i) => (
                 <li key={i} className="text-sm flex gap-2 items-start">
                   <span className="text-xs font-bold shrink-0 mt-0.5" style={{ color: "var(--text-hint)" }}>{i + 1}.</span>
@@ -117,39 +128,45 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </ol>
           )}
 
-          {/* Media ref */}
+          {/* Media ref tag */}
           {post.media_ref_title && (
-            <div className="mb-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs"
-              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+            <div className="mb-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px]"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
               🎬 {post.media_ref_title}
             </div>
           )}
 
           {/* ── Action row ── */}
-          <div className="flex items-center gap-1 -ml-1.5">
-            {/* Like / Reactions */}
+          <div className="flex items-center gap-0.5 -ml-1.5">
+            {/* Like */}
             <div className="relative">
               <button
                 onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
-                onClick={onUpvote} disabled={hasLiked}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all active:scale-90"
+                onClick={handleLike} disabled={hasLiked}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
                 style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
-                <span className="text-base leading-none">{hasLiked ? "❤️" : "🤍"}</span>
+                <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
                 {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
               </button>
               <AnimatePresence>
                 {showReactions && (
-                  <motion.div initial={{ opacity: 0, scale: 0.8, y: 4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.7, y: 8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
                     className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", border: "1px solid var(--border-light)" }}
+                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}
                     onMouseLeave={() => setShowReactions(false)}>
                     {REACTIONS.map(r => (
-                      <button key={r} onClick={() => { onUpvote(); setShowReactions(false); }}
-                        className="text-xl w-9 h-9 flex items-center justify-center rounded-full transition-all hover:scale-125 active:scale-90"
+                      <motion.button key={r}
+                        whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
+                        onClick={() => { handleLike(); setShowReactions(false); }}
+                        className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
                         style={{ backgroundColor: "var(--bg-subtle)" }}>
                         {r}
-                      </button>
+                      </motion.button>
                     ))}
                   </motion.div>
                 )}
@@ -158,7 +175,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
             {/* Comment */}
             <button onClick={() => setShowComments(true)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all active:scale-90"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip"
               style={{ color: "var(--text-hint)" }}>
               <MessageCircle className="w-4 h-4" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
@@ -166,7 +183,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
             {/* Share */}
             <button onClick={handleShare}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all active:scale-90"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium chip"
               style={{ color: "var(--text-hint)" }}>
               <Share2 className="w-4 h-4" />
             </button>
@@ -178,8 +195,8 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
         </div>
       </div>
 
-      {/* ── Divider ── */}
-      <div style={{ height: 1, backgroundColor: "var(--border-subtle)", marginLeft: 60 }} />
-    </div>
+      {/* Divider */}
+      <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-subtle) 60px, var(--border-subtle))", marginLeft: 60 }} />
+    </motion.div>
   );
 }
