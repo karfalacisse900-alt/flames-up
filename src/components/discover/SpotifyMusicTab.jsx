@@ -214,26 +214,30 @@ export default function SpotifyMusicTab() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [sortBy, setSortBy] = useState("default");
 
-  // Enrich preloaded list on mount (batch: fetch first 20 quickly)
+  // Enrich preloaded list on mount (parallel batches of 5)
   useEffect(() => {
     let cancelled = false;
     const enrichBatch = async () => {
       setEnriching(true);
-      const batch = PRELOADED_SONGS.slice(0, 30);
-      for (const song of batch) {
+      const batch = PRELOADED_SONGS.slice(0, 40);
+      const CHUNK = 5;
+      for (let i = 0; i < batch.length; i += CHUNK) {
         if (cancelled) break;
-        const key = `${song.title}|${song.artist}`;
-        try {
-          const res = await base44.functions.invoke("spotifySearch", {
-            query: `${song.title} ${song.artist}`, type: "track", limit: 1,
-          });
-          const track = res.data?.tracks?.[0];
-          if (track && !cancelled) {
-            setEnriched(prev => ({ ...prev, [key]: track }));
-          }
-        } catch (_) { /* skip */ }
-        // Small delay to avoid rate limit
-        await new Promise(r => setTimeout(r, 120));
+        const chunk = batch.slice(i, i + CHUNK);
+        await Promise.all(chunk.map(async (song) => {
+          if (cancelled) return;
+          const key = `${song.title}|${song.artist}`;
+          try {
+            const res = await base44.functions.invoke("spotifySearch", {
+              query: `${song.title} ${song.artist}`, type: "track", limit: 1,
+            });
+            const track = res.data?.tracks?.[0];
+            if (track && !cancelled) {
+              setEnriched(prev => ({ ...prev, [key]: track }));
+            }
+          } catch (_) { /* skip */ }
+        }));
+        await new Promise(r => setTimeout(r, 250));
       }
       if (!cancelled) setEnriching(false);
     };

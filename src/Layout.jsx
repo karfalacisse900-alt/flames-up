@@ -56,7 +56,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
-        <div className="max-w-lg mx-auto relative" style={{ paddingBottom: hideNav ? 0 : "72px", minHeight: "100dvh", overflowX: "hidden" }}>
+        <div className="max-w-lg mx-auto relative" style={{ paddingBottom: hideNav ? 0 : "72px", minHeight: "100dvh" }}>
           {children}
         </div>
 
