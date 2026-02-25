@@ -190,61 +190,41 @@ export default function CommunityFeed({ user }) {
       </AnimatePresence>
 
       {/* ── Quick compose row ── */}
-      {viewMode === "list" && (
-        <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-            {user?.full_name?.[0]?.toUpperCase() || "?"}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+          {user?.full_name?.[0]?.toUpperCase() || "?"}
+        </div>
+        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+          className="flex-1 text-left px-4 py-2.5 rounded-full text-sm transition-all"
+          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
+          What's on your mind?
+        </button>
+        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+          className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
+          <ImageIcon className="w-4 h-4" />
+        </button>
+        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+          className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
+          <Smile className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* ====== FEED ====== */}
+      <div className="pb-24">
+        {filteredPosts.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-4xl mb-3">💬</p>
+            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+              {tab === "following" ? "Follow people to see their posts here" : "No posts yet"}
+            </p>
+            <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+              className="mt-3 text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
+              Be the first to post
+            </button>
           </div>
-          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="flex-1 text-left px-4 py-2.5 rounded-full text-sm transition-all"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
-            What's on your mind?
-          </button>
-          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
-            <ImageIcon className="w-4 h-4" />
-          </button>
-          <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
-            <Smile className="w-4 h-4" />
-          </button>
-          <motion.button whileTap={{ scale: 0.85 }}
-          onClick={() => { setViewMode("swipe"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
-          className="p-2 rounded-full chip" style={{ color: "var(--accent-primary)" }}>
-          <Layers className="w-4 h-4" />
-        </motion.button>
-        </div>
-      )}
-
-      {/* ====== LIST MODE ====== */}
-      {viewMode === "list" && (
-        <div className="pb-24">
-          {filteredPosts.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-4xl mb-3">💬</p>
-              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-                {tab === "following" ? "Follow people to see their posts here" : "No posts yet"}
-              </p>
-              <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-                className="mt-3 text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
-                Be the first to post
-              </button>
-            </div>
-          ) : filteredPosts.map(renderPostCard)}
-        </div>
-      )}
-
-      {/* ====== SWIPE MODE ====== */}
-      {viewMode === "swipe" && (
-        <SwipeModeView
-          posts={filteredPosts}
-          debates={debates}
-          user={user}
-          onUpvote={(post) => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
-          onClose={() => { setViewMode("list"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } })); }}
-        />
-      )}
+        ) : filteredPosts.map(renderPostCard)}
+      </div>
 
       <AnimatePresence>
         {showCreate && (
