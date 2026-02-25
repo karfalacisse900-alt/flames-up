@@ -30,7 +30,6 @@ export default function CommunityFeed({ user }) {
   const [tab, setTab] = useState("foryou");
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
-  const [viewMode, setViewMode] = useState("list");
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const qc = useQueryClient();
 
