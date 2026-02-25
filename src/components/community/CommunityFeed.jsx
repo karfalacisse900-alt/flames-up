@@ -1,27 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { AnimatePresence } from "framer-motion";
-import { Plus, Layers, List } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Plus, ImageIcon, Smile } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
-import DailySpotlight from "./DailySpotlight";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import SwipeModeView from "./SwipeModeView";
 import { requireVerified } from "../auth/EmailVerificationGate";
-
-const FILTER_OPTIONS = [
-  { key: "all",       label: "✦ All" },
-  { key: "trending",  label: "🔥 Trending" },
-  { key: "newest",    label: "🆕 Newest" },
-  { key: "upvoted",   label: "▲ Most Upvoted" },
-  { key: "commented", label: "💬 Most Commented" },
-  { key: "debated",   label: "⚔️ Debates" },
-  { key: "questions", label: "❓ Questions" },
-  { key: "lists",     label: "📋 Lists" },
-  { key: "opinions",  label: "💬 Opinions" },
-  { key: "quotes",    label: "✦ Quotes" },
-];
 
 
 
