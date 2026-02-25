@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Search, BookOpen, X, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import MediaDetailSheet from "./MediaDetailSheet";
 
 const QUICK_SEARCHES = ["Fiction classics", "Philosophy", "Science", "History", "Self-help", "Mystery", "Fantasy", "Biography"];
 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Search, Music, X, Play, Square, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import MediaDetailSheet from "./MediaDetailSheet";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [

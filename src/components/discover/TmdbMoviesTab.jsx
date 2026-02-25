@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Search, X, Film, Tv, Star, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import MediaDetailSheet from "./MediaDetailSheet";
 
 // TMDb genre IDs
 const MOVIE_GENRES = [
