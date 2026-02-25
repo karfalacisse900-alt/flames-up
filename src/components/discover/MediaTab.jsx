@@ -628,25 +628,27 @@ export default function MediaTab({ user }) {
       </p>
 
       {/* Content */}
-      <div className="px-5 space-y-3">
-        {filtered.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-3xl mb-3">🎭</p>
-            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Nothing matches your filters</p>
-            <button onClick={() => { setSearch(""); setSelectedGenre("all"); setSelectedMood("all"); }}
-              className="mt-3 text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>Clear filters</button>
-          </div>
-        ) : isMusicView ? (
-          <MusicSection items={filtered} user={user} savedIds={savedIds} onSave={saveMut.mutate} onUnsave={unsaveMut.mutate} onSelect={setSelectedItem} />
-        ) : (
-          filtered.map(item => (
-            <MediaCard key={item.id} item={item} user={user} savedIds={savedIds}
-              onSave={user ? saveMut.mutate : () => {}}
-              onUnsave={user ? unsaveMut.mutate : () => {}}
-              onSelect={setSelectedItem} />
-          ))
-        )}
-      </div>
+      {isMusicView ? (
+        <SpotifyMusicTab user={user} />
+      ) : (
+        <div className="px-5 space-y-3">
+          {filtered.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-3xl mb-3">🎭</p>
+              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Nothing matches your filters</p>
+              <button onClick={() => { setSearch(""); setSelectedGenre("all"); setSelectedMood("all"); }}
+                className="mt-3 text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>Clear filters</button>
+            </div>
+          ) : (
+            filtered.map(item => (
+              <MediaCard key={item.id} item={item} user={user} savedIds={savedIds}
+                onSave={user ? saveMut.mutate : () => {}}
+                onUnsave={user ? unsaveMut.mutate : () => {}}
+                onSelect={setSelectedItem} />
+            ))
+          )}
+        </div>
+      )}
 
       {/* Legal footer */}
       <p className="text-[10px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
