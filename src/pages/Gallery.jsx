@@ -256,7 +256,6 @@ export default function Gallery() {
           <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#3C6E5A", borderTopColor: "transparent" }} />
         </div>
       ) : sorted.length === 0 ? (
-
         <div className="text-center py-20">
           <p className="text-5xl mb-3">🎨</p>
           <p className="text-sm mb-4" style={{ color: "#6B6B6B" }}>No artworks yet. Be the first!</p>
