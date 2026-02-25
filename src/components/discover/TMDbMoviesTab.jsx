@@ -103,9 +103,9 @@ function MovieCard({ item }) {
   );
 }
 
-export default function TMDbMoviesTab() {
+export default function TMDbMoviesTab({ defaultType = "multi" }) {
   const [query, setQuery] = useState("");
-  const [type, setType] = useState("multi");
+  const [type, setType] = useState(defaultType);
   const [genre, setGenre] = useState("All");
   const [results, setResults] = useState(null);
   const [trending, setTrending] = useState([]);
