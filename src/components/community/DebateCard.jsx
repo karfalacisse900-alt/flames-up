@@ -70,7 +70,11 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
   };
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+    >
       <div className="flex gap-3 px-4 py-4">
         <div className="shrink-0 flex flex-col items-center">
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
