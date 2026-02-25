@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Mic, Square, Play, Pause, ImageIcon, Smile, Search, X } from "lucide-react";
 import { checkContent, createModerationReport } from "../components/moderation/moderationHelper";
 import { requireVerified } from "../components/auth/EmailVerificationGate";
+import GifCard from "../components/feed/GifCard";
+import ImageCard from "../components/feed/ImageCard";
 
 const avatarColors = ["#7C69C4", "#D98B62", "#3C6E5A", "#E05C7A", "#4A7FC1", "#B07843"];
 const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColors.length];
@@ -237,19 +239,11 @@ function CommentItem({ reply }) {
         {reply.type === "voice" ? (
           <VoicePlayer audioUrl={reply.audio_url} />
         ) : reply.type === "image" ? (
-          <div className="rounded-2xl mt-1 overflow-hidden" style={{ maxHeight: 240, maxWidth: "100%", aspectRatio: "1/1" }}>
-            <img src={reply.image_url} alt="" loading="lazy"
-              className="w-full h-full object-cover"
-              style={{ display: "block" }} />
-          </div>
+          <ImageCard src={reply.image_url} alt="comment" maxHeight={240} aspectRatio="1/1" />
         ) : reply.type === "sticker" ? (
           <span className="text-4xl">{reply.body}</span>
         ) : reply.type === "gif" ? (
-          <div className="rounded-2xl mt-1 overflow-hidden" style={{ maxHeight: 200, maxWidth: "100%", aspectRatio: "16/9" }}>
-            <img src={reply.gif_url} alt="gif" loading="lazy"
-              className="w-full h-full object-cover"
-              style={{ display: "block" }} />
-          </div>
+          <GifCard src={reply.gif_url} alt="GIF" maxHeight={200} />
         ) : (
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{reply.body}</p>
         )}
