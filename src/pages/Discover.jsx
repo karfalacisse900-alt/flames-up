@@ -233,23 +233,25 @@ export default function Discover() {
       <div className="px-4 pt-3 pb-3" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-          <div className="flex items-center gap-2 shrink-0">
-  
-            {contentTab === "apps" && (
-              <>
-                <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs"
-                  style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)", borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)", color: compareMode ? "#fff" : "var(--text-secondary)" }}>
-                  Compare
-                </button>
-                <button onClick={() => { setViewMode(viewMode === "list" ? "swipe" : "list"); setSwipeIndex(0); }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                  {viewMode === "list" ? <><Layers className="w-3.5 h-3.5" /> Swipe</> : <><List className="w-3.5 h-3.5" /> List</>}
-                </button>
-              </>
-            )}
-          </div>
+          {contentTab === "apps" && (
+            <div className="flex items-center gap-1 p-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+              <button onClick={() => { setViewMode("list"); setSwipeIndex(0); }}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={{ backgroundColor: viewMode === "list" ? "var(--bg-card)" : "transparent", color: viewMode === "list" ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                List
+              </button>
+              <button onClick={() => { setViewMode("swipe"); setSwipeIndex(0); }}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={{ backgroundColor: viewMode === "swipe" ? "var(--bg-card)" : "transparent", color: viewMode === "swipe" ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                Swipe
+              </button>
+              <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "transparent", color: compareMode ? "#fff" : "var(--text-hint)" }}>
+                Compare
+              </button>
+            </div>
+          )}
         </div>
         {/* Content type tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
