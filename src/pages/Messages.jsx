@@ -102,8 +102,17 @@ function ChatView({ user, conversation, onBack }) {
   const { data: messages = [] } = useQuery({
     queryKey: ["dm", convId],
     queryFn: () => base44.entities.DirectMessage.filter({ conversation_id: convId }, "created_date", 100),
-    refetchInterval: 3000,
+    refetchInterval: 2000,
   });
+
+  // Mark unread messages as read
+  useEffect(() => {
+    messages
+      .filter((m) => m.receiver_email === user.email && !m.is_read)
+      .forEach(async (m) => {
+        await base44.entities.DirectMessage.update(m.id, { is_read: true });
+      });
+  }, [messages, user.email]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
