@@ -55,24 +55,30 @@ export default function Live() {
   const handleCreateRoom = async () => {
     if (!title.trim()) return;
     setCreating(true);
-    const room = await base44.entities.LiveRoom.create({
-      title: title.trim(),
-      category,
-      host_email: user?.email || "",
-      host_name: user?.full_name || "Host",
-      is_active: true,
-      viewer_count: 0,
-      viewers: [],
-      entry_price: Number(entryPrice) || 0,
-      top_supporters: [],
-      total_gifts_received: 0,
-    });
-    setTitle("");
-    setEntryPrice(0);
-    setShowCreate(false);
-    setCreating(false);
-    queryClient.invalidateQueries({ queryKey: ["liveRooms"] });
-    window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
+    try {
+      const room = await base44.entities.LiveRoom.create({
+        title: title.trim(),
+        category,
+        host_email: user?.email || "",
+        host_name: user?.full_name || "Host",
+        is_active: true,
+        viewer_count: 0,
+        viewers: [],
+        entry_price: Number(entryPrice) || 0,
+        top_supporters: [],
+        total_gifts_received: 0,
+      });
+      setTitle("");
+      setEntryPrice(0);
+      setShowCreate(false);
+      queryClient.invalidateQueries({ queryKey: ["liveRooms"] });
+      window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
+    } catch (err) {
+      console.error("Create room error:", err);
+      alert("Failed to create room. Please try again.");
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleEnterRoom = async (room) => {
@@ -82,16 +88,21 @@ export default function Live() {
     }
     // Paid room — charge coins
     setEnteringRoom(room.id);
-    const bal = await getBalance(user.email);
-    if (bal < room.entry_price) {
-      alert(`You need ⬡${room.entry_price} coins to enter this room. You have ⬡${bal}.`);
+    try {
+      const bal = await getBalance(user.email);
+      if (bal < room.entry_price) {
+        alert(`You need ⬡${room.entry_price} coins to enter this room. You have ⬡${bal}.`);
+        return;
+      }
+      await addCoins(user.email, -room.entry_price, "gift_sent", `Entry fee for "${room.title}"`, room.id);
+      await addCoins(room.host_email, room.entry_price, "gift_received", `Entry fee from ${user.full_name || user.email}`, room.id);
+      window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
+    } catch (err) {
+      console.error("Enter room error:", err);
+      alert("Failed to enter room. Please try again.");
+    } finally {
       setEnteringRoom(null);
-      return;
     }
-    await addCoins(user.email, -room.entry_price, "gift_sent", `Entry fee for "${room.title}"`, room.id);
-    await addCoins(room.host_email, room.entry_price, "gift_received", `Entry fee from ${user.full_name || user.email}`, room.id);
-    setEnteringRoom(null);
-    window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
   };
 
   return (

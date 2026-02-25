@@ -45,10 +45,15 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
     }),
     onSuccess: async () => {
       setCommentText("");
-      await base44.entities.Artwork.update(artwork.id, { comment_count: (artwork.comment_count || 0) + 1 });
+      try {
+        await base44.entities.Artwork.update(artwork.id, { comment_count: (artwork.comment_count || 0) + 1 });
+      } catch (err) {
+        console.error("Update count error:", err);
+      }
       qc.invalidateQueries({ queryKey: ["artComments", artwork.id] });
       qc.invalidateQueries({ queryKey: ["artworks"] });
     },
+    onError: (err) => console.error("Comment error:", err),
   });
 
   return (
@@ -192,15 +197,19 @@ export default function Gallery() {
   const handleLike = async (art) => {
     if (!user?.email) return;
     if (art.liked_by?.includes(user.email)) return;
-    const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
-    if (art._type === "ArtPiece") {
-      await base44.entities.ArtPiece.update(art._raw_id, updated);
-      qc.invalidateQueries({ queryKey: ["artPieces"] });
-    } else {
-      await base44.entities.Artwork.update(art.id, updated);
-      qc.invalidateQueries({ queryKey: ["artworks"] });
+    try {
+      const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
+      if (art._type === "ArtPiece") {
+        await base44.entities.ArtPiece.update(art._raw_id, updated);
+        qc.invalidateQueries({ queryKey: ["artPieces"] });
+      } else {
+        await base44.entities.Artwork.update(art.id, updated);
+        qc.invalidateQueries({ queryKey: ["artworks"] });
+      }
+      if (selected?.id === art.id) setSelected({ ...selected, ...updated });
+    } catch (err) {
+      console.error("Like error:", err);
     }
-    if (selected?.id === art.id) setSelected({ ...selected, ...updated });
   };
 
   return (
