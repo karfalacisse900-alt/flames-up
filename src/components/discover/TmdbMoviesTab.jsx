@@ -131,7 +131,7 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
 
   const genres = tab === "movie" ? MOVIE_GENRES : TV_GENRES;
 
-  const fetchContent = async ({ q, gid, type, trending } = {}) => {
+  const fetchContent = async ({ q, gid, type, trending, sort } = {}) => {
     setLoading(true);
     setError(null);
     try {
@@ -139,7 +139,8 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
         query: q || undefined,
         type: type || tab,
         genre_id: gid || undefined,
-        trending: trending || (!q && !gid),
+        trending: trending || (!q && !gid && !sort),
+        sort_by: sort || (q || gid ? undefined : sortBy),
         page: 1,
       });
       setResults(res.data?.results || []);
@@ -149,12 +150,19 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     setLoading(false);
   };
 
+  const SORT_OPTIONS = [
+    { key: "popularity", label: "🔥 Popular" },
+    { key: "vote_average", label: "⭐ Top Rated" },
+    { key: "release_date_desc", label: "📅 Newest" },
+    { key: "release_date_asc", label: "📅 Oldest" },
+  ];
+
   // Load trending on mount + tab change
   useEffect(() => {
     setGenre(null);
     setQuery("");
     setIsSearch(false);
-    fetchContent({ type: tab, trending: true });
+    fetchContent({ type: tab, sort: sortBy });
   }, [tab]);
 
   const handleSearch = (e) => {
@@ -172,8 +180,16 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     if (g.id) {
       fetchContent({ gid: g.id });
     } else {
-      fetchContent({ trending: true });
+      fetchContent({ sort: sortBy });
     }
+  };
+
+  const handleSort = (key) => {
+    setSortBy(key);
+    setQuery("");
+    setIsSearch(false);
+    setGenre(null);
+    fetchContent({ sort: key });
   };
 
   const clearSearch = () => {
@@ -209,6 +225,23 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
             {t.label}
           </button>
         ))}
+      </div>
+
+      {/* Sort options */}
+      <div className="px-5 mb-2 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 w-max pb-1">
+          {SORT_OPTIONS.map(s => (
+            <button key={s.key} onClick={() => handleSort(s.key)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
+              style={{
+                backgroundColor: sortBy === s.key && !isSearch ? "var(--accent-primary)" : "var(--bg-card)",
+                color: sortBy === s.key && !isSearch ? "#fff" : "var(--text-secondary)",
+                borderColor: sortBy === s.key && !isSearch ? "var(--accent-primary)" : "var(--border-light)",
+              }}>
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Genre chips */}
