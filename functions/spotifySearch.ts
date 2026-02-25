@@ -48,9 +48,11 @@ Deno.serve(async (req) => {
         album: t.album?.name,
         cover_url: t.album?.images?.[0]?.url,
         spotify_url: t.external_urls?.spotify,
+        album_url: t.album?.external_urls?.spotify,
         duration_ms: t.duration_ms,
         preview_url: t.preview_url,
         release_year: t.album?.release_date?.split("-")[0],
+        release_date: t.album?.release_date,
       })) || [],
 
       artists: data.artists?.items?.map(a => ({
