@@ -70,145 +70,132 @@ export default function CommunityPostCard({ post, user, onUpvote, onDownvote, is
     setReported(true);
   };
 
+  const initials = post.is_anonymous ? "?" : (post.author_name?.[0] || "U").toUpperCase();
+  const avatarColors = ["#7C69C4","#D98B62","#3C6E5A","#E05C7A","#4A7FC1","#B07843"];
+  const avatarColor = avatarColors[(post.author_name || "").charCodeAt(0) % avatarColors.length] || avatarColors[0];
+
   return (
-    <div className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: "#FDFAF3", border: "1px solid #EDE0C8", boxShadow: "0 2px 10px rgba(139,105,20,0.06)" }}>
-
-      {/* Top accent stripe */}
-      <div className="h-[3px]" style={{ background: `linear-gradient(90deg, ${cfg.color}90, ${cfg.color}20)` }} />
-
-      <div className="p-4">
-        {/* Header row */}
-        <div className="flex items-center gap-2 mb-2.5">
-          {/* Type badge */}
-          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide"
-            style={{ backgroundColor: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}30` }}>
-            {cfg.emoji} {cfg.label}
-          </span>
-
-          <div className="ml-auto flex items-center gap-1.5">
-            <span className="text-[11px] font-medium" style={{ color: "#A08060" }}>
-              {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
-            </span>
-            {!post.is_anonymous && post.author_email && (
-              <MuteBlockMenu
-                targetEmail={post.author_email}
-                targetName={post.author_name}
-                user={user}
-                onReport={handleReport}
-              />
-            )}
+    <div style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+      <div className="px-4 py-3.5">
+        {/* Avatar + author + type */}
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 mt-0.5"
+            style={{ backgroundColor: `${avatarColor}22`, color: avatarColor, border: `1.5px solid ${avatarColor}44` }}>
+            {initials}
           </div>
-        </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: cfg.bg, color: cfg.color }}>
+                {cfg.emoji} {cfg.label}
+              </span>
+            </div>
 
-        {/* Title */}
-        {post.title && (
-          <p className="font-bold text-[15px] mb-1.5 leading-snug" style={{ color: "#2C1A00", fontFamily: "var(--font-serif)" }}>
-            {post.title}
-          </p>
-        )}
+            {/* Title */}
+            {post.title && (
+              <p className="font-bold text-[15px] mt-1.5 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {post.title}
+              </p>
+            )}
 
-        {/* Body */}
-        <p className="text-sm leading-relaxed" style={{ color: "#4A3520", fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)" }}>
-          {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
-        </p>
+            {/* Body */}
+            <p className="text-sm leading-relaxed mt-1" style={{ color: "var(--text-secondary)", fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)" }}>
+              {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
+            </p>
 
-        {/* List items */}
-        {post.type === "list" && post.list_items?.length > 0 && (
-          <ol className="mt-2.5 space-y-1.5">
-            {post.list_items.map((item, i) => (
-              <li key={i} className="text-sm flex gap-2 items-start">
-                <span className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
-                  style={{ backgroundColor: cfg.bg, color: cfg.color }}>
-                  {i + 1}
-                </span>
-                <span style={{ color: "#4A3520" }}>{item}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {/* Voting + comment row */}
-        <div className="flex items-center gap-2 mt-3.5 pt-3" style={{ borderTop: "1px solid #EDE0C8" }}>
-          <button onClick={onUpvote} disabled={hasUpvoted}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-90"
-            style={{
-              backgroundColor: hasUpvoted ? "#B07843" : "#F5EDDB",
-              color: hasUpvoted ? "#fff" : "#8B6914",
-              border: `1px solid ${hasUpvoted ? "#B07843" : "#DDD0B0"}`,
-            }}>
-            ▲ {post.upvotes || 0}
-          </button>
-
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: score >= 0 ? "#EEF7F2" : "#FFF0F0", color: score >= 0 ? "#3C6E5A" : "#C86B6B" }}>
-            {score > 0 ? `+${score}` : score}
-          </span>
-
-          <button onClick={onDownvote} disabled={hasDownvoted}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-90"
-            style={{
-              backgroundColor: hasDownvoted ? "#C86B6B22" : "#F5EDDB",
-              color: hasDownvoted ? "#C86B6B" : "#A08060",
-              border: `1px solid ${hasDownvoted ? "#C86B6B55" : "#DDD0B0"}`,
-            }}>
-            ▼ {post.downvotes || 0}
-          </button>
-
-          <button onClick={onToggle}
-            className="ml-auto flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-all active:scale-90"
-            style={{ backgroundColor: isExpanded ? "#E8D8BE" : "#F5EDDB", color: "#8B6914", border: "1px solid #DDD0B0" }}>
-            💬 {post.comment_count || 0}
-            <ChevronDown className="w-3.5 h-3.5 transition-transform" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
-          </button>
-        </div>
-
-        {/* Comments section */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22 }} className="overflow-hidden">
-              <div className="pt-3 space-y-2.5 mt-2" style={{ borderTop: "1px solid #EDE0C8" }}>
-                {comments.length === 0 && (
-                  <p className="text-center text-xs py-3" style={{ color: "#A08060" }}>No comments yet — be first!</p>
-                )}
-                {comments.map(c => (
-                  <div key={c.id} className="flex gap-2">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{ backgroundColor: "#EDE0C8", color: "#8B6914" }}>
-                      {(c.is_anonymous ? "A" : (c.author_name?.[0] || "U")).toUpperCase()}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[11px] font-semibold mb-0.5" style={{ color: "#A08060" }}>
-                        {c.is_anonymous ? "Anonymous" : c.author_name}
-                      </p>
-                      <p className="text-xs leading-relaxed" style={{ color: "#4A3520" }}>{c.body}</p>
-                    </div>
-                  </div>
+            {/* List items */}
+            {post.type === "list" && post.list_items?.length > 0 && (
+              <ol className="mt-2 space-y-1">
+                {post.list_items.map((item, i) => (
+                  <li key={i} className="text-sm flex gap-2 items-start">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
+                      style={{ backgroundColor: cfg.bg, color: cfg.color }}>{i + 1}</span>
+                    <span style={{ color: "var(--text-secondary)" }}>{item}</span>
+                  </li>
                 ))}
+              </ol>
+            )}
 
-                {user && (
-                  <div className="flex gap-2 pt-1">
-                    <input
-                      value={commentText}
-                      onChange={e => setCommentText(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
-                      placeholder="Add a comment..."
-                      className="flex-1 text-xs px-3 py-2 rounded-xl outline-none"
-                      style={{ backgroundColor: "#F5EDDB", border: "1px solid #DDD0B0", color: "#2C1A00" }}
-                    />
-                    <button onClick={() => commentText.trim() && commentMut.mutate()}
-                      disabled={commentMut.isPending}
-                      className="p-2 rounded-xl transition-all active:scale-90"
-                      style={{ backgroundColor: "#B07843", color: "#fff" }}>
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+            {/* Action row */}
+            <div className="flex items-center gap-3 mt-3">
+              <button onClick={onUpvote} disabled={hasUpvoted}
+                className="flex items-center gap-1 text-xs font-semibold transition-all active:scale-90"
+                style={{ color: hasUpvoted ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                ▲ <span>{post.upvotes || 0}</span>
+              </button>
+
+              <span className="text-xs font-bold" style={{ color: score >= 0 ? "var(--accent-primary)" : "#C86B6B" }}>
+                {score > 0 ? `+${score}` : score}
+              </span>
+
+              <button onClick={onDownvote} disabled={hasDownvoted}
+                className="flex items-center gap-1 text-xs font-semibold transition-all active:scale-90"
+                style={{ color: hasDownvoted ? "#C86B6B" : "var(--text-hint)" }}>
+                ▼ <span>{post.downvotes || 0}</span>
+              </button>
+
+              <button onClick={onToggle}
+                className="flex items-center gap-1 text-xs font-medium transition-all active:scale-90 ml-1"
+                style={{ color: isExpanded ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                💬 {post.comment_count || 0}
+                <ChevronDown className="w-3 h-3 transition-transform" style={{ transform: isExpanded ? "rotate(180deg)" : "none" }} />
+              </button>
+
+              <div className="ml-auto">
+                {!post.is_anonymous && post.author_email && (
+                  <MuteBlockMenu targetEmail={post.author_email} targetName={post.author_name} user={user} onReport={handleReport} />
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+
+            {/* Comments */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.22 }} className="overflow-hidden">
+                  <div className="pt-3 space-y-3 mt-1">
+                    {comments.length === 0 && (
+                      <p className="text-xs py-1" style={{ color: "var(--text-hint)" }}>No comments yet — be first!</p>
+                    )}
+                    {comments.map(c => (
+                      <div key={c.id} className="flex gap-2">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                          {(c.is_anonymous ? "A" : (c.author_name?.[0] || "U")).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-[11px] font-semibold mr-1.5" style={{ color: "var(--text-secondary)" }}>
+                            {c.is_anonymous ? "Anonymous" : c.author_name}
+                          </span>
+                          <span className="text-xs leading-relaxed" style={{ color: "var(--text-primary)" }}>{c.body}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {user && (
+                      <div className="flex gap-2 pt-1">
+                        <input value={commentText} onChange={e => setCommentText(e.target.value)}
+                          onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
+                          placeholder="Add a comment..."
+                          className="flex-1 text-xs px-3 py-2 rounded-xl outline-none"
+                          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+                        />
+                        <button onClick={() => commentText.trim() && commentMut.mutate()}
+                          disabled={commentMut.isPending}
+                          className="p-2 rounded-xl transition-all active:scale-90"
+                          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+                          <Send className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
