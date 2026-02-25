@@ -144,12 +144,12 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
               {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
             </button>
 
-            <button onClick={() => setShowComments(true)}
+            <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
               className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all active:scale-90"
               style={{ color: "var(--text-hint)" }}>
               <MessageCircle className="w-4 h-4" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
-            </button>
+            </Link>
 
             <button onClick={handleShare}
               className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all active:scale-90"
