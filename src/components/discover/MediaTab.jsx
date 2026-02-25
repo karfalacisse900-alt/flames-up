@@ -625,13 +625,17 @@ export default function MediaTab({ user }) {
       )}
 
       {/* Results count */}
-      <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
-        {isMusicView ? "Organized by genre" : `${filtered.length} item${filtered.length !== 1 ? "s" : ""}`}
-      </p>
+      {!isMusicView && !isBookView && (
+        <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
+          {`${filtered.length} item${filtered.length !== 1 ? "s" : ""}`}
+        </p>
+      )}
 
       {/* Content */}
       {isMusicView ? (
         <SpotifyMusicTab user={user} />
+      ) : isBookView ? (
+        <OpenLibraryBooksTab />
       ) : (
         <div className="px-5 space-y-3">
           {filtered.length === 0 ? (
