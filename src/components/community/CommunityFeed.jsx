@@ -210,10 +210,11 @@ export default function CommunityFeed({ user }) {
             className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
             <Smile className="w-4 h-4" />
           </button>
-          <button onClick={() => { setViewMode("swipe"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
-            className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
-            <Layers className="w-4 h-4" />
-          </button>
+          <motion.button whileTap={{ scale: 0.85 }}
+          onClick={() => { setViewMode("swipe"); window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } })); }}
+          className="p-2 rounded-full chip" style={{ color: "var(--accent-primary)" }}>
+          <Layers className="w-4 h-4" />
+        </motion.button>
         </div>
       )}
 
