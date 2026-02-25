@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { MessageCircle, Share2, Bookmark } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import MuteBlockMenu from "./MuteBlockMenu";
 import CommentModal from "./CommentModal";
 
