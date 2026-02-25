@@ -65,10 +65,14 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       <div className="flex gap-3 px-4 py-3.5">
         {/* Avatar */}
         <div className="shrink-0">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-            style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
-            {initials}
-          </div>
+          {post.author_avatar_url ? (
+            <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover" />
+          ) : (
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
+              style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
+              {initials}
+            </div>
+          )}
         </div>
 
         {/* Content */}

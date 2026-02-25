@@ -9,9 +9,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const query = searchParams.get('q') || '';
-    const limit = searchParams.get('limit') || '20';
+    // Parse payload from POST body
+    let payload = {};
+    if (req.method === 'POST') {
+      try {
+        payload = await req.json();
+      } catch (_) {}
+    }
+
+    const query = payload.q || '';
+    const limit = payload.limit || '20';
 
     if (!query.trim()) {
       return Response.json({ data: [], pagination: { count: 0 } });
