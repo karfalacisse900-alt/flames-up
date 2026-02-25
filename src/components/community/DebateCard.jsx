@@ -158,9 +158,6 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
             </button>
           </div>
 
-          <AnimatePresence>
-            {showComments && <CommentModal post={post} debate={debate} user={user} onClose={() => setShowComments(false)} />}
-          </AnimatePresence>
         </div>
       </div>
 
