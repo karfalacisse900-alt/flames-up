@@ -2,10 +2,23 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Send } from "lucide-react";
+import { ChevronDown, Send, MessageCircle, Share2, Bookmark, MoreHorizontal } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
+
+const REACTIONS = ["👍","❤️","🔥","😂","😮","👏"];
+
+function timeAgo(dateStr) {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
 
 const TYPE_CONFIG = {
   opinion:         { label: "Opinion",     emoji: "💬", color: "#8B6914", bg: "#FBF5E6" },
