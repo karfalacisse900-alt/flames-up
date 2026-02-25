@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Share2, Bookmark } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
-import CommentModal from "./CommentModal";
+import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
 
 const REACTIONS = ["❤️", "🔥", "😂", "😮", "👏", "💯"];
 
