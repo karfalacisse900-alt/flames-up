@@ -215,3 +215,20 @@ button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-pri
 [data-radix-select-item][data-highlighted] {
   background-color: var(--accent-primary-light) !important;
 }
+
+/* FORCE THEME OVERRIDE */
+html, body, #root {
+  background-color: #F2EDE4 !important;
+}
+
+.bg-\[var\(--bg-app\)\],
+[style*="--bg-app"] {
+  background-color: #F2EDE4 !important;
+}
+
+/* Force all page wrappers to beige */
+#root > div,
+#root > main,
+#root > section {
+  background-color: #F2EDE4 !important;
+}
