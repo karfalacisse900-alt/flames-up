@@ -174,12 +174,12 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </div>
 
             {/* Comment */}
-            <button onClick={() => setShowComments(true)}
+            <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
               className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip"
               style={{ color: "var(--text-hint)" }}>
               <MessageCircle className="w-4 h-4" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
-            </button>
+            </Link>
 
             {/* Share */}
             <button onClick={handleShare}
