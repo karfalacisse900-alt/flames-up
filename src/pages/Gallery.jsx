@@ -207,7 +207,7 @@ export default function Gallery() {
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Gallery</h1>
           <button onClick={() => navigate(createPageUrl("ArtStudio"))}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: "#3C6E5A", color: "#E6EFEA" }}>
+            style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
             🎨 Create
           </button>
         </div>
