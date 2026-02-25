@@ -23,7 +23,6 @@ const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avat
 
 export default function DebateCard({ post, debate, user, onUpvote }) {
   const qc = useQueryClient();
-  const [showComments, setShowComments] = useState(false);
   const [saved, setSaved] = useState(false);
   const [reported, setReported] = useState(false);
 
