@@ -65,12 +65,12 @@ import LiveRoomView from './pages/LiveRoomView';
 import Messages from './pages/Messages';
 import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
+import PostComments from './pages/PostComments';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import Wallet from './pages/Wallet';
-import PostComments from './pages/PostComments';
 import __Layout from './Layout.jsx';
 
 
@@ -93,12 +93,12 @@ export const PAGES = {
     "Messages": Messages,
     "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
+    "PostComments": PostComments,
     "PostDetail": PostDetail,
     "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
     "Wallet": Wallet,
-    "PostComments": PostComments,
 }
 
 export const pagesConfig = {

@@ -134,13 +134,8 @@ function GifPicker({ onSelect, onClose }) {
   const fetchGifs = async (query) => {
     setLoading(true);
     try {
-      const key = "dc6zaTOxFJmzC";
-      const endpoint = query === "trending"
-        ? `https://api.giphy.com/v1/gifs/trending?api_key=${key}&limit=24&rating=g`
-        : `https://api.giphy.com/v1/gifs/search?api_key=${key}&q=${encodeURIComponent(query)}&limit=24&rating=g`;
-      const res = await fetch(endpoint);
-      const data = await res.json();
-      setGifs(data.data || []);
+      const res = await base44.functions.invoke('giphySearch', { q: query, limit: '24' });
+      setGifs(res.data?.data || []);
     } catch (_) {}
     setLoading(false);
   };
@@ -183,9 +178,9 @@ function GifPicker({ onSelect, onClose }) {
           <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-1.5 px-4 pb-4 content-start">
             {gifs.map(g => (
               <img key={g.id}
-                src={g.images?.fixed_height_small?.url}
+                src={g.preview || g.url}
                 alt={g.title}
-                onClick={() => { onSelect(g.images?.downsized?.url || g.images?.fixed_height?.url); onClose(); }}
+                onClick={() => { onSelect(g.url); onClose(); }}
                 className="w-full rounded-xl cursor-pointer object-cover"
                 style={{ height: 90 }}
               />
