@@ -257,17 +257,17 @@ export default function MediaDetailSheet({ item, onClose }) {
 
   // Determine which detail view to render
   const renderContent = () => {
-    // Spotify enriched track (has spotify_url or preview_url)
-    if (item.spotify_url || item.preview_url || (item.media_type === "music" && item.artist)) {
+    // TMDb item (has tmdb_url or poster_url) — check BEFORE music so movie/show items aren't misidentified
+    if (item.tmdb_url || item.poster_url) {
+      return <MovieDetail item={item} />;
+    }
+    // Spotify track (has spotify_url, preview_url, or artist field from our spotify enrichment)
+    if (item.spotify_url || item.preview_url || item.media_type === "music" || item.artist) {
       return <MusicDetail item={item} />;
     }
     // Open Library book (has ol_url)
     if (item.ol_url) {
       return <BookDetail item={item} />;
-    }
-    // TMDb item (has tmdb_url or poster_url)
-    if (item.tmdb_url || item.poster_url) {
-      return <MovieDetail item={item} />;
     }
     // Static catalogue item
     return <StaticMediaDetail item={item} />;
