@@ -61,10 +61,15 @@ function VoicePlayer({ audioUrl }) {
         style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
         {playing ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
       </button>
-      <div className="flex-1 h-1.5 rounded-full overflow-hidden cursor-pointer" style={{ backgroundColor: "var(--border-light)" }}>
-        <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: "var(--accent-primary)" }} />
+      <div className="flex-1 h-1.5 rounded-full overflow-hidden cursor-pointer" style={{ backgroundColor: "var(--border-light)" }} onClick={(e) => {
+      if (!audioRef.current) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audioRef.current.currentTime = pct * audioRef.current.duration;
+      }}>
+      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: "var(--accent-primary)" }} />
       </div>
-      {duration > 0 && <span className="text-xs shrink-0" style={{ color: "var(--text-hint)" }}>{fmt(duration)}</span>}
+      {duration > 0 && <span className="text-xs shrink-0 font-mono" style={{ color: "var(--text-hint)" }}>{fmt(duration)}</span>}
     </div>
   );
 }
@@ -232,15 +237,19 @@ function CommentItem({ reply }) {
         {reply.type === "voice" ? (
           <VoicePlayer audioUrl={reply.audio_url} />
         ) : reply.type === "image" ? (
-          <img src={reply.image_url} alt="" loading="lazy"
-            className="rounded-2xl mt-1 object-cover"
-            style={{ maxHeight: 200, maxWidth: "100%" }} />
+          <div className="rounded-2xl mt-1 overflow-hidden" style={{ maxHeight: 240, maxWidth: "100%", aspectRatio: "1/1" }}>
+            <img src={reply.image_url} alt="" loading="lazy"
+              className="w-full h-full object-cover"
+              style={{ display: "block" }} />
+          </div>
         ) : reply.type === "sticker" ? (
           <span className="text-4xl">{reply.body}</span>
         ) : reply.type === "gif" ? (
-          <img src={reply.gif_url} alt="gif" loading="lazy"
-            className="rounded-2xl mt-1 object-cover"
-            style={{ maxHeight: 180, maxWidth: "100%" }} />
+          <div className="rounded-2xl mt-1 overflow-hidden" style={{ maxHeight: 200, maxWidth: "100%", aspectRatio: "16/9" }}>
+            <img src={reply.gif_url} alt="gif" loading="lazy"
+              className="w-full h-full object-cover"
+              style={{ display: "block" }} />
+          </div>
         ) : (
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{reply.body}</p>
         )}
