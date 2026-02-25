@@ -10,6 +10,7 @@ import CreatePostModal from "../components/home/CreatePostModal";
 import { getFontStyle } from "../components/home/FontPicker";
 import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
+import TrendingCarousel from "../components/home/TrendingCarousel";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -21,6 +22,7 @@ export default function Home() {
   return (
     <div className="flex flex-col" style={{ height: "calc(100dvh - 64px)", backgroundColor: "var(--bg-app)" }}>
       <div className="h-full overflow-y-auto">
+        <TrendingCarousel />
         <CommunityFeed user={user} />
       </div>
       <WelcomePopup />
