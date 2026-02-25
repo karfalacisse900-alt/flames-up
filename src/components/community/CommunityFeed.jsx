@@ -16,14 +16,6 @@ const TABS = [
   { key: "following", label: "Following" },
 ];
 
-const FILTER_OPTIONS = [
-  { key: "all",       label: "✦ All" },
-  { key: "trending",  label: "🔥 Hot" },
-  { key: "questions", label: "❓ Q&A" },
-  { key: "debated",   label: "⚔️ Debates" },
-  { key: "quotes",    label: "✦ Quotes" },
-];
-
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
