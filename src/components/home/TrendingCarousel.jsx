@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Flame, MessageCircle, HelpCircle, Swords } from "lucide-react";
+import { Flame, MessageCircle, HelpCircle, Swords, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const TYPE_CONFIG = {
   question:   { icon: HelpCircle,     color: "#7C69C4", bg: "#F0EEF8", label: "Question" },
@@ -48,6 +50,12 @@ function TrendingCard({ post }) {
         {(post.comment_count || 0) > 0 && (
           <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>💬 {post.comment_count}</span>
         )}
+        <Link to={createPageUrl(`PostDetail?id=${post.id}`)}
+          className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+          style={{ backgroundColor: cfg.color, color: "#fff" }}
+          onClick={e => e.stopPropagation()}>
+          <Users className="w-3 h-3" /> Join
+        </Link>
       </div>
     </motion.div>
   );
