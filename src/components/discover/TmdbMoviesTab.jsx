@@ -156,12 +156,12 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     { key: "release_date_asc", label: "📅 Oldest" },
   ];
 
-  // Load trending on mount + tab change
+  // Load on mount + tab change
   useEffect(() => {
     setGenre(null);
     setQuery("");
     setIsSearch(false);
-    fetchContent({ type: tab, sort: sortBy });
+    fetchContent({ type: tab });
   }, [tab]);
 
   const handleSearch = (e) => {
@@ -176,15 +176,12 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     setGenre(g.id);
     setQuery("");
     setIsSearch(false);
-    if (g.id) {
-      fetchContent({ gid: g.id });
-    } else {
-      fetchContent({ sort: sortBy });
-    }
+    fetchContent({ gid: g.id || undefined });
   };
 
   const handleSort = (key) => {
     setSortBy(key);
+    sortByRef.current = key;
     setQuery("");
     setIsSearch(false);
     setGenre(null);
@@ -195,7 +192,7 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     setQuery("");
     setIsSearch(false);
     setGenre(null);
-    fetchContent({ trending: true });
+    fetchContent({});
   };
 
   return (
@@ -291,7 +288,7 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
       )}
 
       <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
-        {isSearch ? `${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"` : `Trending ${tab === "tv" ? "shows" : "movies"} this week`}
+        {isSearch ? `${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"` : `${results.length} ${tab === "tv" ? "shows" : "movies"}`}
       </p>
 
       {/* Results */}
