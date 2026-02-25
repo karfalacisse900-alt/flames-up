@@ -189,9 +189,6 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </button>
           </div>
 
-          <AnimatePresence>
-            {showComments && <CommentModal post={post} user={user} onClose={() => setShowComments(false)} />}
-          </AnimatePresence>
         </div>
       </div>
 
