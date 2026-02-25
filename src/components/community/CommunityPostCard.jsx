@@ -61,7 +61,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             style={{ backgroundColor: `${avatarColor}22`, color: avatarColor, border: `2px solid ${avatarColor}33` }}>
             {initials}
           </div>
-          {isExpanded && <div className="w-px flex-1 mt-2" style={{ backgroundColor: "var(--border-subtle)", minHeight: 20 }} />}
+
         </div>
 
         {/* Content */}
