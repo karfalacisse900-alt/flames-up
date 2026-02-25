@@ -171,7 +171,7 @@ export default function CommunityFeed({ user }) {
 
       {/* ====== LIST MODE ====== */}
       {viewMode === "list" && (
-        <div className="px-4 space-y-3 pb-24">
+        <div className="pb-24">
           {filteredPosts.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-4xl mb-3">💬</p>
