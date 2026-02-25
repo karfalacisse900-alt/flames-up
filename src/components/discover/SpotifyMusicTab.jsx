@@ -231,11 +231,17 @@ export default function SpotifyMusicTab() {
             const res = await base44.functions.invoke("spotifySearch", {
               query: `${song.title} ${song.artist}`, type: "track", limit: 1,
             });
+            if (res.data?.error) {
+              console.error("Spotify error:", res.data.error);
+              return;
+            }
             const track = res.data?.tracks?.[0];
             if (track && !cancelled) {
               setEnriched(prev => ({ ...prev, [key]: track }));
             }
-          } catch (_) { /* skip */ }
+          } catch (err) { 
+            console.error("Spotify fetch error:", err.message);
+          }
         }));
         await new Promise(r => setTimeout(r, 250));
       }
@@ -252,9 +258,17 @@ export default function SpotifyMusicTab() {
     setError(null);
     try {
       const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type: "track", limit: 20 });
-      setSearchResults(res.data?.tracks || []);
-    } catch {
-      setError("Search failed. Try again.");
+      if (res.data?.error) {
+        setError("Spotify API error. Please try again.");
+        console.error("Spotify error:", res.data.error);
+        setSearchResults([]);
+      } else {
+        setSearchResults(res.data?.tracks || []);
+      }
+    } catch (err) {
+      setError("Network error. Check your connection.");
+      console.error("Search error:", err);
+      setSearchResults([]);
     }
     setLoading(false);
   };
