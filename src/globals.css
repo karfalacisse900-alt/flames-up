@@ -87,6 +87,11 @@
   --sidebar-ring:                155 40% 30%;
 }
 
+html {
+  /* Prevent viewport resize on mobile keyboard open */
+  height: -webkit-fill-available;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: #F2EDE4 !important;
@@ -95,10 +100,20 @@ body {
   touch-action: pan-y;
   overscroll-behavior: none;
   overflow-x: hidden;
+  overflow-y: hidden;
+  /* Stable viewport on mobile */
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  /* Prevent text scaling on input focus (iOS zoom fix) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 #root {
   overflow-x: hidden;
+  overflow-y: hidden;
+  /* Prevent layout shift from scrollbars appearing */
+  scrollbar-gutter: stable;
 }
 
 * {
