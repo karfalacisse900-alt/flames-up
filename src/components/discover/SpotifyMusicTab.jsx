@@ -333,30 +333,21 @@ export default function SpotifyMusicTab() {
         </div>
       </div>
 
-      {/* Combined filter row: genre chips + sort dropdown */}
-      <div className="px-5 mb-3 flex items-center gap-2">
-        <div className="flex-1 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 w-max pb-1">
-            {GENRE_FILTERS.map(g => (
-              <button key={g} onClick={() => { setGenre(g); setSearchResults(null); setQuery(""); }}
-                className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
-                style={{
-                  backgroundColor: genre === g ? "#1DB954" : "var(--bg-card)",
-                  color: genre === g ? "#fff" : "var(--text-secondary)",
-                  borderColor: genre === g ? "#1DB954" : "var(--border-light)",
-                }}>
-                {g}
-              </button>
-            ))}
-          </div>
+      {/* Genre chips */}
+      <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 w-max pb-1">
+          {GENRE_FILTERS.slice(0, 8).map(g => (
+            <button key={g} onClick={() => { setGenre(g); setSearchResults(null); setQuery(""); }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
+              style={{
+                backgroundColor: genre === g ? "#1DB954" : "var(--bg-card)",
+                color: genre === g ? "#fff" : "var(--text-secondary)",
+                borderColor: genre === g ? "#1DB954" : "var(--border-light)",
+              }}>
+              {g}
+            </button>
+          ))}
         </div>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-          className="shrink-0 text-xs rounded-xl px-2 py-1.5 outline-none font-medium"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-secondary)", fontSize: 12 }}>
-          {SORT_OPTIONS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-        </select>
       </div>
 
       {/* Search bar */}

@@ -3,9 +3,7 @@ import { Search, BookOpen, X, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MediaDetailSheet from "./MediaDetailSheet";
 
-const QUICK_SEARCHES = ["Fiction classics", "Philosophy", "Science", "History", "Self-help", "Mystery", "Fantasy", "Biography"];
-
-const SUBJECTS = ["All Subjects", "Fiction", "History", "Science", "Philosophy", "Biography", "Fantasy", "Mystery", "Psychology", "Poetry", "Romance", "Thriller"];
+const QUICK_SEARCHES = ["Fiction", "History", "Science", "Mystery", "Fantasy", "Biography", "Philosophy", "Romance"];
 
 function BookCard({ book }) {
   const coverUrl = book.cover_i
@@ -78,25 +76,17 @@ function BookCard({ book }) {
 
 export default function OpenLibraryBooksTab() {
   const [query, setQuery] = useState("");
-  const [subject, setSubject] = useState("All Subjects");
   const [books, setBooks] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const doSearch = async (q, subj) => {
+  const doSearch = async (q) => {
     if (!q.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      let url = `https://openlibrary.org/search.json?limit=20&fields=key,title,author_name,first_publish_year,cover_i,subject,first_sentence`;
-      // Append subject filter if selected
-      const activeSubject = subj !== "All Subjects" ? subj : null;
-      if (activeSubject) {
-        url += `&q=${encodeURIComponent(q + " " + activeSubject)}`;
-      } else {
-        url += `&q=${encodeURIComponent(q)}`;
-      }
+      const url = `https://openlibrary.org/search.json?limit=20&fields=key,title,author_name,first_publish_year,cover_i,subject,first_sentence&q=${encodeURIComponent(q)}`;
       const res = await fetch(url);
       const data = await res.json();
       setBooks(data.docs || []);
@@ -108,46 +98,20 @@ export default function OpenLibraryBooksTab() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    doSearch(query, subject);
+    doSearch(query);
   };
 
   return (
     <div className="pb-10">
-      {/* Open Library branding header */}
-      <div className="px-5 pt-4 pb-3 flex items-center gap-2">
-        <span className="text-2xl">📚</span>
-        <div>
-          <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Open Library</p>
-          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Millions of free books to discover</p>
-        </div>
-      </div>
-
-      {/* Subject filter */}
-      <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 w-max pb-1">
-          {SUBJECTS.map(s => (
-            <button key={s} onClick={() => { setSubject(s); if (query) doSearch(query, s); }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: subject === s ? "var(--accent-primary)" : "var(--bg-card)",
-                color: subject === s ? "#fff" : "var(--text-secondary)",
-                borderColor: subject === s ? "var(--accent-primary)" : "var(--border-light)",
-              }}>
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Search bar */}
-      <form onSubmit={handleSearch} className="px-5 mb-3">
+      <form onSubmit={handleSearch} className="px-5 pt-3 mb-3">
         <div className="relative flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search by title or author..."
+              placeholder="Search books by title or author..."
               className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm outline-none"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
             />
@@ -165,12 +129,12 @@ export default function OpenLibraryBooksTab() {
         </div>
       </form>
 
-      {/* Quick search chips */}
+      {/* Quick chips */}
       {!books && (
         <div className="px-5 mb-4 overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 w-max pb-1">
             {QUICK_SEARCHES.map(q => (
-              <button key={q} onClick={() => { setQuery(q); doSearch(q, subject); }}
+              <button key={q} onClick={() => { setQuery(q); doSearch(q); }}
                 className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap"
                 style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                 {q}

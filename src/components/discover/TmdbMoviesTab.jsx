@@ -226,27 +226,10 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
         ))}
       </div>
 
-      {/* Sort options */}
-      <div className="px-5 mb-2 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 w-max pb-1">
-          {SORT_OPTIONS.map(s => (
-            <button key={s.key} onClick={() => handleSort(s.key)}
-              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: sortBy === s.key && !isSearch ? "var(--accent-primary)" : "var(--bg-card)",
-                color: sortBy === s.key && !isSearch ? "#fff" : "var(--text-secondary)",
-                borderColor: sortBy === s.key && !isSearch ? "var(--accent-primary)" : "var(--border-light)",
-              }}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Genre chips */}
+      {/* Genre chips only */}
       <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 w-max pb-1">
-          {genres.map(g => (
+          {genres.slice(0, 8).map(g => (
             <button key={g.label} onClick={() => handleGenre(g)}
               className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
               style={{

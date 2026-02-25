@@ -109,38 +109,26 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
 
           {debate && (
             <div className="mb-2">
-              {/* Slim progress bar */}
-              <div className="h-1 rounded-full overflow-hidden flex mb-1.5" style={{ backgroundColor: "var(--border-subtle)" }}>
-                <div style={{ width: `${pctA}%`, backgroundColor: "#3C6E5A" }} />
-                <div style={{ width: `${pctB}%`, backgroundColor: "#D98B62" }} />
-              </div>
-              {/* Inline vote buttons */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => user && !hasVoted && voteDebateMut.mutate("a")}
                   disabled={hasVoted}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border"
-                  style={{
-                    backgroundColor: hasVotedA ? "#3C6E5A15" : "transparent",
-                    color: hasVotedA ? "#3C6E5A" : "var(--text-secondary)",
-                    borderColor: hasVotedA ? "#3C6E5A" : "var(--border-light)",
-                  }}>
-                  {debate.side_a_label} <span style={{ color: "#3C6E5A", fontWeight: 700 }}>{pctA}%</span>
+                  className="flex-1 flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: hasVotedA ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: hasVotedA ? 700 : 400 }}>
+                  <span className="truncate">{debate.side_a_label}</span>
+                  <span className="shrink-0 ml-1 font-bold">{pctA}%</span>
                 </button>
-                <span className="text-xs" style={{ color: "var(--text-hint)" }}>vs</span>
+                <span className="text-[10px] shrink-0" style={{ color: "var(--text-hint)" }}>vs</span>
                 <button
                   onClick={() => user && !hasVoted && voteDebateMut.mutate("b")}
                   disabled={hasVoted}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 border"
-                  style={{
-                    backgroundColor: hasVotedB ? "#D98B6215" : "transparent",
-                    color: hasVotedB ? "#D98B62" : "var(--text-secondary)",
-                    borderColor: hasVotedB ? "#D98B62" : "var(--border-light)",
-                  }}>
-                  {debate.side_b_label} <span style={{ color: "#D98B62", fontWeight: 700 }}>{pctB}%</span>
+                  className="flex-1 flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: hasVotedB ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: hasVotedB ? 700 : 400 }}>
+                  <span className="truncate">{debate.side_b_label}</span>
+                  <span className="shrink-0 ml-1 font-bold">{pctB}%</span>
                 </button>
-                <span className="ml-auto text-[10px]" style={{ color: "var(--text-hint)" }}>{totalVotes} votes</span>
               </div>
+              {totalVotes > 0 && <p className="text-[10px] mt-1" style={{ color: "var(--text-hint)" }}>{totalVotes} votes</p>}
             </div>
           )}
 

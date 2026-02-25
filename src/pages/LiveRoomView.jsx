@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Users } from "lucide-react";
+import { ArrowLeft, Send, Users, Gift, X } from "lucide-react";
 import { addCoins, getBalance } from "../components/coins/coinsHelper";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
@@ -20,6 +20,7 @@ export default function LiveRoomView() {
   const [userBalance, setUserBalance] = useState(0);
   const [messageText, setMessageText] = useState("");
   const [floatingGifts, setFloatingGifts] = useState([]);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
   const chatEndRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -256,12 +257,30 @@ export default function LiveRoomView() {
         </AnimatePresence>
       </div>
 
+      {/* Gift panel (slides up when open) */}
+      {showGiftPanel && (
+        <div className="shrink-0 px-4 pt-3 pb-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>Gifts & Reactions</span>
+            <button onClick={() => setShowGiftPanel(false)} className="p-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+            </button>
+          </div>
+          <GiftPanel onSendGift={handleSendGift} onReaction={handleReaction} userBalance={userBalance} />
+        </div>
+      )}
+
       {/* Bottom panel */}
       <div
         className="shrink-0 px-4 pb-4 pt-2"
-        style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}
+        style={{ backgroundColor: "var(--bg-card)", borderTop: showGiftPanel ? "none" : "1px solid var(--border-light)" }}
       >
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2">
+          <button onClick={() => setShowGiftPanel(v => !v)}
+            className="p-2.5 rounded-xl shrink-0 transition-all active:scale-90"
+            style={{ backgroundColor: showGiftPanel ? "var(--accent-primary)" : "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+            <Gift className="w-4 h-4" style={{ color: showGiftPanel ? "#fff" : "var(--text-hint)" }} />
+          </button>
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
@@ -273,7 +292,6 @@ export default function LiveRoomView() {
             <Send className="w-4 h-4" />
           </Button>
         </div>
-        <GiftPanel onSendGift={handleSendGift} onReaction={handleReaction} userBalance={userBalance} />
       </div>
     </div>
   );

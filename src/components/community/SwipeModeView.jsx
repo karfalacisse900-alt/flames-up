@@ -180,7 +180,7 @@ function DatingCard({ post, debate, user, onLike, onSkip, onNext, isTop }) {
           {/* Content — always centered */}
           <div className="flex-1 flex flex-col justify-center items-center text-center overflow-hidden">
           {post.image_url && (
-            <img src={post.image_url} alt="" className="w-full rounded-2xl mb-3 object-cover max-h-40" />
+            <img src={post.image_url} alt="" className="rounded-xl mb-3 object-cover" style={{ maxHeight: 160, maxWidth: "100%", width: "auto" }} />
           )}
           {post.title && (
             <p className="text-2xl font-bold leading-tight mb-4 w-full text-center" style={{ color: "#1C0E00", fontFamily: "var(--font-serif)" }}>
