@@ -169,7 +169,7 @@ function OnboardingGuide() {
           <button
             onClick={() => setStep(s => s + 1)}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
-            style={{ backgroundColor: "var(--accent-primary)" }}
+            style={{ backgroundColor: "#2E6B4F" }}
           >
             Next →
           </button>
@@ -329,7 +329,7 @@ export default function HelpCenter() {
               onClick={() => setActiveTab(key)}
               className="px-4 py-2 rounded-full text-xs font-semibold transition-all"
               style={{
-                backgroundColor: activeTab === key ? "var(--accent-primary)" : "var(--bg-subtle)",
+                backgroundColor: activeTab === key ? "#2E6B4F" : "var(--bg-subtle)",
                 color: activeTab === key ? "#fff" : "var(--text-secondary)",
               }}
             >
