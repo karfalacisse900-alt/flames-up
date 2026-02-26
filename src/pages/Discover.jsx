@@ -23,6 +23,7 @@ import QuickVote from "../components/discover/QuickVote";
 import ProductsTab from "../components/discover/ProductsTab";
 import MediaTab from "../components/discover/MediaTab";
 import BooksTab from "../components/discover/BooksTab";
+import StoresAndDeals from "../components/discover/StoresAndDeals";
 
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
@@ -242,7 +243,7 @@ export default function Discover() {
         </div>
         {/* Content type tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["media", "🎬 Media"], ["books", "📚 Books"], ["services", "👤 Services"], ["local", "📍 Local"]].map(([val, label]) => (
+          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["media", "🎬 Media"], ["books", "📚 Books"], ["stores", "🛍 Stores"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
@@ -435,33 +436,10 @@ export default function Discover() {
         </div>
       )}
 
-      {/* ===== SERVICE PEOPLE TAB ===== */}
-      {contentTab === "services" && (
+      {/* ===== STORES & DEALS TAB ===== */}
+      {contentTab === "stores" && (
         <div className="pb-24 mt-4">
-          <div className="px-5 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
-              <Input placeholder="Search by name, skill, role..." value={search}
-               onChange={e => setSearch(e.target.value)}
-               className="pl-10 rounded-xl text-sm" />
-            </div>
-          </div>
-          {spLoading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-            </div>
-          ) : filteredServicePeople.length === 0 ? (
-            <div className="text-center py-16 px-5">
-              <p className="text-4xl mb-3">👤</p>
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>{search ? "No people found" : "No service people listed yet"}</p>
-            </div>
-          ) : (
-            <div className="px-5 space-y-3">
-              {filteredServicePeople.map(person => (
-                <ServicePersonCard key={person.id} person={person} user={user} onClick={() => setSelectedServicePerson(person)} />
-              ))}
-            </div>
-          )}
+          <StoresAndDeals />
         </div>
       )}
 
