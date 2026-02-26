@@ -154,6 +154,7 @@ function SongCard({ track, onShare }) {
             previewUrl={track.preview_url}
             trackTitle={track.title}
             autoPlay={coverClicked}
+            track={{ title: track.title, artist: track.artist }}
           />
         )}
 
