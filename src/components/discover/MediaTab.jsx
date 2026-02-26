@@ -116,11 +116,10 @@ const MEDIA_CATALOGUE = [
 // ─── Constants ─────────────────────────────────────────────────────────────
 
 const MEDIA_TYPES = [
-  { key: "all", label: "All", emoji: "✦" },
+  { key: "music", label: "Music", emoji: "🎵" },
   { key: "movieshow", label: "Movies & Shows", emoji: "🎬" },
   { key: "book", label: "Books", emoji: "📚" },
   { key: "game", label: "Games", emoji: "🎮" },
-  { key: "music", label: "Music", emoji: "🎵" },
 ];
 
 const MUSIC_GENRES = ["Afrobeats","Hip-Hop","R&B","Pop","Rock","Emotional","Soundtrack","International","Psychedelic Pop"];
