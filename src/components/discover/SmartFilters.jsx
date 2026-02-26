@@ -1,15 +1,15 @@
 import React from "react";
 
 const SMART_FILTERS = [
-  { key: "all", label: "✨ All" },
-  { key: "trending", label: "🔥 Trending" },
-  { key: "community_favorite", label: "💛 Community Fav" },
-  { key: "underrated", label: "🪄 Underrated" },
-  { key: "just_launched", label: "🚀 Just Launched" },
-  { key: "highly_debated", label: "⚡ Highly Debated" },
-  { key: "low_cost", label: "💸 Low Cost" },
-  { key: "no_subscription", label: "🔓 No Subscription" },
-  { key: "hidden_gems", label: "💎 Hidden Gems" },
+  { key: "all", label: "All" },
+  { key: "trending", label: "Trending" },
+  { key: "community_favorite", label: "Community Fav" },
+  { key: "underrated", label: "Underrated" },
+  { key: "just_launched", label: "Just Launched" },
+  { key: "highly_debated", label: "Highly Debated" },
+  { key: "low_cost", label: "Low Cost" },
+  { key: "no_subscription", label: "No Subscription" },
+  { key: "hidden_gems", label: "Hidden Gems" },
 ];
 
 export default function SmartFilters({ active, onChange }) {
