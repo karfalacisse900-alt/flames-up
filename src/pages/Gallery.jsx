@@ -251,11 +251,13 @@ export default function Gallery() {
       <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Gallery</h1>
-          <button onClick={() => {}}
-            className="flex items-center justify-center w-10 h-10 rounded-full text-lg font-semibold"
-            style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
-            +
-          </button>
+          {user && (
+            <button onClick={() => setShowUpload(true)}
+              className="flex items-center justify-center w-10 h-10 rounded-full text-lg font-semibold"
+              style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
+              +
+            </button>
+          )}
         </div>
 
         {/* Tab toggle */}
