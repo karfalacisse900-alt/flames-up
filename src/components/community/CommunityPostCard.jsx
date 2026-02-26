@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Share2, Bookmark } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const REACTIONS = ["❤️", "🔥", "😂", "😮", "👏", "💯"];
 
