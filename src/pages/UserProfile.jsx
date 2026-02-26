@@ -122,11 +122,11 @@ export default function UserProfile() {
                   </button>
                 )}
                 <Link
-                  to={createPageUrl("Messages") + `?with=${viewingUser.email}&name=${viewingUser.full_name}`}
-                  className="p-2 rounded-full border transition-all"
+                  to={createPageUrl("Messages") + `?with=${encodeURIComponent(viewingUser.email)}&name=${encodeURIComponent(viewingUser.display_name || viewingUser.full_name || "")}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
                   style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare className="w-3.5 h-3.5" /> Message
                 </Link>
               </div>
             )}
