@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart } from "lucide-react";
+import { LogOut, Edit2, Palette, MessageSquare, Wallet, Bookmark, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Wrench, Plus, X, Download, HelpCircle, Film } from "lucide-react";
 import SavedMediaLists from "../components/profile/SavedMediaLists";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
@@ -30,7 +30,7 @@ export default function Profile() {
   const [newSkill, setNewSkill] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
-  const [activeTab, setActiveTab] = useState("activity");
+  const [activeTab, setActiveTab] = useState("badges");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -175,6 +175,7 @@ export default function Profile() {
                       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                       {[
                         { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
+                        { to: createPageUrl("Shop"), icon: <ShoppingBag className="w-4 h-4" />, label: "Shop", color: "var(--accent-secondary)" },
                         { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
                         { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
                         { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
@@ -252,20 +253,26 @@ export default function Profile() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Clock className="w-3.5 h-3.5" /> Activity
-          </TabsTrigger>
-          <TabsTrigger value="liked" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Heart className="w-3.5 h-3.5" /> Liked
-          </TabsTrigger>
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Medal className="w-3.5 h-3.5" /> Badges
+          </TabsTrigger>
+          <TabsTrigger value="skills" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Wrench className="w-3.5 h-3.5" /> Skills
+          </TabsTrigger>
+          <TabsTrigger value="art" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Palette className="w-3.5 h-3.5" /> Art
+          </TabsTrigger>
+          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Bookmark className="w-3.5 h-3.5" /> Saved
           </TabsTrigger>
           <TabsTrigger value="media_lists" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Film className="w-3.5 h-3.5" /> Lists
           </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
         </TabsList>
 

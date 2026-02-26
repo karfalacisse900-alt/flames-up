@@ -86,15 +86,11 @@ const SORT_OPTIONS = [
 
 // ── Single song card ────────────────────────────────────────────────────────
 function SongCard({ track, onShare }) {
-  const [playKey, setPlayKey] = useState(0); // increment to re-trigger autoPlay
-  const [isPreviewActive, setIsPreviewActive] = useState(false);
+  const [coverClicked, setCoverClicked] = useState(false);
 
   const handleCoverClick = (e) => {
     e.stopPropagation();
-    if (track.preview_url) {
-      setIsPreviewActive(true);
-      setPlayKey(k => k + 1);
-    }
+    if (track.preview_url) setCoverClicked(true);
   };
 
   return (
@@ -113,9 +109,9 @@ function SongCard({ track, onShare }) {
             <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
           </div>
         )}
-        {track.preview_url && (
+        {track.preview_url && !coverClicked && (
           <div className="absolute inset-0 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
+            style={{ backgroundColor: "rgba(0,0,0,0.35)" }}>
             <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#1DB954" }}>
               <Play className="w-3.5 h-3.5 text-black" fill="black" style={{ marginLeft: 1 }} />
             </div>
@@ -149,13 +145,12 @@ function SongCard({ track, onShare }) {
           )}
         </div>
 
-        {/* Audio preview player */}
-        {track.preview_url && isPreviewActive && (
+        {/* Audio preview player — shows when cover clicked or preview_url exists */}
+        {track.preview_url && (
           <AudioPreviewPlayer
-            key={playKey}
             previewUrl={track.preview_url}
             trackTitle={track.title}
-            autoPlay={true}
+            autoPlay={coverClicked}
           />
         )}
 
