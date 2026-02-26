@@ -346,6 +346,14 @@ export default function HelpCenter() {
             </p>
             <OnboardingGuide />
           </div>
+        ) : activeTab === "ai" ? (
+          <div>
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-2xl" style={{ backgroundColor: "var(--accent-primary-light)", border: "1px solid var(--accent-primary)" }}>
+              <Sparkles className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
+              <p className="text-sm" style={{ color: "var(--accent-primary)" }}>Ask me anything about the app and I'll guide you step by step.</p>
+            </div>
+            <AIChat />
+          </div>
         ) : (
           <div className="space-y-4">
             {FAQ_SECTIONS.map((section) => (
