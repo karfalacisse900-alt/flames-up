@@ -99,6 +99,7 @@ export default function SearchResultCard({ item, onShare }) {
             trackTitle={item.title}
             autoPlay={coverClicked}
             track={{ title: item.title, artist: item.artist }}
+            onPlayingTrack={track => setCurrentTrack(track)}
           />
         )}
 
