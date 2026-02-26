@@ -156,6 +156,7 @@ function SongCard({ track, onShare }) {
             trackTitle={track.title}
             autoPlay={coverClicked}
             track={{ title: track.title, artist: track.artist }}
+            onPlayingTrack={track => setCurrentTrack(track)}
           />
         )}
 
