@@ -601,7 +601,7 @@ export default function MediaTab({ user }) {
       )}
 
       {/* Trending strip — only when no filters active */}
-      {!search && activeType === "all" && selectedGenre === "all" && selectedMood === "all" && (
+      {false && (
         <div className="mb-4">
           <div className="px-5 flex items-center gap-1.5 mb-2">
             <Flame className="w-4 h-4" style={{ color: "#D98B62" }} />
