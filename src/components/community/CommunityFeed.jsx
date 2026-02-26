@@ -8,6 +8,7 @@ import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { createPageUrl } from "@/utils";
+import { rankFeedForUser, trackPostView } from "./feedRanking";
 
 
 
