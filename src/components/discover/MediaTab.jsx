@@ -126,7 +126,6 @@ const MEDIA_TYPES = [
   { key: "music", label: "Music", emoji: "🎵" },
   { key: "movieshow", label: "Movies & Shows", emoji: "🎬" },
   { key: "book", label: "Books", emoji: "📚" },
-  { key: "game", label: "Games", emoji: "🎮" },
 ];
 
 const MUSIC_GENRES = ["Afrobeats","Hip-Hop","R&B","Pop","Rock","Emotional","Soundtrack","International","Psychedelic Pop"];
@@ -487,6 +486,9 @@ export default function MediaTab({ user }) {
   // Filtered & sorted list
   const filtered = useMemo(() => {
     let list = MEDIA_CATALOGUE.filter(item => {
+      // Exclude games from this tab
+      if (item.media_type === "game") return false;
+      
       let typeMatch;
       if (activeType === "movieshow") typeMatch = item.media_type === "movie" || item.media_type === "show";
       else typeMatch = item.media_type === activeType;
@@ -522,7 +524,7 @@ export default function MediaTab({ user }) {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
           <input
-            placeholder="Search movies, shows, books, games, music..."
+            placeholder="Search movies, shows, books, music..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
