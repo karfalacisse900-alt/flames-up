@@ -206,13 +206,22 @@ function MediaCard({ item, user, savedIds, onSave, onUnsave, onSelect, onShare }
                 <p className="font-semibold text-sm leading-snug" style={{ color: "var(--text-primary)" }}>{item.title}</p>
                 {item.creator && <p className="text-[11px] mt-0.5" style={{ color: "var(--text-hint)" }}>{item.creator}</p>}
               </div>
-              <button
-                onClick={e => { e.stopPropagation(); isSaved ? onUnsave(item) : onSave(item); }}
-                className="shrink-0 p-1.5 rounded-full transition-all active:scale-90"
-                style={{ backgroundColor: isSaved ? colors.bg : "transparent", color: isSaved ? colors.accent : "var(--text-hint)" }}
-              >
-                {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-              </button>
+              <div className="flex gap-1 shrink-0">
+                <button
+                  onClick={e => { e.stopPropagation(); onShare && onShare(item); }}
+                  className="p-1.5 rounded-full transition-all active:scale-90"
+                  style={{ color: "var(--text-hint)" }}
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); isSaved ? onUnsave(item) : onSave(item); }}
+                  className="p-1.5 rounded-full transition-all active:scale-90"
+                  style={{ backgroundColor: isSaved ? colors.bg : "transparent", color: isSaved ? colors.accent : "var(--text-hint)" }}
+                >
+                  {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {/* Tags */}
