@@ -452,6 +452,7 @@ export default function MediaTab({ user }) {
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
   const qc = useQueryClient();
 
   // User saves
