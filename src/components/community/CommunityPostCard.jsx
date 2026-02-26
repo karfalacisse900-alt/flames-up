@@ -30,9 +30,37 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const [reported, setReported] = useState(false);
   const [likeBounce, setLikeBounce] = useState(false);
   const longPressTimer = useRef(null);
+  const qc = useQueryClient();
 
   const avatarColor = getAvatarColor(post.author_name);
   const initials = post.is_anonymous ? "?" : (post.author_name?.[0] || "U").toUpperCase();
+
+  const isOwnPost = user?.email && post.author_email === user.email;
+
+  const { data: followRecord } = useQuery({
+    queryKey: ["followStatus", user?.email, post.author_email],
+    queryFn: () => base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email }),
+    enabled: !!user?.email && !isOwnPost && !post.is_anonymous,
+    select: (data) => data[0] || null,
+  });
+
+  const isFollowing = !!followRecord;
+
+  const handleFollow = async () => {
+    if (!user || isOwnPost) return;
+    if (isFollowing && followRecord) {
+      await base44.entities.Follow.delete(followRecord.id);
+    } else {
+      await base44.entities.Follow.create({
+        follower_email: user.email,
+        follower_name: user.full_name || user.email,
+        following_email: post.author_email,
+        following_name: post.author_name,
+      });
+    }
+    qc.invalidateQueries({ queryKey: ["followStatus", user?.email, post.author_email] });
+    qc.invalidateQueries({ queryKey: ["myFollows", user?.email] });
+  };
 
   const handleReport = async () => {
     if (!user || reported) return;
