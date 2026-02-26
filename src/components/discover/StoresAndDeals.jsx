@@ -23,8 +23,6 @@ const STORES = [
 
 const CATEGORIES = ["All", "Outlet / Discount", "Department Store", "Tech", "Beauty", "Home", "Grocery"];
 
-const STORE_TAGS = ["👍 Best Deals", "🔥 Popular", "💰 Budget", "⭐ Quality"];
-
 function StoreCard({ store, onShare }) {
   return (
     <motion.div
@@ -40,19 +38,10 @@ function StoreCard({ store, onShare }) {
           <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
             {store.name}
           </h3>
-          <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             {store.description}
           </p>
         </div>
-      </div>
-
-      {/* Small tags */}
-      <div className="flex flex-wrap gap-1 mb-3">
-        {STORE_TAGS.map(tag => (
-          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-            {tag}
-          </span>
-        ))}
       </div>
 
       {/* Action buttons */}
