@@ -191,6 +191,7 @@ export default function SpotifyMusicTab() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   const [nowPlaying, setNowPlaying] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
 
   // Enrich preloaded list on mount (parallel batches of 5)
   useEffect(() => {
