@@ -139,18 +139,29 @@ export default function Shop() {
   const handleBuyCoins = async (bundle) => {
     setPurchasing(bundle.id);
     try {
+      // Check if in iframe (not published)
+      if (window.self !== window.top) {
+        showToast("⚠️ Checkout only works on published app");
+        setPurchasing(null);
+        return;
+      }
+
       const response = await base44.functions.invoke("createCoinCheckout", {
         priceId: bundle.priceId,
       });
       
-      if (!response.data.sessionId) throw new Error("No session ID returned");
+      if (!response.data?.sessionId) {
+        throw new Error(response.data?.error || "Failed to create checkout session");
+      }
+
       const stripe = await loadStripe("pk_live_51SxzwC3vUrZIHCwo4WAd4Q5L0p4dZ3jhHWrCN6gLk6ofqeiXfN76tbPUQT0fHRWMhpHXkXWWzWvFycIZx0b3owbE000mxwkAKN");
       if (!stripe) throw new Error("Stripe failed to load");
+      
       const result = await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       if (result?.error) throw result.error;
     } catch (error) {
       console.error("Checkout error:", error);
-      showToast("❌ Checkout failed: " + (error?.message || "Unknown error"));
+      showToast("❌ Unable to start checkout. Please try again.");
       setPurchasing(null);
     }
   };
