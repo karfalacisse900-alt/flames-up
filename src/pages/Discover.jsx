@@ -21,7 +21,7 @@ import WhyTheseApps from "../components/discover/WhyTheseApps";
 import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
 import MediaTab from "../components/discover/MediaTab";
-import BooksTab from "../components/discover/BooksTab";
+import OpenLibraryBooksTab from "../components/discover/OpenLibraryBooksTab";
 import StoresAndDeals from "../components/discover/StoresAndDeals";
 
 
