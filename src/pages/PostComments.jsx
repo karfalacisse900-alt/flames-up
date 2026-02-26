@@ -222,10 +222,14 @@ function CommentItem({ reply }) {
 
   return (
     <div className="flex gap-3 py-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-        style={{ background: `linear-gradient(135deg, ${color}33, ${color}55)`, color }}>
-        {(reply.author_name?.[0] || "U").toUpperCase()}
-      </div>
+      {reply.author_avatar_url ? (
+        <img src={reply.author_avatar_url} alt={reply.author_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+      ) : (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+          style={{ background: `linear-gradient(135deg, ${color}33, ${color}55)`, color }}>
+          {(reply.author_name?.[0] || "U").toUpperCase()}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 mb-1">
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
