@@ -159,6 +159,13 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
     { key: "release_date_asc", label: "📅 Oldest" },
   ];
 
+  const CLASSIC_SEARCHES = tab === "movie" ? [
+    "The Godfather","The Dark Knight","12 Angry Men","Return of the King","Schindler's List",
+    "Pulp Fiction","Fellowship of the Ring","The Good the Bad and the Ugly","Forrest Gump",
+    "The Two Towers","Fight Club","Inception","The Empire Strikes Back","The Matrix",
+    "Goodfellas","One Flew Over the Cuckoo's Nest","Interstellar","Se7en",
+  ] : ["Good Omens","Breaking Bad","Chernobyl","Succession","Severance","The Wire"];
+
   // Load on mount + tab change
   useEffect(() => {
     setGenre(null);
