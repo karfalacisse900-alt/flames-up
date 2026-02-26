@@ -251,6 +251,9 @@ export default function Profile() {
           <TabsTrigger value="media_lists" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Film className="w-3.5 h-3.5" /> Lists
           </TabsTrigger>
+          <TabsTrigger value="saved_items" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <FolderOpen className="w-3.5 h-3.5" /> Saved
+          </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
