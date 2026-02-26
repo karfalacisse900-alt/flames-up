@@ -175,7 +175,6 @@ export default function Profile() {
                       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                       {[
                         { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                        { to: createPageUrl("Shop"), icon: <ShoppingBag className="w-4 h-4" />, label: "Shop", color: "var(--accent-secondary)" },
                         { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
                         { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
                         { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
