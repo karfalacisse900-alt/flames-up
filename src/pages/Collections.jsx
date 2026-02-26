@@ -1,34 +1,119 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2, Bookmark, ChevronRight } from "lucide-react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { ArrowLeft, Plus, Trash2, Bookmark, ChevronRight, Tag, StickyNote, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
-function CollectionItemCard({ item, onRemove }) {
+function CollectionItemCard({ item, onRemove, onUpdate }) {
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notes, setNotes] = useState(item.notes || "");
+  const [newTag, setNewTag] = useState("");
+  const [showTagInput, setShowTagInput] = useState(false);
+
+  const handleSaveNotes = () => {
+    onUpdate(item.id, { notes });
+    setEditingNotes(false);
+  };
+
+  const handleAddTag = () => {
+    if (!newTag.trim()) return;
+    const tags = [...(item.tags || []), newTag.trim()];
+    onUpdate(item.id, { tags });
+    setNewTag("");
+    setShowTagInput(false);
+  };
+
+  const handleRemoveTag = (tag) => {
+    const tags = (item.tags || []).filter(t => t !== tag);
+    onUpdate(item.id, { tags });
+  };
+
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
-      {item.item_image_url ?
-      <img src={item.item_image_url} alt={item.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" /> :
+    <div className="py-3 border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
+      <div className="flex items-start gap-3">
+        {item.item_image_url ?
+          <img src={item.item_image_url} alt={item.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" /> :
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
+            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+            {item.item_title?.[0]?.toUpperCase()}
+          </div>
+        }
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{item.item_title}</p>
+          {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.item_subtitle}</p>}
+          <span className="text-[10px] px-2 py-0.5 rounded-full mt-1 inline-block capitalize"
+            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+            {item.item_type === "app" ? "App" : "Service Person"}
+          </span>
 
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
-      style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-          {item.item_title?.[0]?.toUpperCase()}
+          {/* Tags */}
+          {(item.tags?.length > 0 || showTagInput) && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {(item.tags || []).map(tag => (
+                <span key={tag} className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+                  {tag}
+                  <button onClick={() => handleRemoveTag(tag)} className="ml-0.5">
+                    <X className="w-2.5 h-2.5" style={{ color: "var(--text-hint)" }} />
+                  </button>
+                </span>
+              ))}
+              {showTagInput && (
+                <div className="flex items-center gap-1">
+                  <input
+                    autoFocus
+                    value={newTag}
+                    onChange={e => setNewTag(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") handleAddTag(); if (e.key === "Escape") setShowTagInput(false); }}
+                    placeholder="tag…"
+                    className="text-[10px] px-2 py-0.5 rounded-full outline-none w-20"
+                    style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
+                  />
+                  <button onClick={handleAddTag} className="p-0.5" style={{ color: "var(--accent-primary)" }}><Check className="w-3 h-3" /></button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Notes */}
+          {editingNotes ? (
+            <div className="mt-2">
+              <textarea
+                autoFocus
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                rows={2}
+                placeholder="Add a note…"
+                className="w-full text-xs px-2 py-1.5 rounded-lg outline-none resize-none"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
+              />
+              <div className="flex gap-2 mt-1">
+                <button onClick={handleSaveNotes} className="text-[10px] px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save</button>
+                <button onClick={() => setEditingNotes(false)} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>Cancel</button>
+              </div>
+            </div>
+          ) : item.notes ? (
+            <p className="text-[11px] mt-1.5 italic cursor-pointer" style={{ color: "var(--text-hint)" }} onClick={() => setEditingNotes(true)}>
+              📝 {item.notes}
+            </p>
+          ) : null}
         </div>
-      }
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{item.item_title}</p>
-        {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.item_subtitle}</p>}
-        <span className="text-[10px] px-2 py-0.5 rounded-full mt-1 inline-block capitalize"
-        style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-          {item.item_type === "app" ? "App" : "Service Person"}
-        </span>
-      </div>
-      <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full transition-colors" style={{ color: "var(--text-hint)" }}>
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-    </div>);
 
+        <div className="flex flex-col items-center gap-1.5 shrink-0">
+          <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setShowTagInput(s => !s)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+            <Tag className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setEditingNotes(s => !s)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+            <StickyNote className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CollectionDetail({ collection, user, onBack, onDelete }) {
