@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     if (!query) return Response.json({ error: "Missing query" }, { status: 400 });
 
     const token = await getSpotifyToken();
+    await sleep(500); // Rate limit prevention
 
     const searchTypes = type === "all" ? "track,artist,album" : type;
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${searchTypes}&limit=${limit}&market=US`;
@@ -40,6 +41,12 @@ Deno.serve(async (req) => {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`Spotify HTTP ${res.status}:`, text);
+      return Response.json({ error: `Spotify error: ${res.status}` }, { status: res.status });
+    }
 
     const data = await res.json();
 
