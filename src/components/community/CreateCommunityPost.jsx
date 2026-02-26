@@ -57,11 +57,13 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
-    // Require at least an image for opinion/discussion/quote posts
-    if (!imageUrl && type !== "debate" && type !== "list" && type !== "question" && type !== "quote_of_day") {
-      alert("Please add a photo or GIF to your post.");
+    // Require at least an image/gif for non-structured post types
+    const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
+    if (requiresMedia && !imageUrl) {
+      setMediaError(true);
       return;
     }
+    setMediaError(false);
     setSaving(true);
 
     // AI moderation check
