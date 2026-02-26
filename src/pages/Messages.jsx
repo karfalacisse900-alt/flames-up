@@ -127,6 +127,10 @@ function ChatView({ user, conversation, onBack }) {
     refetchInterval: 2000,
   });
 
+  // Filter out messages from blocked users
+  const blockedList = JSON.parse(localStorage.getItem("blocked_users") || "[]");
+  const visibleMessages = messages.filter(m => !blockedList.includes(m.sender_email) || m.sender_email === user.email);
+
   // Mark unread messages as read
   useEffect(() => {
     messages
