@@ -254,6 +254,9 @@ export default function Profile() {
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
+          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Bookmark className="w-3.5 h-3.5" /> Saved
+          </TabsTrigger>
           <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
