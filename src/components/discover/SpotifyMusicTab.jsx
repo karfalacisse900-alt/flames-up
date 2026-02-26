@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Music, X, Play, Share2 } from "lucide-react";
+import { Search, Music, X, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MediaDetailSheet from "./MediaDetailSheet";
-import { AudioPreviewPlayer, MiniStickyPlayer } from "./AudioPreviewPlayer";
 import ShareModal from "./ShareModal.jsx";
 import SearchResultCard from "./SearchResultCard";
-import { useAudio } from "@/components/AudioContext";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [
@@ -225,22 +223,62 @@ export default function SpotifyMusicTab() {
 
   const handleSearch = (e) => { e.preventDefault(); doSearch(query); };
 
-  // Build display list
-  const preloadedMerged = PRELOADED_SONGS.map(s => {
-    const key = `${s.title}|${s.artist}`;
-    const spotify = enriched[key];
-    return {
-      id: key,
-      title: s.title,
-      artist: s.artist,
-      duration_str: s.duration,
-      cover_url: spotify?.cover_url || null,
-      spotify_url: spotify?.spotify_url || null,
-      preview_url: spotify?.preview_url || null,
-      album: spotify?.album || null,
-      release_year: spotify?.release_year || null,
+  // Build display list - enrich immediately on mount
+  const [preloadedMerged, setPreloadedMerged] = useState([]);
+  
+  useEffect(() => {
+    const enrichAll = async () => {
+      const merged = await Promise.all(
+        PRELOADED_SONGS.map(async (s) => {
+          const key = `${s.title}|${s.artist}`;
+          if (enriched[key]) {
+            return {
+              id: key,
+              title: s.title,
+              artist: s.artist,
+              duration_str: s.duration,
+              ...enriched[key],
+            };
+          }
+          try {
+            const query = `${s.title} ${s.artist.split(" feat")[0].split(",")[0].trim()}`;
+            const res = await base44.functions.invoke("spotifySearch", {
+              query, type: "track", limit: 3,
+            });
+            const tracks = res.data?.tracks || [];
+            const match = tracks.find(t =>
+              t.title?.toLowerCase() === s.title.toLowerCase()
+            ) || tracks[0];
+            
+            return {
+              id: key,
+              title: s.title,
+              artist: s.artist,
+              duration_str: s.duration,
+              cover_url: match?.cover_url || null,
+              spotify_url: match?.spotify_url || null,
+              album: match?.album || null,
+              release_year: match?.release_year || null,
+            };
+          } catch (err) {
+            console.error(`Failed to enrich ${s.title}:`, err);
+            return {
+              id: key,
+              title: s.title,
+              artist: s.artist,
+              duration_str: s.duration,
+              cover_url: null,
+              spotify_url: null,
+              album: null,
+              release_year: null,
+            };
+          }
+        })
+      );
+      setPreloadedMerged(merged);
     };
-  });
+    enrichAll();
+  }, [enriched]);
 
   // Genre filter applied to preloaded list (client-side keyword match)
   const GENRE_KEYWORDS = {
@@ -280,12 +318,7 @@ export default function SpotifyMusicTab() {
 
   const displayList = applySort(searchResults
     ? searchResults.map(t => toDisplayTrack({ id: t.id, title: t.title, artist: t.artist, cover_url: t.cover_url, spotify_url: t.spotify_url, preview_url: t.preview_url, album: t.album, release_year: t.release_year }))
-    : filteredPreloaded.map(track => {
-        const result = toDisplayTrack(track);
-        // Enrich on demand when rendering
-        enrichSongOnDemand(track);
-        return result;
-      }));
+    : filteredPreloaded.map(track => toDisplayTrack(track)));
 
   return (
     <div className="pb-10">

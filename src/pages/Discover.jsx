@@ -22,6 +22,7 @@ import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
 import ProductsTab from "../components/discover/ProductsTab";
 import MediaTab from "../components/discover/MediaTab";
+import BooksTab from "../components/discover/BooksTab";
 
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
@@ -241,7 +242,7 @@ export default function Discover() {
         </div>
         {/* Content type tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["media", "🎬 Media"], ["services", "👤 Services"], ["local", "📍 Local"]].map(([val, label]) => (
+          {[["apps", "🛠 Apps"], ["products", "📦 Products"], ["media", "🎬 Media"], ["books", "📚 Books"], ["services", "👤 Services"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
@@ -424,6 +425,13 @@ export default function Discover() {
       {contentTab === "media" && (
         <div className="mt-3">
           <MediaTab user={user} />
+        </div>
+      )}
+
+      {/* ===== BOOKS TAB ===== */}
+      {contentTab === "books" && (
+        <div className="mt-3">
+          <BooksTab />
         </div>
       )}
 
