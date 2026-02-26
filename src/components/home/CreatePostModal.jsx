@@ -105,7 +105,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
           width: "100%",
           maxWidth: "512px",
           borderRadius: "24px 24px 0 0",
-          backgroundColor: "var(--bg-app)",
+          backgroundColor: "var(--bg-modal)",
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",
