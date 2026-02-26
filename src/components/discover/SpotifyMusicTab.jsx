@@ -195,36 +195,46 @@ export default function SpotifyMusicTab() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich preloaded list on mount (parallel batches of 5)
+  // Enrich ALL preloaded songs on mount (parallel batches of 4)
   useEffect(() => {
     let cancelled = false;
     const enrichBatch = async () => {
       setEnriching(true);
-      const batch = PRELOADED_SONGS.slice(0, 40);
-      const CHUNK = 5;
-      for (let i = 0; i < batch.length; i += CHUNK) {
+      const CHUNK = 4;
+      for (let i = 0; i < PRELOADED_SONGS.length; i += CHUNK) {
         if (cancelled) break;
-        const chunk = batch.slice(i, i + CHUNK);
+        const chunk = PRELOADED_SONGS.slice(i, i + CHUNK);
         await Promise.all(chunk.map(async (song) => {
           if (cancelled) return;
           const key = `${song.title}|${song.artist}`;
-          try {
-            const res = await base44.functions.invoke("spotifySearch", {
-              query: `${song.title} ${song.artist}`, type: "track", limit: 1,
-            });
-            if (res.data?.error) {
-              console.error("Spotify error:", res.data.error);
-              return;
+          // Try multiple query formats for better hit rate
+          const queries = [
+            `track:"${song.title}" artist:"${song.artist.split(" feat")[0].split(",")[0].trim()}"`,
+            `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
+            song.title,
+          ];
+          for (const q of queries) {
+            if (cancelled) break;
+            try {
+              const res = await base44.functions.invoke("spotifySearch", {
+                query: q, type: "track", limit: 3,
+              });
+              if (res.data?.error) break;
+              // Find best matching track (exact title match preferred)
+              const tracks = res.data?.tracks || [];
+              const match = tracks.find(t =>
+                t.title?.toLowerCase() === song.title.toLowerCase()
+              ) || tracks[0];
+              if (match) {
+                setEnriched(prev => ({ ...prev, [key]: match }));
+                break; // found a match, stop trying other queries
+              }
+            } catch (err) {
+              console.error("Spotify fetch error:", err.message);
             }
-            const track = res.data?.tracks?.[0];
-            if (track && !cancelled) {
-              setEnriched(prev => ({ ...prev, [key]: track }));
-            }
-          } catch (err) { 
-            console.error("Spotify fetch error:", err.message);
           }
         }));
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 300));
       }
       if (!cancelled) setEnriching(false);
     };
