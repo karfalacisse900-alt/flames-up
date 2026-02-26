@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Mic, Square, Play, Pause } from "lucide-react";
+import { ArrowLeft, Send, Mic, Square, MoreVertical, Ban, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
