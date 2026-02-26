@@ -218,19 +218,25 @@ export default function SpotifyMusicTab() {
     }
   };
 
-  // Live search
+  // Live search — fetch tracks, albums, and artists
   const doSearch = async (q) => {
     if (!q.trim()) { setSearchResults(null); return; }
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type: "track", limit: 20 });
+      const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type: "all", limit: 20 });
       if (res.data?.error) {
         setError("Spotify API error. Please try again.");
         console.error("Spotify error:", res.data.error);
         setSearchResults([]);
       } else {
-        setSearchResults(res.data?.tracks || []);
+        // Combine tracks, albums, and artists with type labels
+        const combined = [
+          ...(res.data?.tracks || []).map(t => ({ ...t, media_type: "music" })),
+          ...(res.data?.albums || []).map(a => ({ ...a, media_type: "album" })),
+          ...(res.data?.artists || []).map(ar => ({ ...ar, media_type: "artist" })),
+        ];
+        setSearchResults(combined);
       }
     } catch (err) {
       setError("Network error. Check your connection.");
