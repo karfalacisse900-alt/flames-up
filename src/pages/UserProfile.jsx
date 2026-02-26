@@ -8,7 +8,7 @@ import { createPageUrl } from "@/utils";
 export default function UserProfile() {
   const [user, setUser] = useState(null);
   const [viewingUser, setViewingUser] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const qc = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
