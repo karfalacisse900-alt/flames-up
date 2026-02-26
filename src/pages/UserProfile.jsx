@@ -22,17 +22,21 @@ export default function UserProfile() {
     }
   }, []);
 
-  const { data: followers = [] } = useQuery({
+  const { data: followers = [], refetch: refetchFollowers } = useQuery({
     queryKey: ["profileFollowers", viewingUser?.email],
-    queryFn: () => viewingUser?.email ? base44.entities.Follow.filter({ following_email: viewingUser.email }) : [],
+    queryFn: () => base44.entities.Follow.filter({ following_email: viewingUser.email }),
     enabled: !!viewingUser?.email,
   });
 
   const { data: following = [] } = useQuery({
     queryKey: ["profileFollowing", viewingUser?.email],
-    queryFn: () => viewingUser?.email ? base44.entities.Follow.filter({ follower_email: viewingUser.email }) : [],
+    queryFn: () => base44.entities.Follow.filter({ follower_email: viewingUser.email }),
     enabled: !!viewingUser?.email,
   });
+
+  const isFollowing = user && viewingUser
+    ? followers.some(f => f.follower_email === user.email)
+    : false;
 
   const { data: userPosts = [] } = useQuery({
     queryKey: ["userPosts", viewingUser?.email],
