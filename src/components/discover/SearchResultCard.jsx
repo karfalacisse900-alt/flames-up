@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Music, Disc3, Mic2, Play, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AudioPreviewPlayer } from "./AudioPreviewPlayer";
+import { useAudio } from "@/components/AudioContext";
 
 export default function SearchResultCard({ item, onShare }) {
   const [coverClicked, setCoverClicked] = useState(false);
+  const { setCurrentTrack } = useAudio();
 
   const handleCoverClick = (e) => {
     e.stopPropagation();
