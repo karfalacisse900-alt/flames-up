@@ -435,7 +435,7 @@ function MusicSection({ items, user, savedIds, onSave, onUnsave, onSelect }) {
 
 // ─── Main MediaTab ─────────────────────────────────────────────────────────
 export default function MediaTab({ user }) {
-  const [activeType, setActiveType] = useState("all");
+  const [activeType, setActiveType] = useState("music");
   const [sortBy, setSortBy] = useState("default");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedMood, setSelectedMood] = useState("all");
