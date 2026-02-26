@@ -267,7 +267,7 @@ export default function Discover() {
           <SmartFilters active={smartFilter} onChange={f => { setSmartFilter(f); setActiveCategory("all"); }} />
 
           {/* Search + Filter */}
-          {viewMode === "list" && (
+          {true && (
             <div className="px-5 pt-1 space-y-2">
               <div className="flex gap-2">
                 <div className="relative flex-1">
