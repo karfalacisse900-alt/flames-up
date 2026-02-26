@@ -117,8 +117,7 @@ const MEDIA_CATALOGUE = [
 
 const MEDIA_TYPES = [
   { key: "all", label: "All", emoji: "✦" },
-  { key: "movie", label: "Movies", emoji: "🎬" },
-  { key: "show", label: "Shows", emoji: "📺" },
+  { key: "movieshow", label: "Movies & Shows", emoji: "🎬" },
   { key: "book", label: "Books", emoji: "📚" },
   { key: "game", label: "Games", emoji: "🎮" },
   { key: "music", label: "Music", emoji: "🎵" },
