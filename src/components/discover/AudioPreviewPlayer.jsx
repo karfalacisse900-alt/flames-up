@@ -70,14 +70,33 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
 
   useEffect(() => () => cleanup(), [cleanup]);
 
-  // autoPlay support
+  // autoPlay support — trigger fresh play when autoPlay turns true
+  const autoPlayFired = React.useRef(false);
   useEffect(() => {
-    if (autoPlay && previewUrl && state === "idle") {
-      // small delay to allow DOM to mount
-      const t = setTimeout(() => {
-        handlePlay({ stopPropagation: () => {} });
-      }, 100);
-      return () => clearTimeout(t);
+    if (autoPlay && previewUrl && !autoPlayFired.current) {
+      autoPlayFired.current = true;
+      globalAudio.stop();
+      setState("loading");
+      const audio = new Audio();
+      audio.preload = "none";
+      audioRef.current = audio;
+      globalAudio.current = audio;
+      globalAudio.stopCb = cleanup;
+      audio.oncanplay = () => {
+        audio.play().catch(() => cleanup());
+        setState("playing");
+        if (onPlayStart) onPlayStart();
+        tickRef.current = setInterval(() => {
+          const cur = audio.currentTime;
+          setElapsed(cur);
+          setProgress(cur / MAX);
+          if (cur >= MAX) { audio.pause(); globalAudio.stop(); }
+        }, 100);
+      };
+      audio.onended = () => { globalAudio.stop(); };
+      audio.onerror = () => { cleanup(); };
+      audio.src = previewUrl;
+      audio.load();
     }
   }, [autoPlay, previewUrl]); // eslint-disable-line
 
