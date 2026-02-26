@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronLeft, BookOpen, MessageSquare, Compass, Palette, Radio, User, Star, Coins } from "lucide-react";
+import { ChevronDown, ChevronLeft, Sparkles, Send, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
+import { base44 } from "@/api/base44Client";
 
 const FAQ_SECTIONS = [
   {

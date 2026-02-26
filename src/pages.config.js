@@ -67,10 +67,10 @@ import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
 import PostComments from './pages/PostComments';
 import PostDetail from './pages/PostDetail';
+import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
-import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
@@ -96,10 +96,10 @@ export const PAGES = {
     "Notifications": Notifications,
     "PostComments": PostComments,
     "PostDetail": PostDetail,
+    "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
     "UserProfile": UserProfile,
-    "Profile": Profile,
     "Wallet": Wallet,
 }
 
