@@ -88,37 +88,20 @@ const SORT_OPTIONS = [
 
 // ── Single song card ────────────────────────────────────────────────────────
 function SongCard({ track, onShare }) {
-  const [coverClicked, setCoverClicked] = useState(false);
-
-  const handleCoverClick = (e) => {
-    e.stopPropagation();
-    if (!track.preview_url) return;
-    // Toggle: if already clicked (playing), reset to stop; otherwise start
-    setCoverClicked(v => !v);
-  };
-
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       className="flex gap-3 p-3 rounded-2xl"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
 
-      {/* Album cover — click to preview */}
-      <div className="shrink-0 relative" onClick={handleCoverClick}>
+      {/* Album cover */}
+      <div className="shrink-0">
         {track.cover_url ? (
           <img src={track.cover_url} alt={track.title}
-            className="w-16 rounded-xl object-cover cursor-pointer" style={{ height: 72 }} />
+            className="w-16 rounded-xl object-cover" style={{ height: 72 }} />
         ) : (
-          <div className="w-16 rounded-xl flex items-center justify-center cursor-pointer"
+          <div className="w-16 rounded-xl flex items-center justify-center"
             style={{ height: 72, backgroundColor: "var(--bg-subtle)" }}>
             <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
-          </div>
-        )}
-        {track.preview_url && !coverClicked && (
-          <div className="absolute inset-0 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.35)" }}>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#1DB954" }}>
-              <Play className="w-3.5 h-3.5 text-black" fill="black" style={{ marginLeft: 1 }} />
-            </div>
           </div>
         )}
       </div>
@@ -149,16 +132,7 @@ function SongCard({ track, onShare }) {
           )}
         </div>
 
-        {/* Audio preview player — shows when cover clicked or preview_url exists */}
-        {track.preview_url && (
-          <AudioPreviewPlayer
-            previewUrl={track.preview_url}
-            trackTitle={track.title}
-            autoPlay={coverClicked}
-            track={{ title: track.title, artist: track.artist }}
-            onPlayingTrack={track => setCurrentTrack(track)}
-          />
-        )}
+
 
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {track.spotify_url ? (
@@ -196,10 +170,7 @@ export default function SpotifyMusicTab() {
   const [enriching, setEnriching] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [sortBy, setSortBy] = useState("default");
-  const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
-  const audioContext = useAudio();
-  const setCurrentTrack = audioContext?.setCurrentTrack || (() => {});
 
   // Enrich songs on demand via search (avoid rate limiting)
   const enrichSongOnDemand = async (song) => {
