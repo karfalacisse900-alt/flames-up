@@ -161,7 +161,7 @@ function CollectionDetail({ collection, user, onBack, onDelete }) {
 
         <div className="rounded-2xl px-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             {items.map((item) =>
-          <CollectionItemCard key={item.id} item={item} onRemove={handleRemoveItem} />
+          <CollectionItemCard key={item.id} item={item} onRemove={handleRemoveItem} onUpdate={handleUpdateItem} />
           )}
           </div>
         }
