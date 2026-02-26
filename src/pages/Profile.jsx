@@ -252,26 +252,20 @@ export default function Profile() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
+          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Clock className="w-3.5 h-3.5" /> Activity
+          </TabsTrigger>
+          <TabsTrigger value="liked" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Heart className="w-3.5 h-3.5" /> Liked
+          </TabsTrigger>
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Medal className="w-3.5 h-3.5" /> Badges
-          </TabsTrigger>
-          <TabsTrigger value="skills" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Wrench className="w-3.5 h-3.5" /> Skills
-          </TabsTrigger>
-          <TabsTrigger value="art" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Palette className="w-3.5 h-3.5" /> Art
-          </TabsTrigger>
-          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Bookmark className="w-3.5 h-3.5" /> Saved
           </TabsTrigger>
           <TabsTrigger value="media_lists" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Film className="w-3.5 h-3.5" /> Lists
           </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
         </TabsList>
 
