@@ -164,7 +164,7 @@ function MiniStars({ value, onRate }) {
 }
 
 // ─── Media Card ────────────────────────────────────────────────────────────
-function MediaCard({ item, user, savedIds, onSave, onUnsave, onSelect }) {
+function MediaCard({ item, user, savedIds, onSave, onUnsave, onSelect, onShare }) {
   const colors = TYPE_COLORS[item.media_type] || TYPE_COLORS.movie;
   const isSaved = savedIds.includes(item.id);
 
