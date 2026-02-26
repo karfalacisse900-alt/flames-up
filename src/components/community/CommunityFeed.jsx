@@ -132,6 +132,8 @@ export default function CommunityFeed({ user }) {
 
   const renderPostCard = (post) => {
     const debate = getDebateForPost(post.id);
+    // Track view for session-level adaptation
+    if (user?.email) trackPostView(post.id);
     return post.type === "debate" || post.type === "question" ? (
       <DebateCard key={post.id} post={post} debate={debate} user={user}
         onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
