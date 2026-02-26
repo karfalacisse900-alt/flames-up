@@ -83,21 +83,37 @@ const SORT_OPTIONS = [
 
 
 
-// ── Single song card (mirrors BookCard layout) ─────────────────────────────
-function SongCard({ track }) {
+// ── Single song card ────────────────────────────────────────────────────────
+function SongCard({ track, onShare }) {
+  const [coverClicked, setCoverClicked] = useState(false);
+
+  const handleCoverClick = (e) => {
+    e.stopPropagation();
+    if (track.preview_url) setCoverClicked(true);
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       className="flex gap-3 p-3 rounded-2xl"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      {/* Album cover */}
-      <div className="shrink-0">
+
+      {/* Album cover — click to preview */}
+      <div className="shrink-0 relative" onClick={handleCoverClick}>
         {track.cover_url ? (
           <img src={track.cover_url} alt={track.title}
-            className="w-16 rounded-xl object-cover" style={{ height: 72 }} />
+            className="w-16 rounded-xl object-cover cursor-pointer" style={{ height: 72 }} />
         ) : (
-          <div className="w-16 rounded-xl flex items-center justify-center"
+          <div className="w-16 rounded-xl flex items-center justify-center cursor-pointer"
             style={{ height: 72, backgroundColor: "var(--bg-subtle)" }}>
             <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
+          </div>
+        )}
+        {track.preview_url && !coverClicked && (
+          <div className="absolute inset-0 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.35)" }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#1DB954" }}>
+              <Play className="w-3.5 h-3.5 text-black" fill="black" style={{ marginLeft: 1 }} />
+            </div>
           </div>
         )}
       </div>
@@ -127,12 +143,20 @@ function SongCard({ track }) {
             </span>
           )}
         </div>
+
+        {/* Audio preview player — shows when cover clicked or preview_url exists */}
         {track.preview_url && (
-          <AudioPreviewPlayer previewUrl={track.preview_url} trackTitle={track.title} />
+          <AudioPreviewPlayer
+            previewUrl={track.preview_url}
+            trackTitle={track.title}
+            autoPlay={coverClicked}
+          />
         )}
-        <div className="flex items-center gap-2 mt-2">
+
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
           {track.spotify_url ? (
             <a href={track.spotify_url} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
               style={{ backgroundColor: "#1DB954", color: "#fff" }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
@@ -141,6 +165,13 @@ function SongCard({ track }) {
           ) : (
             <span className="text-[10px] italic" style={{ color: "var(--text-hint)" }}>Searching…</span>
           )}
+          {/* Share button */}
+          <button
+            onClick={e => { e.stopPropagation(); onShare && onShare(track); }}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-medium transition-all active:scale-95"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+            <Share2 className="w-3 h-3" /> Share
+          </button>
         </div>
       </div>
     </motion.div>
