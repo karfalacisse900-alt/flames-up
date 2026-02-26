@@ -121,6 +121,7 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
     audio.oncanplay = () => {
       audio.play().catch(() => cleanup());
       setState("playing");
+      if (onPlayStart) onPlayStart();
       tickRef.current = setInterval(() => {
         const cur = audio.currentTime;
         setElapsed(cur);
