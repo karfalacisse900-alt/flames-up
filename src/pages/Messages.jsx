@@ -272,26 +272,28 @@ function ChatView({ user, conversation, onBack }) {
         <div ref={endRef} />
       </div>
 
-      <div className="p-3 flex gap-2 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)" }}>
-        <Input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Message..."
-          className="flex-1 rounded-xl"
-          onKeyDown={(e) => e.key === "Enter" && sendText()}
-        />
-        <button
-          onPointerDown={startRecording}
-          onPointerUp={stopRecording}
-          className={`p-2.5 rounded-xl transition-colors ${recording ? "animate-pulse" : ""}`}
-          style={{ backgroundColor: recording ? "rgba(224,92,122,0.15)" : "var(--bg-subtle)", color: recording ? "#E05C7A" : "var(--text-secondary)" }}
-        >
-          {recording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-        </button>
-        <Button onClick={sendText} disabled={!text.trim() || sending} size="icon" className="rounded-xl shrink-0" style={{ backgroundColor: "var(--accent-primary)" }}>
-          <Send className="w-4 h-4" />
-        </Button>
-      </div>
+      {!blocked && (
+        <div className="p-3 flex gap-2 shrink-0" style={{ backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Message..."
+            className="flex-1 rounded-xl"
+            onKeyDown={(e) => e.key === "Enter" && sendText()}
+          />
+          <button
+            onPointerDown={startRecording}
+            onPointerUp={stopRecording}
+            className={`p-2.5 rounded-xl transition-colors ${recording ? "animate-pulse" : ""}`}
+            style={{ backgroundColor: recording ? "rgba(224,92,122,0.15)" : "var(--bg-subtle)", color: recording ? "#E05C7A" : "var(--text-secondary)" }}
+          >
+            {recording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </button>
+          <Button onClick={sendText} disabled={!text.trim() || sending} size="icon" className="rounded-xl shrink-0" style={{ backgroundColor: "var(--accent-primary)" }}>
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
