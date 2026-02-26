@@ -23,6 +23,8 @@ import QuickVote from "../components/discover/QuickVote";
 import MediaTab from "../components/discover/MediaTab";
 import OpenLibraryBooksTab from "../components/discover/OpenLibraryBooksTab";
 import StoresAndDeals from "../components/discover/StoresAndDeals";
+import GamesTab from "../components/discover/GamesTab";
+import SubmitMediaForm from "../components/discover/SubmitMediaForm";
 
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
@@ -149,6 +151,7 @@ export default function Discover() {
   const [compareMode, setCompareMode] = useState(false);
   const [contentTab, setContentTab] = useState("apps");
   const [smartFilter, setSmartFilter] = useState("all");
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -241,8 +244,8 @@ export default function Discover() {
           )}
         </div>
         {/* Content type tabs */}
-        <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-          {[["apps", "🛠 Apps"], ["media", "🎬 Media"], ["books", "📚 Books"], ["stores", "🛍 Stores"], ["local", "📍 Local"]].map(([val, label]) => (
+         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+           {[["apps", "🛠 Apps"], ["media", "🎬 Media"], ["books", "📚 Books"], ["games", "🎮 Games"], ["stores", "🛍 Stores"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
@@ -428,6 +431,23 @@ export default function Discover() {
         </div>
       )}
 
+      {/* ===== GAMES TAB ===== */}
+      {contentTab === "games" && (
+        <div className="pb-24 mt-4">
+          <div className="px-5 flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Steam Games</h2>
+            <button
+              onClick={() => setShowSubmitForm(true)}
+              className="px-3 py-1 rounded-full text-xs font-medium"
+              style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
+            >
+              + Submit Game
+            </button>
+          </div>
+          <GamesTab />
+        </div>
+      )}
+
       {/* ===== STORES & DEALS TAB ===== */}
       {contentTab === "stores" && (
         <div className="pb-24 mt-4">
@@ -461,6 +481,19 @@ export default function Discover() {
         <ServicePersonModal person={selectedServicePerson} user={user}
           onClose={() => setSelectedServicePerson(null)} />
       )}
-    </div>
-  );
-}
+
+      {/* Submit Media Form Modal */}
+      <AnimatePresence>
+        {showSubmitForm && (
+          <SubmitMediaForm
+            onClose={() => setShowSubmitForm(false)}
+            onSuccess={() => {
+              setShowSubmitForm(false);
+              // Show success toast
+            }}
+          />
+        )}
+      </AnimatePresence>
+      </div>
+      );
+      }
