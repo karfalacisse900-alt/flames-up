@@ -93,14 +93,28 @@ function StoreCard({ store, onShare, onRatingChange }) {
 
 export default function StoresAndDeals() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("Popular");
   const [shareItem, setShareItem] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const filtered = activeCategory === "All"
-    ? STORES
-    : STORES.filter(s => s.category === activeCategory);
+  const filtered = useMemo(() => {
+    let result = activeCategory === "All"
+      ? STORES
+      : STORES.filter(s => s.category === activeCategory);
+
+    if (sortBy === "A-Z") {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return result;
+  }, [activeCategory, sortBy]);
+
+  const handleRatingChange = () => {
+    setRefreshKey(k => k + 1);
+  };
 
   return (
-    <div className="pb-10">
+    <div className="pb-10" key={refreshKey}>
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
@@ -131,14 +145,29 @@ export default function StoresAndDeals() {
         </div>
       </div>
 
+      {/* Sort */}
+      <div className="px-5 mb-3 flex justify-end">
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+          className="text-xs font-medium outline-none"
+          style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", border: "1px solid var(--border-light)", padding: "6px 10px", borderRadius: "8px" }}
+        >
+          {SORT_OPTIONS.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Stores grid */}
       <div className="px-5 space-y-2">
         <AnimatePresence>
           {filtered.map(store => (
             <StoreCard
-              key={store.name}
+              key={store.id}
               store={store}
               onShare={setShareItem}
+              onRatingChange={handleRatingChange}
             />
           ))}
         </AnimatePresence>
