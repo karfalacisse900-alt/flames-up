@@ -21,6 +21,31 @@ async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
+async function spotifySearchWithBackoff(url, token, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok) {
+      return res;
+    }
+
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get("Retry-After") || "1", 10);
+      const waitTime = retryAfter * 1000 * Math.pow(2, attempt);
+      console.log(`Rate limited (429). Waiting ${waitTime}ms before retry ${attempt + 1}/${maxRetries}`);
+      await sleep(waitTime);
+      continue;
+    }
+
+    // For other errors, fail fast
+    return res;
+  }
+
+  return Response.json({ error: "Rate limited after max retries" }, { status: 429 });
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -33,14 +58,12 @@ Deno.serve(async (req) => {
     if (!query) return Response.json({ error: "Missing query" }, { status: 400 });
 
     const token = await getSpotifyToken();
-    await sleep(500); // Rate limit prevention
+    await sleep(300);
 
     const searchTypes = type === "all" ? "track,artist,album" : type;
     const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${searchTypes}&limit=${limit}&market=US`;
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await spotifySearchWithBackoff(url, token);
 
     if (!res.ok) {
       const text = await res.text();
