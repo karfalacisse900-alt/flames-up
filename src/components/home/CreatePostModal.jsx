@@ -119,7 +119,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 12px", flexShrink: 0 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, fontFamily: "var(--font-serif)", color: "var(--text-primary)", margin: 0 }}>New Post</h2>
-          <button onClick={onClose} style={{ padding: 8, borderRadius: 99, background: "var(--bg-app)", border: "none", cursor: "pointer", display: "flex" }}>
+          <button onClick={onClose} style={{ padding: 8, borderRadius: 99, background: "var(--bg-modal)", border: "none", cursor: "pointer", display: "flex" }}>
             <X style={{ width: 18, height: 18, color: "var(--text-hint)" }} />
           </button>
         </div>
