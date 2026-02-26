@@ -86,11 +86,15 @@ const SORT_OPTIONS = [
 
 // ── Single song card ────────────────────────────────────────────────────────
 function SongCard({ track, onShare }) {
-  const [coverClicked, setCoverClicked] = useState(false);
+  const [playKey, setPlayKey] = useState(0); // increment to re-trigger autoPlay
+  const [isPreviewActive, setIsPreviewActive] = useState(false);
 
   const handleCoverClick = (e) => {
     e.stopPropagation();
-    if (track.preview_url) setCoverClicked(true);
+    if (track.preview_url) {
+      setIsPreviewActive(true);
+      setPlayKey(k => k + 1);
+    }
   };
 
   return (
