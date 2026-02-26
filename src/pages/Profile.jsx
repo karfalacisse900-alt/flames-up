@@ -26,8 +26,6 @@ export default function Profile() {
   const [aboutMe, setAboutMe] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [skills, setSkills] = useState([]);
-  const [newSkill, setNewSkill] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
   const [activeTab, setActiveTab] = useState("posts");
