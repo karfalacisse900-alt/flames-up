@@ -75,9 +75,9 @@ export default function Profile() {
     enabled: !!user?.email,
   });
 
-  const { data: savedItems = [] } = useQuery({
-    queryKey: ["savedItems", user?.email],
-    queryFn: () => base44.entities.SavedItem.filter({ user_email: user.email }, "-created_date", 100),
+  const { data: likedPosts = [] } = useQuery({
+    queryKey: ["likedPosts", user?.email],
+    queryFn: () => base44.entities.Post.list("-created_date", 200).then(posts => posts.filter(p => p.liked_by?.includes(user.email))),
     enabled: !!user?.email,
   });
 
