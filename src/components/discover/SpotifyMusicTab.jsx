@@ -187,6 +187,7 @@ export default function SpotifyMusicTab() {
   const [genre, setGenre] = useState("All");
   const [searchResults, setSearchResults] = useState(null);
   const [enriched, setEnriched] = useState({}); // keyed by "title|artist"
+  const [enrichedKeys, setEnrichedKeys] = useState(new Set()); // tracks which keys have been attempted
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [enriching, setEnriching] = useState(false);
