@@ -92,7 +92,7 @@ export default function Layout({ children, currentPageName }) {
         <EmailVerificationBanner onDismiss={() => setShowVerifyBanner(false)} />
       )}
       {!hideNav && <AppAIAssistant />}
-      <MiniStickyPlayer track={currentTrack} onClose={() => setCurrentTrack(null)} />
+      <MiniPlayerWrapper />
     </div>);
 
 }
