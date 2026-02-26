@@ -471,7 +471,9 @@ export default function MediaTab({ user }) {
   // Filtered & sorted list
   const filtered = useMemo(() => {
     let list = MEDIA_CATALOGUE.filter(item => {
-      const typeMatch = activeType === "all" || item.media_type === activeType;
+      const typeMatch = activeType === "all" || activeType === "movieshow"
+        ? (activeType === "all" || item.media_type === "movie" || item.media_type === "show")
+        : item.media_type === activeType;
       const genreMatch = selectedGenre === "all" || item.genre?.includes(selectedGenre);
       const moodMatch = selectedMood === "all" || item.mood_tags?.includes(selectedMood);
       const searchMatch = !search ||
@@ -494,7 +496,7 @@ export default function MediaTab({ user }) {
 
   const isMusicView = activeType === "music";
   const isBookView = activeType === "book";
-  const isMovieShowView = activeType === "movie" || activeType === "show";
+  const isMovieShowView = activeType === "movieshow";
   const activeFilterCount = [selectedGenre !== "all", selectedMood !== "all", sortBy !== "default"].filter(Boolean).length;
 
   return (
