@@ -250,6 +250,20 @@ export default function TmdbMoviesTab({ defaultTab = "movie" }) {
         </div>
       </div>
 
+      {/* Classic picks quick search */}
+      <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 w-max pb-1">
+          {CLASSIC_SEARCHES.slice(0, 8).map(title => (
+            <button key={title}
+              onClick={() => { setQuery(title); setIsSearch(true); fetchContent({ q: title }); }}
+              className="px-3 py-1 rounded-full text-[10px] font-medium border whitespace-nowrap transition-all active:scale-95"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
+              {title}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Search bar */}
       <form onSubmit={handleSearch} className="px-5 mb-3">
         <div className="relative flex gap-2">
