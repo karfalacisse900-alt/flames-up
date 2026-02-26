@@ -389,7 +389,7 @@ export default function SpotifyMusicTab() {
           <AnimatePresence>
             {displayList.map(track => (
               <div key={track.id} onClick={() => setSelectedItem(track)} className="cursor-pointer">
-                <SongCard track={track} />
+                <SongCard track={track} onShare={setShareItem} />
               </div>
             ))}
           </AnimatePresence>
