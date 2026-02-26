@@ -100,7 +100,7 @@ body {
   touch-action: pan-y;
   overscroll-behavior: none;
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
   /* Stable viewport on mobile */
   min-height: 100dvh;
   min-height: -webkit-fill-available;
@@ -111,7 +111,7 @@ body {
 
 #root {
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
   /* Prevent layout shift from scrollbars appearing */
   scrollbar-gutter: stable;
 }

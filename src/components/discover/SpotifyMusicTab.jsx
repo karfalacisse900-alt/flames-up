@@ -170,28 +170,7 @@ export default function SpotifyMusicTab() {
   const [sortBy, setSortBy] = useState("default");
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich songs on demand via search (avoid rate limiting)
-  const enrichSongOnDemand = async (song) => {
-    const key = `${song.title}|${song.artist}`;
-    if (enriched[key]) return; // Already enriched
-    
-    try {
-      const query = `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`;
-      const res = await base44.functions.invoke("spotifySearch", {
-        query, type: "track", limit: 3,
-      });
-      if (res.data?.error) return;
-      const tracks = res.data?.tracks || [];
-      const match = tracks.find(t =>
-        t.title?.toLowerCase() === song.title.toLowerCase()
-      ) || tracks[0];
-      if (match) {
-        setEnriched(prev => ({ ...prev, [key]: match }));
-      }
-    } catch (err) {
-      console.error("Spotify enrichment error:", err.message);
-    }
-  };
+
 
   // Live search — fetch tracks, albums, and artists
   const doSearch = async (q) => {
