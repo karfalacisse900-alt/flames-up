@@ -128,6 +128,11 @@ function CollectionDetail({ collection, user, onBack, onDelete }) {
     qc.invalidateQueries({ queryKey: ["collectionItems", collection.id] });
   };
 
+  const handleUpdateItem = async (id, data) => {
+    await base44.entities.CollectionItem.update(id, data);
+    qc.invalidateQueries({ queryKey: ["collectionItems", collection.id] });
+  };
+
   const handleDeleteCollection = async () => {
     for (const item of items) await base44.entities.CollectionItem.delete(item.id);
     await base44.entities.UserCollection.delete(collection.id);
