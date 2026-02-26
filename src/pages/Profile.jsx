@@ -30,7 +30,7 @@ export default function Profile() {
   const [newSkill, setNewSkill] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
-  const [activeTab, setActiveTab] = useState("badges");
+  const [activeTab, setActiveTab] = useState("posts");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
