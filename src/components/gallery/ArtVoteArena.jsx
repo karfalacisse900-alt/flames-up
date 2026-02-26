@@ -51,20 +51,41 @@ export default function ArtVoteArena({ user }) {
   const [votes, setVotes] = useState({}); // { matchId: artId }
   const [matchIndex, setMatchIndex] = useState(0);
 
-  const { data: artworks = [], isLoading } = useQuery({
+  const { data: artworks = [], isLoading: loadingArtworks } = useQuery({
     queryKey: ["artVoteArtworks"],
     queryFn: () => base44.entities.Artwork.filter({ status: "published" }, "-created_date", 60),
     staleTime: 60000,
   });
 
+  const { data: artPieces = [], isLoading: loadingPieces } = useQuery({
+    queryKey: ["artVotePieces"],
+    queryFn: () => base44.entities.ArtPiece.list("-created_date", 60),
+    staleTime: 60000,
+  });
+
+  const isLoading = loadingArtworks || loadingPieces;
+
+  const allArt = useMemo(() => [
+    ...artworks,
+    ...artPieces.map(p => ({
+      id: `piece_${p.id}`,
+      _raw_id: p.id,
+      _type: "ArtPiece",
+      title: p.title,
+      image_url: p.image_url,
+      user_name: p.creator_name || p.owner_name,
+      vote_count: 0,
+    }))
+  ], [artworks, artPieces]);
+
   const matches = useMemo(() => {
-    const shuffled = [...artworks].sort(() => Math.random() - 0.5);
+    const shuffled = [...allArt].sort(() => Math.random() - 0.5);
     const pairs = [];
     for (let i = 0; i + 1 < shuffled.length; i += 2) {
       pairs.push([shuffled[i], shuffled[i + 1]]);
     }
     return pairs;
-  }, [artworks.length]);
+  }, [allArt.length]);
 
   const currentMatch = matches[matchIndex % Math.max(1, matches.length)];
   const matchId = currentMatch ? `${currentMatch[0]?.id}_${currentMatch[1]?.id}` : null;
