@@ -95,10 +95,15 @@ export default function ArtVoteArena({ user }) {
   const handleVote = (artId) => {
     if (!matchId || voted) return;
     setVotes(prev => ({ ...prev, [matchId]: artId }));
-    // Update vote count
-    base44.entities.Artwork.update(artId, {
-      vote_count: ((artworks.find(a => a.id === artId)?.vote_count) || 0) + 1,
-    }).then(() => qc.invalidateQueries({ queryKey: ["artVoteArtworks"] }));
+    const art = allArt.find(a => a.id === artId);
+    if (!art) return;
+    if (art._type === "ArtPiece") {
+      base44.entities.ArtPiece.update(art._raw_id, { like_count: (art.vote_count || art.like_count || 0) + 1 })
+        .then(() => qc.invalidateQueries({ queryKey: ["artVotePieces"] }));
+    } else {
+      base44.entities.Artwork.update(artId, { vote_count: (art.vote_count || 0) + 1 })
+        .then(() => qc.invalidateQueries({ queryKey: ["artVoteArtworks"] }));
+    }
   };
 
   const nextMatch = () => setMatchIndex(i => i + 1);
