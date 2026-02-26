@@ -46,7 +46,7 @@ function formatTime(sec) {
 }
 
 // ── Inline player shown inside the card ───────────────────────────────────
-export function AudioPreviewPlayer({ previewUrl, trackTitle }) {
+export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, onPlayStart }) {
   const [state, setState] = useState("idle"); // idle | loading | playing | paused
   const [progress, setProgress] = useState(0); // 0–1
   const [elapsed, setElapsed] = useState(0);
