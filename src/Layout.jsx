@@ -4,6 +4,8 @@ import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react";
 import AppAIAssistant from "@/components/AppAIAssistant";
+import { MiniStickyPlayer } from "@/components/discover/AudioPreviewPlayer";
+import { useAudio } from "@/components/AudioContext";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
