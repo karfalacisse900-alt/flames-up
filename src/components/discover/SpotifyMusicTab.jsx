@@ -195,46 +195,45 @@ export default function SpotifyMusicTab() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich ALL preloaded songs on mount (parallel batches of 4)
+  // Enrich ALL preloaded songs on mount (sequential for reliability)
   useEffect(() => {
     let cancelled = false;
     const enrichBatch = async () => {
       setEnriching(true);
-      const CHUNK = 4;
-      for (let i = 0; i < PRELOADED_SONGS.length; i += CHUNK) {
+      for (const song of PRELOADED_SONGS) {
         if (cancelled) break;
-        const chunk = PRELOADED_SONGS.slice(i, i + CHUNK);
-        await Promise.all(chunk.map(async (song) => {
-          if (cancelled) return;
-          const key = `${song.title}|${song.artist}`;
-          // Try multiple query formats for better hit rate
-          const queries = [
-            `track:"${song.title}" artist:"${song.artist.split(" feat")[0].split(",")[0].trim()}"`,
-            `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
-            song.title,
-          ];
-          for (const q of queries) {
-            if (cancelled) break;
-            try {
-              const res = await base44.functions.invoke("spotifySearch", {
-                query: q, type: "track", limit: 3,
-              });
-              if (res.data?.error) break;
-              // Find best matching track (exact title match preferred)
-              const tracks = res.data?.tracks || [];
-              const match = tracks.find(t =>
-                t.title?.toLowerCase() === song.title.toLowerCase()
-              ) || tracks[0];
-              if (match) {
-                setEnriched(prev => ({ ...prev, [key]: match }));
-                break; // found a match, stop trying other queries
-              }
-            } catch (err) {
-              console.error("Spotify fetch error:", err.message);
+        const key = `${song.title}|${song.artist}`;
+        // Try multiple query formats for better hit rate
+        const queries = [
+          `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
+          `${song.title}`,
+        ];
+        for (const q of queries) {
+          if (cancelled) break;
+          try {
+            const res = await base44.functions.invoke("spotifySearch", {
+              query: q, type: "track", limit: 5,
+            });
+            if (res.data?.error) {
+              console.log("Spotify error for", q, res.data.error);
+              continue;
             }
+            // Find best matching track (exact title match preferred)
+            const tracks = res.data?.tracks || [];
+            const match = tracks.find(t =>
+              t.title?.toLowerCase() === song.title.toLowerCase() &&
+              t.artist?.toLowerCase().includes(song.artist.split(" feat")[0].split(",")[0].trim().toLowerCase())
+            ) || tracks.find(t => t.title?.toLowerCase() === song.title.toLowerCase()) || tracks[0];
+            if (match && match.preview_url) {
+              setEnriched(prev => ({ ...prev, [key]: match }));
+              break; // found a good match, stop trying
+            }
+          } catch (err) {
+            console.error("Spotify fetch error:", err.message);
           }
-        }));
-        await new Promise(r => setTimeout(r, 300));
+        }
+        // Small delay between requests to avoid rate limiting
+        await new Promise(r => setTimeout(r, 200));
       }
       if (!cancelled) setEnriching(false);
     };
