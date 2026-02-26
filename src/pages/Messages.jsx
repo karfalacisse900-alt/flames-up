@@ -252,7 +252,7 @@ function ChatView({ user, conversation, onBack }) {
       )}
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-        {messages.map((msg) => {
+        {visibleMessages.map((msg) => {
           const isMe = msg.sender_email === user.email;
           return (
             <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
