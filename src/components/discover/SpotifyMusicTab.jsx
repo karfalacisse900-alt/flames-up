@@ -195,46 +195,51 @@ export default function SpotifyMusicTab() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich ALL preloaded songs on mount (parallel batches of 4)
+  // Enrich ALL preloaded songs on mount (batches of 5)
   useEffect(() => {
     let cancelled = false;
     const enrichBatch = async () => {
       setEnriching(true);
-      const CHUNK = 4;
+      const CHUNK = 5;
       for (let i = 0; i < PRELOADED_SONGS.length; i += CHUNK) {
         if (cancelled) break;
         const chunk = PRELOADED_SONGS.slice(i, i + CHUNK);
         await Promise.all(chunk.map(async (song) => {
           if (cancelled) return;
           const key = `${song.title}|${song.artist}`;
-          // Try multiple query formats for better hit rate
+          const mainArtist = song.artist.split(" feat")[0].split(",")[0].trim();
           const queries = [
-            `track:"${song.title}" artist:"${song.artist.split(" feat")[0].split(",")[0].trim()}"`,
-            `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
+            `${song.title} ${mainArtist}`,
+            `track:${song.title} artist:${mainArtist}`,
             song.title,
           ];
           for (const q of queries) {
             if (cancelled) break;
             try {
               const res = await base44.functions.invoke("spotifySearch", {
-                query: q, type: "track", limit: 3,
+                query: q, type: "track", limit: 5,
               });
               if (res.data?.error) break;
-              // Find best matching track (exact title match preferred)
               const tracks = res.data?.tracks || [];
-              const match = tracks.find(t =>
-                t.title?.toLowerCase() === song.title.toLowerCase()
-              ) || tracks[0];
+              if (!tracks.length) continue;
+              // Prefer exact title match, otherwise take first result
+              const titleLow = song.title.toLowerCase();
+              const artistLow = mainArtist.toLowerCase();
+              const match =
+                tracks.find(t => t.title?.toLowerCase() === titleLow && t.artist?.toLowerCase().includes(artistLow)) ||
+                tracks.find(t => t.title?.toLowerCase() === titleLow) ||
+                tracks[0];
               if (match) {
+                // Always store the match even if preview_url is null — we still get cover + link
                 setEnriched(prev => ({ ...prev, [key]: match }));
-                break; // found a match, stop trying other queries
+                break;
               }
             } catch (err) {
-              console.error("Spotify fetch error:", err.message);
+              console.error("Spotify enrich error:", err.message);
             }
           }
         }));
-        await new Promise(r => setTimeout(r, 300));
+        if (!cancelled) await new Promise(r => setTimeout(r, 250));
       }
       if (!cancelled) setEnriching(false);
     };
