@@ -125,6 +125,13 @@ export default function ArtVoteArena({ user }) {
     </div>
   );
 
+  // Compute top art overall
+  const topArt = useMemo(() => {
+    return [...allArt]
+      .sort((a, b) => (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0))
+      .slice(0, 3);
+  }, [allArt]);
+
   const [artA, artB] = currentMatch || [];
 
   // Compute percentages
@@ -164,7 +171,28 @@ export default function ArtVoteArena({ user }) {
         ))}
       </div>
 
-
+      {/* Top Rated Art Section */}
+      {topArt && topArt.length > 0 && (
+        <div className="mt-8 pt-6 border-t" style={{ borderColor: "var(--border-light)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Trophy className="w-4 h-4" style={{ color: "#F5A623" }} />
+            <p className="text-sm font-bold" style={{ color: "#243D33", fontFamily: "var(--font-serif)" }}>Top Rated Art</p>
+          </div>
+          <div className="space-y-2">
+            {topArt.map((art, idx) => (
+              <div key={art.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                <span className="text-sm font-bold" style={{ color: "#E07070" }}>#{idx + 1}</span>
+                <img src={art.image_url} alt={art.title} className="w-10 h-10 rounded-lg object-cover" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
+                  <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{art.user_name}</p>
+                </div>
+                <p className="text-xs font-bold" style={{ color: "#F5A623" }}>{art.vote_count || art.like_count || 0} votes</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
