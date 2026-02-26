@@ -109,9 +109,6 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              {!post.is_anonymous && post.author_avatar_url ? (
-                <img src={post.author_avatar_url} alt={post.author_name} className="w-5 h-5 rounded-full object-cover shrink-0" />
-              ) : null}
               <Link to={!post.is_anonymous && post.author_email ? createPageUrl(`UserProfile?email=${post.author_email}`) : "#"}
                 className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
                 {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
