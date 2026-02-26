@@ -6,6 +6,7 @@ import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react"
 import AppAIAssistant from "@/components/AppAIAssistant";
 import { MiniStickyPlayer } from "@/components/discover/AudioPreviewPlayer";
 import { useAudio } from "@/components/AudioContext";
+import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
@@ -21,7 +22,6 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
-  const { currentTrack, setCurrentTrack } = useAudio();
 
   useEffect(() => {
     base44.auth.me().then((u) => {
