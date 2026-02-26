@@ -242,12 +242,12 @@ function CommentItem({ reply }) {
 
         {reply.type === "voice" ? (
           <VoicePlayer audioUrl={reply.audio_url} />
-        ) : reply.type === "image" ? (
-          <ImageCard src={reply.image_url} alt="comment" maxHeight={240} aspectRatio="1/1" />
+        ) : reply.type === "image" && reply.image_url ? (
+          <img src={reply.image_url} alt="comment" className="rounded-xl mt-1 max-w-full object-cover" style={{ maxHeight: 240 }} />
         ) : reply.type === "sticker" ? (
           <span className="text-4xl">{reply.body}</span>
-        ) : reply.type === "gif" ? (
-          <GifCard src={reply.gif_url} alt="GIF" maxHeight={200} />
+        ) : reply.type === "gif" && reply.gif_url ? (
+          <img src={reply.gif_url} alt="GIF" className="rounded-xl mt-1 max-w-full" style={{ maxHeight: 200 }} />
         ) : (
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{reply.body}</p>
         )}
