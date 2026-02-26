@@ -347,6 +347,58 @@ export default function Gallery() {
           />
         )}
       </AnimatePresence>
+
+      {/* Upload Modal */}
+      <AnimatePresence>
+        {showUpload && (
+          <motion.div className="fixed inset-0 z-50 flex items-end justify-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowUpload(false)} />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="relative w-full max-w-lg rounded-t-3xl p-6 space-y-4"
+              style={{ backgroundColor: "#E6EFEA" }}
+              onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Upload Artwork</h2>
+                <button onClick={() => setShowUpload(false)}><X className="w-5 h-5" style={{ color: "#6B6B6B" }} /></button>
+              </div>
+
+              {/* File picker */}
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                onChange={e => setUploadFile(e.target.files?.[0] || null)} />
+              <button onClick={() => fileInputRef.current?.click()}
+                className="w-full py-8 rounded-2xl border-2 border-dashed flex flex-col items-center gap-2 transition-colors"
+                style={{ borderColor: uploadFile ? "#3C6E5A" : "#BF9E79", backgroundColor: uploadFile ? "rgba(60,110,90,0.06)" : "transparent" }}>
+                {uploadFile ? (
+                  <img src={URL.createObjectURL(uploadFile)} alt="preview" className="h-24 rounded-xl object-cover" />
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6" style={{ color: "#BF9E79" }} />
+                    <span className="text-sm" style={{ color: "#6B6B6B" }}>Tap to choose an image</span>
+                  </>
+                )}
+              </button>
+
+              <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
+                placeholder="Title *"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
+              <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
+                placeholder="Description (optional)" rows={2}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
+                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
+
+              <Button onClick={handleUpload}
+                disabled={uploading || !uploadFile || !uploadTitle.trim()}
+                className="w-full rounded-xl" style={{ backgroundColor: "#3C6E5A", color: "#fff" }}>
+                {uploading ? "Uploading…" : "🎨 Upload to Gallery"}
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
