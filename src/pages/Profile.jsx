@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, Palette, MessageSquare, Wallet, Bookmark, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Wrench, Plus, X, Download, HelpCircle } from "lucide-react";
+import { LogOut, Edit2, Palette, MessageSquare, Wallet, Bookmark, Gift, ShoppingBag, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Wrench, Plus, X, Download, HelpCircle, Film } from "lucide-react";
+import SavedMediaLists from "../components/profile/SavedMediaLists";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
 import InterestsSection from "../components/profile/InterestsSection";
