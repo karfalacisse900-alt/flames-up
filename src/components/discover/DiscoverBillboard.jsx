@@ -221,7 +221,7 @@ export default function DiscoverBillboard({ items, user, onItemClick }) {
                 {item.link && (
                   <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-sm font-semibold"
-                    style={{ backgroundColor: "#2E6B4F", color: "#fff", boxShadow: "0 2px 10px rgba(111,143,114,0.3)" }}>
+                    style={{ backgroundColor: "var(--accent-primary)", color: "#fff", boxShadow: "0 2px 10px rgba(111,143,114,0.3)" }}>
                     Visit <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
