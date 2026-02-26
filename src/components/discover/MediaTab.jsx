@@ -641,7 +641,7 @@ export default function MediaTab({ user }) {
       ) : isBookView ? (
         <OpenLibraryBooksTab />
       ) : isMovieShowView ? (
-        <TmdbMoviesTab defaultTab={activeType} />
+        <TmdbMoviesTab defaultTab="movie" />
       ) : (
         <div className="px-5 space-y-3">
           {filtered.length === 0 ? (
