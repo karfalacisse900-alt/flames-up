@@ -273,7 +273,7 @@ export default function Discover() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9B9B9B]" />
                   <Input placeholder="Search tools, apps, services..." value={search}
-                    onChange={e => { setSearch(e.target.value); setSwipeIndex(0); }}
+                    onChange={e => { setSearch(e.target.value); }}
                     className="pl-10 rounded-xl text-sm" />
                 </div>
                 <button onClick={() => setShowFilters(f => !f)}
