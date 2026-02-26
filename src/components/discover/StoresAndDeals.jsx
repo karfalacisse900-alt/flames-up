@@ -24,7 +24,9 @@ const STORES = [
 
 const CATEGORIES = ["All", "Outlet / Discount", "Department Store", "Tech", "Beauty", "Home", "Grocery"];
 
-function StoreCard({ store, onShare }) {
+const SORT_OPTIONS = ["Popular", "Top Rated", "A-Z"];
+
+function StoreCard({ store, onShare, onRatingChange }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -32,48 +34,58 @@ function StoreCard({ store, onShare }) {
       className="p-4 rounded-2xl"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
     >
-      {/* Header with icon */}
+      {/* Header */}
       <div className="flex items-start gap-2 mb-3">
         <span className="text-2xl shrink-0">{store.icon}</span>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
             {store.name}
           </h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>
+            {store.category}
+          </p>
           <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             {store.description}
           </p>
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2">
-        <a
-          href={store.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={e => e.stopPropagation()}
-          className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
-          style={{ backgroundColor: "#2E6B4F", color: "#fff" }}
-        >
-          Website
-        </a>
-        <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name)}+near+me`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={e => e.stopPropagation()}
-          className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
-        >
-          Maps
-        </a>
-        <button
-          onClick={e => { e.stopPropagation(); onShare(store); }}
-          className="p-2 rounded-lg transition-all"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
-        >
-          <Share2 className="w-3.5 h-3.5" />
-        </button>
+      {/* Worth it button and actions */}
+      <div className="flex flex-col gap-2">
+        <WorthItButton
+          contentType="store"
+          contentId={store.id}
+          onRatingChange={onRatingChange}
+        />
+        <div className="flex gap-2">
+          <a
+            href={store.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
+            style={{ backgroundColor: "#2E6B4F", color: "#fff" }}
+          >
+            Website
+          </a>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name)}+near+me`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
+          >
+            Maps
+          </a>
+          <button
+            onClick={e => { e.stopPropagation(); onShare(store); }}
+            className="p-2 rounded-lg transition-all"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </motion.div>
   );
