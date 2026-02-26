@@ -143,6 +143,11 @@ function SongCard({ track, onShare }) {
               Listen on Spotify
             </a>
           ) : null}
+          {/* Worth it rating */}
+          <WorthItButton
+            contentType="song"
+            contentId={`${track.title}|${track.artist}`}
+          />
           {/* Share button */}
           <button
             onClick={e => { e.stopPropagation(); onShare && onShare(track); }}
