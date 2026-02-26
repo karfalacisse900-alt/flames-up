@@ -37,6 +37,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
   const fileInputRef = React.useRef(null);
 
   const handleFileUpload = async (e) => {
