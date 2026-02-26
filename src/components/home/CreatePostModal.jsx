@@ -265,7 +265,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         </div>
 
         {/* ─── STICKY FOOTER — always visible ─── */}
-        <div style={{ flexShrink: 0, padding: "12px 20px 28px", borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-app)" }}>
+        <div style={{ flexShrink: 0, padding: "12px 20px 28px", borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-modal)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />
