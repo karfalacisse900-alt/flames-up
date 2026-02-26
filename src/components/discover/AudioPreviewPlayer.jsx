@@ -70,6 +70,17 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
 
   useEffect(() => () => cleanup(), [cleanup]);
 
+  // autoPlay support
+  useEffect(() => {
+    if (autoPlay && previewUrl && state === "idle") {
+      // small delay to allow DOM to mount
+      const t = setTimeout(() => {
+        handlePlay({ stopPropagation: () => {} });
+      }, 100);
+      return () => clearTimeout(t);
+    }
+  }, [autoPlay, previewUrl]); // eslint-disable-line
+
   const handlePlay = (e) => {
     e.stopPropagation();
     if (!previewUrl) return;
