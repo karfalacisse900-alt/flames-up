@@ -87,6 +87,12 @@ export default function ArtVoteArena({ user }) {
     return pairs;
   }, [allArt.length]);
 
+  const topArt = useMemo(() => {
+    return [...allArt]
+      .sort((a, b) => (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0))
+      .slice(0, 3);
+  }, [allArt]);
+
   const currentMatch = matches[matchIndex % Math.max(1, matches.length)];
   const matchId = currentMatch ? `${currentMatch[0]?.id}_${currentMatch[1]?.id}` : null;
   const voted = matchId ? !!votes[matchId] : false;
@@ -124,13 +130,6 @@ export default function ArtVoteArena({ user }) {
       <p className="text-sm" style={{ color: "#6B6B6B" }}>Not enough artworks for a vote yet</p>
     </div>
   );
-
-  // Compute top art overall
-  const topArt = useMemo(() => {
-    return [...allArt]
-      .sort((a, b) => (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0))
-      .slice(0, 3);
-  }, [allArt]);
 
   const [artA, artB] = currentMatch || [];
 
