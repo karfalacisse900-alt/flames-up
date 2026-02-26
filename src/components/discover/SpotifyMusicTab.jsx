@@ -165,9 +165,9 @@ function SongCard({ track, onShare }) {
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
               Listen on Spotify
             </a>
-          ) : track._enriching ? (
-            <span className="text-[10px] italic" style={{ color: "var(--text-hint)" }}>Loading…</span>
-          ) : null}
+          ) : (
+            <span className="text-[10px] italic" style={{ color: "var(--text-hint)" }}>Searching…</span>
+          )}
           {/* Share button */}
           <button
             onClick={e => { e.stopPropagation(); onShare && onShare(track); }}
@@ -187,7 +187,6 @@ export default function SpotifyMusicTab() {
   const [genre, setGenre] = useState("All");
   const [searchResults, setSearchResults] = useState(null);
   const [enriched, setEnriched] = useState({}); // keyed by "title|artist"
-  const [enrichedKeys, setEnrichedKeys] = useState(new Set()); // tracks which keys have been attempted
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [enriching, setEnriching] = useState(false);
@@ -196,51 +195,46 @@ export default function SpotifyMusicTab() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich ALL preloaded songs on mount (batches of 5)
+  // Enrich ALL preloaded songs on mount (parallel batches of 4)
   useEffect(() => {
     let cancelled = false;
     const enrichBatch = async () => {
       setEnriching(true);
-      const CHUNK = 5;
+      const CHUNK = 4;
       for (let i = 0; i < PRELOADED_SONGS.length; i += CHUNK) {
         if (cancelled) break;
         const chunk = PRELOADED_SONGS.slice(i, i + CHUNK);
         await Promise.all(chunk.map(async (song) => {
           if (cancelled) return;
           const key = `${song.title}|${song.artist}`;
-          const mainArtist = song.artist.split(" feat")[0].split(",")[0].trim();
+          // Try multiple query formats for better hit rate
           const queries = [
-            `${song.title} ${mainArtist}`,
-            `track:${song.title} artist:${mainArtist}`,
+            `track:"${song.title}" artist:"${song.artist.split(" feat")[0].split(",")[0].trim()}"`,
+            `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
             song.title,
           ];
           for (const q of queries) {
             if (cancelled) break;
             try {
               const res = await base44.functions.invoke("spotifySearch", {
-                query: q, type: "track", limit: 5,
+                query: q, type: "track", limit: 3,
               });
               if (res.data?.error) break;
+              // Find best matching track (exact title match preferred)
               const tracks = res.data?.tracks || [];
-              if (!tracks.length) continue;
-              // Prefer exact title match, otherwise take first result
-              const titleLow = song.title.toLowerCase();
-              const artistLow = mainArtist.toLowerCase();
-              const match =
-                tracks.find(t => t.title?.toLowerCase() === titleLow && t.artist?.toLowerCase().includes(artistLow)) ||
-                tracks.find(t => t.title?.toLowerCase() === titleLow) ||
-                tracks[0];
+              const match = tracks.find(t =>
+                t.title?.toLowerCase() === song.title.toLowerCase()
+              ) || tracks[0];
               if (match) {
-                // Always store the match even if preview_url is null — we still get cover + link
                 setEnriched(prev => ({ ...prev, [key]: match }));
-                break;
+                break; // found a match, stop trying other queries
               }
             } catch (err) {
-              console.error("Spotify enrich error:", err.message);
+              console.error("Spotify fetch error:", err.message);
             }
           }
         }));
-        if (!cancelled) await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 300));
       }
       if (!cancelled) setEnriching(false);
     };

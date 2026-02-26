@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, Bookmark } from "lucide-react";
+import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart } from "lucide-react";
 import SavedMediaLists from "../components/profile/SavedMediaLists";
-import SavedDiscoverItems from "../components/profile/SavedDiscoverItems";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
 import InterestsSection from "../components/profile/InterestsSection";
@@ -254,9 +253,6 @@ export default function Profile() {
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-          <TabsTrigger value="saved" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Bookmark className="w-3.5 h-3.5" /> Saved
-          </TabsTrigger>
           <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
@@ -340,11 +336,6 @@ export default function Profile() {
 
         <TabsContent value="interests" className="mt-4">
           <InterestsSection user={user} onUpdated={setUser} />
-        </TabsContent>
-
-        <TabsContent value="saved" className="mt-4">
-          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Apps & services you bookmarked from Discover</p>
-          <SavedDiscoverItems user={user} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-4">
