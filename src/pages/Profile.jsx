@@ -101,8 +101,8 @@ export default function Profile() {
   const activeTheme = THEMES[user?.profile_theme || "default"] || THEMES.default;
 
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, skills, profile_theme: profileTheme });
-    setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, skills, profile_theme: profileTheme }));
+    await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, profile_theme: profileTheme });
+    setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, profile_theme: profileTheme }));
     setShowEdit(false);
   };
 
