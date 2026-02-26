@@ -141,7 +141,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="shrink-0 px-5 pt-5 pb-3 flex items-start justify-between" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5DFD0" }}>
+        <div className="shrink-0 px-5 pt-5 pb-3 flex items-start justify-between" style={{ backgroundColor: "var(--bg-modal)", borderBottom: "1px solid var(--border-light)" }}>
           <div className="flex items-center gap-3">
             <DiscoverLogo item={item} size="md" />
             <div>
