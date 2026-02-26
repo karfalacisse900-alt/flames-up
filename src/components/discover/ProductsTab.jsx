@@ -255,6 +255,7 @@ export default function ProductsTab() {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedFeature, setSelectedFeature] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const { data: dbProducts = [] } = useQuery({
     queryKey: ["products"],
