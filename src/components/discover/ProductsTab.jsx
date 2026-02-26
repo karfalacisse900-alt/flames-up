@@ -3,6 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import QuickVote from "./QuickVote";
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import ProductCard from "../products/ProductCard";
+import ProductDetailModal from "../products/ProductDetailModal";
 
 const PRODUCT_CATEGORIES = [
   { key: "all", label: "All" },
