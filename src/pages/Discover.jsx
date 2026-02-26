@@ -342,7 +342,7 @@ export default function Discover() {
           <div className="px-5 mb-2 overflow-x-auto scrollbar-hide mt-3">
             <div className="flex gap-2">
               {categories.map(cat => (
-                <button key={cat} onClick={() => { setActiveCategory(cat); setSwipeIndex(0); }}
+                <button key={cat} onClick={() => { setActiveCategory(cat); }}
                   className="px-3 py-1.5 text-xs rounded-full border whitespace-nowrap transition-all"
                   style={{ backgroundColor: activeCategory === cat ? "var(--accent-primary)" : "var(--bg-nav)", color: activeCategory === cat ? "#fff" : "var(--text-secondary)", borderColor: activeCategory === cat ? "var(--accent-primary)" : "var(--border-light)" }}>
                   {cat === "all" ? "All" : cat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
