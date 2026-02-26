@@ -4,7 +4,7 @@ import { Search, Music, X, Play, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MediaDetailSheet from "./MediaDetailSheet";
 import { AudioPreviewPlayer, MiniStickyPlayer } from "./AudioPreviewPlayer";
-import ShareModal from "./ShareModal";
+import ShareModal from "./ShareModal.jsx";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [
