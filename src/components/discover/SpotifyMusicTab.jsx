@@ -297,7 +297,12 @@ export default function SpotifyMusicTab() {
 
   const displayList = applySort(searchResults
     ? searchResults.map(t => toDisplayTrack({ id: t.id, title: t.title, artist: t.artist, cover_url: t.cover_url, spotify_url: t.spotify_url, preview_url: t.preview_url, album: t.album, release_year: t.release_year }))
-    : filteredPreloaded.map(toDisplayTrack));
+    : filteredPreloaded.map(track => {
+        const result = toDisplayTrack(track);
+        // Enrich on demand when rendering
+        enrichSongOnDemand(track);
+        return result;
+      }));
 
   return (
     <div className="pb-10">
