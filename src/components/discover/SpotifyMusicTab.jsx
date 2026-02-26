@@ -198,7 +198,8 @@ export default function SpotifyMusicTab() {
   const [sortBy, setSortBy] = useState("default");
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
-  const { setCurrentTrack } = useAudio();
+  const audioContext = useAudio();
+  const setCurrentTrack = audioContext?.setCurrentTrack || (() => {});
 
   // Enrich songs on demand via search (avoid rate limiting)
   const enrichSongOnDemand = async (song) => {
