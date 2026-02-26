@@ -73,6 +73,7 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
   // autoPlay support — trigger fresh play when autoPlay turns true
   const autoPlayFired = React.useRef(false);
   useEffect(() => {
+    if (!autoPlay) { autoPlayFired.current = false; return; }
     if (autoPlay && previewUrl && !autoPlayFired.current) {
       autoPlayFired.current = true;
       globalAudio.stop();
