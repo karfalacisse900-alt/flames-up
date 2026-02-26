@@ -200,6 +200,33 @@ export default function Gallery() {
     return new Date(b.created_date) - new Date(a.created_date);
   });
 
+  const handleUpload = async () => {
+    if (!uploadFile || !uploadTitle.trim() || !user) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: uploadFile });
+      await base44.entities.Artwork.create({
+        user_email: user.email,
+        user_name: user.full_name || "Artist",
+        title: uploadTitle.trim(),
+        description: uploadDesc,
+        image_url: file_url,
+        status: "published",
+        like_count: 0,
+        liked_by: [],
+        comment_count: 0,
+        vote_count: 0,
+      });
+      qc.invalidateQueries({ queryKey: ["artworks"] });
+      setShowUpload(false);
+      setUploadTitle("");
+      setUploadDesc("");
+      setUploadFile(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleLike = async (art) => {
     if (!user?.email) return;
     if (art.liked_by?.includes(user.email)) return;
