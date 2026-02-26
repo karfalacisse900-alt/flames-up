@@ -5,30 +5,107 @@ import { ArrowLeft, Plus, Trash2, Bookmark, ChevronRight, Tag, FileText, X } fro
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
-function CollectionItemCard({ item, onRemove }) {
+function CollectionItemCard({ item, onRemove, onUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [notes, setNotes] = useState(item.notes || "");
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState(item.tags || []);
+
+  const handleSave = async () => {
+    await onUpdate(item.id, { notes, tags });
+    setEditing(false);
+  };
+
+  const addTag = () => {
+    const t = tagInput.trim();
+    if (t && !tags.includes(t)) setTags([...tags, t]);
+    setTagInput("");
+  };
+
+  const removeTag = (t) => setTags(tags.filter(tag => tag !== t));
+
   return (
-    <div className="flex items-center gap-3 py-2.5 border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
-      {item.item_image_url ?
-      <img src={item.item_image_url} alt={item.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" /> :
-
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
-      style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-          {item.item_title?.[0]?.toUpperCase()}
+    <div className="py-3 border-b last:border-b-0" style={{ borderColor: "var(--border-subtle)" }}>
+      <div className="flex items-center gap-3">
+        {item.item_image_url ?
+          <img src={item.item_image_url} alt={item.item_title} className="w-10 h-10 rounded-xl object-cover shrink-0" /> :
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
+            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+            {item.item_title?.[0]?.toUpperCase()}
+          </div>
+        }
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{item.item_title}</p>
+          {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.item_subtitle}</p>}
+          <div className="flex gap-1 flex-wrap mt-1">
+            <span className="text-[10px] px-2 py-0.5 rounded-full capitalize"
+              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+              {item.item_type}
+            </span>
+            {tags.map(t => (
+              <span key={t} className="text-[10px] px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                #{t}
+              </span>
+            ))}
+          </div>
+          {notes && !editing && (
+            <p className="text-[11px] mt-1 italic" style={{ color: "var(--text-hint)" }}>"{notes}"</p>
+          )}
         </div>
-      }
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{item.item_title}</p>
-        {item.item_subtitle && <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>{item.item_subtitle}</p>}
-        <span className="text-[10px] px-2 py-0.5 rounded-full mt-1 inline-block capitalize"
-        style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-          {item.item_type === "app" ? "App" : "Service Person"}
-        </span>
+        <div className="flex gap-1 shrink-0">
+          <button onClick={() => setEditing(e => !e)} className="p-1.5 rounded-full transition-colors" style={{ color: "var(--accent-primary)" }}>
+            <FileText className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full transition-colors" style={{ color: "var(--text-hint)" }}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
-      <button onClick={() => onRemove(item.id)} className="p-1.5 rounded-full transition-colors" style={{ color: "var(--text-hint)" }}>
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-    </div>);
 
+      {editing && (
+        <div className="mt-2 space-y-2 pl-13">
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Add a personal note…"
+            rows={2}
+            className="w-full px-3 py-2 rounded-xl text-xs outline-none resize-none"
+            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+          />
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1 flex-1 px-2 py-1.5 rounded-xl"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <Tag className="w-3 h-3 shrink-0" style={{ color: "var(--text-hint)" }} />
+              <input
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addTag()}
+                placeholder="Add tag…"
+                className="flex-1 text-xs outline-none bg-transparent"
+                style={{ color: "var(--text-primary)" }}
+              />
+            </div>
+            <button onClick={addTag} className="px-2 py-1 rounded-xl text-xs font-medium text-white" style={{ backgroundColor: "var(--accent-primary)" }}>+</button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex gap-1 flex-wrap">
+              {tags.map(t => (
+                <button key={t} onClick={() => removeTag(t)} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                  #{t} <X className="w-2.5 h-2.5" />
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="px-3 py-1 rounded-xl text-xs font-medium text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save</button>
+            <button onClick={() => setEditing(false)} className="px-3 py-1 rounded-xl text-xs font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CollectionDetail({ collection, user, onBack, onDelete }) {
