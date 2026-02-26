@@ -140,13 +140,6 @@ export default function ArtVoteArena({ user }) {
   const pctB = 100 - pctA;
   const withPct = [{ ...artA, _pct: pctA }, { ...artB, _pct: pctB }];
 
-  // Compute top art overall
-  const topArt = useMemo(() => {
-    return [...allArt]
-      .sort((a, b) => (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0))
-      .slice(0, 3);
-  }, [allArt]);
-
   return (
     <div className="px-4 pb-6">
       <div className="flex items-center gap-2 mb-4">
