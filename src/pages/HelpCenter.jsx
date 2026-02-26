@@ -307,6 +307,7 @@ function AIChat() {
 export default function HelpCenter() {
   const [activeTab, setActiveTab] = useState("guide");
   const [openSection, setOpenSection] = useState(null);
+  const [ref] = [React.useRef(null)];
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
