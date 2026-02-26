@@ -458,47 +458,28 @@ export default function ProductsTab() {
         {filtered.length} product{filtered.length !== 1 ? "s" : ""}
       </p>
 
-      {/* Product cards */}
-      <div className="px-5 space-y-3">
+      {/* Product cards grid */}
+      <div className="px-5 grid grid-cols-2 gap-3">
         {filtered.length === 0 ? (
-          <div className="py-12 text-center">
+          <div className="col-span-2 py-12 text-center">
             <p className="text-3xl mb-3">🔍</p>
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No products match your filters</p>
             <button onClick={resetFilters} className="mt-3 text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>Clear filters</button>
           </div>
         ) : filtered.map(product => (
-          <div
-            key={product.id}
-            className="rounded-2xl p-4"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ backgroundColor: "var(--accent-primary-light)" }}>
-                {CATEGORY_ICONS[product.category] || "📦"}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold text-sm leading-snug" style={{ color: "var(--text-primary)" }}>{product.name}</p>
-                  {product.price && (
-                    <span className="text-[10px] font-semibold shrink-0 px-1.5 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                      {product.price}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{product.description}</p>
-                {product.insight && (
-                  <p className="text-[10px] mt-1.5 italic" style={{ color: "var(--accent-primary)" }}>💡 {product.insight}</p>
-                )}
-                <QuickVote item={product} />
-              </div>
-            </div>
-          </div>
+          <ProductCard key={product.id} product={product} onClick={() => setSelectedProduct(product)} />
         ))}
       </div>
 
-      <p className="text-[10px] text-center px-5 mt-6" style={{ color: "var(--text-hint)" }}>
+      <p className="text-[10px] text-center px-5 mt-6 pb-4" style={{ color: "var(--text-hint)" }}>
         All product names and trademarks belong to their respective owners. This platform is community-driven and not affiliated with any brand.
       </p>
+
+      <AnimatePresence>
+        {selectedProduct && (
+          <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
