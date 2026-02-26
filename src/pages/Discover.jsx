@@ -355,34 +355,6 @@ export default function Discover() {
             <div className="flex justify-center py-16">
               <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
             </div>
-          ) : viewMode === "swipe" ? (
-            <div className="px-5 pb-24 mt-4">
-              {filtered.length === 0 ? (
-                <div className="text-center py-16"><p className="text-sm" style={{ color: "var(--text-hint)" }}>Nothing found</p></div>
-              ) : (
-                <>
-                  <div style={{ height: "65vh" }}>
-                    <AnimatePresence mode="wait">
-                      <motion.div key={filtered[swipeIndex]?.id} className="h-full"
-                        initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }}>
-                        {filtered[swipeIndex] && (
-                          <SwipeDiscoverCard item={filtered[swipeIndex]} onOpen={() => setSelectedItem(filtered[swipeIndex])} />
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                  <div className="flex items-center justify-center gap-6 mt-4">
-                    <button onClick={() => setSwipeIndex(i => Math.max(0, i - 1))} disabled={swipeIndex === 0} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                      <ChevronLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-                    </button>
-                    <span className="text-xs" style={{ color: "var(--text-hint)" }}>{swipeIndex + 1} / {filtered.length}</span>
-                    <button onClick={() => setSwipeIndex(i => Math.min(filtered.length - 1, i + 1))} disabled={swipeIndex === filtered.length - 1} className="p-3 rounded-full disabled:opacity-30" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                      <ChevronRight className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
           ) : (
             <div className="pb-24 mt-4">
               {showSections && (
