@@ -380,6 +380,11 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="media_lists" className="mt-4">
+          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Your saved movies, books, music & games</p>
+          <SavedMediaLists user={user} />
+        </TabsContent>
+
         <TabsContent value="art" className="mt-4">
           {myArt.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No art created yet</p>
