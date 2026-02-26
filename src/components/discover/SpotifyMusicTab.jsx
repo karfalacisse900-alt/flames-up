@@ -149,12 +149,13 @@ function SongCard({ track, onShare }) {
           )}
         </div>
 
-        {/* Audio preview player — shows when cover clicked or preview_url exists */}
-        {track.preview_url && (
+        {/* Audio preview player */}
+        {track.preview_url && isPreviewActive && (
           <AudioPreviewPlayer
+            key={playKey}
             previewUrl={track.preview_url}
             trackTitle={track.title}
-            autoPlay={coverClicked}
+            autoPlay={true}
           />
         )}
 
