@@ -70,8 +70,8 @@ function SwipeDiscoverCard({ item, onOpen }) {
         </button>
         {item.link && (
           <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-medium"
-            style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-medium bg-[#2E6B4F] text-white"
+            style={{}}>
             Visit <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
