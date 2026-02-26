@@ -342,6 +342,11 @@ export default function Profile() {
           <InterestsSection user={user} onUpdated={setUser} />
         </TabsContent>
 
+        <TabsContent value="saved" className="mt-4">
+          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Apps & services you bookmarked from Discover</p>
+          <SavedDiscoverItems user={user} />
+        </TabsContent>
+
         <TabsContent value="activity" className="mt-4">
           <ActivityHistory user={user} />
         </TabsContent>
