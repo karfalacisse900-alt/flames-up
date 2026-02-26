@@ -125,7 +125,7 @@ export default function ArtVoteArena({ user }) {
 
   // Compute percentages
   const totalVotes = (artA?.vote_count || artA?.like_count || 0) + (artB?.vote_count || artB?.like_count || 0);
-  const pctA = totalVotes > 0 ? Math.round(((artA?.vote_count || 0) / totalVotes) * 100) : 50;
+  const pctA = totalVotes > 0 ? Math.round(((artA?.vote_count || artA?.like_count || 0) / totalVotes) * 100) : 50;
   const pctB = 100 - pctA;
   const withPct = [{ ...artA, _pct: pctA }, { ...artB, _pct: pctB }];
 
