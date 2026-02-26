@@ -272,6 +272,58 @@ export default function Profile() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="posts" className="mt-4 space-y-3">
+          {myPosts.length === 0 ? (
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
+          ) : (
+            myPosts.map(post => (
+              <div key={post.id} className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
+                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
+                    <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
+                    <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
+                      <span>❤️ {post.like_count || 0}</span>
+                      <span>💬 {post.reply_count || 0}</span>
+                      <span>{new Date(post.created_date).toLocaleDateString()}</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm("Delete this post?")) return;
+                      await base44.entities.Post.delete(post.id);
+                      queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
+                    }}
+                    className="p-1.5 rounded-full shrink-0" style={{ color: "var(--text-hint)" }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="liked" className="mt-4 space-y-3">
+          {likedPosts.length === 0 ? (
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No liked posts yet</p>
+          ) : (
+            likedPosts.map(post => (
+              <Link key={post.id} to={createPageUrl(`PostDetail?id=${post.id}`)}>
+                <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
+                    style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
+                  <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
+                  <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
+                    <span>by {post.is_anonymous ? "Anonymous" : post.author_name}</span>
+                    <span>❤️ {post.like_count || 0}</span>
+                  </p>
+                </div>
+              </Link>
+            ))
+          )}
+        </TabsContent>
+
         <TabsContent value="badges" className="mt-4">
           <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Earned by being active in the community</p>
           <BadgesSection badges={computedBadges} />
