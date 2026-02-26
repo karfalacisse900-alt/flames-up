@@ -96,6 +96,7 @@ export default function SearchResultCard({ item, onShare }) {
             previewUrl={item.preview_url}
             trackTitle={item.title}
             autoPlay={coverClicked}
+            track={{ title: item.title, artist: item.artist }}
           />
         )}
 
