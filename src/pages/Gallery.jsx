@@ -145,6 +145,12 @@ export default function Gallery() {
   const [sort, setSort] = useState("newest");
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState("gallery"); // "gallery" | "vote"
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDesc, setUploadDesc] = useState("");
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
