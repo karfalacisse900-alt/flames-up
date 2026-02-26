@@ -6,6 +6,7 @@ import MediaDetailSheet from "./MediaDetailSheet";
 import { AudioPreviewPlayer, MiniStickyPlayer } from "./AudioPreviewPlayer";
 import ShareModal from "./ShareModal.jsx";
 import SearchResultCard from "./SearchResultCard";
+import { useAudio } from "@/components/AudioContext";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [
