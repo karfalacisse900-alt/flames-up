@@ -84,6 +84,13 @@ function VoiceRecorder({ onSend }) {
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
 
+  const stop = () => {
+    mediaRef.current?.stop();
+    clearInterval(timerRef.current);
+    setRecording(false);
+    setSeconds(0);
+  };
+
   const start = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mr = new MediaRecorder(stream);
@@ -99,16 +106,9 @@ function VoiceRecorder({ onSend }) {
     setRecording(true);
     setSeconds(0);
     timerRef.current = setInterval(() => setSeconds(s => {
-      if (s >= 59) { stop(); return s; }
+      if (s >= 59) { mr.stop(); clearInterval(timerRef.current); setRecording(false); setSeconds(0); return s; }
       return s + 1;
     }), 1000);
-  };
-
-  const stop = () => {
-    mediaRef.current?.stop();
-    clearInterval(timerRef.current);
-    setRecording(false);
-    setSeconds(0);
   };
 
   return (
