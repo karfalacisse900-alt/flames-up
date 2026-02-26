@@ -338,6 +338,11 @@ export default function Profile() {
           <SavedMediaLists user={user} />
         </TabsContent>
 
+        <TabsContent value="saved_items" className="mt-4">
+          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Your saved apps, products & services</p>
+          <SavedItems user={user} />
+        </TabsContent>
+
         <TabsContent value="interests" className="mt-4">
           <InterestsSection user={user} onUpdated={setUser} />
         </TabsContent>
