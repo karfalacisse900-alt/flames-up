@@ -81,65 +81,7 @@ const SORT_OPTIONS = [
   { key: "year_asc", label: "Year ↑" },
 ];
 
-// ── Global audio singleton ─────────────────────────────────────────────────
-let _activeAudio = null;
-let _activeStop = null;
 
-function PreviewButton({ previewUrl }) {
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef(null);
-  const tickRef = useRef(null);
-
-  useEffect(() => () => {
-    if (audioRef.current) audioRef.current.pause();
-    clearInterval(tickRef.current);
-  }, []);
-
-  const toggle = (e) => {
-    e.stopPropagation();
-    if (!previewUrl) return;
-    if (playing) {
-      audioRef.current?.pause();
-      clearInterval(tickRef.current);
-      setPlaying(false);
-      setProgress(0);
-      _activeAudio = null;
-      _activeStop = null;
-    } else {
-      // Stop previous
-      if (_activeAudio) { _activeAudio.pause(); _activeAudio.currentTime = 0; }
-      if (_activeStop) { _activeStop(); }
-      const audio = new Audio(previewUrl);
-      audioRef.current = audio;
-      _activeAudio = audio;
-      _activeStop = () => { setPlaying(false); setProgress(0); };
-      audio.play();
-      setPlaying(true);
-      tickRef.current = setInterval(() => {
-        setProgress(((audio.currentTime || 0) / 30) * 100);
-      }, 150);
-      audio.onended = () => {
-        setPlaying(false); setProgress(0);
-        clearInterval(tickRef.current);
-        _activeAudio = null; _activeStop = null;
-      };
-    }
-  };
-
-  if (!previewUrl) return null;
-  return (
-    <button onClick={toggle}
-      className="relative flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium overflow-hidden transition-all active:scale-95 shrink-0"
-      style={{ backgroundColor: playing ? "#111" : "var(--bg-subtle)", color: playing ? "#1DB954" : "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-      {playing && <div className="absolute inset-0 rounded-lg opacity-20" style={{ width: `${progress}%`, backgroundColor: "#1DB954", transition: "width 0.15s" }} />}
-      <span className="relative z-10 flex items-center gap-1">
-        {playing ? <Square className="w-2.5 h-2.5" fill="currentColor" /> : <Play className="w-2.5 h-2.5" fill="currentColor" />}
-        {playing ? "Stop" : "Preview"}
-      </span>
-    </button>
-  );
-}
 
 // ── Single song card (mirrors BookCard layout) ─────────────────────────────
 function SongCard({ track }) {
