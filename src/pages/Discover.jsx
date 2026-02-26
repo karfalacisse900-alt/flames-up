@@ -136,8 +136,6 @@ function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompa
 export default function Discover() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState("list");
-  const [swipeIndex, setSwipeIndex] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedServicePerson, setSelectedServicePerson] = useState(null);
   const [sortBy, setSortBy] = useState("default");
@@ -234,23 +232,11 @@ export default function Discover() {
         <div className="flex items-center justify-between gap-2 mb-3">
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
           {contentTab === "apps" && (
-            <div className="flex items-center gap-1 p-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-              <button onClick={() => { setViewMode("list"); setSwipeIndex(0); }}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-                style={{ backgroundColor: viewMode === "list" ? "var(--bg-card)" : "transparent", color: viewMode === "list" ? "var(--accent-primary)" : "var(--text-hint)" }}>
-                List
-              </button>
-              <button onClick={() => { setViewMode("swipe"); setSwipeIndex(0); }}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-                style={{ backgroundColor: viewMode === "swipe" ? "var(--bg-card)" : "transparent", color: viewMode === "swipe" ? "var(--accent-primary)" : "var(--text-hint)" }}>
-                Swipe
-              </button>
-              <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-                style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "transparent", color: compareMode ? "#fff" : "var(--text-hint)" }}>
-                Compare
-              </button>
-            </div>
+            <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
+              style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)", color: compareMode ? "#fff" : "var(--text-secondary)", borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)" }}>
+              Compare
+            </button>
           )}
         </div>
         {/* Content type tabs */}
