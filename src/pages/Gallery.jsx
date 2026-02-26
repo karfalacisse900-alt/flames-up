@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords } from "lucide-react";
+import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import { Button } from "@/components/ui/button";
 import { createPageUrl } from "@/utils";
