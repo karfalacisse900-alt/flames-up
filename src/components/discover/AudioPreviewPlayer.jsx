@@ -70,35 +70,32 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
 
   useEffect(() => () => cleanup(), [cleanup]);
 
-  // autoPlay support — trigger fresh play when autoPlay turns true
-  const autoPlayFired = React.useRef(false);
+  // autoPlay on mount
   useEffect(() => {
-    if (autoPlay && previewUrl && !autoPlayFired.current) {
-      autoPlayFired.current = true;
-      globalAudio.stop();
-      setState("loading");
-      const audio = new Audio();
-      audio.preload = "none";
-      audioRef.current = audio;
-      globalAudio.current = audio;
-      globalAudio.stopCb = cleanup;
-      audio.oncanplay = () => {
-        audio.play().catch(() => cleanup());
-        setState("playing");
-        if (onPlayStart) onPlayStart();
-        tickRef.current = setInterval(() => {
-          const cur = audio.currentTime;
-          setElapsed(cur);
-          setProgress(cur / MAX);
-          if (cur >= MAX) { audio.pause(); globalAudio.stop(); }
-        }, 100);
-      };
-      audio.onended = () => { globalAudio.stop(); };
-      audio.onerror = () => { cleanup(); };
-      audio.src = previewUrl;
-      audio.load();
-    }
-  }, [autoPlay, previewUrl]); // eslint-disable-line
+    if (!autoPlay || !previewUrl) return;
+    globalAudio.stop();
+    setState("loading");
+    const audio = new Audio();
+    audio.preload = "none";
+    audioRef.current = audio;
+    globalAudio.current = audio;
+    globalAudio.stopCb = cleanup;
+    audio.oncanplay = () => {
+      audio.play().catch(() => cleanup());
+      setState("playing");
+      if (onPlayStart) onPlayStart();
+      tickRef.current = setInterval(() => {
+        const cur = audio.currentTime;
+        setElapsed(cur);
+        setProgress(cur / MAX);
+        if (cur >= MAX) { audio.pause(); globalAudio.stop(); }
+      }, 100);
+    };
+    audio.onended = () => { globalAudio.stop(); };
+    audio.onerror = () => { cleanup(); };
+    audio.src = previewUrl;
+    audio.load();
+  }, []); // eslint-disable-line
 
   const handlePlay = (e) => {
     e.stopPropagation();
