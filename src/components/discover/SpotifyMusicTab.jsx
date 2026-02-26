@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import MediaDetailSheet from "./MediaDetailSheet";
 import ShareModal from "./ShareModal.jsx";
 import SearchResultCard from "./SearchResultCard";
+import WorthItButton from "./WorthItButton";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [
