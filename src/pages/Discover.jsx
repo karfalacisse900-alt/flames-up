@@ -20,7 +20,6 @@ import LocalServices from "../components/discover/LocalServices";
 import WhyTheseApps from "../components/discover/WhyTheseApps";
 import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
-import ProductsTab from "../components/discover/ProductsTab";
 import MediaTab from "../components/discover/MediaTab";
 import BooksTab from "../components/discover/BooksTab";
 import StoresAndDeals from "../components/discover/StoresAndDeals";
