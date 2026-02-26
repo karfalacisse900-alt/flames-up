@@ -665,7 +665,8 @@ export default function MediaTab({ user }) {
               <MediaCard key={item.id} item={item} user={user} savedIds={savedIds}
                 onSave={user ? saveMut.mutate : () => {}}
                 onUnsave={user ? unsaveMut.mutate : () => {}}
-                onSelect={setSelectedItem} />
+                onSelect={setSelectedItem}
+                onShare={setShareItem} />
             ))
           )}
         </div>
