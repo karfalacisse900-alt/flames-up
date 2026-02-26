@@ -1,65 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle, TrendingUp, TrendingDown, Gift, Gamepad2, Palette, Radio, Star, Zap, Users } from "lucide-react";
-import { addCoins } from "../components/coins/coinsHelper";
+import { ArrowLeft, CheckCircle, TrendingUp, TrendingDown, Gift, Gamepad2, Palette, Radio, Star, Zap, Users, Coins, CreditCard, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { getWallet, claimDailyCheckin } from "../components/coins/coinsHelper";
 import { motion, AnimatePresence } from "framer-motion";
 
 const typeConfig = {
-  daily_checkin: { icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-50", label: "Daily Check-in" },
-  boost_post: { icon: Zap, color: "text-amber-500", bg: "bg-amber-50", label: "Post Boosted" },
-  referral_bonus: { icon: Users, color: "text-violet-500", bg: "bg-violet-50", label: "Referral Bonus" },
-  post_liked: { icon: Star, color: "text-amber-500", bg: "bg-amber-50", label: "Post Liked" },
-  game_win: { icon: Gamepad2, color: "text-violet-500", bg: "bg-violet-50", label: "Game Won" },
-  live_host: { icon: Radio, color: "text-blue-500", bg: "bg-blue-50", label: "Hosted Live" },
-  art_sale: { icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50", label: "Art Sold" },
-  art_purchase: { icon: Palette, color: "text-rose-500", bg: "bg-rose-50", label: "Art Bought" },
-  gift_sent: { icon: Gift, color: "text-pink-500", bg: "bg-pink-50", label: "Gift Sent" },
-  gift_received: { icon: Gift, color: "text-pink-500", bg: "bg-pink-50", label: "Gift Received" },
-  signup_bonus: { icon: Star, color: "text-amber-500", bg: "bg-amber-50", label: "Welcome Bonus" },
+  daily_checkin: { icon: CheckCircle, color: "text-emerald-500", label: "Daily Check-in" },
+  boost_post: { icon: Zap, color: "text-amber-500", label: "Post Boosted" },
+  referral_bonus: { icon: Users, color: "text-violet-500", label: "Referral Bonus" },
+  post_liked: { icon: Star, color: "text-amber-500", label: "Post Liked" },
+  game_win: { icon: Gamepad2, color: "text-violet-500", label: "Game Won" },
+  live_host: { icon: Radio, color: "text-blue-500", label: "Hosted Live" },
+  art_sale: { icon: TrendingUp, color: "text-emerald-500", label: "Art Sold" },
+  art_purchase: { icon: Palette, color: "text-rose-500", label: "Art Bought" },
+  gift_sent: { icon: Gift, color: "text-pink-500", label: "Gift Sent" },
+  gift_received: { icon: Gift, color: "text-pink-500", label: "Gift Received" },
+  signup_bonus: { icon: Star, color: "text-amber-500", label: "Welcome Bonus" },
 };
 
-const earnWays = [
-  { emoji: "✅", title: "Daily Check-in", desc: "+10 coins every day", amount: "+10" },
-  { emoji: "❤️", title: "Post gets liked", desc: "+2 coins per like", amount: "+2" },
-  { emoji: "🏆", title: "Win a game", desc: "+15 coins per win", amount: "+15" },
-  { emoji: "🎙️", title: "Host a live session", desc: "+20 coins per session", amount: "+20" },
-  { emoji: "🎨", title: "Sell art", desc: "Earn the listed price", amount: "varies" },
-  { emoji: "🤝", title: "Refer a friend", desc: "+50 coins each when they join", amount: "+50" },
-  { emoji: "⚡", title: "Boost a post", desc: "Costs coins, gets more views", amount: "-20~120" },
+const COIN_PACKAGES = [
+  { id: "starter", coins: 100, price: "$0.99", bonus: null, label: "Starter", emoji: "⬡", popular: false },
+  { id: "basic", coins: 500, price: "$3.99", bonus: "+50 bonus", label: "Basic", emoji: "⬡⬡", popular: false },
+  { id: "popular", coins: 1200, price: "$7.99", bonus: "+200 bonus", label: "Popular", emoji: "⬡⬡⬡", popular: true },
+  { id: "pro", coins: 3000, price: "$14.99", bonus: "+600 bonus", label: "Pro", emoji: "💎", popular: false },
 ];
 
 export default function Wallet() {
   const [user, setUser] = useState(null);
   const [claimLoading, setClaimLoading] = useState(false);
   const [claimMsg, setClaimMsg] = useState("");
+  const [buyLoading, setBuyLoading] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    base44.auth.me().then(async (u) => {
-      setUser(u);
-      // Handle referral reward for newly joined users
-      const refCode = sessionStorage.getItem("ref_code");
-      if (refCode && u?.email) {
-        sessionStorage.removeItem("ref_code");
-        // Find the referrer by checking all referrals with this code
-        const existing = await base44.entities.Referral.filter({ referred_email: u.email });
-        if (existing.length === 0) {
-          // Create referral record
-          const ref = await base44.entities.Referral.create({
-            referrer_email: refCode, // we'll resolve below
-            referred_email: u.email,
-            referral_code: refCode,
-            reward_claimed: true,
-          });
-          // Give both users 50 coins
-          await addCoins(u.email, 50, "referral_bonus", "Referral bonus - you joined via a friend's link! 🎁");
-        }
-      }
-    }).catch(() => {});
+    base44.auth.me().then(u => setUser(u)).catch(() => {});
   }, []);
 
   const { data: wallet, refetch: refetchWallet } = useQuery({
@@ -70,7 +47,7 @@ export default function Wallet() {
 
   const { data: transactions = [] } = useQuery({
     queryKey: ["transactions", user?.email],
-    queryFn: () => base44.entities.CoinTransaction.filter({ user_email: user.email }, "-created_date", 50),
+    queryFn: () => base44.entities.CoinTransaction.filter({ user_email: user.email }, "-created_date", 30),
     enabled: !!user?.email,
   });
 
@@ -85,6 +62,21 @@ export default function Wallet() {
     queryClient.invalidateQueries({ queryKey: ["transactions", user.email] });
   };
 
+  const handleBuy = async (pkg) => {
+    if (window.self !== window.top) {
+      alert("Purchases only work from the published app.");
+      return;
+    }
+    setBuyLoading(pkg.id);
+    try {
+      const res = await base44.functions.invoke("createCoinCheckout", { package_id: pkg.id, user_email: user?.email });
+      if (res.data?.url) window.location.href = res.data.url;
+    } catch (e) {
+      alert("Unable to start checkout. Please try again.");
+    }
+    setBuyLoading(null);
+  };
+
   const balance = wallet?.balance ?? 0;
 
   return (
@@ -94,32 +86,38 @@ export default function Wallet() {
         <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
           <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </Link>
-        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>My Wallet</h2>
+        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Coins</h2>
       </div>
 
-      {/* Balance card */}
+      {/* Balance hero */}
       <div className="mx-5 mt-5">
-        <div className="rounded-3xl p-6 text-center" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%)" }}>
-          <p className="text-white/70 text-sm font-medium">Coin Balance</p>
-          <p className="text-5xl font-bold text-white mt-1">⬡ {balance}</p>
-          <p className="text-white/60 text-xs mt-2">Use coins to buy art or send gifts in live</p>
+        <div className="rounded-3xl p-6 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%)" }}>
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 0%, transparent 50%)" }} />
+          <p className="text-white/70 text-xs font-medium uppercase tracking-widest mb-1">Your Balance</p>
+          <p className="text-6xl font-bold text-white mt-1">{balance}</p>
+          <p className="text-white/60 text-sm mt-1">⬡ coins</p>
 
-          <button
-            onClick={handleCheckin}
-            disabled={claimLoading}
-            className="mt-4 px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-2xl text-sm font-medium transition-all border border-white/30"
-          >
-            {claimLoading ? "Claiming..." : "Daily Check-in (+10 ⬡)"}
-          </button>
-          <Link
-            to={createPageUrl("Referral")}
-            className="mt-3 inline-block px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-2xl text-sm font-medium transition-all border border-white/30"
-          >
-            🎁 Refer Friends (+50 ⬡ each)
-          </Link>
+          <div className="flex gap-2 justify-center mt-5">
+            <button
+              onClick={handleCheckin}
+              disabled={claimLoading}
+              className="px-5 py-2 rounded-2xl text-sm font-semibold transition-all border border-white/30"
+              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "#fff" }}
+            >
+              {claimLoading ? "Claiming..." : "✅ Daily Bonus"}
+            </button>
+            <Link
+              to={createPageUrl("Referral")}
+              className="px-5 py-2 rounded-2xl text-sm font-semibold transition-all border border-white/30"
+              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "#fff" }}
+            >
+              🎁 Refer & Earn
+            </Link>
+          </div>
+
           <AnimatePresence>
             {claimMsg && (
-              <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-white text-xs mt-2">
+              <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-white text-xs mt-3">
                 {claimMsg}
               </motion.p>
             )}
@@ -127,26 +125,61 @@ export default function Wallet() {
         </div>
       </div>
 
-      {/* Ways to earn */}
-      <div className="mx-5 mt-5">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Ways to Earn</h3>
-        <div className="rounded-2xl divide-y" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", borderColor: "var(--border-light)" }}>
-          {earnWays.map((way, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-3" style={{ borderColor: "var(--border-light)" }}>
-              <span className="text-xl">{way.emoji}</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{way.title}</p>
-                <p className="text-xs" style={{ color: "var(--text-hint)" }}>{way.desc}</p>
+      {/* Buy coins */}
+      <div className="mx-5 mt-6">
+        <div className="flex items-center gap-2 mb-3">
+          <CreditCard className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+          <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Buy Coins</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {COIN_PACKAGES.map(pkg => (
+            <button
+              key={pkg.id}
+              onClick={() => handleBuy(pkg)}
+              disabled={buyLoading === pkg.id}
+              className="relative rounded-2xl p-4 text-left transition-all active:scale-95"
+              style={{
+                backgroundColor: pkg.popular ? "var(--accent-primary)" : "var(--bg-card)",
+                border: pkg.popular ? "none" : "1px solid var(--border-light)",
+                boxShadow: pkg.popular ? "0 8px 24px rgba(46,107,79,0.3)" : "none",
+              }}
+            >
+              {pkg.popular && (
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                  style={{ backgroundColor: "#D98B62", color: "#fff" }}>
+                  MOST POPULAR
+                </span>
+              )}
+              <p className="text-2xl mb-1">{pkg.emoji}</p>
+              <p className="text-lg font-bold" style={{ color: pkg.popular ? "#fff" : "var(--text-primary)" }}>
+                {pkg.coins.toLocaleString()} ⬡
+              </p>
+              {pkg.bonus && (
+                <p className="text-[11px] font-semibold mb-1" style={{ color: pkg.popular ? "rgba(255,255,255,0.75)" : "var(--accent-secondary)" }}>
+                  {pkg.bonus}
+                </p>
+              )}
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-base font-bold" style={{ color: pkg.popular ? "#fff" : "var(--accent-primary)" }}>
+                  {pkg.price}
+                </span>
+                {buyLoading === pkg.id ? (
+                  <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: pkg.popular ? "#fff" : "var(--accent-primary)", borderTopColor: "transparent" }} />
+                ) : (
+                  <Sparkles className="w-4 h-4" style={{ color: pkg.popular ? "rgba(255,255,255,0.7)" : "var(--text-hint)" }} />
+                )}
               </div>
-              <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>{way.amount}</span>
-            </div>
+            </button>
           ))}
         </div>
+        <p className="text-[10px] text-center mt-3" style={{ color: "var(--text-hint)" }}>
+          Coins are used to send gifts, buy art, and boost posts. No real money value.
+        </p>
       </div>
 
-      {/* Transaction history */}
-      <div className="mx-5 mt-5">
-        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Transaction History</h3>
+      {/* Recent transactions */}
+      <div className="mx-5 mt-6">
+        <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Recent Activity</h3>
         {transactions.length === 0 ? (
           <div className="rounded-2xl p-8 text-center" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
             <p className="text-3xl mb-2">💰</p>
@@ -154,20 +187,20 @@ export default function Wallet() {
           </div>
         ) : (
           <div className="rounded-2xl divide-y" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            {transactions.map((txn) => {
-              const cfg = typeConfig[txn.type] || { icon: Star, color: "text-gray-400", bg: "bg-gray-50", label: txn.type };
+            {transactions.slice(0, 15).map((txn) => {
+              const cfg = typeConfig[txn.type] || { icon: Star, color: "text-gray-400", label: txn.type };
               const Icon = cfg.icon;
               const isPositive = txn.amount > 0;
               return (
                 <div key={txn.id} className="flex items-center gap-3 px-4 py-3" style={{ borderColor: "var(--border-light)" }}>
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-subtle)" }}>
                     <Icon className={`w-4 h-4 ${cfg.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{txn.description || cfg.label}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{txn.description || cfg.label}</p>
                     <p className="text-xs" style={{ color: "var(--text-hint)" }}>{new Date(txn.created_date).toLocaleDateString()}</p>
                   </div>
-                  <span className="text-sm font-bold" style={{ color: isPositive ? "var(--accent-primary)" : "#E05C7A" }}>
+                  <span className="text-sm font-bold shrink-0" style={{ color: isPositive ? "var(--accent-primary)" : "#E05C7A" }}>
                     {isPositive ? "+" : ""}{txn.amount} ⬡
                   </span>
                 </div>

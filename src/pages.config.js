@@ -50,6 +50,7 @@
 import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
 import ArtStudio from './pages/ArtStudio';
+import Collections from './pages/Collections';
 import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
@@ -69,9 +70,8 @@ import PostDetail from './pages/PostDetail';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
-import Wallet from './pages/Wallet';
-import Collections from './pages/Collections';
 import Profile from './pages/Profile';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +79,7 @@ export const PAGES = {
     "AdminModeration": AdminModeration,
     "Art": Art,
     "ArtStudio": ArtStudio,
+    "Collections": Collections,
     "Discover": Discover,
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
@@ -98,9 +99,8 @@ export const PAGES = {
     "Referral": Referral,
     "Shop": Shop,
     "UserProfile": UserProfile,
-    "Wallet": Wallet,
-    "Collections": Collections,
     "Profile": Profile,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {
