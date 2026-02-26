@@ -322,7 +322,7 @@ export default function HelpCenter() {
           </div>
         </div>
         <div className="flex gap-2">
-          {[["guide", "🗺️ How It Works"], ["faq", "💬 FAQ"]].map(([key, label]) => (
+          {[["guide", "🗺️ How It Works"], ["faq", "💬 FAQ"], ["ai", "✨ AI Assistant"]].map(([key, label]) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
