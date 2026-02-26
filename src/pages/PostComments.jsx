@@ -354,7 +354,8 @@ export default function PostComments() {
       const comment = await base44.entities.CommunityComment.create({
         post_id: postId,
         author_email: user?.email || "",
-        author_name: user?.full_name || "Anonymous",
+        author_name: user?.display_name || user?.full_name || "Anonymous",
+        author_avatar_url: user?.avatar_url || "",
         is_anonymous: false,
         body: body || "",
         type: type || "text",
