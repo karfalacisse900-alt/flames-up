@@ -382,6 +382,12 @@ export default function SpotifyMusicTab() {
       <AnimatePresence>
         {selectedItem && <MediaDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />}
       </AnimatePresence>
+
+      <MiniStickyPlayer track={nowPlaying} onClose={() => {
+        const { AudioPreviewPlayer: _, ...rest } = {};
+        // globalAudio.stop() is called via AudioPreviewPlayer's cleanup
+        setNowPlaying(null);
+      }} />
     </div>
   );
 }
