@@ -114,7 +114,7 @@ export default function ArtVoteArena({ user }) {
     </div>
   );
 
-  if (matches.length === 0) return (
+  if (!isLoading && matches.length === 0) return (
     <div className="text-center py-12 px-6">
       <p className="text-4xl mb-3">🎨</p>
       <p className="text-sm" style={{ color: "#6B6B6B" }}>Not enough artworks for a vote yet</p>
@@ -124,7 +124,7 @@ export default function ArtVoteArena({ user }) {
   const [artA, artB] = currentMatch || [];
 
   // Compute percentages
-  const totalVotes = (artA?.vote_count || 0) + (artB?.vote_count || 0);
+  const totalVotes = (artA?.vote_count || artA?.like_count || 0) + (artB?.vote_count || artB?.like_count || 0);
   const pctA = totalVotes > 0 ? Math.round(((artA?.vote_count || 0) / totalVotes) * 100) : 50;
   const pctB = 100 - pctA;
   const withPct = [{ ...artA, _pct: pctA }, { ...artB, _pct: pctB }];
