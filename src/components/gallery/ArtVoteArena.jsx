@@ -99,14 +99,18 @@ export default function ArtVoteArena({ user }) {
     if (!art) return;
     if (art._type === "ArtPiece") {
       base44.entities.ArtPiece.update(art._raw_id, { like_count: (art.vote_count || art.like_count || 0) + 1 })
-        .then(() => qc.invalidateQueries({ queryKey: ["artVotePieces"] }));
+        .then(() => {
+          qc.invalidateQueries({ queryKey: ["artVotePieces"] });
+          setTimeout(() => setMatchIndex(i => i + 1), 600);
+        });
     } else {
       base44.entities.Artwork.update(artId, { vote_count: (art.vote_count || 0) + 1 })
-        .then(() => qc.invalidateQueries({ queryKey: ["artVoteArtworks"] }));
+        .then(() => {
+          qc.invalidateQueries({ queryKey: ["artVoteArtworks"] });
+          setTimeout(() => setMatchIndex(i => i + 1), 600);
+        });
     }
   };
-
-  const nextMatch = () => setMatchIndex(i => i + 1);
 
   if (isLoading) return (
     <div className="flex justify-center py-12">
@@ -128,6 +132,13 @@ export default function ArtVoteArena({ user }) {
   const pctA = totalVotes > 0 ? Math.round(((artA?.vote_count || artA?.like_count || 0) / totalVotes) * 100) : 50;
   const pctB = 100 - pctA;
   const withPct = [{ ...artA, _pct: pctA }, { ...artB, _pct: pctB }];
+
+  // Compute top art overall
+  const topArt = useMemo(() => {
+    return [...allArt]
+      .sort((a, b) => (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0))
+      .slice(0, 3);
+  }, [allArt]);
 
   return (
     <div className="px-4 pb-6">
@@ -153,15 +164,7 @@ export default function ArtVoteArena({ user }) {
         ))}
       </div>
 
-      {voted && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 text-center">
-          <button onClick={nextMatch}
-            className="flex items-center gap-2 mx-auto px-5 py-2.5 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: "#2E6B4F", color: "#fff" }}>
-            <RefreshCw className="w-4 h-4" /> Next Match
-          </button>
-        </motion.div>
-      )}
+
     </div>
   );
 }

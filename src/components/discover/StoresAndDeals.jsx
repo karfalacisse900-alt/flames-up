@@ -4,21 +4,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import ShareModal from "./ShareModal";
 
 const STORES = [
-  { name: "Burlington", category: "Outlet / Discount", description: "Off-price clothing & home goods", website: "https://www.burlington.com", icon: "🏬" },
-  { name: "TJ Maxx", category: "Outlet / Discount", description: "Brand-name apparel & accessories discounts", website: "https://www.tjmaxx.com", icon: "🏬" },
-  { name: "Ross Dress for Less", category: "Outlet / Discount", description: "Designer clothing at discount prices", website: "https://www.rossstores.com", icon: "🏬" },
-  { name: "Marshalls", category: "Outlet / Discount", description: "Off-price fashion & home décor", website: "https://www.marshallsonline.com", icon: "🏬" },
-  { name: "Target", category: "Department Store", description: "Everyday essentials & style", website: "https://www.target.com", icon: "🏢" },
-  { name: "Walmart", category: "Department Store", description: "Wide variety of products at low prices", website: "https://www.walmart.com", icon: "🏢" },
-  { name: "Kohl's", category: "Department Store", description: "Fashion, home & beauty with rewards", website: "https://www.kohls.com", icon: "🏢" },
-  { name: "Best Buy", category: "Tech", description: "Electronics & tech products", website: "https://www.bestbuy.com", icon: "💻" },
-  { name: "Apple", category: "Tech", description: "Official Apple products & services", website: "https://www.apple.com", icon: "💻" },
-  { name: "Sephora", category: "Beauty", description: "Makeup, skincare & beauty products", website: "https://www.sephora.com", icon: "💄" },
-  { name: "Ulta Beauty", category: "Beauty", description: "Beauty, cosmetics & haircare", website: "https://www.ulta.com", icon: "💄" },
-  { name: "Home Depot", category: "Home", description: "Home improvement & DIY supplies", website: "https://www.homedepot.com", icon: "🔨" },
-  { name: "Lowe's", category: "Home", description: "Home improvement & garden supplies", website: "https://www.lowes.com", icon: "🔨" },
-  { name: "Costco", category: "Grocery", description: "Bulk groceries & wholesale shopping", website: "https://www.costco.com", icon: "🛒" },
-  { name: "Trader Joe's", category: "Grocery", description: "Natural & organic grocery items", website: "https://www.traderjoes.com", icon: "🛒" },
+  { name: "Burlington", category: "Outlet / Discount", description: "Save up to 60% on designer and brand-name clothing, accessories, and home décor. Find premium brands at fraction of retail prices with constantly rotating inventory.", website: "https://www.burlington.com", icon: "🏬" },
+  { name: "TJ Maxx", category: "Outlet / Discount", description: "Discover designer handbags, apparel, shoes, and home goods at 20-60% off. Updated multiple times daily with new treasures from top brands.", website: "https://www.tjmaxx.com", icon: "🏬" },
+  { name: "Ross Dress for Less", category: "Outlet / Discount", description: "Off-price fashion leader offering clearance on designer and brand-name apparel, shoes, and accessories. Expert curation for budget-conscious shoppers.", website: "https://www.rossstores.com", icon: "🏬" },
+  { name: "Marshalls", category: "Outlet / Discount", description: "Premium off-price retailer featuring discounted designer fashion, footwear, and home furnishings. Shop brand names you love at prices you'll love more.", website: "https://www.marshallsonline.com", icon: "🏬" },
+  { name: "Target", category: "Department Store", description: "One-stop shop for clothing, household essentials, electronics, and more. Same-day delivery, price matching, and exclusive designer collaborations.", website: "https://www.target.com", icon: "🏢" },
+  { name: "Walmart", category: "Department Store", description: "America's leading retailer with everyday low prices on groceries, apparel, electronics, and home goods. Free 2-day shipping for members.", website: "https://www.walmart.com", icon: "🏢" },
+  { name: "Kohl's", category: "Department Store", description: "Fashion-focused retailer offering apparel, accessories, and beauty with Kohl's Cash rewards. Exclusive brands and frequent promotions for smart shoppers.", website: "https://www.kohls.com", icon: "🏢" },
+  { name: "Best Buy", category: "Tech", description: "Your destination for latest electronics, appliances, and tech gadgets. Expert staff, price guarantee, and extended warranties for peace of mind.", website: "https://www.bestbuy.com", icon: "💻" },
+  { name: "Apple", category: "Tech", description: "Official Apple store for authentic iPhones, Macs, iPads, and accessories. Expert support, trade-in programs, and exclusive product launches.", website: "https://www.apple.com", icon: "💻" },
+  { name: "Sephora", category: "Beauty", description: "Beauty paradise with 20,000+ products from 500+ brands. Beauty experts, free samples, and loyalty rewards make every purchase special.", website: "https://www.sephora.com", icon: "💄" },
+  { name: "Ulta Beauty", category: "Beauty", description: "Complete beauty destination featuring prestige and drugstore makeup, skincare, and fragrance. Exclusive brands, free beauty consultations, and rewards program.", website: "https://www.ulta.com", icon: "💄" },
+  { name: "Home Depot", category: "Home", description: "Premier DIY and professional-grade home improvement store. Expert advice, tool rentals, and delivery services for all your project needs.", website: "https://www.homedepot.com", icon: "🔨" },
+  { name: "Lowe's", category: "Home", description: "Home improvement leader offering building materials, appliances, and tools. Project inspiration, contractor services, and same-day delivery available.", website: "https://www.lowes.com", icon: "🔨" },
+  { name: "Costco", category: "Grocery", description: "Wholesale membership club offering bulk groceries, electronics, furniture, and home essentials at incredible savings. Premium quality at wholesale prices.", website: "https://www.costco.com", icon: "🛒" },
+  { name: "Trader Joe's", category: "Grocery", description: "Specialty grocer curating natural, organic, and gourmet products from around the world. Unique finds and reasonable prices for conscious shoppers.", website: "https://www.traderjoes.com", icon: "🛒" },
 ];
 
 const CATEGORIES = ["All", "Outlet / Discount", "Department Store", "Tech", "Beauty", "Home", "Grocery"];
@@ -52,7 +52,7 @@ function StoreCard({ store, onShare }) {
           rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
           className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
-          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
+          style={{ backgroundColor: "#2E6B4F", color: "#fff" }}
         >
           Website
         </a>
