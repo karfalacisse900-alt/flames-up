@@ -208,17 +208,6 @@ export default function Profile() {
           {user.bio && <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
           {/* Hide email from profile view */}
 
-          {/* Skills */}
-          {user.skills?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {user.skills.map((skill, i) => (
-                <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)" }}>
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
-
           {/* Coin balance */}
           <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
             <WalletWidget balance={coinBalance} />
