@@ -219,10 +219,33 @@ function ChatView({ user, conversation, onBack }) {
           <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </button>
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
-          {conversation.name?.[0]?.toUpperCase() || "?"}
+          {conversation.avatar_url
+            ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+            : conversation.name?.[0]?.toUpperCase() || "?"}
         </div>
-        <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{conversation.name}</p>
+        <p className="font-medium text-sm flex-1" style={{ color: "var(--text-primary)" }}>{conversation.name}</p>
+        <div className="relative">
+          <button onClick={() => setShowMenu(v => !v)} className="p-2 rounded-full" style={{ color: "var(--text-hint)" }}>
+            <MoreVertical className="w-4 h-4" />
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 top-9 z-30 rounded-xl shadow-lg border overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", minWidth: 160 }}>
+              <button onClick={handleBlock} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-left"
+                style={{ color: blocked ? "var(--accent-primary)" : "#E05C7A" }}>
+                <Ban className="w-4 h-4" />
+                {blocked ? "Unblock User" : "Block User"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      {blocked && (
+        <div className="mx-4 mt-3 px-4 py-3 rounded-xl flex items-center gap-2 text-sm"
+          style={{ backgroundColor: "#FFF0F3", color: "#E05C7A", border: "1px solid #FFDDE5" }}>
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          You have blocked this user. They can no longer send you messages.
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {messages.map((msg) => {
