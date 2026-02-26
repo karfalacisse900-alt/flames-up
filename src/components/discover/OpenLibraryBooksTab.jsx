@@ -63,8 +63,8 @@ function BookCard({ book }) {
           </p>
         )}
         <a href={olUrl} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all active:scale-95"
-          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all active:scale-95 bg-[#2E6B4F] text-white"
+          style={{}}>
           <BookOpen className="w-3 h-3" />
           Read / Buy
           <ExternalLink className="w-3 h-3" />
