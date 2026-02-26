@@ -387,11 +387,18 @@ export default function SpotifyMusicTab() {
       ) : displayList.length > 0 ? (
         <div className="px-5 space-y-2">
           <AnimatePresence>
-            {displayList.map(track => (
-              <div key={track.id} onClick={() => setSelectedItem(track)} className="cursor-pointer">
-                <SongCard track={track} onShare={setShareItem} />
-              </div>
-            ))}
+            {displayList.map(item => {
+              const isSearchResult = searchResults && searchResults.some(s => s.id === item.id);
+              return (
+                <div key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer">
+                  {isSearchResult ? (
+                    <SearchResultCard item={item} onShare={setShareItem} />
+                  ) : (
+                    <SongCard track={item} onShare={setShareItem} />
+                  )}
+                </div>
+              );
+            })}
           </AnimatePresence>
           {searchResults && (
             <button onClick={() => { setSearchResults(null); setQuery(""); }}
@@ -403,7 +410,7 @@ export default function SpotifyMusicTab() {
       ) : (
         <div className="py-12 text-center px-5">
           <p className="text-3xl mb-3">🎵</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No tracks match "{genre}"</p>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No {searchResults ? "results" : "tracks"} found</p>
         </div>
       )}
 
