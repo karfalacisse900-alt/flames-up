@@ -127,8 +127,10 @@ function SongCard({ track }) {
             </span>
           )}
         </div>
+        {track.preview_url && (
+          <AudioPreviewPlayer previewUrl={track.preview_url} trackTitle={track.title} />
+        )}
         <div className="flex items-center gap-2 mt-2">
-          {track.preview_url && <PreviewButton previewUrl={track.preview_url} />}
           {track.spotify_url ? (
             <a href={track.spotify_url} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
