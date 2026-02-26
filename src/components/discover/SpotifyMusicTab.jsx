@@ -195,51 +195,28 @@ export default function SpotifyMusicTab() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [shareItem, setShareItem] = useState(null);
 
-  // Enrich ALL preloaded songs on mount (sequential for reliability)
-  useEffect(() => {
-    let cancelled = false;
-    const enrichBatch = async () => {
-      setEnriching(true);
-      for (const song of PRELOADED_SONGS) {
-        if (cancelled) break;
-        const key = `${song.title}|${song.artist}`;
-        // Try multiple query formats for better hit rate
-        const queries = [
-          `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`,
-          `${song.title}`,
-        ];
-        for (const q of queries) {
-          if (cancelled) break;
-          try {
-            const res = await base44.functions.invoke("spotifySearch", {
-              query: q, type: "track", limit: 5,
-            });
-            if (res.data?.error) {
-              console.log("Spotify error for", q, res.data.error);
-              continue;
-            }
-            // Find best matching track (exact title match preferred)
-            const tracks = res.data?.tracks || [];
-            const match = tracks.find(t =>
-              t.title?.toLowerCase() === song.title.toLowerCase() &&
-              t.artist?.toLowerCase().includes(song.artist.split(" feat")[0].split(",")[0].trim().toLowerCase())
-            ) || tracks.find(t => t.title?.toLowerCase() === song.title.toLowerCase()) || tracks[0];
-            if (match && match.preview_url) {
-              setEnriched(prev => ({ ...prev, [key]: match }));
-              break; // found a good match, stop trying
-            }
-          } catch (err) {
-            console.error("Spotify fetch error:", err.message);
-          }
-        }
-        // Small delay between requests to avoid rate limiting
-        await new Promise(r => setTimeout(r, 200));
+  // Enrich songs on demand via search (avoid rate limiting)
+  const enrichSongOnDemand = async (song) => {
+    const key = `${song.title}|${song.artist}`;
+    if (enriched[key]) return; // Already enriched
+    
+    try {
+      const query = `${song.title} ${song.artist.split(" feat")[0].split(",")[0].trim()}`;
+      const res = await base44.functions.invoke("spotifySearch", {
+        query, type: "track", limit: 3,
+      });
+      if (res.data?.error) return;
+      const tracks = res.data?.tracks || [];
+      const match = tracks.find(t =>
+        t.title?.toLowerCase() === song.title.toLowerCase()
+      ) || tracks[0];
+      if (match) {
+        setEnriched(prev => ({ ...prev, [key]: match }));
       }
-      if (!cancelled) setEnriching(false);
-    };
-    enrichBatch();
-    return () => { cancelled = true; };
-  }, []);
+    } catch (err) {
+      console.error("Spotify enrichment error:", err.message);
+    }
+  };
 
   // Live search
   const doSearch = async (q) => {
