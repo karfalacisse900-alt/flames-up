@@ -123,8 +123,8 @@ export default function Live() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-medium transition-colors"
-          style={{ backgroundColor: "var(--accent-primary)" }}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-[#2E6B4F] text-white"
+          style={{}}
         >
           <Radio className="w-4 h-4" /> Go Live
         </button>
