@@ -88,6 +88,7 @@ export default function Layout({ children, currentPageName }) {
       {showVerifyBanner && (
         <EmailVerificationBanner onDismiss={() => setShowVerifyBanner(false)} />
       )}
+      {!hideNav && <AppAIAssistant />}
     </div>);
 
 }
