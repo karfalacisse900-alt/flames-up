@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Music, X } from "lucide-react";
+import { Search, Music, X, Play, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MediaDetailSheet from "./MediaDetailSheet";
 import { AudioPreviewPlayer, MiniStickyPlayer } from "./AudioPreviewPlayer";
+import ShareModal from "./ShareModal";
 
 // ── Preloaded trending songs ──────────────────────────────────────────────
 const PRELOADED_SONGS = [
