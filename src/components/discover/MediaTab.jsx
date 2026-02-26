@@ -471,9 +471,10 @@ export default function MediaTab({ user }) {
   // Filtered & sorted list
   const filtered = useMemo(() => {
     let list = MEDIA_CATALOGUE.filter(item => {
-      const typeMatch = activeType === "all" || activeType === "movieshow"
-        ? (activeType === "all" || item.media_type === "movie" || item.media_type === "show")
-        : item.media_type === activeType;
+      let typeMatch;
+      if (activeType === "all") typeMatch = true;
+      else if (activeType === "movieshow") typeMatch = item.media_type === "movie" || item.media_type === "show";
+      else typeMatch = item.media_type === activeType;
       const genreMatch = selectedGenre === "all" || item.genre?.includes(selectedGenre);
       const moodMatch = selectedMood === "all" || item.mood_tags?.includes(selectedMood);
       const searchMatch = !search ||
