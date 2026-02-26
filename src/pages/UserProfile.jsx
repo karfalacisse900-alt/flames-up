@@ -50,42 +50,26 @@ export default function UserProfile() {
     enabled: !!viewingUser?.email,
   });
 
-  useEffect(() => {
-    if (user && viewingUser) {
-      const isFollowingUser = following.some(f => f.follower_email === user.email && f.following_email === viewingUser.email);
-      setIsFollowing(isFollowingUser);
-    }
-  }, [user, viewingUser, following]);
-
   const handleFollow = async () => {
     if (!user || !viewingUser) return;
-    try {
-      await base44.entities.Follow.create({
-        follower_email: user.email,
-        follower_name: user.full_name || user.email,
-        following_email: viewingUser.email,
-        following_name: viewingUser.full_name || viewingUser.email,
-      });
-      setIsFollowing(true);
-    } catch (err) {
-      console.error("Follow error:", err);
-    }
+    await base44.entities.Follow.create({
+      follower_email: user.email,
+      follower_name: user.full_name || user.email,
+      following_email: viewingUser.email,
+      following_name: viewingUser.full_name || viewingUser.email,
+    });
+    qc.invalidateQueries({ queryKey: ["profileFollowers", viewingUser.email] });
+    qc.invalidateQueries({ queryKey: ["myFollows", user.email] });
   };
 
   const handleUnfollow = async () => {
     if (!user || !viewingUser) return;
-    try {
-      const follows = await base44.entities.Follow.filter({
-        follower_email: user.email,
-        following_email: viewingUser.email,
-      });
-      if (follows.length > 0) {
-        await base44.entities.Follow.delete(follows[0].id);
-      }
-      setIsFollowing(false);
-    } catch (err) {
-      console.error("Unfollow error:", err);
+    const myFollowRecord = followers.find(f => f.follower_email === user.email);
+    if (myFollowRecord) {
+      await base44.entities.Follow.delete(myFollowRecord.id);
     }
+    qc.invalidateQueries({ queryKey: ["profileFollowers", viewingUser.email] });
+    qc.invalidateQueries({ queryKey: ["myFollows", user.email] });
   };
 
   if (!viewingUser) {
