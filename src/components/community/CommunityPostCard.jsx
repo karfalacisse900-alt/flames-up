@@ -109,12 +109,23 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+              {!post.is_anonymous && post.author_avatar_url ? (
+                <img src={post.author_avatar_url} alt={post.author_name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+              ) : null}
+              <Link to={!post.is_anonymous && post.author_email ? createPageUrl(`UserProfile?email=${post.author_email}`) : "#"}
+                className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
                 {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
-              </span>
+              </Link>
               <span className="text-[11px] shrink-0" style={{ color: "var(--text-hint)" }}>· {timeAgo(post.created_date)}</span>
             </div>
             <div className="flex items-center gap-0.5 shrink-0">
+              {!isOwnPost && !post.is_anonymous && post.author_email && user && (
+                <button onClick={handleFollow}
+                  className="p-1.5 rounded-full transition-all chip"
+                  style={{ color: isFollowing ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                  {isFollowing ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                </button>
+              )}
               <button onClick={() => setSaved(v => !v)}
                 className="p-1.5 rounded-full transition-all chip"
                 style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
