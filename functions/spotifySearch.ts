@@ -17,6 +17,10 @@ async function getSpotifyToken() {
   return data.access_token;
 }
 
+async function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
