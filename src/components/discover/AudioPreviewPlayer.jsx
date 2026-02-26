@@ -142,13 +142,7 @@ export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, o
       audio.play().catch(() => cleanup());
       setState("playing");
       if (onPlayStart) onPlayStart();
-      if (track) {
-        try {
-          const { useAudio } = require("@/components/AudioContext");
-          const { setCurrentTrack } = useAudio();
-          setCurrentTrack(track);
-        } catch (e) {}
-      }
+      if (onPlayingTrack && track) onPlayingTrack(track);
       tickRef.current = setInterval(() => {
         const cur = audio.currentTime;
         setElapsed(cur);
