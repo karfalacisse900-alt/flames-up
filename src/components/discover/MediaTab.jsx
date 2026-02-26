@@ -684,6 +684,8 @@ export default function MediaTab({ user }) {
             onClose={() => setSelectedItem(null)} />
         )}
       </AnimatePresence>
+
+      {shareItem && <ShareModal item={shareItem} onClose={() => setShareItem(null)} />}
     </div>
   );
 }
