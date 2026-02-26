@@ -424,7 +424,7 @@ export default function Discover() {
       {/* ===== BOOKS TAB ===== */}
       {contentTab === "books" && (
         <div className="mt-3">
-          <BooksTab />
+          <OpenLibraryBooksTab />
         </div>
       )}
 
