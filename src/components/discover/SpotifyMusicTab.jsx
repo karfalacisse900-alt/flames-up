@@ -90,7 +90,9 @@ function SongCard({ track, onShare }) {
 
   const handleCoverClick = (e) => {
     e.stopPropagation();
-    if (track.preview_url) setCoverClicked(true);
+    if (!track.preview_url) return;
+    // Toggle: if already clicked (playing), reset to stop; otherwise start
+    setCoverClicked(v => !v);
   };
 
   return (
