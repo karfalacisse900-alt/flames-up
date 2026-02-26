@@ -46,13 +46,20 @@ function formatTime(sec) {
 }
 
 // ── Inline player shown inside the card ───────────────────────────────────
-export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, onPlayStart }) {
+export function AudioPreviewPlayer({ previewUrl, trackTitle, autoPlay = false, onPlayStart, track }) {
   const [state, setState] = useState("idle"); // idle | loading | playing | paused
   const [progress, setProgress] = useState(0); // 0–1
   const [elapsed, setElapsed] = useState(0);
   const audioRef = useRef(null);
   const tickRef = useRef(null);
   const MAX = 30;
+  let AudioContext;
+  try {
+    const { useAudio } = require("@/components/AudioContext");
+    const audioCtx = useAudio();
+  } catch (e) {
+    AudioContext = null;
+  }
 
   const cleanup = useCallback(() => {
     clearInterval(tickRef.current);
