@@ -92,10 +92,32 @@ function ChatView({ user, conversation, onBack }) {
   const [text, setText] = useState("");
   const [recording, setRecording] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const mediaRef = useRef(null);
   const chunksRef = useRef([]);
   const endRef = useRef(null);
   const queryClient = useQueryClient();
+
+  // Check if this user is blocked
+  useEffect(() => {
+    const blockedList = JSON.parse(localStorage.getItem("blocked_users") || "[]");
+    setBlocked(blockedList.includes(conversation.email));
+  }, [conversation.email]);
+
+  const handleBlock = () => {
+    const blockedList = JSON.parse(localStorage.getItem("blocked_users") || "[]");
+    if (blocked) {
+      const updated = blockedList.filter(e => e !== conversation.email);
+      localStorage.setItem("blocked_users", JSON.stringify(updated));
+      setBlocked(false);
+    } else {
+      blockedList.push(conversation.email);
+      localStorage.setItem("blocked_users", JSON.stringify(blockedList));
+      setBlocked(true);
+    }
+    setShowMenu(false);
+  };
 
   const convId = [user.email, conversation.email].sort().join("_");
 
