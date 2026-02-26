@@ -113,9 +113,9 @@ function SongCard({ track, onShare }) {
             <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
           </div>
         )}
-        {track.preview_url && !coverClicked && (
+        {track.preview_url && (
           <div className="absolute inset-0 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.35)" }}>
+            style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
             <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#1DB954" }}>
               <Play className="w-3.5 h-3.5 text-black" fill="black" style={{ marginLeft: 1 }} />
             </div>
