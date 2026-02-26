@@ -137,7 +137,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
     >
       <div
         className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col"
-        style={{ backgroundColor: "#FFFFFF", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)", maxHeight: "90dvh" }}
+        style={{ backgroundColor: "var(--bg-modal)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)", maxHeight: "90dvh" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
