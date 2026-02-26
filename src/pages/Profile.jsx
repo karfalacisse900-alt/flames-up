@@ -348,23 +348,6 @@ export default function Profile() {
           <SavedMediaLists user={user} />
         </TabsContent>
 
-        <TabsContent value="art" className="mt-4">
-          {myArt.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No art created yet</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {myArt.map((art) => (
-                <div key={art.id} className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--bg-nav)", border: "1px solid var(--border-light)" }}>
-                  <img src={art.image_url} alt={art.title} className="aspect-square w-full object-cover" />
-                  <div className="p-2">
-                    <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
         <TabsContent value="interests" className="mt-4">
           <InterestsSection user={user} onUpdated={setUser} />
         </TabsContent>
