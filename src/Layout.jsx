@@ -6,7 +6,7 @@ import { Home, Compass, Palette, Radio, User, Bell, Search } from "lucide-react"
 import AppAIAssistant from "@/components/AppAIAssistant";
 import { MiniStickyPlayer } from "@/components/discover/AudioPreviewPlayer";
 import { useAudio } from "@/components/AudioContext";
-import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper";
+import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
