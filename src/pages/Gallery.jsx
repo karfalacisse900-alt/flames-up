@@ -297,7 +297,7 @@ export default function Gallery() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA", overflowX: "hidden" }}>
       {/* Header */}
       <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
@@ -374,7 +374,7 @@ export default function Gallery() {
       )}
 
       {/* Vote Arena */}
-      {tab === "vote" && <ArtVoteArena user={user} />}
+      {tab === "vote" && <div style={{ backgroundColor: "#E6EFEA" }}><ArtVoteArena user={user} /></div>}
 
       {/* Masonry Grid */}
       {tab === "gallery" && (
