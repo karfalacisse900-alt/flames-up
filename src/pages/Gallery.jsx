@@ -301,10 +301,10 @@ export default function Gallery() {
       {/* Header */}
       <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Gallery</h1>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Gallery</h1>
           <div className="flex items-center gap-2">
             {allArtworks.length > 0 && (
-              <span className="text-xs px-2.5 py-1 rounded-full text-white/40" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+              <span className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor: "#DCCBB8", color: "#6B6B6B" }}>
                 {allArtworks.length} works
               </span>
             )}
@@ -319,15 +319,15 @@ export default function Gallery() {
         </div>
 
         {/* Tab toggle */}
-        <div className="flex gap-1 p-1 rounded-xl mb-3" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+        <div className="flex gap-1 p-1 rounded-xl mb-3" style={{ backgroundColor: "#DCCBB8" }}>
           <button onClick={() => setTab("gallery")}
             className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{ backgroundColor: tab === "gallery" ? "#fff" : "transparent", color: tab === "gallery" ? "#111" : "rgba(255,255,255,0.4)" }}>
+            style={{ backgroundColor: tab === "gallery" ? "#243D33" : "transparent", color: tab === "gallery" ? "#E6EFEA" : "#6B6B6B" }}>
             🖼 Gallery
           </button>
           <button onClick={() => setTab("vote")}
             className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "rgba(255,255,255,0.4)" }}>
+            style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "#6B6B6B" }}>
             <Swords className="w-3 h-3" /> Vote Arena
           </button>
         </div>
@@ -340,8 +340,8 @@ export default function Gallery() {
                 <button key={s.key} onClick={() => setSort(s.key)}
                   className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0"
                   style={{
-                    backgroundColor: sort === s.key ? "#2E6B4F" : "rgba(255,255,255,0.06)",
-                    color: sort === s.key ? "#fff" : "rgba(255,255,255,0.4)",
+                    backgroundColor: sort === s.key ? "#243D33" : "#DCCBB8",
+                    color: sort === s.key ? "#E6EFEA" : "#6B6B6B",
                   }}>
                   <s.icon className="w-3 h-3" /> {s.label}
                 </button>
@@ -353,9 +353,9 @@ export default function Gallery() {
                 <button key={cat} onClick={() => setCategory(cat)}
                   className="px-3 py-1 rounded-full text-xs capitalize whitespace-nowrap transition-all"
                   style={{
-                    backgroundColor: category === cat ? "rgba(255,255,255,0.15)" : "transparent",
-                    color: category === cat ? "#fff" : "rgba(255,255,255,0.3)",
-                    border: `1px solid ${category === cat ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.06)"}`,
+                    backgroundColor: category === cat ? "#DCCBB8" : "transparent",
+                    color: category === cat ? "#243D33" : "#6B6B6B",
+                    border: `1px solid ${category === cat ? "#BF9E79" : "#DCCBB860"}`,
                   }}>
                   {cat === "all" ? "All" : cat}
                 </button>
@@ -367,7 +367,7 @@ export default function Gallery() {
 
       {/* Stats bar (gallery only) */}
       {tab === "gallery" && !isLoading && allArtworks.length > 0 && (
-        <div className="px-5 py-2 flex gap-4 text-xs" style={{ color: "rgba(255,255,255,0.3)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="px-5 py-2 flex gap-4 text-xs" style={{ color: "#6B6B6B", borderBottom: "1px solid #DCCBB8" }}>
           <span>❤️ {totalLikes} total likes</span>
           {topArtist && <span>🏆 Top: {topArtist}</span>}
         </div>
@@ -385,7 +385,7 @@ export default function Gallery() {
         ) : sorted.length === 0 ? (
           <div className="text-center py-20 px-6">
             <p className="text-5xl mb-3">🎨</p>
-            <p className="text-sm text-white/40">No artworks yet</p>
+            <p className="text-sm" style={{ color: "#6B6B6B" }}>No artworks yet</p>
             {user && <button onClick={() => setShowUpload(true)} className="mt-4 px-4 py-2 rounded-xl text-sm font-semibold" style={{ backgroundColor: "#2E6B4F", color: "#fff" }}>Upload First</button>}
           </div>
         ) : (
