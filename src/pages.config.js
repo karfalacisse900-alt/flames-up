@@ -53,6 +53,7 @@ import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
 import ArtStudio from './pages/ArtStudio';
 import Collections from './pages/Collections';
+import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
 import Explore from './pages/Explore';
@@ -73,7 +74,6 @@ import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
-import Discover from './pages/Discover';
 import __Layout from './Layout.jsx';
 
 
@@ -84,6 +84,7 @@ export const PAGES = {
     "Art": Art,
     "ArtStudio": ArtStudio,
     "Collections": Collections,
+    "Discover": Discover,
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
     "Explore": Explore,
@@ -104,7 +105,6 @@ export const PAGES = {
     "Shop": Shop,
     "UserProfile": UserProfile,
     "Wallet": Wallet,
-    "Discover": Discover,
 }
 
 export const pagesConfig = {
