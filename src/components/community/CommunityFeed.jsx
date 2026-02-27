@@ -191,22 +191,24 @@ export default function CommunityFeed({ user }) {
       </AnimatePresence>
 
       {/* ── Quick compose row ── */}
-      <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+      <div className="px-4 py-2.5 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #2E6B4F08, #4CAF7D10)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 text-white"
+          style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", flexShrink: 0 }}>
           {user?.full_name?.[0]?.toUpperCase() || "?"}
         </div>
         <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
           className="flex-1 text-left px-4 py-2.5 rounded-full text-sm transition-all"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
-          What's on your mind?
+          style={{ background: "linear-gradient(135deg, #2E6B4F12, #4CAF7D0A)", color: "#2E6B4F", border: "1.5px solid #2E6B4F30", fontWeight: 500 }}>
+          ✍️ What's on your mind?
         </button>
         <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-          className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
+          className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ background: "linear-gradient(135deg, #2E6B4F20, #4CAF7D20)", color: "#2E6B4F" }}>
           <ImageIcon className="w-4 h-4" />
         </button>
         <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-          className="p-2 rounded-full transition-all active:scale-90" style={{ color: "var(--accent-primary)" }}>
+          className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ background: "linear-gradient(135deg, #D98B6220, #F5A86220)", color: "#D98B62" }}>
           <Smile className="w-4 h-4" />
         </button>
       </div>
