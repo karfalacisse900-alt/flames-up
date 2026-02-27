@@ -226,19 +226,8 @@ export default function SpotifyMusicTab() {
     };
     try {
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(terms[g] || g)}&entity=song&limit=30&media=music&country=US`;
-      const res = await fetch(url, { mode: "cors" });
-      const data = await res.json();
-      setBrowseTracks(data.results.map(t => ({
-        id: String(t.trackId || `${t.trackName}|${t.artistName}`),
-        title: t.trackName,
-        artist: t.artistName,
-        album: t.collectionName,
-        cover_url: t.artworkUrl100?.replace("100x100", "300x300"),
-        itunes_url: t.trackViewUrl,
-        preview_url: t.previewUrl,
-        duration: formatDuration(t.trackTimeMillis),
-        release_year: t.releaseDate ? new Date(t.releaseDate).getFullYear() : null,
-      })));
+      const data = await fetchItunes(url);
+      setBrowseTracks(data.results.map(mapTrack));
     } catch (err) {
       setError("Failed to load tracks.");
     }
