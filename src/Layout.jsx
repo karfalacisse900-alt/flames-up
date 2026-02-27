@@ -58,7 +58,8 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener("swipemode", handler);
   }, []);
 
-  const hideNav = swipeMode || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments"].includes(currentPageName);
+  const isAdminPage = ADMIN_PAGES.includes(currentPageName);
+  const hideNav = swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments"].includes(currentPageName);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
