@@ -132,21 +132,22 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         {/* Scrollable body */}
         <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px", backgroundColor: "#FAFAF8" }}>
           {/* Type selector */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, marginTop: 16 }}>
             {postTypes.map((pt) => (
               <button
                 key={pt.value}
                 onClick={() => setType(pt.value)}
                 style={{
                   flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                  padding: "12px 4px", borderRadius: 12,
-                  border: `2px solid ${type === pt.value ? "var(--accent-primary)" : "var(--border-light)"}`,
-                  backgroundColor: type === pt.value ? "rgba(60,110,90,0.07)" : "transparent",
+                  padding: "12px 4px", borderRadius: 16,
+                  border: `2px solid ${type === pt.value ? "#2E6B4F" : "#E2E8F0"}`,
+                  background: type === pt.value ? "linear-gradient(135deg, #2E6B4F15, #4CAF7D15)" : "#fff",
                   cursor: "pointer",
+                  boxShadow: type === pt.value ? "0 2px 12px #2E6B4F20" : "none",
                 }}
               >
-                <span style={{ fontSize: 20 }}>{pt.emoji}</span>
-                <span style={{ fontSize: 11, fontWeight: 500, color: type === pt.value ? "var(--accent-primary)" : "var(--text-secondary)" }}>{pt.label}</span>
+                <span style={{ fontSize: 22 }}>{pt.emoji}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: type === pt.value ? "#2E6B4F" : "#94A3B8" }}>{pt.label}</span>
               </button>
             ))}
           </div>
