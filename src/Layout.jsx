@@ -68,8 +68,8 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
       {!hideNav &&
-      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)", paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "64px" }}>
-          <div className="max-w-lg mx-auto flex justify-around items-center h-full px-2">
+      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)", paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "64px", maxWidth: "100vw", overflow: "hidden" }}>
+          <div className="max-w-lg mx-auto flex justify-around items-center h-full px-2" style={{ maxWidth: "min(512px, 100vw)" }}>
                 {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
                 const showBadge = item.page === "Notifications" && unreadCount > 0;
