@@ -131,7 +131,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="w-full max-w-lg mx-auto rounded-t-3xl overflow-hidden"
-        style={{ backgroundColor: "var(--bg-modal)", maxHeight: "90vh", overflowY: "auto" }}
+        style={{ backgroundColor: "#F2EDE4", maxHeight: "90vh", overflowY: "auto", color: "#1E1E1E" }}
         onClick={e => e.stopPropagation()}
       >
         <div className="h-1.5 w-12 rounded-full mx-auto mt-3" style={{ backgroundColor: "var(--border-medium)" }} />
