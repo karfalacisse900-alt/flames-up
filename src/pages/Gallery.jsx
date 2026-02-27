@@ -146,7 +146,7 @@ function ArtCard({ art, user, onSelect, onLike }) {
   const isLiked = art.liked_by?.includes(user?.email);
   return (
     <div className="break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group relative"
-      style={{ backgroundColor: "#222", border: "1px solid rgba(255,255,255,0.06)" }}
+      style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E7950" }}
       onClick={() => onSelect(art)}>
       <div className="relative overflow-hidden">
         <img src={art.image_url} alt={art.title} className="w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -164,14 +164,14 @@ function ArtCard({ art, user, onSelect, onLike }) {
         </button>
       </div>
       <div className="px-3 py-2.5">
-        <p className="text-xs font-semibold truncate text-white/90">{art.title}</p>
+        <p className="text-xs font-semibold truncate" style={{ color: "#243D33" }}>{art.title}</p>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-[10px] text-white/40 truncate">{art.user_name}</p>
+          <p className="text-[10px] truncate" style={{ color: "#6B6B6B" }}>{art.user_name}</p>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-0.5 text-[10px] text-white/40">
+            <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "#6B6B6B" }}>
               <Heart className="w-2.5 h-2.5" /> {art.like_count || 0}
             </span>
-            <span className="flex items-center gap-0.5 text-[10px] text-white/40">
+            <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "#6B6B6B" }}>
               <MessageCircle className="w-2.5 h-2.5" /> {art.comment_count || 0}
             </span>
           </div>
@@ -414,12 +414,12 @@ export default function Gallery() {
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               className="relative w-full max-w-lg rounded-t-3xl p-6 space-y-4 overflow-y-auto"
-              style={{ backgroundColor: "#1a1a1a", maxHeight: "90dvh" }}
+              style={{ backgroundColor: "#E6EFEA", maxHeight: "90dvh" }}
               onClick={e => e.stopPropagation()}>
 
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Upload Artwork</h2>
-                <button onClick={() => setShowUpload(false)}><X className="w-5 h-5 text-white/50" /></button>
+                <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Upload Artwork</h2>
+                <button onClick={() => setShowUpload(false)}><X className="w-5 h-5" style={{ color: "#6B6B6B" }} /></button>
               </div>
 
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
@@ -442,21 +442,23 @@ export default function Gallery() {
               </button>
 
               <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
-                placeholder="Title *" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
+                placeholder="Title *" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
 
               <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
                 placeholder="Description (optional)" rows={2}
-                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
+                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
 
               <div>
-                <label className="text-xs text-white/40 mb-1.5 block">Category</label>
+                <label className="text-xs mb-1.5 block" style={{ color: "#6B6B6B" }}>Category</label>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.filter(c => c !== "all").map(cat => (
                     <button key={cat} onClick={() => setUploadCategory(cat)}
                       className="px-3 py-1 rounded-full text-xs capitalize transition-all"
                       style={{
-                        backgroundColor: uploadCategory === cat ? "#2E6B4F" : "rgba(255,255,255,0.08)",
-                        color: uploadCategory === cat ? "#fff" : "rgba(255,255,255,0.4)",
+                        backgroundColor: uploadCategory === cat ? "#2E6B4F" : "#DCCBB8",
+                        color: uploadCategory === cat ? "#fff" : "#6B6B6B",
                       }}>
                       {cat}
                     </button>
@@ -465,10 +467,11 @@ export default function Gallery() {
               </div>
 
               <div>
-                <label className="text-xs text-white/40 mb-1.5 flex items-center gap-1"><Tag className="w-3 h-3" /> Tags (comma separated)</label>
+                <label className="text-xs mb-1.5 flex items-center gap-1" style={{ color: "#6B6B6B" }}><Tag className="w-3 h-3" /> Tags (comma separated)</label>
                 <input value={uploadTags} onChange={e => setUploadTags(e.target.value)}
                   placeholder="nature, color, minimal…"
-                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
               </div>
 
               <button onClick={handleUpload} disabled={uploading || !uploadFile || !uploadTitle.trim()}
