@@ -209,7 +209,6 @@ export default function SpotifyMusicTab() {
   const [browseLoading, setBrowseLoading] = useState(false);
 
   const loadBrowse = useCallback(async (g) => {
-
     setBrowseLoading(true);
     setBrowseTracks([]);
     const terms = {
