@@ -389,7 +389,7 @@ export default function Gallery() {
             {user && <button onClick={() => setShowUpload(true)} className="mt-4 px-4 py-2 rounded-xl text-sm font-semibold" style={{ backgroundColor: "#2E6B4F", color: "#fff" }}>Upload First</button>}
           </div>
         ) : (
-          <div className="px-4 pt-4" style={{ columns: "2", columnGap: "12px" }}>
+          <div className="px-4 pt-4" style={{ columns: "2", columnGap: "12px", maxWidth: "100%", overflow: "hidden" }}>
             {sorted.map(art => (
               <ArtCard key={art.id} art={art} user={user} onSelect={setSelected} onLike={handleLike} />
             ))}
