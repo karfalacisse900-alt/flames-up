@@ -191,43 +191,52 @@ export default function Live() {
 
       {/* Create room dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-sm rounded-2xl" style={{ backgroundColor: "var(--bg-modal)", border: "1px solid var(--border-light)" }}>
-          <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Start Live Session</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+        <DialogContent className="max-w-sm p-0 overflow-hidden rounded-3xl" style={{ border: "none" }}>
+          {/* Gradient header */}
+          <div className="relative px-5 pt-5 pb-6 overflow-hidden" style={{ background: "linear-gradient(135deg, #E53E3E, #FF6B6B)" }}>
+            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-20" style={{ background: "radial-gradient(circle, white, transparent)" }} />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(255,255,255,0.25)" }}>🎙️</div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Go Live</h2>
+                <p className="text-white/60 text-xs">Start a live session for your community</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 space-y-4" style={{ backgroundColor: "#FAFAF8" }}>
             <Input
-              placeholder="Session title"
+              placeholder="Give your session a title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="rounded-xl"
-              style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
+              className="rounded-2xl text-sm"
+              style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}
             />
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}>
+              <SelectTrigger className="rounded-2xl" style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ backgroundColor: "var(--bg-modal)", borderColor: "var(--border-light)" }}>
+              <SelectContent style={{ backgroundColor: "#FAFAF8", borderColor: "#E2E8F0" }}>
                 {Object.entries(categoryLabel).map(([val, label]) => (
-                  <SelectItem key={val} value={val} style={{ color: "var(--text-primary)" }}>{categoryEmoji[val]} {label}</SelectItem>
+                  <SelectItem key={val} value={val} style={{ color: "#1E293B" }}>{categoryEmoji[val]} {label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: "var(--text-secondary)" }}>Entry Price (coins) — 0 = free</label>
+              <label className="text-xs font-bold mb-1.5 block" style={{ color: "#64748B" }}>Entry Price (coins) — 0 = free</label>
               <Input
-                type="number"
-                min={0}
-                placeholder="0"
+                type="number" min={0} placeholder="0"
                 value={entryPrice}
                 onChange={(e) => setEntryPrice(Math.max(0, parseInt(e.target.value) || 0))}
-                className="rounded-xl"
-                style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-primary)" }}
+                className="rounded-2xl text-sm"
+                style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}
               />
             </div>
-            <Button onClick={handleCreateRoom} disabled={!title.trim() || creating} className="w-full rounded-xl">
-              {creating ? "Starting..." : "Go Live"}
-            </Button>
+            <button onClick={handleCreateRoom} disabled={!title.trim() || creating}
+              className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-40"
+              style={{ background: "linear-gradient(135deg, #E53E3E, #FF6B6B)", boxShadow: "0 4px 20px #E53E3E40" }}>
+              {creating ? "Starting…" : "🎙️ Go Live"}
+            </button>
           </div>
         </DialogContent>
       </Dialog>
