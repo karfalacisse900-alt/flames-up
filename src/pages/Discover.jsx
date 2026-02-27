@@ -83,53 +83,71 @@ function SwipeDiscoverCard({ item, onOpen }) {
   );
 }
 
+const CAT_COLORS = {
+  productivity: { from: "#667EEA", to: "#764BA2" },
+  finance: { from: "#11998E", to: "#38EF7D" },
+  learning: { from: "#F093FB", to: "#F5576C" },
+  lifestyle: { from: "#4FACFE", to: "#00F2FE" },
+  entertainment: { from: "#FA709A", to: "#FEE140" },
+  health: { from: "#43E97B", to: "#38F9D7" },
+  social: { from: "#F7971E", to: "#FFD200" },
+  developer_tools: { from: "#30CFD0", to: "#330867" },
+};
+
 function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompare, user }) {
+  const cc = CAT_COLORS[item.category] || { from: "#2E6B4F", to: "#4CAF7D" };
   return (
     <div onClick={compareMode ? onToggleCompare : onOpen}
-      className="rounded-2xl p-4 hover:shadow-sm transition-all cursor-pointer active:scale-[0.99] relative"
-      style={{ backgroundColor: "var(--bg-card)", border: isSelected ? "2px solid var(--accent-primary)" : "1px solid var(--border-light)" }}>
-      {compareMode && (
-        <div className="absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-          style={{ borderColor: isSelected ? "var(--accent-primary)" : "var(--border-medium)", backgroundColor: isSelected ? "var(--accent-primary)" : "transparent" }}>
-          {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
-        </div>
-      )}
-      <div className="flex items-start gap-3">
-        <DiscoverLogo item={item} size="md" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
-            {item.is_new && <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: "rgba(217,139,98,0.12)", color: "var(--accent-secondary)" }}>New</span>}
-            {item.is_sponsored && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(217,139,98,0.1)", color: "var(--accent-secondary)", border: "1px solid rgba(217,139,98,0.3)" }}>Sponsored</span>}
+      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all"
+      style={{ backgroundColor: "#fff", border: isSelected ? "2px solid var(--accent-primary)" : "1px solid #E2E8F0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      {/* gradient top bar */}
+      <div className="h-1" style={{ background: `linear-gradient(90deg, ${cc.from}, ${cc.to})` }} />
+      <div className="p-4">
+        {compareMode && (
+          <div className="absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center"
+            style={{ borderColor: isSelected ? "var(--accent-primary)" : "#E2E8F0", backgroundColor: isSelected ? "var(--accent-primary)" : "transparent" }}>
+            {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
           </div>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>
-          <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="text-[10px] px-2 py-0.5 rounded-full border" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-medium)" }}>
-              {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-            </span>
-            {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-secondary)", border: "1px solid var(--border-light)" }}>{item.pricing}</span>}
-            {item.promo && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(60,110,90,0.08)", color: "var(--accent-primary)", border: "1px solid rgba(60,110,90,0.2)" }}>
-                ✓ {item.promo}
-              </span>
+        )}
+        <div className="flex items-start gap-3">
+          <div className="relative shrink-0">
+            <DiscoverLogo item={item} size="md" />
+            {item.is_new && (
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>
+                <span className="text-white text-[8px] font-bold">N</span>
+              </div>
             )}
-            <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
           </div>
-          <QuickVote item={item} />
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {user && (
-            <BookmarkButton user={user} itemType="app" itemId={item.id}
-              itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
-          )}
-          {item.link && (
-            <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-              className="p-2 shrink-0 transition-colors rounded-full"
-              style={{ color: "var(--text-hint)", backgroundColor: "var(--bg-app)" }}>
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold text-sm" style={{ color: "#1E293B" }}>{item.title}</h3>
+              {item.is_sponsored && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold" style={{ backgroundColor: "#FFF7ED", color: "#C2410C", border: "1px solid #FED7AA" }}>Sponsored</span>}
+            </div>
+            {item.brand_name && <p className="text-[11px] mt-0.5" style={{ color: "#94A3B8" }}>{item.brand_name}</p>}
+            <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "#64748B" }}>{item.description}</p>
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `linear-gradient(135deg, ${cc.from}20, ${cc.to}20)`, color: cc.from, border: `1px solid ${cc.from}30` }}>
+                {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+              {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0" }}>{item.pricing}</span>}
+              {item.promo && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0" }}>🎁 {item.promo}</span>}
+              <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
+            </div>
+            <QuickVote item={item} />
+          </div>
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            {user && (
+              <BookmarkButton user={user} itemType="app" itemId={item.id}
+                itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
+            )}
+            {item.link && (
+              <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-white"
+                style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})`, boxShadow: `0 2px 8px ${cc.from}40` }}>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>
