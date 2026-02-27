@@ -88,6 +88,10 @@
 }
 
 html {
+  /* Lock width to prevent any horizontal overflow */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   /* Prevent viewport resize on mobile keyboard open */
   height: -webkit-fill-available;
 }
@@ -99,19 +103,28 @@ body {
   -webkit-font-smoothing: antialiased;
   touch-action: pan-y;
   overscroll-behavior: none;
-  overflow-x: hidden;
+  /* Hard-lock horizontal overflow at body level */
+  overflow-x: hidden !important;
   overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
   /* Stable viewport on mobile */
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   /* Prevent text scaling on input focus (iOS zoom fix) */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Ensure box-sizing is consistent */
+  box-sizing: border-box;
+  position: relative;
 }
 
 #root {
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
   /* Prevent layout shift from scrollbars appearing */
   scrollbar-gutter: stable;
 }
@@ -224,14 +237,22 @@ nav, button, a[role="button"], .no-select {
 .text-\[11px\].font-medium { font-weight: 600 !important; }
 
 @layer base {
-  * {
+  *, *::before, *::after {
+    box-sizing: border-box;
     @apply border-[var(--border-light)];
   }
   button {
     transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Prevent buttons from breaking layout */
+    max-width: 100%;
   }
   #root > * {
     overflow-x: clip;
+    max-width: 100%;
+  }
+  img, video, canvas, svg {
+    max-width: 100%;
+    display: block;
   }
 }
 
