@@ -17,6 +17,8 @@ const navItems = [
 { name: "Profile", icon: User,    page: "Profile" },
 ];
 
+const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
+
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);

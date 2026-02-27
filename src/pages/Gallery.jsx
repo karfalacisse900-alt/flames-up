@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload } from "lucide-react";
+import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload, Grid, TrendingUp, Award, Tag, Eye, Loader2 } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
-import { Button } from "@/components/ui/button";
-import { createPageUrl } from "@/utils";
-import { useNavigate } from "react-router-dom";
 import ArtVoteArena from "@/components/gallery/ArtVoteArena";
 
 const SORTS = [
-  { key: "newest", label: "Newest", icon: Clock },
-  { key: "liked", label: "Most Liked", icon: Heart },
-  { key: "trending", label: "Trending", icon: Flame },
-  { key: "top_rated", label: "Top Voted", icon: Star },
+  { key: "newest", label: "New", icon: Clock },
+  { key: "liked", label: "Popular", icon: Heart },
+  { key: "trending", label: "Hot", icon: Flame },
+  { key: "top_rated", label: "Top", icon: Star },
 ];
+
+const CATEGORIES = ["all", "abstract", "portrait", "landscape", "digital", "illustration", "photography", "other"];
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -28,7 +27,7 @@ function timeAgo(dateStr) {
 function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   const qc = useQueryClient();
   const [commentText, setCommentText] = useState("");
-
+  const [imgLoaded, setImgLoaded] = useState(false);
   const isLiked = artwork.liked_by?.includes(user?.email);
 
   const { data: comments = [] } = useQuery({
@@ -47,92 +46,94 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
       setCommentText("");
       try {
         await base44.entities.Artwork.update(artwork.id, { comment_count: (artwork.comment_count || 0) + 1 });
-      } catch (err) {
-        console.error("Update count error:", err);
-      }
+      } catch {}
       qc.invalidateQueries({ queryKey: ["artComments", artwork.id] });
       qc.invalidateQueries({ queryKey: ["artworks"] });
     },
-    onError: (err) => console.error("Comment error:", err),
   });
 
   return (
     <motion.div className="fixed inset-0 z-50 flex items-end justify-center"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <motion.div
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="relative w-full max-w-lg rounded-t-3xl flex flex-col"
-        style={{ maxHeight: "92dvh", backgroundColor: "#E6EFEA" }}>
-        
-        {/* Image */}
-        <div className="relative shrink-0">
-          <img src={artwork.image_url} alt={artwork.title} className="w-full aspect-video object-cover rounded-t-3xl" />
-          <button onClick={onClose} className="absolute top-3 right-3 bg-black/50 rounded-full p-2">
+        style={{ maxHeight: "92dvh", backgroundColor: "#1a1a1a" }}>
+
+        {/* Full image */}
+        <div className="relative shrink-0 bg-black rounded-t-3xl overflow-hidden">
+          {!imgLoaded && <div className="aspect-video skeleton" />}
+          <img src={artwork.image_url} alt={artwork.title}
+            className="w-full max-h-64 object-contain"
+            style={{ display: imgLoaded ? "block" : "none" }}
+            onLoad={() => setImgLoaded(true)} />
+          <button onClick={onClose} className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full p-2">
             <X className="w-4 h-4 text-white" />
           </button>
+          {/* Gradient overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-16" style={{ background: "linear-gradient(to top, #1a1a1a, transparent)" }} />
         </div>
 
-        {/* Info */}
-        <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid #DCCBB8" }}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>{artwork.title}</h2>
-              <p className="text-xs mt-0.5" style={{ color: "#6B6B6B" }}>by {artwork.user_name} · {timeAgo(artwork.created_date)}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => onLike(artwork)}
-                className="flex flex-col items-center gap-0.5"
-                style={{ color: isLiked ? "#E07070" : "#6B6B6B" }}>
-                <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-                <span className="text-[10px] font-semibold">{artwork.like_count || 0}</span>
-              </button>
-              <button className="flex flex-col items-center gap-0.5" style={{ color: "#6B6B6B" }}
-                onClick={() => navigator.share?.({ title: artwork.title, url: window.location.href }).catch(() => {})}>
-                <Share2 className="w-5 h-5" />
-                <span className="text-[10px] font-semibold">Share</span>
-              </button>
-            </div>
+        {/* Info bar */}
+        <div className="px-5 py-3 shrink-0 flex items-start justify-between gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>{artwork.title}</h2>
+            <p className="text-xs text-white/50 mt-0.5">by {artwork.user_name} · {timeAgo(artwork.created_date)}</p>
+            {artwork.description && <p className="text-sm text-white/70 mt-1.5 leading-relaxed">{artwork.description}</p>}
+            {artwork.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {artwork.tags.map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>#{t}</span>
+                ))}
+              </div>
+            )}
           </div>
-          {artwork.description && (
-            <p className="text-sm mt-2 leading-relaxed" style={{ color: "#4A4A4A" }}>{artwork.description}</p>
-          )}
+          <div className="flex flex-col items-center gap-3 shrink-0">
+            <button onClick={() => onLike(artwork)} className="flex flex-col items-center gap-0.5">
+              <Heart className={`w-6 h-6 transition-all ${isLiked ? "fill-red-400 text-red-400 scale-110" : "text-white/50"}`} />
+              <span className="text-[10px] text-white/50">{artwork.like_count || 0}</span>
+            </button>
+            <button className="flex flex-col items-center gap-0.5 text-white/40"
+              onClick={() => navigator.share?.({ title: artwork.title, url: window.location.href }).catch(() => {})}>
+              <Share2 className="w-5 h-5" />
+              <span className="text-[10px]">Share</span>
+            </button>
+          </div>
         </div>
 
         {/* Comments */}
         <div className="flex-1 overflow-y-auto px-5 py-3 space-y-3">
-          <p className="text-xs font-bold" style={{ color: "#243D33" }}>💬 Comments ({artwork.comment_count || 0})</p>
-          {comments.length === 0 && <p className="text-sm text-center py-4" style={{ color: "#A8A8A8" }}>No comments yet</p>}
+          <p className="text-xs font-bold text-white/70">💬 Comments ({artwork.comment_count || 0})</p>
+          {comments.length === 0 && <p className="text-sm text-center py-4 text-white/30">Be the first to comment</p>}
           {comments.map(c => (
             <div key={c.id} className="flex gap-2.5">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                style={{ backgroundColor: "#DCCBB8", color: "#243D33" }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-white"
+                style={{ backgroundColor: "#2E6B4F" }}>
                 {c.user_name?.[0]?.toUpperCase() || "?"}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold" style={{ color: "#6B6B6B" }}>{c.user_name}</p>
+              <div className="flex-1">
+                <p className="text-[11px] font-semibold text-white/40">{c.user_name}</p>
                 {c.audio_url
                   ? <audio src={c.audio_url} controls className="h-8 w-full mt-1" style={{ maxWidth: 220 }} />
-                  : <p className="text-sm" style={{ color: "#2F2F2F" }}>{c.text}</p>
-                }
+                  : <p className="text-sm text-white/80">{c.text}</p>}
               </div>
             </div>
           ))}
         </div>
 
         {user && (
-          <div className="px-4 py-3 flex gap-2 items-center" style={{ borderTop: "1px solid #DCCBB8", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#E6EFEA" }}>
+          <div className="px-4 py-3 flex gap-2 items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#1a1a1a" }}>
             <input value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
-              placeholder="Add a comment…" className="flex-1 text-sm px-3 py-2 rounded-xl outline-none"
-              style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
+              placeholder="Add a comment…" className="flex-1 text-sm px-3 py-2 rounded-xl outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
             <button onClick={() => commentText.trim() && commentMut.mutate()}
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "#3C6E5A", color: "#fff" }}>
-              <Send className="w-4 h-4" />
+              style={{ backgroundColor: "#2E6B4F" }}>
+              <Send className="w-4 h-4 text-white" />
             </button>
-            <ArtVoiceComment artworkId={artwork.id} user={user} onSent={() => { }} />
+            <ArtVoiceComment artworkId={artwork.id} user={user} onSent={() => {}} />
           </div>
         )}
       </motion.div>
@@ -140,35 +141,76 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   );
 }
 
+// Masonry grid card
+function ArtCard({ art, user, onSelect, onLike }) {
+  const isLiked = art.liked_by?.includes(user?.email);
+  return (
+    <div className="break-inside-avoid mb-3 rounded-2xl overflow-hidden cursor-pointer group relative"
+      style={{ backgroundColor: "#222", border: "1px solid rgba(255,255,255,0.06)" }}
+      onClick={() => onSelect(art)}>
+      <div className="relative overflow-hidden">
+        <img src={art.image_url} alt={art.title} className="w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        {/* hover overlay */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.4)" }}>
+          <Eye className="w-8 h-8 text-white" />
+        </div>
+        {/* Like btn */}
+        <button
+          onClick={e => { e.stopPropagation(); onLike(art); }}
+          className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
+          <Heart className={`w-4 h-4 transition-all ${isLiked ? "fill-red-400 text-red-400" : "text-white"}`} />
+        </button>
+      </div>
+      <div className="px-3 py-2.5">
+        <p className="text-xs font-semibold truncate text-white/90">{art.title}</p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-[10px] text-white/40 truncate">{art.user_name}</p>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-0.5 text-[10px] text-white/40">
+              <Heart className="w-2.5 h-2.5" /> {art.like_count || 0}
+            </span>
+            <span className="flex items-center gap-0.5 text-[10px] text-white/40">
+              <MessageCircle className="w-2.5 h-2.5" /> {art.comment_count || 0}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Gallery() {
   const [user, setUser] = useState(null);
   const [sort, setSort] = useState("newest");
   const [selected, setSelected] = useState(null);
-  const [tab, setTab] = useState("gallery"); // "gallery" | "vote"
+  const [tab, setTab] = useState("gallery");
+  const [category, setCategory] = useState("all");
   const [showUpload, setShowUpload] = useState(false);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadDesc, setUploadDesc] = useState("");
+  const [uploadTags, setUploadTags] = useState("");
+  const [uploadCategory, setUploadCategory] = useState("other");
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: artworks = [], isLoading: loadingArtworks } = useQuery({
     queryKey: ["artworks"],
-    queryFn: () => base44.entities.Artwork.filter({ status: "published" }, "-created_date", 60),
+    queryFn: () => base44.entities.Artwork.filter({ status: "published" }, "-created_date", 80),
   });
 
-  // Also load legacy ArtPiece records
   const { data: artPieces = [], isLoading: loadingPieces } = useQuery({
     queryKey: ["artPieces"],
-    queryFn: () => base44.entities.ArtPiece.list("-created_date", 60),
+    queryFn: () => base44.entities.ArtPiece.list("-created_date", 80),
   });
 
-  // Merge both into a unified list
-  const allArtworks = [
+  const allArtworks = useMemo(() => [
     ...artworks,
     ...artPieces.map(p => ({
       id: `piece_${p.id}`,
@@ -183,22 +225,36 @@ export default function Gallery() {
       comment_count: 0,
       description: p.description,
       created_date: p.created_date,
+      tags: [],
+      category: "other",
     }))
-  ];
+  ], [artworks, artPieces]);
 
   const isLoading = loadingArtworks || loadingPieces;
 
-  const sorted = [...allArtworks].sort((a, b) => {
-    if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
-    if (sort === "top_rated") return (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0);
-    if (sort === "trending") {
-      const cutoff = Date.now() - 86400000;
-      const aRecent = new Date(a.created_date) > cutoff ? (a.like_count || 0) : 0;
-      const bRecent = new Date(b.created_date) > cutoff ? (b.like_count || 0) : 0;
-      return bRecent - aRecent;
-    }
-    return new Date(b.created_date) - new Date(a.created_date);
-  });
+  const sorted = useMemo(() => {
+    let list = allArtworks;
+    if (category !== "all") list = list.filter(a => a.category === category);
+    return [...list].sort((a, b) => {
+      if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
+      if (sort === "top_rated") return (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0);
+      if (sort === "trending") {
+        const cutoff = Date.now() - 86400000;
+        const aScore = new Date(a.created_date) > cutoff ? (a.like_count || 0) * 2 : (a.like_count || 0);
+        const bScore = new Date(b.created_date) > cutoff ? (b.like_count || 0) * 2 : (b.like_count || 0);
+        return bScore - aScore;
+      }
+      return new Date(b.created_date) - new Date(a.created_date);
+    });
+  }, [allArtworks, sort, category]);
+
+  // Stats
+  const totalLikes = allArtworks.reduce((sum, a) => sum + (a.like_count || 0), 0);
+  const topArtist = useMemo(() => {
+    const map = {};
+    allArtworks.forEach(a => { map[a.user_name] = (map[a.user_name] || 0) + (a.like_count || 0); });
+    return Object.entries(map).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  }, [allArtworks]);
 
   const handleUpload = async () => {
     if (!uploadFile || !uploadTitle.trim() || !user) return;
@@ -216,135 +272,135 @@ export default function Gallery() {
         liked_by: [],
         comment_count: 0,
         vote_count: 0,
+        category: uploadCategory,
+        tags: uploadTags.split(",").map(t => t.trim()).filter(Boolean),
       });
       qc.invalidateQueries({ queryKey: ["artworks"] });
       setShowUpload(false);
-      setUploadTitle("");
-      setUploadDesc("");
-      setUploadFile(null);
+      setUploadTitle(""); setUploadDesc(""); setUploadTags(""); setUploadFile(null); setPreviewUrl(null);
     } finally {
       setUploading(false);
     }
   };
 
   const handleLike = async (art) => {
-    if (!user?.email) return;
-    if (art.liked_by?.includes(user.email)) return;
-    try {
-      const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
-      if (art._type === "ArtPiece") {
-        await base44.entities.ArtPiece.update(art._raw_id, updated);
-        qc.invalidateQueries({ queryKey: ["artPieces"] });
-      } else {
-        await base44.entities.Artwork.update(art.id, updated);
-        qc.invalidateQueries({ queryKey: ["artworks"] });
-      }
-      if (selected?.id === art.id) setSelected({ ...selected, ...updated });
-    } catch (err) {
-      console.error("Like error:", err);
+    if (!user?.email || art.liked_by?.includes(user.email)) return;
+    const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
+    if (art._type === "ArtPiece") {
+      await base44.entities.ArtPiece.update(art._raw_id, updated);
+      qc.invalidateQueries({ queryKey: ["artPieces"] });
+    } else {
+      await base44.entities.Artwork.update(art.id, updated);
+      qc.invalidateQueries({ queryKey: ["artworks"] });
     }
+    if (selected?.id === art.id) setSelected({ ...selected, ...updated });
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "#0f0f0f" }}>
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
+      <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#0f0f0f", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Gallery</h1>
-          {user && (
-            <button onClick={() => setShowUpload(true)}
-              className="flex items-center justify-center w-10 h-10 rounded-full text-lg font-semibold"
-              style={{ backgroundColor: "#2E6B4F", color: "#FFFFFF" }}>
-              +
-            </button>
-          )}
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Gallery</h1>
+          <div className="flex items-center gap-2">
+            {allArtworks.length > 0 && (
+              <span className="text-xs px-2.5 py-1 rounded-full text-white/40" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+                {allArtworks.length} works
+              </span>
+            )}
+            {user && (
+              <button onClick={() => setShowUpload(true)}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-semibold"
+                style={{ backgroundColor: "#2E6B4F", color: "#fff" }}>
+                +
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tab toggle */}
-        <div className="flex gap-1 p-1 rounded-xl mb-3" style={{ backgroundColor: "#DCCBB8" }}>
+        <div className="flex gap-1 p-1 rounded-xl mb-3" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
           <button onClick={() => setTab("gallery")}
             className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{ backgroundColor: tab === "gallery" ? "#243D33" : "transparent", color: tab === "gallery" ? "#E6EFEA" : "#6B6B6B" }}>
+            style={{ backgroundColor: tab === "gallery" ? "#fff" : "transparent", color: tab === "gallery" ? "#111" : "rgba(255,255,255,0.4)" }}>
             🖼 Gallery
           </button>
           <button onClick={() => setTab("vote")}
             className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "#6B6B6B" }}>
+            style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "rgba(255,255,255,0.4)" }}>
             <Swords className="w-3 h-3" /> Vote Arena
           </button>
         </div>
 
-        {/* Sort pills — only in gallery tab */}
         {tab === "gallery" && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {SORTS.map(s => (
-              <button key={s.key} onClick={() => setSort(s.key)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0"
-                style={{
-                  backgroundColor: sort === s.key ? "#243D33" : "#DCCBB8",
-                  color: sort === s.key ? "#E6EFEA" : "#6B6B6B",
-                }}>
-                <s.icon className="w-3 h-3" /> {s.label}
-              </button>
-            ))}
-          </div>
+          <>
+            {/* Sort */}
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-2">
+              {SORTS.map(s => (
+                <button key={s.key} onClick={() => setSort(s.key)}
+                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0"
+                  style={{
+                    backgroundColor: sort === s.key ? "#2E6B4F" : "rgba(255,255,255,0.06)",
+                    color: sort === s.key ? "#fff" : "rgba(255,255,255,0.4)",
+                  }}>
+                  <s.icon className="w-3 h-3" /> {s.label}
+                </button>
+              ))}
+            </div>
+            {/* Categories */}
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {CATEGORIES.map(cat => (
+                <button key={cat} onClick={() => setCategory(cat)}
+                  className="px-3 py-1 rounded-full text-xs capitalize whitespace-nowrap transition-all"
+                  style={{
+                    backgroundColor: category === cat ? "rgba(255,255,255,0.15)" : "transparent",
+                    color: category === cat ? "#fff" : "rgba(255,255,255,0.3)",
+                    border: `1px solid ${category === cat ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.06)"}`,
+                  }}>
+                  {cat === "all" ? "All" : cat}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
+
+      {/* Stats bar (gallery only) */}
+      {tab === "gallery" && !isLoading && allArtworks.length > 0 && (
+        <div className="px-5 py-2 flex gap-4 text-xs" style={{ color: "rgba(255,255,255,0.3)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+          <span>❤️ {totalLikes} total likes</span>
+          {topArtist && <span>🏆 Top: {topArtist}</span>}
+        </div>
+      )}
 
       {/* Vote Arena */}
       {tab === "vote" && <ArtVoteArena user={user} />}
 
-      {/* Grid */}
-      {tab === "gallery" && (isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#3C6E5A", borderTopColor: "transparent" }} />
-        </div>
-      ) : sorted.length === 0 ? (
-         <div className="text-center py-20">
-           <p className="text-5xl mb-3">🎨</p>
-           <p className="text-sm" style={{ color: "#6B6B6B" }}>No artworks yet. Upload some art!</p>
-         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 px-4 pt-4">
-          {sorted.map(art => {
-            const isLiked = art.liked_by?.includes(user?.email);
-            return (
-              <motion.div key={art.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl overflow-hidden cursor-pointer"
-                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E7950" }}
-                onClick={() => setSelected(art)}>
-                <div className="aspect-square overflow-hidden">
-                  <img src={art.image_url} alt={art.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                </div>
-                <div className="p-2.5">
-                  <p className="text-xs font-semibold truncate" style={{ color: "#243D33" }}>{art.title}</p>
-                  <p className="text-[10px] truncate mt-0.5" style={{ color: "#6B6B6B" }}>{art.user_name}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <button onClick={e => { e.stopPropagation(); handleLike(art); }}
-                      className="flex items-center gap-1 text-xs transition-colors"
-                      style={{ color: isLiked ? "#E07070" : "#6B6B6B" }}>
-                      <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-current" : ""}`} />
-                      <span>{art.like_count || 0}</span>
-                    </button>
-                    <span className="flex items-center gap-1 text-[10px]" style={{ color: "#A8A8A8" }}>
-                      <MessageCircle className="w-3 h-3" /> {art.comment_count || 0}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      ))}
+      {/* Masonry Grid */}
+      {tab === "gallery" && (
+        isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#2E6B4F" }} />
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className="text-center py-20 px-6">
+            <p className="text-5xl mb-3">🎨</p>
+            <p className="text-sm text-white/40">No artworks yet</p>
+            {user && <button onClick={() => setShowUpload(true)} className="mt-4 px-4 py-2 rounded-xl text-sm font-semibold" style={{ backgroundColor: "#2E6B4F", color: "#fff" }}>Upload First</button>}
+          </div>
+        ) : (
+          <div className="px-4 pt-4" style={{ columns: "2", columnGap: "12px" }}>
+            {sorted.map(art => (
+              <ArtCard key={art.id} art={art} user={user} onSelect={setSelected} onLike={handleLike} />
+            ))}
+          </div>
+        )
+      )}
 
+      {/* Detail Modal */}
       <AnimatePresence>
         {selected && (
-          <ArtworkDetailModal
-            artwork={selected}
-            user={user}
-            onClose={() => setSelected(null)}
-            onLike={handleLike}
-          />
+          <ArtworkDetailModal artwork={selected} user={user} onClose={() => setSelected(null)} onLike={handleLike} />
         )}
       </AnimatePresence>
 
@@ -353,48 +409,73 @@ export default function Gallery() {
         {showUpload && (
           <motion.div className="fixed inset-0 z-50 flex items-end justify-center"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="absolute inset-0 bg-black/60" onClick={() => setShowUpload(false)} />
+            <div className="absolute inset-0 bg-black/80" onClick={() => setShowUpload(false)} />
             <motion.div
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="relative w-full max-w-lg rounded-t-3xl p-6 space-y-4"
-              style={{ backgroundColor: "#E6EFEA" }}
+              className="relative w-full max-w-lg rounded-t-3xl p-6 space-y-4 overflow-y-auto"
+              style={{ backgroundColor: "#1a1a1a", maxHeight: "90dvh" }}
               onClick={e => e.stopPropagation()}>
+
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "#243D33" }}>Upload Artwork</h2>
-                <button onClick={() => setShowUpload(false)}><X className="w-5 h-5" style={{ color: "#6B6B6B" }} /></button>
+                <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Upload Artwork</h2>
+                <button onClick={() => setShowUpload(false)}><X className="w-5 h-5 text-white/50" /></button>
               </div>
 
-              {/* File picker */}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
-                onChange={e => setUploadFile(e.target.files?.[0] || null)} />
+                onChange={e => {
+                  const f = e.target.files?.[0];
+                  if (f) { setUploadFile(f); setPreviewUrl(URL.createObjectURL(f)); }
+                }} />
+
               <button onClick={() => fileInputRef.current?.click()}
-                className="w-full py-8 rounded-2xl border-2 border-dashed flex flex-col items-center gap-2 transition-colors"
-                style={{ borderColor: uploadFile ? "#3C6E5A" : "#BF9E79", backgroundColor: uploadFile ? "rgba(60,110,90,0.06)" : "transparent" }}>
-                {uploadFile ? (
-                  <img src={URL.createObjectURL(uploadFile)} alt="preview" className="h-24 rounded-xl object-cover" />
+                className="w-full rounded-2xl border-2 border-dashed flex flex-col items-center gap-2 transition-all overflow-hidden"
+                style={{ borderColor: uploadFile ? "#2E6B4F" : "rgba(255,255,255,0.15)", minHeight: previewUrl ? "auto" : 120 }}>
+                {previewUrl ? (
+                  <img src={previewUrl} alt="preview" className="w-full max-h-48 object-cover rounded-2xl" />
                 ) : (
-                  <>
-                    <Upload className="w-6 h-6" style={{ color: "#BF9E79" }} />
-                    <span className="text-sm" style={{ color: "#6B6B6B" }}>Tap to choose an image</span>
-                  </>
+                  <div className="py-8 flex flex-col items-center gap-2">
+                    <Upload className="w-8 h-8 text-white/30" />
+                    <span className="text-sm text-white/40">Tap to choose image</span>
+                  </div>
                 )}
               </button>
 
               <input value={uploadTitle} onChange={e => setUploadTitle(e.target.value)}
-                placeholder="Title *"
-                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
+                placeholder="Title *" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
+
               <textarea value={uploadDesc} onChange={e => setUploadDesc(e.target.value)}
                 placeholder="Description (optional)" rows={2}
-                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
-                style={{ backgroundColor: "#DCCBB8", border: "1px solid #BF9E79", color: "#243D33" }} />
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
 
-              <Button onClick={handleUpload}
-                disabled={uploading || !uploadFile || !uploadTitle.trim()}
-                className="w-full rounded-xl" style={{ backgroundColor: "#3C6E5A", color: "#fff" }}>
-                {uploading ? "Uploading…" : "🎨 Upload to Gallery"}
-              </Button>
+              <div>
+                <label className="text-xs text-white/40 mb-1.5 block">Category</label>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.filter(c => c !== "all").map(cat => (
+                    <button key={cat} onClick={() => setUploadCategory(cat)}
+                      className="px-3 py-1 rounded-full text-xs capitalize transition-all"
+                      style={{
+                        backgroundColor: uploadCategory === cat ? "#2E6B4F" : "rgba(255,255,255,0.08)",
+                        color: uploadCategory === cat ? "#fff" : "rgba(255,255,255,0.4)",
+                      }}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-white/40 mb-1.5 flex items-center gap-1"><Tag className="w-3 h-3" /> Tags (comma separated)</label>
+                <input value={uploadTags} onChange={e => setUploadTags(e.target.value)}
+                  placeholder="nature, color, minimal…"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
+              </div>
+
+              <button onClick={handleUpload} disabled={uploading || !uploadFile || !uploadTitle.trim()}
+                className="w-full py-3 rounded-xl font-semibold text-white disabled:opacity-40 transition-all"
+                style={{ backgroundColor: "#2E6B4F" }}>
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "🎨 Upload to Gallery"}
+              </button>
             </motion.div>
           </motion.div>
         )}

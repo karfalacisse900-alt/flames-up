@@ -1,159 +1,120 @@
-import React, { useState, useRef, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { Search, Music, X, Share2 } from "lucide-react";
+import React, { useState, useRef, useCallback } from "react";
+import { Search, Music, X, Play, Pause, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import MediaDetailSheet from "./MediaDetailSheet";
-import ShareModal from "./ShareModal.jsx";
-import SearchResultCard from "./SearchResultCard";
 import WorthItButton from "./WorthItButton";
+import ShareModal from "./ShareModal.jsx";
 
-// ── Preloaded trending songs ──────────────────────────────────────────────
-const PRELOADED_SONGS = [
-  { title: "Achour", artist: "Innoss'B", duration: "3:51" },
-  { title: "Yo Pe", artist: "Innoss'B", duration: "4:33" },
-  { title: "Careless Whisper", artist: "George Michael", duration: "5:01" },
-  { title: "Until I Found You", artist: "Stephen Sanchez", duration: "2:57" },
-  { title: "Gangsta's Paradise", artist: "Coolio", duration: "4:01" },
-  { title: "Yellow", artist: "Coldplay", duration: "4:27" },
-  { title: "On the Low", artist: "Burna Boy", duration: "3:06" },
-  { title: "I Wanna Be Yours", artist: "Arctic Monkeys", duration: "3:04" },
-  { title: "Die With A Smile", artist: "Lady Gaga & Bruno Mars", duration: "4:12" },
-  { title: "Save Your Tears", artist: "The Weeknd", duration: "3:36" },
-  { title: "Somewhere Only We Know", artist: "Keane", duration: "3:59" },
-  { title: "In Da Club", artist: "50 Cent", duration: "3:14" },
-  { title: "Diamonds", artist: "Rihanna", duration: "3:46" },
-  { title: "Take on Me", artist: "a-ha", duration: "3:46" },
-  { title: "Those Eyes", artist: "New West", duration: "3:41" },
-  { title: "Sailor Song", artist: "Gigi Perez", duration: "3:32" },
-  { title: "One Of The Girls", artist: "The Weeknd, JENNIE & Lily Rose Depp", duration: "4:05" },
-  { title: "Arcade", artist: "Duncan Laurence", duration: "3:04" },
-  { title: "Billie Jean", artist: "Michael Jackson", duration: "4:54" },
-  { title: "Every Breath You Take", artist: "The Police", duration: "4:14" },
-  { title: "Show Me Love", artist: "WizTheMc & bees & honey", duration: "2:57" },
-  { title: "Beautiful Things", artist: "Benson Boone", duration: "3:01" },
-  { title: "Gasolina", artist: "Daddy Yankee", duration: "3:13" },
-  { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", duration: "3:59" },
-  { title: "blue", artist: "yung kai", duration: "3:35" },
-  { title: "Never Gonna Give You Up", artist: "Rick Astley", duration: "3:34" },
-  { title: "Right Here Waiting", artist: "Richard Marx", duration: "4:25" },
-  { title: "Yeah!", artist: "Usher feat. Lil Jon & Ludacris", duration: "4:11" },
-  { title: "I Want to Know What Love Is", artist: "Foreigner", duration: "5:05" },
-  { title: "Dear Mama", artist: "2Pac", duration: "4:40" },
-  { title: "It Must Have Been Love", artist: "Roxette", duration: "4:20" },
-  { title: "Sweet Dreams (Are Made of This)", artist: "Eurythmics", duration: "3:38" },
-  { title: "Perfect", artist: "Ed Sheeran", duration: "4:24" },
-  { title: "Cinnamon Girl", artist: "Lana Del Rey", duration: "5:01" },
-  { title: "How Deep Is Your Love", artist: "Bee Gees", duration: "4:04" },
-  { title: "Smack That", artist: "Akon feat. Eminem", duration: "3:33" },
-  { title: "Pretty Little Baby", artist: "Connie Francis", duration: "2:23" },
-  { title: "Dandelions", artist: "Ruth B.", duration: "3:54" },
-  { title: "Karma Chameleon", artist: "Culture Club", duration: "4:13" },
-  { title: "APT.", artist: "ROSÉ & Bruno Mars", duration: "2:50" },
-  { title: "End of Beginning", artist: "Djo", duration: "2:40" },
-  { title: "Another Day in Paradise", artist: "Phil Collins", duration: "5:24" },
-  { title: "Way Down We Go", artist: "KALEO", duration: "3:34" },
-  { title: "The Night We Met", artist: "Lord Huron", duration: "3:29" },
-  { title: "Empire State Of Mind", artist: "JAY-Z feat. Alicia Keys", duration: "4:37" },
-  { title: "Dancing Queen", artist: "ABBA", duration: "3:51" },
-  { title: "Wake Me Up Before You Go-Go", artist: "Wham!", duration: "3:52" },
-  { title: "Someone You Loved", artist: "Lewis Capaldi", duration: "3:03" },
-  { title: "Shekini", artist: "P-Square", duration: "3:39" },
-  { title: "Another Love", artist: "Tom Odell", duration: "4:11" },
-  { title: "Time After Time", artist: "Cyndi Lauper", duration: "4:02" },
-  { title: "Ms. Jackson", artist: "Outkast", duration: "4:31" },
-  { title: "Eye of the Tiger", artist: "Survivor", duration: "4:04" },
-  { title: "lovely", artist: "Billie Eilish & Khalid", duration: "3:21" },
-  { title: "Blinding Lights", artist: "The Weeknd", duration: "3:22" },
-  { title: "My Heart Will Go On", artist: "Céline Dion", duration: "4:40" },
-  { title: "Butter", artist: "BTS", duration: "2:45" },
-  { title: "TOKYO DRIFT", artist: "Teriyaki Boyz", duration: "4:16" },
-  { title: "Ooh Ahh (My Life Be Like)", artist: "Grits feat. TobyMac", duration: "3:54" },
-  { title: "Nothing's Gonna Stop Us Now", artist: "Starship", duration: "4:31" },
-  { title: "Baby", artist: "Justin Bieber feat. Ludacris", duration: "3:35" },
-  { title: "Y Que Fue?", artist: "Don Miguelo", duration: "2:44" },
-  { title: "Hoist The Colours", artist: "Samuel Kim", duration: "4:49" },
-];
+const GENRE_FILTERS = ["All", "Pop", "Hip-Hop", "R&B", "Rock", "Afrobeats", "Latin", "K-Pop", "Classical", "Dance", "Emotional"];
 
-const GENRE_FILTERS = ["All", "Pop", "Hip-Hop", "R&B", "Rock", "Afrobeats", "Latin", "K-Pop", "Classic", "Dance", "Emotional"];
-const SORT_OPTIONS = [
-  { key: "default", label: "Default" },
-  { key: "az", label: "A → Z" },
-  { key: "artist", label: "By Artist" },
-  { key: "year_desc", label: "Year ↓" },
-  { key: "year_asc", label: "Year ↑" },
-];
+const GENRE_KEYWORDS = {
+  "Pop": ["pop", "taylor", "dua", "ed sheeran", "bts", "rose", "bruno", "justin", "billie", "sheeran", "wham", "abba", "cyndi", "rick", "phil", "celine", "lewis", "benson", "duncan", "stephen"],
+  "Hip-Hop": ["rap", "hip hop", "50 cent", "usher", "coolio", "2pac", "outkast", "jay-z", "eminem", "ludacris", "kanye", "drake", "kendrick"],
+  "R&B": ["r&b", "the weeknd", "rihanna", "khalid", "lady gaga", "beyonce"],
+  "Rock": ["rock", "arctic monkeys", "coldplay", "keane", "foreigner", "survivor", "police", "a-ha", "nirvana", "queen", "metallica"],
+  "Afrobeats": ["afro", "burna boy", "p-square", "innoss", "wizkid", "davido", "rema", "ckay"],
+  "Latin": ["latin", "daddy yankee", "reggaeton", "despacito", "bachata", "salsa"],
+  "K-Pop": ["k-pop", "bts", "rosé", "jennie", "blackpink", "exo", "twice", "stray kids"],
+  "Classical": ["classical", "beethoven", "mozart", "bach", "chopin", "orchestra", "symphony"],
+  "Dance": ["dance", "disco", "electronic", "edm", "house", "techno", "dua lipa", "calvin harris"],
+  "Emotional": ["sad", "emotional", "ballad", "heartbreak", "someone you loved", "another love", "lovely"],
+};
 
+const formatDuration = (ms) => {
+  if (!ms) return null;
+  const mins = Math.floor(ms / 60000);
+  const secs = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
+  return `${mins}:${secs}`;
+};
 
-
-// ── Single song card ────────────────────────────────────────────────────────
-function SongCard({ track, onShare }) {
+function MiniPlayer({ track, isPlaying, onToggle, onClose }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="flex gap-3 p-3 rounded-2xl"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+    <motion.div
+      initial={{ y: 80 }}
+      animate={{ y: 0 }}
+      exit={{ y: 80 }}
+      className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto z-40 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
+      style={{ backgroundColor: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)" }}
+    >
+      {track.cover_url ? (
+        <img src={track.cover_url} alt={track.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+      ) : (
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+          <Music className="w-5 h-5 text-white/60" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-white truncate">{track.title}</p>
+        <p className="text-[10px] text-white/60 truncate">{track.artist}</p>
+      </div>
+      <button onClick={onToggle} className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#1DB954" }}>
+        {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white ml-0.5" />}
+      </button>
+      <button onClick={onClose} className="text-white/50 hover:text-white">
+        <X className="w-4 h-4" />
+      </button>
+    </motion.div>
+  );
+}
 
-      {/* Album cover */}
-      <div className="shrink-0">
+function TrackCard({ track, isCurrentTrack, isPlaying, onPlay, onShare }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex gap-3 p-3 rounded-2xl"
+      style={{ backgroundColor: isCurrentTrack ? "rgba(29,185,84,0.08)" : "var(--bg-card)", border: `1px solid ${isCurrentTrack ? "#1DB95430" : "var(--border-light)"}` }}
+    >
+      {/* Album art + play button */}
+      <div className="relative shrink-0 cursor-pointer" onClick={onPlay}>
         {track.cover_url ? (
-          <img src={track.cover_url} alt={track.title}
-            className="w-16 rounded-xl object-cover" style={{ height: 72 }} />
+          <img src={track.cover_url} alt={track.title} className="w-16 h-16 rounded-xl object-cover" />
         ) : (
-          <div className="w-16 rounded-xl flex items-center justify-center"
-            style={{ height: 72, backgroundColor: "var(--bg-subtle)" }}>
+          <div className="w-16 h-16 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
             <Music className="w-7 h-7" style={{ color: "var(--text-hint)" }} />
+          </div>
+        )}
+        {track.preview_url && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
+            {isCurrentTrack && isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white" />}
+          </div>
+        )}
+        {isCurrentTrack && isPlaying && (
+          <div className="absolute bottom-1 right-1 flex gap-px items-end">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="w-1 rounded-full bg-green-400 wave-bar" style={{ height: 8 }} />
+            ))}
           </div>
         )}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold leading-snug truncate" style={{ color: "var(--text-primary)" }}>
-          {track.title}
-        </p>
-        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
-          🎤 {track.artist}
-        </p>
+        <p className="text-sm font-semibold leading-snug truncate" style={{ color: "var(--text-primary)" }}>{track.title}</p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>{track.artist}</p>
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
-          {track.album && (
-            <span className="text-[10px] truncate max-w-[120px]" style={{ color: "var(--text-hint)" }}>
-              💿 {track.album}
-            </span>
-          )}
-          {(track.duration || track.duration_str) && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-              {track.duration || track.duration_str}
-            </span>
-          )}
-          {track.release_year && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-              {track.release_year}
-            </span>
-          )}
+          {track.album && <span className="text-[10px] truncate max-w-[100px]" style={{ color: "var(--text-hint)" }}>💿 {track.album}</span>}
+          {track.duration && <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>{track.duration}</span>}
+          {track.release_year && <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>{track.release_year}</span>}
         </div>
-
-
-
         <div className="flex items-center gap-2 mt-2 flex-wrap">
-          {track.spotify_url ? (
-            <a href={track.spotify_url} target="_blank" rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
+          {track.preview_url && (
+            <button onClick={onPlay} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95" style={{ backgroundColor: "#1DB954", color: "#fff" }}>
+              <Play className="w-3 h-3" /> Preview
+            </button>
+          )}
+          {track.itunes_url && (
+            <a href={track.itunes_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95"
-              style={{ backgroundColor: "#1DB954", color: "#fff" }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-              Listen on Spotify
+              style={{ backgroundColor: "#FC3C44", color: "#fff" }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.25 14.375a.625.625 0 01-.625-.625V8.25l-5 1.25V17a.625.625 0 01-.625.625.625.625 0 01-.625-.625V9.875a.625.625 0 01.469-.605l6.25-1.563A.625.625 0 0115.875 8.25v7.5a.625.625 0 01-.625.625z"/></svg>
+              iTunes
             </a>
-          ) : null}
-          {/* Worth it rating */}
-          <WorthItButton
-            contentType="song"
-            contentId={`${track.title}|${track.artist}`}
-          />
-          {/* Share button */}
-          <button
-            onClick={e => { e.stopPropagation(); onShare && onShare(track); }}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-medium transition-all active:scale-95"
+          )}
+          <WorthItButton contentType="song" contentId={`${track.title}|${track.artist}`} />
+          <button onClick={e => { e.stopPropagation(); onShare && onShare(track); }}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-medium"
             style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-            <Share2 className="w-3 h-3" /> Share
+            Share
           </button>
         </div>
       </div>
@@ -161,171 +122,143 @@ function SongCard({ track, onShare }) {
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────
 export default function SpotifyMusicTab() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("All");
   const [searchResults, setSearchResults] = useState(null);
-  const [enriched, setEnriched] = useState({}); // keyed by "title|artist"
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [enriching, setEnriching] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [sortBy, setSortBy] = useState("default");
   const [shareItem, setShareItem] = useState(null);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
 
-  // Live search — fetch tracks, albums, and artists
-  const doSearch = async (q) => {
+  const searchItunes = useCallback(async (q) => {
     if (!q.trim()) { setSearchResults(null); return; }
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke("spotifySearch", { query: q.trim(), type: "all", limit: 20 });
-      if (res.data?.error) {
-        setError("Spotify API error. Please try again.");
-        console.error("Spotify error:", res.data.error);
-        setSearchResults([]);
-      } else {
-        // Combine tracks, albums, and artists with type labels
-        const combined = [
-          ...(res.data?.tracks || []).map(t => ({ ...t, media_type: "music" })),
-          ...(res.data?.albums || []).map(a => ({ ...a, media_type: "album" })),
-          ...(res.data?.artists || []).map(ar => ({ ...ar, media_type: "artist" })),
-        ];
-        setSearchResults(combined);
-      }
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25&media=music`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setSearchResults(data.results.map(t => ({
+        id: String(t.trackId || `${t.trackName}|${t.artistName}`),
+        title: t.trackName,
+        artist: t.artistName,
+        album: t.collectionName,
+        cover_url: t.artworkUrl100?.replace("100x100", "300x300"),
+        itunes_url: t.trackViewUrl,
+        preview_url: t.previewUrl,
+        duration: formatDuration(t.trackTimeMillis),
+        release_year: t.releaseDate ? new Date(t.releaseDate).getFullYear() : null,
+        genre: t.primaryGenreName,
+      })));
     } catch (err) {
-      setError("Network error. Check your connection.");
-      console.error("Search error:", err);
-      setSearchResults([]);
+      setError("Could not load results. Check your connection.");
     }
     setLoading(false);
+  }, []);
+
+  const handleSearch = (e) => { e.preventDefault(); searchItunes(query); };
+
+  const handlePlay = (track) => {
+    if (!track.preview_url) return;
+    if (currentTrack?.id === track.id) {
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current?.play();
+        setIsPlaying(true);
+      }
+      return;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    audioRef.current = new Audio(track.preview_url);
+    audioRef.current.play();
+    audioRef.current.onended = () => setIsPlaying(false);
+    setCurrentTrack(track);
+    setIsPlaying(true);
   };
 
-  const handleSearch = (e) => { e.preventDefault(); doSearch(query); };
+  const handleClosePlayer = () => {
+    audioRef.current?.pause();
+    setCurrentTrack(null);
+    setIsPlaying(false);
+  };
 
-  // Build display list - enrich immediately on mount
-  const [preloadedMerged, setPreloadedMerged] = useState([]);
-  
-  useEffect(() => {
-    const enrichAll = async () => {
-      const merged = await Promise.all(
-        PRELOADED_SONGS.map(async (s) => {
-          const key = `${s.title}|${s.artist}`;
-          if (enriched[key]) {
-            return {
-              id: key,
-              title: s.title,
-              artist: s.artist,
-              duration_str: s.duration,
-              ...enriched[key],
-            };
-          }
-          try {
-            const query = `${s.title} ${s.artist.split(" feat")[0].split(",")[0].trim()}`;
-            const res = await base44.functions.invoke("spotifySearch", {
-              query, type: "track", limit: 3,
-            });
-            const tracks = res.data?.tracks || [];
-            const match = tracks.find(t =>
-              t.title?.toLowerCase() === s.title.toLowerCase()
-            ) || tracks[0];
-            
-            return {
-              id: key,
-              title: s.title,
-              artist: s.artist,
-              duration_str: s.duration,
-              cover_url: match?.cover_url || null,
-              spotify_url: match?.spotify_url || null,
-              album: match?.album || null,
-              release_year: match?.release_year || null,
-            };
-          } catch (err) {
-            console.error(`Failed to enrich ${s.title}:`, err);
-            return {
-              id: key,
-              title: s.title,
-              artist: s.artist,
-              duration_str: s.duration,
-              cover_url: null,
-              spotify_url: null,
-              album: null,
-              release_year: null,
-            };
-          }
-        })
-      );
-      setPreloadedMerged(merged);
+  // Curated browseable tracks (fetch on demand per genre)
+  const [browseTracks, setBrowseTracks] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+
+  const loadBrowse = useCallback(async (g) => {
+    setBrowseLoading(true);
+    setBrowseTracks([]);
+    const terms = {
+      "All": "top hits 2024",
+      "Pop": "pop hits",
+      "Hip-Hop": "hip hop rap",
+      "R&B": "r&b soul",
+      "Rock": "rock classic",
+      "Afrobeats": "afrobeats afropop",
+      "Latin": "latin reggaeton",
+      "K-Pop": "k-pop",
+      "Classical": "classical piano",
+      "Dance": "dance electronic",
+      "Emotional": "sad emotional ballad",
     };
-    enrichAll();
-  }, [enriched]);
+    try {
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(terms[g] || g)}&entity=song&limit=30&media=music`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setBrowseTracks(data.results.map(t => ({
+        id: String(t.trackId || `${t.trackName}|${t.artistName}`),
+        title: t.trackName,
+        artist: t.artistName,
+        album: t.collectionName,
+        cover_url: t.artworkUrl100?.replace("100x100", "300x300"),
+        itunes_url: t.trackViewUrl,
+        preview_url: t.previewUrl,
+        duration: formatDuration(t.trackTimeMillis),
+        release_year: t.releaseDate ? new Date(t.releaseDate).getFullYear() : null,
+      })));
+    } catch (err) {
+      setError("Failed to load tracks.");
+    }
+    setBrowseLoading(false);
+  }, []);
 
-  // Genre filter applied to preloaded list (client-side keyword match)
-  const GENRE_KEYWORDS = {
-    "Pop": ["pop","katy","taylor","dua","ed sheeran","bts","rose","bruno","justin","billie","sheeran","wham","abba","cyndi","rick","phil","celine","lewis","benson","duncan","stephen"],
-    "Hip-Hop": ["50 cent","usher","coolio","2pac","outkast","jay-z","jay z","eminem","ludacris","lil jon","toby","grits","teriyaki"],
-    "R&B": ["the weeknd","rihanna","khalid","lady gaga"],
-    "Rock": ["arctic monkeys","coldplay","keane","foreigner","survivor","police","a-ha","eurythmics","roxette","kaleo","lord huron","starship"],
-    "Afrobeats": ["burna boy","p-square","innoss","innossb"],
-    "Latin": ["daddy yankee","don miguelo","gasolina"],
-    "K-Pop": ["bts","rosé","jennie"],
-    "Classic": ["george michael","michael jackson","bee gees","abba","cyndi lauper","rick astley","richard marx","phil collins","connie francis","culture club","foreigner","roxette","eurythmics","police","a-ha","wham","starship"],
-    "Dance": ["abba","wham","gasolina","yeah","usher","dancing","wake me up"],
-    "Emotional": ["dandelions","someone you loved","another love","the night we met","lovely","arcade","end of beginning","right here waiting","my heart"],
-  };
+  React.useEffect(() => {
+    if (!searchResults) loadBrowse(genre);
+  }, [genre]);
 
-  const filteredPreloaded = genre === "All"
-    ? preloadedMerged
-    : preloadedMerged.filter(s => {
-        const keywords = GENRE_KEYWORDS[genre] || [];
-        const hay = (s.title + " " + s.artist).toLowerCase();
-        return keywords.some(k => hay.includes(k));
-      });
-
-  const toDisplayTrack = (t) => ({
-    ...t,
-    media_type: "music",
-    duration_str: t.duration_str || (t.duration_ms ? `${Math.floor(t.duration_ms/60000)}:${String(Math.floor((t.duration_ms%60000)/1000)).padStart(2,"0")}` : null),
-  });
-
-  const applySort = (list) => {
-    if (sortBy === "az") return [...list].sort((a, b) => a.title.localeCompare(b.title));
-    if (sortBy === "artist") return [...list].sort((a, b) => a.artist?.localeCompare(b.artist || ""));
-    if (sortBy === "year_desc") return [...list].sort((a, b) => (b.release_year || 0) - (a.release_year || 0));
-    if (sortBy === "year_asc") return [...list].sort((a, b) => (a.release_year || 0) - (b.release_year || 0));
-    return list;
-  };
-
-  const displayList = applySort(searchResults
-    ? searchResults.map(t => toDisplayTrack({ id: t.id, title: t.title, artist: t.artist, cover_url: t.cover_url, spotify_url: t.spotify_url, preview_url: t.preview_url, album: t.album, release_year: t.release_year }))
-    : filteredPreloaded.map(track => toDisplayTrack(track)));
+  const displayList = searchResults || browseTracks;
 
   return (
-    <div className="pb-10">
+    <div className="pb-24">
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center gap-2">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="#1DB954">
-          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-        </svg>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#FC3C44" }}>
+          <Music className="w-4 h-4 text-white" />
+        </div>
         <div>
-          <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Spotify Music</p>
-          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>
-            {`${PRELOADED_SONGS.length} curated tracks · search for more`}
-          </p>
+          <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Music Discovery</p>
+          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Powered by iTunes · 30s previews included</p>
         </div>
       </div>
 
       {/* Genre chips */}
       <div className="px-5 mb-3 overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 w-max pb-1">
-          {GENRE_FILTERS.slice(0, 8).map(g => (
+          {GENRE_FILTERS.map(g => (
             <button key={g} onClick={() => { setGenre(g); setSearchResults(null); setQuery(""); }}
               className="px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all"
               style={{
-                backgroundColor: genre === g ? "#1DB954" : "var(--bg-card)",
-                color: genre === g ? "#fff" : "var(--text-secondary)",
-                borderColor: genre === g ? "#1DB954" : "var(--border-light)",
+                backgroundColor: genre === g && !searchResults ? "#FC3C44" : "var(--bg-card)",
+                color: genre === g && !searchResults ? "#fff" : "var(--text-secondary)",
+                borderColor: genre === g && !searchResults ? "#FC3C44" : "var(--border-light)",
               }}>
               {g}
             </button>
@@ -333,18 +266,15 @@ export default function SpotifyMusicTab() {
         </div>
       </div>
 
-      {/* Search bar */}
+      {/* Search */}
       <form onSubmit={handleSearch} className="px-5 mb-3">
-        <div className="relative flex gap-2">
+        <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search by title or artist…"
+            <input value={query} onChange={e => setQuery(e.target.value)}
+              placeholder="Search any song or artist…"
               className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-            />
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
             {query && (
               <button type="button" onClick={() => { setQuery(""); setSearchResults(null); }} className="absolute right-3 top-1/2 -translate-y-1/2">
                 <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
@@ -353,64 +283,61 @@ export default function SpotifyMusicTab() {
           </div>
           <button type="submit" disabled={!query.trim() || loading}
             className="px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-40"
-            style={{ backgroundColor: "#1DB954", color: "#fff" }}>
+            style={{ backgroundColor: "#FC3C44", color: "#fff" }}>
             {loading ? "…" : "Go"}
           </button>
         </div>
       </form>
 
-      {/* Error */}
       {error && (
         <div className="mx-5 mb-3 p-3 rounded-xl text-xs text-center" style={{ backgroundColor: "#FEF0E6", color: "#D98B62" }}>{error}</div>
       )}
 
-      {/* Count */}
       <p className="px-5 mb-2 text-[11px]" style={{ color: "var(--text-hint)" }}>
-        {searchResults ? `${displayList.length} result${displayList.length !== 1 ? "s" : ""} for "${query}"` : `${displayList.length} track${displayList.length !== 1 ? "s" : ""}`}
+        {searchResults ? `${displayList.length} results for "${query}"` : `${displayList.length} tracks · ${genre}`}
       </p>
 
-      {/* Results */}
-      {loading ? (
+      {loading || browseLoading ? (
         <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "#1DB954", borderTopColor: "transparent" }} />
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "#FC3C44", borderTopColor: "transparent" }} />
         </div>
-      ) : displayList.length > 0 ? (
+      ) : (
         <div className="px-5 space-y-2">
           <AnimatePresence>
-            {displayList.map(item => {
-              const isSearchResult = searchResults && searchResults.some(s => s.id === item.id);
-              return (
-                <div key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer">
-                  {isSearchResult ? (
-                    <SearchResultCard item={item} onShare={setShareItem} />
-                  ) : (
-                    <SongCard track={item} onShare={setShareItem} />
-                  )}
-                </div>
-              );
-            })}
+            {displayList.map(track => (
+              <TrackCard
+                key={track.id}
+                track={track}
+                isCurrentTrack={currentTrack?.id === track.id}
+                isPlaying={isPlaying && currentTrack?.id === track.id}
+                onPlay={() => handlePlay(track)}
+                onShare={setShareItem}
+              />
+            ))}
           </AnimatePresence>
           {searchResults && (
             <button onClick={() => { setSearchResults(null); setQuery(""); }}
               className="w-full py-2 text-xs font-medium text-center" style={{ color: "var(--text-hint)" }}>
-              ← Back to all songs
+              ← Back to browse
             </button>
           )}
-        </div>
-      ) : (
-        <div className="py-12 text-center px-5">
-          <p className="text-3xl mb-3">🎵</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No {searchResults ? "results" : "tracks"} found</p>
+          {displayList.length === 0 && !loading && !browseLoading && (
+            <div className="py-12 text-center">
+              <p className="text-3xl mb-3">🎵</p>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No tracks found</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Footer */}
       <p className="text-[10px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
-        Powered by <span style={{ color: "#1DB954", fontWeight: 600 }}>Spotify</span>. Music data © Spotify AB. No music is hosted in this app. All links go to official Spotify pages.
+        Music data provided by <span style={{ color: "#FC3C44", fontWeight: 600 }}>Apple iTunes</span>. 30-second previews are for discovery only. All links open Apple Music. No music is hosted in this app.
       </p>
 
       <AnimatePresence>
-        {selectedItem && <MediaDetailSheet item={selectedItem} onClose={() => setSelectedItem(null)} />}
+        {currentTrack && (
+          <MiniPlayer track={currentTrack} isPlaying={isPlaying} onToggle={() => handlePlay(currentTrack)} onClose={handleClosePlayer} />
+        )}
       </AnimatePresence>
 
       {shareItem && <ShareModal item={shareItem} onClose={() => setShareItem(null)} />}
