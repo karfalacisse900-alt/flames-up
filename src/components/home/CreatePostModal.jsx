@@ -130,7 +130,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px", backgroundColor: "var(--bg-modal)" }}>
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px 8px", backgroundColor: "#FAFAF8" }}>
           {/* Type selector */}
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {postTypes.map((pt) => (
