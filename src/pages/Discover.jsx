@@ -419,7 +419,7 @@ export default function Discover() {
             </div>
           )}
 
-          {!isLoading && !compareMode && <DiscoverAIAssistant items={items} onItemClick={setSelectedItem} />}
+          {/* AI assistant removed */}
           {compareMode && (
             <CompareBar selected={compareList}
               onRemove={id => setCompareList(prev => prev.filter(c => c.id !== id))}

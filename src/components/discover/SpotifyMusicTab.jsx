@@ -138,8 +138,8 @@ export default function SpotifyMusicTab() {
     setLoading(true);
     setError(null);
     try {
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25&media=music`;
-      const res = await fetch(url);
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25&media=music&country=US`;
+      const res = await fetch(url, { mode: "cors" });
       const data = await res.json();
       setSearchResults(data.results.map(t => ({
         id: String(t.trackId || `${t.trackName}|${t.artistName}`),
@@ -210,8 +210,8 @@ export default function SpotifyMusicTab() {
       "Emotional": "sad emotional ballad",
     };
     try {
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(terms[g] || g)}&entity=song&limit=30&media=music`;
-      const res = await fetch(url);
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(terms[g] || g)}&entity=song&limit=30&media=music&country=US`;
+      const res = await fetch(url, { mode: "cors" });
       const data = await res.json();
       setBrowseTracks(data.results.map(t => ({
         id: String(t.trackId || `${t.trackName}|${t.artistName}`),
