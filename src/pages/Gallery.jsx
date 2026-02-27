@@ -297,9 +297,9 @@ export default function Gallery() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#0f0f0f" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA" }}>
       {/* Header */}
-      <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#0f0f0f", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Gallery</h1>
           <div className="flex items-center gap-2">
