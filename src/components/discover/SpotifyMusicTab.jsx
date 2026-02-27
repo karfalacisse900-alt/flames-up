@@ -232,7 +232,7 @@ export default function SpotifyMusicTab() {
       setError("Failed to load tracks.");
     }
     setBrowseLoading(false);
-  }, []);
+  }, [fetchItunes]);
 
   React.useEffect(() => {
     if (!searchResults) loadBrowse(genre);
