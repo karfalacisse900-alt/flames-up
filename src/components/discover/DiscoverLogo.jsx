@@ -14,29 +14,27 @@ function getColor(title = "") {
   return colorPalette[idx];
 }
 
+// Only display user-uploaded logos (logo_url set by admin).
+// Never auto-fetch favicons or third-party brand logos.
 export default function DiscoverLogo({ item, size = "md" }) {
   const dim = size === "lg" ? "w-16 h-16" : size === "sm" ? "w-10 h-10" : "w-14 h-14";
   const textSize = size === "lg" ? "text-2xl" : size === "sm" ? "text-base" : "text-xl";
-  const pixelSize = size === "lg" ? 64 : size === "sm" ? 40 : 56;
-
-  const hostname = (() => { try { return item.link ? new URL(item.link).hostname : null; } catch { return null; } })();
-  const faviconUrl = hostname ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=${pixelSize * 2}` : null;
-  const src = item.logo_url || faviconUrl;
 
   const [failed, setFailed] = React.useState(false);
   const color = getColor(item.title);
+  const showImage = item.logo_url && !failed;
 
   return (
     <div
       className={`${dim} rounded-2xl overflow-hidden shrink-0 flex items-center justify-center font-bold ${textSize}`}
       style={{
-        backgroundColor: (src && !failed) ? "var(--bg-app)" : color.bg,
+        backgroundColor: showImage ? "var(--bg-app)" : color.bg,
         border: "1px solid var(--border-light)",
       }}
     >
-      {src && !failed ? (
+      {showImage ? (
         <img
-          src={src}
+          src={item.logo_url}
           alt=""
           className="w-full h-full object-contain p-1"
           onError={() => setFailed(true)}
