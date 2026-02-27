@@ -60,7 +60,7 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="relative w-full max-w-lg rounded-t-3xl flex flex-col"
-        style={{ maxHeight: "92dvh", backgroundColor: "#1a1a1a" }}>
+        style={{ height: "92dvh", backgroundColor: "#1a1a1a" }}>
 
         {/* Full image */}
         <div className="relative shrink-0 bg-black rounded-t-3xl overflow-hidden">
@@ -104,7 +104,7 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
         </div>
 
         {/* Comments */}
-        <div className="flex-1 overflow-y-auto px-5 py-3 space-y-3">
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 space-y-3">
           <p className="text-xs font-bold text-white/70">💬 Comments ({artwork.comment_count || 0})</p>
           {comments.length === 0 && <p className="text-sm text-center py-4 text-white/30">Be the first to comment</p>}
           {comments.map(c => (
@@ -124,7 +124,7 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
         </div>
 
         {user && (
-          <div className="px-4 py-3 flex gap-2 items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#1a1a1a" }}>
+          <div className="shrink-0 px-4 py-3 flex gap-2 items-center" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))", backgroundColor: "#1a1a1a" }}>
             <input value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
               placeholder="Add a comment…" className="flex-1 text-sm px-3 py-2 rounded-xl outline-none bg-white/10 text-white placeholder-white/30 border border-white/10" />
