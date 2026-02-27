@@ -136,6 +136,9 @@ body {
 /* ── Micro-interactions & depth ── */
 button {
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease, box-shadow 0.15s ease !important;
+  /* Isolate transforms so they never affect layout of siblings */
+  will-change: transform;
+  transform-origin: center;
 }
 button:active {
   transform: scale(0.93) !important;
