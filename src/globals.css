@@ -342,6 +342,13 @@ html, body, #root {
 /* Prevent any fixed/absolute element from expanding past viewport */
 .fixed, [style*="position: fixed"], [style*="position:fixed"] {
   max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* w-screen is 100vw which can cause overflow - contain it */
+.w-screen {
+  width: 100% !important;
+  max-width: 100vw !important;
 }
 
 /* Prevent framer-motion from breaking layout */
