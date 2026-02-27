@@ -98,56 +98,55 @@ function DiscoverListItem({ item, onOpen, compareMode, isSelected, onToggleCompa
   const cc = CAT_COLORS[item.category] || { from: "#2E6B4F", to: "#4CAF7D" };
   return (
     <div onClick={compareMode ? onToggleCompare : onOpen}
-      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all"
-      style={{ backgroundColor: "#fff", border: isSelected ? "2px solid var(--accent-primary)" : "1px solid #E2E8F0", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      {/* gradient top bar */}
-      <div className="h-1" style={{ background: `linear-gradient(90deg, ${cc.from}, ${cc.to})` }} />
-      <div className="p-4">
-        {compareMode && (
-          <div className="absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center"
-            style={{ borderColor: isSelected ? "var(--accent-primary)" : "#E2E8F0", backgroundColor: isSelected ? "var(--accent-primary)" : "transparent" }}>
-            {isSelected && <span className="text-white text-[10px] font-bold">✓</span>}
+      className="cursor-pointer active:scale-[0.99] transition-all relative"
+      style={{ padding: "12px 0", borderBottom: "1px solid #F1F5F9" }}>
+      {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full" style={{ background: `linear-gradient(180deg, ${cc.from}, ${cc.to})` }} />}
+      <div className="flex items-start gap-3 pl-1">
+        {/* Logo with gradient ring */}
+        <div className="relative shrink-0">
+          <div className="w-14 h-14 rounded-2xl overflow-hidden p-0.5" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>
+            <div className="w-full h-full rounded-[10px] overflow-hidden bg-white flex items-center justify-center">
+              <DiscoverLogo item={item} size="md" />
+            </div>
           </div>
-        )}
-        <div className="flex items-start gap-3">
-          <div className="relative shrink-0">
-            <DiscoverLogo item={item} size="md" />
-            {item.is_new && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>
-                <span className="text-white text-[8px] font-bold">N</span>
+          {item.is_new && (
+            <div className="absolute -top-1 -right-1 text-[9px] font-bold px-1 rounded-full text-white" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>NEW</div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-sm leading-tight" style={{ color: "#1E293B" }}>{item.title}</h3>
+                {item.is_sponsored && <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: "#FFF7ED", color: "#C2410C" }}>AD</span>}
               </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-bold text-sm" style={{ color: "#1E293B" }}>{item.title}</h3>
-              {item.is_sponsored && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold" style={{ backgroundColor: "#FFF7ED", color: "#C2410C", border: "1px solid #FED7AA" }}>Sponsored</span>}
+              {item.brand_name && <p className="text-[11px]" style={{ color: "#94A3B8" }}>{item.brand_name}</p>}
             </div>
-            {item.brand_name && <p className="text-[11px] mt-0.5" style={{ color: "#94A3B8" }}>{item.brand_name}</p>}
-            <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "#64748B" }}>{item.description}</p>
-            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `linear-gradient(135deg, ${cc.from}20, ${cc.to}20)`, color: cc.from, border: `1px solid ${cc.from}30` }}>
-                {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-              </span>
-              {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0" }}>{item.pricing}</span>}
-              {item.promo && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0" }}>🎁 {item.promo}</span>}
-              <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
+            <div className="flex items-center gap-1 shrink-0">
+              {user && (
+                <BookmarkButton user={user} itemType="app" itemId={item.id}
+                  itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
+              )}
+              {item.link && (
+                <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-white"
+                  style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
             </div>
-            <QuickVote item={item} />
           </div>
-          <div className="flex flex-col items-center gap-1 shrink-0">
-            {user && (
-              <BookmarkButton user={user} itemType="app" itemId={item.id}
-                itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
-            )}
-            {item.link && (
-              <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-white"
-                style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})`, boxShadow: `0 2px 8px ${cc.from}40` }}>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )}
+          <p className="text-xs mt-1 line-clamp-2 leading-relaxed" style={{ color: "#64748B" }}>{item.description}</p>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `linear-gradient(135deg, ${cc.from}25, ${cc.to}25)`, color: cc.from }}>
+              {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+            </span>
+            {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F1F5F9", color: "#475569" }}>{item.pricing}</span>}
+            {item.promo && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "#ECFDF5", color: "#059669" }}>🎁 {item.promo}</span>}
+            <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
           </div>
+          <QuickVote item={item} />
         </div>
       </div>
     </div>
