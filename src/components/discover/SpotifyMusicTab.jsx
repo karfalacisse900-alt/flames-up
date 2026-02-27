@@ -133,31 +133,46 @@ export default function SpotifyMusicTab() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
+  const fetchItunes = useCallback(async (url) => {
+    // Try direct first, fall back to allorigins proxy
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("bad status");
+      return await res.json();
+    } catch {
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy);
+      const wrapper = await res.json();
+      return JSON.parse(wrapper.contents);
+    }
+  }, []);
+
+  const mapTrack = (t) => ({
+    id: String(t.trackId || `${t.trackName}|${t.artistName}`),
+    title: t.trackName,
+    artist: t.artistName,
+    album: t.collectionName,
+    cover_url: t.artworkUrl100?.replace("100x100", "300x300"),
+    itunes_url: t.trackViewUrl,
+    preview_url: t.previewUrl,
+    duration: formatDuration(t.trackTimeMillis),
+    release_year: t.releaseDate ? new Date(t.releaseDate).getFullYear() : null,
+    genre: t.primaryGenreName,
+  });
+
   const searchItunes = useCallback(async (q) => {
     if (!q.trim()) { setSearchResults(null); return; }
     setLoading(true);
     setError(null);
     try {
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=25&media=music&country=US`;
-      const res = await fetch(url, { mode: "cors" });
-      const data = await res.json();
-      setSearchResults(data.results.map(t => ({
-        id: String(t.trackId || `${t.trackName}|${t.artistName}`),
-        title: t.trackName,
-        artist: t.artistName,
-        album: t.collectionName,
-        cover_url: t.artworkUrl100?.replace("100x100", "300x300"),
-        itunes_url: t.trackViewUrl,
-        preview_url: t.previewUrl,
-        duration: formatDuration(t.trackTimeMillis),
-        release_year: t.releaseDate ? new Date(t.releaseDate).getFullYear() : null,
-        genre: t.primaryGenreName,
-      })));
+      const data = await fetchItunes(url);
+      setSearchResults(data.results.map(mapTrack));
     } catch (err) {
       setError("Could not load results. Check your connection.");
     }
     setLoading(false);
-  }, []);
+  }, [fetchItunes]);
 
   const handleSearch = (e) => { e.preventDefault(); searchItunes(query); };
 
