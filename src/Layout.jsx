@@ -62,8 +62,8 @@ export default function Layout({ children, currentPageName }) {
   const hideNav = swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments"].includes(currentPageName);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
-        <div className={isAdminPage ? "w-full relative" : "max-w-lg mx-auto relative"} style={{ paddingBottom: hideNav ? 0 : "72px", minHeight: "100dvh" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "hidden", width: "100%", maxWidth: "100%" }}>
+        <div className={isAdminPage ? "w-full relative" : "max-w-lg mx-auto relative"} style={{ paddingBottom: hideNav ? 0 : "72px", minHeight: "100dvh", overflowX: "hidden", maxWidth: "100%" }}>
           {children}
         </div>
 
