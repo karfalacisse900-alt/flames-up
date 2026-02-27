@@ -104,24 +104,29 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
           position: "relative",
           width: "100%",
           maxWidth: "512px",
-          borderRadius: "24px 24px 0 0",
-          backgroundColor: "var(--bg-modal)",
+          borderRadius: "28px 28px 0 0",
+          backgroundColor: "#FAFAF8",
           display: "flex",
           flexDirection: "column",
           maxHeight: "90vh",
+          overflow: "hidden",
         }}
       >
-        {/* Drag handle */}
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 99, backgroundColor: "var(--border-medium)" }} />
-        </div>
-
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 12px", flexShrink: 0 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, fontFamily: "var(--font-serif)", color: "var(--text-primary)", margin: 0 }}>New Post</h2>
-          <button onClick={onClose} style={{ padding: 8, borderRadius: 99, background: "var(--bg-modal)", border: "none", cursor: "pointer", display: "flex" }}>
-            <X style={{ width: 18, height: 18, color: "var(--text-hint)" }} />
-          </button>
+        {/* Gradient header */}
+        <div style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", padding: "16px 20px 20px", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -16, right: -16, width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.2), transparent)" }} />
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <div style={{ width: 36, height: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.4)" }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, fontFamily: "var(--font-serif)", color: "#fff", margin: 0 }}>New Post</h2>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 2 }}>Share a thought with the community</p>
+            </div>
+            <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 99, background: "rgba(255,255,255,0.2)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X style={{ width: 16, height: 16, color: "#fff" }} />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable body */}
