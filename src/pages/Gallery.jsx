@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload, Grid, TrendingUp, Award, Tag, Eye, Loader2 } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import ArtVoteArena from "@/components/gallery/ArtVoteArena";
+import DailyWinnerBanner from "@/components/gallery/DailyWinnerBanner";
 
 const SORTS = [
   { key: "newest", label: "New", icon: Clock },
@@ -284,8 +285,11 @@ export default function Gallery() {
   };
 
   const handleLike = async (art) => {
-    if (!user?.email || art.liked_by?.includes(user.email)) return;
-    const updated = { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
+    if (!user?.email) return;
+    const alreadyLiked = art.liked_by?.includes(user.email);
+    const updated = alreadyLiked
+      ? { like_count: Math.max(0, (art.like_count || 0) - 1), liked_by: (art.liked_by || []).filter(e => e !== user.email) }
+      : { like_count: (art.like_count || 0) + 1, liked_by: [...(art.liked_by || []), user.email] };
     if (art._type === "ArtPiece") {
       await base44.entities.ArtPiece.update(art._raw_id, updated);
       qc.invalidateQueries({ queryKey: ["artPieces"] });
