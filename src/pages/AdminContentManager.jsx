@@ -18,6 +18,7 @@ function StatusBadge({ status }) {
 export default function AdminContentManager() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("submissions");
+  const [dykFilter, setDykFilter] = useState("pending");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedItem, setSelectedItem] = useState(null); // for reject modal
   const [editingItem, setEditingItem] = useState(null);
