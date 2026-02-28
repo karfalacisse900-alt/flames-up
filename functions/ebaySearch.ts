@@ -11,11 +11,19 @@ const CACHE_TTL = 15 * 60 * 1000;
 async function getEbayToken() {
   if (tokenCache && Date.now() < tokenExpiry) return tokenCache;
 
-  const clientId = Deno.env.get("EBAY_CLIENT_ID");
-  const clientSecret = Deno.env.get("EBAY_CLIENT_SECRET");
+  const clientId = Deno.env.get("EBAY_CLIENT_ID")?.trim();
+  const clientSecret = Deno.env.get("EBAY_CLIENT_SECRET")?.trim();
+
+  if (!clientId || !clientSecret) {
+    throw new Error("eBay credentials not configured");
+  }
+
+  console.log("eBay clientId prefix:", clientId.substring(0, 10) + "...");
+
+  // eBay requires the credentials encoded as clientId:clientSecret
   const credentials = btoa(`${clientId}:${clientSecret}`);
 
-  const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+  const res = await fetch("https://api.sandbox.ebay.com/identity/v1/oauth2/token", {
     method: "POST",
     headers: {
       "Authorization": `Basic ${credentials}`,
@@ -26,8 +34,29 @@ async function getEbayToken() {
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("eBay token error:", err);
-    throw new Error("Failed to get eBay token");
+    console.error("eBay token error (sandbox):", err);
+
+    // Try production endpoint as fallback
+    const resProd = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope",
+    });
+
+    if (!resProd.ok) {
+      const errProd = await resProd.text();
+      console.error("eBay token error (production):", errProd);
+      throw new Error("Failed to get eBay token: " + errProd);
+    }
+
+    const dataProd = await resProd.json();
+    tokenCache = dataProd.access_token;
+    tokenExpiry = Date.now() + (dataProd.expires_in - 60) * 1000;
+    console.log("eBay token obtained from production");
+    return tokenCache;
   }
 
   const data = await res.json();
