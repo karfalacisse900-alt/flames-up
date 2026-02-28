@@ -208,12 +208,18 @@ export default function DidYouKnowSection({ user }) {
       <AnimatePresence>
         {showForm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-end" onClick={() => setShowForm(false)}>
+            className="fixed inset-0 z-50 flex items-end"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 9999 }}
+            onClick={() => setShowForm(false)}>
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              className="w-full rounded-t-3xl max-h-[92vh] overflow-y-auto"
-              style={{ backgroundColor: "var(--bg-modal)" }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="w-full max-w-lg mx-auto rounded-t-3xl flex flex-col"
+              style={{ backgroundColor: "#FAFAF8", maxHeight: "90vh" }}
               onClick={e => e.stopPropagation()}>
-              <SubmitForm user={user} onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ["didYouKnow"] })} />
+              <div className="h-1.5 w-12 rounded-full mx-auto mt-3 mb-1" style={{ backgroundColor: "#CEC8BC" }} />
+              <div className="overflow-y-auto flex-1 pb-8">
+                <SubmitForm user={user} onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ["didYouKnow"] })} />
+              </div>
             </motion.div>
           </motion.div>
         )}
