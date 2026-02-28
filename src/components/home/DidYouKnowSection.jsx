@@ -128,10 +128,11 @@ export default function DidYouKnowSection({ user }) {
     <div className="px-4 pt-4 pb-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <Link to={createPageUrl("DidYouKnow")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="text-lg">💡</span>
           <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Did You Know?</p>
-        </div>
+          <ChevronRight className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+        </Link>
         {user && (
           <button onClick={() => setShowForm(true)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
