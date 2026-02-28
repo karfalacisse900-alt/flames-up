@@ -64,28 +64,7 @@ export default function HomeHeader({ user }) {
         </div>
       </div>
 
-      {/* Tagline strip */}
-      <div className="mt-3 flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
-        {[
-          { emoji: "🔥", label: "Trending" },
-          { emoji: "💬", label: "Debates" },
-          { emoji: "✦", label: "Quotes" },
-          { emoji: "🎨", label: "Gallery" },
-          { emoji: "🎮", label: "Games" },
-        ].map(({ emoji, label }) => (
-          <span
-            key={label}
-            className="shrink-0 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
-            style={{
-              backgroundColor: "var(--bg-card)",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}
-          >
-            {emoji} {label}
-          </span>
-        ))}
-      </div>
+
     </div>
   );
 }

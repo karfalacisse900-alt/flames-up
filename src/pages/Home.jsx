@@ -4,6 +4,7 @@ import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
 import TrendingCarousel from "../components/home/TrendingCarousel";
 import HomeHeader from "@/components/home/HomeHeader";
+import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 
 export default function Home() {
   const [user, setUser] = useState(null);
