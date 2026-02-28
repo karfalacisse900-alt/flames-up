@@ -17,7 +17,6 @@ export default function Home() {
       <div className="overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
         <HomeHeader user={user} />
         <DidYouKnowSection user={user} />
-        <TrendingCarousel />
         <CommunityFeed user={user} />
       </div>
       <WelcomePopup />
