@@ -16,7 +16,6 @@ import CompareModal from "../components/discover/CompareModal";
 import ServicePersonCard from "../components/discover/ServicePersonCard";
 import ServicePersonModal from "../components/discover/ServicePersonModal";
 import BookmarkButton from "../components/discover/BookmarkButton";
-import LocalServices from "../components/discover/LocalServices";
 import WhyTheseApps from "../components/discover/WhyTheseApps";
 import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
@@ -263,8 +262,8 @@ export default function Discover() {
           )}
         </div>
         {/* Content type tabs */}
-         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
-           {[["apps", "🛠 Apps"], ["media", "🎬 Media"], ["books", "📚 Books"], ["games", "🎮 Games"], ["shop", "🛒 Shop"], ["shopify", "🛍 Brands"], ["local", "📍 Local"]].map(([val, label]) => (
+         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide" style={{ backgroundColor: "var(--bg-app)", border: "1px solid var(--border-light)" }}>
+           {[["apps", "🛠 Apps"], ["media", "🎬 Media"], ["books", "📚 Books"], ["games", "🎮 Games"], ["shop", "🛍 Shop"], ["shopify", "🏪 Store"], ["local", "📍 Local"]].map(([val, label]) => (
             <button key={val} onClick={() => setContentTab(val)}
               className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
@@ -467,24 +466,24 @@ export default function Discover() {
         </div>
       )}
 
-      {/* ===== STORES & DEALS TAB ===== */}
-      {contentTab === "stores" && (
-        <div className="pb-24 mt-4">
-          <StoresAndDeals />
+      {/* ===== EBAY SHOP TAB ===== */}
+      {contentTab === "shop" && (
+        <div className="mt-4">
+          <EbayShopTab />
         </div>
       )}
 
-      {/* ===== LOCAL SERVICES TAB ===== */}
+      {/* ===== SHOPIFY TAB ===== */}
+      {contentTab === "shopify" && (
+        <div className="mt-4">
+          <ShopifyTab />
+        </div>
+      )}
+
+      {/* ===== LOCAL SERVICES TAB (Mapbox) ===== */}
       {contentTab === "local" && (
-        <div className="pb-24 mt-4">
-          <div className="px-5 mb-4">
-            <div className="rounded-2xl p-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                🗺️ Discover everyday local services in your neighborhood — tapping any category opens <span className="font-semibold">Google Maps</span> with nearby results.
-              </p>
-            </div>
-          </div>
-          <LocalServices />
+        <div className="mt-2">
+          <MapboxLocal />
         </div>
       )}
 
