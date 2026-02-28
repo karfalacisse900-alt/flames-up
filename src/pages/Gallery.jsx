@@ -377,6 +377,9 @@ export default function Gallery() {
         </div>
       )}
 
+      {/* Daily Winner Banner */}
+      {tab === "gallery" && <DailyWinnerBanner />}
+
       {/* Vote Arena */}
       {tab === "vote" && <div style={{ backgroundColor: "#E6EFEA" }}><ArtVoteArena user={user} /></div>}
 
