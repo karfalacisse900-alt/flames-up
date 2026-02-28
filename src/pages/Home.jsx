@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
 import TrendingCarousel from "../components/home/TrendingCarousel";
-import HomeHeader from "../components/home/HomeHeader";
+import HomeHeader from "@/components/home/HomeHeader";
 
 export default function Home() {
   const [user, setUser] = useState(null);
