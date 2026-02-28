@@ -160,19 +160,8 @@ export default function CommunityFeed({ user }) {
     <div style={{ backgroundColor: "var(--bg-app)" }}>
       {/* ── Header ── */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
-        {/* Tabs: For You / Following */}
-        <div className="flex border-b" style={{ borderColor: "var(--border-light)" }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              className="flex-1 py-3 text-sm font-semibold relative transition-all"
-              style={{ color: tab === t.key ? "var(--accent-primary)" : "var(--text-hint)" }}>
-              {t.label}
-              {tab === t.key && (
-                <motion.div layoutId="feedTab" className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full"
-                  style={{ backgroundColor: "var(--accent-primary)" }} />
-              )}
-            </button>
-          ))}
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community Feed</p>
         </div>
       </div>
 
