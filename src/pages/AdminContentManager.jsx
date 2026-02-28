@@ -40,12 +40,14 @@ export default function AdminContentManager() {
     queryKey: ["userSubmissions"],
     queryFn: () => base44.entities.UserSubmittedMedia.list("-created_date", 200),
     refetchInterval: 30000,
+    enabled: user?.role === "admin",
   });
 
   const { data: reviews = [], isLoading: revLoading } = useQuery({
     queryKey: ["userReviews"],
     queryFn: () => base44.entities.UserMediaReview.list("-created_date", 200),
     refetchInterval: 30000,
+    enabled: user?.role === "admin",
   });
 
   // Real-time notification on new pending items
