@@ -1,51 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// Basic profanity list (extend as needed)
-const PROFANITY = ["spam","scam","fuck","shit","bitch","ass","nigger","faggot","retard"];
-
-// Rate limit: max 10 moderation calls per user per minute
+// Rate limit: max 15 calls per user per minute
 const rateLimitMap = {};
 
 function checkRateLimit(email) {
   const now = Date.now();
   if (!rateLimitMap[email]) rateLimitMap[email] = [];
   rateLimitMap[email] = rateLimitMap[email].filter(t => now - t < 60000);
-  if (rateLimitMap[email].length >= 10) return false;
+  if (rateLimitMap[email].length >= 15) return false;
   rateLimitMap[email].push(now);
   return true;
 }
 
-function basicModerate(text) {
+// Basic pre-filter (fast, no API call)
+function preFilter(text) {
   const lower = text.toLowerCase();
-  const flags = [];
-
-  // Profanity check
-  const foundProfanity = PROFANITY.filter(w => lower.includes(w));
-  if (foundProfanity.length > 0) {
-    flags.push({ type: "profanity", detail: foundProfanity });
-  }
-
-  // Spam patterns
-  const spamPatterns = [
-    /https?:\/\/[^\s]+/gi,         // URLs
-    /(.)\1{5,}/gi,                  // Repeated chars
-    /buy now|click here|free money|make money|earn \$|limited offer/gi,
-  ];
-  const spamMatches = spamPatterns.flatMap(p => text.match(p) || []);
-  if (spamMatches.length > 2) {
-    flags.push({ type: "spam", detail: spamMatches.slice(0, 3) });
-  }
-
-  // Too short / too long
-  if (text.trim().length < 3) flags.push({ type: "too_short" });
-  if (text.length > 5000) flags.push({ type: "too_long" });
-
-  // Determine verdict
-  let verdict = "safe";
-  if (flags.some(f => f.type === "profanity" || f.type === "spam")) verdict = "review";
-  if (flags.some(f => f.type === "profanity" && f.detail?.length > 2)) verdict = "block";
-
-  return { verdict, flags };
+  const hardBlockWords = ["nigger", "faggot", "kys", "kill yourself", "cp ", "child porn"];
+  if (hardBlockWords.some(w => lower.includes(w))) return { verdict: "block", reason: "hate_speech_or_harm" };
+  if (text.trim().length < 2) return { verdict: "block", reason: "too_short" };
+  if (text.length > 10000) return { verdict: "review", reason: "too_long" };
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -55,32 +29,88 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
     if (!checkRateLimit(user.email)) {
-      console.warn(`Rate limit exceeded for ${user.email}`);
-      return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+      console.warn(`[MODERATION] Rate limit exceeded for ${user.email}`);
+      return Response.json({ error: "Rate limit exceeded. Please slow down." }, { status: 429 });
     }
 
-    const { text, content_type = "general" } = await req.json();
+    const { text, content_type = "general", admin_override } = await req.json();
     if (!text) return Response.json({ error: "text required" }, { status: 400 });
 
-    const result = basicModerate(text);
+    // Admin override: skip moderation
+    if (admin_override && user.role === "admin") {
+      console.log(JSON.stringify({ ts: new Date().toISOString(), user: user.email, content_type, verdict: "safe", reason: "admin_override" }));
+      return Response.json({ verdict: "safe", flags: [], can_publish: true, admin_override: true });
+    }
 
-    // Log moderation decision
+    // Fast pre-filter
+    const preResult = preFilter(text);
+    if (preResult) {
+      console.log(JSON.stringify({ ts: new Date().toISOString(), user: user.email, content_type, verdict: preResult.verdict, reason: preResult.reason, stage: "pre_filter" }));
+      return Response.json({ verdict: preResult.verdict, flags: [preResult.reason], can_publish: false });
+    }
+
+    // AI moderation via LLM
+    let verdict = "safe";
+    let flags = [];
+    let aiReason = "";
+
+    const aiResult = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are a content moderation AI for a social community app. Analyze the following user-submitted content and classify it.
+
+Content type: ${content_type}
+Content: """${text.slice(0, 2000)}"""
+
+Respond with JSON only:
+{
+  "verdict": "safe" | "review" | "block",
+  "flags": ["spam", "hate_speech", "harassment", "misinformation", "adult_content", "violence", "off_topic"],
+  "reason": "brief explanation"
+}
+
+Rules:
+- "safe": appropriate for all users
+- "review": borderline, needs human review (mild profanity, debatable content, suspicious links)
+- "block": clearly harmful (hate speech, explicit threats, spam attacks, illegal content)
+- Only include relevant flags, can be empty array for safe content`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          verdict: { type: "string" },
+          flags: { type: "array", items: { type: "string" } },
+          reason: { type: "string" }
+        }
+      }
+    });
+
+    verdict = aiResult?.verdict || "review";
+    flags = aiResult?.flags || [];
+    aiReason = aiResult?.reason || "";
+
+    // Validate verdict
+    if (!["safe", "review", "block"].includes(verdict)) verdict = "review";
+
+    // Log
     console.log(JSON.stringify({
       ts: new Date().toISOString(),
       user: user.email,
       content_type,
       length: text.length,
-      verdict: result.verdict,
-      flags: result.flags.map(f => f.type),
+      verdict,
+      flags,
+      reason: aiReason,
+      stage: "ai_moderation"
     }));
 
     return Response.json({
-      verdict: result.verdict,   // "safe" | "review" | "block"
-      flags: result.flags,
-      can_publish: result.verdict !== "block",
+      verdict,
+      flags,
+      reason: aiReason,
+      can_publish: verdict !== "block",
     });
+
   } catch (error) {
-    console.error("moderateContent error:", error.message);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error("[MODERATION] Error:", error.message);
+    // Fail open for system errors (don't block users due to our errors)
+    return Response.json({ verdict: "safe", flags: [], can_publish: true, error_fallback: true });
   }
 });
