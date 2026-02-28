@@ -326,6 +326,56 @@ export default function AdminContentManager() {
           </div>
         )}
 
+        {/* Did You Know */}
+        {activeTab === "dyk" && (
+          <div className="space-y-3">
+            {/* filter */}
+            <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
+              {["pending", "approved", "rejected", "all"].map(f => (
+                <button key={f} onClick={() => setDykFilter(f)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold capitalize whitespace-nowrap"
+                  style={{ backgroundColor: dykFilter === f ? "var(--accent-primary)" : "var(--bg-card)", color: dykFilter === f ? "#fff" : "var(--text-secondary)", border: `1px solid ${dykFilter === f ? "var(--accent-primary)" : "var(--border-light)"}` }}>
+                  {f}
+                </button>
+              ))}
+            </div>
+            {dykLoading && <div className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>}
+            {!dykLoading && filteredDYK.length === 0 && (
+              <div className="text-center py-12 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <p style={{ color: "var(--text-hint)" }}>No submissions</p>
+              </div>
+            )}
+            {!dykLoading && filteredDYK.map(post => (
+              <motion.div key={post.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                className="p-4 rounded-2xl"
+                style={{ backgroundColor: "var(--bg-card)", border: `2px solid ${post.status === "approved" ? "#22c55e" : post.status === "rejected" ? "#ef4444" : "var(--border-light)"}` }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-semibold text-sm flex-1" style={{ color: "var(--text-primary)" }}>{post.title || "No title"}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${post.status === "pending" ? "bg-yellow-100 text-yellow-800" : post.status === "approved" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{post.status?.toUpperCase()}</span>
+                </div>
+                <p className="text-xs leading-relaxed mb-2" style={{ color: "var(--text-secondary)" }}>{post.content}</p>
+                {post.source_link && <a href={post.source_link} target="_blank" rel="noopener noreferrer" className="text-xs" style={{ color: "var(--accent-primary)" }}>{post.source_link}</a>}
+                <p className="text-[10px] mt-1.5 mb-3" style={{ color: "var(--text-hint)" }}>by {post.submitter_name} · {new Date(post.created_date).toLocaleDateString()}</p>
+                {post.status === "pending" && (
+                  <div className="flex gap-2">
+                    <button onClick={() => approveDYK.mutate(post)} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-1" style={{ backgroundColor: "#22c55e" }}>
+                      <Check className="w-4 h-4" /> Approve
+                    </button>
+                    <button onClick={() => rejectDYK.mutate({ id: post.id, note: "Rejected by admin" })} className="flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-1" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                      <X className="w-4 h-4" /> Reject
+                    </button>
+                  </div>
+                )}
+                {post.status !== "pending" && (
+                  <button onClick={() => deleteDYK.mutate(post.id)} className="w-full py-2 rounded-lg text-sm flex items-center justify-center gap-1.5" style={{ backgroundColor: "rgba(239,68,68,0.08)", color: "#dc2626" }}>
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                  </button>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
         {/* Reviews */}
         {activeTab === "reviews" && (
           <div className="space-y-3">
