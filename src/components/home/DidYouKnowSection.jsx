@@ -120,6 +120,8 @@ export default function DidYouKnowSection({ user }) {
   });
 
   const post = posts.length > 0 ? posts[current] : null;
+
+  // Always render the section (removed early return when posts.length === 0)
   const isLiked = user?.email && post?.liked_by?.includes(user.email);
 
   return (
