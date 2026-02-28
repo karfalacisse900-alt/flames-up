@@ -17,6 +17,7 @@ export default function Home() {
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
       <div className="overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
         <HomeHeader user={user} />
+        <DidYouKnowSection user={user} />
         <TrendingCarousel />
         <CommunityFeed user={user} />
       </div>
