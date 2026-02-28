@@ -148,7 +148,36 @@ export default function AdminContentManager() {
   const pendingSubs = submissions.filter(s => s.status === "pending").length;
   const pendingRevs = reviews.filter(r => r.status === "pending").length;
 
+  // Did You Know queries & mutations
+  const { data: dykPosts = [], isLoading: dykLoading } = useQuery({
+    queryKey: ["adminDYK"],
+    queryFn: () => base44.entities.DidYouKnow.list("-created_date", 200),
+    refetchInterval: 30000,
+    enabled: user?.role === "admin",
+  });
+  const approveDYK = useMutation({
+    mutationFn: (post) => base44.entities.DidYouKnow.update(post.id, { status: "approved", approved_at: new Date().toISOString(), approved_by: user?.email }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminDYK"] }),
+  });
+  const rejectDYK = useMutation({
+    mutationFn: ({ id, note }) => base44.entities.DidYouKnow.update(id, { status: "rejected", admin_note: note }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminDYK"] }),
+  });
+  const deleteDYK = useMutation({
+    mutationFn: (id) => base44.entities.DidYouKnow.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminDYK"] }),
+  });
+  const filteredDYK = dykPosts.filter(p => dykFilter === "all" || p.status === dykFilter);
+  const pendingDYK = dykPosts.filter(p => p.status === "pending").length;
+
   if (!user) return <div className="flex items-center justify-center h-screen"><Loader2 className="w-6 h-6 animate-spin" /></div>;
+  if (user?.role !== "admin") return (
+    <div className="flex flex-col items-center justify-center h-screen gap-3 px-6">
+      <AlertCircle className="w-12 h-12" style={{ color: "#ef4444" }} />
+      <p className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Access Denied</p>
+      <p className="text-sm text-center" style={{ color: "var(--text-secondary)" }}>You need admin role to access this page.</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen pb-8" style={{ backgroundColor: "var(--bg-app)" }}>
