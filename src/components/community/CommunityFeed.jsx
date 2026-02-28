@@ -89,13 +89,43 @@ export default function CommunityFeed({ user }) {
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
       if (!requireVerified(user)) throw new Error("Email not verified");
-      return base44.entities.CommunityPost.update(post.id, {
-        upvotes: (post.upvotes || 0) + 1,
-        upvoted_by: [...(post.upvoted_by || []), user.email],
-        engagement_score: (post.upvotes || 0) + 1 + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
+      const hasUpvoted = post.upvoted_by?.includes(user.email);
+      if (hasUpvoted) {
+        // Unlike
+        const newUpvotes = Math.max(0, (post.upvotes || 0) - 1);
+        return base44.entities.CommunityPost.update(post.id, {
+          upvotes: newUpvotes,
+          upvoted_by: (post.upvoted_by || []).filter(e => e !== user.email),
+          engagement_score: newUpvotes + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
+        });
+      } else {
+        // Like
+        const newUpvotes = (post.upvotes || 0) + 1;
+        return base44.entities.CommunityPost.update(post.id, {
+          upvotes: newUpvotes,
+          upvoted_by: [...(post.upvoted_by || []), user.email],
+          engagement_score: newUpvotes + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
+        });
+      }
+    },
+    onSuccess: (_, { post }) => {
+      // Update only the specific post in cache without re-sorting
+      qc.setQueryData(["communityPosts"], (old) => {
+        if (!old) return old;
+        return old.map(p => p.id === post.id
+          ? {
+              ...p,
+              upvotes: post.upvoted_by?.includes(user.email)
+                ? Math.max(0, (p.upvotes || 0) - 1)
+                : (p.upvotes || 0) + 1,
+              upvoted_by: post.upvoted_by?.includes(user.email)
+                ? (p.upvoted_by || []).filter(e => e !== user.email)
+                : [...(p.upvoted_by || []), user.email],
+            }
+          : p
+        );
       });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["communityPosts"] }),
   });
 
   const downvoteMut = useMutation({
@@ -107,7 +137,7 @@ export default function CommunityFeed({ user }) {
         engagement_score: (post.upvotes || 0) + ((post.comment_count || 0) * 2) - ((post.downvotes || 0) + 1),
       });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["communityPosts"] }),
+    onSuccess: () => {},
   });
 
   const filteredPosts = useMemo(() => {
