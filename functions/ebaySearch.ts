@@ -3,66 +3,52 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 // In-memory token cache
 let tokenCache = null;
 let tokenExpiry = 0;
+let usingSandbox = false;
 
 // In-memory search cache (15 min TTL)
 const searchCache = {};
 const CACHE_TTL = 15 * 60 * 1000;
 
 async function getEbayToken() {
-  if (tokenCache && Date.now() < tokenExpiry) return tokenCache;
+  if (tokenCache && Date.now() < tokenExpiry) return { token: tokenCache, sandbox: usingSandbox };
 
   const clientId = Deno.env.get("EBAY_CLIENT_ID")?.trim();
   const clientSecret = Deno.env.get("EBAY_CLIENT_SECRET")?.trim();
 
-  if (!clientId || !clientSecret) {
-    throw new Error("eBay credentials not configured");
-  }
+  if (!clientId || !clientSecret) throw new Error("eBay credentials not configured");
 
-  console.log("eBay clientId prefix:", clientId.substring(0, 10) + "...");
-
-  // eBay requires the credentials encoded as clientId:clientSecret
   const credentials = btoa(`${clientId}:${clientSecret}`);
+  const body = "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope";
+  const headers = { "Authorization": `Basic ${credentials}`, "Content-Type": "application/x-www-form-urlencoded" };
 
-  const res = await fetch("https://api.sandbox.ebay.com/identity/v1/oauth2/token", {
-    method: "POST",
-    headers: {
-      "Authorization": `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope",
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("eBay token error (sandbox):", err);
-
-    // Try production endpoint as fallback
-    const resProd = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${credentials}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope",
-    });
-
-    if (!resProd.ok) {
-      const errProd = await resProd.text();
-      console.error("eBay token error (production):", errProd);
-      throw new Error("Failed to get eBay token: " + errProd);
-    }
-
-    const dataProd = await resProd.json();
-    tokenCache = dataProd.access_token;
-    tokenExpiry = Date.now() + (dataProd.expires_in - 60) * 1000;
-    console.log("eBay token obtained from production");
-    return tokenCache;
+  // Try production first
+  const prodRes = await fetch("https://api.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body });
+  if (prodRes.ok) {
+    const data = await prodRes.json();
+    tokenCache = data.access_token;
+    tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+    usingSandbox = false;
+    console.log("eBay token obtained from PRODUCTION");
+    return { token: tokenCache, sandbox: false };
   }
 
-  const data = await res.json();
-  tokenCache = data.access_token;
-  tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-  return tokenCache;
+  const prodErr = await prodRes.text();
+  console.error("eBay production token failed:", prodErr);
+
+  // Fall back to sandbox
+  const sandboxRes = await fetch("https://api.sandbox.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body });
+  if (sandboxRes.ok) {
+    const data = await sandboxRes.json();
+    tokenCache = data.access_token;
+    tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+    usingSandbox = true;
+    console.log("eBay token obtained from SANDBOX");
+    return { token: tokenCache, sandbox: true };
+  }
+
+  const sandboxErr = await sandboxRes.text();
+  console.error("eBay sandbox token also failed:", sandboxErr);
+  throw new Error("eBay authentication failed. Please verify your EBAY_CLIENT_ID and EBAY_CLIENT_SECRET secrets.");
 }
 
 Deno.serve(async (req) => {
@@ -80,15 +66,18 @@ Deno.serve(async (req) => {
       return Response.json(searchCache[cacheKey].data);
     }
 
-    const token = await getEbayToken();
+    const { token, sandbox } = await getEbayToken();
+    const baseUrl = sandbox
+      ? "https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search"
+      : "https://api.ebay.com/buy/browse/v1/item_summary/search";
+
     const params = new URLSearchParams({
       q: query,
       limit: String(limit),
       offset: String(offset),
-      fieldgroups: "MATCHING_ITEMS",
     });
 
-    const searchRes = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
+    const searchRes = await fetch(`${baseUrl}?${params}`, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
@@ -99,12 +88,10 @@ Deno.serve(async (req) => {
     if (!searchRes.ok) {
       const err = await searchRes.text();
       console.error("eBay search error (status " + searchRes.status + "):", err);
-      return Response.json({ error: "eBay search failed: " + err }, { status: 500 });
+      return Response.json({ error: "eBay search failed", details: err }, { status: 500 });
     }
 
-    const res = searchRes;
-
-    const data = await res.json();
+    const data = await searchRes.json();
     const items = (data.itemSummaries || []).map(item => ({
       id: item.itemId,
       title: item.title,
@@ -120,7 +107,7 @@ Deno.serve(async (req) => {
     const result = { items, total: data.total || 0, offset, limit };
     searchCache[cacheKey] = { data: result, ts: Date.now() };
 
-    console.log(`eBay search "${query}": ${items.length} results`);
+    console.log(`eBay search "${query}" (${sandbox ? "sandbox" : "production"}): ${items.length} results`);
     return Response.json(result);
   } catch (error) {
     console.error("ebaySearch error:", error.message);
