@@ -16,10 +16,9 @@ const CATEGORIES = [
   { id: "gyms",        label: "Fitness",      emoji: "💪", query: "gym fitness",          color: "#10B981" },
 ];
 
-// Simple seeded count for trending badges
-function trendCount(placeId, offset = 0) {
-  let h = offset;
-  for (let i = 0; i < placeId.length; i++) h = ((h << 5) - h) + placeId.charCodeAt(i);
+function trendCount(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i);
   return (Math.abs(h) % 350) + 50;
 }
 
@@ -29,9 +28,7 @@ function LocationPermissionScreen({ onAllow, onSkip }) {
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center" style={{ minHeight: 480 }}>
       <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
         <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl"
-          style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>
-          🗺️
-        </div>
+          style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>🗺️</div>
       </motion.div>
       <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
         Discover What's Around You
@@ -53,8 +50,7 @@ function LocationPermissionScreen({ onAllow, onSkip }) {
           </motion.div>
         ))}
       </div>
-      <button onClick={onAllow}
-        className="w-full max-w-xs py-3.5 rounded-2xl font-bold text-white text-sm mb-3"
+      <button onClick={onAllow} className="w-full max-w-xs py-3.5 rounded-2xl font-bold text-white text-sm mb-3"
         style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>
         Allow Location Access
       </button>
@@ -65,12 +61,36 @@ function LocationPermissionScreen({ onAllow, onSkip }) {
   );
 }
 
+// ── Search Suggestions Dropdown ──────────────────────────
+function SearchSuggestions({ suggestions, onSelect, onClose }) {
+  if (!suggestions.length) return null;
+  return (
+    <div className="absolute top-full left-0 right-0 mt-1 rounded-2xl overflow-hidden z-50"
+      style={{ backgroundColor: "#FAFAF8", boxShadow: "0 8px 32px rgba(0,0,0,0.16)", border: "1px solid var(--border-light)" }}>
+      {suggestions.map((s, i) => (
+        <button key={i} onClick={() => onSelect(s)}
+          className="w-full flex items-center gap-3 px-4 py-3 text-left border-b last:border-b-0 transition-colors"
+          style={{ borderColor: "var(--border-light)" }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-subtle)"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
+          <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: "var(--accent-primary)" }} />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{s.text}</p>
+            <p className="text-xs truncate" style={{ color: "var(--text-hint)" }}>{s.place_name?.split(",").slice(1, 3).join(",")}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Main Component ───────────────────────────────────────
 export default function MapboxLocal() {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const userMarkerRef = useRef(null);
+  const searchDebounceRef = useRef(null);
 
   const [token, setToken] = useState(null);
   const [tokenLoading, setTokenLoading] = useState(true);
@@ -79,6 +99,8 @@ export default function MapboxLocal() {
   const [userLocation, setUserLocation] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedPlaceCat, setSelectedPlaceCat] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -95,48 +117,45 @@ export default function MapboxLocal() {
   const initMap = useCallback((accessToken, center = [-74.006, 40.7128]) => {
     if (!mapContainer.current || mapRef.current) return;
     window.mapboxgl.accessToken = accessToken;
-
     const m = new window.mapboxgl.Map({
       container: mapContainer.current,
-      // Use streets-v12 — a real-looking, clean street map
       style: "mapbox://styles/mapbox/streets-v12",
       center,
       zoom: 13,
       attributionControl: false,
       pitchWithRotate: false,
     });
-
     m.addControl(new window.mapboxgl.AttributionControl({ compact: true }), "bottom-left");
     m.addControl(new window.mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
     m.on("load", () => setMapLoaded(true));
+    // Close suggestions when map is clicked
+    m.on("click", () => { setShowSuggestions(false); setSelectedPlace(null); });
     mapRef.current = m;
   }, []);
 
   const loadMapbox = useCallback((accessToken, center) => {
     if (window.mapboxgl) { initMap(accessToken, center); return; }
-
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css";
     document.head.appendChild(link);
-
     const script = document.createElement("script");
     script.src = "https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js";
     script.onload = () => initMap(accessToken, center);
     document.head.appendChild(script);
   }, [initMap]);
 
-  const flyToUser = (lng, lat) => {
+  const placeUserMarker = (lng, lat) => {
     if (!mapRef.current) return;
-    mapRef.current.flyTo({ center: [lng, lat], zoom: 14.5, duration: 1800, essential: true });
     if (userMarkerRef.current) userMarkerRef.current.remove();
     const el = document.createElement("div");
-    el.style.cssText = `
-      width:16px;height:16px;border-radius:50%;
-      background:#2E6B4F;border:3px solid white;
-      box-shadow:0 0 0 5px rgba(46,107,79,0.25),0 2px 8px rgba(0,0,0,0.35);
-    `;
+    el.style.cssText = `width:16px;height:16px;border-radius:50%;background:#2E6B4F;border:3px solid white;box-shadow:0 0 0 5px rgba(46,107,79,0.22),0 2px 8px rgba(0,0,0,0.3);`;
     userMarkerRef.current = new window.mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(mapRef.current);
+  };
+
+  const flyToUser = (lng, lat) => {
+    mapRef.current?.flyTo({ center: [lng, lat], zoom: 14.5, duration: 1600, essential: true });
+    placeUserMarker(lng, lat);
   };
 
   const handleAllow = () => {
@@ -162,39 +181,74 @@ export default function MapboxLocal() {
   // Init map after permission
   useEffect(() => {
     if (!token || !mapContainer.current) return;
-    if (permissionState === "granted") {
-      if (!userLocation) return; // wait for coords
+    if (permissionState === "granted" && userLocation) {
       loadMapbox(token, userLocation);
     } else if (permissionState === "skipped" || permissionState === "denied") {
       loadMapbox(token);
     }
   }, [token, permissionState, userLocation]);
 
-  // Fly to user once map loads
   useEffect(() => {
-    if (mapLoaded && userLocation) {
-      flyToUser(userLocation[0], userLocation[1]);
-    }
+    if (mapLoaded && userLocation) flyToUser(userLocation[0], userLocation[1]);
   }, [mapLoaded]);
 
-  const clearMarkers = () => {
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
+  // Autocomplete suggestions
+  const fetchSuggestions = async (q) => {
+    if (!token || q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    const prox = userLocation ? `${userLocation[0]},${userLocation[1]}` : "-74.006,40.7128";
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?proximity=${prox}&types=poi,address,place&limit=5&access_token=${token}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    setSuggestions(data.features || []);
+    setShowSuggestions(true);
+  };
+
+  const handleSearchInput = (val) => {
+    setSearchQuery(val);
+    clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => fetchSuggestions(val), 280);
+  };
+
+  const handleSuggestionSelect = (feature) => {
+    setShowSuggestions(false);
+    setSearchQuery(feature.text);
+    setSuggestions([]);
+    if (mapRef.current && feature.center) {
+      mapRef.current.flyTo({ center: feature.center, zoom: 15, duration: 1000 });
+      // Drop a single highlighted marker
+      clearMarkers();
+      const el = createMarkerEl(CATEGORIES[2], trendCount(feature.id || feature.place_name));
+      const marker = new window.mapboxgl.Marker({ element: el, anchor: "bottom" })
+        .setLngLat(feature.center).addTo(mapRef.current);
+      el.addEventListener("click", () => { setSelectedPlace(feature); setSelectedPlaceCat(CATEGORIES[2]); });
+      markersRef.current.push(marker);
+    }
+  };
+
+  const clearMarkers = () => { markersRef.current.forEach(m => m.remove()); markersRef.current = []; };
+
+  const createMarkerEl = (catConfig, trend) => {
+    const el = document.createElement("div");
+    el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;";
+    el.innerHTML = `
+      <div style="background:linear-gradient(135deg,#243D33,#2E6B4F);border:2.5px solid #DCCBB8;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 14px rgba(36,61,51,0.4);">${catConfig.emoji}</div>
+      <div style="background:#BF9E79;color:#1A2E24;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:800;margin-top:3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.18);">🔥 ${trend}</div>
+    `;
+    return el;
   };
 
   const searchNearby = async (cat) => {
     if (!mapRef.current || !token) return;
     const query = cat ? cat.query : searchQuery;
     if (!query) return;
-
     setIsSearching(true);
     setSelectedCategory(cat?.id || null);
     setSelectedPlace(null);
+    setShowSuggestions(false);
 
     const c = mapRef.current.getCenter();
     const center = userLocation || [c.lng, c.lat];
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?proximity=${center[0]},${center[1]}&types=poi&limit=15&access_token=${token}`;
-
     const res = await fetch(url);
     const data = await res.json();
     setIsSearching(false);
@@ -207,45 +261,19 @@ export default function MapboxLocal() {
       const [lng, lat] = feature.center;
       const catConfig = cat || CATEGORIES[2];
       const trend = trendCount(feature.id || feature.place_name);
-
-      const el = document.createElement("div");
-      el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;";
-      el.innerHTML = `
-        <div style="
-          background:linear-gradient(135deg,#243D33,#2E6B4F);
-          border:2.5px solid #DCCBB8;
-          border-radius:50%;
-          width:38px;height:38px;
-          display:flex;align-items:center;justify-content:center;
-          font-size:17px;
-          box-shadow:0 4px 14px rgba(36,61,51,0.45);
-          transition:transform 0.15s;
-        ">${catConfig.emoji}</div>
-        <div style="
-          background:#BF9E79;color:#1A2E24;
-          border-radius:20px;padding:1px 7px;
-          font-size:9px;font-weight:800;
-          margin-top:3px;white-space:nowrap;letter-spacing:0.3px;
-          box-shadow:0 1px 4px rgba(0,0,0,0.2);
-        ">🔥 ${trend}</div>
-      `;
+      const el = createMarkerEl(catConfig, trend);
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "bottom" })
-        .setLngLat([lng, lat])
-        .addTo(mapRef.current);
-
+        .setLngLat([lng, lat]).addTo(mapRef.current);
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         setSelectedPlace(feature);
         setSelectedPlaceCat(catConfig);
       });
-
       markersRef.current.push(marker);
     });
 
-    if (features.length > 0) {
-      mapRef.current.flyTo({ center: features[0].center, zoom: 14, duration: 1200 });
-    }
+    if (features.length > 0) mapRef.current.flyTo({ center: features[0].center, zoom: 14, duration: 1200 });
   };
 
   // ── Render ──
@@ -260,29 +288,51 @@ export default function MapboxLocal() {
     <div className="px-4 py-12 text-center">
       <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--text-hint)" }} />
       <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Map not configured</p>
-      <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>MAPBOX_ACCESS_TOKEN not set</p>
     </div>
   );
 
-  if (permissionState === "ask") {
-    return <LocationPermissionScreen onAllow={handleAllow} onSkip={handleSkip} />;
-  }
+  if (permissionState === "ask") return <LocationPermissionScreen onAllow={handleAllow} onSkip={handleSkip} />;
 
   return (
     <div className="pb-24">
       {/* Search */}
       <div className="px-4 pt-3 pb-2">
-        <form onSubmit={e => { e.preventDefault(); searchNearby(null); }} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search any vibe or spot..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-          </div>
-          <button type="submit" className="px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>Go</button>
-        </form>
+        <div className="relative">
+          <form onSubmit={e => { e.preventDefault(); searchNearby(null); }} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <input
+                value={searchQuery}
+                onChange={e => handleSearchInput(e.target.value)}
+                onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
+                placeholder="Search any place, vibe, or spot..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl text-sm outline-none"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+              />
+              {searchQuery && (
+                <button type="button" onClick={() => { setSearchQuery(""); setSuggestions([]); setShowSuggestions(false); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+                </button>
+              )}
+            </div>
+            <button type="submit" className="px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>Go</button>
+          </form>
+
+          {/* Suggestions dropdown */}
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                <SearchSuggestions
+                  suggestions={suggestions}
+                  onSelect={handleSuggestionSelect}
+                  onClose={() => setShowSuggestions(false)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Category pills */}
@@ -302,7 +352,7 @@ export default function MapboxLocal() {
         </div>
       </div>
 
-      {/* Status bar */}
+      {/* Status */}
       <div className="px-4 mb-2 h-5">
         {isSearching && (
           <div className="flex items-center gap-2">
@@ -311,23 +361,20 @@ export default function MapboxLocal() {
           </div>
         )}
         {!isSearching && resultCount > 0 && (
-          <p className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
-            ✦ {resultCount} trending spots found
-          </p>
+          <p className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>✦ {resultCount} trending spots found</p>
         )}
       </div>
 
       {/* Map */}
       <div className="px-4 relative">
         <div ref={mapContainer} className="w-full rounded-3xl overflow-hidden"
-          style={{ height: 440, border: "2px solid var(--border-medium)", boxShadow: "0 6px 24px rgba(0,0,0,0.15)" }} />
+          style={{ height: 440, border: "2px solid var(--border-medium)", boxShadow: "0 6px 24px rgba(0,0,0,0.14)" }} />
 
         {!mapLoaded && (
           <div className="absolute inset-4 flex items-center justify-center rounded-3xl"
             style={{ backgroundColor: "#E8E3D9" }}>
             <div className="text-center">
-              <div className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-2"
-                style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+              <div className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-2" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Loading map...</p>
             </div>
           </div>
@@ -345,15 +392,13 @@ export default function MapboxLocal() {
 
       {mapLoaded && !selectedPlace && (
         <div className="px-4 mt-3">
-          <div className="p-3 rounded-2xl" style={{ background: "linear-gradient(120deg, #243D3310, #2E6B4F08)", border: "1px solid #2E6B4F25" }}>
-            <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>
-              Tap a category above → pins appear on the map → tap any pin for photos, reviews & community discussion.
-            </p>
-          </div>
+          <p className="text-[11px] text-center" style={{ color: "var(--text-hint)" }}>
+            Tap a category → pins appear → tap any pin for photos, reviews, directions & community posts
+          </p>
         </div>
       )}
 
-      {/* Place social sheet overlay */}
+      {/* Place social sheet */}
       <AnimatePresence>
         {selectedPlace && (
           <>
@@ -365,6 +410,8 @@ export default function MapboxLocal() {
               place={selectedPlace}
               category={selectedPlaceCat}
               onClose={() => setSelectedPlace(null)}
+              mapToken={token}
+              userLocation={userLocation}
             />
           </>
         )}
