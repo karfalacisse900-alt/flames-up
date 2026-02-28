@@ -111,21 +111,10 @@ export default function CommunityFeed({ user }) {
   });
 
   const filteredPosts = useMemo(() => {
-    let list = posts.filter(p => p.type !== "review");
-
-    if (tab === "following") {
-      if (followingEmails.length === 0) return [];
-      list = list.filter(p => followingEmails.includes(p.author_email));
-      return [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-    }
-
-    // For You: adaptive AI ranking
-    if (user?.email) {
-      return rankFeedForUser(list, user.email, debates);
-    }
-    // Logged-out: engagement sort
+    const list = posts.filter(p => p.type !== "review");
+    if (user?.email) return rankFeedForUser(list, user.email, debates);
     return [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
-  }, [posts, tab, followingEmails, user?.email, debates]);
+  }, [posts, user?.email, debates]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
