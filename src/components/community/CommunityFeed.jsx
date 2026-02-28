@@ -14,7 +14,6 @@ import { rankFeedForUser, trackPostView } from "./feedRanking";
 
 const TABS = [
   { key: "foryou", label: "For You" },
-  { key: "following", label: "Following" },
 ];
 
 function timeAgo(dateStr) {
