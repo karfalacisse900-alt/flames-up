@@ -1,208 +1,168 @@
 import React, { useState, useMemo } from "react";
-import { Share2, ArrowUpDown, Star } from "lucide-react";
+import { Share2, ExternalLink, MapPin, Star, TrendingUp, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShareModal from "./ShareModal";
-import WorthItButton from "./WorthItButton";
 
 const STORES = [
-  { id: "burlington", name: "Burlington", category: "Outlet / Discount", description: "Save up to 60% on designer and brand-name clothing, accessories, and home décor.", website: "https://www.burlington.com", icon: "🏬", rating: 0.85 },
-  { id: "tjmaxx", name: "TJ Maxx", category: "Outlet / Discount", description: "Discover designer handbags, apparel, shoes, and home goods at 20-60% off.", website: "https://www.tjmaxx.com", icon: "🏬", rating: 0.82 },
-  { id: "ross", name: "Ross Dress for Less", category: "Outlet / Discount", description: "Off-price fashion leader offering clearance on designer and brand-name apparel.", website: "https://www.rossstores.com", icon: "🏬", rating: 0.78 },
-  { id: "marshalls", name: "Marshalls", category: "Outlet / Discount", description: "Premium off-price retailer featuring discounted designer fashion and home furnishings.", website: "https://www.marshallsonline.com", icon: "🏬", rating: 0.80 },
-  { id: "target", name: "Target", category: "Department Store", description: "One-stop shop for clothing, household essentials, electronics, and more.", website: "https://www.target.com", icon: "🏢", rating: 0.88 },
-  { id: "walmart", name: "Walmart", category: "Department Store", description: "America's leading retailer with everyday low prices on groceries and more.", website: "https://www.walmart.com", icon: "🏢", rating: 0.80 },
-  { id: "kohls", name: "Kohl's", category: "Department Store", description: "Fashion-focused retailer offering apparel, accessories, and beauty with rewards.", website: "https://www.kohls.com", icon: "🏢", rating: 0.79 },
-  { id: "bestbuy", name: "Best Buy", category: "Tech", description: "Your destination for latest electronics, appliances, and tech gadgets.", website: "https://www.bestbuy.com", icon: "💻", rating: 0.84 },
-  { id: "apple", name: "Apple", category: "Tech", description: "Official Apple store for authentic iPhones, Macs, iPads, and accessories.", website: "https://www.apple.com", icon: "💻", rating: 0.90 },
-  { id: "sephora", name: "Sephora", category: "Beauty", description: "Beauty paradise with 20,000+ products from 500+ brands.", website: "https://www.sephora.com", icon: "💄", rating: 0.87 },
-  { id: "ulta", name: "Ulta Beauty", category: "Beauty", description: "Complete beauty destination featuring prestige and drugstore makeup.", website: "https://www.ulta.com", icon: "💄", rating: 0.86 },
-  { id: "homedepot", name: "Home Depot", category: "Home", description: "Premier DIY and professional-grade home improvement store.", website: "https://www.homedepot.com", icon: "🔨", rating: 0.83 },
-  { id: "lowes", name: "Lowe's", category: "Home", description: "Home improvement leader offering building materials, appliances, and tools.", website: "https://www.lowes.com", icon: "🔨", rating: 0.82 },
-  { id: "costco", name: "Costco", category: "Grocery", description: "Wholesale membership club offering bulk groceries at incredible savings.", website: "https://www.costco.com", icon: "🛒", rating: 0.91 },
-  { id: "traderjoes", name: "Trader Joe's", category: "Grocery", description: "Specialty grocer curating natural, organic, and gourmet products.", website: "https://www.traderjoes.com", icon: "🛒", rating: 0.89 },
+  { id: "burlington", name: "Burlington", category: "Outlet", description: "Save up to 60% on designer and brand-name clothing, accessories, and home décor.", website: "https://www.burlington.com", emoji: "🏷️", color: "#E63946", light: "#FFE8E9", rating: 85, badge: "Up to 60% off" },
+  { id: "tjmaxx", name: "TJ Maxx", category: "Outlet", description: "Designer handbags, apparel, shoes, and home goods at 20-60% off.", website: "https://www.tjmaxx.com", emoji: "💎", color: "#E76F51", light: "#FFF0EB", rating: 82, badge: "Designer deals" },
+  { id: "ross", name: "Ross Dress for Less", category: "Outlet", description: "Off-price fashion with clearance on designer and brand-name apparel.", website: "https://www.rossstores.com", emoji: "🛍️", color: "#2A9D8F", light: "#E8F8F7", rating: 78, badge: "Everyday savings" },
+  { id: "target", name: "Target", category: "Department", description: "One-stop shop for clothing, household essentials, electronics, and more.", website: "https://www.target.com", emoji: "🎯", color: "#CC0000", light: "#FFE8E8", rating: 88, badge: "Fan favorite" },
+  { id: "walmart", name: "Walmart", category: "Department", description: "America's leading retailer with everyday low prices on groceries and more.", website: "https://www.walmart.com", emoji: "🛒", color: "#0071CE", light: "#E8F4FF", rating: 80, badge: "Low prices" },
+  { id: "bestbuy", name: "Best Buy", category: "Tech", description: "Latest electronics, appliances, and tech gadgets with expert service.", website: "https://www.bestbuy.com", emoji: "💻", color: "#003087", light: "#E8EEFF", rating: 84, badge: "Tech hub" },
+  { id: "apple", name: "Apple Store", category: "Tech", description: "Authentic iPhones, Macs, iPads, and accessories with in-store support.", website: "https://www.apple.com", emoji: "🍎", color: "#1D1D1F", light: "#F5F5F7", rating: 90, badge: "Premium tech" },
+  { id: "sephora", name: "Sephora", category: "Beauty", description: "20,000+ beauty products from 500+ brands in one destination.", website: "https://www.sephora.com", emoji: "💄", color: "#D4004C", light: "#FFE8F0", rating: 87, badge: "Beauty paradise" },
+  { id: "ulta", name: "Ulta Beauty", category: "Beauty", description: "Prestige and drugstore makeup with rewards and salon services.", website: "https://www.ulta.com", emoji: "✨", color: "#B8007A", light: "#FFE8F8", rating: 86, badge: "Earn rewards" },
+  { id: "homedepot", name: "Home Depot", category: "Home", description: "Premier DIY and professional-grade home improvement store.", website: "https://www.homedepot.com", emoji: "🔨", color: "#F96302", light: "#FFF3E8", rating: 83, badge: "DIY expert" },
+  { id: "costco", name: "Costco", category: "Grocery", description: "Wholesale club offering bulk groceries at incredible savings.", website: "https://www.costco.com", emoji: "📦", color: "#005DAA", light: "#E8F2FF", rating: 91, badge: "Bulk savings" },
+  { id: "traderjoes", name: "Trader Joe's", category: "Grocery", description: "Curated natural, organic, and gourmet products at fair prices.", website: "https://www.traderjoes.com", emoji: "🌿", color: "#B5451B", light: "#FFF0EB", rating: 89, badge: "Organic finds" },
 ];
 
-const CATEGORIES = ["All", "Outlet / Discount", "Department Store", "Tech", "Beauty", "Home", "Grocery"];
-const SORT_OPTIONS = ["Popular", "Top Rated", "A-Z"];
+const CATEGORIES = [
+  { key: "All", emoji: "🛍️" },
+  { key: "Outlet", emoji: "🏷️" },
+  { key: "Department", emoji: "🏢" },
+  { key: "Tech", emoji: "💻" },
+  { key: "Beauty", emoji: "💄" },
+  { key: "Home", emoji: "🔨" },
+  { key: "Grocery", emoji: "🛒" },
+];
 
-function StoreCard({ store, onShare, onRatingChange }) {
+function StoreRow({ store, onShare }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-4 rounded-2xl backdrop-blur-sm hover:shadow-md transition-all"
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-2 relative overflow-hidden"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <span className="text-2xl shrink-0">{store.icon}</span>
-          <div className="min-w-0">
-            <h3 className="font-semibold text-sm leading-tight" style={{ color: "var(--text-primary)" }}>
-              {store.name}
-            </h3>
-            <p className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>
-              {store.category}
-            </p>
-          </div>
+      {/* Left accent bar */}
+      <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full" style={{ backgroundColor: store.color }} />
+
+      {/* Emoji icon */}
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 ml-2"
+        style={{ backgroundColor: store.light }}>
+        {store.emoji}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-sm font-bold leading-tight" style={{ color: "var(--text-primary)" }}>{store.name}</p>
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            style={{ backgroundColor: store.light, color: store.color }}>{store.badge}</span>
         </div>
-        {/* Rating */}
-        <div className="flex items-center gap-0.5 px-2 py-1 rounded-lg" style={{ backgroundColor: "#E8F2EC" }}>
-          <Star className="w-3 h-3" style={{ color: "#2E6B4F", fill: "#2E6B4F" }} />
-          <span className="text-xs font-semibold" style={{ color: "#2E6B4F" }}>
-            {(store.rating * 100).toFixed(0)}%
-          </span>
+        <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: "var(--text-secondary)" }}>{store.description}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-0.5">
+            <Star className="w-3 h-3" style={{ color: "#F5A623", fill: "#F5A623" }} />
+            <span className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>{store.rating}%</span>
+          </div>
+          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>{store.category}</span>
         </div>
       </div>
 
-      {/* Description */}
-      <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
-        {store.description}
-      </p>
-
-      {/* Rating and Actions */}
-      <div className="flex flex-col gap-2">
-        <WorthItButton
-          contentType="store"
-          contentId={store.id}
-          onRatingChange={onRatingChange}
-        />
-        <div className="flex gap-2">
-          <a
-            href={store.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all hover:shadow-sm"
-            style={{ backgroundColor: "#2E6B4F", color: "#fff" }}
-          >
-            Visit
-          </a>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name)}+near+me`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="flex-1 py-2 rounded-lg text-xs font-medium text-center transition-all"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
-          >
-            Maps
-          </a>
-          <button
-            onClick={e => { e.stopPropagation(); onShare(store); }}
-            className="p-2 rounded-lg transition-all hover:bg-opacity-70"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
-          >
-            <Share2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
+      {/* Actions */}
+      <div className="flex flex-col gap-1.5 shrink-0">
+        <a href={store.website} target="_blank" rel="noopener noreferrer"
+          className="w-8 h-8 rounded-xl flex items-center justify-center"
+          style={{ backgroundColor: store.color }}>
+          <ExternalLink className="w-3.5 h-3.5 text-white" />
+        </a>
+        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name)}+near+me`}
+          target="_blank" rel="noopener noreferrer"
+          className="w-8 h-8 rounded-xl flex items-center justify-center"
+          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+          <MapPin className="w-3.5 h-3.5" style={{ color: "var(--text-secondary)" }} />
+        </a>
       </div>
     </motion.div>
   );
 }
 
+function FeaturedStore({ store }) {
+  return (
+    <a href={store.website} target="_blank" rel="noopener noreferrer"
+      className="shrink-0 w-44 rounded-2xl overflow-hidden block mr-3"
+      style={{ border: "1px solid var(--border-light)" }}>
+      <div className="h-20 flex items-center justify-center text-4xl"
+        style={{ backgroundColor: store.light }}>{store.emoji}</div>
+      <div className="p-2.5" style={{ backgroundColor: "var(--bg-card)" }}>
+        <p className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{store.name}</p>
+        <p className="text-[10px] mt-0.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{store.description}</p>
+        <div className="flex items-center justify-between mt-1.5">
+          <span className="text-[10px] font-semibold" style={{ color: store.color }}>{store.badge}</span>
+          <ArrowRight className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
+        </div>
+      </div>
+    </a>
+  );
+}
+
 export default function StoresAndDealsRedesigned() {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("Popular");
   const [shareItem, setShareItem] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const filtered = useMemo(() => {
-    let result = activeCategory === "All"
-      ? STORES
-      : STORES.filter(s => s.category === activeCategory);
+  const topRated = useMemo(() => [...STORES].sort((a, b) => b.rating - a.rating).slice(0, 5), []);
 
-    // Sort
-    if (sortBy === "Top Rated") {
-      result = [...result].sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "A-Z") {
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    return result;
-  }, [activeCategory, sortBy]);
-
-  const handleRatingChange = () => {
-    setRefreshKey(k => k + 1);
-  };
+  const filtered = useMemo(() =>
+    activeCategory === "All" ? STORES : STORES.filter(s => s.category === activeCategory),
+    [activeCategory]
+  );
 
   return (
-    <div className="pb-10" key={refreshKey}>
-      {/* Header with gradient accent */}
-      <div className="px-5 pt-4 pb-4">
-        <p className="text-base font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-          🛍 Stores & Deals
-        </p>
-        <p className="text-[11px] mt-1" style={{ color: "var(--text-hint)" }}>
-          Discover verified stores and find the best deals
-        </p>
+    <div className="pb-10">
+      {/* Hero */}
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2 mb-0.5">
+          <TrendingUp className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+          <p className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Stores & Deals</p>
+        </div>
+        <p className="text-xs" style={{ color: "var(--text-hint)" }}>Discover top stores · Find best deals</p>
       </div>
 
-      {/* Category filter - horizontal scroll */}
-      <div className="px-5 mb-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 w-max pb-2">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className="px-3.5 py-2 rounded-full text-xs font-semibold border transition-all whitespace-nowrap"
-              style={{
-                backgroundColor: activeCategory === cat ? "#2E6B4F" : "var(--bg-card)",
-                color: activeCategory === cat ? "#fff" : "var(--text-secondary)",
-                borderColor: activeCategory === cat ? "#2E6B4F" : "var(--border-light)",
-              }}
-            >
-              {cat}
-            </button>
-          ))}
+      {/* Featured horizontal scroll */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 px-4 mb-2">
+          <Star className="w-3.5 h-3.5" style={{ color: "#F5A623", fill: "#F5A623" }} />
+          <p className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>Top Rated</p>
+        </div>
+        <div className="flex overflow-x-auto scrollbar-hide pl-4 pr-2">
+          {topRated.map(store => <FeaturedStore key={store.id} store={store} />)}
         </div>
       </div>
 
-      {/* Sort controls */}
-      <div className="px-5 mb-4 flex justify-between items-center">
-        <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-          {filtered.length} {filtered.length === 1 ? "store" : "stores"}
-        </span>
-        <div className="flex items-center gap-2 text-xs">
-          <ArrowUpDown className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="bg-transparent text-xs font-medium outline-none"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {SORT_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        </div>
+      {/* Category filter pills */}
+      <div className="flex overflow-x-auto scrollbar-hide px-4 gap-2 mb-4 pb-1">
+        {CATEGORIES.map(cat => (
+          <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+            className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all border"
+            style={{
+              backgroundColor: activeCategory === cat.key ? "var(--accent-primary)" : "var(--bg-card)",
+              color: activeCategory === cat.key ? "#fff" : "var(--text-secondary)",
+              borderColor: activeCategory === cat.key ? "var(--accent-primary)" : "var(--border-light)",
+            }}>
+            <span>{cat.emoji}</span> {cat.key}
+          </button>
+        ))}
       </div>
 
-      {/* Stores grid */}
-      <div className="px-5 space-y-2.5">
+      {/* Count */}
+      <div className="px-4 mb-2 flex items-center justify-between">
+        <p className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>{filtered.length} stores</p>
+      </div>
+
+      {/* List */}
+      <div className="px-4">
         <AnimatePresence>
           {filtered.map(store => (
-            <StoreCard
-              key={store.id}
-              store={store}
-              onShare={setShareItem}
-              onRatingChange={handleRatingChange}
-            />
+            <StoreRow key={store.id} store={store} onShare={setShareItem} />
           ))}
         </AnimatePresence>
       </div>
 
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <div className="text-center py-12 px-5">
-          <p className="text-2xl mb-2">🏪</p>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>No stores in this category</p>
-        </div>
-      )}
-
-      {/* Disclaimer */}
       <p className="text-[9px] text-center px-5 mt-6 leading-relaxed" style={{ color: "var(--text-hint)" }}>
-        All trademarks belong to their respective owners. This platform is not affiliated with listed companies.
+        All trademarks belong to their respective owners. Not affiliated with listed companies.
       </p>
 
       {shareItem && <ShareModal item={shareItem} onClose={() => setShareItem(null)} />}
