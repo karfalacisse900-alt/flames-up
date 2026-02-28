@@ -74,6 +74,7 @@ import Referral from './pages/Referral';
 import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
+import DidYouKnow from './pages/DidYouKnow';
 import __Layout from './Layout.jsx';
 
 
@@ -105,6 +106,7 @@ export const PAGES = {
     "Shop": Shop,
     "UserProfile": UserProfile,
     "Wallet": Wallet,
+    "DidYouKnow": DidYouKnow,
 }
 
 export const pagesConfig = {
