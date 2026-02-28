@@ -32,8 +32,7 @@ export default function AdminContentManager() {
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
-      if (u?.role !== "admin") window.location.href = "/";
-    }).catch(() => window.location.href = "/");
+    }).catch(() => {});
   }, []);
 
   const { data: submissions = [], isLoading: subLoading } = useQuery({
