@@ -22,9 +22,11 @@ import SmartFilters from "../components/discover/SmartFilters";
 import QuickVote from "../components/discover/QuickVote";
 import MediaTab from "../components/discover/MediaTab";
 import OpenLibraryBooksTab from "../components/discover/OpenLibraryBooksTab";
-import StoresAndDeals from "../components/discover/StoresAndDeals";
 import GamesTab from "../components/discover/GamesTab";
 import SubmitMediaForm from "../components/discover/SubmitMediaForm";
+import EbayShopTab from "../components/discover/EbayShopTab";
+import ShopifyTab from "../components/discover/ShopifyTab";
+import MapboxLocal from "../components/discover/MapboxLocal";
 
 
 const categories = ["all", "productivity", "finance", "learning", "lifestyle", "entertainment", "health", "social", "developer_tools"];
