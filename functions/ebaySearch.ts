@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       fieldgroups: "MATCHING_ITEMS",
     });
 
-    const res = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
+    const searchRes = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
@@ -96,11 +96,13 @@ Deno.serve(async (req) => {
       },
     });
 
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("eBay search error:", err);
-      return Response.json({ error: "eBay search failed" }, { status: 500 });
+    if (!searchRes.ok) {
+      const err = await searchRes.text();
+      console.error("eBay search error (status " + searchRes.status + "):", err);
+      return Response.json({ error: "eBay search failed: " + err }, { status: 500 });
     }
+
+    const res = searchRes;
 
     const data = await res.json();
     const items = (data.itemSummaries || []).map(item => ({
