@@ -119,10 +119,8 @@ export default function DidYouKnowSection({ user }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["didYouKnow"] }),
   });
 
-  if (posts.length === 0) return null;
-
-  const post = posts[current];
-  const isLiked = user?.email && post.liked_by?.includes(user.email);
+  const post = posts.length > 0 ? posts[current] : null;
+  const isLiked = user?.email && post?.liked_by?.includes(user.email);
 
   return (
     <div className="px-4 pt-4 pb-2">
@@ -133,61 +131,76 @@ export default function DidYouKnowSection({ user }) {
           <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Did You Know?</p>
           <ChevronRight className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
         </Link>
-        {user && (
-          <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)30" }}>
-            <Plus className="w-3 h-3" /> Submit
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <Link to={createPageUrl("DidYouKnow")}
+            className="text-xs font-semibold px-3 py-1.5 rounded-full"
+            style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)", border: "1px solid var(--accent-primary)30" }}>
+            See all
+          </Link>
+          {user && (
+            <button onClick={() => setShowForm(true)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)30" }}>
+              <Plus className="w-3 h-3" /> Submit
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Card */}
-      <AnimatePresence mode="wait">
-        <motion.div key={post.id}
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          className="p-4 rounded-2xl"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
-          {post.title && (
-            <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>{post.title}</p>
-          )}
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{post.content}</p>
+      {post ? (
+        <AnimatePresence mode="wait">
+          <motion.div key={post.id}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            className="p-4 rounded-2xl"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
+            {post.title && (
+              <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>{post.title}</p>
+            )}
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{post.content}</p>
 
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-3">
-              <button onClick={() => user && likeMut.mutate(post)}
-                className="flex items-center gap-1.5 transition-all active:scale-90">
-                <Heart className={`w-4 h-4 transition-colors ${isLiked ? "fill-current" : ""}`}
-                  style={{ color: isLiked ? "#E05C7A" : "var(--text-hint)" }} />
-                <span className="text-xs font-medium" style={{ color: isLiked ? "#E05C7A" : "var(--text-hint)" }}>{post.like_count || 0}</span>
-              </button>
-              {post.source_link && (
-                <a href={post.source_link} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs" style={{ color: "var(--accent-primary)" }}>
-                  <ExternalLink className="w-3 h-3" /> Source
-                </a>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>
-                {post.is_anonymous ? "Anonymous" : post.submitter_name || "Community"}
-              </p>
-              <div className="flex gap-1">
-                {posts.map((_, i) => (
-                  <button key={i} onClick={() => setCurrent(i)}
-                    className="w-1.5 h-1.5 rounded-full transition-all"
-                    style={{ backgroundColor: i === current ? "var(--accent-primary)" : "var(--border-medium)" }} />
-                ))}
-              </div>
-              {current < posts.length - 1 && (
-                <button onClick={() => setCurrent(c => Math.min(posts.length - 1, c + 1))}>
-                  <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+            <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center gap-3">
+                <button onClick={() => user && likeMut.mutate(post)}
+                  className="flex items-center gap-1.5 transition-all active:scale-90">
+                  <Heart className={`w-4 h-4 transition-colors ${isLiked ? "fill-current" : ""}`}
+                    style={{ color: isLiked ? "#E05C7A" : "var(--text-hint)" }} />
+                  <span className="text-xs font-medium" style={{ color: isLiked ? "#E05C7A" : "var(--text-hint)" }}>{post.like_count || 0}</span>
                 </button>
-              )}
+                {post.source_link && (
+                  <a href={post.source_link} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs" style={{ color: "var(--accent-primary)" }}>
+                    <ExternalLink className="w-3 h-3" /> Source
+                  </a>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>
+                  {post.is_anonymous ? "Anonymous" : post.submitter_name || "Community"}
+                </p>
+                <div className="flex gap-1">
+                  {posts.map((_, i) => (
+                    <button key={i} onClick={() => setCurrent(i)}
+                      className="w-1.5 h-1.5 rounded-full transition-all"
+                      style={{ backgroundColor: i === current ? "var(--accent-primary)" : "var(--border-medium)" }} />
+                  ))}
+                </div>
+                {current < posts.length - 1 && (
+                  <button onClick={() => setCurrent(c => Math.min(posts.length - 1, c + 1))}>
+                    <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
+      ) : (
+        <Link to={createPageUrl("DidYouKnow")}
+          className="flex items-center justify-center p-4 rounded-2xl text-sm"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px dashed var(--border-medium)", color: "var(--text-hint)" }}>
+          No facts yet — be the first to submit one! →
+        </Link>
+      )}
 
       {/* Submit form modal */}
       <AnimatePresence>
