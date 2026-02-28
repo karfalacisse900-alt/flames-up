@@ -1,122 +1,133 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, ExternalLink, ShoppingBag, ChevronRight } from "lucide-react";
-
-function ShopifyProductCard({ product }) {
-  const price = parseFloat(product.minPrice || 0).toFixed(2);
-  const currency = product.currency === "USD" ? "$" : product.currency;
-  const hasVariants = product.variants?.length > 1;
-
-  return (
-    <a href={product.url} target="_blank" rel="noopener noreferrer"
-      className="block rounded-2xl overflow-hidden active:scale-[0.98] transition-all"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      <div className="w-full h-44 bg-gray-100 overflow-hidden flex items-center justify-center">
-        {product.image ? (
-          <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
-        ) : (
-          <ShoppingBag className="w-12 h-12" style={{ color: "var(--text-hint)" }} />
-        )}
-      </div>
-      <div className="p-3">
-        {product.vendor && (
-          <p className="text-[10px] font-semibold uppercase tracking-wide mb-1" style={{ color: "var(--accent-secondary)" }}>{product.vendor}</p>
-        )}
-        <p className="text-sm font-semibold leading-snug line-clamp-2" style={{ color: "var(--text-primary)" }}>{product.title}</p>
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-base font-bold" style={{ color: "var(--accent-primary)" }}>
-            {currency}{price}
-            {hasVariants && product.maxPrice !== product.minPrice && (
-              <span className="text-xs font-normal" style={{ color: "var(--text-hint)" }}> – {currency}{parseFloat(product.maxPrice).toFixed(2)}</span>
-            )}
-          </p>
-          <ExternalLink className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-        </div>
-        {product.tags?.length > 0 && (
-          <div className="flex gap-1 flex-wrap mt-2">
-            {product.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </a>
-  );
-}
+import { Search, ExternalLink, ChevronRight, ShoppingBag } from "lucide-react";
 
 export default function ShopifyTab() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [inputVal, setInputVal] = useState("");
+  const [pageInfo, setPageInfo] = useState(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["shopify", search],
-    queryFn: () => base44.functions.invoke("shopifyProducts", { query: search, first: 20 }).then(r => r.data),
-    staleTime: 20 * 60 * 1000,
-  });
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearch(inputVal.trim());
+  const fetchProducts = async (q = "", after = null) => {
+    setLoading(true);
+    setError(null);
+    const res = await base44.functions.invoke("shopifyProducts", { query: q, first: 20, after });
+    setLoading(false);
+    if (res.data?.error) {
+      setError(res.data.error);
+      return;
+    }
+    setProducts(res.data?.products || []);
+    setPageInfo(res.data?.pageInfo || null);
+    setSearch(q);
   };
 
-  const products = data?.products || [];
+  useEffect(() => { fetchProducts(); }, []);
 
-  if (data?.error === "Shopify not configured") {
-    return (
-      <div className="px-4 py-16 text-center">
-        <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--text-hint)" }} />
-        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Shopify Not Connected</p>
-        <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Set SHOPIFY_STORE_DOMAIN and SHOPIFY_STOREFRONT_ACCESS_TOKEN in secrets.</p>
-      </div>
-    );
-  }
+  const handleSubmit = (e) => { e.preventDefault(); fetchProducts(inputVal); };
+
+  if (loading && products.length === 0) return (
+    <div className="flex justify-center py-20">
+      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+    </div>
+  );
+
+  if (error) return (
+    <div className="px-4 py-10 text-center">
+      <p className="text-4xl mb-3">🛍️</p>
+      <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Shop coming soon</p>
+      <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Store not yet configured</p>
+    </div>
+  );
 
   return (
-    <div className="px-4 pb-24">
+    <div className="pb-24">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">🏪</span>
-        <div>
-          <h2 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Creator Shop</h2>
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Powered by Shopify</p>
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-2xl">🛍️</span>
+          <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Creator Shop</h2>
         </div>
+        <p className="text-xs" style={{ color: "var(--text-hint)" }}>Exclusive products & collaborations</p>
       </div>
 
       {/* Search */}
-      <form onSubmit={handleSearch} className="flex gap-2 mb-5">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
-          <input value={inputVal} onChange={e => setInputVal(e.target.value)}
-            placeholder="Search products..."
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm outline-none"
-            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+      <form onSubmit={handleSubmit} className="px-4 mb-4">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
+            <input value={inputVal} onChange={e => setInputVal(e.target.value)}
+              placeholder="Search products..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+          </div>
+          <button type="submit" className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
+            style={{ backgroundColor: "var(--accent-primary)" }}>
+            Search
+          </button>
         </div>
-        <button type="submit"
-          className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
-          style={{ backgroundColor: "var(--accent-secondary)" }}>
-          Search
-        </button>
       </form>
 
-      {isLoading ? (
-        <div className="grid grid-cols-2 gap-3">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="h-60 rounded-2xl animate-pulse" style={{ backgroundColor: "var(--bg-subtle)" }} />
-          ))}
+      {loading && (
+        <div className="flex justify-center py-8">
+          <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
         </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-16">
-          <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--text-hint)" }} />
-          <p className="text-sm" style={{ color: "var(--text-hint)" }}>No products found</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {products.map(p => <ShopifyProductCard key={p.id} product={p} />)}
-        </div>
+      )}
+
+      {!loading && (
+        <>
+          {products.length === 0 ? (
+            <div className="text-center py-16">
+              <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--text-hint)" }} />
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No products found</p>
+            </div>
+          ) : (
+            <div className="px-4 grid grid-cols-2 gap-3">
+              {products.map(product => (
+                <div key={product.id} className="rounded-2xl overflow-hidden"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  {product.image ? (
+                    <div className="aspect-square overflow-hidden">
+                      <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-square flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                      <ShoppingBag className="w-10 h-10" style={{ color: "var(--text-hint)" }} />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <p className="text-xs font-semibold line-clamp-2 mb-1" style={{ color: "var(--text-primary)" }}>{product.title}</p>
+                    {product.vendor && <p className="text-[10px] mb-1" style={{ color: "var(--text-hint)" }}>{product.vendor}</p>}
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>
+                        {product.minPrice === product.maxPrice
+                          ? `$${parseFloat(product.minPrice).toFixed(2)}`
+                          : `$${parseFloat(product.minPrice).toFixed(2)}+`}
+                      </p>
+                      <a href={product.url} target="_blank" rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg text-white"
+                        style={{ backgroundColor: "var(--accent-primary)" }}>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {pageInfo?.hasNextPage && (
+            <div className="px-4 mt-4">
+              <button onClick={() => fetchProducts(search, pageInfo.endCursor)}
+                className="w-full py-3 rounded-xl text-sm font-semibold border"
+                style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
+                Load more
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
