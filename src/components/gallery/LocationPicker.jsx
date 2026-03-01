@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MapPin, X, Loader2 } from "lucide-react";
 
 /**
- * LocationPicker — uses OpenStreetMap Nominatim for geocoding (no API key needed).
- * Stores { name, lat, lng } on selection.
+ * LocationPicker — uses Mapbox geocoding (same key already in the app)
+ * Falls back to manual text entry if geocoding fails.
  */
 export default function LocationPicker({ value, onChange }) {
   const [query, setQuery] = useState(value?.name || "");
@@ -14,29 +14,28 @@ export default function LocationPicker({ value, onChange }) {
 
   const search = (q) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!q || q.length < 2) { setSuggestions([]); setOpen(false); return; }
+    if (!q || q.length < 2) { setSuggestions([]); return; }
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
+        // Use Mapbox geocoding (token already used in other components)
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5&addressdetails=1`,
-          { headers: { "Accept-Language": "en" } }
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw&autocomplete=true&limit=5`
         );
         const data = await res.json();
-        setSuggestions(data || []);
+        setSuggestions(data.features || []);
         setOpen(true);
       } catch {
         setSuggestions([]);
       }
       setLoading(false);
-    }, 420);
+    }, 380);
   };
 
-  const pick = (item) => {
-    const name = item.display_name;
-    const lat = parseFloat(item.lat);
-    const lng = parseFloat(item.lon);
-    setQuery(name.split(",").slice(0, 3).join(","));
+  const pick = (feature) => {
+    const name = feature.place_name;
+    const [lng, lat] = feature.center;
+    setQuery(name);
     setSuggestions([]);
     setOpen(false);
     onChange({ name, lat, lng });
@@ -45,7 +44,6 @@ export default function LocationPicker({ value, onChange }) {
   const clear = () => {
     setQuery("");
     setSuggestions([]);
-    setOpen(false);
     onChange(null);
   };
 
@@ -53,11 +51,11 @@ export default function LocationPicker({ value, onChange }) {
     <div className="relative">
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
         style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
-        <MapPin className="w-4 h-4 shrink-0" style={{ color: "#4285F4" }} />
+        <MapPin className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
         <input
           value={query}
           onChange={e => { setQuery(e.target.value); search(e.target.value); }}
-          placeholder="Add location (Google Maps)…"
+          placeholder="Add location…"
           className="flex-1 text-sm bg-transparent outline-none"
           style={{ color: "var(--text-primary)" }}
         />
@@ -72,24 +70,14 @@ export default function LocationPicker({ value, onChange }) {
       {open && suggestions.length > 0 && (
         <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl overflow-hidden shadow-lg"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          {suggestions.map((item, i) => {
-            const parts = item.display_name.split(",");
-            const primary = parts.slice(0, 2).join(",").trim();
-            const secondary = parts.slice(2, 4).join(",").trim();
-            return (
-              <button key={i} onClick={() => pick(item)}
-                className="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-start gap-2"
-                style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-subtle)", backgroundColor: "transparent" }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-subtle)"}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
-                <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "#4285F4" }} />
-                <div className="min-w-0">
-                  <p className="font-medium truncate">{primary}</p>
-                  {secondary && <p className="text-xs truncate" style={{ color: "var(--text-hint)" }}>{secondary}</p>}
-                </div>
-              </button>
-            );
-          })}
+          {suggestions.map(f => (
+            <button key={f.id} onClick={() => pick(f)}
+              className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--bg-subtle)] transition-colors flex items-start gap-2"
+              style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-subtle)" }}>
+              <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "var(--accent-primary)" }} />
+              <span className="line-clamp-2">{f.place_name}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -260,28 +260,27 @@ nav, button, a[role="button"], .no-select {
 }
 
 /* ── Desktop / responsive masonry ── */
-.gallery-masonry .masonry-grid,
 .gallery-masonry .masonry-grid {
   columns: 2;
   column-gap: 8px;
-  width: 100%;
-}
-@media (min-width: 480px) {
-  .gallery-masonry .masonry-grid { columns: 2; column-gap: 8px; }
 }
 @media (min-width: 640px) {
-  .gallery-masonry .masonry-grid { columns: 3; column-gap: 10px; }
+  .gallery-masonry .masonry-grid {
+    columns: 3;
+    column-gap: 10px;
+  }
 }
 @media (min-width: 1024px) {
-  .gallery-masonry .masonry-grid { columns: 4; column-gap: 12px; }
+  .gallery-masonry .masonry-grid {
+    columns: 4;
+    column-gap: 12px;
+  }
 }
 @media (min-width: 1280px) {
-  .gallery-masonry .masonry-grid { columns: 5; column-gap: 14px; }
-}
-.gallery-masonry .masonry-grid .break-inside-avoid {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  -webkit-column-break-inside: avoid;
+  .gallery-masonry .masonry-grid {
+    columns: 5;
+    column-gap: 14px;
+  }
 }
 
 /* ── Desktop layout: wider container for non-mobile pages ── */
