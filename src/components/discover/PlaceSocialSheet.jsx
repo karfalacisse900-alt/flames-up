@@ -85,6 +85,20 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
   const [routeLoading, setRouteLoading] = useState(false);
   const [localCheckIns, setLocalCheckIns] = useState(0);
 
+  // Fetch real community posts tagged to this place (by place name keyword)
+  const placeName = place.text || "";
+  const { data: realPosts = [], isLoading: postsLoading } = useQuery({
+    queryKey: ["placePosts", placeName],
+    queryFn: () => base44.entities.CommunityPost.list("-created_date", 50).then(posts =>
+      posts.filter(p => {
+        const txt = (p.content || p.text || p.title || "").toLowerCase();
+        const kw = placeName.toLowerCase().split(" ").filter(w => w.length > 3);
+        return kw.some(k => txt.includes(k));
+      }).slice(0, 6)
+    ),
+    enabled: !!placeName && activeTab === "discuss",
+  });
+
   const seed = getPlaceSeed(place.id || place.place_name || "x");
   const rating = (3.8 + seededRandom(seed) * 1.2).toFixed(1);
   const visitCount = seededInt(seed, 80, 450);
