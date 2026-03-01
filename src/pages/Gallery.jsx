@@ -369,7 +369,7 @@ function UploadModal({ user, onClose, qc }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="relative w-full max-w-lg rounded-t-3xl md:rounded-2xl p-6 space-y-4 overflow-y-auto"
-        style={{ backgroundColor: "var(--bg-app)", maxHeight: "92dvh" }}
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-8 h-1 rounded-full mx-auto md:hidden" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="flex items-center justify-between">
