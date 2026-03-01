@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, X, Send, Flame, Clock, Star, Search, SlidersHorizontal,
-  Sparkles, Upload, Eye, Loader2, Camera, Trophy, Grid3X3, MapPin, Navigation, CalendarDays,
+  Sparkles, Upload, Eye, Loader2, Camera, Trophy, Grid3X3, MapPin, Navigation, CalendarDays, ExternalLink,
 } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import ArtVoteArena from "@/components/gallery/ArtVoteArena";
