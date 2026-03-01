@@ -336,6 +336,16 @@ export default function Gallery() {
             style={{ backgroundColor: tab === "vote" ? "#E07070" : "transparent", color: tab === "vote" ? "#fff" : "#6B6B6B" }}>
             <Swords className="w-3 h-3" /> Vote Arena
           </button>
+          <Link to={createPageUrl("WeeklyChallenges")}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={{ backgroundColor: "transparent", color: "#6B6B6B" }}>
+            <Camera className="w-3 h-3" /> Challenges
+          </Link>
+          <Link to={createPageUrl("HallOfFame")}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={{ backgroundColor: "transparent", color: "#6B6B6B" }}>
+            <Trophy className="w-3 h-3" /> Fame
+          </Link>
         </div>
 
         {tab === "gallery" && (
