@@ -158,10 +158,12 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
     setNewComment("");
   };
 
-  const handleCheckIn = () => {
+  const handleCheckIn = (anonymous = false) => {
     if (checkedIn) return;
+    setCheckInAnonymous(anonymous);
     setCheckedIn(true);
     setLocalCheckIns(n => n + 1);
+    setShowCheckInOptions(false);
   };
 
   return (
