@@ -1,112 +1,79 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Zap, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { addCoins } from "../coins/coinsHelper";
+import { X, Zap, Star, Flame, Loader2 } from "lucide-react";
 
-const BOOST_OPTIONS = [
-  { label: "6 Hours", hours: 6, cost: 20 },
-  { label: "24 Hours", hours: 24, cost: 50 },
-  { label: "3 Days", hours: 72, cost: 120 },
+const BOOSTS = [
+  { level: "24h",       label: "24-Hour Boost",       price: "$3",  cents: 300,  icon: Zap,   desc: "Higher feed ranking for a day", color: "#2E6B4F" },
+  { level: "3day",      label: "3-Day Boost",          price: "$8",  cents: 800,  icon: Flame, desc: "Extended visibility for 3 days", color: "#D98B62" },
+  { level: "spotlight", label: "Featured Spotlight",   price: "$20", cents: 2000, icon: Star,  desc: "Top section for 7 days", color: "#E05C7A" },
 ];
 
-export default function BoostPostModal({ post, user, balance, onClose, onBoosted }) {
-  const [selected, setSelected] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+export default function BoostPostModal({ contentType, contentId, onClose }) {
+  const [loading, setLoading] = useState(null);
 
-  const option = BOOST_OPTIONS[selected];
-  const canAfford = balance >= option.cost;
-
-  const handleBoost = async () => {
-    if (!canAfford) { setError("Not enough coins!"); return; }
-    setLoading(true);
-    const expiresAt = new Date(Date.now() + option.hours * 3600 * 1000).toISOString();
-    await base44.entities.Post.update(post.id, { is_boosted: true, boost_expires_at: expiresAt });
-    await addCoins(user.email, -option.cost, "boost_post", `Boosted post for ${option.label}`, post.id);
-    onBoosted?.();
-    onClose();
-    setLoading(false);
+  const handleBoost = async (boost) => {
+    // Block inside iframe (e.g., Base44 preview)
+    if (window.self !== window.top) {
+      alert("Checkout only works from the published app, not from the preview.");
+      return;
+    }
+    setLoading(boost.level);
+    const res = await base44.functions.invoke("createBoostCheckout", {
+      content_type: contentType,
+      content_id: contentId,
+      boost_level: boost.level,
+    });
+    setLoading(null);
+    if (res.data?.url) {
+      window.location.href = res.data.url;
+    }
   };
 
   return (
-    <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+      onClick={onClose}>
       <motion.div
-        className="fixed inset-0 z-50 flex items-end justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onTouchMove={e => e.stopPropagation()}
-      >
-        <div className="absolute inset-0 bg-black/40" onClick={onClose} onTouchMove={e => e.stopPropagation()} />
-        <motion.div
-          className="relative w-full max-w-lg rounded-t-3xl p-6"
-          style={{ backgroundColor: "var(--bg-nav)" }}
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 25 }}
-        >
-          <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full" style={{ backgroundColor: "var(--bg-app)" }}>
-            <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-          </button>
-
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #F59E0B, #D97706)" }}>
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Boost This Post</h3>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Pin it to the top + show a Boosted badge</p>
-            </div>
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 320, damping: 30 }}
+        className="w-full max-w-lg rounded-t-3xl p-5 space-y-3"
+        style={{ backgroundColor: "#FAFAF8" }}
+        onClick={e => e.stopPropagation()}>
+        <div className="w-8 h-1 rounded-full mx-auto" style={{ backgroundColor: "var(--border-medium)" }} />
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Boost Your Post</h3>
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Get more eyes on your content</p>
           </div>
+          <button onClick={onClose}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>
+        </div>
 
-          {/* Balance */}
-          <div className="mb-4 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-            Your balance: <span className="font-bold" style={{ color: "var(--accent-primary)" }}>{balance} ⬡</span>
-          </div>
+        {BOOSTS.map(b => {
+          const Icon = b.icon;
+          return (
+            <button key={b.level} onClick={() => handleBoost(b)}
+              disabled={!!loading}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all border disabled:opacity-50"
+              style={{ backgroundColor: b.color + "0D", borderColor: b.color + "30" }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: b.color }}>
+                {loading === b.level ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Icon className="w-5 h-5 text-white" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{b.label}</p>
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{b.desc}</p>
+              </div>
+              <span className="text-base font-black flex-shrink-0" style={{ color: b.color }}>{b.price}</span>
+            </button>
+          );
+        })}
 
-          {/* Options */}
-          <div className="space-y-2 mb-5">
-            {BOOST_OPTIONS.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => { setSelected(i); setError(""); }}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border transition-all"
-                style={{
-                  backgroundColor: selected === i ? "var(--bg-app)" : "transparent",
-                  borderColor: selected === i ? "var(--accent-primary)" : "var(--border-light)",
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected === i ? "border-[var(--accent-primary)]" : "border-gray-300"}`}>
-                    {selected === i && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "var(--accent-primary)" }} />}
-                  </div>
-                  <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{opt.label}</span>
-                </div>
-                <span className="text-sm font-bold" style={{ color: "var(--accent-secondary)" }}>{opt.cost} ⬡</span>
-              </button>
-            ))}
-          </div>
-
-          {error && <p className="text-sm text-rose-500 mb-3 text-center">{error}</p>}
-
-          <button
-            onClick={handleBoost}
-            disabled={loading || !canAfford}
-            className="w-full py-3 rounded-2xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2"
-            style={{ backgroundColor: canAfford ? "#F59E0B" : "#D1D5DB", boxShadow: canAfford ? "0 4px 14px rgba(245,158,11,0.4)" : "none" }}
-          >
-            <Zap className="w-4 h-4" />
-            {loading ? "Boosting..." : `Boost for ${option.cost} ⬡`}
-          </button>
-          {!canAfford && (
-            <p className="text-center text-xs mt-2" style={{ color: "var(--text-hint)" }}>
-              You need {option.cost - balance} more coins. Earn them in the Wallet!
-            </p>
-          )}
-        </motion.div>
+        <p className="text-[10px] text-center pb-1" style={{ color: "var(--text-hint)" }}>
+          🔒 Secure payment via Stripe. Boosts increase visibility — not moderation immunity.
+        </p>
       </motion.div>
-    </AnimatePresence>
+    </motion.div>
   );
 }
