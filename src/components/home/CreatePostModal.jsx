@@ -31,6 +31,18 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [editingFile, setEditingFile] = useState(null);
   const fileInputRef = useRef();
 
+  const handleImageFile = (f) => {
+    setImageFile(f);
+    setImagePreview(URL.createObjectURL(f));
+    setEditingFile(f);
+  };
+
+  const handleEditorDone = (editedFile, editedUrl) => {
+    setImageFile(editedFile);
+    setImagePreview(editedUrl);
+    setEditingFile(null);
+  };
+
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
     setLoading(true);
@@ -38,6 +50,12 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     // AI moderation check
     const modCheck = await checkContent(text);
     
+    let imageUrl = null;
+    if (imageFile) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      imageUrl = file_url;
+    }
+
     let pollData = {};
     if (type === "question" && answerType !== "open") {
       let opts = answerType === "yes_no" ? ["Yes", "No"] : multiOptions.filter(o => o.trim());
@@ -50,6 +68,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       author_name: isAnonymous ? "Anonymous" : (user?.display_name || user?.full_name || "User"),
       author_email: isAnonymous ? "" : (user?.email || ""),
       like_count: 0, reply_count: 0, liked_by: [],
+      ...(imageUrl ? { image_url: imageUrl } : {}),
       ...pollData,
     });
     
@@ -61,6 +80,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     setText(""); setType("question"); setIsAnonymous(false); setFontFamily("serif");
     setAnswerType("open"); setMultiOptions(["", ""]);
     setShowAiPanel(false); setAiTopic("");
+    setImageFile(null); setImagePreview(null);
     setLoading(false);
     onCreated();
     onClose();
