@@ -87,9 +87,10 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      transition={{ duration: 0.28, ease: "easeOut" }}
+      whileHover={{ backgroundColor: "rgba(46,107,79,0.015)" }}
     >
       <div className="flex gap-3 px-4 py-3.5">
         {/* Avatar */}
