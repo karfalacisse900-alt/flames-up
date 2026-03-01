@@ -316,6 +316,7 @@ function UploadModal({ user, onClose, qc }) {
   const [tags, setTags] = useState("");
   const [category, setUploadCategory] = useState("other");
   const [location, setLocation] = useState(null);
+  const [link, setLink] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef();
 
