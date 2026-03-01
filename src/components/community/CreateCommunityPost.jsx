@@ -66,7 +66,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
     // Require at least an image/gif for non-structured post types
     const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
-    if (requiresMedia && !imageUrl) {
+    if (requiresMedia && !imagePreview && !imageUrl) {
       setMediaError(true);
       return;
     }
