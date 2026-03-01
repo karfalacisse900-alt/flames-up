@@ -36,22 +36,28 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [sideA, setSideA] = useState("");
   const [sideB, setSideB] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setImageUrl(file_url);
-    } catch (err) {
-      console.error(err);
-    }
-    setUploading(false);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setEditingFile(file);
+    e.target.value = "";
+  };
+
+  const handleEditorDone = (editedFile, editedUrl) => {
+    setImageFile(editedFile);
+    setImagePreview(editedUrl);
+    setImageUrl(""); // will upload on submit
+    setEditingFile(null);
   };
 
   const handleSubmit = async () => {
