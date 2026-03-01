@@ -259,6 +259,44 @@ nav, button, a[role="button"], .no-select {
   }
 }
 
+/* ── Desktop / responsive masonry ── */
+.gallery-masonry .masonry-grid {
+  columns: 2;
+  column-gap: 8px;
+}
+@media (min-width: 640px) {
+  .gallery-masonry .masonry-grid {
+    columns: 3;
+    column-gap: 10px;
+  }
+}
+@media (min-width: 1024px) {
+  .gallery-masonry .masonry-grid {
+    columns: 4;
+    column-gap: 12px;
+  }
+}
+@media (min-width: 1280px) {
+  .gallery-masonry .masonry-grid {
+    columns: 5;
+    column-gap: 14px;
+  }
+}
+
+/* ── Desktop layout: wider container for non-mobile pages ── */
+@media (min-width: 768px) {
+  /* The layout wraps pages inside max-w-lg mx-auto — on desktop we override it */
+  .desktop-wide {
+    max-width: 1200px !important;
+  }
+  /* Community feed posts should not be full mobile-card width on desktop */
+  .community-post-desktop {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ── Global Tailwind utility overrides ── */
 .bg-white    { background-color: var(--bg-card) !important; }
 .bg-gray-50  { background-color: var(--bg-subtle) !important; }
