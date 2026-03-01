@@ -22,6 +22,18 @@ const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"]
 const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore"];
 
 
+// Flames-Up Logo component
+function FlamesUpLogo() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #E05C2A, #F97316)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Flame style={{ width: 16, height: 16, color: "#fff", fill: "#fff" }} />
+      </div>
+      <span style={{ fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)", letterSpacing: "-0.3px" }}>flames-up</span>
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   useLayoutStabilizer();
   const [user, setUser] = useState(null);
