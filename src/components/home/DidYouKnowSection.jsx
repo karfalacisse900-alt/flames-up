@@ -5,6 +5,7 @@ import { Heart, ExternalLink, Plus, X, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import KeywordHighlight from "@/components/KeywordHighlight";
 
 const MAX_CONTENT = 500;
 const MAX_TITLE = 80;

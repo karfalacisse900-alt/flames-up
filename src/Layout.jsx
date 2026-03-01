@@ -22,6 +22,7 @@ const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"]
 
 
 export default function Layout({ children, currentPageName }) {
+  useLayoutStabilizer();
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
