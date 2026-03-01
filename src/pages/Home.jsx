@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { motion } from "framer-motion";
 import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -15,9 +16,29 @@ export default function Home() {
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
       <div className="overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
+        {/* Header */}
         <HomeHeader user={user} />
-        <DidYouKnowSection user={user} />
-        <CommunityFeed user={user} />
+
+        {/* Did You Know — subtle animated entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        >
+          <DidYouKnowSection user={user} />
+        </motion.div>
+
+        {/* Divider with gradient */}
+        <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />
+
+        {/* Community Feed */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <CommunityFeed user={user} />
+        </motion.div>
       </div>
       <WelcomePopup />
     </div>
