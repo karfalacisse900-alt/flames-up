@@ -12,9 +12,9 @@ import { useLayoutStabilizer } from "@/components/hooks/useLayoutStabilizer";
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
 { name: "Discover", icon: Search,  page: "Discover" },
+{ name: "Groups",  icon: Users,   page: "Groups" },
 { name: "Gallery", icon: Palette, page: "Gallery" },
 { name: "Live",    icon: Radio,   page: "Live" },
-{ name: "Alerts",  icon: Bell,    page: "Notifications" },
 { name: "Profile", icon: User,    page: "Profile" },
 ];
 
