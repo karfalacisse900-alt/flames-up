@@ -352,6 +352,7 @@ function UploadModal({ user, onClose, qc }) {
       status: "published", like_count: 0, liked_by: [], comment_count: 0, vote_count: 0,
       category, tags: tags.split(",").map(t => t.trim()).filter(Boolean),
       ...(location ? { location_name: location.name, location_lat: location.lat, location_lng: location.lng } : {}),
+      ...(link.trim() ? { link: link.trim() } : {}),
     });
     qc.invalidateQueries({ queryKey: ["artworks"] });
     setUploading(false);
