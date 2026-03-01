@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Upload, Heart, Trophy, Flame, Zap, X, Send, ChevronRight, Loader2 } from "lucide-react";
+import { Clock, Upload, Heart, Trophy, Flame, Zap, X, ChevronRight, Loader2 } from "lucide-react";
+import PhotoEditor from "@/components/editor/PhotoEditor";
 
 // ── Countdown ─────────────────────────────────────────────
 function Countdown({ target }) {
