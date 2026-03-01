@@ -324,6 +324,45 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
                 </button>
               </div>
             )}
+            {/* Real community posts matching this location */}
+            {postsLoading && (
+              <div className="flex items-center gap-2 py-2">
+                <Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--accent-primary)" }} />
+                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Loading community posts...</p>
+              </div>
+            )}
+            {realPosts.length > 0 && (
+              <div className="mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: catColor }}>
+                  💬 Community posts mentioning this place
+                </p>
+                {realPosts.map(p => (
+                  <div key={p.id} className="p-3 mb-2 rounded-2xl" style={{ background: `linear-gradient(135deg, ${catColor}12, ${catColor}06)`, border: `1px solid ${catColor}20` }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: catColor }}>
+                        {(p.author_name || p.user_name || "U")[0]}
+                      </div>
+                      <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                        {p.author_name || p.user_name || "Community Member"}
+                      </p>
+                      <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>
+                        {p.created_date ? `${Math.floor((Date.now() - new Date(p.created_date)) / 86400000)}d ago` : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                      {(p.content || p.text || "").slice(0, 140)}{(p.content || p.text || "").length > 140 ? "…" : ""}
+                    </p>
+                    {(p.like_count > 0) && (
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <Heart className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
+                        <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{p.like_count}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {localComments.map(c => (
               <div key={c.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--accent-primary-light)", border: `1px solid ${catColor}22` }}>
                 <div className="flex items-center gap-2 mb-1">
