@@ -350,9 +350,10 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
           </div>
         )}
 
-        {/* DISCUSS */}
-        {activeTab === "discuss" && (
+        {/* COMMUNITY */}
+        {activeTab === "community" && (
           <div className="pt-3 space-y-3">
+            {/* Compose */}
             {user && (
               <div className="flex gap-2">
                 <input value={newComment} onChange={e => setNewComment(e.target.value)}
@@ -360,35 +361,88 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
                   placeholder="Share thoughts about this place..."
                   className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-                <button onClick={handleComment} className="p-2.5 rounded-xl text-white" style={{ backgroundColor: catColor }}>
+                <button onClick={handleComment} className="p-2.5 rounded-xl text-white flex-shrink-0" style={{ backgroundColor: catColor }}>
                   <Send className="w-4 h-4" />
                 </button>
               </div>
             )}
+
+            {/* Local (just-submitted) comments */}
             {localComments.map(c => (
               <div key={c.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--accent-primary-light)", border: `1px solid ${catColor}22` }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: catColor }}>{c.name[0]}</div>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ backgroundColor: catColor }}>{c.name[0]}</div>
                   <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{c.name}</p>
                   <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{c.time}</p>
                 </div>
                 <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{c.text}</p>
               </div>
             ))}
-            {communityPosts.map(post => (
-              <div key={post.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: catColor }}>{post.name[0]}</div>
-                  <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{post.name}</p>
-                  <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{post.time}</p>
+
+            {/* Real matched community posts */}
+            {realPosts.length > 0 && (
+              <>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: catColor }}>📡 From the Community</p>
+                {realPosts.map(post => (
+                  <div key={post.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ backgroundColor: catColor }}>
+                        {(post.author_name || post.user_name || "?")[0]?.toUpperCase()}
+                      </div>
+                      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                        {post.is_anonymous ? "Anonymous" : (post.author_name || post.user_name || "Community Member")}
+                      </p>
+                      <p className="text-[10px] flex-shrink-0" style={{ color: "var(--text-hint)" }}>
+                        {post.created_date ? `${Math.floor((Date.now() - new Date(post.created_date)) / 86400000)}d ago` : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{post.text}</p>
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <Heart className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
+                      <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{post.like_count || 0}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* Trending posts as social context */}
+            {realPosts.length === 0 && trendingPosts.length > 0 && (
+              <>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>🔥 Trending Nearby Discussions</p>
+                {trendingPosts.slice(0, 4).map(post => (
+                  <div key={post.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ backgroundColor: "#888" }}>
+                        {(post.author_name || "?")[0]?.toUpperCase()}
+                      </div>
+                      <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                        {post.is_anonymous ? "Anonymous" : (post.author_name || "Community")}
+                      </p>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{post.text}</p>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {realPosts.length === 0 && trendingPosts.length === 0 && !user && (
+              <p className="text-xs text-center py-6" style={{ color: "var(--text-hint)" }}>Be the first to discuss this place</p>
+            )}
+
+            {/* Mock community posts as starters */}
+            {realPosts.length === 0 && (
+              communityPosts.map(post => (
+                <div key={post.id} className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", opacity: 0.7 }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ backgroundColor: catColor }}>{post.name[0]}</div>
+                    <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{post.name}</p>
+                    <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{post.time}</p>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>"{post.text}"</p>
                 </div>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>"{post.text}"</p>
-                <div className="flex items-center gap-1 mt-1.5">
-                  <Heart className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
-                  <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{post.likes}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
 
