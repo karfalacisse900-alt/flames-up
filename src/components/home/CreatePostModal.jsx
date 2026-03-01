@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2 } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2, Image, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { base44 } from "@/api/base44Client";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import FontPicker, { getFontStyle } from "./FontPicker";
+import PhotoEditor from "../editor/PhotoEditor";
 
 const postTypes = [
   { value: "question", label: "Question", emoji: "❓" },
