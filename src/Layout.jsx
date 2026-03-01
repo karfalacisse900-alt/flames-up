@@ -72,7 +72,7 @@ export default function Layout({ children, currentPageName }) {
         paddingBottom: hideNav ? 0 : "72px",
         minHeight: "100dvh",
         overflowX: "hidden",
-        maxWidth: isAdminPage ? "100%" : "512px",
+        maxWidth: isAdminPage ? "100%" : WIDE_PAGES.includes(currentPageName) ? "1400px" : "512px",
         width: "100%",
         marginLeft: "auto",
         marginRight: "auto",
