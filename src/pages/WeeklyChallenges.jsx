@@ -79,42 +79,44 @@ function EntryCard({ entry, canVote, onVote, onLike, user }) {
   );
 }
 
-// ── Submit Modal ───────────────────────────────────────────
+// ── Submit Modal (with Photo Editor) ──────────────────────────────────────────
 function SubmitModal({ challenge, user, onClose }) {
   const qc = useQueryClient();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
   const [done, setDone] = useState(false);
   const fileRef = useRef();
 
+  const handleFile = (f) => { setFile(f); setPreview(URL.createObjectURL(f)); };
+
+  const handleEditorDone = (editedFile, editedUrl) => {
+    setFile(editedFile); setPreview(editedUrl); setEditingFile(null);
+  };
+
   const handleSubmit = async () => {
     if (!file || !user) return;
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     await base44.entities.ChallengeEntry.create({
-      challenge_id: challenge.id,
-      image_url: file_url,
-      title: title.trim() || "My Entry",
-      caption: caption.trim(),
-      user_email: user.email,
-      user_name: user.full_name || "Artist",
-      vote_count: 0,
-      like_count: 0,
-      voted_by: [],
-      liked_by: [],
+      challenge_id: challenge.id, image_url: file_url,
+      title: title.trim() || "My Entry", caption: caption.trim(),
+      user_email: user.email, user_name: user.full_name || "Artist",
+      vote_count: 0, like_count: 0, voted_by: [], liked_by: [],
     });
     await base44.entities.PhotoChallenge.update(challenge.id, {
       submission_count: (challenge.submission_count || 0) + 1,
     });
     qc.invalidateQueries({ queryKey: ["challengeEntries", challenge.id] });
     qc.invalidateQueries({ queryKey: ["challenges"] });
-    setUploading(false);
-    setDone(true);
+    setUploading(false); setDone(true);
     setTimeout(onClose, 1600);
   };
+
+  if (editingFile) return <PhotoEditor file={editingFile} onDone={handleEditorDone} onCancel={() => setEditingFile(null)} />;
 
   if (done) return (
     <div className="p-8 text-center">
@@ -132,7 +134,7 @@ function SubmitModal({ challenge, user, onClose }) {
       </div>
 
       <input type="file" accept="image/*" className="hidden" ref={fileRef}
-        onChange={e => { const f = e.target.files?.[0]; if (f) { setFile(f); setPreview(URL.createObjectURL(f)); } }} />
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
 
       <button onClick={() => fileRef.current?.click()}
         className="w-full rounded-2xl overflow-hidden border-2 border-dashed min-h-[120px] flex items-center justify-center"
@@ -141,6 +143,14 @@ function SubmitModal({ challenge, user, onClose }) {
           : <div className="text-center py-6"><Upload className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-hint)" }} /><p className="text-xs" style={{ color: "var(--text-hint)" }}>Tap to choose photo</p></div>
         }
       </button>
+
+      {preview && (
+        <button onClick={() => setEditingFile(file)}
+          className="w-full py-2.5 rounded-xl text-sm font-semibold border"
+          style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
+          ✨ Edit Photo / Add Filters
+        </button>
+      )}
 
       <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Entry title (optional)"
         className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
