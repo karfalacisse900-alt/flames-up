@@ -9,79 +9,7 @@ import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 
-function timeAgo(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
 
-// Animated compose bar
-function QuickCompose({ user, onOpen }) {
-  const avatarLetter = user?.full_name?.[0]?.toUpperCase() || "?";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="mx-4 my-3"
-    >
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all active:scale-[0.98]"
-        style={{
-          background: "linear-gradient(135deg, var(--bg-card) 0%, #f0f8f4 100%)",
-          border: "1.5px solid var(--border-light)",
-          boxShadow: "0 2px 12px rgba(46,107,79,0.06)",
-        }}
-        onClick={onOpen}
-      >
-        {/* Avatar */}
-        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 text-white"
-          style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
-          {avatarLetter}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium" style={{ color: "var(--text-hint)" }}>
-            What's on your mind, {user?.full_name?.split(" ")[0] || "friend"}?
-          </p>
-        </div>
-
-        {/* Quick action icons */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(46,107,79,0.1)" }}>
-            <ImageIcon className="w-3.5 h-3.5" style={{ color: "#2E6B4F" }} />
-          </div>
-          <div className="w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(217,139,98,0.1)" }}>
-            <Sparkles className="w-3.5 h-3.5" style={{ color: "#D98B62" }} />
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Feed section header
-function SectionLabel({ label, icon: Icon, count }) {
-  return (
-    <div className="flex items-center gap-2 px-4 py-2">
-      <Icon className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
-      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>{label}</p>
-      {count > 0 && (
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
 
 export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
