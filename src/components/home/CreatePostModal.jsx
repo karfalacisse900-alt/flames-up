@@ -196,6 +196,34 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             <FontPicker value={fontFamily} onChange={setFontFamily} />
           </div>
 
+          {/* Image attach */}
+          <div style={{ marginTop: 12 }}>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); e.target.value = ""; }} />
+            {imagePreview ? (
+              <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-light)" }}>
+                <img src={imagePreview} alt="attached" className="w-full max-h-48 object-cover" />
+                <div className="absolute top-2 right-2 flex gap-1.5">
+                  <button onClick={() => setEditingFile(imageFile)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
+                    style={{ backgroundColor: "rgba(46,107,79,0.85)", backdropFilter: "blur(4px)" }}>
+                    ✨ Edit
+                  </button>
+                  <button onClick={() => { setImageFile(null); setImagePreview(null); }}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
+                    <X style={{ width: 14, height: 14 }} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => fileInputRef.current?.click()}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 10, border: "1px dashed var(--border-medium)", color: "var(--text-secondary)", fontSize: 12, fontWeight: 500, cursor: "pointer", background: "transparent" }}>
+                <Image style={{ width: 14, height: 14 }} /> Add Photo
+              </button>
+            )}
+          </div>
+
           {/* Answer type */}
           {type === "question" && (
             <div style={{ marginTop: 12 }}>
