@@ -325,7 +325,20 @@ function UploadModal({ user, onClose, qc }) {
   const handleSubmit = async () => {
     if (!file || !title.trim() || !user) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    // Convert to jpeg blob to ensure compatibility
+    let uploadFile = file;
+    if (file.type !== "image/jpeg" && file.type !== "image/png") {
+      try {
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        canvas.getContext("2d").drawImage(bitmap, 0, 0);
+        const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.92));
+        uploadFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
+      } catch {}
+    }
+    const { file_url } = await base44.integrations.Core.UploadFile({ file: uploadFile });
     await base44.entities.Artwork.create({
       user_email: user.email, user_name: user.full_name || "Artist",
       title: title.trim(), description: desc, image_url: file_url,
