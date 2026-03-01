@@ -135,6 +135,10 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     onClose();
   };
 
+  if (editingFile) {
+    return <PhotoEditor file={editingFile} onDone={handleEditorDone} onCancel={() => setEditingFile(null)} />;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
