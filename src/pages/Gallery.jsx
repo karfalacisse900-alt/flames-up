@@ -303,7 +303,7 @@ export default function Gallery() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA", overflowX: "hidden" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "#E6EFEA", overflowX: "hidden", maxWidth: "100%", width: "100%" }}>
       {/* Header */}
       <div className="px-5 pt-5 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#E6EFEA", borderBottom: "1px solid #DCCBB8" }}>
         <div className="flex items-center justify-between mb-3">
