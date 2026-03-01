@@ -319,6 +319,12 @@ function UploadModal({ user, onClose, qc }) {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef();
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   const handleFile = (f) => { setFile(f); setPreviewUrl(URL.createObjectURL(f)); setEditingFile(f); };
   const handleEditorDone = (editedFile, editedUrl) => { setFile(editedFile); setPreviewUrl(editedUrl); setEditingFile(null); };
 
