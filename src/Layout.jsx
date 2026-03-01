@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Home, Compass, Palette, Radio, User, Bell, Search, Flame } from "lucide-react";
+import { Home, Compass, Palette, Radio, User, Bell, Search, Flame, Users } from "lucide-react";
 import AppAIAssistant from "@/components/AppAIAssistant";
 import { MiniStickyPlayer } from "@/components/discover/AudioPreviewPlayer";
 import { useAudio } from "@/components/AudioContext";

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { X, Plus, Minus, ImageIcon } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
+import PhotoEditor from "../editor/PhotoEditor";
 
 const POST_TYPES = [
   { key: "opinion",      label: "Opinion",    emoji: "💬", desc: "Share your take on anything" },
