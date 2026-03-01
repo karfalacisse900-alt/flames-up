@@ -74,9 +74,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setSaving(true);
 
     // Upload image if picked but not yet uploaded
-    if (imageFile && !imageUrl) {
+    let finalImageUrl = imageUrl;
+    if (imageFile && !finalImageUrl) {
       setUploading(true);
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      finalImageUrl = file_url;
       setImageUrl(file_url);
       setUploading(false);
     }
@@ -85,12 +87,12 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
-      // Still create the post but flag it for moderation review
       const newPost = await base44.entities.CommunityPost.create({
         type, title: title.trim() || undefined, body: body.trim() || title.trim(),
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
         author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
+        image_url: finalImageUrl || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
         list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
@@ -112,8 +114,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
-      image_url: imageUrl || undefined,
-
+      image_url: finalImageUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
