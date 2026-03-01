@@ -162,47 +162,95 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   );
 }
 
+// ── Location Pill ─────────────────────────────────────────────────────────────
+function LocationPill({ art }) {
+  if (!art.location_name) return null;
+  const city = art.location_name.split(",")[0].trim();
+  const mapsUrl = `https://www.google.com/maps?q=${art.location_lat},${art.location_lng}`;
+  return (
+    <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+      {/* Main location pill → opens Google Maps */}
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="location-pill flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all hover:scale-105"
+        style={{ backgroundColor: "rgba(66,133,244,0.12)", color: "#4285F4", border: "1px solid rgba(66,133,244,0.25)" }}
+        title={`Open ${art.location_name} on Google Maps`}>
+        <MapPin className="w-2.5 h-2.5 shrink-0" />
+        <span className="truncate max-w-[90px]">{city}</span>
+      </a>
+      {/* Map icon → Google Maps satellite */}
+      <a
+        href={`https://www.google.com/maps/@${art.location_lat},${art.location_lng},15z`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="w-5 h-5 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+        style={{ backgroundColor: "rgba(66,133,244,0.12)", color: "#4285F4" }}
+        title="View on map">
+        <Navigation className="w-2.5 h-2.5" />
+      </a>
+      {/* External link icon → Google search for place */}
+      <a
+        href={`https://www.google.com/search?q=${encodeURIComponent(art.location_name)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className="w-5 h-5 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+        style={{ backgroundColor: "rgba(66,133,244,0.12)", color: "#4285F4" }}
+        title="Search this place">
+        <ExternalLink className="w-2.5 h-2.5" />
+      </a>
+    </div>
+  );
+}
+
 // ── Art card (masonry) ────────────────────────────────────────────────────────
 function ArtCard({ art, user, onSelect, onLike }) {
   const isLiked = art.liked_by?.includes(user?.email);
   return (
     <div
-      className="break-inside-avoid mb-2 md:mb-3 rounded-xl overflow-hidden cursor-pointer group"
+      className="art-card break-inside-avoid mb-2 md:mb-3 rounded-xl overflow-hidden cursor-pointer group"
       style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid var(--border-light)" }}
       onClick={() => onSelect(art)}>
+
+      {/* Image */}
       <div className="relative overflow-hidden">
-        <img src={art.image_url} alt={art.title} className="w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-        {/* Hover overlay */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-between p-2"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 65%)" }}>
-          <div className="flex items-center gap-1 min-w-0">
-            {art.location_name && (
-              <button
-                onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); }}
-                className="flex items-center gap-0.5 text-[10px] text-white rounded-full px-1.5 py-0.5 hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: "rgba(66,133,244,0.75)" }}>
-                <MapPin className="w-2.5 h-2.5 shrink-0" />
-                <span className="truncate max-w-[80px]">{art.location_name.split(",")[0]}</span>
-              </button>
-            )}
-          </div>
-          <Eye className="w-4 h-4 text-white/80 shrink-0" />
+        <img
+          src={art.image_url}
+          alt={art.title}
+          className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+          style={{ display: "block" }}
+        />
+        {/* Gradient overlay on hover */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end p-2"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)", pointerEvents: "none" }}>
+          <Eye className="w-4 h-4 text-white/80 ml-auto shrink-0" />
         </div>
-        {/* Like button */}
-        <button onClick={e => { e.stopPropagation(); onLike(art); }}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}>
-          <Heart className={`w-3.5 h-3.5 transition-all ${isLiked ? "fill-red-400 text-red-400" : "text-white"}`} />
+        {/* Like button — top right, visible on hover */}
+        <button
+          onClick={e => { e.stopPropagation(); onLike(art); }}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+          <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-red-400 text-red-400" : "text-white"}`} />
         </button>
       </div>
-      <div className="px-2 py-1.5">
+
+      {/* Card footer */}
+      <div className="px-2.5 py-2">
         <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
         <div className="flex items-center justify-between mt-0.5">
           <p className="text-[10px] truncate" style={{ color: "var(--text-hint)" }}>{art.user_name}</p>
-          <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "var(--text-hint)" }}>
+          <span className="flex items-center gap-0.5 text-[10px] shrink-0" style={{ color: "var(--text-hint)" }}>
             <Heart className="w-2.5 h-2.5" />{art.like_count || 0}
           </span>
         </div>
+        {/* Always-visible location pill + icons */}
+        <LocationPill art={art} />
       </div>
     </div>
   );
