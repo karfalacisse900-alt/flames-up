@@ -401,6 +401,98 @@ export default function AdminContentManager() {
           </div>
         )}
 
+        {/* Challenges */}
+        {activeTab === "challenges" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold" style={{ color: "var(--text-secondary)" }}>{challenges.length} challenges</p>
+              <button onClick={() => setShowCreateChallenge(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white"
+                style={{ background: "linear-gradient(135deg,#243D33,#2E6B4F)" }}>
+                <Plus className="w-4 h-4" /> New Challenge
+              </button>
+            </div>
+
+            {challengesLoading && <div className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>}
+            {challenges.map(c => (
+              <div key={c.id} className="p-4 rounded-2xl space-y-2" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>📸 {c.theme}</p>
+                    {c.description && <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>{c.description}</p>}
+                    <p className="text-[10px] mt-1" style={{ color: "var(--text-hint)" }}>{c.submission_count || 0} entries</p>
+                  </div>
+                  <button onClick={() => deleteChallengeMut.mutate(c.id)} className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(239,68,68,0.08)", color: "#dc2626" }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {/* Status picker */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {["upcoming", "submissions_open", "voting_open", "completed"].map(s => (
+                    <button key={s} onClick={() => updateChallengeMut.mutate({ id: c.id, data: { status: s } })}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-bold capitalize transition-all"
+                      style={{
+                        backgroundColor: c.status === s ? "var(--accent-primary)" : "var(--bg-subtle)",
+                        color: c.status === s ? "#fff" : "var(--text-hint)",
+                      }}>
+                      {s.replace("_", " ")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Create challenge modal */}
+            <AnimatePresence>
+              {showCreateChallenge && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-black/50 flex items-end" onClick={() => setShowCreateChallenge(false)}>
+                  <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="w-full max-w-lg mx-auto rounded-t-3xl p-5 space-y-3 overflow-y-auto"
+                    style={{ backgroundColor: "var(--bg-modal)", maxHeight: "90dvh" }}
+                    onClick={e => e.stopPropagation()}>
+                    <div className="w-8 h-1 rounded-full mx-auto" style={{ backgroundColor: "var(--border-medium)" }} />
+                    <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Create Weekly Challenge</h2>
+                    {[
+                      { field: "theme", placeholder: "Theme (e.g. Golden Hour)", label: "Theme *" },
+                      { field: "description", placeholder: "What should participants shoot?", label: "Description" },
+                      { field: "prize_badge", placeholder: "e.g. Gold Badge 🥇", label: "Prize Badge" },
+                      { field: "submissions_end", placeholder: "", label: "Submissions End (date)", type: "date" },
+                      { field: "voting_end", placeholder: "", label: "Voting End (date)", type: "date" },
+                    ].map(({ field, placeholder, label, type }) => (
+                      <div key={field}>
+                        <label className="text-xs font-semibold block mb-1" style={{ color: "var(--text-secondary)" }}>{label}</label>
+                        <input type={type || "text"} value={newChallenge[field]} onChange={e => setNewChallenge(p => ({ ...p, [field]: e.target.value }))}
+                          placeholder={placeholder}
+                          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+                      </div>
+                    ))}
+                    <div>
+                      <label className="text-xs font-semibold block mb-1" style={{ color: "var(--text-secondary)" }}>Initial Status</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {["upcoming", "submissions_open"].map(s => (
+                          <button key={s} onClick={() => setNewChallenge(p => ({ ...p, status: s }))}
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold capitalize"
+                            style={{ backgroundColor: newChallenge.status === s ? "var(--accent-primary)" : "var(--bg-subtle)", color: newChallenge.status === s ? "#fff" : "var(--text-secondary)" }}>
+                            {s.replace("_", " ")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => createChallengeMut.mutate()} disabled={!newChallenge.theme.trim() || createChallengeMut.isPending}
+                      className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-40"
+                      style={{ background: "linear-gradient(135deg,#243D33,#2E6B4F)" }}>
+                      {createChallengeMut.isPending ? "Creating..." : "Create Challenge"}
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
         {/* Reviews */}
         {activeTab === "reviews" && (
           <div className="space-y-3">
