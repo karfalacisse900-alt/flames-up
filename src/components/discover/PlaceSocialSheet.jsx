@@ -112,10 +112,35 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
   const catEmoji = category?.emoji || "📍";
   const catColor = category?.color || "#2E6B4F";
   const placeLngLat = place.center;
+  // keyword for matching community posts to this place
+  const placeKeyword = (place.text || "").toLowerCase();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // Fetch real community posts relevant to this place
+  const { data: realPosts = [] } = useQuery({
+    queryKey: ["placePosts", place.id],
+    queryFn: async () => {
+      const allPosts = await base44.entities.CommunityPost.list("-created_date", 40);
+      // filter posts that mention the place name or nearby category keywords
+      const kw = [placeKeyword, category?.label?.toLowerCase(), category?.query?.toLowerCase()].filter(Boolean);
+      const matched = allPosts.filter(p => {
+        const txt = (p.text || p.title || "").toLowerCase();
+        return kw.some(k => k.split(" ").some(word => word.length > 3 && txt.includes(word)));
+      });
+      return matched.slice(0, 6);
+    },
+    staleTime: 60000,
+  });
+
+  // Fetch recent trending posts as fallback context
+  const { data: trendingPosts = [] } = useQuery({
+    queryKey: ["trendingPostsMap"],
+    queryFn: () => base44.entities.CommunityPost.list("-like_count", 8),
+    staleTime: 120000,
+  });
 
   // Fetch route when navigate tab active and user location known
   useEffect(() => {
