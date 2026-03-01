@@ -2,19 +2,12 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, ImageIcon, Smile, ArrowUp } from "lucide-react";
+import { Plus, ImageIcon, Smile, ArrowUp, Sparkles, TrendingUp, Users, Zap } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
-import { createPageUrl } from "@/utils";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
-
-
-
-const TABS = [
-  { key: "foryou", label: "For You" },
-];
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -26,8 +19,71 @@ function timeAgo(dateStr) {
   return `${Math.floor(h / 24)}d`;
 }
 
+// Animated compose bar
+function QuickCompose({ user, onOpen }) {
+  const avatarLetter = user?.full_name?.[0]?.toUpperCase() || "?";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="mx-4 my-3"
+    >
+      <div
+        className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all active:scale-[0.98]"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-card) 0%, #f0f8f4 100%)",
+          border: "1.5px solid var(--border-light)",
+          boxShadow: "0 2px 12px rgba(46,107,79,0.06)",
+        }}
+        onClick={onOpen}
+      >
+        {/* Avatar */}
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 text-white"
+          style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
+          {avatarLetter}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium" style={{ color: "var(--text-hint)" }}>
+            What's on your mind, {user?.full_name?.split(" ")[0] || "friend"}?
+          </p>
+        </div>
+
+        {/* Quick action icons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "rgba(46,107,79,0.1)" }}>
+            <ImageIcon className="w-3.5 h-3.5" style={{ color: "#2E6B4F" }} />
+          </div>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "rgba(217,139,98,0.1)" }}>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "#D98B62" }} />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// Feed section header
+function SectionLabel({ label, icon: Icon, count }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2">
+      <Icon className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
+      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>{label}</p>
+      {count > 0 && (
+        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+          {count}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function CommunityFeed({ user }) {
-  const [tab, setTab] = useState("foryou");
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
@@ -38,40 +94,26 @@ export default function CommunityFeed({ user }) {
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
   });
 
-  // Real-time subscription
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      if (event.type === "create") {
-        setNewPostsAvailable(n => n + 1);
-      } else if (event.type === "update" || event.type === "delete") {
-        qc.invalidateQueries({ queryKey: ["communityPosts"] });
-      }
+      if (event.type === "create") setNewPostsAvailable(n => n + 1);
+      else if (event.type === "update" || event.type === "delete") qc.invalidateQueries({ queryKey: ["communityPosts"] });
     });
     return unsub;
   }, [qc]);
 
-  // Real-time comment updates
   useEffect(() => {
     const unsub = base44.entities.CommunityComment.subscribe((event) => {
-      if (event.type === "create" && expandedPost === event.data?.post_id) {
+      if (event.type === "create" && expandedPost === event.data?.post_id)
         qc.invalidateQueries({ queryKey: ["communityComments", event.data.post_id] });
-      }
     });
     return unsub;
   }, [expandedPost, qc]);
 
-  // Real-time debate updates
   useEffect(() => {
-    const unsub = base44.entities.CommunityDebate.subscribe(() => {
-      qc.invalidateQueries({ queryKey: ["communityDebates"] });
-    });
+    const unsub = base44.entities.CommunityDebate.subscribe(() => qc.invalidateQueries({ queryKey: ["communityDebates"] }));
     return unsub;
   }, [qc]);
-
-  const loadNewPosts = () => {
-    refetch();
-    setNewPostsAvailable(0);
-  };
 
   const { data: debates = [] } = useQuery({
     queryKey: ["communityDebates"],
@@ -84,14 +126,13 @@ export default function CommunityFeed({ user }) {
     enabled: !!user?.email,
   });
 
-  const followingEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
+  const loadNewPosts = () => { refetch(); setNewPostsAvailable(0); };
 
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
       if (!requireVerified(user)) throw new Error("Email not verified");
       const hasUpvoted = post.upvoted_by?.includes(user.email);
       if (hasUpvoted) {
-        // Unlike
         const newUpvotes = Math.max(0, (post.upvotes || 0) - 1);
         return base44.entities.CommunityPost.update(post.id, {
           upvotes: newUpvotes,
@@ -99,7 +140,6 @@ export default function CommunityFeed({ user }) {
           engagement_score: newUpvotes + ((post.comment_count || 0) * 2) - (post.downvotes || 0),
         });
       } else {
-        // Like
         const newUpvotes = (post.upvotes || 0) + 1;
         return base44.entities.CommunityPost.update(post.id, {
           upvotes: newUpvotes,
@@ -109,15 +149,12 @@ export default function CommunityFeed({ user }) {
       }
     },
     onSuccess: (_, { post }) => {
-      // Update only the specific post in cache without re-sorting
       qc.setQueryData(["communityPosts"], (old) => {
         if (!old) return old;
         return old.map(p => p.id === post.id
           ? {
               ...p,
-              upvotes: post.upvoted_by?.includes(user.email)
-                ? Math.max(0, (p.upvotes || 0) - 1)
-                : (p.upvotes || 0) + 1,
+              upvotes: post.upvoted_by?.includes(user.email) ? Math.max(0, (p.upvotes || 0) - 1) : (p.upvotes || 0) + 1,
               upvoted_by: post.upvoted_by?.includes(user.email)
                 ? (p.upvoted_by || []).filter(e => e !== user.email)
                 : [...(p.upvoted_by || []), user.email],
@@ -128,18 +165,6 @@ export default function CommunityFeed({ user }) {
     },
   });
 
-  const downvoteMut = useMutation({
-    mutationFn: ({ post }) => {
-      if (!requireVerified(user)) throw new Error("Email not verified");
-      return base44.entities.CommunityPost.update(post.id, {
-        downvotes: (post.downvotes || 0) + 1,
-        downvoted_by: [...(post.downvoted_by || []), user.email],
-        engagement_score: (post.upvotes || 0) + ((post.comment_count || 0) * 2) - ((post.downvotes || 0) + 1),
-      });
-    },
-    onSuccess: () => {},
-  });
-
   const filteredPosts = useMemo(() => {
     const list = posts.filter(p => p.type !== "review");
     if (user?.email) return rankFeedForUser(list, user.email, debates);
@@ -148,98 +173,134 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const renderPostCard = (post) => {
+  const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
-    // Track view for session-level adaptation
     if (user?.email) trackPostView(post.id);
-    return post.type === "debate" || post.type === "question" ? (
-      <DebateCard key={post.id} post={post} debate={debate} user={user}
-        onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
-        isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-      />
-    ) : (
-      <CommunityPostCard key={post.id} post={post} user={user}
-        onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
-        isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-      />
+    return (
+      <motion.div
+        key={post.id}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4), ease: "easeOut" }}
+      >
+        {post.type === "debate" || post.type === "question" ? (
+          <DebateCard post={post} debate={debate} user={user}
+            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+            isExpanded={expandedPost === post.id}
+            onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+          />
+        ) : (
+          <CommunityPostCard post={post} user={user}
+            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+            isExpanded={expandedPost === post.id}
+            onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+          />
+        )}
+      </motion.div>
     );
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+      <div className="flex flex-col gap-4 px-4 py-6">
+        {[0, 1, 2].map(i => (
+          <div key={i} className="rounded-2xl p-4 space-y-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full skeleton" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 w-24 rounded skeleton" />
+                <div className="h-2.5 w-16 rounded skeleton" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <div className="h-3 rounded skeleton" />
+              <div className="h-3 w-4/5 rounded skeleton" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* ── Header ── */}
-      <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)" }}>
+      {/* Sticky feed header */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="px-4 py-2.5 flex items-center justify-between">
-          <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community Feed</p>
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community Feed</p>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+            style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
+            <Plus className="w-3 h-3" /> Post
+          </motion.button>
         </div>
       </div>
 
-      {/* ── New posts indicator ── */}
+      {/* New posts floating pill */}
       <AnimatePresence>
         {newPostsAvailable > 0 && (
-          <motion.button initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+          <motion.button
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             onClick={loadNewPosts}
-            className="fixed top-14 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold shadow-lg"
-            style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
-            <ArrowUp className="w-3.5 h-3.5" />
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-xl"
+            style={{
+              background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+              color: "#fff",
+              boxShadow: "0 6px 24px rgba(46,107,79,0.45)",
+            }}>
+            <motion.span animate={{ y: [-2, 2, -2] }} transition={{ repeat: Infinity, duration: 1 }}>
+              <ArrowUp className="w-3.5 h-3.5" />
+            </motion.span>
             {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* ── Quick compose row ── */}
-      <div className="px-4 py-2.5 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #2E6B4F08, #4CAF7D10)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 text-white"
-          style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", flexShrink: 0 }}>
-          {user?.full_name?.[0]?.toUpperCase() || "?"}
-        </div>
-        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-          className="flex-1 text-left px-4 py-2.5 rounded-full text-sm transition-all"
-          style={{ background: "linear-gradient(135deg, #2E6B4F12, #4CAF7D0A)", color: "#2E6B4F", border: "1.5px solid #2E6B4F30", fontWeight: 500 }}>
-          ✍️ What's on your mind?
-        </button>
-        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "linear-gradient(135deg, #2E6B4F20, #4CAF7D20)", color: "#2E6B4F" }}>
-          <ImageIcon className="w-4 h-4" />
-        </button>
-        <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
-          style={{ background: "linear-gradient(135deg, #D98B6220, #F5A86220)", color: "#D98B62" }}>
-          <Smile className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Compose bar */}
+      <QuickCompose user={user} onOpen={() => { if (!requireVerified(user)) return; setShowCreate(true); }} />
 
-      {/* ====== FEED ====== */}
-      <div className="pb-24">
+      {/* Feed */}
+      <div className="pb-28">
         {filteredPosts.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-4xl mb-3">💬</p>
-            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              {tab === "following" ? "Follow people to see their posts here" : "No posts yet"}
-            </p>
-            <button onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-              className="mt-3 text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
-              Be the first to post
-            </button>
-          </div>
-        ) : filteredPosts.map(renderPostCard)}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-16 text-center px-8"
+          >
+            <div className="text-5xl mb-4">💬</div>
+            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Start the conversation</p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Be the first to share a thought with the community</p>
+            <motion.button
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+              onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
+              ✦ Create First Post
+            </motion.button>
+          </motion.div>
+        ) : (
+          <>
+            <SectionLabel label="Trending Now" icon={TrendingUp} count={filteredPosts.length} />
+            {filteredPosts.map((post, index) => renderPostCard(post, index))}
+          </>
+        )}
       </div>
 
       <AnimatePresence>
         {showCreate && (
           <CreateCommunityPost user={user} onClose={() => setShowCreate(false)}
-            onCreated={() => { qc.invalidateQueries({ queryKey: ["communityPosts"] }); qc.invalidateQueries({ queryKey: ["communityDebates"] }); }} />
+            onCreated={() => {
+              qc.invalidateQueries({ queryKey: ["communityPosts"] });
+              qc.invalidateQueries({ queryKey: ["communityDebates"] });
+            }} />
         )}
       </AnimatePresence>
     </div>
