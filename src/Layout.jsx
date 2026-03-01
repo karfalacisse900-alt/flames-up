@@ -7,6 +7,7 @@ import AppAIAssistant from "@/components/AppAIAssistant";
 import { MiniStickyPlayer } from "@/components/discover/AudioPreviewPlayer";
 import { useAudio } from "@/components/AudioContext";
 import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
+import { useLayoutStabilizer } from "@/components/hooks/useLayoutStabilizer";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
