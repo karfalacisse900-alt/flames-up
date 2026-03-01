@@ -19,6 +19,7 @@ const navItems = [
 ];
 
 const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
+const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore"];
 
 
 export default function Layout({ children, currentPageName }) {
