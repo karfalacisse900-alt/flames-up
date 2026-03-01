@@ -113,6 +113,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
       image_url: imageUrl || undefined,
+
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
