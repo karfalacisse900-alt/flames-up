@@ -29,40 +29,39 @@ function HallCard({ rank, entry, color, icon }) {
       transition={{ delay: rank * 0.07 }}
       className="relative p-5 rounded-3xl overflow-hidden"
       style={{
-        background: isGold
-          ? "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"
-          : "linear-gradient(135deg, #1e1e1e, #2a2a2a)",
-        border: isGold ? "1.5px solid #FFD70055" : "1px solid rgba(255,255,255,0.08)",
-        boxShadow: isGold ? "0 8px 32px rgba(255,215,0,0.15)" : "0 2px 12px rgba(0,0,0,0.3)",
+        backgroundColor: "var(--bg-card)",
+        border: isGold ? "2px solid #D4A017" : "1px solid var(--border-light)",
+        boxShadow: isGold ? "0 4px 24px rgba(212,160,23,0.15)" : "0 1px 8px rgba(0,0,0,0.06)",
       }}>
+      {/* Gold shimmer strip for #1 */}
+      {isGold && <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl" style={{ background: "linear-gradient(90deg, #D4A017, #F5D060, #D4A017)" }} />}
+
       {/* Rank badge */}
-      <div className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black"
-        style={{ backgroundColor: isGold ? "#FFD700" : "#333", color: isGold ? "#1a1a1a" : "#888" }}>
-        {rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`}
+      <div className="absolute top-3 right-3 text-xl">
+        {rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : <span className="text-sm font-black" style={{ color: "var(--text-hint)" }}>#{rank}</span>}
       </div>
 
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-4">
         <div className="relative">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white"
-            style={{ background: isGold ? "linear-gradient(135deg, #FFD700, #FFA500)" : `linear-gradient(135deg, ${color}88, ${color}44)` }}>
+            style={{ background: isGold ? "linear-gradient(135deg, #D4A017, #F5D060)" : `linear-gradient(135deg, ${color}, ${color}99)` }}>
             {entry.user_name?.[0]?.toUpperCase() || "?"}
           </div>
           {isGold && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px]"
-              style={{ backgroundColor: "#FFD700" }}>👑</div>
+            <div className="absolute -top-2 -right-2 text-sm">👑</div>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-base font-bold truncate" style={{ color: isGold ? "#FFD700" : "#fff", fontFamily: "var(--font-serif)" }}>
+          <p className="text-base font-bold truncate" style={{ color: isGold ? "#B8860B" : "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
             {entry.user_name}
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "var(--text-hint)" }}>
             {icon} {entry.category_label}
           </p>
           {entry.badge_label && (
             <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: isGold ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.1)", color: isGold ? "#FFD700" : "#aaa" }}>
+              style={{ backgroundColor: isGold ? "#FEF9E7" : "var(--accent-primary-light)", color: isGold ? "#B8860B" : "var(--accent-primary)", border: `1px solid ${isGold ? "#D4A017" : "var(--border-light)"}` }}>
               {entry.badge_label}
             </span>
           )}
@@ -72,7 +71,7 @@ function HallCard({ rank, entry, color, icon }) {
       {/* Stats */}
       <div className="flex gap-2 flex-wrap">
         {entry.stats?.map((s, i) => (
-          <StatBadge key={i} label={s.label} value={s.value} color={isGold ? "#FFD700" : color} />
+          <StatBadge key={i} label={s.label} value={s.value} color={isGold ? "#B8860B" : color} />
         ))}
       </div>
 
