@@ -168,15 +168,15 @@ export default function HallOfFame() {
   const catInfo = CATEGORIES.find(c => c.id === activeCategory);
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: "linear-gradient(180deg, #0d1117 0%, #1a1a2e 100%)" }}>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-5 pt-8 pb-5" style={{ background: "linear-gradient(180deg, #0d1117, #1a1a2e)" }}>
+      <div className="px-5 pt-8 pb-5" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-            style={{ background: "linear-gradient(135deg, #FFD700, #FFA500)" }}>🏆</div>
+            style={{ background: "linear-gradient(135deg, #D4A017, #F5D060)" }}>🏆</div>
           <div>
-            <h1 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-serif)" }}>Hall of Fame</h1>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Monthly prestige. Earned, not bought.</p>
+            <h1 className="text-2xl font-black" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Hall of Fame</h1>
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Monthly prestige. Earned, not bought.</p>
           </div>
         </div>
 
@@ -186,9 +186,9 @@ export default function HallOfFame() {
             <button key={c.id} onClick={() => setActiveCategory(c.id)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border"
               style={{
-                backgroundColor: activeCategory === c.id ? "#FFD700" : "rgba(255,255,255,0.06)",
-                color: activeCategory === c.id ? "#1a1a1a" : "rgba(255,255,255,0.5)",
-                borderColor: activeCategory === c.id ? "#FFD700" : "rgba(255,255,255,0.1)",
+                backgroundColor: activeCategory === c.id ? "#D4A017" : "var(--bg-card)",
+                color: activeCategory === c.id ? "#fff" : "var(--text-secondary)",
+                borderColor: activeCategory === c.id ? "#D4A017" : "var(--border-light)",
               }}>
               {c.icon} {c.label.split(" ").slice(0, 2).join(" ")}
             </button>
@@ -198,8 +198,8 @@ export default function HallOfFame() {
 
       {/* Category heading */}
       <div className="px-5 pb-4">
-        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#FFD700" }}>{catInfo?.icon} {catInfo?.label}</p>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{catInfo?.desc}</p>
+        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#B8860B" }}>{catInfo?.icon} {catInfo?.label}</p>
+        <p className="text-xs" style={{ color: "var(--text-hint)" }}>{catInfo?.desc}</p>
       </div>
 
       {/* Winners list */}
@@ -207,7 +207,7 @@ export default function HallOfFame() {
         {winners.length === 0 && (
           <div className="text-center py-12">
             <p className="text-4xl mb-3">🏆</p>
-            <p className="text-sm font-semibold text-white/50">No data yet — be the first to earn your spot</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-hint)" }}>No data yet — be the first to earn your spot</p>
           </div>
         )}
         {winners.map((entry, i) => (
