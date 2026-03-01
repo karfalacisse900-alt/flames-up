@@ -158,9 +158,13 @@ export default function DidYouKnowSection({ user }) {
             className="p-4 rounded-2xl"
             style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
             {post.title && (
-              <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>{post.title}</p>
+              <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>
+                <KeywordHighlight text={post.title} />
+              </p>
             )}
-            <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{post.content}</p>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+              <KeywordHighlight text={post.content} />
+            </p>
 
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center gap-3">
