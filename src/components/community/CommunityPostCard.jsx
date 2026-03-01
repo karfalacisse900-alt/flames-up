@@ -235,7 +235,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-subtle) 60px, var(--border-subtle))", marginLeft: 60 }} />
+      <div style={{ height: 1, background: "linear-gradient(to right, transparent 48px, var(--border-subtle) 60px, var(--border-subtle) 90%, transparent)", margin: "0 0 0 0" }} />
     </motion.div>
   );
 }
