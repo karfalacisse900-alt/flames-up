@@ -26,6 +26,10 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [aiTopic, setAiTopic] = useState("");
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
+  const fileInputRef = useRef();
 
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
