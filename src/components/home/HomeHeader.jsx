@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -22,17 +22,17 @@ export default function HomeHeader({ user }) {
       }}
     >
       <div className="flex items-center justify-between">
-        {/* Left: greeting + name */}
+        {/* Left: logo + greeting */}
         <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}>
+              <Flame className="w-4 h-4 text-white fill-white" />
+            </div>
+            <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>flames-up</span>
+          </div>
           <p className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>
-            {greeting()}
+            {greeting()}{firstName ? `, ${firstName}` : ""}
           </p>
-          <h1
-            className="text-2xl font-bold leading-tight"
-            style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}
-          >
-            {firstName ? `${firstName} ✦` : "Community ✦"}
-          </h1>
         </div>
 
         {/* Right: action buttons */}
