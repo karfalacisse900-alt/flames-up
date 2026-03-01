@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, Star, TrendingUp, Bookmark, ExternalLink, Heart, Send, Navigation, Clock, Footprints, Car, MapPin, CheckCircle } from "lucide-react";
+import { X, Star, TrendingUp, Bookmark, ExternalLink, Heart, Send, Navigation, Clock, Footprints, Car, MapPin, CheckCircle, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 
 // ── Seeded data helpers ──────────────────────────────────
 function seededRandom(seed) {
