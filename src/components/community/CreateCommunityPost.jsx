@@ -73,6 +73,14 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setMediaError(false);
     setSaving(true);
 
+    // Upload image if picked but not yet uploaded
+    if (imageFile && !imageUrl) {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      setImageUrl(file_url);
+      setUploading(false);
+    }
+
     // AI moderation check
     const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
     const modResult = await checkContent(textToCheck);
