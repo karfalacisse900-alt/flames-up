@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import { X, Plus, Minus, ImageIcon } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
-import PhotoEditor from "../editor/PhotoEditor";
 
 const POST_TYPES = [
   { key: "opinion",      label: "Opinion",    emoji: "💬", desc: "Share your take on anything" },
@@ -24,9 +23,9 @@ const MEDIA_TYPES = [
   { key: "music",   label: "🎵 Music" },
 ];
 
-export default function CreateCommunityPost({ user, onClose, onCreated, initialType }) {
-  const [step, setStep] = useState(initialType ? "compose" : "type");
-  const [type, setType] = useState(initialType || "");
+export default function CreateCommunityPost({ user, onClose, onCreated }) {
+  const [step, setStep] = useState("type");
+  const [type, setType] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mediaType, setMediaType] = useState("general");
