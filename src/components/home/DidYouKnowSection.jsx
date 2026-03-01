@@ -120,9 +120,18 @@ export default function DidYouKnowSection({ user }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["didYouKnow"] }),
   });
 
+  // Auto-advance every 5 seconds
+  useEffect(() => {
+    if (posts.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent(c => (c + 1) % posts.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [posts.length]);
+
   const post = posts.length > 0 ? posts[current] : null;
 
-  // Always render the section (removed early return when posts.length === 0)
+  // Always render the section
   const isLiked = user?.email && post?.liked_by?.includes(user.email);
 
   return (
