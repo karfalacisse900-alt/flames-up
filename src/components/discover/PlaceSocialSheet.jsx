@@ -193,16 +193,42 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <button onClick={handleCheckIn}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all"
-              style={{
-                backgroundColor: checkedIn ? catColor : "var(--bg-subtle)",
-                color: checkedIn ? "#fff" : "var(--text-hint)",
-                border: `1px solid ${checkedIn ? catColor : "var(--border-light)"}`,
-              }}>
-              <CheckCircle className="w-3 h-3" />
-              {checkedIn ? "Checked in!" : "Check-in"}
-            </button>
+            {/* Check-in button with privacy options */}
+            <div className="relative">
+              <button onClick={() => checkedIn ? null : setShowCheckInOptions(!showCheckInOptions)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all"
+                style={{
+                  backgroundColor: checkedIn ? catColor : "var(--bg-subtle)",
+                  color: checkedIn ? "#fff" : "var(--text-hint)",
+                  border: `1px solid ${checkedIn ? catColor : "var(--border-light)"}`,
+                }}>
+                <CheckCircle className="w-3 h-3" />
+                {checkedIn ? (checkInAnonymous ? "Checked in 🔒" : "Checked in!") : "Check-in"}
+              </button>
+              {showCheckInOptions && !checkedIn && (
+                <div className="absolute top-full right-0 mt-1 w-44 rounded-2xl overflow-hidden z-50"
+                  style={{ backgroundColor: "#FAFAF8", boxShadow: "0 8px 24px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}>
+                  <button onClick={() => handleCheckIn(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-xs font-semibold hover:bg-[var(--bg-subtle)] transition-colors"
+                    style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                    <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: catColor }} />
+                    <div>
+                      <p>Public Check-in</p>
+                      <p className="text-[9px] font-normal" style={{ color: "var(--text-hint)" }}>Name visible to others</p>
+                    </div>
+                  </button>
+                  <button onClick={() => handleCheckIn(true)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-xs font-semibold hover:bg-[var(--bg-subtle)] transition-colors"
+                    style={{ color: "var(--text-primary)" }}>
+                    <span className="text-sm flex-shrink-0">🔒</span>
+                    <div>
+                      <p>Anonymous Check-in</p>
+                      <p className="text-[9px] font-normal" style={{ color: "var(--text-hint)" }}>Counts, but stays private</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
             <button onClick={() => setSaved(!saved)} className="p-2 rounded-full"
               style={{ backgroundColor: saved ? catColor + "20" : "var(--bg-subtle)" }}>
               <Bookmark className="w-4 h-4" style={{ color: saved ? catColor : "var(--text-hint)", fill: saved ? catColor : "none" }} />
