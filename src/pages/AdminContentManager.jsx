@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Edit2, Trash2, Loader2, AlertCircle, Bell, Filter, CheckSquare, Square, BarChart2, ArrowLeft } from "lucide-react";
+import { Check, X, Edit2, Trash2, Loader2, AlertCircle, Bell, Filter, CheckSquare, Square, BarChart2, ArrowLeft, Camera, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
