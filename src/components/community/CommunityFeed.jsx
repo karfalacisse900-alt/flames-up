@@ -264,9 +264,6 @@ export default function CommunityFeed({ user }) {
         )}
       </AnimatePresence>
 
-      {/* Compose bar */}
-      <QuickCompose user={user} onOpen={() => { if (!requireVerified(user)) return; setShowCreate(true); }} />
-
       {/* Feed */}
       <div className="pb-28">
         {filteredPosts.length === 0 ? (
@@ -287,10 +284,7 @@ export default function CommunityFeed({ user }) {
             </motion.button>
           </motion.div>
         ) : (
-          <>
-            <SectionLabel label="Trending Now" icon={TrendingUp} count={filteredPosts.length} />
-            {filteredPosts.map((post, index) => renderPostCard(post, index))}
-          </>
+          filteredPosts.map((post, index) => renderPostCard(post, index))
         )}
       </div>
 
