@@ -111,6 +111,11 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
 
   if (!open) return null;
 
+  // Show photo editor fullscreen when editing
+  if (editingFile) {
+    return <PhotoEditor file={editingFile} onDone={handleEditorDone} onCancel={() => setEditingFile(null)} />;
+  }
+
   return (
     <div
       style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
