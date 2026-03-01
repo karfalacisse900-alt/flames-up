@@ -23,9 +23,9 @@ const MEDIA_TYPES = [
   { key: "music",   label: "🎵 Music" },
 ];
 
-export default function CreateCommunityPost({ user, onClose, onCreated }) {
-  const [step, setStep] = useState("type");
-  const [type, setType] = useState("");
+export default function CreateCommunityPost({ user, onClose, onCreated, initialType }) {
+  const [step, setStep] = useState(initialType ? "compose" : "type");
+  const [type, setType] = useState(initialType || "");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mediaType, setMediaType] = useState("general");
