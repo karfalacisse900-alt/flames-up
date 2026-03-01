@@ -65,7 +65,19 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "hidden", width: "100%", maxWidth: "100%" }}>
-        <div className={isAdminPage ? "w-full relative" : "max-w-lg mx-auto relative"} style={{ paddingBottom: hideNav ? 0 : "72px", minHeight: "100dvh", overflowX: "hidden", maxWidth: "100%" }}>
+        <div
+      className={isAdminPage ? "w-full relative" : "relative"}
+      style={{
+        paddingBottom: hideNav ? 0 : "72px",
+        minHeight: "100dvh",
+        overflowX: "hidden",
+        maxWidth: isAdminPage ? "100%" : "512px",
+        width: "100%",
+        marginLeft: "auto",
+        marginRight: "auto",
+      }}
+      data-page={currentPageName}
+    >
           {children}
         </div>
 
