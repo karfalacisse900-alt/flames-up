@@ -235,13 +235,19 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
               {type !== "debate" && type !== "list" && (
                 <div>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                  {imageUrl ? (
+                  {imagePreview ? (
                     <div className="relative rounded-xl overflow-hidden">
-                      <img src={imageUrl} alt="Upload" className="w-full max-h-64 object-cover" />
-                      <button onClick={() => setImageUrl("")}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      <img src={imagePreview} alt="Upload" className="w-full max-h-64 object-cover" />
+                      <div className="absolute top-2 right-2 flex gap-1.5">
+                        <button onClick={() => setEditingFile(imageFile)}
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
+                          style={{ backgroundColor: "rgba(46,107,79,0.85)" }}>✨ Edit</button>
+                        <button onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
+                          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
@@ -252,10 +258,10 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                         color: mediaError ? "#E05C7A" : "var(--text-secondary)"
                       }}>
                       <ImageIcon className="w-4 h-4" />
-                      {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo/GIF"}
+                      {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo / GIF"}
                     </button>
                   )}
-                  {mediaError && !imageUrl && (
+                  {mediaError && !imagePreview && (
                     <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo or GIF before posting.</p>
                   )}
                 </div>
