@@ -170,8 +170,9 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
     <motion.div
       initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
       transition={{ type: "spring", stiffness: 300, damping: 32 }}
-      className="absolute bottom-0 left-0 right-0 z-30 rounded-t-3xl flex flex-col"
-      style={{ backgroundColor: "#FAFAF8", boxShadow: "0 -12px 48px rgba(0,0,0,0.24)", maxHeight: "82vh" }}
+      className="absolute bottom-0 left-0 right-0 z-30 rounded-t-3xl flex flex-col overflow-hidden"
+      style={{ backgroundColor: "#FAFAF8", boxShadow: "0 -12px 48px rgba(0,0,0,0.24)", maxHeight: "82vh", width: "100%", maxWidth: "100%" }}
+      onClick={() => showCheckInOptions && setShowCheckInOptions(false)}
     >
       {/* ── Handle + Header ── */}
       <div className="pt-3 pb-1 px-4 flex-shrink-0">
