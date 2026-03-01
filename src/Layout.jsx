@@ -3,6 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { Home, Palette, User, Search, Flame, Users } from "lucide-react";
+import AppAIAssistant from "@/components/AppAIAssistant";
+import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
+import { useLayoutStabilizer } from "@/components/hooks/useLayoutStabilizer";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
