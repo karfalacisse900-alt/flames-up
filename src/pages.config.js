@@ -58,7 +58,6 @@ import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
 import Explore from './pages/Explore';
-import Gallery from './pages/Gallery';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
 import HallOfFame from './pages/HallOfFame';
@@ -92,7 +91,6 @@ export const PAGES = {
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
     "Explore": Explore,
-    "Gallery": Gallery,
     "GamePlay": GamePlay,
     "Games": Games,
     "HallOfFame": HallOfFame,
