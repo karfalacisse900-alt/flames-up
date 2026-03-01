@@ -77,6 +77,7 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
   const [user, setUser] = useState(null);
   const [saved, setSaved] = useState(false);
   const [checkedIn, setCheckedIn] = useState(false);
+  const [checkInAnonymous, setCheckInAnonymous] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [localComments, setLocalComments] = useState([]);
   const [activeTab, setActiveTab] = useState("overview");
@@ -84,6 +85,7 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
   const [routeInfo, setRouteInfo] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [localCheckIns, setLocalCheckIns] = useState(0);
+  const [showCheckInOptions, setShowCheckInOptions] = useState(false);
 
   const seed = getPlaceSeed(place.id || place.place_name || "x");
   const rating = (3.8 + seededRandom(seed) * 1.2).toFixed(1);
