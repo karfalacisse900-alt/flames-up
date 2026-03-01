@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload, Grid, TrendingUp, Award, Tag, Eye, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, X, Send, Flame, Clock, Star, Swords, Upload, Grid, TrendingUp, Award, Tag, Eye, Loader2, Camera, Trophy } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import ArtVoteArena from "@/components/gallery/ArtVoteArena";
 import DailyWinnerBanner from "@/components/gallery/DailyWinnerBanner";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const SORTS = [
   { key: "newest", label: "New", icon: Clock },
