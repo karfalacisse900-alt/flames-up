@@ -417,6 +417,10 @@ function UploadModal({ user, onClose, qc }) {
         <input value={tags} onChange={e => setTags(e.target.value)} placeholder="Tags: nature, color, minimal…"
           className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+
+        <input value={link} onChange={e => setLink(e.target.value)} placeholder="🔗 External link (optional)"
+          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
         <button onClick={handleSubmit} disabled={uploading || !file || !title.trim()}
           className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>
