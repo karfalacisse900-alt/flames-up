@@ -255,13 +255,13 @@ export default function PlaceSocialSheet({ place, category, onClose, mapToken, u
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
           {TABS.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold capitalize transition-all"
+              className="flex-1 py-1.5 rounded-lg text-[9px] font-semibold capitalize transition-all"
               style={{
                 backgroundColor: activeTab === tab ? "#FAFAF8" : "transparent",
                 color: activeTab === tab ? "var(--text-primary)" : "var(--text-hint)",
                 boxShadow: activeTab === tab ? "0 1px 4px rgba(0,0,0,0.09)" : "none",
               }}>
-              {tab === "navigate" ? "🧭" : ""}{tab}
+              {tab === "navigate" ? "🧭 Nav" : tab === "community" ? "💬 Talk" : tab === "overview" ? "📍 Info" : tab === "photos" ? "📸 Pics" : "⭐ Reviews"}
             </button>
           ))}
         </div>
