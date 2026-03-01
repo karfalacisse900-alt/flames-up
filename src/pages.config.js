@@ -61,6 +61,7 @@ import Explore from './pages/Explore';
 import Gallery from './pages/Gallery';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
+import HallOfFame from './pages/HallOfFame';
 import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
 import Live from './pages/Live';
@@ -76,7 +77,6 @@ import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
-import HallOfFame from './pages/HallOfFame';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +95,7 @@ export const PAGES = {
     "Gallery": Gallery,
     "GamePlay": GamePlay,
     "Games": Games,
+    "HallOfFame": HallOfFame,
     "HelpCenter": HelpCenter,
     "Home": Home,
     "Live": Live,
@@ -110,7 +111,6 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
-    "HallOfFame": HallOfFame,
 }
 
 export const pagesConfig = {
