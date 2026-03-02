@@ -131,9 +131,7 @@ Deno.serve(async (req) => {
     const items = allItems
       .map(item => {
         const imageUrl = item.image?.imageUrl || item.thumbnailImages?.[0]?.imageUrl || null;
-        if (!imageUrl) return null;
         let itemUrl = item.itemWebUrl || "";
-        // Always point to real eBay product page
         itemUrl = itemUrl.replace("sandbox.ebay.com", "www.ebay.com");
 
         return {
