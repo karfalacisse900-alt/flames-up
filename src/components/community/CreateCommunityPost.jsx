@@ -63,18 +63,40 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setEditingFile(null);
   };
 
+  const handleVideoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Max 100MB
+    if (file.size > 100 * 1024 * 1024) { alert("Video must be under 100MB"); return; }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl("");
+    e.target.value = "";
+  };
+
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
-    // Require at least an image/gif for non-structured post types
+    // Require at least an image/gif/video for non-structured post types
     const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
-    if (requiresMedia && !imagePreview && !imageUrl) {
+    if (requiresMedia && !imagePreview && !imageUrl && !videoPreview) {
       setMediaError(true);
       return;
     }
     setMediaError(false);
     setSaving(true);
+
+    // Upload video if picked
+    let finalVideoUrl = null;
+    if (videoFile) {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
+      finalVideoUrl = file_url;
+      setUploading(false);
+    }
 
     // Upload image if picked but not yet uploaded
     let finalImageUrl = imageUrl;
