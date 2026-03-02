@@ -53,6 +53,23 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
   const gradBg = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
 
+  // Real-time subscription for group chat
+  useEffect(() => {
+    const unsub = base44.entities.CommunityPost.subscribe((event) => {
+      if (event.data?.group_id === group.id || event.type === "update") {
+        qc.invalidateQueries({ queryKey: ["groupPosts", group.id] });
+      }
+    });
+    return unsub;
+  }, [group.id, qc]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (activeTab === "chat") {
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [posts.length, activeTab]);
+
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["groupPosts", group.id],
     queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 50),
@@ -80,23 +97,6 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
     queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id, moderation_status: "pending" }),
     enabled: isAdmin,
   });
-
-  // Real-time subscription for group chat
-  useEffect(() => {
-    const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      if (event.data?.group_id === group.id || event.type === "update") {
-        qc.invalidateQueries({ queryKey: ["groupPosts", group.id] });
-      }
-    });
-    return unsub;
-  }, [group.id, qc]);
-
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (activeTab === "chat") {
-      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    }
-  }, [posts.length, activeTab]);
 
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
