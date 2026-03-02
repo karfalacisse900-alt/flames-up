@@ -4,10 +4,11 @@ import { X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const EVENT_TYPES = [
-  { key: "meetup", label: "Online Meetup", emoji: "🤝" },
-  { key: "qa_session", label: "Q&A Session", emoji: "❓" },
-  { key: "watch_party", label: "Watch Party", emoji: "🎬" },
-  { key: "discussion", label: "Discussion", emoji: "💬" },
+  { key: "meetup", label: "Party Event", emoji: "🎉" },
+  { key: "watch_party", label: "Video Reaction", emoji: "🎥" },
+  { key: "gaming", label: "Mini-Games Night", emoji: "🎮" },
+  { key: "discussion", label: "Live Discussion", emoji: "🎤" },
+  { key: "qa_session", label: "Video Call", emoji: "📹" },
   { key: "other", label: "Other", emoji: "📅" },
 ];
 

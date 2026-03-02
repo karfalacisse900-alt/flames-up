@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Users, Search, ChevronRight, Lock, Globe, Crown, Shield, X } from "lucide-react";
-import GroupFeed from "@/components/groups/GroupFeed";
+import GroupHub from "@/components/groups/GroupHub";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
 
 const CATEGORY_COLORS = {
