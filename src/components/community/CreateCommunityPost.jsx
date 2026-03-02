@@ -65,21 +65,19 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
-    // Require at least an image/gif for non-structured post types
-    const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
-    if (requiresMedia && !imagePreview && !imageUrl) {
-      setMediaError(true);
-      return;
-    }
     setMediaError(false);
     setSaving(true);
 
-    // Upload image if a file is selected (always re-upload to get a fresh URL)
-    let finalImageUrl = imageUrl || null;
+    // Upload image first if one is selected
+    let finalImageUrl = null;
     if (imageFile) {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
-      finalImageUrl = file_url;
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+        finalImageUrl = file_url;
+      } catch (err) {
+        console.error("Image upload failed:", err);
+      }
       setUploading(false);
     }
 
