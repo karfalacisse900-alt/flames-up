@@ -3,6 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 // In-memory token cache
 let tokenCache = null;
 let tokenExpiry = 0;
+let tokenIsSandbox = false;
 
 // In-memory search cache (15 min TTL)
 const searchCache = {};
