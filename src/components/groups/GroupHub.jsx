@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, Pin } from "lucide-react";
+import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import CommunityPostCard from "@/components/community/CommunityPostCard";
 import GroupPostCompose from "./GroupPostCompose";
 import GroupChatPost from "./GroupChatPost";
 import GroupChatCompose from "./GroupChatCompose";
@@ -13,6 +12,7 @@ import GroupModerationPanel from "./GroupModerationPanel";
 import GroupEventCard from "./GroupEventCard";
 import GroupGamesTab from "./GroupGamesTab";
 import GroupReactionTab from "./GroupReactionTab";
+import TypingIndicator, { useTypingIndicator } from "./TypingIndicator";
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
