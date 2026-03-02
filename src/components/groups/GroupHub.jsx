@@ -13,6 +13,7 @@ import GroupModerationPanel from "./GroupModerationPanel";
 import GroupEventCard from "./GroupEventCard";
 import GroupGamesTab from "./GroupGamesTab";
 import GroupReactionTab from "./GroupReactionTab";
+import { TypingIndicator } from "./TypingIndicator";
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
