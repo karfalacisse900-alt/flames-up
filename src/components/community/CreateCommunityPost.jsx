@@ -49,7 +49,8 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-    setEditingFile(file);
+    setImageUrl(""); // reset any previously uploaded url
+    setEditingFile(null);
     e.target.value = "";
   };
 
