@@ -58,6 +58,18 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     e.target.value = "";
   };
 
+  const handleVideoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) {
+      alert("Video must be under 100MB");
+      return;
+    }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
   const handleEditorDone = (editedFile, editedUrl) => {
     setImageFile(editedFile);
     setImagePreview(editedUrl);
