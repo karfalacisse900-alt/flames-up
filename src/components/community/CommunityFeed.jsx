@@ -236,6 +236,12 @@ export default function CommunityFeed({ user }) {
         ) : (
           filteredPosts.map((post, index) => renderPostCard(post, index))
         )}
+        {/* Infinite scroll sentinel */}
+        {visibleCount < rankedPosts.length && (
+          <div ref={loaderRef} className="flex justify-center py-6">
+            <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
