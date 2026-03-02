@@ -81,6 +81,23 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
     enabled: isAdmin,
   });
 
+  // Real-time subscription for group chat
+  useEffect(() => {
+    const unsub = base44.entities.CommunityPost.subscribe((event) => {
+      if (event.data?.group_id === group.id || event.type === "update") {
+        qc.invalidateQueries({ queryKey: ["groupPosts", group.id] });
+      }
+    });
+    return unsub;
+  }, [group.id, qc]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (activeTab === "chat") {
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [posts.length, activeTab]);
+
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
       const hasUpvoted = post.upvoted_by?.includes(user?.email);
