@@ -152,11 +152,11 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
           </p>
 
-          {/* Image */}
+          {/* Image / GIF */}
           {post.image_url && (
             <img src={post.image_url} alt="" loading="lazy"
-              className="w-full rounded-2xl mb-2.5 object-cover"
-              style={{ maxHeight: 280, border: "1px solid var(--border-subtle)" }} />
+              className="w-full rounded-2xl mb-2.5"
+              style={{ maxHeight: 320, border: "1px solid var(--border-subtle)", objectFit: post.image_url?.includes('.gif') || post.image_url?.includes('giphy') ? "contain" : "cover", backgroundColor: "var(--bg-subtle)" }} />
           )}
 
           {/* Video */}

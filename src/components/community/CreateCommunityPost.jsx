@@ -78,7 +78,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
-    if (!body.trim() && type !== "debate") return;
+    if (!body.trim() && type !== "debate" && !imageFile && !imageUrl && !videoFile) return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
     setMediaError(false);
     setSaving(true);
