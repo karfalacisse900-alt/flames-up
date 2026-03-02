@@ -55,6 +55,7 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["groupPosts", group.id],
     queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 50),
+    refetchInterval: 8000,
   });
 
   const { data: events = [] } = useQuery({
