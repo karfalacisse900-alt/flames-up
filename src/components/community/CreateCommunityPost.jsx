@@ -100,6 +100,16 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       setUploading(false);
     }
 
+    // Upload video if picked
+    let finalVideoUrl = videoUrl;
+    if (videoFile && !finalVideoUrl) {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
+      finalVideoUrl = file_url;
+      setVideoUrl(file_url);
+      setUploading(false);
+    }
+
     // AI moderation check
     const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
     const modResult = await checkContent(textToCheck);
