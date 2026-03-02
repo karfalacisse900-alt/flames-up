@@ -130,14 +130,11 @@ Deno.serve(async (req) => {
 
     const items = allItems
       .map(item => {
-        // Get real eBay image — prefer thumbnailImages, then image
         const imageUrl = item.image?.imageUrl || item.thumbnailImages?.[0]?.imageUrl || null;
-        // Only include items with real images
-        if (!imageUrl || imageUrl.includes("placeholder") || imageUrl.includes("no-image")) return null;
-        // Make sure the URL links to real eBay (not sandbox)
+        if (!imageUrl) return null;
         let itemUrl = item.itemWebUrl || "";
-        // Force production eBay URLs
-        itemUrl = itemUrl.replace("sandbox.ebay.com", "ebay.com");
+        // Always point to real eBay product page
+        itemUrl = itemUrl.replace("sandbox.ebay.com", "www.ebay.com");
 
         return {
           id: item.itemId,
