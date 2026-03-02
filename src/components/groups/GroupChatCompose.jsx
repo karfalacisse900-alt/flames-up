@@ -10,11 +10,12 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState(null); // string or null
+  const [mentionQuery, setMentionQuery] = useState(null);
   const [mentionStart, setMentionStart] = useState(-1);
   const textareaRef = useRef(null);
   const localFileRef = useRef(null);
   const usedRef = fileInputRef || localFileRef;
+  const { onKeyPress: broadcastTyping } = useTypingBroadcast(group.id, user?.email, user?.full_name || user?.email);
 
   // Detect @mention trigger
   const handleBodyChange = (e) => {
