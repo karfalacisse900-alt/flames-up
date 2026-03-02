@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
+import { Search, ExternalLink, ShoppingCart, Sparkles } from "lucide-react";
 
-const DEFAULT_QUERIES = ["Headphones", "Sneakers", "Gaming Chair", "Watches", "AirPods"];
-
+const POPULAR = ["Headphones", "Sneakers", "iPhone 15", "Gaming Chair", "Vintage Watch", "AirPods", "Nike Shoes"];
 
 function EbayCard({ item, index }) {
   return (
