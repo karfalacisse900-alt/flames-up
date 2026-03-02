@@ -17,7 +17,15 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
   const usedRef = fileInputRef || localFileRef;
   const typingTimerRef = useRef(null);
 
-  // Detect @mention trigger
+  // Cleanup typing on unmount
+  useEffect(() => {
+    return () => {
+      if (user && group?.id) broadcastTyping(group.id, user, false);
+      clearTimeout(typingTimerRef.current);
+    };
+  }, []);
+
+  // Detect @mention trigger + broadcast typing
   const handleBodyChange = (e) => {
     const val = e.target.value;
     setBody(val);
@@ -30,6 +38,12 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     } else {
       setMentionQuery(null);
       setMentionStart(-1);
+    }
+    // Typing indicator
+    if (user && group?.id) {
+      broadcastTyping(group.id, user, true);
+      clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = setTimeout(() => broadcastTyping(group.id, user, false), 2500);
     }
   };
 
