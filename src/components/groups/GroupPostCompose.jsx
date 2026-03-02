@@ -28,7 +28,7 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
     if (!f) return;
     setImageFile(f);
     setImagePreview(URL.createObjectURL(f));
-    setEditingFile(f);
+    setEditingFile(null); // don't auto-open editor, let user tap Edit button
     e.target.value = "";
   };
 
@@ -41,7 +41,6 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
   const handleSubmit = async () => {
     if (!body.trim() || saving) return;
     setSaving(true);
-    const modResult = await checkContent(body);
 
     let imageUrl = null;
     if (imageFile) {
@@ -50,6 +49,8 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
       imageUrl = file_url;
       setUploading(false);
     }
+
+    const modResult = await checkContent(body);
 
     const newPost = await base44.entities.CommunityPost.create({
       type, body: body.trim(),
