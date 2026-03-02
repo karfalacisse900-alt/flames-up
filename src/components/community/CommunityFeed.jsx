@@ -225,9 +225,10 @@ export default function CommunityFeed({ user }) {
       <AnimatePresence>
         {showCreate && (
           <CreateCommunityPost user={user} onClose={() => setShowCreate(false)}
-            onCreated={() => {
-              qc.invalidateQueries({ queryKey: ["communityPosts"] });
-              qc.invalidateQueries({ queryKey: ["communityDebates"] });
+            onCreated={async () => {
+              await qc.invalidateQueries({ queryKey: ["communityPosts"] });
+              await qc.invalidateQueries({ queryKey: ["communityDebates"] });
+              await refetch();
             }} />
         )}
       </AnimatePresence>
