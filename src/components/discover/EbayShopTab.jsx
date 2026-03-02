@@ -6,7 +6,26 @@ import { Search, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
 const DEFAULT_QUERIES = ["Headphones", "Sneakers", "Gaming Chair", "Watches", "AirPods"];
 
 
-function EbayCard({ item, index }) {
+const PLACEHOLDER_IMAGES = {
+  "Headphones": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+  "Sneakers": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+  "Gaming Chair": "https://images.unsplash.com/photo-1616599382690-e14de6b74e17?w=400&q=80",
+  "Watches": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
+  "AirPods": "https://images.unsplash.com/photo-1588423771073-b8903fead85b?w=400&q=80",
+};
+
+function getPlaceholderImage(title, query) {
+  // Try to match a keyword from the query or title
+  const key = Object.keys(PLACEHOLDER_IMAGES).find(k =>
+    query?.toLowerCase().includes(k.toLowerCase()) || title?.toLowerCase().includes(k.toLowerCase())
+  );
+  return key
+    ? PLACEHOLDER_IMAGES[key]
+    : `https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80`; // generic shopping
+}
+
+function EbayCard({ item, index, query }) {
+  const imgSrc = item.image || item.thumbnail || getPlaceholderImage(item.title, query);
   return (
     <motion.a
       href={item.url} target="_blank" rel="noopener noreferrer"
@@ -18,14 +37,9 @@ function EbayCard({ item, index }) {
       className="block rounded-2xl overflow-hidden break-inside-avoid mb-3"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "inline-block", width: "100%" }}
     >
-      {item.image ? (
-        <img src={item.image} alt={item.title} className="w-full object-cover"
-          style={{ maxHeight: index % 3 === 0 ? 220 : 160 }} />
-      ) : (
-        <div className="w-full h-36 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <ShoppingCart className="w-8 h-8" style={{ color: "var(--text-hint)" }} />
-        </div>
-      )}
+      <img src={imgSrc} alt={item.title} className="w-full object-cover"
+        style={{ height: index % 3 === 0 ? 200 : 150 }}
+        onError={e => { e.target.src = getPlaceholderImage(item.title, query); }} />
       <div className="p-2.5">
         <p className="text-xs font-medium leading-snug line-clamp-2 mb-1.5" style={{ color: "var(--text-primary)" }}>{item.title}</p>
         <div className="flex items-center justify-between">
@@ -40,48 +54,6 @@ function EbayCard({ item, index }) {
         </div>
       </div>
     </motion.a>
-  );
-}
-
-function AutoCarousel({ onSearch }) {
-  const [current, setCurrent] = useState(0);
-  const timer = useRef(null);
-
-  const featured = [
-    { emoji: "🎧", label: "Headphones", color: "#7c3aed" },
-    { emoji: "👟", label: "Sneakers", color: "#db2777" },
-    { emoji: "📱", label: "iPhone 15", color: "#0284c7" },
-    { emoji: "🎮", label: "Gaming", color: "#16a34a" },
-    { emoji: "⌚", label: "Watches", color: "#d97706" },
-  ];
-
-  useEffect(() => {
-    timer.current = setInterval(() => setCurrent(c => (c + 1) % featured.length), 2200);
-    return () => clearInterval(timer.current);
-  }, []);
-
-  return (
-    <div className="px-4 mb-5">
-      <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Trending</p>
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-        {featured.map((f, i) => (
-          <motion.button key={f.label}
-            onClick={() => onSearch(f.label)}
-            animate={{ scale: current === i ? 1.06 : 1, opacity: current === i ? 1 : 0.75 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl shrink-0 font-semibold text-xs"
-            style={{
-              background: current === i ? `linear-gradient(135deg, ${f.color}22, ${f.color}11)` : "var(--bg-card)",
-              border: `1.5px solid ${current === i ? f.color + "55" : "var(--border-light)"}`,
-              color: current === i ? f.color : "var(--text-secondary)",
-              minWidth: 72,
-            }}>
-            <span className="text-2xl">{f.emoji}</span>
-            {f.label}
-          </motion.button>
-        ))}
-      </div>
-    </div>
   );
 }
 
