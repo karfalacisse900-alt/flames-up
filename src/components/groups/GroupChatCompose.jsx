@@ -125,6 +125,9 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     setImagePreview(null);
     onClearReply?.();
     setSaving(false);
+    // Stop typing indicator
+    if (user && group?.id) broadcastTyping(group.id, user, false);
+    clearTimeout(typingTimerRef.current);
     onPosted?.();
   };
 
