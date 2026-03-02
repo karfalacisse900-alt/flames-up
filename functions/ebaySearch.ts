@@ -3,7 +3,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 // In-memory token cache
 let tokenCache = null;
 let tokenExpiry = 0;
-let tokenBaseUrl = "https://api.ebay.com";
 
 // In-memory search cache (10 min TTL)
 const searchCache = {};
@@ -24,26 +23,19 @@ async function getEbayToken() {
     "Content-Type": "application/x-www-form-urlencoded"
   };
 
-  // Try production first, fall back to sandbox
-  for (const endpoint of [
-    "https://api.ebay.com/identity/v1/oauth2/token",
-    "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
-  ]) {
-    const res = await fetch(endpoint, { method: "POST", headers, body });
-    if (res.ok) {
-      const data = await res.json();
-      tokenCache = data.access_token;
-      tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-      const env = endpoint.includes("sandbox") ? "sandbox" : "production";
-      tokenBaseUrl = endpoint.includes("sandbox") ? "https://api.sandbox.ebay.com" : "https://api.ebay.com";
-      console.log(`eBay token obtained (${env})`);
-      return tokenCache;
-    }
-    const errText = await res.text();
-    console.warn(`eBay token failed for ${endpoint}:`, errText);
+  // Try production ONLY — sandbox causes broken product URLs
+  const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body });
+  if (res.ok) {
+    const data = await res.json();
+    tokenCache = data.access_token;
+    tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+    console.log("eBay token obtained (production)");
+    return tokenCache;
   }
 
-  throw new Error("eBay authentication failed on both production and sandbox endpoints");
+  const err = await res.text();
+  console.error("eBay token error:", err);
+  throw new Error("eBay authentication failed: " + err);
 }
 
 // Mixed category search — rotate through multiple queries to get diverse results
@@ -86,7 +78,7 @@ Deno.serve(async (req) => {
 
       const results = await Promise.allSettled(queries.map(async (q) => {
         const params = new URLSearchParams({ q, limit: String(perQuery), offset: "0" });
-        const res = await fetch(`${tokenBaseUrl}/buy/browse/v1/item_summary/search?${params}`, {
+        const res = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
             "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
@@ -111,7 +103,7 @@ Deno.serve(async (req) => {
       allItems = allItems.slice(0, limit);
     } else {
       const params = new URLSearchParams({ q: query, limit: String(limit), offset: String(offset) });
-      const searchRes = await fetch(`${tokenBaseUrl}/buy/browse/v1/item_summary/search?${params}`, {
+      const searchRes = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
@@ -130,9 +122,14 @@ Deno.serve(async (req) => {
 
     const items = allItems
       .map(item => {
+        // Get real eBay image — prefer thumbnailImages, then image
         const imageUrl = item.image?.imageUrl || item.thumbnailImages?.[0]?.imageUrl || null;
+        // Only include items with real images
+        if (!imageUrl || imageUrl.includes("placeholder") || imageUrl.includes("no-image")) return null;
+        // Make sure the URL links to real eBay (not sandbox)
         let itemUrl = item.itemWebUrl || "";
-        itemUrl = itemUrl.replace("sandbox.ebay.com", "www.ebay.com");
+        // Force production eBay URLs
+        itemUrl = itemUrl.replace("sandbox.ebay.com", "ebay.com");
 
         return {
           id: item.itemId,
