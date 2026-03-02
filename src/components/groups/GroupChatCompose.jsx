@@ -21,6 +21,7 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
   const handleBodyChange = (e) => {
     const val = e.target.value;
     setBody(val);
+    broadcastTyping();
     const cursor = e.target.selectionStart;
     const textBefore = val.slice(0, cursor);
     const atMatch = textBefore.match(/@(\w*)$/);
