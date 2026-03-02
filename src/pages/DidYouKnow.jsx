@@ -307,6 +307,9 @@ export default function DidYouKnowPage() {
 
   const scamVoteMut = useMutation({
     mutationFn: ({ post, vote }) => {
+      const alreadyVotedTrue = post.true_voted_by?.includes(user.email);
+      const alreadyVotedFalse = post.false_voted_by?.includes(user.email);
+      if (alreadyVotedTrue || alreadyVotedFalse) return Promise.resolve();
       if (vote === "true") {
         return base44.entities.DidYouKnow.update(post.id, {
           true_votes: (post.true_votes || 0) + 1,
