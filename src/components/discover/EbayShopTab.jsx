@@ -1,31 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
+import { Search, ShoppingCart, Sparkles } from "lucide-react";
 
-const DEFAULT_QUERIES = ["Headphones", "Sneakers", "Gaming Chair", "Watches", "AirPods"];
+const FEATURED_CATEGORIES = [
+  { emoji: "🎧", label: "Headphones", color: "#7c3aed" },
+  { emoji: "👟", label: "Sneakers", color: "#db2777" },
+  { emoji: "📱", label: "iPhone 15", color: "#0284c7" },
+  { emoji: "🎮", label: "Gaming", color: "#16a34a" },
+  { emoji: "⌚", label: "Watches", color: "#d97706" },
+  { emoji: "💻", label: "Laptops", color: "#0891b2" },
+];
 
-
-const PLACEHOLDER_IMAGES = {
-  "Headphones": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-  "Sneakers": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-  "Gaming Chair": "https://images.unsplash.com/photo-1616599382690-e14de6b74e17?w=400&q=80",
-  "Watches": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-  "AirPods": "https://images.unsplash.com/photo-1588423771073-b8903fead85b?w=400&q=80",
-};
-
-function getPlaceholderImage(title, query) {
-  // Try to match a keyword from the query or title
-  const key = Object.keys(PLACEHOLDER_IMAGES).find(k =>
-    query?.toLowerCase().includes(k.toLowerCase()) || title?.toLowerCase().includes(k.toLowerCase())
-  );
-  return key
-    ? PLACEHOLDER_IMAGES[key]
-    : `https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80`; // generic shopping
-}
-
-function EbayCard({ item, index, query }) {
-  const imgSrc = item.image || item.thumbnail || getPlaceholderImage(item.title, query);
+function EbayCard({ item, index }) {
   return (
     <motion.a
       href={item.url} target="_blank" rel="noopener noreferrer"
@@ -37,9 +24,16 @@ function EbayCard({ item, index, query }) {
       className="block rounded-2xl overflow-hidden break-inside-avoid mb-3"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "inline-block", width: "100%" }}
     >
-      <img src={imgSrc} alt={item.title} className="w-full object-cover"
+      <img
+        src={item.image}
+        alt={item.title}
+        className="w-full object-cover"
         style={{ height: index % 3 === 0 ? 200 : 150 }}
-        onError={e => { e.target.src = getPlaceholderImage(item.title, query); }} />
+        onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
+      />
+      <div className="w-full h-32 items-center justify-center" style={{ display: "none", backgroundColor: "var(--bg-subtle)" }}>
+        <ShoppingCart className="w-8 h-8" style={{ color: "var(--text-hint)" }} />
+      </div>
       <div className="p-2.5">
         <p className="text-xs font-medium leading-snug line-clamp-2 mb-1.5" style={{ color: "var(--text-primary)" }}>{item.title}</p>
         <div className="flex items-center justify-between">
@@ -58,32 +52,49 @@ function EbayCard({ item, index, query }) {
 }
 
 export default function EbayShopTab() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("Headphones");
   const [inputVal, setInputVal] = useState("");
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("Headphones");
   const LIMIT = 20;
 
   const search = async (q, off = 0) => {
     if (!q.trim()) return;
     setLoading(true);
     setError(null);
-    setInputVal(q);
     const res = await base44.functions.invoke("ebaySearch", { query: q, limit: LIMIT, offset: off });
     setLoading(false);
     if (res.data?.error) { setError(res.data.error); return; }
-    setItems(res.data?.items || []);
+    // Filter only items that have images
+    const withImages = (res.data?.items || []).filter(item => item.image && item.image.trim() !== "");
+    setItems(withImages);
     setTotal(res.data?.total || 0);
     setOffset(off);
     setQuery(q);
   };
 
-  const handleSubmit = (e) => { e.preventDefault(); search(inputVal); };
+  // Auto-load on mount
+  useEffect(() => {
+    search("Headphones", 0);
+  }, []);
 
-  // Split items into two columns for masonry
+  const handleCategoryClick = (label) => {
+    setActiveCategory(label);
+    setInputVal("");
+    search(label, 0);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!inputVal.trim()) return;
+    setActiveCategory(null);
+    search(inputVal, 0);
+  };
+
   const col1 = items.filter((_, i) => i % 2 === 0);
   const col2 = items.filter((_, i) => i % 2 === 1);
 
@@ -116,24 +127,20 @@ export default function EbayShopTab() {
         </div>
       </form>
 
-      {/* Auto-carousel */}
-      {!query && <AutoCarousel onSearch={search} />}
-
-      {/* Popular tags */}
-      {!query && (
-        <div className="px-4 mb-4">
-          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Popular</p>
-          <div className="flex flex-wrap gap-2">
-            {POPULAR.map(p => (
-              <button key={p} onClick={() => search(p)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
-                style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Category pills */}
+      <div className="px-4 mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {FEATURED_CATEGORIES.map(cat => (
+          <button key={cat.label} onClick={() => handleCategoryClick(cat.label)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl shrink-0 text-xs font-semibold transition-all"
+            style={{
+              background: activeCategory === cat.label ? `linear-gradient(135deg, ${cat.color}33, ${cat.color}11)` : "var(--bg-card)",
+              border: `1.5px solid ${activeCategory === cat.label ? cat.color + "88" : "var(--border-light)"}`,
+              color: activeCategory === cat.label ? cat.color : "var(--text-secondary)",
+            }}>
+            <span>{cat.emoji}</span> {cat.label}
+          </button>
+        ))}
+      </div>
 
       {/* Loading */}
       {loading && (
@@ -143,7 +150,7 @@ export default function EbayShopTab() {
             transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
             className="w-7 h-7 border-2 rounded-full"
             style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Searching eBay...</p>
+          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Loading products...</p>
         </div>
       )}
 
@@ -159,7 +166,7 @@ export default function EbayShopTab() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
           <div className="px-4 mb-3 flex items-center justify-between">
             <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
-              {total.toLocaleString()} results for <span style={{ color: "var(--text-primary)" }}>"{query}"</span>
+              Showing results for <span style={{ color: "var(--text-primary)" }}>"{query}"</span>
             </p>
           </div>
 
@@ -183,7 +190,7 @@ export default function EbayShopTab() {
             <span className="text-xs" style={{ color: "var(--text-hint)" }}>
               {offset + 1}–{Math.min(offset + LIMIT, total)}
             </span>
-            <button onClick={() => search(query, offset + LIMIT)} disabled={offset + LIMIT >= total}
+            <button onClick={() => search(query, offset + LIMIT)} disabled={offset + LIMIT >= total || items.length < LIMIT}
               className="px-5 py-2 rounded-xl text-sm font-semibold border disabled:opacity-40 transition-all active:scale-95"
               style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
               Next →
@@ -193,10 +200,10 @@ export default function EbayShopTab() {
       )}
 
       {/* Empty */}
-      {!loading && !error && query && items.length === 0 && (
+      {!loading && !error && items.length === 0 && (
         <div className="text-center py-16">
           <p className="text-4xl mb-3">🔍</p>
-          <p className="text-sm" style={{ color: "var(--text-hint)" }}>No results for "{query}"</p>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>No results found for "{query}"</p>
         </div>
       )}
     </div>
