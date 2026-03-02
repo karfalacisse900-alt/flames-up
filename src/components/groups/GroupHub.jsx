@@ -274,6 +274,7 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
               {/* Sticky compose bar at bottom */}
               {isMember && user && (
                 <div className="fixed bottom-16 left-0 right-0 z-30 max-w-lg mx-auto">
+                  <TypingIndicator groupId={group.id} currentUserEmail={user?.email} />
                   <GroupChatCompose group={group} user={user} members={members}
                     replyTo={replyTo} onClearReply={() => setReplyTo(null)}
                     onPosted={() => qc.invalidateQueries({ queryKey: ["groupPosts", group.id] })} />
