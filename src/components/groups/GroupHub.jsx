@@ -288,6 +288,10 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
                 ))
               )}
 
+              {/* Typing indicator + scroll anchor */}
+              <TypingIndicator typingUsers={typingUsers} />
+              <div ref={chatBottomRef} />
+
               {/* Sticky compose bar at bottom */}
               {isMember && user && (
                 <div className="fixed bottom-16 left-0 right-0 z-30 max-w-lg mx-auto">
