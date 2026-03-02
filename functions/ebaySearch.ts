@@ -3,6 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 // In-memory token cache
 let tokenCache = null;
 let tokenExpiry = 0;
+let tokenBaseUrl = "https://api.ebay.com";
 
 // In-memory search cache (10 min TTL)
 const searchCache = {};
