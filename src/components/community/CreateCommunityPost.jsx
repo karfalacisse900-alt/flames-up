@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { X, Plus, Minus, ImageIcon, Video } from "lucide-react";
+import { X, Plus, Minus, ImageIcon } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import PhotoEditor from "../editor/PhotoEditor";
@@ -39,13 +39,10 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [editingFile, setEditingFile] = useState(null);
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const fileInputRef = useRef(null);
-  const videoInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
@@ -63,40 +60,18 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setEditingFile(null);
   };
 
-  const handleVideoUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Max 100MB
-    if (file.size > 100 * 1024 * 1024) { alert("Video must be under 100MB"); return; }
-    setVideoFile(file);
-    setVideoPreview(URL.createObjectURL(file));
-    setImageFile(null);
-    setImagePreview(null);
-    setImageUrl("");
-    e.target.value = "";
-  };
-
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
-    // Require at least an image/gif/video for non-structured post types
+    // Require at least an image/gif for non-structured post types
     const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
-    if (requiresMedia && !imagePreview && !imageUrl && !videoPreview) {
+    if (requiresMedia && !imagePreview && !imageUrl) {
       setMediaError(true);
       return;
     }
     setMediaError(false);
     setSaving(true);
-
-    // Upload video if picked
-    let finalVideoUrl = null;
-    if (videoFile) {
-      setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
-      finalVideoUrl = file_url;
-      setUploading(false);
-    }
 
     // Upload image if picked but not yet uploaded
     let finalImageUrl = imageUrl;
@@ -118,7 +93,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
         image_url: finalImageUrl || undefined,
-        video_url: finalVideoUrl || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
         list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
@@ -141,7 +115,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
       image_url: finalImageUrl || undefined,
-      video_url: finalVideoUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
@@ -260,11 +233,10 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
               )}
 
-              {/* Photo/GIF/Video upload */}
+              {/* Photo/GIF upload */}
               {type !== "debate" && type !== "list" && (
                 <div>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                  <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
                   {imagePreview ? (
                     <div className="relative rounded-xl overflow-hidden">
                       <img src={imagePreview} alt="Upload" className="w-full max-h-64 object-cover" />
@@ -279,41 +251,20 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                         </button>
                       </div>
                     </div>
-                  ) : videoPreview ? (
-                    <div className="relative rounded-xl overflow-hidden">
-                      <video src={videoPreview} controls className="w-full max-h-64 rounded-xl" />
-                      <button onClick={() => { setVideoFile(null); setVideoPreview(null); }}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
                   ) : (
-                    <div className="flex gap-2">
-                      <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
-                        style={{
-                          backgroundColor: "var(--bg-subtle)",
-                          borderColor: mediaError ? "#E05C7A" : "var(--border-light)",
-                          color: mediaError ? "#E05C7A" : "var(--text-secondary)"
-                        }}>
-                        <ImageIcon className="w-4 h-4" />
-                        {uploading ? "Uploading..." : "Photo / GIF"}
-                      </button>
-                      <button onClick={() => { setMediaError(false); videoInputRef.current?.click(); }} disabled={uploading}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
-                        style={{
-                          backgroundColor: "var(--bg-subtle)",
-                          borderColor: mediaError ? "#E05C7A" : "var(--border-light)",
-                          color: mediaError ? "#E05C7A" : "var(--text-secondary)"
-                        }}>
-                        <Video className="w-4 h-4" />
-                        Video
-                      </button>
-                    </div>
+                    <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
+                      className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
+                      style={{
+                        backgroundColor: "var(--bg-subtle)",
+                        borderColor: mediaError ? "#E05C7A" : "var(--border-light)",
+                        color: mediaError ? "#E05C7A" : "var(--text-secondary)"
+                      }}>
+                      <ImageIcon className="w-4 h-4" />
+                      {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo / GIF"}
+                    </button>
                   )}
-                  {mediaError && !imagePreview && !videoPreview && (
-                    <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo, GIF, or video before posting.</p>
+                  {mediaError && !imagePreview && (
+                    <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo or GIF before posting.</p>
                   )}
                 </div>
               )}

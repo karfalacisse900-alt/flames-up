@@ -1,31 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { Send, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Send, Image as ImageIcon, X, AtSign, Loader2 } from "lucide-react";
 import { checkContent } from "@/components/moderation/moderationHelper";
-import { broadcastTyping } from "./TypingIndicator";
 
 export default function GroupChatCompose({ group, user, members = [], replyTo, onClearReply, onPosted, fileInputRef }) {
   const [body, setBody] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState(null);
+  const [mentionQuery, setMentionQuery] = useState(null); // string or null
   const [mentionStart, setMentionStart] = useState(-1);
   const textareaRef = useRef(null);
   const localFileRef = useRef(null);
   const usedRef = fileInputRef || localFileRef;
-  const typingTimerRef = useRef(null);
 
-  // Cleanup typing on unmount
-  useEffect(() => {
-    return () => {
-      if (user && group?.id) broadcastTyping(group.id, user, false);
-      clearTimeout(typingTimerRef.current);
-    };
-  }, []);
-
-  // Detect @mention trigger + broadcast typing
+  // Detect @mention trigger
   const handleBodyChange = (e) => {
     const val = e.target.value;
     setBody(val);
@@ -38,12 +28,6 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     } else {
       setMentionQuery(null);
       setMentionStart(-1);
-    }
-    // Typing indicator
-    if (user && group?.id) {
-      broadcastTyping(group.id, user, true);
-      clearTimeout(typingTimerRef.current);
-      typingTimerRef.current = setTimeout(() => broadcastTyping(group.id, user, false), 2500);
     }
   };
 
@@ -125,9 +109,6 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     setImagePreview(null);
     onClearReply?.();
     setSaving(false);
-    // Stop typing indicator
-    if (user && group?.id) broadcastTyping(group.id, user, false);
-    clearTimeout(typingTimerRef.current);
     onPosted?.();
   };
 

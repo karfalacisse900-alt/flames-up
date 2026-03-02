@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag } from "lucide-react";
+import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, Pin } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import CommunityPostCard from "@/components/community/CommunityPostCard";
 import GroupPostCompose from "./GroupPostCompose";
 import GroupChatPost from "./GroupChatPost";
 import GroupChatCompose from "./GroupChatCompose";
@@ -12,7 +13,6 @@ import GroupModerationPanel from "./GroupModerationPanel";
 import GroupEventCard from "./GroupEventCard";
 import GroupGamesTab from "./GroupGamesTab";
 import GroupReactionTab from "./GroupReactionTab";
-import TypingIndicator, { useTypingIndicator } from "./TypingIndicator";
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
@@ -47,28 +47,9 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const [reportReason, setReportReason] = useState("");
   const [replyTo, setReplyTo] = useState(null);
   const qc = useQueryClient();
-  const chatBottomRef = useRef(null);
-  const typingUsers = useTypingIndicator(group.id, user);
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
   const gradBg = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
-
-  // Real-time subscription for group chat
-  useEffect(() => {
-    const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      if (event.data?.group_id === group.id || event.type === "update") {
-        qc.invalidateQueries({ queryKey: ["groupPosts", group.id] });
-      }
-    });
-    return unsub;
-  }, [group.id, qc]);
-
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (activeTab === "chat") {
-      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    }
-  }, [posts.length, activeTab]);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["groupPosts", group.id],
@@ -287,10 +268,6 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
                   </div>
                 ))
               )}
-
-              {/* Typing indicator + scroll anchor */}
-              <TypingIndicator typingUsers={typingUsers} />
-              <div ref={chatBottomRef} />
 
               {/* Sticky compose bar at bottom */}
               {isMember && user && (
