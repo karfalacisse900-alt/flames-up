@@ -80,7 +80,7 @@ export default function Groups() {
 
   if (selectedGroup) {
     return (
-      <GroupFeed
+      <GroupHub
         group={selectedGroup}
         user={user}
         membership={myMemberships.find(m => m.group_id === selectedGroup.id)}
