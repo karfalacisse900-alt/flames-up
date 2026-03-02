@@ -35,6 +35,7 @@ async function getEbayToken() {
       tokenCache = data.access_token;
       tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
       const env = endpoint.includes("sandbox") ? "sandbox" : "production";
+      tokenBaseUrl = endpoint.includes("sandbox") ? "https://api.sandbox.ebay.com" : "https://api.ebay.com";
       console.log(`eBay token obtained (${env})`);
       return tokenCache;
     }
