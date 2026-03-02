@@ -121,7 +121,7 @@ export default function EbayShopTab() {
       </div>
 
       {/* Search */}
-      <form onSubmit={handleSubmit} className="px-4 mb-4">
+      <form onSubmit={handleSubmit} className="px-4 mb-3">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
@@ -137,24 +137,26 @@ export default function EbayShopTab() {
         </div>
       </form>
 
-      {/* Auto-carousel */}
-      {!query && <AutoCarousel onSearch={search} />}
-
-      {/* Popular tags */}
-      {!query && (
-        <div className="px-4 mb-4">
-          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Popular</p>
-          <div className="flex flex-wrap gap-2">
-            {POPULAR.map(p => (
-              <button key={p} onClick={() => search(p)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
-                style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-                {p}
+      {/* Category pills */}
+      <div className="px-4 mb-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat.q;
+            return (
+              <button key={cat.q} onClick={() => handleCategory(cat)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl shrink-0 text-xs font-semibold transition-all active:scale-95"
+                style={{
+                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: isActive ? "#fff" : "var(--text-secondary)",
+                  border: `1.5px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
+                }}>
+                <span className="text-base">{cat.emoji}</span>
+                {cat.label}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* Loading */}
       {loading && (
