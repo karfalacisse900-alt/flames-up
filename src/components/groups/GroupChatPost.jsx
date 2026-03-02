@@ -104,13 +104,9 @@ export default function GroupChatPost({ post, user, members = [], onReply, isAdm
             {renderBodyWithMentions(post.body || "")}
           </p>
 
-          {/* Image or Video */}
+          {/* Image */}
           {post.image_url && (
-            post.image_url.match(/\.(mp4|mov|webm|avi|mkv)(\?|$)/i) ? (
-              <video src={post.image_url} controls preload="metadata" className="mt-2 rounded-xl w-full" style={{ maxHeight: 220 }} />
-            ) : (
-              <img src={post.image_url} alt="" className="mt-2 rounded-xl max-h-52 object-cover w-full" />
-            )
+            <img src={post.image_url} alt="" className="mt-2 rounded-xl max-h-52 object-cover w-full" />
           )}
 
           {/* Actions row */}

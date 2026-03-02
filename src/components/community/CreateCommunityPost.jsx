@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { X, Plus, Minus, ImageIcon, Video } from "lucide-react";
+import { X, Plus, Minus, ImageIcon } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import PhotoEditor from "../editor/PhotoEditor";
@@ -38,16 +38,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [videoFile, setVideoFile] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
-  const [videoUrl, setVideoUrl] = useState("");
-  const [mediaMode, setMediaMode] = useState("image"); // "image" | "video"
   const [editingFile, setEditingFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const fileInputRef = useRef(null);
-  const videoInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
@@ -55,18 +50,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setEditingFile(file);
-    e.target.value = "";
-  };
-
-  const handleVideoUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 100 * 1024 * 1024) {
-      alert("Video must be under 100MB");
-      return;
-    }
-    setVideoFile(file);
-    setVideoPreview(URL.createObjectURL(file));
     e.target.value = "";
   };
 
@@ -97,16 +80,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       finalImageUrl = file_url;
       setImageUrl(file_url);
-      setUploading(false);
-    }
-
-    // Upload video if picked
-    let finalVideoUrl = videoUrl;
-    if (videoFile && !finalVideoUrl) {
-      setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
-      finalVideoUrl = file_url;
-      setVideoUrl(file_url);
       setUploading(false);
     }
 
@@ -141,7 +114,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
-      image_url: finalImageUrl || finalVideoUrl || undefined,
+      image_url: finalImageUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
@@ -260,78 +233,37 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
               )}
 
-              {/* Media upload (photo or video) */}
+              {/* Photo/GIF upload */}
               {type !== "debate" && type !== "list" && (
                 <div>
-                  <input ref={fileInputRef} type="file" accept="image/*,image/gif" className="hidden" onChange={handleFileUpload} />
-                  <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
-
-                  {/* Toggle image/video */}
-                  <div className="flex gap-1 mb-2 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
-                    <button onClick={() => setMediaMode("image")}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{ backgroundColor: mediaMode === "image" ? "var(--bg-card)" : "transparent", color: mediaMode === "image" ? "var(--accent-primary)" : "var(--text-hint)", boxShadow: mediaMode === "image" ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
-                      <ImageIcon className="w-3.5 h-3.5" /> Photo / GIF
-                    </button>
-                    <button onClick={() => setMediaMode("video")}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{ backgroundColor: mediaMode === "video" ? "var(--bg-card)" : "transparent", color: mediaMode === "video" ? "var(--accent-primary)" : "var(--text-hint)", boxShadow: mediaMode === "video" ? "0 1px 4px rgba(0,0,0,0.08)" : "none" }}>
-                      <Video className="w-3.5 h-3.5" /> Video
-                    </button>
-                  </div>
-
-                  {/* Image upload */}
-                  {mediaMode === "image" && (
-                    <>
-                      {imagePreview ? (
-                        <div className="relative rounded-xl overflow-hidden">
-                          <img src={imagePreview} alt="Upload" className="w-full max-h-64 object-cover" />
-                          <div className="absolute top-2 right-2 flex gap-1.5">
-                            <button onClick={() => setEditingFile(imageFile)}
-                              className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
-                              style={{ backgroundColor: "rgba(46,107,79,0.85)" }}>✨ Edit</button>
-                            <button onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
-                          className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
-                          style={{ backgroundColor: "var(--bg-subtle)", borderColor: mediaError ? "#E05C7A" : "var(--border-light)", color: mediaError ? "#E05C7A" : "var(--text-secondary)" }}>
-                          <ImageIcon className="w-4 h-4" />
-                          {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo / GIF"}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  {imagePreview ? (
+                    <div className="relative rounded-xl overflow-hidden">
+                      <img src={imagePreview} alt="Upload" className="w-full max-h-64 object-cover" />
+                      <div className="absolute top-2 right-2 flex gap-1.5">
+                        <button onClick={() => setEditingFile(imageFile)}
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
+                          style={{ backgroundColor: "rgba(46,107,79,0.85)" }}>✨ Edit</button>
+                        <button onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
+                          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                          <X className="w-3.5 h-3.5" />
                         </button>
-                      )}
-                    </>
+                      </div>
+                    </div>
+                  ) : (
+                    <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
+                      className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
+                      style={{
+                        backgroundColor: "var(--bg-subtle)",
+                        borderColor: mediaError ? "#E05C7A" : "var(--border-light)",
+                        color: mediaError ? "#E05C7A" : "var(--text-secondary)"
+                      }}>
+                      <ImageIcon className="w-4 h-4" />
+                      {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo / GIF"}
+                    </button>
                   )}
-
-                  {/* Video upload */}
-                  {mediaMode === "video" && (
-                    <>
-                      {videoPreview ? (
-                        <div className="relative rounded-xl overflow-hidden">
-                          <video src={videoPreview} controls className="w-full max-h-64 rounded-xl" />
-                          <button onClick={() => { setVideoFile(null); setVideoPreview(null); setVideoUrl(""); }}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => videoInputRef.current?.click()} disabled={uploading}
-                          className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
-                          style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                          <Video className="w-4 h-4" />
-                          {uploading ? "Uploading video..." : "Add Video (max 100MB)"}
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {mediaError && !imagePreview && !videoPreview && mediaMode === "image" && (
+                  {mediaError && !imagePreview && (
                     <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo or GIF before posting.</p>
                   )}
                 </div>

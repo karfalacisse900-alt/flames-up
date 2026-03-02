@@ -1,27 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { Send, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Send, Image as ImageIcon, X, AtSign, Loader2 } from "lucide-react";
 import { checkContent } from "@/components/moderation/moderationHelper";
-import { useTypingBroadcast } from "./TypingIndicator";
 
 export default function GroupChatCompose({ group, user, members = [], replyTo, onClearReply, onPosted, fileInputRef }) {
   const [body, setBody] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState(null);
+  const [mentionQuery, setMentionQuery] = useState(null); // string or null
   const [mentionStart, setMentionStart] = useState(-1);
   const textareaRef = useRef(null);
   const localFileRef = useRef(null);
   const usedRef = fileInputRef || localFileRef;
-  const { onKeyPress: broadcastTyping } = useTypingBroadcast(group.id, user?.email, user?.full_name || user?.email);
 
   // Detect @mention trigger
   const handleBodyChange = (e) => {
     const val = e.target.value;
     setBody(val);
-    broadcastTyping();
     const cursor = e.target.selectionStart;
     const textBefore = val.slice(0, cursor);
     const atMatch = textBefore.match(/@(\w*)$/);

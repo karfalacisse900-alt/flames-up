@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, Pin } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,7 +13,6 @@ import GroupModerationPanel from "./GroupModerationPanel";
 import GroupEventCard from "./GroupEventCard";
 import GroupGamesTab from "./GroupGamesTab";
 import GroupReactionTab from "./GroupReactionTab";
-import { TypingIndicator } from "./TypingIndicator";
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
@@ -55,7 +54,6 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["groupPosts", group.id],
     queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 50),
-    refetchInterval: 8000,
   });
 
   const { data: events = [] } = useQuery({
@@ -274,7 +272,6 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
               {/* Sticky compose bar at bottom */}
               {isMember && user && (
                 <div className="fixed bottom-16 left-0 right-0 z-30 max-w-lg mx-auto">
-                  <TypingIndicator groupId={group.id} currentUserEmail={user?.email} />
                   <GroupChatCompose group={group} user={user} members={members}
                     replyTo={replyTo} onClearReply={() => setReplyTo(null)}
                     onPosted={() => qc.invalidateQueries({ queryKey: ["groupPosts", group.id] })} />
