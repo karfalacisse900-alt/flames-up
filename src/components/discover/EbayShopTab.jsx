@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ExternalLink, ShoppingCart, Sparkles } from "lucide-react";
 
-const POPULAR = ["Headphones", "Sneakers", "iPhone 15", "Gaming Chair", "Vintage Watch", "AirPods", "Nike Shoes"];
+const DEFAULT_QUERIES = ["Headphones", "Sneakers", "Gaming Chair", "Watches", "AirPods"];
+
 
 function EbayCard({ item, index }) {
   return (

@@ -98,11 +98,19 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
 
   const submitReport = async () => {
     if (!reportingPost || !reportReason.trim()) return;
-    await base44.entities.GroupPostReport.create({
+    const report = await base44.entities.GroupPostReport.create({
       group_id: group.id, post_id: reportingPost.id,
       reporter_email: user.email, reporter_name: user.full_name || user.email,
       reason: reportReason.trim(), status: "pending",
     });
+    // Trigger AI review in background
+    base44.functions.invoke("moderateGroupPost", {
+      post_id: reportingPost.id,
+      post_body: reportingPost.body,
+      group_id: group.id,
+      author_email: reportingPost.author_email,
+      report_id: report.id,
+    }).catch(() => {});
     setReportingPost(null);
     setReportReason("");
   };
