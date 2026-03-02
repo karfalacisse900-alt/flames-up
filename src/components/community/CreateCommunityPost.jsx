@@ -109,7 +109,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       const newPost = await base44.entities.CommunityPost.create({
         type, title: title.trim() || undefined, body: body.trim() || title.trim(),
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
-        author_avatar_url: user?.avatar_url || "",
+        author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
         image_url: finalImageUrl || undefined,
         video_url: finalVideoUrl || undefined,
@@ -130,7 +130,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       body: body.trim() || title.trim(),
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
-      author_avatar_url: user?.avatar_url || "",
+      author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
