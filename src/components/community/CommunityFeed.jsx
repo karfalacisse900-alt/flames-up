@@ -19,7 +19,11 @@ export default function CommunityFeed({ user }) {
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
-    queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
+    // Only show posts that don't belong to any group (group_id is null/undefined)
+    queryFn: async () => {
+      const all = await base44.entities.CommunityPost.list("-created_date", 100);
+      return all.filter(p => !p.group_id);
+    },
   });
 
   useEffect(() => {
