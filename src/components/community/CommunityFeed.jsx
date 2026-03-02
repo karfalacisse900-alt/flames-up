@@ -17,16 +17,28 @@ export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loaderRef = useRef(null);
   const qc = useQueryClient();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
-    // Only show posts that don't belong to any group (group_id is null/undefined)
     queryFn: async () => {
-      const all = await base44.entities.CommunityPost.list("-created_date", 100);
+      const all = await base44.entities.CommunityPost.list("-created_date", 300);
       return all.filter(p => !p.group_id);
     },
   });
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setVisibleCount(n => n + PAGE_SIZE);
+    }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
