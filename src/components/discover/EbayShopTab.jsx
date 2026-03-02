@@ -160,13 +160,13 @@ export default function EbayShopTab() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
             className="w-7 h-7 border-2 rounded-full"
             style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Searching eBay...</p>
+          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Loading products...</p>
         </div>
       )}
 
