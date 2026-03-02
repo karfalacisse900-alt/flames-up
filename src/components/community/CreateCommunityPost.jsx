@@ -80,12 +80,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (!requireVerified(user)) return;
     if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
-    // Require at least an image/gif/video for non-structured post types
-    const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
-    if (requiresMedia && !imagePreview && !imageUrl && !videoPreview) {
-      setMediaError(true);
-      return;
-    }
     setMediaError(false);
     setSaving(true);
 
@@ -312,9 +306,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                       </button>
                     </div>
                   )}
-                  {mediaError && !imagePreview && !videoPreview && (
-                    <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo, GIF, or video before posting.</p>
-                  )}
+                  
                 </div>
               )}
 
@@ -326,6 +318,26 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                     rows={2}
                     className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
                     style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+                  {/* Photo/GIF/Video for debate */}
+                  <div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                    {imagePreview ? (
+                      <div className="relative rounded-xl overflow-hidden">
+                        <img src={imagePreview} alt="Upload" className="w-full max-h-48 object-cover" />
+                        <button onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-white"
+                          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => fileInputRef.current?.click()}
+                        className="py-2 px-3 rounded-xl text-xs font-medium flex items-center gap-1.5 border transition-all active:scale-95"
+                        style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                        <ImageIcon className="w-3.5 h-3.5" /> Add Photo (optional)
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <p className="text-[11px] font-medium mb-1" style={{ color: "#3C6E5A" }}>🟢 Side A</p>
