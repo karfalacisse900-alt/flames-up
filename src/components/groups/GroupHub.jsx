@@ -219,40 +219,55 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
         <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
           {/* CHAT TAB */}
           {activeTab === "chat" && (
-            <div className="pb-28">
+            <div style={{ paddingBottom: 120 }}>
+              {/* Pinned posts first */}
+              {visiblePosts.filter(p => p.is_pinned).map(post => (
+                <GroupChatPost key={`pin-${post.id}`} post={post} user={user} members={members}
+                  onReply={setReplyTo} isAdmin={isAdmin} groupId={group.id} />
+              ))}
+              {visiblePosts.filter(p => p.is_pinned).length > 0 && (
+                <div className="mx-4 my-1 border-t" style={{ borderColor: "var(--border-subtle)" }} />
+              )}
+
               {isLoading ? (
                 <div className="flex justify-center py-12">
                   <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
                 </div>
-              ) : visiblePosts.length === 0 ? (
+              ) : visiblePosts.filter(p => !p.is_pinned).length === 0 && visiblePosts.filter(p => p.is_pinned).length === 0 ? (
                 <div className="py-16 text-center px-8">
-                  <div className="text-5xl mb-3">📭</div>
-                  <p className="font-bold text-base mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No posts yet</p>
+                  <div className="text-5xl mb-3">💬</div>
+                  <p className="font-bold text-base mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No messages yet</p>
                   <p className="text-sm" style={{ color: "var(--text-hint)" }}>
-                    {isMember ? "Be the first to post in this group!" : "Join this group to see and post content."}
+                    {isMember ? "Say hello! Use @ to mention members." : "Join this group to chat."}
                   </p>
                 </div>
               ) : (
-                visiblePosts.map((post, i) => (
-                  <motion.div key={post.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+                visiblePosts.filter(p => !p.is_pinned).map(post => (
+                  <div key={post.id} className="relative group/post">
                     {isAdmin && post.moderation_status === "pending" && (
-                      <div className="mx-4 mt-3 -mb-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                        style={{ backgroundColor: "#fef3c7", color: "#d97706", border: "1px solid #fcd34d" }}>
-                        ⏳ Pending approval
-                      </div>
+                      <div className="mx-4 mt-2 -mb-1 flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold"
+                        style={{ backgroundColor: "#fef3c7", color: "#d97706" }}>⏳ Pending</div>
                     )}
-                    <div className="relative group/post">
-                      <CommunityPostCard post={post} user={user} onUpvote={() => user && upvoteMut.mutate({ post })} />
-                      {isMember && user && post.author_email !== user.email && (
-                        <button onClick={() => setReportingPost(post)}
-                          className="absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover/post:opacity-100 transition-opacity"
-                          style={{ backgroundColor: "var(--bg-subtle)" }}>
-                          <Flag className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
+                    <GroupChatPost post={post} user={user} members={members}
+                      onReply={setReplyTo} isAdmin={isAdmin} groupId={group.id} />
+                    {isMember && user && post.author_email !== user.email && (
+                      <button onClick={() => setReportingPost(post)}
+                        className="absolute top-2 right-4 w-6 h-6 rounded-lg flex items-center justify-center opacity-0 group-hover/post:opacity-100 transition-opacity"
+                        style={{ backgroundColor: "var(--bg-subtle)" }}>
+                        <Flag className="w-3 h-3" style={{ color: "var(--text-hint)" }} />
+                      </button>
+                    )}
+                  </div>
                 ))
+              )}
+
+              {/* Sticky compose bar at bottom */}
+              {isMember && user && (
+                <div className="fixed bottom-16 left-0 right-0 z-30 max-w-lg mx-auto">
+                  <GroupChatCompose group={group} user={user} members={members}
+                    replyTo={replyTo} onClearReply={() => setReplyTo(null)}
+                    onPosted={() => qc.invalidateQueries({ queryKey: ["groupPosts", group.id] })} />
+                </div>
               )}
             </div>
           )}
