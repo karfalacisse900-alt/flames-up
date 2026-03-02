@@ -115,6 +115,12 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
             <p className="text-xs leading-relaxed mb-2" style={{ color: "var(--text-secondary)" }}>{post.body}</p>
           )}
 
+          {post.image_url && (
+            <img src={post.image_url} alt="" loading="lazy"
+              className="w-full rounded-2xl mb-2 object-cover"
+              style={{ maxHeight: 280, border: "1px solid var(--border-subtle)" }} />
+          )}
+
           {debate && (
             <div className="mb-2">
               <div className="flex items-center gap-2">
