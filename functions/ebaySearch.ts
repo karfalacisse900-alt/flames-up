@@ -28,7 +28,8 @@ async function getEbayToken() {
   const headers = { "Authorization": `Basic ${credentials}`, "Content-Type": "application/x-www-form-urlencoded" };
 
   // Try production first
-  const prodRes = await fetch("https://api.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body });
+  const prodScope = "grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope";
+  const prodRes = await fetch("https://api.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body: prodScope });
   if (prodRes.ok) {
     const data = await prodRes.json();
     tokenCache = data.access_token;
@@ -37,23 +38,23 @@ async function getEbayToken() {
     console.log("eBay token: PRODUCTION");
     return { token: tokenCache, sandbox: false };
   }
-  console.warn("eBay production auth failed, trying sandbox...");
+  const prodErr = await prodRes.text();
+  console.warn("eBay production auth failed:", prodErr.slice(0, 200));
 
-  // Fall back to sandbox
-  const sandboxBody = "grant_type=client_credentials&scope=https%3A%2F%2Fapi.sandbox.ebay.com%2Foauth%2Fapi_scope";
-  const sandboxRes = await fetch("https://api.sandbox.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body: sandboxBody });
+  // Fall back to sandbox (same scope works for sandbox too)
+  const sandboxRes = await fetch("https://api.sandbox.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body: prodScope });
   if (sandboxRes.ok) {
     const data = await sandboxRes.json();
     tokenCache = data.access_token;
     tokenIsSandbox = true;
     tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-    console.log("eBay token: SANDBOX");
+    console.log("eBay token: SANDBOX - Note: sandbox products may not have real images. Please use production eBay app credentials.");
     return { token: tokenCache, sandbox: true };
   }
 
-  const err = await sandboxRes.text();
-  console.error("Both eBay auth attempts failed:", err);
-  throw new Error("eBay authentication failed. Check EBAY_CLIENT_ID and EBAY_CLIENT_SECRET secrets.");
+  const sandboxErr = await sandboxRes.text();
+  console.error("Both eBay auth attempts failed. Production:", prodErr.slice(0, 100), "Sandbox:", sandboxErr.slice(0, 100));
+  throw new Error("eBay authentication failed. Your EBAY_CLIENT_ID and EBAY_CLIENT_SECRET appear to be sandbox credentials. Please create a production eBay app at developer.ebay.com and update these secrets.");
 }
 
 async function searchSingleQuery(token, q, limit, offset, sandbox = false) {
