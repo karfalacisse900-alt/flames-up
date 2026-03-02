@@ -74,13 +74,12 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setMediaError(false);
     setSaving(true);
 
-    // Upload image if picked but not yet uploaded
-    let finalImageUrl = imageUrl;
-    if (imageFile && !finalImageUrl) {
+    // Upload image if a file is selected (always re-upload to get a fresh URL)
+    let finalImageUrl = imageUrl || null;
+    if (imageFile) {
       setUploading(true);
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       finalImageUrl = file_url;
-      setImageUrl(file_url);
       setUploading(false);
     }
 
