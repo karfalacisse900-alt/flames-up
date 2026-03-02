@@ -47,6 +47,8 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const [reportReason, setReportReason] = useState("");
   const [replyTo, setReplyTo] = useState(null);
   const qc = useQueryClient();
+  const chatBottomRef = useRef(null);
+  const typingUsers = useTypingIndicator(group.id, user);
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
   const gradBg = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
