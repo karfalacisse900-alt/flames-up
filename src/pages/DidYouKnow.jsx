@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Heart, ExternalLink, Plus, X, ChevronLeft, Lightbulb, Sparkles, Search, ShieldAlert, CheckCircle, XCircle } from "lucide-react";
+import { Heart, ExternalLink, Plus, X, ChevronLeft, Lightbulb, Sparkles, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,7 +14,6 @@ function SubmitForm({ user, onClose, onSuccess }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [sourceLink, setSourceLink] = useState("");
-  const [isScamWarning, setIsScamWarning] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -25,6 +24,7 @@ function SubmitForm({ user, onClose, onSuccess }) {
     setSubmitting(true);
     setModerationError(null);
 
+    // AI Moderation check
     const modRes = await base44.functions.invoke("moderateContent", {
       text: content + (title ? " " + title : ""),
       content_type: "did_you_know",
@@ -40,16 +40,11 @@ function SubmitForm({ user, onClose, onSuccess }) {
       title: title.trim().slice(0, MAX_TITLE),
       content: content.trim(),
       source_link: sourceLink.trim() || undefined,
-      status: "pending",
+      status: verdict === "review" ? "pending" : "pending",
       submitter_email: user?.email,
       submitter_name: user?.full_name,
-      is_scam_warning: isScamWarning,
       like_count: 0,
       liked_by: [],
-      true_votes: 0,
-      false_votes: 0,
-      true_voted_by: [],
-      false_voted_by: [],
     });
     setSubmitting(false);
     setDone(true);
@@ -90,10 +85,13 @@ function SubmitForm({ user, onClose, onSuccess }) {
           placeholder="Short title..."
           className="w-full mt-1.5 px-4 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+        <p className="text-right text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{title.length}/{MAX_TITLE}</p>
       </div>
 
       <div>
-        <label className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>Fact / Tip <span style={{ color: "#ef4444" }}>*</span></label>
+        <label className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+          Fact / Tip <span style={{ color: "#ef4444" }}>*</span>
+        </label>
         <textarea value={content} maxLength={MAX_CONTENT} onChange={e => setContent(e.target.value)}
           rows={4} placeholder="Did you know that..."
           className="w-full mt-1.5 px-4 py-2.5 rounded-xl text-sm outline-none resize-none"
@@ -110,24 +108,6 @@ function SubmitForm({ user, onClose, onSuccess }) {
           className="w-full mt-1.5 px-4 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
       </div>
-
-      {/* Scam warning toggle */}
-      <button onClick={() => setIsScamWarning(v => !v)}
-        className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all"
-        style={{
-          backgroundColor: isScamWarning ? "#FFF1F1" : "var(--bg-subtle)",
-          border: `1px solid ${isScamWarning ? "#FECACA" : "var(--border-light)"}`
-        }}>
-        <ShieldAlert className="w-4 h-4 shrink-0" style={{ color: isScamWarning ? "#EF4444" : "var(--text-hint)" }} />
-        <div className="flex-1">
-          <p className="text-xs font-bold" style={{ color: isScamWarning ? "#EF4444" : "var(--text-primary)" }}>⚠️ Scam/Fraud Warning</p>
-          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>Enable this if warning others about scams — community can vote True/False</p>
-        </div>
-        <div className="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0"
-          style={{ borderColor: isScamWarning ? "#EF4444" : "var(--border-medium)", backgroundColor: isScamWarning ? "#EF4444" : "transparent" }}>
-          {isScamWarning && <span className="text-white text-[10px] font-bold">✓</span>}
-        </div>
-      </button>
 
       <button onClick={() => setAgreed(a => !a)}
         className="w-full flex items-start gap-3 p-3 rounded-xl text-left"
@@ -151,66 +131,8 @@ function SubmitForm({ user, onClose, onSuccess }) {
   );
 }
 
-// ── Scam Vote Bar ────────────────────────────────────────
-function ScamVoteBar({ post, user, onVote }) {
-  const trueVotes = post.true_votes || 0;
-  const falseVotes = post.false_votes || 0;
-  const total = trueVotes + falseVotes;
-  const truePct = total > 0 ? Math.round((trueVotes / total) * 100) : 50;
-  const falsePct = total > 0 ? Math.round((falseVotes / total) * 100) : 50;
-  const myVoteTrue = user?.email && post.true_voted_by?.includes(user.email);
-  const myVoteFalse = user?.email && post.false_voted_by?.includes(user.email);
-  const hasVoted = myVoteTrue || myVoteFalse;
-
-  return (
-    <div className="mt-3 p-3 rounded-xl" style={{ backgroundColor: "#FFF8F0", border: "1px solid #FECACA" }}>
-      <div className="flex items-center gap-1.5 mb-2">
-        <ShieldAlert className="w-3.5 h-3.5" style={{ color: "#EF4444" }} />
-        <p className="text-[11px] font-bold" style={{ color: "#EF4444" }}>SCAM ALERT — Community Verdict</p>
-      </div>
-      {/* Bar */}
-      {total > 0 && (
-        <div className="h-2 rounded-full overflow-hidden mb-2 flex" style={{ backgroundColor: "var(--border-light)" }}>
-          <div className="h-full rounded-l-full transition-all" style={{ width: `${truePct}%`, backgroundColor: "#22C55E" }} />
-          <div className="h-full rounded-r-full transition-all" style={{ width: `${falsePct}%`, backgroundColor: "#EF4444" }} />
-        </div>
-      )}
-      <div className="flex gap-2">
-        <button onClick={() => !hasVoted && user && onVote(post, "true")}
-          disabled={hasVoted}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:cursor-default"
-          style={{
-            backgroundColor: myVoteTrue ? "#DCFCE7" : "var(--bg-card)",
-            border: `1.5px solid ${myVoteTrue ? "#22C55E" : "var(--border-light)"}`,
-            color: myVoteTrue ? "#16A34A" : "var(--text-secondary)"
-          }}>
-          <CheckCircle className="w-3.5 h-3.5" />
-          TRUE {trueVotes > 0 && <span className="opacity-70">({trueVotes})</span>}
-        </button>
-        <button onClick={() => !hasVoted && user && onVote(post, "false")}
-          disabled={hasVoted}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:cursor-default"
-          style={{
-            backgroundColor: myVoteFalse ? "#FEE2E2" : "var(--bg-card)",
-            border: `1.5px solid ${myVoteFalse ? "#EF4444" : "var(--border-light)"}`,
-            color: myVoteFalse ? "#DC2626" : "var(--text-secondary)"
-          }}>
-          <XCircle className="w-3.5 h-3.5" />
-          FALSE/SCAM {falseVotes > 0 && <span className="opacity-70">({falseVotes})</span>}
-        </button>
-      </div>
-      {total > 0 && (
-        <p className="text-[10px] text-center mt-1.5" style={{ color: "var(--text-hint)" }}>
-          {total} community vote{total !== 1 ? "s" : ""} · {truePct}% say TRUE
-        </p>
-      )}
-      {!user && <p className="text-[10px] text-center mt-1.5" style={{ color: "var(--text-hint)" }}>Log in to vote</p>}
-    </div>
-  );
-}
-
 // ── Fact Card ────────────────────────────────────────────
-function FactCard({ post, user, onLike, onScamVote, index }) {
+function FactCard({ post, user, onLike, index }) {
   const isLiked = user?.email && post.liked_by?.includes(user.email);
   const gradients = [
     "linear-gradient(135deg, #2E6B4F08 0%, #4CAF7D05 100%)",
@@ -225,23 +147,18 @@ function FactCard({ post, user, onLike, onScamVote, index }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className="p-4 rounded-2xl mb-3"
-      style={{ background: gradients[index % 4], border: `1px solid ${post.is_scam_warning ? "#FECACA" : "var(--border-light)"}`, backgroundColor: "var(--bg-card)" }}
+      style={{ background: gradients[index % 4], border: "1px solid var(--border-light)", backgroundColor: "var(--bg-card)" }}
     >
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-          style={{ background: post.is_scam_warning ? "linear-gradient(135deg, #FEF2F2, #FEE2E2)" : "linear-gradient(135deg, #2E6B4F20, #4CAF7D20)" }}>
-          <span className="text-lg">{post.is_scam_warning ? "⚠️" : "💡"}</span>
+          style={{ background: "linear-gradient(135deg, #2E6B4F20, #4CAF7D20)" }}>
+          <span className="text-lg">💡</span>
         </div>
         <div className="flex-1 min-w-0">
           {post.title && (
-            <p className="text-xs font-bold mb-1 uppercase tracking-wider" style={{ color: post.is_scam_warning ? "#EF4444" : "var(--accent-primary)" }}>{post.title}</p>
+            <p className="text-xs font-bold mb-1 uppercase tracking-wider" style={{ color: "var(--accent-primary)" }}>{post.title}</p>
           )}
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{post.content}</p>
-
-          {/* Scam vote section */}
-          {post.is_scam_warning && (
-            <ScamVoteBar post={post} user={user} onVote={onScamVote} />
-          )}
 
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-3">
@@ -277,7 +194,6 @@ export default function DidYouKnowPage() {
   const [user, setUser] = React.useState(null);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterScam, setFilterScam] = useState(false);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -305,34 +221,13 @@ export default function DidYouKnowPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["didYouKnow"] }),
   });
 
-  const scamVoteMut = useMutation({
-    mutationFn: ({ post, vote }) => {
-      const alreadyVotedTrue = post.true_voted_by?.includes(user.email);
-      const alreadyVotedFalse = post.false_voted_by?.includes(user.email);
-      if (alreadyVotedTrue || alreadyVotedFalse) return Promise.resolve();
-      if (vote === "true") {
-        return base44.entities.DidYouKnow.update(post.id, {
-          true_votes: (post.true_votes || 0) + 1,
-          true_voted_by: [...(post.true_voted_by || []), user.email],
-        });
-      } else {
-        return base44.entities.DidYouKnow.update(post.id, {
-          false_votes: (post.false_votes || 0) + 1,
-          false_voted_by: [...(post.false_voted_by || []), user.email],
-        });
-      }
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["didYouKnow"] }),
-  });
-
-  const filtered = posts.filter(p => {
-    const matchSearch = !search || p.content?.toLowerCase().includes(search.toLowerCase()) || p.title?.toLowerCase().includes(search.toLowerCase());
-    const matchScam = !filterScam || p.is_scam_warning;
-    return matchSearch && matchScam;
-  });
+  const filtered = posts.filter(p =>
+    !search ||
+    p.content?.toLowerCase().includes(search.toLowerCase()) ||
+    p.title?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const topFacts = [...posts].sort((a, b) => (b.like_count || 0) - (a.like_count || 0)).slice(0, 3);
-  const scamCount = posts.filter(p => p.is_scam_warning).length;
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
@@ -373,32 +268,15 @@ export default function DidYouKnowPage() {
           <span className="text-xs font-bold uppercase tracking-wide opacity-90">Community Knowledge</span>
         </div>
         <p className="text-sm font-medium leading-relaxed opacity-90">
-          Discover facts, tips & scam warnings shared by the community. Vote True or False on scam alerts!
+          Discover fascinating facts, tips, and insights shared by the community. Learn something new every day!
         </p>
+        {!user && (
+          <p className="text-[11px] mt-2 opacity-70">Log in to submit your own facts ✍️</p>
+        )}
       </div>
 
-      {/* Scam alert banner if any */}
-      {scamCount > 0 && (
-        <div className="mx-4 mt-3">
-          <button onClick={() => setFilterScam(v => !v)}
-            className="w-full flex items-center gap-2 p-3 rounded-xl transition-all active:scale-98"
-            style={{
-              backgroundColor: filterScam ? "#FEF2F2" : "var(--bg-card)",
-              border: `1.5px solid ${filterScam ? "#EF4444" : "var(--border-light)"}`
-            }}>
-            <ShieldAlert className="w-4 h-4 shrink-0" style={{ color: "#EF4444" }} />
-            <p className="text-xs font-bold flex-1 text-left" style={{ color: "#EF4444" }}>
-              ⚠️ {scamCount} Scam Warning{scamCount !== 1 ? "s" : ""} — Tap to {filterScam ? "show all" : "view"}
-            </p>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold text-white" style={{ backgroundColor: "#EF4444" }}>
-              {filterScam ? "ALL" : "VIEW"}
-            </span>
-          </button>
-        </div>
-      )}
-
       {/* Top facts */}
-      {topFacts.length > 0 && !filterScam && (
+      {topFacts.length > 0 && (
         <div className="px-4 mt-4">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-sm">🏆</span>
@@ -457,13 +335,9 @@ export default function DidYouKnowPage() {
             <p className="text-xs mb-3" style={{ color: "var(--text-hint)" }}>
               {filtered.length} fact{filtered.length !== 1 ? "s" : ""}
               {search ? ` matching "${search}"` : ""}
-              {filterScam ? " · scam warnings only" : ""}
             </p>
             {filtered.map((post, i) => (
-              <FactCard key={post.id} post={post} user={user}
-                onLike={p => likeMut.mutate(p)}
-                onScamVote={(p, vote) => scamVoteMut.mutate({ post: p, vote })}
-                index={i} />
+              <FactCard key={post.id} post={post} user={user} onLike={p => likeMut.mutate(p)} index={i} />
             ))}
           </>
         )}
@@ -474,7 +348,7 @@ export default function DidYouKnowPage() {
         {showForm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 9999 }}
             onClick={() => setShowForm(false)}>
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}

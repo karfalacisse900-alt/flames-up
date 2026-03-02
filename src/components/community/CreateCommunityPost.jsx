@@ -59,7 +59,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const handleEditorDone = (editedFile, editedUrl) => {
     setImageFile(editedFile);
     setImagePreview(editedUrl);
-    setImageUrl(""); // cleared so upload happens fresh on submit
+    setImageUrl(""); // will upload on submit
     setEditingFile(null);
   };
 
@@ -78,8 +78,14 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
-    if (!body.trim() && type !== "debate" && !imageFile && !imageUrl && !videoFile) return;
+    if (!body.trim() && type !== "debate") return;
     if (type === "debate" && (!title.trim() || !sideA.trim() || !sideB.trim())) return;
+    // Require at least an image/gif/video for non-structured post types
+    const requiresMedia = !["debate", "list", "question", "quote_of_day"].includes(type);
+    if (requiresMedia && !imagePreview && !imageUrl && !videoPreview) {
+      setMediaError(true);
+      return;
+    }
     setMediaError(false);
     setSaving(true);
 
@@ -92,15 +98,14 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       setUploading(false);
     }
 
-    // Upload image if picked
-    let finalImageUrl = null;
-    if (imageFile) {
+    // Upload image if picked but not yet uploaded
+    let finalImageUrl = imageUrl;
+    if (imageFile && !finalImageUrl) {
       setUploading(true);
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       finalImageUrl = file_url;
+      setImageUrl(file_url);
       setUploading(false);
-    } else if (imageUrl) {
-      finalImageUrl = imageUrl;
     }
 
     // AI moderation check
@@ -108,9 +113,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
-        type, title: title.trim() || undefined, body: body.trim() || title.trim() || " ",
+        type, title: title.trim() || undefined, body: body.trim() || title.trim(),
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
-        author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
+        author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
         image_url: finalImageUrl || undefined,
         video_url: finalVideoUrl || undefined,
@@ -128,10 +133,10 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const postData = {
       type,
       title: title.trim() || undefined,
-      body: body.trim() || title.trim() || " ",
+      body: body.trim() || title.trim(),
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
-      author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
+      author_avatar_url: user?.avatar_url || "",
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
@@ -307,7 +312,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                       </button>
                     </div>
                   )}
-                  
+                  {mediaError && !imagePreview && !videoPreview && (
+                    <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo, GIF, or video before posting.</p>
+                  )}
                 </div>
               )}
 
@@ -319,26 +326,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                     rows={2}
                     className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
                     style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-                  {/* Photo/GIF/Video for debate */}
-                  <div>
-                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                    {imagePreview ? (
-                      <div className="relative rounded-xl overflow-hidden">
-                        <img src={imagePreview} alt="Upload" className="w-full max-h-48 object-cover" />
-                        <button onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button onClick={() => fileInputRef.current?.click()}
-                        className="py-2 px-3 rounded-xl text-xs font-medium flex items-center gap-1.5 border transition-all active:scale-95"
-                        style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                        <ImageIcon className="w-3.5 h-3.5" /> Add Photo (optional)
-                      </button>
-                    )}
-                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <p className="text-[11px] font-medium mb-1" style={{ color: "#3C6E5A" }}>🟢 Side A</p>

@@ -1,15 +1,13 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, ArrowUp, Zap, Bell } from "lucide-react";
+import { Plus, ArrowUp, Zap } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
-
-const PAGE_SIZE = 15;
 
 
 
@@ -17,28 +15,16 @@ export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const loaderRef = useRef(null);
   const qc = useQueryClient();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
+    // Only show posts that don't belong to any group (group_id is null/undefined)
     queryFn: async () => {
-      const all = await base44.entities.CommunityPost.list("-created_date", 300);
+      const all = await base44.entities.CommunityPost.list("-created_date", 100);
       return all.filter(p => !p.group_id);
     },
   });
-
-  // Infinite scroll via IntersectionObserver
-  useEffect(() => {
-    const el = loaderRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisibleCount(n => n + PAGE_SIZE);
-    }, { threshold: 0.1 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
@@ -94,32 +80,28 @@ export default function CommunityFeed({ user }) {
         });
       }
     },
-    onMutate: ({ post }) => {
-      // Optimistic update so UI toggles immediately
-      const hasUpvoted = post.upvoted_by?.includes(user.email);
+    onSuccess: (_, { post }) => {
       qc.setQueryData(["communityPosts"], (old) => {
         if (!old) return old;
-        return old.map(p => p.id !== post.id ? p : {
-          ...p,
-          upvotes: hasUpvoted ? Math.max(0, (p.upvotes || 0) - 1) : (p.upvotes || 0) + 1,
-          upvoted_by: hasUpvoted
-            ? (p.upvoted_by || []).filter(e => e !== user.email)
-            : [...(p.upvoted_by || []), user.email],
-        });
+        return old.map(p => p.id === post.id
+          ? {
+              ...p,
+              upvotes: post.upvoted_by?.includes(user.email) ? Math.max(0, (p.upvotes || 0) - 1) : (p.upvotes || 0) + 1,
+              upvoted_by: post.upvoted_by?.includes(user.email)
+                ? (p.upvoted_by || []).filter(e => e !== user.email)
+                : [...(p.upvoted_by || []), user.email],
+            }
+          : p
+        );
       });
-    },
-    onError: () => {
-      qc.invalidateQueries({ queryKey: ["communityPosts"] });
     },
   });
 
-  const rankedPosts = useMemo(() => {
+  const filteredPosts = useMemo(() => {
     const list = posts.filter(p => p.type !== "review");
     if (user?.email) return rankFeedForUser(list, user.email, debates);
     return [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
   }, [posts, user?.email, debates]);
-
-  const filteredPosts = rankedPosts.slice(0, visibleCount);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
@@ -135,13 +117,13 @@ export default function CommunityFeed({ user }) {
       >
         {post.type === "debate" || post.type === "question" ? (
           <DebateCard post={post} debate={debate} user={user}
-            onUpvote={() => user && upvoteMut.mutate({ post })}
+            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
         ) : (
           <CommunityPostCard post={post} user={user}
-            onUpvote={() => user && upvoteMut.mutate({ post })}
+            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
@@ -235,12 +217,6 @@ export default function CommunityFeed({ user }) {
           </motion.div>
         ) : (
           filteredPosts.map((post, index) => renderPostCard(post, index))
-        )}
-        {/* Infinite scroll sentinel */}
-        {visibleCount < rankedPosts.length && (
-          <div ref={loaderRef} className="flex justify-center py-6">
-            <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          </div>
         )}
       </div>
 
