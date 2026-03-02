@@ -76,7 +76,6 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   };
 
   const handleLike = () => {
-    if (hasLiked) return;
     setLikeBounce(true);
     setTimeout(() => setLikeBounce(false), 500);
     onUpvote();
@@ -95,14 +94,16 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       <div className="flex gap-3 px-4 py-3.5">
         {/* Avatar */}
         <div className="shrink-0">
-          {post.author_avatar_url ? (
-            <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover" />
-          ) : (
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
-              {initials}
-            </div>
-          )}
+          <Link to={!post.is_anonymous && post.author_email ? createPageUrl(`UserProfile?email=${post.author_email}`) : "#"}>
+            {post.author_avatar_url ? (
+              <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover" />
+            ) : (
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
+                style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
+                {initials}
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Content */}
@@ -192,7 +193,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               <button
                 onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
-                onClick={handleLike} disabled={hasLiked}
+                onClick={() => user && handleLike()}
                 className={`flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
                 style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
                 <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
@@ -211,7 +212,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                     {REACTIONS.map(r => (
                       <motion.button key={r}
                         whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
-                        onClick={() => { handleLike(); setShowReactions(false); }}
+                        onClick={() => { if (user) { handleLike(); } setShowReactions(false); }}
                         className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
                         style={{ backgroundColor: "var(--bg-subtle)" }}>
                         {r}
