@@ -115,17 +115,16 @@ Deno.serve(async (req) => {
       return Response.json(searchCache[cacheKey].data);
     }
 
-    const token = await getEbayToken();
+    const { token, sandbox } = await getEbayToken();
 
     let items = [];
     let total = 0;
 
     if (mixed) {
-      // Fetch from multiple categories and mix results
       const perCategory = Math.ceil(limit / MIXED_QUERIES.length);
-      const promises = MIXED_QUERIES.slice(0, 6).map(q => searchSingleQuery(token, q, perCategory, 0));
+      const promises = MIXED_QUERIES.slice(0, 6).map(q => searchSingleQuery(token, q, perCategory, 0, sandbox));
       const results = await Promise.all(promises);
-      
+
       // Interleave results (1 from each category at a time)
       const maxLen = Math.max(...results.map(r => r.length));
       for (let i = 0; i < maxLen; i++) {
@@ -133,7 +132,6 @@ Deno.serve(async (req) => {
           if (arr[i]) items.push(arr[i]);
         }
       }
-      // Deduplicate by id
       const seen = new Set();
       items = items.filter(item => {
         if (seen.has(item.id)) return false;
@@ -143,10 +141,8 @@ Deno.serve(async (req) => {
       items = items.slice(0, limit);
       total = items.length;
     } else {
-      // Single query search
-      const perPage = limit;
-      items = await searchSingleQuery(token, query, perPage, offset);
-      total = items.length + offset + (items.length === perPage ? perPage : 0);
+      items = await searchSingleQuery(token, query, limit, offset, sandbox);
+      total = items.length + offset + (items.length === limit ? limit : 0);
     }
 
     const result = { items, total, offset, limit };
