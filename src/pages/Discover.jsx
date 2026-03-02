@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { usePullToRefresh } from "../components/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ExternalLink, SlidersHorizontal, X, Star, Zap, BookOpen, Gamepad2, ShoppingBag, Store, MapPin } from "lucide-react";
+import { Search, ExternalLink, SlidersHorizontal, X, Star, Zap, BookOpen, Gamepad2, ShoppingBag, Store, MapPin, Music, Film, ChevronRight, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DiscoverLogo from "../components/discover/DiscoverLogo";
 import StarRating from "../components/discover/StarRating";
@@ -36,50 +36,44 @@ const CAT_COLORS = {
 };
 
 const CONTENT_TABS = [
-  { id: "apps",    label: "Apps",    icon: Zap },
-  { id: "media",   label: "Media",   icon: Star },
-  { id: "books",   label: "Books",   icon: BookOpen },
-  { id: "games",   label: "Games",   icon: Gamepad2 },
-  { id: "shop",    label: "Shop",    icon: ShoppingBag },
-  { id: "shopify", label: "Brands",  icon: Store },
-  { id: "local",   label: "Local",   icon: MapPin },
+  { id: "apps",    label: "Apps",    icon: Zap,         color: "#667EEA" },
+  { id: "media",   label: "Media",   icon: Film,        color: "#FA709A" },
+  { id: "books",   label: "Books",   icon: BookOpen,    color: "#F093FB" },
+  { id: "games",   label: "Games",   icon: Gamepad2,    color: "#43E97B" },
+  { id: "shop",    label: "Shop",    icon: ShoppingBag, color: "#F7971E" },
+  { id: "shopify", label: "Brands",  icon: Store,       color: "#30CFD0" },
+  { id: "local",   label: "Local",   icon: MapPin,      color: "#11998E" },
 ];
 
-// ── App list item ─────────────────────────────────────────────────────────────
 function AppItem({ item, onOpen, compareMode, isSelected, onToggleCompare, user }) {
   const cc = CAT_COLORS[item.category] || { from: "#2E6B4F", to: "#4CAF7D" };
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       onClick={compareMode ? onToggleCompare : onOpen}
-      className="flex items-start gap-3 p-3 rounded-2xl cursor-pointer transition-all active:scale-[0.99] relative"
+      className="flex items-start gap-3 p-3.5 rounded-2xl cursor-pointer relative overflow-hidden"
       style={{
         backgroundColor: "var(--bg-card)",
         border: isSelected ? `2px solid ${cc.from}` : "1px solid var(--border-light)",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
       }}>
-      {isSelected && <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold" style={{ backgroundColor: cc.from }}>✓</div>}
+      {/* gradient accent strip */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 opacity-60" style={{ background: `linear-gradient(90deg, ${cc.from}, ${cc.to})` }} />
+      {isSelected && <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ backgroundColor: cc.from }}>✓</div>}
 
-      {/* Logo with gradient ring */}
-      <div className="w-14 h-14 rounded-2xl overflow-hidden p-0.5 shrink-0" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>
-        <div className="w-full h-full rounded-[10px] overflow-hidden bg-white flex items-center justify-center">
-          <DiscoverLogo item={item} size="md" />
-        </div>
+      <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0" style={{ background: `linear-gradient(135deg, ${cc.from}22, ${cc.to}22)`, border: `1.5px solid ${cc.from}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <DiscoverLogo item={item} size="md" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-1.5">
+        <div className="flex items-start justify-between gap-1.5 mb-0.5">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <h3 className="font-bold text-sm leading-tight" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
-              {item.is_new && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold text-white" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>NEW</span>
-              )}
-              {item.is_sponsored && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: "#FFF7ED", color: "#C2410C" }}>AD</span>
-              )}
+              {item.is_new && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold text-white" style={{ background: `linear-gradient(135deg, ${cc.from}, ${cc.to})` }}>NEW</span>}
+              {item.is_sponsored && <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: "#FFF7ED", color: "#C2410C" }}>AD</span>}
             </div>
-            {item.brand_name && <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>}
+            {item.brand_name && <p className="text-[11px] mt-0.5" style={{ color: "var(--text-hint)" }}>{item.brand_name}</p>}
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {user && <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />}
@@ -92,13 +86,13 @@ function AppItem({ item, onOpen, compareMode, isSelected, onToggleCompare, user 
             )}
           </div>
         </div>
-        <p className="text-xs mt-1 line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        <p className="text-xs leading-relaxed line-clamp-2 mb-2" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `linear-gradient(135deg, ${cc.from}20, ${cc.to}20)`, color: cc.from }}>
             {item.category?.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
           </span>
           {item.pricing && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{item.pricing}</span>}
-          {item.promo && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>🎁 {item.promo}</span>}
+          {item.promo && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>🎁 {item.promo}</span>}
           <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
         </div>
         <QuickVote item={item} />
@@ -107,7 +101,6 @@ function AppItem({ item, onOpen, compareMode, isSelected, onToggleCompare, user 
   );
 }
 
-// ── Main Discover page ────────────────────────────────────────────────────────
 export default function Discover() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -170,6 +163,7 @@ export default function Discover() {
 
   const activeFiltersCount = [filterPlatform !== "all", filterPricing !== "all", sortBy !== "default"].filter(Boolean).length;
   const showSections = activeCategory === "all" && !search;
+  const activeTabMeta = CONTENT_TABS.find(t => t.id === contentTab);
 
   return (
     <div
@@ -183,38 +177,45 @@ export default function Discover() {
       <PullIndicator />
 
       {/* ── Header ── */}
-      <div className="px-4 pt-5 pb-3" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="px-4 pt-5 pb-4" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
-            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Explore tools, media & more</p>
+            <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Discover</h1>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Apps · Media · Books · Games & more</p>
           </div>
           {contentTab === "apps" && (
             <button onClick={() => { setCompareMode(m => !m); setCompareList([]); }}
               className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-              style={{ backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)", color: compareMode ? "#fff" : "var(--text-secondary)", borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)" }}>
+              style={{
+                backgroundColor: compareMode ? "var(--accent-primary)" : "var(--bg-card)",
+                color: compareMode ? "#fff" : "var(--text-secondary)",
+                borderColor: compareMode ? "var(--accent-primary)" : "var(--border-light)",
+              }}>
               ⚖️ Compare
             </button>
           )}
         </div>
 
-        {/* Content type tabs — icon + label pill row */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {/* Tab strip with colored icons */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
           {CONTENT_TABS.map(t => {
             const Icon = t.icon;
             const isActive = contentTab === t.id;
             return (
-              <button key={t.id} onClick={() => setContentTab(t.id)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+              <motion.button
+                key={t.id}
+                onClick={() => setContentTab(t.id)}
+                whileTap={{ scale: 0.93 }}
+                className="flex flex-col items-center gap-1 px-3.5 py-2.5 rounded-2xl shrink-0 transition-all"
                 style={{
-                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                  color: isActive ? "#fff" : "var(--text-secondary)",
-                  border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                  boxShadow: isActive ? "0 2px 12px rgba(46,107,79,0.25)" : "none",
+                  backgroundColor: isActive ? t.color : "var(--bg-card)",
+                  border: `1.5px solid ${isActive ? t.color : "var(--border-light)"}`,
+                  boxShadow: isActive ? `0 4px 16px ${t.color}40` : "none",
+                  minWidth: 62,
                 }}>
-                <Icon className="w-3.5 h-3.5" />
-                {t.label}
-              </button>
+                <Icon className="w-4 h-4" style={{ color: isActive ? "#fff" : t.color }} />
+                <span className="text-[11px] font-semibold" style={{ color: isActive ? "#fff" : "var(--text-secondary)" }}>{t.label}</span>
+              </motion.button>
             );
           })}
         </div>
@@ -225,7 +226,6 @@ export default function Discover() {
         <>
           <SmartFilters active={smartFilter} onChange={f => { setSmartFilter(f); setActiveCategory("all"); }} />
 
-          {/* Search + filter row */}
           <div className="px-4 pt-1 pb-2 space-y-2">
             <div className="flex gap-2 items-center">
               <div className="relative flex-1">
@@ -248,11 +248,9 @@ export default function Discover() {
               </button>
             </div>
 
-            {/* Filter panel */}
             <AnimatePresence>
               {showFilters && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden">
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <div className="p-3 rounded-2xl space-y-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                     {[
                       { label: "Sort", items: [["default","Default"],["rating","Top Rated"],["newest","Newest"]], val: sortBy, set: setSortBy },
@@ -287,15 +285,14 @@ export default function Discover() {
             <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
               {CATEGORIES.map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)}
-                  className="px-3 py-1 text-xs rounded-full border whitespace-nowrap shrink-0 transition-all"
-                  style={{ backgroundColor: activeCategory === cat ? "var(--text-primary)" : "var(--bg-card)", color: activeCategory === cat ? "var(--bg-app)" : "var(--text-secondary)", borderColor: activeCategory === cat ? "var(--text-primary)" : "var(--border-light)", fontWeight: activeCategory === cat ? 700 : 400 }}>
+                  className="px-3 py-1 text-xs rounded-full border whitespace-nowrap shrink-0 transition-all font-medium"
+                  style={{ backgroundColor: activeCategory === cat ? "var(--text-primary)" : "var(--bg-card)", color: activeCategory === cat ? "var(--bg-app)" : "var(--text-secondary)", borderColor: activeCategory === cat ? "var(--text-primary)" : "var(--border-light)", fontWeight: activeCategory === cat ? 700 : 500 }}>
                   {cat === "all" ? "All" : cat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* App list */}
           {isLoading ? (
             <div className="flex justify-center py-16">
               <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
@@ -304,24 +301,23 @@ export default function Discover() {
             <div className="pb-24">
               {showSections && <DiscoverBillboard items={items} user={user} onItemClick={setSelectedItem} />}
               {showSections && newItems.length > 0 && <NewNoteworthy items={newItems} onItemClick={setSelectedItem} />}
-
               {showSections && (
                 <div className="px-4 flex items-center gap-2 mb-3 mt-2">
+                  <TrendingUp className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
                   <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                     {activeCategory === "all" ? "All Tools & Services" : activeCategory.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
                   </h2>
                   <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>{filtered.length}</span>
                 </div>
               )}
-
               {filtered.length === 0 ? (
                 <div className="text-center py-16 px-5">
                   <p className="text-4xl mb-3">🔍</p>
                   <p className="text-sm" style={{ color: "var(--text-hint)" }}>No items found</p>
                 </div>
               ) : (
-                <div className="px-4 space-y-2">
-                  {filtered.map((item, idx) => (
+                <div className="px-4 space-y-2.5">
+                  {filtered.map(item => (
                     <AppItem key={item.id} item={item} user={user}
                       onOpen={() => setSelectedItem(item)}
                       compareMode={compareMode}
@@ -350,22 +346,27 @@ export default function Discover() {
         </>
       )}
 
-      {contentTab === "media"   && <div className="mt-3"><MediaTab user={user} /></div>}
-      {contentTab === "books"   && <div className="mt-3"><OpenLibraryBooksTab /></div>}
-      {contentTab === "games"   && (
-        <div className="pb-24 mt-4">
-          <div className="px-4 flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Steam Games</h2>
-            <button onClick={() => setShowSubmitForm(true)} className="px-3 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "var(--accent-primary)" }}>+ Submit</button>
+      {/* ── Other tabs with consistent header ── */}
+      {contentTab !== "apps" && (
+        <div className="px-4 pb-1">
+          <div className="flex items-center gap-2.5 py-2 px-3.5 rounded-2xl mb-1"
+            style={{ backgroundColor: `${activeTabMeta?.color}15`, border: `1px solid ${activeTabMeta?.color}30` }}>
+            {activeTabMeta && React.createElement(activeTabMeta.icon, { className: "w-4 h-4", style: { color: activeTabMeta.color } })}
+            <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{activeTabMeta?.label}</span>
+            {contentTab === "games" && (
+              <button onClick={() => setShowSubmitForm(true)} className="ml-auto px-3 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: activeTabMeta?.color }}>+ Submit</button>
+            )}
           </div>
-          <GamesTab />
         </div>
       )}
-      {contentTab === "shop"    && <div className="mt-3"><EbayShopTab /></div>}
-      {contentTab === "shopify" && <div className="mt-3"><ShopifyTab /></div>}
-      {contentTab === "local"   && <div className="mt-3"><MapboxLocal /></div>}
 
-      {/* Modals */}
+      {contentTab === "media"   && <div className="mt-1"><MediaTab user={user} /></div>}
+      {contentTab === "books"   && <div className="mt-1"><OpenLibraryBooksTab /></div>}
+      {contentTab === "games"   && <div className="pb-24 mt-1"><GamesTab /></div>}
+      {contentTab === "shop"    && <div className="mt-1"><EbayShopTab /></div>}
+      {contentTab === "shopify" && <div className="mt-1"><ShopifyTab /></div>}
+      {contentTab === "local"   && <div className="mt-1"><MapboxLocal /></div>}
+
       {selectedItem && !compareMode && (
         <DiscoverItemModal item={selectedItem} user={user} allItems={items}
           onClose={() => setSelectedItem(null)}
