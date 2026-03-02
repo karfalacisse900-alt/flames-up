@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       allItems = allItems.slice(0, limit);
     } else {
       const params = new URLSearchParams({ q: query, limit: String(limit), offset: String(offset) });
-      const searchRes = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
+      const searchRes = await fetch(`${tokenBaseUrl}/buy/browse/v1/item_summary/search?${params}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
