@@ -6,26 +6,7 @@ import { Search, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
 const DEFAULT_QUERIES = ["Headphones", "Sneakers", "Gaming Chair", "Watches", "AirPods"];
 
 
-const PLACEHOLDER_IMAGES = {
-  "Headphones": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-  "Sneakers": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-  "Gaming Chair": "https://images.unsplash.com/photo-1616599382690-e14de6b74e17?w=400&q=80",
-  "Watches": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-  "AirPods": "https://images.unsplash.com/photo-1588423771073-b8903fead85b?w=400&q=80",
-};
-
-function getPlaceholderImage(title, query) {
-  // Try to match a keyword from the query or title
-  const key = Object.keys(PLACEHOLDER_IMAGES).find(k =>
-    query?.toLowerCase().includes(k.toLowerCase()) || title?.toLowerCase().includes(k.toLowerCase())
-  );
-  return key
-    ? PLACEHOLDER_IMAGES[key]
-    : `https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80`; // generic shopping
-}
-
-function EbayCard({ item, index, query }) {
-  const imgSrc = item.image || item.thumbnail || getPlaceholderImage(item.title, query);
+function EbayCard({ item, index }) {
   return (
     <motion.a
       href={item.url} target="_blank" rel="noopener noreferrer"
@@ -37,9 +18,14 @@ function EbayCard({ item, index, query }) {
       className="block rounded-2xl overflow-hidden break-inside-avoid mb-3"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "inline-block", width: "100%" }}
     >
-      <img src={imgSrc} alt={item.title} className="w-full object-cover"
-        style={{ height: index % 3 === 0 ? 200 : 150 }}
-        onError={e => { e.target.src = getPlaceholderImage(item.title, query); }} />
+      {item.image ? (
+        <img src={item.image} alt={item.title} className="w-full object-cover"
+          style={{ maxHeight: index % 3 === 0 ? 220 : 160 }} />
+      ) : (
+        <div className="w-full h-36 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <ShoppingCart className="w-8 h-8" style={{ color: "var(--text-hint)" }} />
+        </div>
+      )}
       <div className="p-2.5">
         <p className="text-xs font-medium leading-snug line-clamp-2 mb-1.5" style={{ color: "var(--text-primary)" }}>{item.title}</p>
         <div className="flex items-center justify-between">
@@ -57,6 +43,48 @@ function EbayCard({ item, index, query }) {
   );
 }
 
+function AutoCarousel({ onSearch }) {
+  const [current, setCurrent] = useState(0);
+  const timer = useRef(null);
+
+  const featured = [
+    { emoji: "🎧", label: "Headphones", color: "#7c3aed" },
+    { emoji: "👟", label: "Sneakers", color: "#db2777" },
+    { emoji: "📱", label: "iPhone 15", color: "#0284c7" },
+    { emoji: "🎮", label: "Gaming", color: "#16a34a" },
+    { emoji: "⌚", label: "Watches", color: "#d97706" },
+  ];
+
+  useEffect(() => {
+    timer.current = setInterval(() => setCurrent(c => (c + 1) % featured.length), 2200);
+    return () => clearInterval(timer.current);
+  }, []);
+
+  return (
+    <div className="px-4 mb-5">
+      <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Trending</p>
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {featured.map((f, i) => (
+          <motion.button key={f.label}
+            onClick={() => onSearch(f.label)}
+            animate={{ scale: current === i ? 1.06 : 1, opacity: current === i ? 1 : 0.75 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl shrink-0 font-semibold text-xs"
+            style={{
+              background: current === i ? `linear-gradient(135deg, ${f.color}22, ${f.color}11)` : "var(--bg-card)",
+              border: `1.5px solid ${current === i ? f.color + "55" : "var(--border-light)"}`,
+              color: current === i ? f.color : "var(--text-secondary)",
+              minWidth: 72,
+            }}>
+            <span className="text-2xl">{f.emoji}</span>
+            {f.label}
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function EbayShopTab() {
   const [query, setQuery] = useState("");
   const [inputVal, setInputVal] = useState("");
@@ -65,29 +93,13 @@ export default function EbayShopTab() {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeCategory, setActiveCategory] = useState(null);
   const LIMIT = 20;
 
-  const CATEGORIES = [
-    { label: "Headphones", emoji: "🎧", q: "Headphones" },
-    { label: "Sneakers", emoji: "👟", q: "Sneakers" },
-    { label: "Gaming", emoji: "🎮", q: "Gaming Chair" },
-    { label: "Watches", emoji: "⌚", q: "Watches" },
-    { label: "AirPods", emoji: "🎵", q: "AirPods" },
-    { label: "iPhone", emoji: "📱", q: "iPhone" },
-  ];
-
-  // Auto-load default products on mount
-  useEffect(() => {
-    const randomQ = DEFAULT_QUERIES[Math.floor(Math.random() * DEFAULT_QUERIES.length)];
-    search(randomQ, 0, true);
-  }, []);
-
-  const search = async (q, off = 0, isDefault = false) => {
+  const search = async (q, off = 0) => {
     if (!q.trim()) return;
     setLoading(true);
     setError(null);
-    if (!isDefault) setInputVal(q);
+    setInputVal(q);
     const res = await base44.functions.invoke("ebaySearch", { query: q, limit: LIMIT, offset: off });
     setLoading(false);
     if (res.data?.error) { setError(res.data.error); return; }
@@ -98,11 +110,6 @@ export default function EbayShopTab() {
   };
 
   const handleSubmit = (e) => { e.preventDefault(); search(inputVal); };
-
-  const handleCategory = (cat) => {
-    setActiveCategory(cat.q);
-    search(cat.q);
-  };
 
   // Split items into two columns for masonry
   const col1 = items.filter((_, i) => i % 2 === 0);
@@ -121,7 +128,7 @@ export default function EbayShopTab() {
       </div>
 
       {/* Search */}
-      <form onSubmit={handleSubmit} className="px-4 mb-3">
+      <form onSubmit={handleSubmit} className="px-4 mb-4">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
@@ -137,36 +144,34 @@ export default function EbayShopTab() {
         </div>
       </form>
 
-      {/* Category pills */}
-      <div className="px-4 mb-4">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {CATEGORIES.map(cat => {
-            const isActive = activeCategory === cat.q;
-            return (
-              <button key={cat.q} onClick={() => handleCategory(cat)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl shrink-0 text-xs font-semibold transition-all active:scale-95"
-                style={{
-                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                  color: isActive ? "#fff" : "var(--text-secondary)",
-                  border: `1.5px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                }}>
-                <span className="text-base">{cat.emoji}</span>
-                {cat.label}
+      {/* Auto-carousel */}
+      {!query && <AutoCarousel onSearch={search} />}
+
+      {/* Popular tags */}
+      {!query && (
+        <div className="px-4 mb-4">
+          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Popular</p>
+          <div className="flex flex-wrap gap-2">
+            {POPULAR.map(p => (
+              <button key={p} onClick={() => search(p)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
+                style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+                {p}
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-12 gap-3">
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
             className="w-7 h-7 border-2 rounded-full"
             style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Loading products...</p>
+          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Searching eBay...</p>
         </div>
       )}
 
@@ -189,10 +194,10 @@ export default function EbayShopTab() {
           {/* 2-col masonry */}
           <div className="px-4 flex gap-3">
             <div className="flex-1 flex flex-col">
-              {col1.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2} query={query} />)}
+              {col1.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2} />)}
             </div>
             <div className="flex-1 flex flex-col mt-5">
-              {col2.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2 + 1} query={query} />)}
+              {col2.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2 + 1} />)}
             </div>
           </div>
 

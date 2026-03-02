@@ -76,16 +76,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     // Upload image if picked but not yet uploaded
     let finalImageUrl = imageUrl;
     if (imageFile && !finalImageUrl) {
-      try {
-        setUploading(true);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
-        finalImageUrl = file_url;
-        setImageUrl(file_url);
-      } catch (_) {
-        // Upload failed — post without image
-      } finally {
-        setUploading(false);
-      }
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      finalImageUrl = file_url;
+      setImageUrl(file_url);
+      setUploading(false);
     }
 
     // AI moderation check
