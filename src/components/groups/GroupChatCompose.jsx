@@ -77,7 +77,7 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
 
     const mentions = extractMentions(body);
 
-    await base44.entities.CommunityPost.create({
+    const newPost = await base44.entities.CommunityPost.create({
       type: "opinion",
       body: body.trim(),
       author_email: user.email,
@@ -91,7 +91,16 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
       reply_to_preview: replyTo ? replyTo.body?.slice(0, 60) : undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       read_by: [user.email],
+      moderation_status: "approved", // default, AI will override if needed
     });
+
+    // Run AI moderation in background (non-blocking)
+    base44.functions.invoke("moderateGroupPost", {
+      post_id: newPost.id,
+      post_body: body.trim(),
+      group_id: group.id,
+      author_email: user.email,
+    }).catch(() => {});
 
     await base44.entities.Group.update(group.id, { post_count: (group.post_count || 0) + 1 });
 
