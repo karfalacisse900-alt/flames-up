@@ -80,7 +80,21 @@ export default function CommunityFeed({ user }) {
         });
       }
     },
-    onSuccess: () => {
+    onMutate: ({ post }) => {
+      // Optimistic update so UI toggles immediately
+      const hasUpvoted = post.upvoted_by?.includes(user.email);
+      qc.setQueryData(["communityPosts"], (old) => {
+        if (!old) return old;
+        return old.map(p => p.id !== post.id ? p : {
+          ...p,
+          upvotes: hasUpvoted ? Math.max(0, (p.upvotes || 0) - 1) : (p.upvotes || 0) + 1,
+          upvoted_by: hasUpvoted
+            ? (p.upvoted_by || []).filter(e => e !== user.email)
+            : [...(p.upvoted_by || []), user.email],
+        });
+      });
+    },
+    onError: () => {
       qc.invalidateQueries({ queryKey: ["communityPosts"] });
     },
   });
