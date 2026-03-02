@@ -45,6 +45,7 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const [showModeration, setShowModeration] = useState(false);
   const [reportingPost, setReportingPost] = useState(null);
   const [reportReason, setReportReason] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
   const qc = useQueryClient();
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
@@ -64,6 +65,12 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
     queryKey: ["groupReportCount", group.id],
     queryFn: () => base44.entities.GroupPostReport.filter({ group_id: group.id, status: "pending" }),
     enabled: isAdmin,
+  });
+
+  const { data: members = [] } = useQuery({
+    queryKey: ["groupMembers", group.id],
+    queryFn: () => base44.entities.GroupMember.filter({ group_id: group.id }),
+    enabled: isMember,
   });
 
   const { data: pendingPosts = [] } = useQuery({
