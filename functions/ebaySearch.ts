@@ -56,15 +56,22 @@ async function getEbayToken() {
   throw new Error("eBay authentication failed. Check EBAY_CLIENT_ID and EBAY_CLIENT_SECRET secrets.");
 }
 
-async function searchSingleQuery(token, q, limit, offset) {
+async function searchSingleQuery(token, q, limit, offset, sandbox = false) {
+  const baseUrl = sandbox
+    ? "https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search"
+    : "https://api.ebay.com/buy/browse/v1/item_summary/search";
+
   const params = new URLSearchParams({
     q,
     limit: String(limit),
     offset: String(offset),
-    filter: "buyingOptions:{FIXED_PRICE},price:[5..500]",
   });
 
-  const res = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`, {
+  if (!sandbox) {
+    params.set("filter", "buyingOptions:{FIXED_PRICE},price:[5..500]");
+  }
+
+  const res = await fetch(`${baseUrl}?${params}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
       "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
