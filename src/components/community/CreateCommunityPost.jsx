@@ -76,20 +76,21 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     // Upload image if picked but not yet uploaded
     let finalImageUrl = imageUrl;
     if (imageFile && !finalImageUrl) {
-      setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
-      finalImageUrl = file_url;
-      setImageUrl(file_url);
-      setUploading(false);
+      try {
+        setUploading(true);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+        finalImageUrl = file_url;
+        setImageUrl(file_url);
+      } catch (_) {
+        // Upload failed — post without image
+      } finally {
+        setUploading(false);
+      }
     }
 
-    // AI moderation check (non-blocking — if it fails, allow the post through)
-    let modResult = { safe: true };
-    try {
-      const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
-      modResult = await checkContent(textToCheck);
-    } catch (_) { /* network error — skip moderation */ }
-
+    // AI moderation check
+    const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
+    const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
         type, title: title.trim() || undefined, body: body.trim() || title.trim(),
@@ -101,7 +102,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         is_daily_spotlight: false, is_reported: true,
         list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
       });
-      try { await createModerationReport("post", newPost.id, user?.email, user?.display_name || user?.full_name, modResult.flags, modResult.confidence); } catch (_) {}
+      await createModerationReport("post", newPost.id, user?.email, user?.display_name || user?.full_name, modResult.flags, modResult.confidence);
       setSaving(false);
       onCreated();
       onClose();
