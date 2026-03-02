@@ -95,7 +95,7 @@ function ReactionSessionCard({ session, user }) {
 
   // Extract YouTube embed
   const getYouTubeId = (url) => {
-    const match = url?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+    const match = url?.match(/(?:youtu\.be\/|v\/|watch\?v=|embed\/|shorts\/)([\w-]{11})/);
     return match?.[1] || null;
   };
   const ytId = getYouTubeId(session.video_url);
@@ -129,11 +129,12 @@ function ReactionSessionCard({ session, user }) {
         {ytId ? (
           <div style={{ paddingBottom: "56.25%", position: "relative" }}>
             <iframe
-              src={`https://www.youtube.com/embed/${ytId}`}
+              src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1`}
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               title={session.video_title}
+              referrerPolicy="origin"
             />
           </div>
         ) : (
