@@ -189,10 +189,10 @@ export default function EbayShopTab() {
           {/* 2-col masonry */}
           <div className="px-4 flex gap-3">
             <div className="flex-1 flex flex-col">
-              {col1.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2} />)}
+              {col1.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2} query={query} />)}
             </div>
             <div className="flex-1 flex flex-col mt-5">
-              {col2.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2 + 1} />)}
+              {col2.map((item, i) => <EbayCard key={item.id} item={item} index={i * 2 + 1} query={query} />)}
             </div>
           </div>
 
