@@ -108,7 +108,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
-        type, title: title.trim() || undefined, body: body.trim() || title.trim(),
+        type, title: title.trim() || undefined, body: body.trim() || title.trim() || " ",
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
         author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
         is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
@@ -128,7 +128,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const postData = {
       type,
       title: title.trim() || undefined,
-      body: body.trim() || title.trim(),
+      body: body.trim() || title.trim() || " ",
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
       author_avatar_url: user?.profile_picture_url || user?.avatar_url || "",
