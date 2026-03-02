@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
     const result = { items, total, offset, limit };
     searchCache[cacheKey] = { data: result, ts: Date.now() };
 
-    console.log(`eBay search "${query}" (production): ${items.length} results`);
+    console.log(`eBay search "${query}" (${sandbox ? "sandbox" : "production"}): ${items.length} results`);
     return Response.json(result);
   } catch (error) {
     console.error("ebaySearch error:", error.message);
