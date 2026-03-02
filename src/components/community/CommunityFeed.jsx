@@ -113,11 +113,13 @@ export default function CommunityFeed({ user }) {
     },
   });
 
-  const filteredPosts = useMemo(() => {
+  const rankedPosts = useMemo(() => {
     const list = posts.filter(p => p.type !== "review");
     if (user?.email) return rankFeedForUser(list, user.email, debates);
     return [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
   }, [posts, user?.email, debates]);
+
+  const filteredPosts = rankedPosts.slice(0, visibleCount);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
