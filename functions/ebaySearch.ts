@@ -23,19 +23,25 @@ async function getEbayToken() {
     "Content-Type": "application/x-www-form-urlencoded"
   };
 
-  // Try production ONLY — sandbox causes broken product URLs
-  const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", { method: "POST", headers, body });
-  if (res.ok) {
-    const data = await res.json();
-    tokenCache = data.access_token;
-    tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-    console.log("eBay token obtained (production)");
-    return tokenCache;
+  // Try production first, fall back to sandbox
+  for (const endpoint of [
+    "https://api.ebay.com/identity/v1/oauth2/token",
+    "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
+  ]) {
+    const res = await fetch(endpoint, { method: "POST", headers, body });
+    if (res.ok) {
+      const data = await res.json();
+      tokenCache = data.access_token;
+      tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+      const env = endpoint.includes("sandbox") ? "sandbox" : "production";
+      console.log(`eBay token obtained (${env})`);
+      return tokenCache;
+    }
+    const errText = await res.text();
+    console.warn(`eBay token failed for ${endpoint}:`, errText);
   }
 
-  const err = await res.text();
-  console.error("eBay token error:", err);
-  throw new Error("eBay authentication failed: " + err);
+  throw new Error("eBay authentication failed on both production and sandbox endpoints");
 }
 
 // Mixed category search — rotate through multiple queries to get diverse results
