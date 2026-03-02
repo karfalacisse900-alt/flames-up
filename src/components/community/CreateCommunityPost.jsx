@@ -59,7 +59,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const handleEditorDone = (editedFile, editedUrl) => {
     setImageFile(editedFile);
     setImagePreview(editedUrl);
-    setImageUrl(""); // will upload on submit
+    setImageUrl(""); // cleared so upload happens fresh on submit
     setEditingFile(null);
   };
 
