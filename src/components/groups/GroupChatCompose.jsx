@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { Send, Image as ImageIcon, X, AtSign, Loader2 } from "lucide-react";
+import { Send, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { checkContent } from "@/components/moderation/moderationHelper";
+import { useTypingBroadcast } from "./TypingIndicator";
 
 export default function GroupChatCompose({ group, user, members = [], replyTo, onClearReply, onPosted, fileInputRef }) {
   const [body, setBody] = useState("");
