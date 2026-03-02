@@ -141,7 +141,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_anonymous: isAnon,
       media_type: mediaType,
       media_ref_title: mediaRef.trim() || undefined,
-      image_url: finalImageUrl || undefined,
+      image_url: finalImageUrl || finalVideoUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
       list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
