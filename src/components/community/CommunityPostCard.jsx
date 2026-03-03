@@ -137,7 +137,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               <span className="text-[11px] shrink-0" style={{ color: "var(--text-hint)" }}>· {timeAgo(post.created_date)}</span>
             </div>
             <div className="flex items-center gap-0.5 shrink-0">
-              {!isOwnPost && !post.is_anonymous && !!post.author_email && !!user && (
+              {!isOwnPost && showAuthor && !!user && (
                 <button onClick={handleFollow}
                   className="p-1.5 rounded-full transition-all chip"
                   style={{ color: isFollowing ? "var(--accent-primary)" : "var(--text-hint)" }}>
