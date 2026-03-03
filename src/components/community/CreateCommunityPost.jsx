@@ -38,11 +38,16 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoError, setVideoError] = useState("");
   const [editingFile, setEditingFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
