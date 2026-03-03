@@ -37,6 +37,12 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
   const isOwnPost = user?.email && post.author_email === user.email;
 
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this post?")) return;
+    await base44.entities.CommunityPost.delete(post.id);
+    qc.invalidateQueries({ queryKey: ["communityPosts"] });
+  };
+
   const { data: followRecord } = useQuery({
     queryKey: ["followStatus", user?.email, post.author_email],
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email }),
