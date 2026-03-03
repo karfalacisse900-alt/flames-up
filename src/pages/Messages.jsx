@@ -302,6 +302,72 @@ function ChatView({ user, conversation, onBack }) {
   );
 }
 
+// ── New Message button — pick from followers/following ────────────────────────
+function NewMessageButton({ user, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const { data: follows = [] } = useQuery({
+    queryKey: ["msgFollows", user?.email],
+    queryFn: async () => {
+      const [sent, received] = await Promise.all([
+        base44.entities.Follow.filter({ follower_email: user.email }),
+        base44.entities.Follow.filter({ following_email: user.email }),
+      ]);
+      const map = {};
+      sent.forEach(f => { map[f.following_email] = f.following_name || f.following_email; });
+      received.forEach(f => { map[f.follower_email] = f.follower_name || f.follower_email; });
+      return Object.entries(map).map(([email, name]) => ({ email, name }));
+    },
+    enabled: !!user?.email && open,
+  });
+
+  const filtered = follows.filter(f =>
+    !search || f.name?.toLowerCase().includes(search.toLowerCase()) || f.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (!user) return null;
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
+        <Edit className="w-4 h-4" />
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} onClick={() => setOpen(false)}>
+          <div className="w-full max-w-lg mx-auto rounded-t-3xl p-4 pb-8" style={{ backgroundColor: "var(--bg-modal)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div className="h-1.5 w-12 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--border-medium)" }} />
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>New Message</p>
+              <button onClick={() => setOpen(false)} style={{ color: "var(--text-hint)" }}><X className="w-4 h-4" /></button>
+            </div>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search people..."
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none mb-3"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+            {filtered.length === 0 ? (
+              <p className="text-sm text-center py-6" style={{ color: "var(--text-hint)" }}>
+                {follows.length === 0 ? "Follow someone to start a conversation" : "No results"}
+              </p>
+            ) : filtered.map(f => (
+              <button key={f.email} onClick={() => { onSelect(f); setOpen(false); }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl mb-1 text-left"
+                style={{ backgroundColor: "var(--bg-subtle)" }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: "var(--bg-card)", color: "var(--accent-primary)" }}>
+                  {f.name?.[0]?.toUpperCase() || "?"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{f.email}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Messages() {
   const [user, setUser] = useState(null);
   const [activeConversation, setActiveConversation] = useState(null);
