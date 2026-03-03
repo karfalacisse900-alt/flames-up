@@ -407,6 +407,18 @@ export default function PostComments() {
     commentMut.mutate({ body: commentText.trim(), type: "text" });
   };
 
+  const handleDeleteComment = async (reply) => {
+    if (!window.confirm("Delete this comment?")) return;
+    if (reply.type === "voice") {
+      await base44.entities.VoiceReply.delete(reply.id);
+      qc.invalidateQueries({ queryKey: ["voiceReplies", postId] });
+    } else {
+      await base44.entities.CommunityComment.delete(reply.id);
+      if (post) await base44.entities.CommunityPost.update(post.id, { comment_count: Math.max(0, (post.comment_count || 0) - 1) });
+      invalidate();
+    }
+  };
+
   const allReplies = [
     ...comments.map(c => ({ ...c, type: c.type || "text" })),
     ...voiceReplies.map(v => ({ ...v, type: "voice" })),
