@@ -33,7 +33,9 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const qc = useQueryClient();
 
   const avatarColor = getAvatarColor(post.author_name);
-  const initials = post.is_anonymous ? "?" : (post.author_name?.[0] || "U").toUpperCase();
+  const initials = (post.author_name?.[0] || "U").toUpperCase();
+  // Never reveal author info when anonymous
+  const showAuthor = !post.is_anonymous && !!post.author_email;
 
   const isOwnPost = user?.email && post.author_email === user.email;
 
