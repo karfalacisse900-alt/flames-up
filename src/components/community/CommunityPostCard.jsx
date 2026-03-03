@@ -160,6 +160,13 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               style={{ maxHeight: 280, border: "1px solid var(--border-subtle)" }} />
           )}
 
+          {/* Video */}
+          {post.video_url && (
+            <video src={post.video_url} controls playsInline preload="metadata"
+              className="w-full rounded-2xl mb-2.5"
+              style={{ maxHeight: 320, border: "1px solid var(--border-subtle)", backgroundColor: "#000" }} />
+          )}
+
           {/* List items */}
           {post.type === "list" && post.list_items?.length > 0 && (
             <ol className="mb-2.5 space-y-1">
