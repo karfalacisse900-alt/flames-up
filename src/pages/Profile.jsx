@@ -26,6 +26,7 @@ export default function Profile() {
   const [bio, setBio] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
