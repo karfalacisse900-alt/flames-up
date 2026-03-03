@@ -118,10 +118,14 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <Link to={!post.is_anonymous && post.author_email ? createPageUrl(`UserProfile?email=${post.author_email}`) : "#"}
-                className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
-                {post.is_anonymous ? "Anonymous" : (post.author_name || "User")}
-              </Link>
+              {!post.is_anonymous && post.author_email ? (
+                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
+                  className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                  {post.author_name || "User"}
+                </Link>
+              ) : (
+                <span className="text-sm font-bold truncate" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
+              )}
               <span className="text-[11px] shrink-0" style={{ color: "var(--text-hint)" }}>· {timeAgo(post.created_date)}</span>
             </div>
             <div className="flex items-center gap-0.5 shrink-0">
