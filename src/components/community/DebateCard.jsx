@@ -120,6 +120,11 @@ export default function DebateCard({ post, debate, user, onUpvote }) {
               className="w-full rounded-2xl mb-2 object-cover"
               style={{ maxHeight: 280, border: "1px solid var(--border-subtle)" }} />
           )}
+          {post.video_url && (
+            <video src={post.video_url} controls playsInline preload="metadata"
+              className="w-full rounded-2xl mb-2"
+              style={{ maxHeight: 300, border: "1px solid var(--border-subtle)", backgroundColor: "#000" }} />
+          )}
 
           {debate && (
             <div className="mb-2">
