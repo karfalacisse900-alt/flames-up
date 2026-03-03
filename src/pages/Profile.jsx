@@ -506,6 +506,16 @@ export default function Profile() {
               </div>
             </div>
             <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
+            <div>
+              <Input
+                placeholder="Username (e.g. @cooluser)"
+                value={username.startsWith("@") ? username.slice(1) : username}
+                onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+                className="rounded-xl"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}
+              />
+              <p className="text-[11px] mt-1 px-1" style={{ color: "var(--text-hint)" }}>Unique username — letters, numbers & underscores only</p>
+            </div>
             <Textarea placeholder="Short bio (one-liner)" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={2} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
             <Textarea placeholder="About Me — tell your story, share your passions…" value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} className="rounded-xl resize-none" rows={4} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
             {/* Theme picker */}
