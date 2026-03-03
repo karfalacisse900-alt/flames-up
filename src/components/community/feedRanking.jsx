@@ -194,13 +194,17 @@ export function rankFeedForUser(posts, userEmail, debates = [], followedEmails =
     const isNewCreator = (post.upvotes || 0) < 5 && (post.comment_count || 0) < 3;
     const discoveryBoost = isNewCreator && recency > 0.7 ? 0.08 : 0;
 
+    // Followed user boost: surface posts from people the user follows
+    const followedBoost = followedSet.has(post.author_email) ? 0.25 : 0;
+
     // Multi-layer score formula
     const score = (
-      similarity * 0.35 +
-      collab * 0.20 +
+      similarity * 0.30 +
+      collab * 0.15 +
       engagementPrediction * 0.20 +
       velocity * 0.10 +
       recency * 0.10 +
+      followedBoost +
       discoveryBoost
     ) * seenPenalty;
 
