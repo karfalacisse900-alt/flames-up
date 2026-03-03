@@ -99,11 +99,13 @@ export default function CommunityFeed({ user }) {
     },
   });
 
+  const followedEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
+
   const filteredPosts = useMemo(() => {
     const list = posts.filter(p => p.type !== "review");
-    if (user?.email) return rankFeedForUser(list, user.email, debates);
+    if (user?.email) return rankFeedForUser(list, user.email, debates, followedEmails);
     return [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
-  }, [posts, user?.email, debates]);
+  }, [posts, user?.email, debates, followedEmails]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
