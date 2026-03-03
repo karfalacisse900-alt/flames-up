@@ -216,9 +216,10 @@ function StickerPicker({ onSelect }) {
 }
 
 // ── Comment Item ──────────────────────────────────────────
-function CommentItem({ reply }) {
+function CommentItem({ reply, currentUserEmail, onDelete }) {
   const [liked, setLiked] = useState(false);
   const color = getAvatarColor(reply.author_name);
+  const isOwn = currentUserEmail && reply.author_email === currentUserEmail;
 
   return (
     <div className="flex gap-3 py-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
@@ -238,6 +239,11 @@ function CommentItem({ reply }) {
           <span className="text-xs" style={{ color: "var(--text-hint)" }}>
             {timeAgo(reply.created_date)}
           </span>
+          {isOwn && (
+            <button onClick={() => onDelete(reply)} className="ml-auto p-1 rounded-full" style={{ color: "#E05C7A" }}>
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
         </div>
 
         {reply.type === "voice" ? (
