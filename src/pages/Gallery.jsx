@@ -251,14 +251,18 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
 // ── Art card (masonry) ────────────────────────────────────────────────────────
 function ArtCard({ art, user, onSelect, onLike }) {
   const isLiked = art.liked_by?.includes(user?.email);
+  const [loaded, setLoaded] = useState(false);
   return (
     <div className="break-inside-avoid mb-2 md:mb-3 rounded-xl overflow-hidden cursor-pointer group"
-      style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid var(--border-light)" }}
+      style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid var(--border-light)", contain: "layout style paint" }}
       onClick={() => onSelect(art)}>
       <div className="relative overflow-hidden">
+        {!loaded && <div className="w-full skeleton" style={{ paddingBottom: "75%" }} />}
         <img src={art.image_url} alt={art.title}
           className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy" />
+          loading="lazy"
+          style={{ display: loaded ? "block" : "none" }}
+          onLoad={() => setLoaded(true)} />
         {/* Hover overlay */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-between p-2"
           style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)" }}>
