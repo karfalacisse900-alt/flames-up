@@ -51,6 +51,7 @@ export default function Profile() {
       setBio(u?.bio || "");
       setAboutMe(u?.about_me || "");
       setDisplayName(u?.display_name || u?.full_name || "");
+      setUsername(u?.username || "");
       setAvatarUrl(u?.avatar_url || "");
       setProfileTheme(u?.profile_theme || "default");
     }).catch(() => {});
