@@ -97,8 +97,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setMediaError(false);
     setSaving(true);
 
-    // Upload image first if one is selected
+    // Upload image or video first
     let finalImageUrl = null;
+    let finalVideoUrl = null;
     if (imageFile) {
       setUploading(true);
       try {
@@ -106,6 +107,15 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         finalImageUrl = file_url;
       } catch (err) {
         console.error("Image upload failed:", err);
+      }
+      setUploading(false);
+    } else if (videoFile) {
+      setUploading(true);
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
+        finalVideoUrl = file_url;
+      } catch (err) {
+        console.error("Video upload failed:", err);
       }
       setUploading(false);
     }
