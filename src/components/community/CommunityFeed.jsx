@@ -161,7 +161,7 @@ export default function CommunityFeed({ user }) {
   return (
     <div style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Sticky feed header */}
-      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border-subtle)" }}>
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
