@@ -134,6 +134,7 @@ export default function UserProfile() {
 
           {/* Name & bio */}
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>{viewingUser.display_name || viewingUser.full_name}</h2>
+          {viewingUser.username && <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>{viewingUser.username}</p>}
           {viewingUser.about_me && (
             <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
               {viewingUser.about_me}
