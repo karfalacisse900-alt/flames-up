@@ -310,18 +310,21 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
-                      className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
-                      style={{
-                        backgroundColor: "var(--bg-subtle)",
-                        borderColor: mediaError ? "#E05C7A" : "var(--border-light)",
-                        color: mediaError ? "#E05C7A" : "var(--text-secondary)"
-                      }}>
-                      <ImageIcon className="w-4 h-4" />
-                      {uploading ? "Uploading..." : mediaError ? "⚠️ Photo/GIF required" : "Add Photo / GIF"}
-                    </button>
-                  )}
+                  ) : !videoPreview ? (
+                    <div className="flex gap-2">
+                      <button onClick={() => { setMediaError(false); fileInputRef.current?.click(); }} disabled={uploading}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
+                        style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                        <ImageIcon className="w-4 h-4" />
+                        Photo / GIF
+                      </button>
+                      <button onClick={() => { setVideoError(""); videoInputRef.current?.click(); }} disabled={uploading}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all active:scale-95"
+                        style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+                        🎥 Video (≤60s)
+                      </button>
+                    </div>
+                  ) : null}
                   {mediaError && !imagePreview && (
                     <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>Please add a photo or GIF before posting.</p>
                   )}
