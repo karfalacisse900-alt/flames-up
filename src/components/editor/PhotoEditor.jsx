@@ -267,15 +267,15 @@ export default function PhotoEditor({ file, onDone, onCancel }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ backgroundColor: "#0a0a0a" }}>
+    <div className="fixed inset-0 z-[60] flex flex-col" style={{ backgroundColor: "#0a0a0a", maxWidth: "100vw", overflowX: "hidden" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <button onClick={onCancel} className="flex items-center gap-1.5 text-sm font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+        <button onClick={onCancel} className="flex items-center gap-1 text-sm font-semibold shrink-0" style={{ color: "rgba(255,255,255,0.6)" }}>
           <X className="w-4 h-4" /> Cancel
         </button>
-        <p className="text-sm font-bold text-white tracking-wide">Edit Photo</p>
+        <p className="text-sm font-bold text-white tracking-wide truncate px-2">Edit Photo</p>
         <button onClick={handleExport} disabled={processing}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-bold text-white disabled:opacity-40 shrink-0"
           style={{ background: "linear-gradient(135deg, #1a3d2b, #2E6B4F)" }}>
           {processing ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Check className="w-4 h-4" /> Done</>}
         </button>
