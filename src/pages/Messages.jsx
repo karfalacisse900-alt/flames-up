@@ -347,7 +347,8 @@ export default function Messages() {
         <Link to={createPageUrl("Profile")} className="p-2 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
           <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </Link>
-        <h2 className="font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Messages</h2>
+        <h2 className="font-semibold flex-1" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Messages</h2>
+        <NewMessageButton user={user} onSelect={setActiveConversation} />
       </div>
       <ConversationList user={user} onSelect={setActiveConversation} unreadCounts={unreadCounts} />
     </div>
