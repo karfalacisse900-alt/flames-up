@@ -104,8 +104,18 @@ export default function Profile() {
   const activeTheme = THEMES[user?.profile_theme || "default"] || THEMES.default;
 
   const handleSaveProfile = async () => {
-    await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, profile_theme: profileTheme });
-    setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, avatar_url: avatarUrl, profile_theme: profileTheme }));
+    // Validate username uniqueness if changed
+    if (username && username !== user?.username) {
+      const users = await base44.entities.User.list();
+      const taken = users.some(u => u.username === username && u.email !== user.email);
+      if (taken) {
+        alert("That username is already taken. Please choose another.");
+        return;
+      }
+    }
+    const usernameToSave = username.startsWith("@") ? username : username ? `@${username}` : "";
+    await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, username: usernameToSave, avatar_url: avatarUrl, profile_theme: profileTheme });
+    setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, username: usernameToSave, avatar_url: avatarUrl, profile_theme: profileTheme }));
     setShowEdit(false);
   };
 
