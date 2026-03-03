@@ -272,10 +272,30 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                   style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
               )}
 
-              {/* Photo/GIF upload */}
+              {/* Photo/GIF/Video upload */}
               {type !== "debate" && type !== "list" && (
                 <div>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+
+                  {/* Video preview */}
+                  {videoPreview && (
+                    <div className="relative rounded-xl overflow-hidden mb-2">
+                      <video src={videoPreview} controls className="w-full max-h-64 rounded-xl" />
+                      <div className="absolute top-2 right-2 flex gap-1.5">
+                        <span className="px-2 py-0.5 rounded-lg text-xs font-semibold text-white"
+                          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>⏱ {videoDuration}s</span>
+                        <button onClick={() => { setVideoFile(null); setVideoPreview(null); setVideoError(""); }}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
+                          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {videoError && <p className="text-xs mb-1" style={{ color: "#E05C7A" }}>{videoError}</p>}
+
                   {imagePreview ? (
                     <div className="relative rounded-xl overflow-hidden">
                       <img src={imagePreview} alt="Upload" className="w-full max-h-64 object-cover" />
