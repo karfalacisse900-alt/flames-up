@@ -100,9 +100,9 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       transition={{ duration: 0.22, ease: "easeOut" }}
     >
       <div className="flex gap-3 px-4 py-3.5">
-        {/* Avatar - clickable to profile (only if NOT anonymous) */}
+        {/* Avatar — hidden entirely when anonymous */}
         <div className="shrink-0">
-          {!post.is_anonymous && post.author_email ? (
+          {showAuthor ? (
             <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
               {post.author_avatar_url ? (
                 <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover ring-2 ring-transparent hover:ring-[var(--accent-primary)] transition-all" />
@@ -115,7 +115,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </Link>
           ) : (
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: `linear-gradient(135deg, #ccc3, #ccc5)`, color: "#999" }}>
+              style={{ background: "linear-gradient(135deg, #ccc3, #ccc5)", color: "#999" }}>
               ?
             </div>
           )}
