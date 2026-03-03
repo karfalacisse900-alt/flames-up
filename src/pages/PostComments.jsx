@@ -472,7 +472,7 @@ export default function PostComments() {
               <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Be the first to comment</p>
             </div>
           ) : (
-            allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} />)
+            allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} currentUserEmail={user?.email} onDelete={handleDeleteComment} />)
           )}
         </div>
         <div style={{ height: 100 }} />
