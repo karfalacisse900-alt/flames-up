@@ -93,16 +93,18 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       whileHover={{ backgroundColor: "rgba(46,107,79,0.015)" }}
     >
       <div className="flex gap-3 px-4 py-3.5">
-        {/* Avatar */}
+        {/* Avatar - clickable to profile */}
         <div className="shrink-0">
-          {post.author_avatar_url ? (
-            <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover" />
-          ) : (
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
-              {initials}
-            </div>
-          )}
+          <Link to={!post.is_anonymous && post.author_email ? createPageUrl(`UserProfile?email=${post.author_email}`) : "#"}>
+            {post.author_avatar_url ? (
+              <img src={post.author_avatar_url} alt={post.author_name} className="w-9 h-9 rounded-full object-cover ring-2 ring-transparent hover:ring-[var(--accent-primary)] transition-all" />
+            ) : (
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold hover:opacity-80 transition-opacity"
+                style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}55)`, color: avatarColor }}>
+                {initials}
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Content */}

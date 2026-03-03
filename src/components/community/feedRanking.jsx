@@ -161,11 +161,12 @@ function applyDiversityFilter(rankedPosts, userEmail) {
 }
 
 // ── Main ranking function ─────────────────────────────────
-export function rankFeedForUser(posts, userEmail, debates = []) {
+export function rankFeedForUser(posts, userEmail, debates = [], followedEmails = []) {
   if (!userEmail || posts.length === 0) {
     return posts.sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
   }
 
+  const followedSet = new Set(followedEmails);
   const profile = buildUserProfile(userEmail, posts);
   const collabScores = buildCollaborativeScores(userEmail, posts, posts);
 
