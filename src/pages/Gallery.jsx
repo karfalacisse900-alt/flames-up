@@ -440,15 +440,17 @@ function MasonryGrid({ items, user, onSelect, onLike }) {
   if (items.length === 0) return null;
   return (
     <div style={{
-      columnCount: "var(--masonry-cols, 2)",
+      columns: "2",
       columnGap: "8px",
-    }}>
+      willChange: "auto",
+    }}
+    className="masonry-responsive">
       <style>{`
-        @media (min-width: 480px)  { :root { --masonry-cols: 2; } }
-        @media (min-width: 640px)  { :root { --masonry-cols: 3; } }
-        @media (min-width: 1024px) { :root { --masonry-cols: 4; } }
-        @media (min-width: 1280px) { :root { --masonry-cols: 5; } }
-        @media (min-width: 1600px) { :root { --masonry-cols: 6; } }
+        .masonry-responsive { columns: 2; column-gap: 8px; }
+        @media (min-width: 640px)  { .masonry-responsive { columns: 3; column-gap: 10px; } }
+        @media (min-width: 1024px) { .masonry-responsive { columns: 4; column-gap: 12px; } }
+        @media (min-width: 1280px) { .masonry-responsive { columns: 5; column-gap: 14px; } }
+        @media (min-width: 1600px) { .masonry-responsive { columns: 6; column-gap: 16px; } }
       `}</style>
       {items.map(art => (
         <ArtCard key={art.id} art={art} user={user} onSelect={onSelect} onLike={onLike} />
