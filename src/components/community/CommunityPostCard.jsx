@@ -147,7 +147,12 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                 style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
                 <Bookmark className="w-3.5 h-3.5" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
               </button>
-              {!post.is_anonymous && post.author_email && (
+              {isOwnPost && (
+                <button onClick={handleDelete} className="p-1.5 rounded-full transition-all chip" style={{ color: "#E05C7A" }}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {!post.is_anonymous && post.author_email && !isOwnPost && (
                 <MuteBlockMenu targetEmail={post.author_email} targetName={post.author_name} user={user} onReport={handleReport} />
               )}
             </div>
