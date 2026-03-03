@@ -54,8 +54,32 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-    setImageUrl(""); // reset any previously uploaded url
+    setImageUrl("");
+    setVideoFile(null);
+    setVideoPreview(null);
     setEditingFile(null);
+    e.target.value = "";
+  };
+
+  const handleVideoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    // Check duration
+    const vid = document.createElement("video");
+    vid.src = url;
+    vid.onloadedmetadata = () => {
+      if (vid.duration > 60) {
+        setVideoError("Video must be 60 seconds or less.");
+        return;
+      }
+      setVideoFile(file);
+      setVideoPreview(url);
+      setVideoDuration(Math.round(vid.duration));
+      setVideoError("");
+      setImageFile(null);
+      setImagePreview(null);
+    };
     e.target.value = "";
   };
 
