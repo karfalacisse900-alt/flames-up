@@ -1,89 +1,129 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Maximize2, Pause, Play } from "lucide-react";
 
-// Global registry – ensures only one video plays at a time across all instances
-const activeVideoRegistry = { current: null };
+// Session-level mute preference
+const sessionPrefs = { muted: true };
 
-export default function AutoplayVideo({ src }) {
+// Global singleton — only one video plays at a time
+const activeVideo = { ref: null, setPlaying: null };
+
+export default function AutoplayVideo({ src, onDoubleTap }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
-  const observerRef = useRef(null);
+  const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
+  const iconTimer = useRef(null);
+  const tapTimer = useRef(null);
+  const tapCount = useRef(0);
 
-  const pauseVideo = useCallback(() => {
-    const v = videoRef.current;
-    if (!v || v.paused) return;
-    v.pause();
-    setPlaying(false);
+  const flashIcon = (icon) => {
+    setShowIcon(icon);
+    clearTimeout(iconTimer.current);
+    iconTimer.current = setTimeout(() => setShowIcon(null), 700);
+  };
+
+  const pauseGlobally = useCallback(() => {
+    if (activeVideo.ref === videoRef) {
+      activeVideo.ref = null;
+      activeVideo.setPlaying = null;
+    }
   }, []);
 
-  const playVideo = useCallback(() => {
+  const doPlay = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
-
-    // Pause the previously active video (different instance)
-    if (activeVideoRegistry.current && activeVideoRegistry.current !== videoRef) {
-      const prev = activeVideoRegistry.current.current;
-      if (prev && !prev.paused) {
-        prev.pause();
-      }
+    // Pause the previous active video
+    if (activeVideo.ref && activeVideo.ref !== videoRef) {
+      activeVideo.ref.current?.pause();
+      activeVideo.setPlaying?.(false);
     }
-    activeVideoRegistry.current = videoRef;
-
-    v.muted = true; // must be muted for autoplay policy
+    activeVideo.ref = videoRef;
+    activeVideo.setPlaying = setPlaying;
+    v.muted = sessionPrefs.muted;
+    setMuted(sessionPrefs.muted);
     v.play().then(() => setPlaying(true)).catch(() => {});
   }, []);
 
+  const doPause = useCallback(() => {
+    videoRef.current?.pause();
+    setPlaying(false);
+    pauseGlobally();
+  }, [pauseGlobally]);
+
+  // IntersectionObserver for autoplay
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
+    const obs = new IntersectionObserver(
+      ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          playVideo();
+          doPlay();
         } else {
-          pauseVideo();
+          doPause();
         }
       },
       { threshold: [0, 0.6] }
     );
-
-    observerRef.current.observe(container);
-
+    obs.observe(container);
     return () => {
-      observerRef.current?.disconnect();
-      pauseVideo();
-      // Clean up registry if this was the active video
-      if (activeVideoRegistry.current === videoRef) {
-        activeVideoRegistry.current = null;
-      }
+      obs.disconnect();
+      doPause();
     };
-  }, [playVideo, pauseVideo]);
+  }, [doPlay, doPause]);
 
   const toggleMute = (e) => {
     e.stopPropagation();
     const v = videoRef.current;
     if (!v) return;
-    const newMuted = !muted;
-    v.muted = newMuted;
-    setMuted(newMuted);
-    // If unmuting, pause all others
-    if (!newMuted && activeVideoRegistry.current !== videoRef) {
-      if (activeVideoRegistry.current?.current) {
-        activeVideoRegistry.current.current.pause();
+    const next = !muted;
+    sessionPrefs.muted = next;
+    v.muted = next;
+    setMuted(next);
+  };
+
+  const openFullscreen = (e) => {
+    e.stopPropagation();
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.requestFullscreen) v.requestFullscreen();
+    else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); // iOS Safari
+  };
+
+  const handleTap = () => {
+    tapCount.current += 1;
+    clearTimeout(tapTimer.current);
+    tapTimer.current = setTimeout(() => {
+      if (tapCount.current >= 2) {
+        // Double tap → like
+        flashIcon("like");
+        onDoubleTap?.();
+      } else {
+        // Single tap → play/pause
+        if (playing) {
+          doPause();
+          flashIcon("pause");
+        } else {
+          doPlay();
+          flashIcon("play");
+        }
       }
-      activeVideoRegistry.current = videoRef;
-    }
+      tapCount.current = 0;
+    }, 250);
   };
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full rounded-2xl overflow-hidden mb-2.5"
-      style={{ maxHeight: 360, backgroundColor: "#000", border: "1px solid var(--border-subtle)" }}
+      onClick={handleTap}
+      className="relative w-full overflow-hidden mb-2.5"
+      style={{
+        borderRadius: 18,
+        backgroundColor: "#000",
+        aspectRatio: "4/5",
+        cursor: "pointer",
+        userSelect: "none",
+      }}
     >
       <video
         ref={videoRef}
@@ -92,22 +132,58 @@ export default function AutoplayVideo({ src }) {
         muted
         loop
         preload="none"
-        className="w-full h-full object-cover"
-        style={{ display: "block", maxHeight: 360, minHeight: 160 }}
+        className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Mute toggle */}
-      <button
-        onClick={toggleMute}
-        className="absolute bottom-3 right-3 p-1.5 rounded-full transition-all"
-        style={{
-          backgroundColor: "rgba(0,0,0,0.55)",
-          color: "#fff",
-          backdropFilter: "blur(6px)",
-        }}
-      >
-        {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-      </button>
+      {/* Tap icon feedback */}
+      {showIcon && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 64, height: 64,
+              backgroundColor: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(8px)",
+              animation: "tapFade 0.7s ease forwards",
+            }}
+          >
+            {showIcon === "like" ? (
+              <span style={{ fontSize: 32 }}>❤️</span>
+            ) : showIcon === "play" ? (
+              <Play className="w-7 h-7 text-white" fill="white" />
+            ) : (
+              <Pause className="w-7 h-7 text-white" fill="white" />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom controls */}
+      <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
+        <button
+          onClick={toggleMute}
+          className="p-2 rounded-full"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={openFullscreen}
+          className="p-2 rounded-full"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes tapFade {
+          0%   { opacity: 0; transform: scale(0.6); }
+          20%  { opacity: 1; transform: scale(1.1); }
+          70%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
