@@ -5,6 +5,17 @@ import { X, Plus, Minus, ImageIcon } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import PhotoEditor from "../editor/PhotoEditor";
+import ReactQuill from "react-quill";
+
+const QUILL_MODULES = {
+  toolbar: [
+    ["bold", "italic", "underline"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    ["link"],
+    ["clean"],
+  ],
+};
+const QUILL_FORMATS = ["bold", "italic", "underline", "list", "bullet", "link"];
 
 const POST_TYPES = [
   { key: "opinion",      label: "Opinion",    emoji: "💬", desc: "Share your take on anything" },
