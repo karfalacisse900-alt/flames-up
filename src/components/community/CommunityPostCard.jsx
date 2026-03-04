@@ -185,11 +185,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           )}
 
           {/* Video */}
-          {post.video_url && (
-            <video src={post.video_url} controls playsInline preload="metadata"
-              className="w-full rounded-2xl mb-2.5"
-              style={{ maxHeight: 320, border: "1px solid var(--border-subtle)", backgroundColor: "#000" }} />
-          )}
+          {post.video_url && <AutoplayVideo src={post.video_url} />}
 
           {/* List items */}
           {post.type === "list" && post.list_items?.length > 0 && (
