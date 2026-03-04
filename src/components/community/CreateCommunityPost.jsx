@@ -276,11 +276,25 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
               {/* Body */}
               {type !== "debate" && (
-                <textarea value={body} onChange={e => setBody(e.target.value)}
-                  placeholder={type === "quote_of_day" ? "Enter the quote..." : type === "list" ? "Describe your list..." : "Write your thoughts..."}
-                  rows={4}
-                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
-                  style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+                type === "quote_of_day" ? (
+                  <textarea value={body} onChange={e => setBody(e.target.value)}
+                    placeholder="Enter the quote..."
+                    rows={3}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
+                    style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)", fontStyle: "italic", fontFamily: "var(--font-serif)" }} />
+                ) : (
+                  <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-light)", backgroundColor: "var(--bg-subtle)" }}>
+                    <ReactQuill
+                      theme="snow"
+                      value={body}
+                      onChange={setBody}
+                      modules={QUILL_MODULES}
+                      formats={QUILL_FORMATS}
+                      placeholder={type === "list" ? "Describe your list..." : "Write your thoughts..."}
+                      style={{ fontSize: 14 }}
+                    />
+                  </div>
+                )
               )}
 
               {/* Photo/GIF/Video upload */}
