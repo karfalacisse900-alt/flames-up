@@ -7,8 +7,6 @@ import AutoplayVideo from "./AutoplayVideo";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import ReactMarkdown from "react-markdown";
-
 const REACTIONS = ["❤️", "🔥", "😂", "😮", "👏", "💯"];
 
 function timeAgo(dateStr) {
