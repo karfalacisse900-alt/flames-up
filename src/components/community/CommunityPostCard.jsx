@@ -240,7 +240,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
         {post.image_url && (
           <img src={post.image_url} alt="" loading="lazy"
             className="w-full mb-2.5 object-cover"
-            style={{ borderRadius: 16, aspectRatio: "4/5", maxHeight: 440, border: "1px solid var(--border-subtle)" }} />
+            style={{ borderRadius: 16, maxHeight: 480, width: "100%", display: "block", border: "1px solid var(--border-subtle)" }} />
         )}
 
         {/* ── Video ── */}
