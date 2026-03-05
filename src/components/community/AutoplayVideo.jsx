@@ -132,7 +132,7 @@ export default function AutoplayVideo({ src, onDoubleTap }) {
         playsInline
         loop
         preload="metadata"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-contain"
       />
 
       {/* Tap icon feedback */}
