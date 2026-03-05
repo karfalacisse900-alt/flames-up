@@ -191,7 +191,8 @@ export default function Profile() {
                       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                       {[
                         { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                        { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
+                        { to: createPageUrl("CreatorDashboard"), icon: <BarChart2 className="w-4 h-4" />, label: "Creator Dashboard", color: "var(--accent-primary)" },
+          { to: createPageUrl("Collections"), icon: <FolderOpen className="w-4 h-4" />, label: "Collections", color: "var(--accent-primary)" },
                         { to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Service Profile", color: "var(--accent-primary)" },
                         { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
                       ].map(({ to, icon, label, color }) => (
@@ -270,8 +271,11 @@ export default function Profile() {
           <TabsTrigger value="media_lists" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Film className="w-3.5 h-3.5" /> Lists
           </TabsTrigger>
+          <TabsTrigger value="saved_posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Bookmark className="w-3.5 h-3.5" /> Saved
+          </TabsTrigger>
           <TabsTrigger value="saved_items" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <FolderOpen className="w-3.5 h-3.5" /> Saved
+            <FolderOpen className="w-3.5 h-3.5" /> Apps
           </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
