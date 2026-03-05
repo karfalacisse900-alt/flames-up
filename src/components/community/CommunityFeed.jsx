@@ -102,11 +102,28 @@ export default function CommunityFeed({ user }) {
 
   const followedEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
 
+  // Stable post order — sorted once on load by created_date, never re-sorted on likes
+  const [stablePostIds, setStablePostIds] = useState([]);
+
+  useEffect(() => {
+    if (posts.length > 0) {
+      const list = posts.filter(p => p.type !== "review");
+      const ranked = user?.email
+        ? rankFeedForUser(list, user.email, debates, followedEmails)
+        : [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      setStablePostIds(prev => {
+        // Only add new posts to front; keep existing order intact
+        const existingIds = new Set(prev);
+        const newIds = ranked.filter(p => !existingIds.has(p.id)).map(p => p.id);
+        return newIds.length > 0 ? [...newIds, ...prev] : prev.length === 0 ? ranked.map(p => p.id) : prev;
+      });
+    }
+  }, [posts.map(p => p.id).join(",")]); // only re-run when post list changes (not on like updates)
+
   const filteredPosts = useMemo(() => {
-    const list = posts.filter(p => p.type !== "review");
-    if (user?.email) return rankFeedForUser(list, user.email, debates, followedEmails);
-    return [...list].sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
-  }, [posts, user?.email, debates, followedEmails]);
+    const postMap = new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p]));
+    return stablePostIds.map(id => postMap.get(id)).filter(Boolean);
+  }, [stablePostIds, posts]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
