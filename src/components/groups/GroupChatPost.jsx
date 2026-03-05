@@ -100,9 +100,15 @@ export default function GroupChatPost({ post, user, members = [], onReply, isAdm
           </div>
 
           {/* Body */}
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
-            {renderBodyWithMentions(post.body || "")}
-          </p>
+          {/<[a-z][\s\S]*>/i.test(post.body || "") ? (
+            <div className="text-sm leading-relaxed rich-body"
+              style={{ color: "var(--text-primary)" }}
+              dangerouslySetInnerHTML={{ __html: post.body }} />
+          ) : (
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+              {renderBodyWithMentions(post.body || "")}
+            </p>
+          )}
 
           {/* Image */}
           {post.image_url && (
