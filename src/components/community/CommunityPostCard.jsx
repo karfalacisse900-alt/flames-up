@@ -350,6 +350,12 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
       {/* Backdrop to close menu */}
       {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
+
+      <AnimatePresence>
+        {showSaveModal && (
+          <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
