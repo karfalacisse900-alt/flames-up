@@ -28,6 +28,8 @@ export default function DYKTab({ user }) {
   const [showCategories, setShowCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const loadTimeoutRef = useRef(null);
+  const catBtnRef = useRef(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, minWidth: 0 });
 
   useEffect(() => {
     let isMounted = true;
@@ -80,7 +82,33 @@ export default function DYKTab({ user }) {
       return new Date(b.created_date) - new Date(a.created_date);
     });
 
-  return (
+    const handleToggleCategories = () => {
+    const next = !showCategories;
+    if (next && catBtnRef.current) {
+      const r = catBtnRef.current.getBoundingClientRect();
+      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
+      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
+    }
+    setShowCategories(next);
+    };
+
+    useEffect(() => {
+    if (!showCategories) return;
+    const reposition = () => {
+      if (!catBtnRef.current) return;
+      const r = catBtnRef.current.getBoundingClientRect();
+      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
+      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+    }, [showCategories]);
+
+    return (
     <div className="px-4 py-3 pb-20">
       {/* Search */}
       <div className="relative mb-3">
@@ -104,9 +132,10 @@ export default function DYKTab({ user }) {
         {/* Topics dropdown */}
         <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
           <button
-            onClick={() => setShowCategories(!showCategories)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
-            style={{
+             ref={catBtnRef}
+             onClick={handleToggleCategories}
+             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
+             style={{
               backgroundColor: category ? "var(--accent-primary)" : "var(--bg-card)",
               color: category ? "#fff" : "var(--text-secondary)",
               borderColor: category ? "var(--accent-primary)" : "var(--border-light)",
@@ -126,8 +155,8 @@ export default function DYKTab({ user }) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full left-0 mt-2 rounded-xl z-50 shadow-lg p-2 min-w-max max-h-72 overflow-y-auto"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                className="fixed rounded-xl z-50 shadow-lg p-2 max-h-72 overflow-y-auto"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", top: menuPos.top, left: menuPos.left, minWidth: menuPos.minWidth, maxWidth: "min(320px, calc(100vw - 24px))" }}
                 onClick={e => e.stopPropagation()}
               >
                 <button

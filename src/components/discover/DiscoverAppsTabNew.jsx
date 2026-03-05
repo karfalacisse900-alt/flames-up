@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Search, X, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
@@ -108,6 +108,8 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
   const [localSearch, setLocalSearch] = useState("");
   const [showCategories, setShowCategories] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const catBtnRef = useRef(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, minWidth: 0 });
 
   const filtered = useMemo(() => {
     let result = items.filter(item => {
@@ -128,6 +130,32 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       return (b.avg_rating || 0) - (a.avg_rating || 0);
     });
   }, [items, category, search, localSearch]);
+
+  const handleToggleCategories = () => {
+    const next = !showCategories;
+    if (next && catBtnRef.current) {
+      const r = catBtnRef.current.getBoundingClientRect();
+      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
+      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
+    }
+    setShowCategories(next);
+  };
+
+  useEffect(() => {
+    if (!showCategories) return;
+    const reposition = () => {
+      if (!catBtnRef.current) return;
+      const r = catBtnRef.current.getBoundingClientRect();
+      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
+      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  }, [showCategories]);
 
   if (isLoading) {
     return (
@@ -165,9 +193,10 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         {/* Categories dropdown */}
         <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
           <button
-            onClick={() => setShowCategories(!showCategories)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
-            style={{
+             ref={catBtnRef}
+             onClick={handleToggleCategories}
+             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
+             style={{
               backgroundColor: category ? "var(--accent-primary)" : "var(--bg-card)",
               color: category ? "#fff" : "var(--text-secondary)",
               borderColor: category ? "var(--accent-primary)" : "var(--border-light)",
@@ -188,8 +217,8 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full left-0 mt-2 rounded-xl z-50 shadow-lg p-2 min-w-max max-h-72 overflow-y-auto"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                className="fixed rounded-xl z-50 shadow-lg p-2 max-h-72 overflow-y-auto"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", top: menuPos.top, left: menuPos.left, minWidth: menuPos.minWidth, maxWidth: "min(320px, calc(100vw - 24px))" }}
                 onClick={e => e.stopPropagation()}
               >
                 <button
