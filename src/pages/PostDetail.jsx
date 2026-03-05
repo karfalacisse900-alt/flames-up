@@ -182,9 +182,13 @@ export default function PostDetail() {
           )}
 
           <div className="flex items-center gap-4 mt-5 pt-4" style={{ borderTop: "1px solid var(--border-light)" }}>
-            <span className="flex items-center gap-1 text-sm" style={{ color: "var(--text-hint)" }}>
-              <Heart className="w-4 h-4" /> {post.like_count || 0}
-            </span>
+            <button
+              onClick={() => user && likeMut.mutate()}
+              className="flex items-center gap-1.5 text-sm transition-all"
+              style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
+              <Heart className="w-4 h-4" style={{ fill: hasLiked ? "#E05C7A" : "none", color: hasLiked ? "#E05C7A" : "var(--text-hint)" }} />
+              {post.like_count || 0}
+            </button>
             <span className="text-sm" style={{ color: "var(--text-hint)" }}>{allReplies.length} replies</span>
           </div>
         </div>
