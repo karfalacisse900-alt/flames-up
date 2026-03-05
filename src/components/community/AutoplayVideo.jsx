@@ -63,10 +63,13 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   }, [postId]);
 
   const doPause = useCallback(() => {
-    videoRef.current?.pause();
+    const v = videoRef.current;
+    if (v && postId) videoProgress[postId] = Math.floor(v.currentTime);
+    clearInterval(progressTimer.current);
+    v?.pause();
     setPlaying(false);
     pauseGlobally();
-  }, [pauseGlobally]);
+  }, [pauseGlobally, postId]);
 
   // IntersectionObserver for autoplay
   useEffect(() => {
