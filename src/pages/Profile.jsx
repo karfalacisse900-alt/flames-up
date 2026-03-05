@@ -361,6 +361,10 @@ export default function Profile() {
           <SavedMediaLists user={user} />
         </TabsContent>
 
+        <TabsContent value="saved_posts" className="mt-4">
+          <SavedPosts user={user} />
+        </TabsContent>
+
         <TabsContent value="saved_items" className="mt-4">
           <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Your saved apps, products & services</p>
           <SavedItems user={user} />
