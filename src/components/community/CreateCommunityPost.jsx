@@ -66,9 +66,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       if (d.body) setBody(d.body);
       if (d.media_type) setMediaType(d.media_type);
       if (d.media_ref) setMediaRef(d.media_ref);
-      if (d.side_a) setSideA(d.side_a);
-      if (d.side_b) setSideB(d.side_b);
-      if (d.list_items) setListItems(d.list_items);
       if (d.is_anonymous !== undefined) setIsAnon(d.is_anonymous);
     }).catch(() => {});
   }, [user?.email]);
