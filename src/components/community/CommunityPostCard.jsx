@@ -29,6 +29,21 @@ function isRichText(text) {
   return text && (/<[a-z][\s\S]*>/i.test(text) || /^#{1,6}\s|^\*\*|^\*[^*]|^- |^\d+\. /m.test(text));
 }
 
+// Strip HTML tags and return clean plain text
+function stripHtml(html) {
+  if (!html) return "";
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .trim();
+}
+
 export default function CommunityPostCard({ post, user, onUpvote }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
