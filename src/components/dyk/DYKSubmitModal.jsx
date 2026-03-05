@@ -17,8 +17,10 @@ export default function DYKSubmitModal({ user, onClose, onSubmitted }) {
   const [sourceLink, setSourceLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verification, setVerification] = useState(null);
 
-  async function handleSubmit() {
+  async function handleVerify() {
     if (!content.toLowerCase().startsWith("did you know")) {
       setError('Fact must start with "Did you know"');
       return;
@@ -27,23 +29,45 @@ export default function DYKSubmitModal({ user, onClose, onSubmitted }) {
       setError("Please write a more detailed fact.");
       return;
     }
+    
+    setVerifying(true);
+    setError("");
+    try {
+      const res = await base44.functions.invoke('verifyDidYouKnow', {
+        content: content.trim(),
+        sourceLink: sourceLink.trim()
+      });
+      setVerification(res.data);
+    } catch (err) {
+      setError("Verification failed. You can still submit.");
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function handleSubmit() {
     setSubmitting(true);
-    await base44.entities.DidYouKnow.create({
-      content: content.trim(),
-      category,
-      source_link: sourceLink.trim() || undefined,
-      status: "pending",
-      submitter_email: user.email,
-      submitter_name: user.full_name || "User",
-      useful_count: 0,
-      didnt_know_count: 0,
-      knew_count: 0,
-      voted_by: {},
-      comment_count: 0,
-    });
-    setSubmitting(false);
-    onSubmitted?.();
-    onClose();
+    try {
+      const qualityLabel = verification?.quality_label || null;
+      await base44.entities.DidYouKnow.create({
+        content: content.trim(),
+        category,
+        source_link: sourceLink.trim() || undefined,
+        status: "pending",
+        quality_label: qualityLabel,
+        submitter_email: user.email,
+        submitter_name: user.full_name || "User",
+        useful_count: 0,
+        didnt_know_count: 0,
+        knew_count: 0,
+        voted_by: {},
+        comment_count: 0,
+      });
+      onSubmitted?.();
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -95,13 +119,33 @@ export default function DYKSubmitModal({ user, onClose, onSubmitted }) {
 
         {error && <p className="text-xs text-red-500">{error}</p>}
 
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="w-full py-3 rounded-xl text-sm font-bold transition-opacity disabled:opacity-50"
-          style={{ backgroundColor: "var(--accent-primary, #6366f1)", color: "#fff" }}>
-          {submitting ? "Submitting..." : "Submit for Review"}
-        </button>
+        {verification && (
+          <div className="p-3 rounded-xl border" style={{ backgroundColor: verification.quality_label === "verified" ? "#dcfce7" : verification.quality_label === "community_tip" ? "#fef3c7" : "#fee2e2", borderColor: verification.quality_label === "verified" ? "#86efac" : verification.quality_label === "community_tip" ? "#fcd34d" : "#fca5a5" }}>
+            <p className="text-xs font-semibold mb-1" style={{ color: verification.quality_label === "verified" ? "#166534" : verification.quality_label === "community_tip" ? "#92400e" : "#991b1b" }}>
+              {verification.quality_label === "verified" ? "✓ Verified" : verification.quality_label === "community_tip" ? "⚠ Community Tip" : "⚠ Needs Source"}
+            </p>
+            <p className="text-xs" style={{ color: verification.quality_label === "verified" ? "#166534" : verification.quality_label === "community_tip" ? "#92400e" : "#991b1b" }}>
+              {verification.reasoning}
+            </p>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleVerify}
+            disabled={verifying}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-opacity disabled:opacity-50 border"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", borderColor: "var(--border-light)" }}>
+            {verifying ? "Checking..." : "Verify with AI"}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-opacity disabled:opacity-50"
+            style={{ backgroundColor: "var(--accent-primary, #6366f1)", color: "#fff" }}>
+            {submitting ? "Submitting..." : "Submit"}
+          </button>
+        </div>
 
         <p className="text-center text-xs" style={{ color: "var(--text-hint, #9ca3af)" }}>
           Facts are reviewed before appearing in the feed.
