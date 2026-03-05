@@ -198,7 +198,14 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_daily_spotlight: false,
     };
 
-    await base44.entities.CommunityPost.create(postData);
+    try {
+      await base44.entities.CommunityPost.create(postData);
+    } catch (e) {
+      console.error('Post create failed', e);
+      alert('Posting failed. Please try again.');
+      setSaving(false);
+      return;
+    }
 
     setSaving(false);
     await clearDraft();
