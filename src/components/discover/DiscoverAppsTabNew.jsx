@@ -3,7 +3,7 @@ import { Search, X, ChevronDown, Plus } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 import StarRating from "./StarRating";
 import BookmarkButton from "./BookmarkButton";
-import SubmitAppModal from "./SubmitAppModal";
+import SubmitAppModal from "./SubmitAppModal.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
