@@ -191,9 +191,14 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
       {/* Compose row */}
       <div className="flex items-end gap-2 px-3 py-2.5 border-t" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-card)" }}>
         <input ref={usedRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
+        <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoPick} />
         <button onClick={() => usedRef.current?.click()} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
           style={{ backgroundColor: "var(--bg-subtle)" }}>
           <ImageIcon className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+        </button>
+        <button onClick={() => videoInputRef.current?.click()} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all"
+          style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <Video className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
         </button>
 
         <textarea ref={textareaRef} value={body} onChange={handleBodyChange} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
