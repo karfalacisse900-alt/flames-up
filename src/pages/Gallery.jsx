@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart, X, Send, Flame, Clock, Star, Search, Filter,
-  Sparkles, Upload, Eye, Loader2, Camera, Trophy, Grid3X3, MapPin, Navigation, ExternalLink, CalendarDays, Tag, ChevronDown, ChevronUp,
+  Heart, X, Send, Flame, Clock, Star, Search,
+  Sparkles, Upload, Eye, Loader2, Camera, Trophy, Grid3X3,
+  MapPin, ExternalLink, Tag, ChevronDown, ChevronUp,
 } from "lucide-react";
 import ArtVoiceComment from "@/components/art/ArtVoiceComment";
 import ArtVoteArena from "@/components/gallery/ArtVoteArena";
@@ -13,101 +14,98 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import PhotoEditor from "@/components/editor/PhotoEditor";
 
-const CATEGORIES = ["all", "abstract", "portrait", "landscape", "digital", "illustration", "photography", "other"];
+// ── Categories ────────────────────────────────────────────────────────────────
+const GALLERY_CATEGORIES = [
+  { id: "all",          label: "All",         emoji: "✨" },
+  { id: "art",          label: "Art",          emoji: "🎨" },
+  { id: "photography",  label: "Photography",  emoji: "📷" },
+  { id: "design",       label: "Design",       emoji: "🖌️" },
+  { id: "ai",           label: "AI Art",       emoji: "🤖" },
+  { id: "nature",       label: "Nature",       emoji: "🌿" },
+  { id: "abstract",     label: "Abstract",     emoji: "🌀" },
+  { id: "portrait",     label: "Portrait",     emoji: "👤" },
+  { id: "landscape",    label: "Landscape",    emoji: "🏔️" },
+  { id: "illustration", label: "Illustration", emoji: "✏️" },
+  { id: "digital",      label: "Digital",      emoji: "💻" },
+  { id: "other",        label: "Other",        emoji: "🖼️" },
+];
 
-const DATE_RANGES = [
-  { key: "all",   label: "All time" },
-  { key: "today", label: "Today" },
-  { key: "week",  label: "This week" },
-  { key: "month", label: "This month" },
-  { key: "year",  label: "This year" },
+const UPLOAD_CATEGORIES = GALLERY_CATEGORIES.filter(c => c.id !== "all");
+
+const SORTS = [
+  { key: "newest",   label: "New",     icon: Clock },
+  { key: "liked",    label: "Popular", icon: Heart },
+  { key: "trending", label: "Hot",     icon: Flame },
+  { key: "top",      label: "Top",     icon: Star },
+];
+
+const TABS = [
+  { id: "gallery",    label: "Gallery",      icon: Grid3X3 },
+  { id: "spotlight",  label: "Spotlight",    icon: Sparkles },
+  { id: "challenges", label: "Challenges",   icon: Camera,  link: "WeeklyChallenges" },
+  { id: "fame",       label: "Hall of Fame", icon: Trophy,  link: "HallOfFame" },
 ];
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  return `${Math.floor(hrs / 24)}d`;
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
 
 function openGoogleMaps(lat, lng, name) {
   const q = name ? encodeURIComponent(name) : `${lat},${lng}`;
-  window.open(`https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=`, "_blank");
+  window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
 }
 
-function matchesDateRange(dateStr, range) {
-  if (range === "all") return true;
-  const d = new Date(dateStr);
-  const now = new Date();
-  if (range === "today") return d.toDateString() === now.toDateString();
-  if (range === "week") {
-    const start = new Date(now); start.setDate(now.getDate() - 7);
-    return d >= start;
-  }
-  if (range === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  if (range === "year") return d.getFullYear() === now.getFullYear();
-  return true;
-}
-
-// ── Google Maps Location Picker (no API key needed for basic input) ────────────
+// ── Location Input ─────────────────────────────────────────────────────────────
 function LocationInput({ value, onChange }) {
   const [query, setQuery] = useState(value?.name || "");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const debounceRef = useRef(null);
+  const debRef = useRef(null);
 
-  const search = (q) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!q || q.length < 3) { setSuggestions([]); setOpen(false); return; }
-    debounceRef.current = setTimeout(async () => {
+  const doSearch = (q) => {
+    if (debRef.current) clearTimeout(debRef.current);
+    if (!q || q.length < 3) { setSuggestions([]); return; }
+    debRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`,
-          { headers: { "Accept-Language": "en" } }
-        );
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`, { headers: { "Accept-Language": "en" } });
         const data = await res.json();
         setSuggestions(data);
-        setOpen(data.length > 0);
-      } catch { setSuggestions([]); }
+      } catch {}
       setLoading(false);
     }, 400);
   };
 
   const pick = (item) => {
     const name = item.display_name;
-    const lat = parseFloat(item.lat);
-    const lng = parseFloat(item.lon);
     setQuery(name.split(",").slice(0, 2).join(","));
-    setSuggestions([]); setOpen(false);
-    onChange({ name, lat, lng });
+    setSuggestions([]);
+    onChange({ name, lat: parseFloat(item.lat), lng: parseFloat(item.lon) });
   };
-
-  const clear = () => { setQuery(""); setSuggestions([]); onChange(null); };
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
-        style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
         <MapPin className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
-        <input value={query} onChange={e => { setQuery(e.target.value); search(e.target.value); }}
-          placeholder="Add location…" className="flex-1 text-sm bg-transparent outline-none"
-          style={{ color: "var(--text-primary)" }} />
-        {loading && <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" style={{ color: "var(--text-hint)" }} />}
-        {value && !loading && <button onClick={clear}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
+        <input value={query} onChange={e => { setQuery(e.target.value); doSearch(e.target.value); }}
+          placeholder="Add location…" className="flex-1 text-sm bg-transparent outline-none" style={{ color: "var(--text-primary)" }} />
+        {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "var(--text-hint)" }} />}
+        {value && <button onClick={() => { setQuery(""); onChange(null); }}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
       </div>
-      {open && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl overflow-hidden shadow-lg"
+      {suggestions.length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl shadow-lg overflow-hidden"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           {suggestions.map(f => (
             <button key={f.place_id} onClick={() => pick(f)}
-              className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--bg-subtle)] transition-colors flex items-start gap-2"
+              className="w-full text-left px-4 py-2.5 text-xs hover:bg-[var(--bg-subtle)] flex items-start gap-2"
               style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-subtle)" }}>
-              <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "var(--accent-primary)" }} />
+              <MapPin className="w-3 h-3 mt-0.5 shrink-0" style={{ color: "var(--accent-primary)" }} />
               <span className="line-clamp-2">{f.display_name}</span>
             </button>
           ))}
@@ -117,7 +115,7 @@ function LocationInput({ value, onChange }) {
   );
 }
 
-// ── Artwork Detail Modal ──────────────────────────────────────────────────────
+// ── Artwork Detail Modal ───────────────────────────────────────────────────────
 function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   const qc = useQueryClient();
   const [commentText, setCommentText] = useState("");
@@ -147,79 +145,86 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   return (
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
       <motion.div
-        initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
-        transition={{ type: "spring", damping: 28, stiffness: 300 }}
-        className="relative w-full flex flex-col rounded-2xl overflow-hidden"
-        style={{ height: "92dvh", maxWidth: 860, backgroundColor: "#111", margin: "0 16px" }}>
+        initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="relative w-full flex flex-col rounded-3xl overflow-hidden"
+        style={{ height: "92dvh", maxWidth: 920, backgroundColor: "#0F0F0F", margin: "0 16px", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
 
         <div className="flex flex-col md:flex-row h-full">
           {/* Image pane */}
-          <div className="relative flex-shrink-0 flex items-center justify-center bg-black md:w-[55%] h-52 md:h-full">
-            {!imgLoaded && <div className="absolute inset-0 skeleton" />}
+          <div className="relative flex-shrink-0 flex items-center justify-center md:w-[60%] h-52 md:h-full" style={{ background: "#000" }}>
+            {!imgLoaded && <div className="absolute inset-0" style={{ background: "#111" }} />}
             <img src={artwork.image_url} alt={artwork.title}
               className="w-full h-full object-contain"
               style={{ display: imgLoaded ? "block" : "none" }}
               onLoad={() => setImgLoaded(true)} />
-            <button onClick={onClose} className="absolute top-3 right-3 bg-black/60 rounded-full p-2 z-10">
+            <button onClick={onClose}
+              className="absolute top-4 right-4 bg-black/60 backdrop-blur-md rounded-full p-2.5 z-10 transition-transform hover:scale-110"
+              style={{ border: "1px solid rgba(255,255,255,0.15)" }}>
               <X className="w-4 h-4 text-white" />
             </button>
+            {/* Bottom gradient overlay for location */}
+            <div className="absolute bottom-0 left-0 right-0 p-3" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)" }}>
+              {artwork.location_name && (
+                <button
+                  onClick={() => openGoogleMaps(artwork.location_lat, artwork.location_lng, artwork.location_name)}
+                  className="flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 transition-all"
+                  style={{ backgroundColor: "rgba(66,133,244,0.85)", color: "#fff", backdropFilter: "blur(8px)" }}>
+                  <MapPin className="w-3 h-3" />
+                  {artwork.location_name.split(",").slice(0, 2).join(",")}
+                  <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Info + comments pane */}
-          <div className="flex flex-col flex-1 min-h-0 md:border-l" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-            <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          {/* Info + comments */}
+          <div className="flex flex-col flex-1 min-h-0" style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
+            {/* Header */}
+            <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-white truncate" style={{ fontFamily: "var(--font-serif)" }}>{artwork.title}</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    by {artwork.user_name} · {timeAgo(artwork.created_date)} ago
-                  </p>
-
-                  {/* Location button → opens Google Maps */}
-                  {artwork.location_name && (
-                    <button
-                      onClick={() => openGoogleMaps(artwork.location_lat, artwork.location_lng, artwork.location_name)}
-                      className="flex items-center gap-1.5 mt-2 text-xs font-semibold rounded-full px-3 py-1 transition-all hover:opacity-80"
-                      style={{ backgroundColor: "rgba(66,133,244,0.2)", color: "#4285F4", border: "1px solid rgba(66,133,244,0.3)" }}>
-                      <MapPin className="w-3 h-3" />
-                      {artwork.location_name.split(",").slice(0, 2).join(",")}
-                      <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
-                      <span className="text-[9px] opacity-60">Google Maps</span>
-                    </button>
-                  )}
-
-                  {/* Tags */}
+                  <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>{artwork.title}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                      style={{ backgroundColor: "#2E6B4F" }}>{artwork.user_name?.[0]?.toUpperCase() || "A"}</div>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                      {artwork.user_name} · {timeAgo(artwork.created_date)} ago
+                    </p>
+                  </div>
                   {artwork.tags?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {artwork.tags.map(t => (
-                        <span key={t} className="text-[10px] px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: "rgba(46,107,79,0.2)", color: "#4CAF7D" }}>#{t}</span>
+                        <span key={t} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(46,107,79,0.25)", color: "#4CAF7D" }}>#{t}</span>
                       ))}
                     </div>
                   )}
-
-                  {artwork.description && <p className="text-sm mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>{artwork.description}</p>}
+                  {artwork.description && <p className="text-sm mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>{artwork.description}</p>}
                 </div>
-                <button onClick={() => onLike(artwork)} className="flex flex-col items-center gap-0.5 shrink-0">
-                  <Heart className={`w-6 h-6 transition-all ${isLiked ? "fill-red-400 text-red-400 scale-110" : "text-white/40"}`} />
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{artwork.like_count || 0}</span>
+                <button onClick={() => onLike(artwork)}
+                  className="flex flex-col items-center gap-1 shrink-0 p-2 rounded-2xl transition-all"
+                  style={{ backgroundColor: isLiked ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.07)" }}>
+                  <Heart className={`w-5 h-5 transition-all ${isLiked ? "fill-red-400 text-red-400" : "text-white/50"}`} />
+                  <span className="text-[10px] font-bold" style={{ color: isLiked ? "#f87171" : "rgba(255,255,255,0.3)" }}>{artwork.like_count || 0}</span>
                 </button>
               </div>
             </div>
 
+            {/* Comments */}
             <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 space-y-3">
-              <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.5)" }}>💬 Comments ({artwork.comment_count || 0})</p>
-              {comments.length === 0 && <p className="text-sm text-center py-4" style={{ color: "rgba(255,255,255,0.25)" }}>Be the first to comment</p>}
+              <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.35)" }}>Comments ({artwork.comment_count || 0})</p>
+              {comments.length === 0 && <p className="text-sm text-center py-6" style={{ color: "rgba(255,255,255,0.2)" }}>Be the first to comment ✨</p>}
               {comments.map(c => (
                 <div key={c.id} className="flex gap-2.5">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-white"
-                    style={{ backgroundColor: "#2E6B4F" }}>{c.user_name?.[0]?.toUpperCase() || "?"}</div>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-white" style={{ backgroundColor: "#2E6B4F" }}>
+                    {c.user_name?.[0]?.toUpperCase() || "?"}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>{c.user_name}</p>
+                    <p className="text-[11px] font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{c.user_name}</p>
                     {c.audio_url
-                      ? <audio src={c.audio_url} controls className="h-8 w-full mt-1" style={{ maxWidth: 220 }} />
+                      ? <audio src={c.audio_url} controls className="h-8 w-full" style={{ maxWidth: 220 }} />
                       : <p className="text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>{c.text}</p>}
                   </div>
                 </div>
@@ -228,14 +233,16 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
 
             {user && (
               <div className="shrink-0 px-4 py-3 flex gap-2 items-center"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingBottom: "calc(12px + env(safe-area-inset-bottom,0px))", backgroundColor: "#111" }}>
+                style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingBottom: "calc(12px + env(safe-area-inset-bottom,0px))", backgroundColor: "#0F0F0F" }}>
                 <input value={commentText} onChange={e => setCommentText(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate()}
                   placeholder="Add a comment…"
                   className="flex-1 text-sm px-3 py-2 rounded-xl outline-none"
                   style={{ background: "rgba(255,255,255,0.07)", color: "#fff", border: "1px solid rgba(255,255,255,0.08)" }} />
                 <button onClick={() => commentText.trim() && commentMut.mutate()}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "#2E6B4F" }}>
+                  disabled={!commentText.trim()}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 disabled:opacity-40"
+                  style={{ backgroundColor: "#2E6B4F" }}>
                   <Send className="w-4 h-4 text-white" />
                 </button>
                 <ArtVoiceComment artworkId={artwork.id} user={user} onSent={() => {}} />
@@ -248,69 +255,75 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   );
 }
 
-// ── Art card (masonry) ────────────────────────────────────────────────────────
+// ── Premium Art Card ───────────────────────────────────────────────────────────
 function ArtCard({ art, user, onSelect, onLike }) {
   const isLiked = art.liked_by?.includes(user?.email);
   const [loaded, setLoaded] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <div className="break-inside-avoid mb-2 md:mb-3 rounded-xl overflow-hidden cursor-pointer group"
-      style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 1px 8px rgba(0,0,0,0.07)", border: "1px solid var(--border-light)", contain: "layout style paint" }}
-      onClick={() => onSelect(art)}>
+    <div
+      className="break-inside-avoid mb-2 md:mb-3 rounded-2xl overflow-hidden cursor-pointer group relative"
+      style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 2px 12px rgba(0,0,0,0.1)", border: "1px solid var(--border-light)", contain: "layout style paint", transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease" }}
+      onClick={() => onSelect(art)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ transform: hovered ? "translateY(-2px)" : "translateY(0)", boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.18)" : "0 2px 12px rgba(0,0,0,0.08)" }}
+    >
+      {/* Image */}
       <div className="relative overflow-hidden">
-        {!loaded && <div className="w-full skeleton" style={{ paddingBottom: "75%" }} />}
-        <img src={art.image_url} alt={art.title}
-          className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          style={{ display: loaded ? "block" : "none" }}
-          onLoad={() => setLoaded(true)} />
-        {/* Hover overlay */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-between p-2"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)" }}>
-          <div className="flex flex-col gap-1">
-            {art.location_name && (
-              <button
-                onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); }}
-                className="flex items-center gap-1 text-[10px] text-white rounded-full px-2 py-0.5 transition-all hover:opacity-80"
-                style={{ backgroundColor: "rgba(66,133,244,0.75)", backdropFilter: "blur(4px)" }}>
-                <MapPin className="w-2.5 h-2.5" />
-                {art.location_name.split(",")[0]}
-                <ExternalLink className="w-2 h-2 ml-0.5" />
-              </button>
-            )}
-          </div>
-          <Eye className="w-4 h-4 text-white/80" />
-        </div>
-        {/* Always visible location badge on mobile */}
-        {art.location_name && (
-          <button
-            onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); }}
-            className="absolute bottom-2 left-2 md:hidden flex items-center gap-1 text-[9px] text-white rounded-full px-1.5 py-0.5"
-            style={{ backgroundColor: "rgba(66,133,244,0.8)", backdropFilter: "blur(4px)" }}>
-            <MapPin className="w-2.5 h-2.5" />
-            {art.location_name.split(",")[0]}
-          </button>
+        {!loaded && (
+          <div className="w-full skeleton" style={{ paddingBottom: "75%", borderRadius: 0 }} />
         )}
-        {/* Like button */}
-        <button onClick={e => { e.stopPropagation(); onLike(art); }}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}>
-          <Heart className={`w-3.5 h-3.5 transition-all ${isLiked ? "fill-red-400 text-red-400" : "text-white"}`} />
-        </button>
-      </div>
-      <div className="px-2 py-1.5">
-        <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
-        <div className="flex items-center justify-between mt-0.5">
-          <p className="text-[10px] truncate" style={{ color: "var(--text-hint)" }}>{art.user_name}</p>
-          <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "var(--text-hint)" }}>
-            <Heart className="w-2.5 h-2.5" />{art.like_count || 0}
-          </span>
+        <img src={art.image_url} alt={art.title}
+          className="w-full object-cover"
+          loading="lazy"
+          style={{ display: loaded ? "block" : "none", transition: "transform 0.5s ease" }}
+          onLoad={() => setLoaded(true)} />
+
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 transition-opacity duration-300"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)", opacity: hovered ? 1 : 0.4 }}
+        />
+
+        {/* Top actions */}
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={e => { e.stopPropagation(); onLike(art); }}
+            className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all"
+            style={{ background: isLiked ? "rgba(239,68,68,0.85)" : "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}>
+            <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-white text-white" : "text-white"}`} />
+          </button>
+        </div>
+
+        {/* Bottom info overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5">
+          <p className="text-white text-xs font-bold truncate" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{art.title}</p>
+          <div className="flex items-center justify-between mt-0.5">
+            <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{art.user_name}</p>
+            <div className="flex items-center gap-2">
+              {art.location_name && (
+                <button
+                  onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); }}
+                  className="flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-white text-[9px] font-semibold backdrop-blur-md"
+                  style={{ backgroundColor: "rgba(66,133,244,0.8)" }}>
+                  <MapPin className="w-2.5 h-2.5" />
+                  {art.location_name.split(",")[0].substring(0, 12)}
+                </button>
+              )}
+              <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+                <Heart className={`w-2.5 h-2.5 ${isLiked ? "fill-red-400 text-red-400" : ""}`} />{art.like_count || 0}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Upload Modal ──────────────────────────────────────────────────────────────
+// ── Upload Modal ───────────────────────────────────────────────────────────────
 function UploadModal({ user, onClose, qc }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -320,30 +333,23 @@ function UploadModal({ user, onClose, qc }) {
   const [tags, setTags] = useState("");
   const [category, setUploadCategory] = useState("other");
   const [location, setLocation] = useState(null);
-  const [link, setLink] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef();
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
+  useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
 
   const handleFile = (f) => { setFile(f); setPreviewUrl(URL.createObjectURL(f)); setEditingFile(f); };
-  const handleEditorDone = (editedFile, editedUrl) => { setFile(editedFile); setPreviewUrl(editedUrl); setEditingFile(null); };
+  const handleEditorDone = (ef, eu) => { setFile(ef); setPreviewUrl(eu); setEditingFile(null); };
 
   const handleSubmit = async () => {
     if (!file || !title.trim() || !user) return;
     setUploading(true);
-    // Convert to jpeg blob to ensure compatibility
     let uploadFile = file;
-    if (file.type !== "image/jpeg" && file.type !== "image/png") {
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
       try {
         const bitmap = await createImageBitmap(file);
         const canvas = document.createElement("canvas");
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
+        canvas.width = bitmap.width; canvas.height = bitmap.height;
         canvas.getContext("2d").drawImage(bitmap, 0, 0);
         const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.92));
         uploadFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
@@ -356,7 +362,6 @@ function UploadModal({ user, onClose, qc }) {
       status: "published", like_count: 0, liked_by: [], comment_count: 0, vote_count: 0,
       category, tags: tags.split(",").map(t => t.trim()).filter(Boolean),
       ...(location ? { location_name: location.name, location_lat: location.lat, location_lng: location.lng } : {}),
-      ...(link.trim() ? { link: link.trim() } : {}),
     });
     qc.invalidateQueries({ queryKey: ["artworks"] });
     setUploading(false);
@@ -372,25 +377,20 @@ function UploadModal({ user, onClose, qc }) {
       <motion.div
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
-        className="relative w-full max-w-lg rounded-t-3xl md:rounded-2xl p-6 space-y-4 overflow-y-auto"
+        className="relative w-full max-w-lg rounded-t-3xl md:rounded-3xl p-6 space-y-4 overflow-y-auto"
         style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)" }}
         onClick={e => e.stopPropagation()}>
-        <div className="w-8 h-1 rounded-full mx-auto md:hidden" style={{ backgroundColor: "var(--border-medium)" }} />
+        <div className="w-8 h-1 rounded-full mx-auto md:hidden mb-1" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Upload Artwork</h2>
           <button onClick={onClose}><X className="w-5 h-5" style={{ color: "var(--text-hint)" }} /></button>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
         <button onClick={() => fileRef.current?.click()}
-          className="w-full rounded-2xl border-2 border-dashed overflow-hidden flex flex-col items-center justify-center"
+          className="w-full rounded-2xl border-2 border-dashed overflow-hidden flex flex-col items-center justify-center transition-all"
           style={{ borderColor: previewUrl ? "var(--accent-primary)" : "var(--border-medium)", minHeight: 120 }}>
-          {previewUrl
-            ? <img src={previewUrl} alt="preview" className="w-full max-h-52 object-cover" />
-            : <div className="py-10 flex flex-col items-center gap-2">
-                <Upload className="w-8 h-8" style={{ color: "var(--text-hint)" }} />
-                <p className="text-sm" style={{ color: "var(--text-hint)" }}>Tap to choose image</p>
-              </div>}
+          {previewUrl ? <img src={previewUrl} alt="preview" className="w-full max-h-52 object-cover" />
+            : <div className="py-10 flex flex-col items-center gap-2"><Upload className="w-8 h-8" style={{ color: "var(--text-hint)" }} /><p className="text-sm" style={{ color: "var(--text-hint)" }}>Tap to choose image</p></div>}
         </button>
         {previewUrl && (
           <button onClick={() => setEditingFile(file)}
@@ -408,12 +408,12 @@ function UploadModal({ user, onClose, qc }) {
         <LocationInput value={location} onChange={setLocation} />
         <div>
           <label className="text-xs mb-1.5 block" style={{ color: "var(--text-hint)" }}>Category</label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.filter(c => c !== "all").map(cat => (
-              <button key={cat} onClick={() => setUploadCategory(cat)}
-                className="px-3 py-1 rounded-full text-xs capitalize transition-all"
-                style={{ backgroundColor: category === cat ? "var(--accent-primary)" : "var(--bg-subtle)", color: category === cat ? "#fff" : "var(--text-secondary)" }}>
-                {cat}
+          <div className="flex flex-wrap gap-1.5">
+            {UPLOAD_CATEGORIES.map(cat => (
+              <button key={cat.id} onClick={() => setUploadCategory(cat.id)}
+                className="px-2.5 py-1 rounded-full text-xs transition-all flex items-center gap-1"
+                style={{ backgroundColor: category === cat.id ? "var(--accent-primary)" : "var(--bg-subtle)", color: category === cat.id ? "#fff" : "var(--text-secondary)" }}>
+                {cat.emoji} {cat.label}
               </button>
             ))}
           </div>
@@ -421,12 +421,8 @@ function UploadModal({ user, onClose, qc }) {
         <input value={tags} onChange={e => setTags(e.target.value)} placeholder="Tags: nature, color, minimal…"
           className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-
-        <input value={link} onChange={e => setLink(e.target.value)} placeholder="🔗 External link (optional)"
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
         <button onClick={handleSubmit} disabled={uploading || !file || !title.trim()}
-          className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-40"
+          className="w-full py-3 rounded-2xl font-bold text-white disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>
           {uploading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "🎨 Upload to Gallery"}
         </button>
@@ -435,16 +431,11 @@ function UploadModal({ user, onClose, qc }) {
   );
 }
 
-// ── Responsive Masonry Grid ───────────────────────────────────────────────────
+// ── Masonry Grid ───────────────────────────────────────────────────────────────
 function MasonryGrid({ items, user, onSelect, onLike }) {
   if (items.length === 0) return null;
   return (
-    <div style={{
-      columns: "2",
-      columnGap: "8px",
-      willChange: "auto",
-    }}
-    className="masonry-responsive">
+    <div className="masonry-responsive">
       <style>{`
         .masonry-responsive { columns: 2; column-gap: 8px; }
         @media (min-width: 640px)  { .masonry-responsive { columns: 3; column-gap: 10px; } }
@@ -459,129 +450,7 @@ function MasonryGrid({ items, user, onSelect, onLike }) {
   );
 }
 
-// ── Search & Filter Panel ─────────────────────────────────────────────────────
-function SearchFilterBar({ searchQuery, setSearchQuery, category, setCategory, dateRange, setDateRange, locationFilter, setLocationFilter, locations, resultCount }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="space-y-2">
-      {/* Search input */}
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
-        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-        <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
-        <input
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Search by title, description, tags, or location…"
-          className="flex-1 text-sm bg-transparent outline-none"
-          style={{ color: "var(--text-primary)" }}
-        />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery("")}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>
-        )}
-        <button onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg transition-all"
-          style={{ backgroundColor: expanded ? "var(--accent-primary)" : "var(--bg-subtle)", color: expanded ? "#fff" : "var(--text-secondary)" }}>
-          <Filter className="w-3 h-3" />
-          Filters
-          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
-      </div>
-
-      {/* Expanded filters */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden rounded-xl p-3 space-y-3"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-
-            {/* Category */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-hint)" }}>Category</p>
-              <div className="flex flex-wrap gap-1.5">
-                {CATEGORIES.map(cat => (
-                  <button key={cat} onClick={() => setCategory(cat)}
-                    className="px-3 py-1 rounded-full text-xs capitalize"
-                    style={{ backgroundColor: category === cat ? "var(--accent-primary)" : "var(--bg-subtle)", color: category === cat ? "#fff" : "var(--text-secondary)", fontWeight: category === cat ? 700 : 400 }}>
-                    {cat === "all" ? "All" : cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Date range */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: "var(--text-hint)" }}>
-                <CalendarDays className="w-3 h-3" /> Date Range
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {DATE_RANGES.map(dr => (
-                  <button key={dr.key} onClick={() => setDateRange(dr.key)}
-                    className="px-3 py-1 rounded-full text-xs"
-                    style={{ backgroundColor: dateRange === dr.key ? "var(--text-primary)" : "var(--bg-subtle)", color: dateRange === dr.key ? "var(--bg-app)" : "var(--text-secondary)", fontWeight: dateRange === dr.key ? 700 : 400 }}>
-                    {dr.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Location filter */}
-            {locations.length > 0 && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: "var(--text-hint)" }}>
-                  <MapPin className="w-3 h-3" /> Location
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  <button onClick={() => setLocationFilter(null)}
-                    className="flex items-center gap-1 px-3 py-1 rounded-full text-xs"
-                    style={{ backgroundColor: !locationFilter ? "var(--accent-primary)" : "var(--bg-subtle)", color: !locationFilter ? "#fff" : "var(--text-secondary)" }}>
-                    🌍 All
-                  </button>
-                  {locations.map(loc => (
-                    <button key={loc} onClick={() => setLocationFilter(locationFilter === loc ? null : loc)}
-                      className="flex items-center gap-1 px-3 py-1 rounded-full text-xs whitespace-nowrap"
-                      style={{ backgroundColor: locationFilter === loc ? "#4285F4" : "var(--bg-subtle)", color: locationFilter === loc ? "#fff" : "var(--text-secondary)" }}>
-                      <MapPin className="w-2.5 h-2.5" /> {loc}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Result count + active filters summary */}
-      {(searchQuery || category !== "all" || dateRange !== "all" || locationFilter) && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{resultCount}</span> result{resultCount !== 1 ? "s" : ""}
-          </p>
-          <button onClick={() => { setSearchQuery(""); setCategory("all"); setDateRange("all"); setLocationFilter(null); }}
-            className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
-            Clear all
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Tab / Sort config ─────────────────────────────────────────────────────────
-const TABS = [
-  { id: "gallery",   label: "Gallery",      icon: Grid3X3 },
-  { id: "spotlight", label: "Spotlight",    icon: Sparkles },
-  { id: "challenges",label: "Challenges",   icon: Camera,  link: "WeeklyChallenges" },
-  { id: "fame",      label: "Hall of Fame", icon: Trophy,  link: "HallOfFame" },
-];
-const SORTS = [
-  { key: "newest",    label: "New",     icon: Clock },
-  { key: "liked",     label: "Popular", icon: Heart },
-  { key: "trending",  label: "Hot",     icon: Flame },
-  { key: "top_rated", label: "Top",     icon: Star },
-];
-
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ── Main Gallery Page ──────────────────────────────────────────────────────────
 export default function Gallery() {
   const [user, setUser] = useState(null);
   const [sort, setSort] = useState("newest");
@@ -589,9 +458,8 @@ export default function Gallery() {
   const [tab, setTab] = useState("gallery");
   const [category, setCategory] = useState("all");
   const [showUpload, setShowUpload] = useState(false);
-  const [locationFilter, setLocationFilter] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateRange, setDateRange] = useState("all");
+  const [showSearch, setShowSearch] = useState(false);
   const qc = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
@@ -621,55 +489,31 @@ export default function Gallery() {
 
   const isLoading = loadingArtworks || loadingPieces;
 
-  const locations = useMemo(() => {
-    const seen = new Set();
-    const locs = [];
-    allArtworks.forEach(a => {
-      if (a.location_name) {
-        const city = a.location_name.split(",")[0].trim();
-        if (!seen.has(city)) { seen.add(city); locs.push(city); }
-      }
-    });
-    return locs.slice(0, 10);
-  }, [allArtworks]);
-
   const filtered = useMemo(() => {
     let list = allArtworks;
-
-    // Search: title, description, tags, location
+    if (category !== "all") list = list.filter(a => a.category === category);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(a =>
         a.title?.toLowerCase().includes(q) ||
         a.description?.toLowerCase().includes(q) ||
         a.tags?.some(t => t.toLowerCase().includes(q)) ||
-        a.location_name?.toLowerCase().includes(q) ||
-        a.user_name?.toLowerCase().includes(q)
+        a.user_name?.toLowerCase().includes(q) ||
+        a.location_name?.toLowerCase().includes(q)
       );
     }
-
-    // Category filter
-    if (category !== "all") list = list.filter(a => a.category === category);
-
-    // Location filter
-    if (locationFilter) list = list.filter(a => a.location_name?.toLowerCase().includes(locationFilter.toLowerCase()));
-
-    // Date range
-    if (dateRange !== "all") list = list.filter(a => matchesDateRange(a.created_date, dateRange));
-
-    // Sort
     return [...list].sort((a, b) => {
       if (sort === "liked") return (b.like_count || 0) - (a.like_count || 0);
-      if (sort === "top_rated") return (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0);
+      if (sort === "top") return (b.vote_count || b.like_count || 0) - (a.vote_count || a.like_count || 0);
       if (sort === "trending") {
-        const cutoff = Date.now() - 86400000;
-        const aS = new Date(a.created_date) > cutoff ? (a.like_count || 0) * 2 : (a.like_count || 0);
-        const bS = new Date(b.created_date) > cutoff ? (b.like_count || 0) * 2 : (b.like_count || 0);
+        const cut = Date.now() - 86400000;
+        const aS = new Date(a.created_date) > cut ? (a.like_count || 0) * 2 : (a.like_count || 0);
+        const bS = new Date(b.created_date) > cut ? (b.like_count || 0) * 2 : (b.like_count || 0);
         return bS - aS;
       }
       return new Date(b.created_date) - new Date(a.created_date);
     });
-  }, [allArtworks, searchQuery, category, locationFilter, dateRange, sort]);
+  }, [allArtworks, category, searchQuery, sort]);
 
   const handleLike = async (art) => {
     if (!user?.email) return;
@@ -689,23 +533,44 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)", overflowX: "hidden" }}>
-
       {/* Sticky header */}
       <div className="sticky top-0 z-20 pt-4 pb-2 px-3 md:px-4" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="w-full max-w-screen-xl mx-auto">
+          {/* Title row */}
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Gallery</h1>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>{allArtworks.length} artworks</p>
             </div>
-            {user && (
-              <button onClick={() => setShowUpload(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold text-white"
-                style={{ background: "linear-gradient(135deg,#243D33,#2E6B4F)" }}>
-                <Upload className="w-4 h-4" /> Upload
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowSearch(s => !s)}
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+                style={{ backgroundColor: showSearch ? "var(--accent-primary)" : "var(--bg-card)", border: "1px solid var(--border-light)", color: showSearch ? "#fff" : "var(--text-secondary)" }}>
+                <Search className="w-4 h-4" />
               </button>
-            )}
+              {user && (
+                <button onClick={() => setShowUpload(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg,#243D33,#2E6B4F)" }}>
+                  <Upload className="w-4 h-4" /> Upload
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Search input */}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mb-2 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+                  <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search artworks, artists, tags…"
+                    className="flex-1 text-sm bg-transparent outline-none" style={{ color: "var(--text-primary)" }} />
+                  {searchQuery && <button onClick={() => setSearchQuery("")}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Tabs */}
           <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
@@ -714,54 +579,56 @@ export default function Gallery() {
               const isActive = tab === t.id;
               return t.link ? (
                 <Link key={t.id} to={createPageUrl(t.link)}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap shrink-0"
                   style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
                   <Icon className="w-3.5 h-3.5" /> {t.label}
                 </Link>
               ) : (
                 <button key={t.id} onClick={() => setTab(t.id)}
                   className="flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
-                  style={{
-                    backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                    color: isActive ? "#fff" : "var(--text-secondary)",
-                    border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                  }}>
+                  style={{ backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)", color: isActive ? "#fff" : "var(--text-secondary)", border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}` }}>
                   <Icon className="w-3.5 h-3.5" /> {t.label}
                 </button>
               );
             })}
           </div>
 
-          {/* Sort row (gallery only) */}
           {tab === "gallery" && (
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2">
-              {SORTS.map(s => (
-                <button key={s.key} onClick={() => setSort(s.key)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all"
-                  style={{
-                    backgroundColor: sort === s.key ? "var(--text-primary)" : "var(--bg-card)",
-                    color: sort === s.key ? "var(--bg-app)" : "var(--text-secondary)",
-                    border: "1px solid var(--border-light)",
-                  }}>
-                  <s.icon className="w-3 h-3" /> {s.label}
-                </button>
-              ))}
-            </div>
+            <>
+              {/* Sort row */}
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2">
+                {SORTS.map(s => (
+                  <button key={s.key} onClick={() => setSort(s.key)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all"
+                    style={{ backgroundColor: sort === s.key ? "var(--text-primary)" : "var(--bg-card)", color: sort === s.key ? "var(--bg-app)" : "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
+                    <s.icon className="w-3 h-3" /> {s.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Category filters — premium pill style */}
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2">
+                {GALLERY_CATEGORIES.map(cat => {
+                  const active = category === cat.id;
+                  return (
+                    <button key={cat.id} onClick={() => setCategory(cat.id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+                      style={{
+                        backgroundColor: active ? "var(--accent-primary)" : "var(--bg-card)",
+                        color: active ? "#fff" : "var(--text-secondary)",
+                        border: `1.5px solid ${active ? "var(--accent-primary)" : "var(--border-light)"}`,
+                        boxShadow: active ? "0 2px 12px rgba(46,107,79,0.3)" : "none",
+                        fontWeight: active ? 700 : 400,
+                      }}>
+                      {cat.emoji} {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
 
-          {/* Search + filters (gallery only) */}
-          {tab === "gallery" && (
-            <SearchFilterBar
-              searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-              category={category} setCategory={setCategory}
-              dateRange={dateRange} setDateRange={setDateRange}
-              locationFilter={locationFilter} setLocationFilter={setLocationFilter}
-              locations={locations}
-              resultCount={filtered.length}
-            />
-          )}
-
-          <div className="mt-2" style={{ height: 1, backgroundColor: "var(--border-light)" }} />
+          <div style={{ height: 1, backgroundColor: "var(--border-light)", marginTop: 4 }} />
         </div>
       </div>
 
@@ -779,14 +646,14 @@ export default function Gallery() {
             ) : filtered.length === 0 ? (
               <div className="text-center py-20 px-6">
                 <p className="text-5xl mb-3">🎨</p>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-sm mb-2" style={{ color: "var(--text-secondary)" }}>
                   {searchQuery ? `No results for "${searchQuery}"` : "No artworks in this category"}
                 </p>
-                {user && !searchQuery && (
+                {user && (
                   <button onClick={() => setShowUpload(true)}
-                    className="mt-4 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                    className="mt-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
                     style={{ background: "linear-gradient(135deg,#243D33,#2E6B4F)" }}>
-                    Upload First
+                    Upload First 🎨
                   </button>
                 )}
               </div>
