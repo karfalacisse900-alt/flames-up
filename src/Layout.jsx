@@ -102,6 +102,7 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.page)}
+                    onClick={isActive ? (e) => { e.preventDefault(); navigate(createPageUrl(item.page), { replace: true }); } : undefined}
                     className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
                     style={{ color: isActive ? "var(--accent-primary)" : "var(--text-secondary)", fontWeight: isActive ? 600 : 400 }}>
 
