@@ -90,7 +90,7 @@ export default function DYKCard({ fact, user, onVoted }) {
       {/* Content */}
       <div className="px-4 pb-3">
         <p className="text-base leading-relaxed font-medium" style={{ color: "var(--text-primary, #111)" }}>
-          {fact.content}
+          {fact.content && fact.content.replace(/^(.+?)\n\1$/, "$1")}
         </p>
         {fact.source_link && (
           <a href={fact.source_link} target="_blank" rel="noopener noreferrer"

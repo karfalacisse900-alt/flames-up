@@ -37,12 +37,16 @@ function AppCard({ item, user, onOpen, index }) {
           <DiscoverLogo item={item} size="md" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm leading-tight truncate" style={{ color: "var(--text-primary)" }}>
-            {item.title}
-          </h3>
-          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>
-            {item.brand_name || item.category?.replace(/_/g, " ")}
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <h3 className="font-bold text-sm leading-tight" style={{ color: "var(--text-primary)" }}>
+              {item.title}
+            </h3>
+            {item.brand_name && (
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                {item.brand_name}
+              </p>
+            )}
+          </div>
         </div>
         {user && (
           <div onClick={e => e.stopPropagation()}>

@@ -240,60 +240,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
 
             <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #E2E8F0, transparent)" }} />
 
-            {/* Reviews section */}
-            <div>
-              <h3 className="text-base font-bold mb-3" style={{ color: "#1E293B" }}>
-                Reviews <span className="text-sm font-normal" style={{ color: "#94A3B8" }}>({reviews.length})</span>
-              </h3>
 
-              {user && !userReview && (
-                <div className="p-4 rounded-2xl mb-4" style={{ background: `linear-gradient(135deg, ${cat.from}10, ${cat.to}10)`, border: `1px solid ${cat.from}25` }}>
-                  <p className="text-xs font-bold mb-2" style={{ color: "#1E293B" }}>Rate & Review</p>
-                  <StarRating value={rating} onRate={setRating} size="lg" />
-                  <Textarea className="mt-3 text-sm resize-none rounded-xl" placeholder="Share your experience..." rows={3}
-                    value={reviewText} onChange={e => setReviewText(e.target.value)} style={{ backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid #E2E8F0" }} />
-                  <button onClick={() => { if (!rating) return; submitReview.mutate({ item_id: item.id, user_email: user?.email, user_name: user?.full_name || "Anonymous", rating, review_text: reviewText, helpful_count: 0, helpful_by: [] }); }}
-                    disabled={!rating || submitReview.isPending}
-                    className="mt-3 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-40"
-                    style={{ background: `linear-gradient(135deg, ${cat.from}, ${cat.to})` }}>
-                    <Send className="w-3.5 h-3.5" /> Submit Review
-                  </button>
-                </div>
-              )}
-
-              {userReview && (
-                <div className="p-3 rounded-2xl mb-3" style={{ backgroundColor: "#ECFDF5", border: "1px solid #A7F3D0" }}>
-                  <p className="text-xs font-bold text-green-700 mb-1">✓ Your review</p>
-                  <StarRating value={userReview.rating} size="sm" />
-                  {userReview.review_text && <p className="text-sm mt-1 text-green-800">{userReview.review_text}</p>}
-                </div>
-              )}
-
-              <div className="space-y-3">
-                {reviews.filter(r => r.user_email !== user?.email).map(review => (
-                  <div key={review.id} className="p-3 rounded-2xl" style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
-                    <div className="flex items-start justify-between mb-1">
-                      <div>
-                        <span className="text-xs font-bold" style={{ color: "#1E293B" }}>{review.user_name || "Anonymous"}</span>
-                        <StarRating value={review.rating} size="sm" />
-                      </div>
-                      <button onClick={() => markHelpful.mutate(review)}
-                        className="flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors"
-                        style={{ color: review.helpful_by?.includes(user?.email) ? cat.from : "#94A3B8", backgroundColor: "#fff", border: "1px solid #E2E8F0" }}>
-                        <ThumbsUp className="w-3 h-3" /> {review.helpful_count || 0}
-                      </button>
-                    </div>
-                    {review.review_text && <p className="text-xs leading-relaxed" style={{ color: "#475569" }}>{review.review_text}</p>}
-                  </div>
-                ))}
-                {reviews.length === 0 && (
-                  <div className="text-center py-6 rounded-2xl" style={{ backgroundColor: "#F8FAFC", border: "1px dashed #E2E8F0" }}>
-                    <p className="text-2xl mb-2">💬</p>
-                    <p className="text-xs" style={{ color: "#94A3B8" }}>No reviews yet. Be the first!</p>
-                  </div>
-                )}
-              </div>
-            </div>
 
             {/* Related */}
             {relatedItems.length > 0 && (
