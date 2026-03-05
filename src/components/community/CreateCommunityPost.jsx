@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { X, Plus, Minus, ImageIcon } from "lucide-react";
+import { X, Plus, Minus, ImageIcon, Save } from "lucide-react";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import PhotoEditor from "../editor/PhotoEditor";
@@ -57,8 +57,43 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
+
+  // Load draft on mount
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.PostDraft.filter({ user_email: user.email }, "-created_date", 1).then(drafts => {
+      const d = drafts[0];
+      if (!d) return;
+      if (d.type) { setType(d.type); setStep("compose"); }
+      if (d.title) setTitle(d.title);
+      if (d.body) setBody(d.body);
+      if (d.media_type) setMediaType(d.media_type);
+      if (d.media_ref) setMediaRef(d.media_ref);
+      if (d.side_a) setSideA(d.side_a);
+      if (d.side_b) setSideB(d.side_b);
+      if (d.list_items) setListItems(d.list_items);
+      if (d.is_anonymous !== undefined) setIsAnon(d.is_anonymous);
+    }).catch(() => {});
+  }, [user?.email]);
+
+  const saveDraft = async () => {
+    if (!user?.email || !type) return;
+    const existing = await base44.entities.PostDraft.filter({ user_email: user.email });
+    const data = { user_email: user.email, type, title, body, media_type: mediaType, media_ref: mediaRef, side_a: sideA, side_b: sideB, list_items: listItems, is_anonymous: isAnon };
+    if (existing[0]) await base44.entities.PostDraft.update(existing[0].id, data);
+    else await base44.entities.PostDraft.create(data);
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000);
+  };
+
+  const clearDraft = async () => {
+    if (!user?.email) return;
+    const existing = await base44.entities.PostDraft.filter({ user_email: user.email });
+    for (const d of existing) await base44.entities.PostDraft.delete(d.id);
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
