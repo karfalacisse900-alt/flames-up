@@ -40,9 +40,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [mediaType, setMediaType] = useState("general");
   const [mediaRef, setMediaRef] = useState("");
   const [isAnon, setIsAnon] = useState(false);
-  const [listItems, setListItems] = useState(["", ""]);
-  const [sideA, setSideA] = useState("");
-  const [sideB, setSideB] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
