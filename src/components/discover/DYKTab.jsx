@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Clock, Search } from "lucide-react";
+import { TrendingUp, Clock, Search, X, ChevronDown, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import DYKCard from "../dyk/DYKCard";
 import DYKSubmitModal from "../dyk/DYKSubmitModal";
 
 const CATEGORIES = [
-  { value: "all",           label: "✨ All" },
   { value: "save_money",    label: "💰 Save Money" },
   { value: "apps_tech",     label: "📱 Apps & Tech" },
   { value: "travel",        label: "🌎 Travel" },
@@ -17,10 +17,11 @@ const CATEGORIES = [
 export default function DYKTab({ user }) {
   const [facts, setFacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(null);
   const [sort, setSort] = useState("trending");
   const [search, setSearch] = useState("");
   const [showSubmit, setShowSubmit] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function DYKTab({ user }) {
   }
 
   const filtered = facts
-    .filter(f => category === "all" || f.category === category)
+    .filter(f => !category || f.category === category)
     .filter(f => !search || f.content.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sort === "trending") {
@@ -55,7 +56,7 @@ export default function DYKTab({ user }) {
     });
 
   return (
-    <div className="px-4 py-3">
+    <div className="px-4 py-3 pb-20">
       {/* Search */}
       <div className="relative mb-3">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
@@ -63,59 +64,91 @@ export default function DYKTab({ user }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search facts..."
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
+          className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
         />
-      </div>
-
-      {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto py-2 scrollbar-hide">
-        {CATEGORIES.map(c => (
-          <button
-            key={c.value}
-            onClick={() => setCategory(c.value)}
-            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-full transition-all"
-            style={{
-              backgroundColor: category === c.value ? "var(--accent-primary)" : "var(--bg-card)",
-              color: category === c.value ? "#fff" : "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}>
-            {c.label}
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+            <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
           </button>
-        ))}
+        )}
       </div>
 
-      {/* Sort tabs */}
-      <div className="flex gap-2 mb-3">
+      {/* Filter bar */}
+      <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
+        {/* Categories dropdown */}
+        <div className="relative shrink-0">
+          <button
+            onClick={() => setShowCategories(!showCategories)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
+            style={{
+              backgroundColor: category ? "var(--accent-primary)" : "var(--bg-card)",
+              color: category ? "#fff" : "var(--text-secondary)",
+              borderColor: category ? "var(--accent-primary)" : "var(--border-light)",
+            }}>
+            {category ? CATEGORIES.find(c => c.value === category)?.label : "📂 Topics"}
+            <ChevronDown className="w-3 h-3" />
+          </button>
+          <AnimatePresence>
+            {showCategories && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 mt-2 rounded-xl z-40 shadow-lg p-2"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+              >
+                <button
+                  onClick={() => { setCategory(null); setShowCategories(false); }}
+                  className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
+                  style={{ color: "var(--text-primary)", backgroundColor: !category ? "var(--accent-primary-light)" : "transparent" }}
+                >
+                  All Topics
+                </button>
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c.value}
+                    onClick={() => { setCategory(c.value); setShowCategories(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
+                    style={{ color: "var(--text-primary)", backgroundColor: category === c.value ? "var(--accent-primary-light)" : "transparent" }}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sort buttons */}
         <button
           onClick={() => setSort("trending")}
-          className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full transition-all"
+          className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full transition-all border shrink-0"
           style={{
             backgroundColor: sort === "trending" ? "var(--accent-primary)" : "var(--bg-card)",
             color: sort === "trending" ? "#fff" : "var(--text-secondary)",
-            border: "1px solid var(--border-light)",
+            borderColor: sort === "trending" ? "var(--accent-primary)" : "var(--border-light)",
           }}>
-          <TrendingUp className="w-3 h-3" /> Trending
+          <TrendingUp className="w-3 h-3" />
         </button>
         <button
           onClick={() => setSort("recent")}
-          className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full transition-all"
+          className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full transition-all border shrink-0"
           style={{
             backgroundColor: sort === "recent" ? "var(--accent-primary)" : "var(--bg-card)",
             color: sort === "recent" ? "#fff" : "var(--text-secondary)",
-            border: "1px solid var(--border-light)",
+            borderColor: sort === "recent" ? "var(--accent-primary)" : "var(--border-light)",
           }}>
-          <Clock className="w-3 h-3" /> Recent
+          <Clock className="w-3 h-3" />
         </button>
+
+        {/* Submit button */}
         {user && (
           <button
             onClick={() => setShowSubmit(true)}
-            className="ml-auto text-xs font-medium px-3 py-1.5 rounded-full transition-all"
-            style={{
-              backgroundColor: "var(--accent-primary)",
-              color: "#fff",
-            }}>
-            + Submit
+            className="ml-auto flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full transition-all text-white shrink-0"
+            style={{ backgroundColor: "var(--accent-primary)" }}>
+            <Plus className="w-3 h-3" /> Submit
           </button>
         )}
       </div>
