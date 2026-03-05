@@ -118,6 +118,8 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     setBody("");
     setImageFile(null);
     setImagePreview(null);
+    setVideoFile(null);
+    setVideoPreview(null);
     onClearReply?.();
     setSaving(false);
     onPosted?.();
