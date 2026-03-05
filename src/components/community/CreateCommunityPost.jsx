@@ -363,55 +363,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                 </div>
               )}
 
-              {/* Debate sides */}
-              {type === "debate" && (
-                <>
-                  <textarea value={body} onChange={e => setBody(e.target.value)}
-                    placeholder="Describe the debate (optional)..."
-                    rows={2}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
-                    style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-[11px] font-medium mb-1" style={{ color: "#3C6E5A" }}>🟢 Side A</p>
-                      <input value={sideA} onChange={e => setSideA(e.target.value)} placeholder="e.g. Yes"
-                        className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                        style={{ backgroundColor: "#EEF3F0", border: "1px solid #3C6E5A33", color: "var(--text-primary)" }} />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium mb-1" style={{ color: "#D98B62" }}>🟠 Side B</p>
-                      <input value={sideB} onChange={e => setSideB(e.target.value)} placeholder="e.g. No"
-                        className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                        style={{ backgroundColor: "#FFF3E8", border: "1px solid #D98B6233", color: "var(--text-primary)" }} />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* List items */}
-              {type === "list" && (
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>List items</p>
-                  {listItems.map((item, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <span className="text-xs font-bold w-5 text-center" style={{ color: "var(--accent-primary)" }}>{i+1}</span>
-                      <input value={item} onChange={e => { const n = [...listItems]; n[i] = e.target.value; setListItems(n); }}
-                        placeholder={`Item ${i+1}...`}
-                        className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                        style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-                      {listItems.length > 2 && (
-                        <button onClick={() => setListItems(l => l.filter((_, j) => j !== i))}>
-                          <Minus className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button onClick={() => setListItems(l => [...l, ""])} className="flex items-center gap-1 text-xs mt-1" style={{ color: "var(--accent-primary)" }}>
-                    <Plus className="w-3.5 h-3.5" /> Add item
-                  </button>
-                </div>
-              )}
-
               {/* Anonymous toggle */}
               <div className="flex items-center justify-between py-1">
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Post anonymously</p>
