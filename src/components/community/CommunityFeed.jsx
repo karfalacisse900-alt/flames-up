@@ -128,7 +128,7 @@ export default function CommunityFeed({ user }) {
           />
         ) : (
           <CommunityPostCard post={post} user={user}
-            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+            onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
