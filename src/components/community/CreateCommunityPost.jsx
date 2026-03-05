@@ -81,13 +81,17 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   }, [user?.email]);
 
   const saveDraft = async () => {
-    if (!user?.email || !type) return;
-    const existing = await base44.entities.PostDraft.filter({ user_email: user.email });
+    if (!user?.email) return;
     const data = { user_email: user.email, type, title, body, media_type: mediaType, media_ref: mediaRef, side_a: sideA, side_b: sideB, list_items: listItems, is_anonymous: isAnon };
-    if (existing[0]) await base44.entities.PostDraft.update(existing[0].id, data);
-    else await base44.entities.PostDraft.create(data);
-    setDraftSaved(true);
-    setTimeout(() => setDraftSaved(false), 2000);
+    try {
+      const existing = await base44.entities.PostDraft.filter({ user_email: user.email });
+      if (existing[0]) await base44.entities.PostDraft.update(existing[0].id, data);
+      else await base44.entities.PostDraft.create(data);
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 2000);
+    } catch (e) {
+      console.error("Draft save failed", e);
+    }
   };
 
   const clearDraft = async () => {
