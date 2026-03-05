@@ -53,6 +53,18 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     if (!f) return;
     setImageFile(f);
     setImagePreview(URL.createObjectURL(f));
+    setVideoFile(null);
+    setVideoPreview(null);
+    e.target.value = "";
+  };
+
+  const handleVideoPick = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setVideoFile(f);
+    setVideoPreview(URL.createObjectURL(f));
+    setImageFile(null);
+    setImagePreview(null);
     e.target.value = "";
   };
 
