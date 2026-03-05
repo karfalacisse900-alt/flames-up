@@ -120,8 +120,7 @@ export default function AutoplayVideo({ src, onDoubleTap }) {
       style={{
         borderRadius: 18,
         backgroundColor: "#000",
-        aspectRatio: "9/16",
-        maxHeight: 480,
+        maxHeight: 520,
         cursor: "pointer",
         userSelect: "none",
       }}
