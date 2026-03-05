@@ -218,6 +218,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     }
 
     setSaving(false);
+    await clearDraft();
     onCreated();
     onClose();
   };
@@ -247,7 +248,16 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
             <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
               {step === "type" ? "What would you like to post?" : "Compose Your Post"}
             </h2>
-            <button onClick={onClose}><X className="w-5 h-5" style={{ color: "var(--text-hint)" }} /></button>
+            <div className="flex items-center gap-2">
+              {step === "compose" && (
+                <button onClick={saveDraft} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all"
+                  style={{ borderColor: "var(--border-light)", color: draftSaved ? "var(--accent-primary)" : "var(--text-secondary)", backgroundColor: draftSaved ? "var(--accent-primary-light)" : "transparent" }}>
+                  <Save className="w-3 h-3" />
+                  {draftSaved ? "Saved!" : "Save draft"}
+                </button>
+              )}
+              <button onClick={onClose}><X className="w-5 h-5" style={{ color: "var(--text-hint)" }} /></button>
+            </div>
           </div>
 
           {/* Step 1: Pick type */}
