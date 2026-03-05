@@ -102,7 +102,7 @@ export default function DYKTab({ user }) {
       {/* Filter bar */}
       <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
         {/* Topics dropdown */}
-        <div className="relative shrink-0">
+        <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
           <button
             onClick={() => setShowCategories(!showCategories)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
@@ -114,14 +114,21 @@ export default function DYKTab({ user }) {
             {category ? CATEGORIES.find(c => c.value === category)?.label : "📂 Topics"}
             <ChevronDown className="w-3 h-3" />
           </button>
+          {showCategories && (
+            <div
+              className="fixed top-0 left-0 right-0 bottom-0 z-30"
+              onClick={() => setShowCategories(false)}
+            />
+          )}
           <AnimatePresence>
             {showCategories && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full left-0 mt-2 rounded-xl z-40 shadow-lg p-2"
+                className="absolute top-full left-0 mt-2 rounded-xl z-50 shadow-lg p-2 min-w-max max-h-72 overflow-y-auto"
                 style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                onClick={e => e.stopPropagation()}
               >
                 <button
                   onClick={() => { setCategory(null); setShowCategories(false); }}
