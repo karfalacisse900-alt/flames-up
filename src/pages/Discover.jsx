@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Zap, Film, MapPin, X } from "lucide-react";
+import { Search, Zap, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sub-tabs
-import DiscoverAppsTab from "../components/discover/DiscoverAppsTab.jsx";
-import DiscoverMediaTab from "../components/discover/DiscoverMediaTab.jsx";
-import MapboxLocal from "../components/discover/MapboxLocal";
+import DiscoverAppsTabNew from "../components/discover/DiscoverAppsTabNew.jsx";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
 import DYKTab from "../components/discover/DYKTab.jsx";
 
 const MAIN_TABS = [
   { id: "apps",  label: "Apps & Tools", icon: Zap },
-  { id: "media", label: "Media",        icon: Film },
-  { id: "local", label: "Local",        icon: MapPin },
   { id: "dyk",   label: "Did You Know", icon: "💡" },
 ];
 
@@ -44,17 +40,17 @@ export default function Discover() {
           Discover
         </h1>
         <p className="text-xs mb-4" style={{ color: "var(--text-hint)" }}>
-          Apps, media, and places around you
+          Explore amazing apps and learn facts
         </p>
 
-        {/* Search bar (only for apps and media tabs) */}
-        {activeTab !== "local" && (
+        {/* Search bar only for apps */}
+        {activeTab === "apps" && (
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder={activeTab === "apps" ? "Search apps and tools…" : "Search music, movies, books, games…"}
+              placeholder="Search apps and tools…"
               className="w-full pl-9 pr-9 py-2.5 rounded-2xl text-sm outline-none"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
             />
@@ -94,19 +90,13 @@ export default function Discover() {
       {/* ── Tab Content ── */}
       <div className="pb-24">
         {activeTab === "apps" && (
-          <DiscoverAppsTab
+          <DiscoverAppsTabNew
             items={items}
             isLoading={isLoading}
             search={search}
             user={user}
             onItemClick={setSelectedItem}
           />
-        )}
-        {activeTab === "media" && (
-          <DiscoverMediaTab search={search} user={user} />
-        )}
-        {activeTab === "local" && (
-          <MapboxLocal />
         )}
         {activeTab === "dyk" && (
           <DYKTab user={user} />
