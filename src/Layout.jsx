@@ -117,9 +117,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </nav>
       }
-      {showVerifyBanner && (
-        <EmailVerificationBanner onDismiss={() => setShowVerifyBanner(false)} />
-      )}
+
       {!hideNav && <AppAIAssistant />}
       <MiniPlayerWrapper />
     </div>);
