@@ -289,27 +289,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                 </div>
               </div>
 
-              {/* Media topic */}
-              <div>
-                <p className="text-[11px] font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Topic (optional)</p>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {MEDIA_TYPES.map(m => (
-                    <button key={m.key} onClick={() => setMediaType(m.key)}
-                      className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
-                      style={{
-                        backgroundColor: mediaType === m.key ? "var(--accent-primary)" : "transparent",
-                        color: mediaType === m.key ? "#fff" : "var(--text-secondary)",
-                        borderColor: mediaType === m.key ? "var(--accent-primary)" : "var(--border-light)",
-                      }}>{m.label}</button>
-                  ))}
-                </div>
-                {mediaType !== "general" && (
-                  <input value={mediaRef} onChange={e => setMediaRef(e.target.value)}
-                    placeholder={`Name of the ${mediaType}...`}
-                    className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-                    style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-                )}
-              </div>
+
 
               {/* Title (for debate/list) */}
               {(type === "debate" || type === "list") && (

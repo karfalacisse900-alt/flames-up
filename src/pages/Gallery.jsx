@@ -604,7 +604,7 @@ export default function Gallery() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Gallery</h1>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>{allArtworks.length} artworks</p>
+
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setShowSearch(s => !s)}
@@ -657,40 +657,7 @@ export default function Gallery() {
             })}
           </div>
 
-          {tab === "gallery" && (
-            <>
-              {/* Sort row */}
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2">
-                {SORTS.map(s => (
-                  <button key={s.key} onClick={() => setSort(s.key)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all"
-                    style={{ backgroundColor: sort === s.key ? "var(--text-primary)" : "var(--bg-card)", color: sort === s.key ? "var(--bg-app)" : "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-                    <s.icon className="w-3 h-3" /> {s.label}
-                  </button>
-                ))}
-              </div>
 
-              {/* Category filters — premium pill style */}
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2">
-                {GALLERY_CATEGORIES.map(cat => {
-                  const active = category === cat.id;
-                  return (
-                    <button key={cat.id} onClick={() => setCategory(cat.id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
-                      style={{
-                        backgroundColor: active ? "var(--accent-primary)" : "var(--bg-card)",
-                        color: active ? "#fff" : "var(--text-secondary)",
-                        border: `1.5px solid ${active ? "var(--accent-primary)" : "var(--border-light)"}`,
-                        boxShadow: active ? "0 2px 12px rgba(46,107,79,0.3)" : "none",
-                        fontWeight: active ? 700 : 400,
-                      }}>
-                      {cat.emoji} {cat.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
 
           <div style={{ height: 1, backgroundColor: "var(--border-light)", marginTop: 4 }} />
         </div>

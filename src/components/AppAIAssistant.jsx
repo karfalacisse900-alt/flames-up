@@ -35,9 +35,59 @@ export default function AppAIAssistant() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
 
+  // Draggable position state — start bottom-right
+  const [pos, setPos] = useState({ x: null, y: null }); // null = use CSS default
+  const dragging = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const btnRef = useRef(null);
+
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
+
+  const handleDragStart = (e) => {
+    dragging.current = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rect = btnRef.current.getBoundingClientRect();
+    dragOffset.current = { x: clientX - rect.left, y: clientY - rect.top };
+    e.preventDefault();
+  };
+
+  const handleDragMove = (e) => {
+    if (!dragging.current) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const newX = clientX - dragOffset.current.x;
+    const newY = clientY - dragOffset.current.y;
+    // Clamp to viewport
+    const btn = btnRef.current;
+    const w = btn ? btn.offsetWidth : 48;
+    const h = btn ? btn.offsetHeight : 48;
+    setPos({
+      x: Math.max(8, Math.min(window.innerWidth - w - 8, newX)),
+      y: Math.max(8, Math.min(window.innerHeight - h - 8, newY)),
+    });
+  };
+
+  const handleDragEnd = () => { dragging.current = false; };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleDragMove);
+    window.addEventListener("mouseup", handleDragEnd);
+    window.addEventListener("touchmove", handleDragMove, { passive: false });
+    window.addEventListener("touchend", handleDragEnd);
+    return () => {
+      window.removeEventListener("mousemove", handleDragMove);
+      window.removeEventListener("mouseup", handleDragEnd);
+      window.removeEventListener("touchmove", handleDragMove);
+      window.removeEventListener("touchend", handleDragEnd);
+    };
+  }, []);
+
+  const btnStyle = pos.x !== null
+    ? { position: "fixed", left: pos.x, top: pos.y, bottom: "auto", right: "auto", zIndex: 50, touchAction: "none" }
+    : { position: "fixed", bottom: "80px", right: "16px", zIndex: 50, touchAction: "none" };
 
   const sendMessage = async (text) => {
     const msg = text || input.trim();
@@ -59,16 +109,20 @@ export default function AppAIAssistant() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Draggable floating button */}
       <AnimatePresence>
         {!open && (
           <motion.button
+            ref={btnRef}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            onClick={() => setOpen(true)}
-            className="fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
-            style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
+            style={btnStyle}
+            onMouseDown={handleDragStart}
+            onTouchStart={handleDragStart}
+            onClick={() => !dragging.current && setOpen(true)}
+            className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing select-none"
+            style={{ ...btnStyle, backgroundColor: "var(--accent-primary)", color: "#fff" }}
           >
             <Sparkles className="w-5 h-5" />
           </motion.button>
@@ -104,7 +158,8 @@ export default function AppAIAssistant() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 min-h-0">
+            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 min-h-0"
+              style={{ backgroundColor: "var(--bg-card)" }}>
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
@@ -131,7 +186,8 @@ export default function AppAIAssistant() {
 
             {/* Quick prompts */}
             {messages.length <= 1 && (
-              <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide shrink-0">
+              <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide shrink-0"
+                style={{ backgroundColor: "var(--bg-card)" }}>
                 {QUICK_PROMPTS.map((p, i) => (
                   <button
                     key={i}
@@ -146,7 +202,8 @@ export default function AppAIAssistant() {
             )}
 
             {/* Input */}
-            <div className="px-3 pb-3 pt-1 shrink-0" style={{ borderTop: "1px solid var(--border-light)" }}>
+            <div className="px-3 pb-3 pt-1 shrink-0"
+              style={{ borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-card)" }}>
               <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
                 <input
                   value={input}
