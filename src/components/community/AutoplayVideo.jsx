@@ -116,11 +116,12 @@ export default function AutoplayVideo({ src, onDoubleTap }) {
     <div
       ref={containerRef}
       onClick={handleTap}
-      className="relative w-full overflow-hidden mb-2.5"
+      className="relative w-full overflow-hidden"
       style={{
         borderRadius: 18,
         backgroundColor: "#000",
-        aspectRatio: "4/5",
+        aspectRatio: "9/16",
+        maxHeight: 480,
         cursor: "pointer",
         userSelect: "none",
       }}
