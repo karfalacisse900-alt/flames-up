@@ -72,7 +72,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
   const saveDraft = async () => {
     if (!user?.email) return;
-    const data = { user_email: user.email, type, title, body, media_type: mediaType, media_ref: mediaRef, side_a: sideA, side_b: sideB, list_items: listItems, is_anonymous: isAnon };
+    const data = { user_email: user.email, type, title, body, media_type: mediaType, media_ref: mediaRef, is_anonymous: isAnon };
     try {
       const existing = await base44.entities.PostDraft.filter({ user_email: user.email });
       if (existing[0]) await base44.entities.PostDraft.update(existing[0].id, data);
