@@ -264,11 +264,10 @@ function ArtCard({ art, user, onSelect, onLike }) {
   return (
     <div
       className="break-inside-avoid mb-2 md:mb-3 rounded-2xl overflow-hidden cursor-pointer group relative"
-      style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 2px 12px rgba(0,0,0,0.1)", border: "1px solid var(--border-light)", contain: "layout style paint", transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease" }}
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", contain: "layout style paint", transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease", transform: hovered ? "translateY(-2px)" : "translateY(0)", boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.18)" : "0 2px 12px rgba(0,0,0,0.08)" }}
       onClick={() => onSelect(art)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ transform: hovered ? "translateY(-2px)" : "translateY(0)", boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.18)" : "0 2px 12px rgba(0,0,0,0.08)" }}
     >
       {/* Image */}
       <div className="relative overflow-hidden">
