@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Heart, Send, EyeOff, UserPlus, UserCheck } from "lucide-react";
+import { ArrowLeft, Heart, Send, EyeOff, UserPlus, UserCheck, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Input } from "@/components/ui/input";
@@ -157,41 +157,53 @@ export default function PostDetail() {
       <div className="px-5 mt-4">
         <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs px-3 py-1 rounded-full border capitalize" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{post.type}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
-              {!post.is_anonymous && post.author_email && user?.email && post.author_email !== user.email && (
-                <button
-                  onClick={async () => {
-                    setFollowLoading(true);
-                    if (following) {
-                      const existing = await base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email });
-                      if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
-                      setFollowing(false);
-                    } else {
-                      await base44.entities.Follow.create({
-                        follower_email: user.email,
-                        follower_name: user.display_name || user.full_name || user.email,
-                        following_email: post.author_email,
-                        following_name: post.author_name || post.author_email,
-                      });
-                      setFollowing(true);
-                    }
-                    setFollowLoading(false);
-                  }}
-                  disabled={followLoading}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium transition-all border"
-                  style={{
-                    backgroundColor: following ? "var(--accent-primary)" : "transparent",
-                    color: following ? "#fff" : "var(--accent-primary)",
-                    borderColor: "var(--accent-primary)"
-                  }}>
-                  {following ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
-                  {following ? "Following" : "Follow"}
-                </button>
-              )}
-            </div>
-          </div>
+             <span className="text-xs px-3 py-1 rounded-full border capitalize" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", borderColor: "var(--border-light)" }}>{post.type}</span>
+             <div className="flex items-center gap-2">
+               <span className="text-xs" style={{ color: "var(--text-hint)" }}>{post.is_anonymous ? "Anonymous" : post.author_name}</span>
+               {user?.email === post.author_email && (
+                 <button
+                   onClick={async () => {
+                     if (!window.confirm("Delete this post?")) return;
+                     await base44.entities.Post.delete(post.id);
+                     window.location.href = createPageUrl("Home");
+                   }}
+                   className="p-1.5 rounded-full"
+                   style={{ color: "var(--text-hint)" }}>
+                   <Trash2 className="w-3.5 h-3.5" />
+                 </button>
+               )}
+               {!post.is_anonymous && post.author_email && user?.email && post.author_email !== user.email && (
+                 <button
+                   onClick={async () => {
+                     setFollowLoading(true);
+                     if (following) {
+                       const existing = await base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email });
+                       if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
+                       setFollowing(false);
+                     } else {
+                       await base44.entities.Follow.create({
+                         follower_email: user.email,
+                         follower_name: user.display_name || user.full_name || user.email,
+                         following_email: post.author_email,
+                         following_name: post.author_name || post.author_email,
+                       });
+                       setFollowing(true);
+                     }
+                     setFollowLoading(false);
+                   }}
+                   disabled={followLoading}
+                   className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium transition-all border"
+                   style={{
+                     backgroundColor: following ? "var(--accent-primary)" : "transparent",
+                     color: following ? "#fff" : "var(--accent-primary)",
+                     borderColor: "var(--accent-primary)"
+                   }}>
+                   {following ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
+                   {following ? "Following" : "Follow"}
+                 </button>
+               )}
+             </div>
+           </div>
           <p className="text-xl leading-relaxed" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
             {post.text}
           </p>
