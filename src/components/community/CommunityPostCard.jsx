@@ -272,7 +272,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             <button
               onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
               onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
-              onClick={handleLike} disabled={hasLiked}
+              onClick={handleLike}
               className={`flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
               style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
               <span className="text-[15px] leading-none" style={{ transition: "transform 0.2s" }}>{hasLiked ? "❤️" : "🤍"}</span>
