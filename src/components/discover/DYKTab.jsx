@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { TrendingUp, Clock, Search, X, ChevronDown, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -14,6 +14,10 @@ const CATEGORIES = [
   { value: "jobs",          label: "💼 Science", examples: "Discoveries, Research, Facts" },
 ];
 
+let factsCache = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export default function DYKTab({ user }) {
   const [facts, setFacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,13 +27,28 @@ export default function DYKTab({ user }) {
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const loadTimeoutRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
+    
+    // Use cache if available and fresh
+    if (factsCache && Date.now() - lastFetchTime < CACHE_DURATION) {
+      setFacts(factsCache);
+      setLoading(false);
+      return;
+    }
+
     load().then(() => {
       if (isMounted) setLoading(false);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
     });
-    return () => { isMounted = false; };
+
+    return () => { 
+      isMounted = false;
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
   }, []);
 
   async function load() {
@@ -37,7 +56,13 @@ export default function DYKTab({ user }) {
     setIsLoading(true);
     try {
       const all = await base44.entities.DidYouKnow.filter({ status: "approved" }, "-useful_count", 50);
+      factsCache = all;
+      lastFetchTime = Date.now();
       setFacts(all);
+    } catch (err) {
+      console.error("Failed to load facts:", err);
+      // Fall back to cache even if expired
+      if (factsCache) setFacts(factsCache);
     } finally {
       setIsLoading(false);
     }
