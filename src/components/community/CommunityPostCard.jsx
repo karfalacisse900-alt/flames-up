@@ -190,25 +190,16 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
           {/* Big centered text */}
           <div className="px-5 pb-5 text-center">
-            {(() => {
-              // Get plain text length for font sizing (strip tags just for measurement)
-              const plainLen = post.body ? post.body.replace(/<[^>]+>/g, "").length : 0;
-              const fontSize = plainLen > 120 ? 16 : plainLen > 60 ? 19 : 22;
-              return (
-                <div
-                  className="text-only-body"
-                  style={{
-                    color: "var(--text-primary)",
-                    fontSize,
-                    fontWeight: 600,
-                    fontFamily: "var(--font-serif)",
-                    lineHeight: 1.5,
-                    textAlign: "center",
-                  }}
-                  dangerouslySetInnerHTML={{ __html: post.body || "" }}
-                />
-              );
-            })()}
+            <p className="leading-relaxed whitespace-pre-line"
+              style={{
+                color: "var(--text-primary)",
+                fontSize: post.body?.length > 120 ? 16 : post.body?.length > 60 ? 19 : 22,
+                fontWeight: 600,
+                fontFamily: "var(--font-serif)",
+                lineHeight: 1.45,
+              }}>
+              {post.body}
+            </p>
           </div>
 
           {/* Actions */}

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -292,13 +293,6 @@ nav, button, a[role="button"], .no-select {
 .ql-toolbar button.ql-active svg .ql-fill { fill: var(--accent-primary) !important; }
 .ql-tooltip { background: var(--bg-card) !important; border-color: var(--border-light) !important; color: var(--text-primary) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; border-radius: 10px !important; }
 .ql-tooltip input { background: var(--bg-subtle) !important; color: var(--text-primary) !important; border-color: var(--border-light) !important; border-radius: 6px !important; }
-
-/* ── Text-Only Post Body ── */
-.text-only-body p { margin: 0 0 8px 0; }
-.text-only-body p:last-child { margin-bottom: 0; }
-.text-only-body br { display: block; content: ""; margin-bottom: 4px; }
-.text-only-body strong { font-weight: 700; }
-.text-only-body em { font-style: italic; }
 
 /* ── Community Post Rich Body ── */
 .rich-body p { margin: 0 0 6px 0; }
