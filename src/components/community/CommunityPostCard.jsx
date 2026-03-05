@@ -194,16 +194,16 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
                     style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)" }}>
-                    <button onClick={handleShare} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                      <Share2 className="w-3.5 h-3.5" /> Share
+                    <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <LinkIcon className="w-3.5 h-3.5" /> Copy link
+                    </button>
+                    <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <EyeOff className="w-3.5 h-3.5" /> Not interested
                     </button>
                     {!isOwnPost && (
                       <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                        <Flag className="w-3.5 h-3.5" /> Report
+                        <Flag className="w-3.5 h-3.5" /> Report post
                       </button>
-                    )}
-                    {!isOwnPost && post.author_email && (
-                      <MuteBlockMenu targetEmail={post.author_email} targetName={post.author_name} user={user} onReport={handleReport} inline />
                     )}
                   </motion.div>
                 )}
