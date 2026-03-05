@@ -86,9 +86,18 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const handleShare = () => {
     const url = `${window.location.origin}?post=${post.id}`;
     if (navigator.share) navigator.share({ title: "Post", url });
-    else navigator.clipboard.writeText(url);
+    else { navigator.clipboard.writeText(url); }
     setShowMenu(false);
   };
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}?post=${post.id}`;
+    navigator.clipboard.writeText(url);
+    setShowMenu(false);
+  };
+
+  const [notInterested, setNotInterested] = useState(false);
+  if (notInterested) return null;
 
   const handleLike = () => {
     setLikeBounce(true);
