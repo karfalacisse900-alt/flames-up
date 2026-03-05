@@ -3,8 +3,8 @@ import ReactMarkdown from "react-markdown";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Eye, Link as LinkIcon, EyeOff } from "lucide-react";
-import MuteBlockMenu from "./MuteBlockMenu";
 import AutoplayVideo from "./AutoplayVideo";
+import SavePostModal from "./SavePostModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -97,6 +97,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   };
 
   const [notInterested, setNotInterested] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   if (notInterested) return null;
 
   const handleLike = () => {
