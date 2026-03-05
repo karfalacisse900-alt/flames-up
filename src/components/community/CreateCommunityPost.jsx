@@ -292,13 +292,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
 
 
-              {/* Title (for debate/list) */}
-              {(type === "debate" || type === "list") && (
-                <input value={title} onChange={e => setTitle(e.target.value)}
-                  placeholder={type === "debate" ? "Debate topic..." : "List title..."}
-                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none font-semibold"
-                  style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-              )}
+
 
               {/* Body */}
               {type !== "debate" && (
