@@ -179,6 +179,17 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         </div>
       )}
 
+      {/* Continue Watching banner */}
+      {savedProgress > 2 && !playing && (
+        <div
+          className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
+          style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", zIndex: 10 }}
+        >
+          <Play className="w-3 h-3" fill="white" />
+          Continue from {Math.floor(savedProgress / 60)}:{String(savedProgress % 60).padStart(2, "0")}
+        </div>
+      )}
+
       {/* Bottom controls */}
       <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
         <button
