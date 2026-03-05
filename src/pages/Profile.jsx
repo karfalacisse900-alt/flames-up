@@ -6,6 +6,7 @@ import SavedItems from "../components/profile/SavedItems";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
 import InterestsSection from "../components/profile/InterestsSection";
+import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import { getBalance } from "../components/coins/coinsHelper";
