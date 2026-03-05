@@ -139,12 +139,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       onClick={handleTap}
       className="relative w-full overflow-hidden"
       style={{
-        borderRadius: 18,
-        backgroundColor: "#000",
-        aspectRatio: "9/16",
-        maxHeight: 520,
+        borderRadius: 16,
+        aspectRatio: "4/5",
+        maxHeight: 400,
         cursor: "pointer",
         userSelect: "none",
+        background: "transparent",
       }}
     >
       <video
@@ -153,7 +153,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         playsInline
         loop
         preload="metadata"
-        className="absolute inset-0 w-full h-full object-contain"
+        className="absolute inset-0 w-full h-full object-cover"
       />
 
       {/* Tap icon feedback */}
