@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Search, X, ChevronDown, Plus } from "lucide-react";
+import { Search, X, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
 import StarRating from "./StarRating";
 import BookmarkButton from "./BookmarkButton";
@@ -225,15 +226,43 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>No apps found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
           {filtered.map((item, i) => (
-            <AppCard
-              key={item.id}
-              item={item}
-              user={user}
-              index={i}
-              onOpen={() => onItemClick(item)}
-            />
+            <div key={item.id} onClick={() => onItemClick(item)} className="rounded-2xl p-4 cursor-pointer transition-all active:scale-95" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+              <div className="flex items-start gap-3 mb-2">
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                  <DiscoverLogo item={item} size="md" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
+                    {item.title}
+                  </h3>
+                  {item.brand_name && (
+                    <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                      {item.brand_name}
+                    </p>
+                  )}
+                </div>
+                {user && (
+                  <div onClick={e => e.stopPropagation()}>
+                    <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
+                  </div>
+                )}
+              </div>
+              <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
+                {item.description}
+              </p>
+              <div className="flex items-center justify-between">
+                {item.pricing && (
+                  <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                    {item.pricing}
+                  </span>
+                )}
+                {(item.avg_rating || 0) > 0 && (
+                  <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
