@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Zap, Film, MapPin, X, ExternalLink, SlidersHorizontal } from "lucide-react";
@@ -22,7 +22,7 @@ export default function Discover() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [user, setUser] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
