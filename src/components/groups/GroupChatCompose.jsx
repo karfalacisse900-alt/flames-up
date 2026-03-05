@@ -102,6 +102,7 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
       author_email: user.email,
       author_name: user.full_name || user.email,
       image_url: imageUrl || undefined,
+      video_url: videoUrl || undefined,
       group_id: group.id,
       group_name: group.name,
       mentions: mentions.length > 0 ? mentions : undefined,
