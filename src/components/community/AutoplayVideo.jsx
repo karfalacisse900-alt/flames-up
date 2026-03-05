@@ -130,9 +130,8 @@ export default function AutoplayVideo({ src, onDoubleTap }) {
         ref={videoRef}
         src={src}
         playsInline
-        muted
         loop
-        preload="none"
+        preload="metadata"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
