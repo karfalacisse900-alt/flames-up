@@ -110,6 +110,151 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const handlePressEnd = () => { clearTimeout(longPressTimer.current); };
 
   const bodyIsRich = isRichText(post.body);
+  const isTextOnly = post.type === "text_only";
+
+  // ── Text-Only card layout ──────────────────────────────────────────────────
+  if (isTextOnly) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="relative mx-3 my-2"
+      >
+        <div className="rounded-3xl overflow-hidden"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+
+          {/* Author header */}
+          <div className="flex items-center gap-2.5 px-4 pt-4 pb-3">
+            <div className="shrink-0">
+              {showAuthor ? (
+                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
+                  {post.author_avatar_url ? (
+                    <img src={post.author_avatar_url} alt={post.author_name}
+                      className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}66)`, color: avatarColor }}>
+                      {initials}
+                    </div>
+                  )}
+                </Link>
+              ) : (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: "linear-gradient(135deg, #ccc3, #ccc5)", color: "#999" }}>?</div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              {showAuthor ? (
+                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
+                  className="text-xs font-bold block truncate" style={{ color: "var(--text-primary)" }}>
+                  {post.author_name || "User"}
+                </Link>
+              ) : (
+                <span className="text-xs font-bold block" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
+              )}
+              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+            </div>
+            {/* Three-dot menu */}
+            <div className="relative">
+              <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              <AnimatePresence>
+                {showMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+                    className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
+                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)" }}>
+                    <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <LinkIcon className="w-3.5 h-3.5" /> Copy link
+                    </button>
+                    <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <EyeOff className="w-3.5 h-3.5" /> Not interested
+                    </button>
+                    {isOwnPost && (
+                      <button onClick={handleDelete} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    )}
+                    {!isOwnPost && (
+                      <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
+                        <Flag className="w-3.5 h-3.5" /> Report post
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Big centered text */}
+          <div className="px-5 pb-5 text-center">
+            <p className="leading-relaxed whitespace-pre-line"
+              style={{
+                color: "var(--text-primary)",
+                fontSize: post.body?.length > 120 ? 16 : post.body?.length > 60 ? 19 : 22,
+                fontWeight: 600,
+                fontFamily: "var(--font-serif)",
+                lineHeight: 1.45,
+              }}>
+              {post.body}
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-0.5 px-2 pb-3 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+            <div className="relative">
+              <button
+                onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
+                onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
+                onClick={handleLike}
+                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
+                style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
+                <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
+                {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
+              </button>
+              <AnimatePresence>
+                {showReactions && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.7, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                    className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
+                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}
+                    onMouseLeave={() => setShowReactions(false)}>
+                    {REACTIONS.map(r => (
+                      <motion.button key={r} whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
+                        onClick={() => { handleLike(); setShowReactions(false); }}
+                        className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
+                        style={{ backgroundColor: "var(--bg-subtle)" }}>{r}</motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip" style={{ color: "var(--text-hint)" }}>
+              <MessageCircle className="w-4 h-4" />
+              {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
+            </Link>
+            <button onClick={handleShare} className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium chip" style={{ color: "var(--text-hint)" }}>
+              <Share2 className="w-4 h-4" />
+            </button>
+            <button onClick={() => user ? setShowSaveModal(true) : null}
+              className="ml-auto p-1.5 rounded-full transition-all chip"
+              style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
+              <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+            </button>
+          </div>
+        </div>
+
+        {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
+        <AnimatePresence>
+          {showSaveModal && <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />}
+        </AnimatePresence>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
