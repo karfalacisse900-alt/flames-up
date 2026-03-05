@@ -15,6 +15,7 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
   const [mentionStart, setMentionStart] = useState(-1);
   const textareaRef = useRef(null);
   const localFileRef = useRef(null);
+  const videoInputRef = useRef(null);
   const usedRef = fileInputRef || localFileRef;
 
   // Detect @mention trigger
