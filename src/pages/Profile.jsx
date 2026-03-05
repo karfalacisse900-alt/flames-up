@@ -267,20 +267,11 @@ export default function Profile() {
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Medal className="w-3.5 h-3.5" /> Badges
           </TabsTrigger>
-          <TabsTrigger value="media_lists" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Film className="w-3.5 h-3.5" /> Lists
-          </TabsTrigger>
-          <TabsTrigger value="saved_posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Bookmark className="w-3.5 h-3.5" /> Saved
-          </TabsTrigger>
           <TabsTrigger value="saved_items" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <FolderOpen className="w-3.5 h-3.5" /> Apps
           </TabsTrigger>
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Clock className="w-3.5 h-3.5" /> Activity
           </TabsTrigger>
         </TabsList>
 
@@ -353,15 +344,6 @@ export default function Profile() {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="media_lists" className="mt-4">
-          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Your saved movies, books, music & games</p>
-          <SavedMediaLists user={user} />
-        </TabsContent>
-
-        <TabsContent value="saved_posts" className="mt-4">
-          <SavedPosts user={user} />
         </TabsContent>
 
         <TabsContent value="saved_items" className="mt-4">

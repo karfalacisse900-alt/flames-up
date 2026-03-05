@@ -76,7 +76,7 @@ export default function DYKTab({ user }) {
 
       {/* Filter bar */}
       <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
-        {/* Categories dropdown */}
+        {/* Topics dropdown */}
         <div className="relative shrink-0">
           <button
             onClick={() => setShowCategories(!showCategories)}
