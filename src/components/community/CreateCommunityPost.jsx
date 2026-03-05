@@ -20,6 +20,7 @@ const QUILL_FORMATS = ["bold", "italic", "underline", "list", "bullet", "link"];
 const POST_TYPES = [
   { key: "opinion",      label: "Opinion",    emoji: "💬", desc: "Share your take on anything" },
   { key: "question",     label: "Question",   emoji: "❓", desc: "Ask the community anything" },
+  { key: "text_only",    label: "Text Only",  emoji: "✍️", desc: "Bold text, no media" },
   { key: "debate",       label: "Debate",     emoji: "⚔️", desc: "Create a two-sided debate" },
   { key: "list",         label: "List",       emoji: "📋", desc: "Share a ranked list" },
   { key: "quote_of_day", label: "Quote",      emoji: "✦",  desc: "Share an inspiring quote" },
