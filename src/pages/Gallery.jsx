@@ -507,8 +507,8 @@ function MasonryGrid({ items, user, onSelect, onLike }) {
         @media (min-width: 1280px) { .masonry-responsive { columns: 5; column-gap: 14px; } }
         @media (min-width: 1600px) { .masonry-responsive { columns: 6; column-gap: 16px; } }
       `}</style>
-      {items.map(art => (
-        <ArtCard key={art.id} art={art} user={user} onSelect={onSelect} onLike={onLike} />
+      {items.map((art, i) => (
+        <ArtCard key={art.id} art={art} user={user} onSelect={onSelect} onLike={onLike} index={i} />
       ))}
     </div>
   );
