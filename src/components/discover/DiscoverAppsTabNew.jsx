@@ -105,7 +105,6 @@ function AppCard({ item, user, onOpen, index }) {
 export default function DiscoverAppsTabNew({ items, isLoading, search, user, onItemClick }) {
   const [category, setCategory] = useState(null);
   const [localSearch, setLocalSearch] = useState("");
-  const [pricingFilter, setPricingFilter] = useState(null);
   const [showCategories, setShowCategories] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
 
@@ -119,11 +118,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         item.long_description?.toLowerCase().includes(searchTerm) ||
         item.brand_name?.toLowerCase().includes(searchTerm) ||
         item.tags?.some(t => t.toLowerCase().includes(searchTerm));
-      const pricingMatch = !pricingFilter || 
-        pricingFilter === "free" ? item.pricing === "Free" :
-        pricingFilter === "freemium" ? item.pricing === "Freemium" :
-        true;
-      return catMatch && searchMatch && pricingMatch;
+      return catMatch && searchMatch;
     });
 
     // Sort: featured first, then by rating
@@ -131,7 +126,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       if (a.is_featured !== b.is_featured) return b.is_featured ? 1 : -1;
       return (b.avg_rating || 0) - (a.avg_rating || 0);
     });
-  }, [items, category, search, localSearch, pricingFilter]);
+  }, [items, category, search, localSearch]);
 
   if (isLoading) {
     return (
@@ -191,7 +186,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
               >
                 <button
                   onClick={() => { setCategory(null); setShowCategories(false); }}
-                  className="block w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-opacity-50 transition-all"
+                  className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
                   style={{ color: "var(--text-primary)", backgroundColor: !category ? "var(--accent-primary-light)" : "transparent" }}
                 >
                   All Categories
@@ -200,7 +195,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
                   <button
                     key={c.id}
                     onClick={() => { setCategory(c.id); setShowCategories(false); }}
-                    className="block w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-opacity-50 transition-all"
+                    className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
                     style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
                   >
                     {c.label}
@@ -211,30 +206,6 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           </AnimatePresence>
         </div>
 
-        {/* Pricing filters */}
-        <button
-          onClick={() => setPricingFilter(pricingFilter === "free" ? null : "free")}
-          className="px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
-          style={{
-            backgroundColor: pricingFilter === "free" ? "var(--accent-primary)" : "var(--bg-card)",
-            color: pricingFilter === "free" ? "#fff" : "var(--text-secondary)",
-            borderColor: pricingFilter === "free" ? "var(--accent-primary)" : "var(--border-light)",
-          }}
-        >
-          Free
-        </button>
-        <button
-          onClick={() => setPricingFilter(pricingFilter === "freemium" ? null : "freemium")}
-          className="px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
-          style={{
-            backgroundColor: pricingFilter === "freemium" ? "var(--accent-primary)" : "var(--bg-card)",
-            color: pricingFilter === "freemium" ? "#fff" : "var(--text-secondary)",
-            borderColor: pricingFilter === "freemium" ? "var(--accent-primary)" : "var(--border-light)",
-          }}
-        >
-          Freemium
-        </button>
-
         {/* Submit app button */}
         {user && (
           <button
@@ -242,7 +213,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
             className="ml-auto flex items-center gap-1 px-3 py-2 rounded-full text-xs font-semibold text-white whitespace-nowrap transition-all shrink-0"
             style={{ backgroundColor: "var(--accent-primary)" }}
           >
-            <Plus className="w-3 h-3" /> Submit App
+            <Plus className="w-3 h-3" /> Submit
           </button>
         )}
       </div>
