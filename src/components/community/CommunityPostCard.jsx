@@ -32,9 +32,18 @@ function isRichText(text) {
 // Strip HTML tags and return clean plain text
 function stripHtml(html) {
   if (!html) return "";
+  // First unescape any HTML entities that might be double-encoded
+  const unescaped = html
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
   const div = document.createElement("div");
-  div.innerHTML = html;
-  return (div.textContent || div.innerText || "").trim();
+  div.innerHTML = unescaped;
+  const text = (div.textContent || div.innerText || "").trim();
+  // Replace multiple blank lines with a single one
+  return text.replace(/\n{3,}/g, "\n\n");
 }
 
 export default function CommunityPostCard({ post, user, onUpvote }) {
