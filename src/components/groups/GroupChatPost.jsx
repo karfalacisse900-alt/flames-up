@@ -106,7 +106,12 @@ export default function GroupChatPost({ post, user, members = [], onReply, isAdm
 
           {/* Image */}
           {post.image_url && (
-            <img src={post.image_url} alt="" className="mt-2 rounded-xl max-h-52 object-cover w-full" />
+            <img src={post.image_url} alt="" className="mt-2 rounded-xl object-cover w-full" style={{ maxHeight: 280 }} />
+          )}
+
+          {/* Video */}
+          {post.video_url && (
+            <video src={post.video_url} controls playsInline className="mt-2 rounded-xl w-full" style={{ maxHeight: 280, backgroundColor: "#000" }} />
           )}
 
           {/* Actions row */}
