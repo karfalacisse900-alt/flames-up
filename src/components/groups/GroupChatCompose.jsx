@@ -142,13 +142,24 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
         )}
       </AnimatePresence>
 
-      {/* Image preview */}
+      {/* Media preview */}
       <AnimatePresence>
         {imagePreview && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="px-4 py-2 border-t relative" style={{ borderColor: "var(--border-light)" }}>
             <img src={imagePreview} alt="" className="h-20 rounded-xl object-cover" />
             <button onClick={() => { setImageFile(null); setImagePreview(null); }}
+              className="absolute top-3 right-5 w-6 h-6 rounded-full flex items-center justify-center text-white"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+              <X className="w-3 h-3" />
+            </button>
+          </motion.div>
+        )}
+        {videoPreview && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="px-4 py-2 border-t relative" style={{ borderColor: "var(--border-light)" }}>
+            <video src={videoPreview} className="h-20 rounded-xl object-cover" muted />
+            <button onClick={() => { setVideoFile(null); setVideoPreview(null); }}
               className="absolute top-3 right-5 w-6 h-6 rounded-full flex items-center justify-center text-white"
               style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
               <X className="w-3 h-3" />
