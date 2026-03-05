@@ -166,20 +166,22 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       setUploading(false);
     }
 
+    // Auto-detect: if no media, treat as text_only card
+    const effectiveType = (!finalImageUrl && !finalVideoUrl && type === "opinion") ? "text_only" : type;
+
     // AI moderation check
-    const textToCheck = [title, body, sideA, sideB].filter(Boolean).join(" ");
+    const textToCheck = [body].filter(Boolean).join(" ");
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
-        type, title: title.trim() || undefined, body: body.trim() || title.trim(),
+        type: effectiveType, body: body.trim(),
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
         author_avatar_url: user?.avatar_url || "",
-        is_anonymous: isAnon, media_type: mediaType, media_ref_title: mediaRef.trim() || undefined,
+        is_anonymous: isAnon,
         image_url: finalImageUrl || undefined,
         video_url: finalVideoUrl || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
-        list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
       });
       await createModerationReport("post", newPost.id, user?.email, user?.display_name || user?.full_name, modResult.flags, modResult.confidence);
       setSaving(false);
@@ -189,33 +191,19 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     }
 
     const postData = {
-      type,
-      title: title.trim() || undefined,
-      body: body.trim() || title.trim(),
+      type: effectiveType,
+      body: body.trim(),
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
       author_avatar_url: user?.avatar_url || "",
       is_anonymous: isAnon,
-      media_type: mediaType,
-      media_ref_title: mediaRef.trim() || undefined,
       image_url: finalImageUrl || undefined,
       video_url: finalVideoUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
-      list_items: type === "list" ? listItems.filter(i => i.trim()) : undefined,
     };
 
-    const newPost = await base44.entities.CommunityPost.create(postData);
-
-    if (type === "debate" && newPost?.id) {
-      await base44.entities.CommunityDebate.create({
-        post_id: newPost.id,
-        topic: title.trim(),
-        side_a_label: sideA.trim(),
-        side_b_label: sideB.trim(),
-        side_a_votes: 0, side_b_votes: 0,
-      });
-    }
+    await base44.entities.CommunityPost.create(postData);
 
     setSaving(false);
     await clearDraft();
