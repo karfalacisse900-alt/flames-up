@@ -7,7 +7,10 @@ const sessionPrefs = { muted: false };
 // Global singleton — only one video plays at a time
 const activeVideo = { ref: null, setPlaying: null };
 
-export default function AutoplayVideo({ src, onDoubleTap }) {
+// Continue-watching progress store (postId → seconds)
+const videoProgress = {};
+
+export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(sessionPrefs.muted);
