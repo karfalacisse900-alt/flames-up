@@ -139,7 +139,7 @@ export default function CommunityFeed({ user }) {
       >
         {post.type === "debate" || post.type === "question" ? (
           <DebateCard post={post} debate={debate} user={user}
-            onUpvote={() => user && !post.upvoted_by?.includes(user.email) && upvoteMut.mutate({ post })}
+            onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
