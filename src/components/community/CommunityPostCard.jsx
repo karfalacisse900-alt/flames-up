@@ -337,7 +337,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           )}
 
           {/* Save — pushed right */}
-          <button onClick={() => setSaved(v => !v)}
+          <button onClick={() => user ? setShowSaveModal(true) : null}
             className="ml-auto p-1.5 rounded-full transition-all chip"
             style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
             <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
