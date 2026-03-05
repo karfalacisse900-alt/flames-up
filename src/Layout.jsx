@@ -33,6 +33,7 @@ function FlamesUpLogo() {
 
 export default function Layout({ children, currentPageName }) {
   useLayoutStabilizer();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
