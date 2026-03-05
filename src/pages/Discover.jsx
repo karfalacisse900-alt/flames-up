@@ -9,11 +9,13 @@ import DiscoverAppsTab from "../components/discover/DiscoverAppsTab.jsx";
 import DiscoverMediaTab from "../components/discover/DiscoverMediaTab.jsx";
 import MapboxLocal from "../components/discover/MapboxLocal";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
+import DYKTab from "../components/discover/DYKTab";
 
 const MAIN_TABS = [
   { id: "apps",  label: "Apps & Tools", icon: Zap },
   { id: "media", label: "Media",        icon: Film },
   { id: "local", label: "Local",        icon: MapPin },
+  { id: "dyk",   label: "Did You Know", icon: "💡" },
 ];
 
 export default function Discover() {
@@ -67,7 +69,7 @@ export default function Discover() {
         {/* Main tab switcher */}
         <div className="flex gap-2">
           {MAIN_TABS.map(t => {
-            const Icon = t.icon;
+            const Icon = typeof t.icon === "string" ? null : t.icon;
             const isActive = activeTab === t.id;
             return (
               <button
@@ -81,7 +83,7 @@ export default function Discover() {
                   boxShadow: isActive ? "0 2px 12px rgba(46,107,79,0.25)" : "none",
                 }}
               >
-                <Icon className="w-3.5 h-3.5" />
+                {Icon ? <Icon className="w-3.5 h-3.5" /> : <span>{t.icon}</span>}
                 {t.label}
               </button>
             );
@@ -105,6 +107,9 @@ export default function Discover() {
         )}
         {activeTab === "local" && (
           <MapboxLocal />
+        )}
+        {activeTab === "dyk" && (
+          <DYKTab user={user} />
         )}
       </div>
 
