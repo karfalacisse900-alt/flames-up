@@ -47,8 +47,20 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     activeVideo.setPlaying = setPlaying;
     v.muted = sessionPrefs.muted;
     setMuted(sessionPrefs.muted);
-    v.play().then(() => setPlaying(true)).catch(() => {});
-  }, []);
+    // Resume from saved position
+    if (postId && videoProgress[postId] > 2) {
+      v.currentTime = videoProgress[postId];
+    }
+    v.play().then(() => {
+      setPlaying(true);
+      setSavedProgress(0); // hide banner once playing
+      // Save progress every second
+      clearInterval(progressTimer.current);
+      progressTimer.current = setInterval(() => {
+        if (!v.paused && postId) videoProgress[postId] = Math.floor(v.currentTime);
+      }, 1000);
+    }).catch(() => {});
+  }, [postId]);
 
   const doPause = useCallback(() => {
     videoRef.current?.pause();
