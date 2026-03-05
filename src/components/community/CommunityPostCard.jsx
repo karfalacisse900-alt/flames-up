@@ -91,7 +91,6 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   };
 
   const handleLike = () => {
-    if (hasLiked) return;
     setLikeBounce(true);
     setTimeout(() => setLikeBounce(false), 500);
     onUpvote();
