@@ -324,7 +324,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
               )}
 
               {/* Photo/GIF/Video upload */}
-              {type !== "debate" && type !== "list" && (
+              {type !== "debate" && type !== "list" && type !== "text_only" && (
                 <div>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                   <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
