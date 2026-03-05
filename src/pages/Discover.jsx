@@ -5,8 +5,8 @@ import { Search, Zap, Film, MapPin, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Sub-tabs
-import DiscoverAppsTab from "../components/discover/DiscoverAppsTab";
-import DiscoverMediaTab from "../components/discover/DiscoverMediaTab";
+import DiscoverAppsTab from "../components/discover/DiscoverAppsTab.jsx";
+import DiscoverMediaTab from "../components/discover/DiscoverMediaTab.jsx";
 import MapboxLocal from "../components/discover/MapboxLocal";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
 
