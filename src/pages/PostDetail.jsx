@@ -27,6 +27,35 @@ export default function PostDetail() {
   const [followLoading, setFollowLoading] = useState(false);
   const queryClient = useQueryClient();
 
+  const hasLiked = user?.email && post?.liked_by?.includes(user.email);
+
+  const likeMut = useMutation({
+    mutationFn: () => {
+      if (hasLiked) {
+        return base44.entities.Post.update(postId, {
+          like_count: Math.max(0, (post.like_count || 0) - 1),
+          liked_by: (post.liked_by || []).filter(e => e !== user.email),
+        });
+      }
+      return base44.entities.Post.update(postId, {
+        like_count: (post.like_count || 0) + 1,
+        liked_by: [...(post.liked_by || []), user.email],
+      });
+    },
+    onMutate: () => {
+      queryClient.setQueryData(["post", postId], (old) => {
+        if (!old) return old;
+        const liked = old.liked_by?.includes(user?.email);
+        return {
+          ...old,
+          like_count: liked ? Math.max(0, (old.like_count || 0) - 1) : (old.like_count || 0) + 1,
+          liked_by: liked ? (old.liked_by || []).filter(e => e !== user.email) : [...(old.liked_by || []), user.email],
+        };
+      });
+    },
+    onError: () => queryClient.invalidateQueries({ queryKey: ["post", postId] }),
+  });
+
   useEffect(() => {
     base44.auth.me().then(async (u) => {
       setUser(u);
