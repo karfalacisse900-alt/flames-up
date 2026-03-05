@@ -88,6 +88,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     obs.observe(container);
     return () => {
       obs.disconnect();
+      clearInterval(progressTimer.current);
       doPause();
     };
   }, [doPlay, doPause]);
