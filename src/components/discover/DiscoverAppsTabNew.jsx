@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown, Plus } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 import StarRating from "./StarRating";
 import BookmarkButton from "./BookmarkButton";
+import SubmitAppModal from "./SubmitAppModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
-  { id: "all",             label: "✨ All" },
   { id: "productivity",    label: "⚡ Productivity" },
   { id: "finance",         label: "💰 Finance" },
   { id: "learning",        label: "📚 Learning" },
@@ -51,9 +51,9 @@ function AppCard({ item, user, onOpen, index }) {
         )}
       </div>
 
-      {/* Description */}
-      <p className="text-xs line-clamp-2 mb-3" style={{ color: "var(--text-secondary)" }}>
-        {item.description}
+      {/* Full description (longer) */}
+      <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+        {item.long_description || item.description}
       </p>
 
       {/* Tags and pricing */}
@@ -68,11 +68,11 @@ function AppCard({ item, user, onOpen, index }) {
             NEW
           </span>
         )}
-        {item.tags?.[0] && (
-          <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-            {item.tags[0]}
+        {item.tags?.slice(0, 2).map((tag, i) => (
+          <span key={i} className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+            {tag}
           </span>
-        )}
+        ))}
       </div>
 
       {/* Rating and CTA */}
@@ -99,19 +99,27 @@ function AppCard({ item, user, onOpen, index }) {
 }
 
 export default function DiscoverAppsTabNew({ items, isLoading, search, user, onItemClick }) {
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(null);
   const [localSearch, setLocalSearch] = useState("");
+  const [pricingFilter, setPricingFilter] = useState(null);
+  const [showCategories, setShowCategories] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(false);
 
   const filtered = useMemo(() => {
     let result = items.filter(item => {
-      const catMatch = category === "all" || item.category === category;
+      const catMatch = !category || item.category === category;
       const searchTerm = (search || localSearch).toLowerCase();
       const searchMatch = !searchTerm ||
         item.title?.toLowerCase().includes(searchTerm) ||
         item.description?.toLowerCase().includes(searchTerm) ||
+        item.long_description?.toLowerCase().includes(searchTerm) ||
         item.brand_name?.toLowerCase().includes(searchTerm) ||
         item.tags?.some(t => t.toLowerCase().includes(searchTerm));
-      return catMatch && searchMatch;
+      const pricingMatch = !pricingFilter || 
+        pricingFilter === "free" ? item.pricing === "Free" :
+        pricingFilter === "freemium" ? item.pricing === "Freemium" :
+        true;
+      return catMatch && searchMatch && pricingMatch;
     });
 
     // Sort: featured first, then by rating
@@ -119,7 +127,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       if (a.is_featured !== b.is_featured) return b.is_featured ? 1 : -1;
       return (b.avg_rating || 0) - (a.avg_rating || 0);
     });
-  }, [items, category, search, localSearch]);
+  }, [items, category, search, localSearch, pricingFilter]);
 
   if (isLoading) {
     return (
@@ -135,13 +143,13 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
 
   return (
     <div className="px-4 pt-4 pb-20">
-      {/* Search in this tab */}
+      {/* Search bar */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
         <input
           value={localSearch}
           onChange={e => setLocalSearch(e.target.value)}
-          placeholder="Search apps..."
+          placeholder="Search by name, keyword..."
           className="w-full pl-9 pr-9 py-2.5 rounded-xl text-sm outline-none"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
         />
@@ -152,25 +160,87 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         )}
       </div>
 
-      {/* Category filters */}
-      <div className="flex gap-1.5 overflow-x-auto mb-5 pb-2 scrollbar-hide">
-        {CATEGORIES.map(c => {
-          const isActive = category === c.id;
-          return (
-            <button
-              key={c.id}
-              onClick={() => setCategory(c.id)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
-              style={{
-                backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                color: isActive ? "#fff" : "var(--text-secondary)",
-                borderColor: isActive ? "var(--accent-primary)" : "var(--border-light)",
-              }}
-            >
-              {c.label}
-            </button>
-          );
-        })}
+      {/* Filter bar */}
+      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+        {/* Categories dropdown */}
+        <div className="relative shrink-0">
+          <button
+            onClick={() => setShowCategories(!showCategories)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
+            style={{
+              backgroundColor: category ? "var(--accent-primary)" : "var(--bg-card)",
+              color: category ? "#fff" : "var(--text-secondary)",
+              borderColor: category ? "var(--accent-primary)" : "var(--border-light)",
+            }}
+          >
+            {category ? CATEGORIES.find(c => c.id === category)?.label : "📂 Categories"}
+            <ChevronDown className="w-3 h-3" />
+          </button>
+          <AnimatePresence>
+            {showCategories && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 mt-2 rounded-xl z-40 shadow-lg p-2"
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+              >
+                <button
+                  onClick={() => { setCategory(null); setShowCategories(false); }}
+                  className="block w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-opacity-50 transition-all"
+                  style={{ color: "var(--text-primary)", backgroundColor: !category ? "var(--accent-primary-light)" : "transparent" }}
+                >
+                  All Categories
+                </button>
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => { setCategory(c.id); setShowCategories(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-opacity-50 transition-all"
+                    style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Pricing filters */}
+        <button
+          onClick={() => setPricingFilter(pricingFilter === "free" ? null : "free")}
+          className="px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
+          style={{
+            backgroundColor: pricingFilter === "free" ? "var(--accent-primary)" : "var(--bg-card)",
+            color: pricingFilter === "free" ? "#fff" : "var(--text-secondary)",
+            borderColor: pricingFilter === "free" ? "var(--accent-primary)" : "var(--border-light)",
+          }}
+        >
+          Free
+        </button>
+        <button
+          onClick={() => setPricingFilter(pricingFilter === "freemium" ? null : "freemium")}
+          className="px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
+          style={{
+            backgroundColor: pricingFilter === "freemium" ? "var(--accent-primary)" : "var(--bg-card)",
+            color: pricingFilter === "freemium" ? "#fff" : "var(--text-secondary)",
+            borderColor: pricingFilter === "freemium" ? "var(--accent-primary)" : "var(--border-light)",
+          }}
+        >
+          Freemium
+        </button>
+
+        {/* Submit app button */}
+        {user && (
+          <button
+            onClick={() => setShowSubmit(true)}
+            className="ml-auto flex items-center gap-1 px-3 py-2 rounded-full text-xs font-semibold text-white whitespace-nowrap transition-all shrink-0"
+            style={{ backgroundColor: "var(--accent-primary)" }}
+          >
+            <Plus className="w-3 h-3" /> Submit App
+          </button>
+        )}
       </div>
 
       {/* Grid of app cards */}
@@ -191,6 +261,14 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
             />
           ))}
         </div>
+      )}
+
+      {showSubmit && (
+        <SubmitAppModal
+          user={user}
+          onClose={() => setShowSubmit(false)}
+          onSubmitted={() => { setShowSubmit(false); }}
+        />
       )}
     </div>
   );
