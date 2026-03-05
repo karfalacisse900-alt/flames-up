@@ -245,10 +245,12 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
         {/* ── Video ── */}
         {post.video_url && (
-          <AutoplayVideo
-            src={post.video_url}
-            onDoubleTap={() => { if (!hasLiked) handleLike(); }}
-          />
+          <div className="mb-2.5 w-full">
+            <AutoplayVideo
+              src={post.video_url}
+              onDoubleTap={() => { if (!hasLiked) handleLike(); }}
+            />
+          </div>
         )}
 
         {/* ── List items ── */}
