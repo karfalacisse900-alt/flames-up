@@ -196,10 +196,11 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
                   <button
                     key={c.id}
                     onClick={() => { setCategory(c.id); setShowCategories(false); }}
-                    className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
+                    className="block w-full text-left px-3 py-2 rounded-lg transition-all"
                     style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
                   >
-                    {c.label}
+                    <div className="text-xs font-medium">{c.label}</div>
+                    <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples}</div>
                   </button>
                 ))}
               </motion.div>
@@ -228,7 +229,12 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       ) : (
         <div className="space-y-3">
           {filtered.map((item, i) => (
-            <div key={item.id} onClick={() => onItemClick(item)} className="rounded-2xl p-4 cursor-pointer transition-all active:scale-95" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+            <div key={item.id} onClick={() => onItemClick(item)} className="rounded-2xl p-4 cursor-pointer transition-all active:scale-95 relative overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+              {item.is_featured && (
+                <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "#FFD700", color: "#1a1a1a" }}>
+                  ⭐ Featured
+                </div>
+              )}
               <div className="flex items-start gap-3 mb-2">
                 <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
                   <DiscoverLogo item={item} size="md" />

@@ -6,12 +6,12 @@ import DYKCard from "../dyk/DYKCard";
 import DYKSubmitModal from "../dyk/DYKSubmitModal";
 
 const CATEGORIES = [
-  { value: "save_money",    label: "💰 Save Money" },
-  { value: "apps_tech",     label: "📱 Apps & Tech" },
-  { value: "travel",        label: "🌎 Travel" },
-  { value: "city_services", label: "🏙 City Services" },
-  { value: "entertainment", label: "🎬 Entertainment" },
-  { value: "jobs",          label: "💼 Jobs & Opportunities" },
+  { value: "save_money",    label: "💰 Business", examples: "Finance tips, Money hacks, Investing" },
+  { value: "apps_tech",     label: "📱 Tech", examples: "New apps, AI tools, Software" },
+  { value: "travel",        label: "🌍 World", examples: "Travel tips, Countries, Destinations" },
+  { value: "city_services", label: "🏙 City", examples: "Local services, City guides, Transportation" },
+  { value: "entertainment", label: "🎬 Entertainment", examples: "Movies, Music, Shows" },
+  { value: "jobs",          label: "💼 Science", examples: "Discoveries, Research, Facts" },
 ];
 
 export default function DYKTab({ user }) {
@@ -109,10 +109,11 @@ export default function DYKTab({ user }) {
                   <button
                     key={c.value}
                     onClick={() => { setCategory(c.value); setShowCategories(false); }}
-                    className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
+                    className="block w-full text-left px-3 py-2 rounded-lg transition-all"
                     style={{ color: "var(--text-primary)", backgroundColor: category === c.value ? "var(--accent-primary-light)" : "transparent" }}
                   >
-                    {c.label}
+                    <div className="text-xs font-medium">{c.label}</div>
+                    <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples}</div>
                   </button>
                 ))}
               </motion.div>
