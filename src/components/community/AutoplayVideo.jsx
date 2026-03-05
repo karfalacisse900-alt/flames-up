@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Maximize2, Pause, Play } from "lucide-react";
 
-// Session-level mute preference
-const sessionPrefs = { muted: true };
+// Session-level mute preference — unmuted by default
+const sessionPrefs = { muted: false };
 
 // Global singleton — only one video plays at a time
 const activeVideo = { ref: null, setPlaying: null };
