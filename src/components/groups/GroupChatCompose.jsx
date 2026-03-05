@@ -85,9 +85,13 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
     setSaving(true);
 
     let imageUrl = null;
+    let videoUrl = null;
     if (imageFile) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       imageUrl = file_url;
+    } else if (videoFile) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
+      videoUrl = file_url;
     }
 
     const mentions = extractMentions(body);
