@@ -21,16 +21,25 @@ export default function DYKTab({ user }) {
   const [sort, setSort] = useState("trending");
   const [search, setSearch] = useState("");
   const [showSubmit, setShowSubmit] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    load();
+    let isMounted = true;
+    load().then(() => {
+      if (isMounted) setLoading(false);
+    });
+    return () => { isMounted = false; };
   }, []);
 
   async function load() {
-    setLoading(true);
-    const all = await base44.entities.DidYouKnow.filter({ status: "approved" }, "-useful_count", 100);
-    setFacts(all);
-    setLoading(false);
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const all = await base44.entities.DidYouKnow.filter({ status: "approved" }, "-useful_count", 50);
+      setFacts(all);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const filtered = facts
