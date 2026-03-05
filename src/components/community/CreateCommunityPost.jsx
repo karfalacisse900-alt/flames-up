@@ -156,6 +156,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         finalVideoUrl = file_url;
       } catch (err) {
         console.error("Video upload failed:", err);
+        alert('Video upload failed. Please try a shorter/lighter video.');
       }
       setUploading(false);
     }
