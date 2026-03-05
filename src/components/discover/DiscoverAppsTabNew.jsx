@@ -8,14 +8,14 @@ import SubmitAppModal from "./SubmitAppModal.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
-  { id: "productivity",    label: "⚡ Productivity" },
-  { id: "finance",         label: "💰 Finance" },
-  { id: "learning",        label: "📚 Learning" },
-  { id: "lifestyle",       label: "🌿 Lifestyle" },
-  { id: "entertainment",   label: "🎬 Entertainment" },
-  { id: "health",          label: "💪 Health" },
-  { id: "social",          label: "👥 Social" },
-  { id: "developer_tools", label: "🛠️ Dev Tools" },
+  { id: "productivity",    label: "⚡ Productivity", examples: "Task managers, Note-taking, Project tools" },
+  { id: "finance",         label: "💰 Finance", examples: "Budgeting, Investment, Banking" },
+  { id: "learning",        label: "📚 Learning", examples: "Courses, Languages, Tutorials" },
+  { id: "lifestyle",       label: "🌿 Lifestyle", examples: "Fitness, Wellness, Travel" },
+  { id: "entertainment",   label: "🎬 Entertainment", examples: "Streaming, Gaming, Music" },
+  { id: "health",          label: "💪 Health", examples: "Fitness, Mental health, Nutrition" },
+  { id: "social",          label: "👥 Social", examples: "Messaging, Communities, Networking" },
+  { id: "developer_tools", label: "🛠️ Dev Tools", examples: "Code editors, Testing, APIs" },
 ];
 
 function AppCard({ item, user, onOpen, index }) {
@@ -193,16 +193,16 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
                   All Categories
                 </button>
                 {CATEGORIES.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => { setCategory(c.id); setShowCategories(false); }}
-                    className="block w-full text-left px-3 py-2 rounded-lg transition-all"
-                    style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
-                  >
-                    <div className="text-xs font-medium">{c.label}</div>
-                    <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples}</div>
-                  </button>
-                ))}
+                   <button
+                     key={c.id}
+                     onClick={() => { setCategory(c.id); setShowCategories(false); }}
+                     className="block w-full text-left px-3 py-2 rounded-lg transition-all"
+                     style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
+                   >
+                     <div className="text-xs font-medium">{c.label}</div>
+                     <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples || ""}</div>
+                   </button>
+                 ))}
               </motion.div>
             )}
           </AnimatePresence>
@@ -227,51 +227,56 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>No apps found</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((item, i) => (
-            <div key={item.id} onClick={() => onItemClick(item)} className="rounded-2xl p-4 cursor-pointer transition-all active:scale-95 relative overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-              {item.is_featured && (
-                <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "#FFD700", color: "#1a1a1a" }}>
-                  ⭐ Featured
-                </div>
-              )}
-              <div className="flex items-start gap-3 mb-2">
-                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
-                  <DiscoverLogo item={item} size="md" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-                    {item.title}
-                  </h3>
-                  {item.brand_name && (
-                    <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-                      {item.brand_name}
-                    </p>
-                  )}
-                </div>
-                {user && (
-                  <div onClick={e => e.stopPropagation()}>
-                    <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
-                  </div>
-                )}
-              </div>
-              <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
-                {item.description}
-              </p>
-              <div className="flex items-center justify-between">
-                {item.pricing && (
-                  <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                    {item.pricing}
-                  </span>
-                )}
-                {(item.avg_rating || 0) > 0 && (
-                  <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+         <div className="space-y-3">
+           {filtered.map((item, i) => (
+             <div key={item.id} onClick={() => onItemClick(item)} className="rounded-2xl p-4 cursor-pointer transition-all active:scale-95 relative overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+               {item.is_featured && (
+                 <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "#FFD700", color: "#1a1a1a" }}>
+                   ⭐ Featured
+                 </div>
+               )}
+               {item.is_sponsored && (
+                 <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "var(--accent-secondary)", color: "#fff" }}>
+                   💎 Premium
+                 </div>
+               )}
+               <div className="flex items-start gap-3 mb-2">
+                 <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                   <DiscoverLogo item={item} size="md" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                   <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
+                     {item.title}
+                   </h3>
+                   {item.brand_name && (
+                     <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                       {item.brand_name}
+                     </p>
+                   )}
+                 </div>
+                 {user && (
+                   <div onClick={e => e.stopPropagation()}>
+                     <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} />
+                   </div>
+                 )}
+               </div>
+               <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
+                 {item.description}
+               </p>
+               <div className="flex items-center justify-between">
+                 {item.pricing && (
+                   <span className="text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                     {item.pricing}
+                   </span>
+                 )}
+                 {(item.avg_rating || 0) > 0 && (
+                   <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
+                 )}
+               </div>
+             </div>
+           ))}
+         </div>
+       )}
 
       {showSubmit && (
         <SubmitAppModal
