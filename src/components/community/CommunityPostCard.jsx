@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Ban, Eye } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Eye, Link as LinkIcon, EyeOff } from "lucide-react";
 import MuteBlockMenu from "./MuteBlockMenu";
 import AutoplayVideo from "./AutoplayVideo";
 import { createPageUrl } from "@/utils";
