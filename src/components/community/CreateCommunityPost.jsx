@@ -55,6 +55,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
+  const isBodyEmpty = (html) => {
+    const txt = (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+    return txt.length === 0;
+  };
+
   // Load draft on mount
   useEffect(() => {
     if (!user?.email) return;
@@ -315,7 +320,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                   {/* Video preview */}
                   {videoPreview && (
                     <div className="relative rounded-xl overflow-hidden mb-2">
-                      <video src={videoPreview} controls className="w-full max-h-64 rounded-xl" />
+                      <video src={videoPreview} controls className="w-full max-h-64 rounded-xl object-cover" />
                       <div className="absolute top-2 right-2 flex gap-1.5">
                         <span className="px-2 py-0.5 rounded-lg text-xs font-semibold text-white"
                           style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>⏱ {videoDuration}s</span>
