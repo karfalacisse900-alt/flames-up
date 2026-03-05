@@ -268,18 +268,22 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
   );
 }
 
+function stripHtml(html) {
+  if (!html) return "";
+  const div = document.createElement("div");
+  div.innerHTML = html.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+  return (div.textContent || div.innerText || "").trim();
+}
+
 // ── Post Preview ──────────────────────────────────────────
 function PostPreview({ post }) {
+  const cleanBody = stripHtml(post.body);
+  const displayText = post.title || cleanBody;
   return (
     <div className="px-4 py-4" style={{ borderBottom: "2px solid var(--border-light)" }}>
-      <p className="text-sm font-bold leading-snug mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-        {post.title || post.body?.slice(0, 120)}
+      <p className="text-sm font-bold leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+        {displayText.slice(0, 160)}{displayText.length > 160 ? "…" : ""}
       </p>
-      {post.title && post.body && (
-        <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          {post.body?.slice(0, 120)}{post.body?.length > 120 ? "…" : ""}
-        </p>
-      )}
       <div className="flex items-center gap-2 mt-2">
         <span className="text-xs" style={{ color: "var(--text-hint)" }}>
           {post.is_anonymous ? "Anonymous" : post.author_name}
