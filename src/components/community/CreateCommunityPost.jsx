@@ -132,7 +132,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   };
 
   const handleSubmit = async () => {
-    if (!requireVerified(user)) return;
+    if (!requireVerified(user)) { alert('Please verify your email to post.'); return; }
     if (!body.trim()) return;
     setMediaError(false);
     setSaving(true);

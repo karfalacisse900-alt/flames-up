@@ -17,6 +17,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
+  const [aspect, setAspect] = useState("4/5");
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
@@ -70,6 +71,19 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     setPlaying(false);
     pauseGlobally();
   }, [pauseGlobally, postId]);
+
+  // Adjust container aspect ratio to the video natural size
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const onMeta = () => {
+      if (v.videoWidth && v.videoHeight) {
+        setAspect(`${v.videoWidth}/${v.videoHeight}`);
+      }
+    };
+    v.addEventListener('loadedmetadata', onMeta);
+    return () => v.removeEventListener('loadedmetadata', onMeta);
+  }, [src]);
 
   // IntersectionObserver for autoplay
   useEffect(() => {
@@ -140,8 +154,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
-        maxHeight: 400,
+        aspectRatio: aspect,
+        maxHeight: 480,
         cursor: "pointer",
         userSelect: "none",
         background: "transparent",
