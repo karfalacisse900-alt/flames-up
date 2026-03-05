@@ -255,63 +255,128 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   );
 }
 
+// ── Deterministic "random" sizing based on item id ───────────────────────────
+function getCardSize(id, index) {
+  // Use a seeded hash so sizes are stable across re-renders
+  const hash = [...String(id)].reduce((acc, c) => acc * 31 + c.charCodeAt(0), 0);
+  const n = Math.abs(hash + index * 7) % 10;
+  // ~20% tall, ~20% wide-ish, 60% natural
+  if (n < 2) return "tall";   // force tall aspect
+  if (n < 4) return "natural"; // let image breathe
+  return "normal";
+}
+
 // ── Premium Art Card ───────────────────────────────────────────────────────────
-function ArtCard({ art, user, onSelect, onLike }) {
+function ArtCard({ art, user, onSelect, onLike, index }) {
   const isLiked = art.liked_by?.includes(user?.email);
   const [loaded, setLoaded] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const size = getCardSize(art.id, index);
+
+  const aspectStyle = size === "tall"
+    ? { aspectRatio: "2/3" }
+    : size === "natural"
+    ? {}  // let the image define height naturally
+    : { aspectRatio: "4/5" };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}?art=${art.id}`;
+    if (navigator.share) navigator.share({ title: art.title, url });
+    else navigator.clipboard.writeText(url);
+    setMenuOpen(false);
+  };
 
   return (
     <div
       className="break-inside-avoid mb-2 md:mb-3 rounded-2xl overflow-hidden cursor-pointer group relative"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", contain: "layout style paint", transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease", transform: hovered ? "translateY(-2px)" : "translateY(0)", boxShadow: hovered ? "0 12px 40px rgba(0,0,0,0.18)" : "0 2px 12px rgba(0,0,0,0.08)" }}
-      onClick={() => onSelect(art)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      style={{
+        boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+        transition: "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease",
+      }}
+      onClick={() => { if (!menuOpen) onSelect(art); }}
     >
-      {/* Image */}
-      <div className="relative overflow-hidden">
+      {/* Image wrapper — variable height */}
+      <div className="relative overflow-hidden rounded-2xl" style={aspectStyle}>
         {!loaded && (
-          <div className="w-full skeleton" style={{ paddingBottom: "75%", borderRadius: 0 }} />
+          <div className="absolute inset-0 skeleton" />
         )}
-        <img src={art.image_url} alt={art.title}
-          className="w-full object-cover"
+        <img
+          src={art.image_url}
+          alt={art.title}
           loading="lazy"
-          style={{ display: loaded ? "block" : "none", transition: "transform 0.5s ease" }}
-          onLoad={() => setLoaded(true)} />
-
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0 transition-opacity duration-300"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)", opacity: hovered ? 1 : 0.4 }}
+          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+          style={{ display: loaded ? "block" : "none", minHeight: 80 }}
+          onLoad={() => setLoaded(true)}
         />
 
-        {/* Top actions */}
-        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Overlay — visible on hover/tap */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-250"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)" }}
+        />
+
+        {/* Three-dot menu — top right, hover only */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={e => e.stopPropagation()}>
           <button
-            onClick={e => { e.stopPropagation(); onLike(art); }}
-            className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all"
-            style={{ background: isLiked ? "rgba(239,68,68,0.85)" : "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}>
-            <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-white text-white" : "text-white"}`} />
+            onClick={e => { e.stopPropagation(); setMenuOpen(o => !o); }}
+            className="w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md"
+            style={{ background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.18)" }}>
+            <MoreHorizontal className="w-3.5 h-3.5 text-white" />
           </button>
+          <AnimatePresence>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.88, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-8 z-40 w-44 rounded-2xl overflow-hidden"
+                  style={{ backgroundColor: "rgba(20,20,20,0.96)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
+                >
+                  {art.location_name && (
+                    <button
+                      onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-left text-white hover:bg-white/10 transition-colors">
+                      <MapPin className="w-3.5 h-3.5 text-blue-400" /> Open in Maps
+                    </button>
+                  )}
+                  {art.link && (
+                    <a href={art.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-white hover:bg-white/10 transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5 text-green-400" /> Visit Website
+                    </a>
+                  )}
+                  <button
+                    onClick={handleShare}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-left text-white hover:bg-white/10 transition-colors">
+                    <Share2 className="w-3.5 h-3.5 text-purple-400" /> Share
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); onLike(art); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-left text-white hover:bg-white/10 transition-colors">
+                    <Heart className="w-3.5 h-3.5 text-red-400" /> {isLiked ? "Unlike" : "Like"}
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Bottom info overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-2.5">
-          <p className="text-white text-xs font-bold truncate" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{art.title}</p>
-          <div className="flex items-center justify-between mt-0.5">
-            <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{art.user_name}</p>
-            <div className="flex items-center gap-2">
+        {/* Bottom info — hover only */}
+        <div className="absolute bottom-0 left-0 right-0 px-2.5 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-250">
+          <p className="text-white text-[11px] font-bold truncate leading-tight" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>{art.title}</p>
+          <div className="flex items-center justify-between mt-0.5 gap-1">
+            <p className="text-[9px] truncate" style={{ color: "rgba(255,255,255,0.65)" }}>{art.user_name}</p>
+            <div className="flex items-center gap-1.5 shrink-0">
               {art.location_name && (
-                <button
-                  onClick={e => { e.stopPropagation(); openGoogleMaps(art.location_lat, art.location_lng, art.location_name); }}
-                  className="flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-white text-[9px] font-semibold backdrop-blur-md"
-                  style={{ backgroundColor: "rgba(66,133,244,0.8)" }}>
-                  <MapPin className="w-2.5 h-2.5" />
-                  {art.location_name.split(",")[0].substring(0, 12)}
-                </button>
+                <span className="flex items-center gap-0.5 text-[9px] text-blue-300">
+                  <MapPin className="w-2 h-2" />{art.location_name.split(",")[0].substring(0, 10)}
+                </span>
               )}
-              <span className="flex items-center gap-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <span className="flex items-center gap-0.5 text-[9px]" style={{ color: "rgba(255,255,255,0.7)" }}>
                 <Heart className={`w-2.5 h-2.5 ${isLiked ? "fill-red-400 text-red-400" : ""}`} />{art.like_count || 0}
               </span>
             </div>
