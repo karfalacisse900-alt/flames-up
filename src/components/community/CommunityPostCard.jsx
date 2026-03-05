@@ -205,31 +205,22 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
           {/* Big centered text */}
           <div className="px-5 pb-5 text-center">
-            {/<[a-z][\s\S]*>/i.test(post.body) ? (
-              <div
-                className="rich-body"
-                style={{
-                  color: "var(--text-primary)",
-                  fontSize: post.body?.replace(/<[^>]+>/g, "").length > 120 ? 16 : post.body?.replace(/<[^>]+>/g, "").length > 60 ? 19 : 22,
-                  fontWeight: 600,
-                  fontFamily: "var(--font-serif)",
-                  lineHeight: 1.45,
-                  textAlign: "center",
-                }}
-                dangerouslySetInnerHTML={{ __html: post.body }}
-              />
-            ) : (
-              <p className="leading-relaxed whitespace-pre-line"
-                style={{
-                  color: "var(--text-primary)",
-                  fontSize: post.body?.length > 120 ? 16 : post.body?.length > 60 ? 19 : 22,
-                  fontWeight: 600,
-                  fontFamily: "var(--font-serif)",
-                  lineHeight: 1.45,
-                }}>
-                {post.body}
-              </p>
-            )}
+            {(() => {
+              const cleanText = stripHtml(post.body);
+              const fontSize = cleanText.length > 120 ? 16 : cleanText.length > 60 ? 19 : 22;
+              return (
+                <p className="leading-relaxed whitespace-pre-line"
+                  style={{
+                    color: "var(--text-primary)",
+                    fontSize,
+                    fontWeight: 600,
+                    fontFamily: "var(--font-serif)",
+                    lineHeight: 1.45,
+                  }}>
+                  {cleanText}
+                </p>
+              );
+            })()}
           </div>
 
           {/* Actions */}
