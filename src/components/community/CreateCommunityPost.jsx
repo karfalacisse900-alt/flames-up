@@ -295,7 +295,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
 
               {/* Body */}
-              {type !== "debate" && (
+              {(
                 type === "quote_of_day" ? (
                   <textarea value={body} onChange={e => setBody(e.target.value)}
                     placeholder="Enter the quote..."
