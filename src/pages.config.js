@@ -61,7 +61,6 @@ import Explore from './pages/Explore';
 import Gallery from './pages/Gallery';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
-import Groups from './pages/Groups';
 import HallOfFame from './pages/HallOfFame';
 import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
@@ -96,7 +95,6 @@ export const PAGES = {
     "Gallery": Gallery,
     "GamePlay": GamePlay,
     "Games": Games,
-    "Groups": Groups,
     "HallOfFame": HallOfFame,
     "HelpCenter": HelpCenter,
     "Home": Home,
