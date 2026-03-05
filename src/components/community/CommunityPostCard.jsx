@@ -382,25 +382,14 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
         {/* ── Body ── */}
         {post.body && (
           <div className="mb-2.5">
-            {/<[a-z][\s\S]*>/i.test(post.body) ? (
-              <div className="prose prose-sm max-w-none text-sm leading-relaxed rich-body"
-                style={{ color: "var(--text-secondary)" }}
-                dangerouslySetInnerHTML={{ __html: post.body }} />
-            ) : /^#{1,6}\s|^\*\*|^\*[^*]|^- |^\d+\. /m.test(post.body) ? (
-              <div className="prose prose-sm max-w-none text-sm leading-relaxed rich-body"
-                style={{ color: "var(--text-secondary)" }}>
-                <ReactMarkdown>{post.body}</ReactMarkdown>
-              </div>
-            ) : (
-              <p className="text-sm leading-relaxed"
-                style={{
-                  color: "var(--text-secondary)",
-                  fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
-                  fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
-                }}>
-                {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
-              </p>
-            )}
+            <p className="text-sm leading-relaxed whitespace-pre-line"
+              style={{
+                color: "var(--text-secondary)",
+                fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
+                fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+              }}>
+              {post.type === "quote_of_day" ? `"${stripHtml(post.body)}"` : stripHtml(post.body)}
+            </p>
           </div>
         )}
 
