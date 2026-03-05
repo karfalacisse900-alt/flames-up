@@ -9,7 +9,7 @@ import DiscoverAppsTab from "../components/discover/DiscoverAppsTab.jsx";
 import DiscoverMediaTab from "../components/discover/DiscoverMediaTab.jsx";
 import MapboxLocal from "../components/discover/MapboxLocal";
 import DiscoverItemModal from "../components/discover/DiscoverItemModal";
-import DYKTab from "../components/discover/DYKTab";
+import DYKTab from "../components/discover/DYKTab.jsx";
 
 const MAIN_TABS = [
   { id: "apps",  label: "Apps & Tools", icon: Zap },
