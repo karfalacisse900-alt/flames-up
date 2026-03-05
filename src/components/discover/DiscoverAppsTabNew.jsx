@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Search, X, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
@@ -163,7 +163,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       {/* Filter bar */}
       <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
         {/* Categories dropdown */}
-        <div className="relative shrink-0">
+        <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
           <button
             onClick={() => setShowCategories(!showCategories)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
@@ -176,14 +176,21 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
             {category ? CATEGORIES.find(c => c.id === category)?.label : "📂 Categories"}
             <ChevronDown className="w-3 h-3" />
           </button>
+          {showCategories && (
+            <div
+              className="fixed top-0 left-0 right-0 bottom-0 z-30"
+              onClick={() => setShowCategories(false)}
+            />
+          )}
           <AnimatePresence>
             {showCategories && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full left-0 mt-2 rounded-xl z-40 shadow-lg p-2"
+                className="absolute top-full left-0 mt-2 rounded-xl z-50 shadow-lg p-2 min-w-max max-h-72 overflow-y-auto"
                 style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                onClick={e => e.stopPropagation()}
               >
                 <button
                   onClick={() => { setCategory(null); setShowCategories(false); }}
