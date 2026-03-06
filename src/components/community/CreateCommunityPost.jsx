@@ -219,6 +219,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
         location_lng: location?.lng || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
+        tags: challengeContext ? ["daily_challenge"] : undefined,
       });
       await createModerationReport("post", newPost.id, user?.email, user?.display_name || user?.full_name, modResult.flags, modResult.confidence);
       setSaving(false);
