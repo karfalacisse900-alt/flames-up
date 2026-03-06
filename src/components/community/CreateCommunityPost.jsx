@@ -205,7 +205,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
-        type: effectiveType, body: body,
+        type: effectiveType, body: cleanedBody,
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
         author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon,
