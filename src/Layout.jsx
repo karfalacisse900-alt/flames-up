@@ -117,7 +117,20 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
       {!hideNav &&
-      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderTop: "1px solid var(--border-light)", paddingBottom: "env(safe-area-inset-bottom, 0px)", height: "64px", maxWidth: "100vw", overflow: "hidden" }}>
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          backgroundColor: "var(--bg-nav)",
+          backdropFilter: "blur(20px)",
+          borderTop: "1px solid var(--border-light)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          height: "64px",
+          maxWidth: "100vw",
+          overflow: "hidden",
+          transform: navVisible ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          willChange: "transform",
+        }}>
           <div className="max-w-lg mx-auto flex justify-around items-center h-full px-2" style={{ maxWidth: "min(512px, 100vw)" }}>
                 {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
