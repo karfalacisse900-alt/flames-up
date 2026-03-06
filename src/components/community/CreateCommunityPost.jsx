@@ -41,7 +41,8 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [mediaRef, setMediaRef] = useState("");
   const [isAnon, setIsAnon] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]); // array of {file, preview}
+  const [imageFile, setImageFile] = useState(null); // legacy single
   const [imagePreview, setImagePreview] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
