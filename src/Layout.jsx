@@ -62,6 +62,27 @@ export default function Layout({ children, currentPageName }) {
 
   const [swipeMode, setSwipeMode] = useState(false);
 
+  // Hide nav on scroll down, show on scroll up
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollTicking.current) return;
+      scrollTicking.current = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const diff = currentY - lastScrollY.current;
+        if (diff > 6 && currentY > 80) {
+          setNavVisible(false);
+        } else if (diff < -4) {
+          setNavVisible(true);
+        }
+        lastScrollY.current = currentY;
+        scrollTicking.current = false;
+      });
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     const handler = () => { setShowVerifyBanner(true); setTimeout(() => setShowVerifyBanner(false), 5000); };
     window.addEventListener("show_verify_banner", handler);
