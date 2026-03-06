@@ -156,7 +156,8 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
   const handleSubmit = async () => {
     if (!requireVerified(user)) return;
-    if (isBodyEmpty(body)) return;
+    const cleanedBody = cleanBody(body);
+    if (isBodyEmpty(cleanedBody)) return;
     setMediaError(false);
     setSaving(true);
 
