@@ -146,8 +146,12 @@ export default function CommunityFeed({ user }) {
 
   const filteredPosts = useMemo(() => {
     const postMap = new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p]));
-    return stablePostIds.map(id => postMap.get(id)).filter(Boolean);
-  }, [stablePostIds, posts]);
+    const base = stablePostIds.map(id => postMap.get(id)).filter(Boolean);
+    if (activeTab === "nearby" && userCity) {
+      return base.filter(p => p.location_city && p.location_city.toLowerCase() === userCity.toLowerCase());
+    }
+    return base;
+  }, [stablePostIds, posts, activeTab, userCity]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
