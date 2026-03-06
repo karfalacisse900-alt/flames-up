@@ -310,10 +310,22 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
           {/* Step 2: Compose */}
           {step === "compose" && (
             <div className="space-y-3 pb-6">
-              <button onClick={() => setStep("type")} className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
-                ← Change type
-              </button>
-              <div className="flex items-center gap-2 py-2 px-3 rounded-xl mb-1" style={{ backgroundColor: "#3C6E5A14" }}>
+              {!challengeContext && (
+                <button onClick={() => setStep("type")} className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
+                  ← Change type
+                </button>
+              )}
+
+              {/* Challenge context banner */}
+              {challengeContext && (
+                <div className="rounded-2xl px-4 py-3 mb-1" style={{ background: "linear-gradient(135deg, #1A4231, #2E6B4F)" }}>
+                  <p className="text-[11px] font-bold tracking-widest text-yellow-300 uppercase mb-1">⚡ Daily Challenge</p>
+                  <p className="text-white font-semibold text-sm" style={{ fontFamily: "var(--font-serif)" }}>"{challengeContext.question}"</p>
+                  <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>Your post will be tagged as a challenge answer 🏆</p>
+                </div>
+              )}
+
+              {!challengeContext && <div className="flex items-center gap-2 py-2 px-3 rounded-xl mb-1" style={{ backgroundColor: "#3C6E5A14" }}>
                 <span className="text-xl">{POST_TYPES.find(t => t.key === type)?.emoji}</span>
                 <div>
                   <p className="text-xs font-bold" style={{ color: "#3C6E5A" }}>{POST_TYPES.find(t => t.key === type)?.label}</p>
