@@ -17,7 +17,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
-  const [aspect, setAspect] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [aspect, setAspect] = useState("9/16");
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
@@ -72,18 +73,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     pauseGlobally();
   }, [pauseGlobally, postId]);
 
-  // Adjust container aspect ratio to the video natural size
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const onMeta = () => {
-      if (v.videoWidth && v.videoHeight) {
-        setAspect(`${v.videoWidth}/${v.videoHeight}`);
-      }
-    };
-    v.addEventListener('loadedmetadata', onMeta);
-    return () => v.removeEventListener('loadedmetadata', onMeta);
-  }, [src]);
+
 
   // IntersectionObserver for autoplay
   useEffect(() => {
@@ -154,8 +144,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: aspect || "4/5",
-        maxHeight: 480,
+        aspectRatio: "9/16",
+        maxHeight: "70vh",
+        width: "100%",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
