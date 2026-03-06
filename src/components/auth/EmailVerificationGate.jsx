@@ -16,8 +16,8 @@ import { MailCheck } from "lucide-react";
 
 export function requireVerified(user) {
   if (!user) return false;
+  // Only block if explicitly verified=false; if field is undefined/null, allow
   if (user.email_verified === false) {
-    // dispatch a global event so any listener can show the banner
     window.dispatchEvent(new CustomEvent("show_verify_banner"));
     return false;
   }

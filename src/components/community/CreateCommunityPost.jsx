@@ -137,8 +137,8 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   };
 
   const handleSubmit = async () => {
-    if (!requireVerified(user)) { alert('Please verify your email to post.'); return; }
-    if (isBodyEmpty(body)) { alert('Please write something before posting.'); return; }
+    if (!requireVerified(user)) return;
+    if (isBodyEmpty(body)) return;
     setMediaError(false);
     setSaving(true);
 
@@ -174,7 +174,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     const modResult = await checkContent(textToCheck);
     if (!modResult.safe) {
       const newPost = await base44.entities.CommunityPost.create({
-        type: effectiveType, body: body.trim(),
+        type: effectiveType, body: body,
         author_email: user?.email || "", author_name: user?.display_name || user?.full_name || "Anonymous",
         author_avatar_url: user?.avatar_url || "",
         is_anonymous: isAnon,
@@ -192,7 +192,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
 
     const postData = {
       type: effectiveType,
-      body: body.trim(),
+      body: body,
       author_email: user?.email || "",
       author_name: user?.display_name || user?.full_name || "Anonymous",
       author_avatar_url: user?.avatar_url || "",
@@ -203,15 +203,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       is_daily_spotlight: false,
     };
 
-    try {
-      await base44.entities.CommunityPost.create(postData);
-    } catch (e) {
-      console.error('Post create failed', e);
-      alert('Posting failed. Please try again.');
-      setSaving(false);
-      return;
-    }
-
+    await base44.entities.CommunityPost.create(postData);
     setSaving(false);
     await clearDraft();
     onCreated();
