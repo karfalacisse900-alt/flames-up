@@ -407,12 +407,16 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           </div>
         )}
 
-        {/* ── Image ── */}
-        {post.image_url && (
-          <img src={post.image_url} alt="" loading="lazy"
-            className="w-full mb-2.5 object-cover"
-            style={{ borderRadius: 16, maxHeight: 480, width: "100%", display: "block", border: "1px solid var(--border-subtle)" }} />
-        )}
+        {/* ── Images (carousel if multiple, single if one) ── */}
+        {(() => {
+          const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
+          if (imgs.length === 0) return null;
+          return (
+            <div className="mb-2.5">
+              <PhotoCarousel images={imgs} aspectRatio="4/3" />
+            </div>
+          );
+        })()}
 
         {/* ── Video ── */}
         {post.video_url && (
