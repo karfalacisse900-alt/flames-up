@@ -335,6 +335,11 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                   🎬 {post.media_ref_title}
                 </span>
               )}
+              {post.tags?.includes("daily_challenge") && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: "#1A423144", color: "#2E6B4F" }}>
+                  ⚡ Challenge
+                </span>
+              )}
             </div>
           </div>
 
