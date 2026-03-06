@@ -64,11 +64,14 @@ export default function Layout({ children, currentPageName }) {
 
   // Hide nav on scroll down, show on scroll up
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = (e) => {
       if (scrollTicking.current) return;
       scrollTicking.current = true;
       requestAnimationFrame(() => {
-        const currentY = window.scrollY;
+        // Support both window scroll and scrollable container scroll
+        const currentY = e.target === document || e.target === window
+          ? window.scrollY
+          : e.target.scrollTop ?? window.scrollY;
         const diff = currentY - lastScrollY.current;
         if (diff > 6 && currentY > 80) {
           setNavVisible(false);
@@ -79,8 +82,9 @@ export default function Layout({ children, currentPageName }) {
         scrollTicking.current = false;
       });
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Capture:true catches scroll events from ALL scrollable children
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", handleScroll, { capture: true });
   }, []);
 
   useEffect(() => {
