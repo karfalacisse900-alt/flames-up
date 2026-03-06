@@ -97,13 +97,19 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    setImageUrl("");
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    // multi-photo: add to existing imageFiles array (max 10)
+    const newEntries = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
+    setImageFiles(prev => {
+      const combined = [...prev, ...newEntries].slice(0, 10);
+      return combined;
+    });
     setVideoFile(null);
     setVideoPreview(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl("");
     setEditingFile(null);
     e.target.value = "";
   };
