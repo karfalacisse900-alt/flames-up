@@ -54,6 +54,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [location, setLocation] = useState(null);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
