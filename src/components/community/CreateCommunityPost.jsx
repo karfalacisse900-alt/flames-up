@@ -59,8 +59,17 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
   const videoInputRef = useRef(null);
 
   const isBodyEmpty = (html) => {
-    const txt = (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+    const txt = (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s/g, '').trim();
     return txt.length === 0;
+  };
+
+  // Strip trailing/leading empty <p> tags from Quill output
+  const cleanBody = (html) => {
+    if (!html) return '';
+    return html
+      .replace(/^(<p>\s*(<br>)?\s*<\/p>\s*)+/gi, '')
+      .replace(/(\s*<p>\s*(<br>)?\s*<\/p>)+$/gi, '')
+      .trim();
   };
 
   // Load draft on mount
