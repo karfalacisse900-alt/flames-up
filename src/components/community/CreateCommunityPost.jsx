@@ -412,6 +412,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
                 ) : null}
               </div>
 
+              {/* Location tag */}
+              <LocationTagButton location={location} onLocation={setLocation} />
+
               {/* Anonymous toggle */}
               <div className="flex items-center justify-between py-1">
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Post anonymously</p>
