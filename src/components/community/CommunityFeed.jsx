@@ -268,21 +268,41 @@ export default function CommunityFeed({ user }) {
 
       {/* Feed */}
       <div className="pb-28">
-        {filteredPosts.length === 0 ? (
+        {activeTab === "nearby" && locationLoading ? (
+          <div className="py-16 flex flex-col items-center gap-3">
+            <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-sm" style={{ color: "var(--text-hint)" }}>Finding your location…</p>
+          </div>
+        ) : activeTab === "nearby" && !userCity ? (
+          <div className="py-16 text-center px-8">
+            <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
+            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Location access needed</p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Allow location to see posts from people near you</p>
+            <button onClick={detectLocation}
+              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
+              Enable Location
+            </button>
+          </div>
+        ) : filteredPosts.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="py-16 text-center px-8"
           >
-            <div className="text-5xl mb-4">💬</div>
-            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Start the conversation</p>
-            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Be the first to share a thought with the community</p>
+            <div className="text-5xl mb-4">{activeTab === "nearby" ? "📍" : "💬"}</div>
+            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              {activeTab === "nearby" ? `No posts from ${userCity} yet` : "Start the conversation"}
+            </p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
+              {activeTab === "nearby" ? "Be the first to post with your location tagged!" : "Be the first to share a thought with the community"}
+            </p>
             <motion.button
               whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
               onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
               className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
-              ✦ Create First Post
+              ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
             </motion.button>
           </motion.div>
         ) : (
