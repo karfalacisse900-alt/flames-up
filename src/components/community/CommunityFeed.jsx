@@ -14,6 +14,7 @@ import { rankFeedForUser, trackPostView } from "./feedRanking";
 
 export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
+  const [challengeContext, setChallengeContext] = useState(null); // {question}
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
