@@ -218,6 +218,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
       author_avatar_url: user?.avatar_url || "",
       is_anonymous: isAnon,
       image_url: finalImageUrl || undefined,
+      image_urls: finalImageUrls.length > 0 ? finalImageUrls : undefined,
       video_url: finalVideoUrl || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
