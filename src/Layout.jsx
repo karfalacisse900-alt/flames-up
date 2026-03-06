@@ -37,6 +37,9 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollTicking = useRef(false);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
