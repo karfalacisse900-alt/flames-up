@@ -390,15 +390,19 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
         {/* ── Body ── */}
         {post.body && (
-          <div className="mb-2.5">
-            <p className="text-sm leading-relaxed whitespace-pre-line"
-              style={{
-                color: "var(--text-secondary)",
-                fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
-                fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
-              }}>
-              {post.type === "quote_of_day" ? `"${stripHtml(post.body)}"` : stripHtml(post.body)}
-            </p>
+          <div className="mb-2.5 text-sm leading-relaxed"
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
+              fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+            }}>
+            {bodyIsRich ? (
+              <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
+            ) : (
+              <p className="whitespace-pre-line">
+                {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
+              </p>
+            )}
           </div>
         )}
 
