@@ -191,10 +191,9 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       {/* Filter bar */}
       <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
         {/* Categories dropdown */}
-        <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
+        <div className="relative shrink-0">
           <button
-             ref={catBtnRef}
-             onClick={handleToggleCategories}
+             onClick={() => setShowCategories(v => !v)}
              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
              style={{
               backgroundColor: category ? "var(--accent-primary)" : "var(--bg-card)",
@@ -205,41 +204,38 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
             {category ? CATEGORIES.find(c => c.id === category)?.label : "📂 Categories"}
             <ChevronDown className="w-3 h-3" />
           </button>
-          {showCategories && (
-            <div
-              className="fixed top-0 left-0 right-0 bottom-0 z-30"
-              onClick={() => setShowCategories(false)}
-            />
-          )}
           <AnimatePresence>
             {showCategories && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="fixed rounded-xl z-50 shadow-lg p-2 max-h-72 overflow-y-auto"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", top: menuPos.top, left: menuPos.left, minWidth: menuPos.minWidth, maxWidth: "min(320px, calc(100vw - 24px))" }}
-                onClick={e => e.stopPropagation()}
-              >
-                <button
-                  onClick={() => { setCategory(null); setShowCategories(false); }}
-                  className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
-                  style={{ color: "var(--text-primary)", backgroundColor: !category ? "var(--accent-primary-light)" : "transparent" }}
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setShowCategories(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="absolute left-0 top-full mt-2 rounded-xl z-50 shadow-xl p-2 max-h-72 overflow-y-auto"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minWidth: 220, maxWidth: "calc(100vw - 32px)" }}
+                  onClick={e => e.stopPropagation()}
                 >
-                  All Categories
-                </button>
-                {CATEGORIES.map(c => (
-                   <button
-                     key={c.id}
-                     onClick={() => { setCategory(c.id); setShowCategories(false); }}
-                     className="block w-full text-left px-3 py-2 rounded-lg transition-all"
-                     style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
-                   >
-                     <div className="text-xs font-medium">{c.label}</div>
-                     <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples || ""}</div>
-                   </button>
-                 ))}
-              </motion.div>
+                  <button
+                    onClick={() => { setCategory(null); setShowCategories(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-lg text-xs transition-all"
+                    style={{ color: "var(--text-primary)", backgroundColor: !category ? "var(--accent-primary-light)" : "transparent" }}
+                  >
+                    All Categories
+                  </button>
+                  {CATEGORIES.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setCategory(c.id); setShowCategories(false); }}
+                      className="block w-full text-left px-3 py-2 rounded-lg transition-all"
+                      style={{ color: "var(--text-primary)", backgroundColor: category === c.id ? "var(--accent-primary-light)" : "transparent" }}
+                    >
+                      <div className="text-xs font-medium">{c.label}</div>
+                      <div className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{c.examples || ""}</div>
+                    </button>
+                  ))}
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>
