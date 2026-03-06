@@ -268,6 +268,18 @@ export default function CommunityFeed({ user }) {
         )}
       </AnimatePresence>
 
+      {/* Daily Challenge Card */}
+      {activeTab === "for_you" && (
+        <DailyChallengeCard
+          user={user}
+          onAnswerChallenge={(ch) => {
+            if (!requireVerified(user)) return;
+            setChallengeContext(ch);
+            setShowCreate(true);
+          }}
+        />
+      )}
+
       {/* Feed */}
       <div className="pb-28">
         {activeTab === "nearby" && locationLoading ? (
