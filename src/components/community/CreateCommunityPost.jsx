@@ -33,10 +33,10 @@ const MEDIA_TYPES = [
   { key: "music",   label: "🎵 Music" },
 ];
 
-export default function CreateCommunityPost({ user, onClose, onCreated }) {
-  const [step, setStep] = useState("type");
-  const [type, setType] = useState("");
-  const [title, setTitle] = useState("");
+export default function CreateCommunityPost({ user, onClose, onCreated, challengeContext }) {
+  const [step, setStep] = useState(challengeContext ? "compose" : "type");
+  const [type, setType] = useState(challengeContext ? "opinion" : "");
+  const [title, setTitle] = useState(challengeContext ? challengeContext.question : "");
   const [body, setBody] = useState("");
   const [mediaType, setMediaType] = useState("general");
   const [mediaRef, setMediaRef] = useState("");
