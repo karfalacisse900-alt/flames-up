@@ -244,6 +244,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       location_lng: location?.lng || undefined,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
       is_daily_spotlight: false,
+      tags: challengeContext ? ["daily_challenge"] : undefined,
     };
 
     await base44.entities.CommunityPost.create(postData);
