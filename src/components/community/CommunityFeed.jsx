@@ -208,10 +208,10 @@ export default function CommunityFeed({ user }) {
     <div style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}>
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="px-4 py-2.5 flex items-center justify-between">
+        <div className="px-4 pt-2.5 pb-0 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-            <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community Feed</p>
+            <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community</p>
           </div>
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -220,6 +220,26 @@ export default function CommunityFeed({ user }) {
             style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
             <Plus className="w-3 h-3" /> Post
           </motion.button>
+        </div>
+        {/* Feed tabs */}
+        <div className="flex gap-0 px-4 pt-2 pb-0">
+          {[
+            { key: "for_you", label: "For You" },
+            { key: "nearby", label: "Nearby", icon: MapPin },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className="flex items-center gap-1 px-4 py-2 text-sm font-semibold border-b-2 transition-all"
+              style={{
+                borderColor: activeTab === tab.key ? "var(--accent-primary)" : "transparent",
+                color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-hint)",
+                backgroundColor: "transparent",
+              }}>
+              {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
