@@ -17,7 +17,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
-  const [aspect, setAspect] = useState("4/5");
+  const [aspect, setAspect] = useState(null);
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
@@ -154,11 +154,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: aspect,
+        aspectRatio: aspect || "4/5",
         maxHeight: 480,
         cursor: "pointer",
         userSelect: "none",
-        background: "transparent",
+        background: "#000",
       }}
     >
       <video
