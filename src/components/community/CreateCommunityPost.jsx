@@ -6,6 +6,7 @@ import { checkContent, createModerationReport } from "../moderation/moderationHe
 import { requireVerified } from "../auth/EmailVerificationGate";
 import PhotoEditor from "../editor/PhotoEditor";
 import ReactQuill from "react-quill";
+import LocationTagButton from "./LocationTagButton";
 
 const QUILL_MODULES = {
   toolbar: [
