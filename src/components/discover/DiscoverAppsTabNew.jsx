@@ -108,8 +108,6 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
   const [localSearch, setLocalSearch] = useState("");
   const [showCategories, setShowCategories] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
-  const catBtnRef = useRef(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, minWidth: 0 });
 
   const filtered = useMemo(() => {
     let result = items.filter(item => {
@@ -131,31 +129,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
     });
   }, [items, category, search, localSearch]);
 
-  const handleToggleCategories = () => {
-    const next = !showCategories;
-    if (next && catBtnRef.current) {
-      const r = catBtnRef.current.getBoundingClientRect();
-      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
-      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
-    }
-    setShowCategories(next);
-  };
 
-  useEffect(() => {
-    if (!showCategories) return;
-    const reposition = () => {
-      if (!catBtnRef.current) return;
-      const r = catBtnRef.current.getBoundingClientRect();
-      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
-      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
-    };
-    window.addEventListener('resize', reposition);
-    window.addEventListener('scroll', reposition, true);
-    return () => {
-      window.removeEventListener('resize', reposition);
-      window.removeEventListener('scroll', reposition, true);
-    };
-  }, [showCategories]);
 
   if (isLoading) {
     return (

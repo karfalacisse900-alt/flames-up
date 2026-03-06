@@ -28,8 +28,7 @@ export default function DYKTab({ user }) {
   const [showCategories, setShowCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const loadTimeoutRef = useRef(null);
-  const catBtnRef = useRef(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, minWidth: 0 });
+
 
   useEffect(() => {
     let isMounted = true;
@@ -82,31 +81,7 @@ export default function DYKTab({ user }) {
       return new Date(b.created_date) - new Date(a.created_date);
     });
 
-    const handleToggleCategories = () => {
-    const next = !showCategories;
-    if (next && catBtnRef.current) {
-      const r = catBtnRef.current.getBoundingClientRect();
-      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
-      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
-    }
-    setShowCategories(next);
-    };
 
-    useEffect(() => {
-    if (!showCategories) return;
-    const reposition = () => {
-      if (!catBtnRef.current) return;
-      const r = catBtnRef.current.getBoundingClientRect();
-      const left = Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 320);
-      setMenuPos({ top: r.bottom + window.scrollY + 8, left, minWidth: r.width });
-    };
-    window.addEventListener('resize', reposition);
-    window.addEventListener('scroll', reposition, true);
-    return () => {
-      window.removeEventListener('resize', reposition);
-      window.removeEventListener('scroll', reposition, true);
-    };
-    }, [showCategories]);
 
     return (
     <div className="px-4 py-3 pb-20">
