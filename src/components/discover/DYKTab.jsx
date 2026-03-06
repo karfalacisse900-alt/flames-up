@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { TrendingUp, Clock, Search, X, ChevronDown, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+// removed coordinate-based positioning — using CSS relative dropdown instead
 import DYKCard from "../dyk/DYKCard";
 import DYKSubmitModal from "../dyk/DYKSubmitModal";
 
@@ -28,6 +29,7 @@ export default function DYKTab({ user }) {
   const [showCategories, setShowCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const loadTimeoutRef = useRef(null);
+  const catBtnRef = useRef(null);
 
 
   useEffect(() => {
