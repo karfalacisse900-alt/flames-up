@@ -15,6 +15,9 @@ export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
+  const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
+  const [userCity, setUserCity] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
   const qc = useQueryClient();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
@@ -25,6 +28,27 @@ export default function CommunityFeed({ user }) {
       return all.filter(p => !p.group_id);
     },
   });
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+          const data = await res.json();
+          const addr = data.address || {};
+          setUserCity(addr.city || addr.town || addr.village || addr.county || "");
+        } catch {}
+        setLocationLoading(false);
+      },
+      () => setLocationLoading(false)
+    );
+  };
+
+  useEffect(() => {
+    if (activeTab === "nearby" && !userCity && !locationLoading) detectLocation();
+  }, [activeTab]);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
