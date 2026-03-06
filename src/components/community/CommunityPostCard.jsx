@@ -322,8 +322,14 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             ) : (
               <span className="text-sm font-bold block" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
             )}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+              {post.location_city && (
+                <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "var(--text-hint)" }}>
+                  <MapPin className="w-2.5 h-2.5" />
+                  {[post.location_city, post.location_region].filter(Boolean).join(", ")}
+                </span>
+              )}
               {post.media_ref_title && (
                 <span className="text-[11px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
                   🎬 {post.media_ref_title}
