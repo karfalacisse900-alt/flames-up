@@ -149,14 +149,26 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
     setMediaError(false);
     setSaving(true);
 
-    // Upload image or video first
+    // Upload image(s) or video first
     let finalImageUrl = null;
+    let finalImageUrls = [];
     let finalVideoUrl = null;
-    if (imageFile) {
+    if (imageFiles.length > 0) {
+      setUploading(true);
+      try {
+        const uploads = await Promise.all(imageFiles.map(({ file }) => base44.integrations.Core.UploadFile({ file })));
+        finalImageUrls = uploads.map(r => r.file_url);
+        finalImageUrl = finalImageUrls[0];
+      } catch (err) {
+        console.error("Image upload failed:", err);
+      }
+      setUploading(false);
+    } else if (imageFile) {
       setUploading(true);
       try {
         const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
         finalImageUrl = file_url;
+        finalImageUrls = [file_url];
       } catch (err) {
         console.error("Image upload failed:", err);
       }
