@@ -202,6 +202,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated }) {
         image_url: finalImageUrl || undefined,
         image_urls: finalImageUrls.length > 0 ? finalImageUrls : undefined,
         video_url: finalVideoUrl || undefined,
+        location_city: location?.city || undefined,
+        location_region: location?.region || undefined,
+        location_country: location?.country || undefined,
+        location_lat: location?.lat || undefined,
+        location_lng: location?.lng || undefined,
         upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
         is_daily_spotlight: false, is_reported: true,
       });
