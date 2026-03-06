@@ -28,10 +28,10 @@ export default function CommunityFeed({ user }) {
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      if (event.type === "update" || event.type === "delete") {
-        qc.invalidateQueries({ queryKey: ["communityPosts"] });
+      qc.invalidateQueries({ queryKey: ["communityPosts"] });
+      if (event.type === "create") {
+        setNewPostsAvailable(n => n + 1);
       }
-      // Don't increment counter for creates — the onCreated callback handles refetch
     });
     return unsub;
   }, [qc]);
