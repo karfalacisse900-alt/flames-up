@@ -6,6 +6,7 @@ import { Plus, ArrowUp, Zap, MapPin, Loader2 } from "lucide-react";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
+import DailyChallengeCard from "./DailyChallengeCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 
