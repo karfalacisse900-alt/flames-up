@@ -148,7 +148,7 @@ export default function Layout({ children, currentPageName }) {
 
       {!hideNav &&
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
         style={{
           backgroundColor: "var(--bg-nav)",
           backdropFilter: "blur(20px)",
