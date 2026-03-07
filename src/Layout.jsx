@@ -117,7 +117,7 @@ export default function Layout({ children, currentPageName }) {
         style={{
           paddingBottom: hideNav ? 0 : "72px",
           minHeight: "100dvh",
-          overflowX: "hidden",
+          overflowX: "clip",
           // On lg+: shift right for left sidebar (240px). On xl+: also leave room for right sidebar (256px).
           marginLeft: showSidebars ? undefined : "auto",
           marginRight: showSidebars ? undefined : "auto",
