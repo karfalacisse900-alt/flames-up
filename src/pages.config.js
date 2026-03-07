@@ -54,6 +54,7 @@ import Art from './pages/Art';
 import ArtStudio from './pages/ArtStudio';
 import Collections from './pages/Collections';
 import CreatorDashboard from './pages/CreatorDashboard';
+import DailyChallenge from './pages/DailyChallenge';
 import DidYouKnow from './pages/DidYouKnow';
 import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
@@ -80,7 +81,6 @@ import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
-import DailyChallenge from './pages/DailyChallenge';
 import __Layout from './Layout.jsx';
 
 
@@ -92,6 +92,7 @@ export const PAGES = {
     "ArtStudio": ArtStudio,
     "Collections": Collections,
     "CreatorDashboard": CreatorDashboard,
+    "DailyChallenge": DailyChallenge,
     "DidYouKnow": DidYouKnow,
     "Discover": Discover,
     "DiscoverForum": DiscoverForum,
@@ -118,7 +119,6 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
-    "DailyChallenge": DailyChallenge,
 }
 
 export const pagesConfig = {

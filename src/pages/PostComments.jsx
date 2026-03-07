@@ -375,6 +375,39 @@ export default function PostComments() {
       });
       if (body && !mod.safe) await createModerationReport("reply", comment.id, user?.email, user?.full_name, mod.flags, mod.confidence);
       if (post) await base44.entities.CommunityPost.update(post.id, { comment_count: (post.comment_count || 0) + 1 });
+
+      // Notify post author about reply (if not own post)
+      if (post && post.author_email && post.author_email !== user?.email) {
+        base44.entities.Notification.create({
+          recipient_email: post.author_email,
+          actor_name: user?.full_name || user?.email || "Someone",
+          actor_email: user?.email || "",
+          type: "post_replied",
+          post_text: (post.title || post.body || "").slice(0, 100),
+          ref_id: post.id,
+          is_read: false,
+        }).catch(() => {});
+      }
+
+      // Notify any @mentions in body
+      if (body) {
+        const mentionMatches = body.match(/@(\S+)/g) || [];
+        for (const m of mentionMatches) {
+          const mentionedName = m.slice(1);
+          if (mentionedName && mentionedName !== (user?.full_name || "")) {
+            base44.entities.Notification.create({
+              recipient_email: mentionedName, // best effort — store name as ref
+              actor_name: user?.full_name || user?.email || "Someone",
+              actor_email: user?.email || "",
+              type: "mention",
+              post_text: body.slice(0, 100),
+              ref_id: post?.id || "",
+              is_read: false,
+            }).catch(() => {});
+          }
+        }
+      }
+
       return comment;
     },
     onSuccess: () => {
