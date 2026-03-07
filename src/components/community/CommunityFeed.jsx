@@ -242,12 +242,12 @@ export default function CommunityFeed({ user }) {
       {newPostsAvailable > 0 && (
         <button
           onClick={loadNewPosts}
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-xl"
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold"
           style={{
             background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
             color: "#fff",
             boxShadow: "0 6px 24px rgba(46,107,79,0.45)",
-            animation: "slideUp 0.25s ease forwards",
+            animation: "slideUp 0.25s ease",
           }}>
           <ArrowUp className="w-3.5 h-3.5" />
           {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
@@ -285,7 +285,11 @@ export default function CommunityFeed({ user }) {
             </button>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="py-16 text-center px-8 fade-slide-in">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-16 text-center px-8"
+          >
             <div className="text-5xl mb-4">{activeTab === "nearby" ? "📍" : "💬"}</div>
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
               {activeTab === "nearby" ? `No posts from ${userCity} yet` : "Start the conversation"}
@@ -293,29 +297,32 @@ export default function CommunityFeed({ user }) {
             <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
               {activeTab === "nearby" ? "Be the first to post with your location tagged!" : "Be the first to share a thought with the community"}
             </p>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
               onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
               className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
               ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         ) : (
           filteredPosts.map((post, index) => renderPostCard(post, index))
         )}
       </div>
 
-      {showCreate && (
-        <CreateCommunityPost
-          user={user}
-          challengeContext={challengeContext}
-          onClose={() => { setShowCreate(false); setChallengeContext(null); }}
-          onCreated={async () => {
-            await qc.invalidateQueries({ queryKey: ["communityPosts"] });
-            await qc.invalidateQueries({ queryKey: ["communityDebates"] });
-            await refetch();
-          }} />
-      )}
+      <AnimatePresence>
+        {showCreate && (
+          <CreateCommunityPost
+            user={user}
+            challengeContext={challengeContext}
+            onClose={() => { setShowCreate(false); setChallengeContext(null); }}
+            onCreated={async () => {
+              await qc.invalidateQueries({ queryKey: ["communityPosts"] });
+              await qc.invalidateQueries({ queryKey: ["communityDebates"] });
+              await refetch();
+            }} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
