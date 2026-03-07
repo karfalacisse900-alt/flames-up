@@ -334,10 +334,9 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
     <div className="pb-28">
       {/* ── Filter toggle bar ── */}
       <div className="flex items-center justify-between px-4 mb-4">
-        <motion.button
-          whileTap={{ scale: 0.94 }}
+        <button
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold active:scale-95 transition-transform duration-150"
           style={{
             backgroundColor: activeCategory ? "var(--accent-primary)" : "var(--bg-card)",
             color: activeCategory ? "#fff" : "var(--text-secondary)",
@@ -352,7 +351,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               <X className="w-3 h-3" />
             </span>
           )}
-        </motion.button>
+        </button>
 
         <div className="flex items-center gap-1.5">
           <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
