@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Users, Lock, Globe, Flame } from "lucide-react";
+import { Search, Plus, Users, Lock, Flame, ChevronRight } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
 
