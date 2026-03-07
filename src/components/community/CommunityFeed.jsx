@@ -305,19 +305,17 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
-      <AnimatePresence>
-        {showCreate && (
-          <CreateCommunityPost
-            user={user}
-            challengeContext={challengeContext}
-            onClose={() => { setShowCreate(false); setChallengeContext(null); }}
-            onCreated={async () => {
-              await qc.invalidateQueries({ queryKey: ["communityPosts"] });
-              await qc.invalidateQueries({ queryKey: ["communityDebates"] });
-              await refetch();
-            }} />
-        )}
-      </AnimatePresence>
+      {showCreate && (
+        <CreateCommunityPost
+          user={user}
+          challengeContext={challengeContext}
+          onClose={() => { setShowCreate(false); setChallengeContext(null); }}
+          onCreated={async () => {
+            await qc.invalidateQueries({ queryKey: ["communityPosts"] });
+            await qc.invalidateQueries({ queryKey: ["communityDebates"] });
+            await refetch();
+          }} />
+      )}
     </div>
   );
 }
