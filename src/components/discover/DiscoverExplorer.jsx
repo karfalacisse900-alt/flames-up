@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Shuffle, Sparkles, ChevronRight, Star, Bookmark } from "lucide-react";
+import { ExternalLink, Shuffle, Sparkles, Star, SlidersHorizontal, X, Flame, TrendingUp } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 import BookmarkButton from "./BookmarkButton";
+import AppPreviewDrawer from "./AppPreviewDrawer";
 
 const CATEGORY_GRADIENTS = {
   productivity:    ["#6366f1", "#8b5cf6"],
@@ -16,62 +17,59 @@ const CATEGORY_GRADIENTS = {
   general:         ["#2E6B4F", "#1a4230"],
 };
 
+const CATEGORY_FILTERS = [
+  { id: null,              label: "All",          emoji: "✨" },
+  { id: "productivity",    label: "Productivity", emoji: "⚡" },
+  { id: "finance",         label: "Finance",      emoji: "💰" },
+  { id: "learning",        label: "Learning",     emoji: "📚" },
+  { id: "lifestyle",       label: "Lifestyle",    emoji: "🌿" },
+  { id: "entertainment",   label: "Entertain.",   emoji: "🎬" },
+  { id: "health",          label: "Health",       emoji: "💪" },
+  { id: "social",          label: "Social",       emoji: "👥" },
+  { id: "developer_tools", label: "Dev Tools",    emoji: "🛠️" },
+];
+
 function getGradient(cat) {
   const g = CATEGORY_GRADIENTS[cat] || CATEGORY_GRADIENTS.general;
   return `linear-gradient(135deg, ${g[0]}, ${g[1]})`;
 }
 
-const CATEGORY_ROWS = [
-  { label: "🔥 Trending Tools",     filter: i => i.is_featured },
-  { label: "🤖 AI Tools",           filter: i => i.tags?.some(t => /ai|gpt|llm|artificial/i.test(t)) || i.description?.toLowerCase().includes("ai") },
-  { label: "⚡ Productivity Apps",  filter: i => i.category === "productivity" },
-  { label: "📚 Study Tools",        filter: i => i.category === "learning" },
-  { label: "🎬 Entertainment",      filter: i => i.category === "entertainment" },
-  { label: "🛠️ Developer Tools",    filter: i => i.category === "developer_tools" },
-  { label: "💪 Health & Wellness",  filter: i => i.category === "health" },
-  { label: "🌿 Lifestyle",          filter: i => i.category === "lifestyle" },
-];
+// ── Pulse dot for trending items ────────────────────────────────────────────
+function PulseDot() {
+  return (
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: "#f43f5e" }} />
+      <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: "#f43f5e" }} />
+    </span>
+  );
+}
 
-const QUICK_CHIPS = [
-  { label: "🤖 AI Tools",         search: "ai" },
-  { label: "📚 Study Tools",      search: "study" },
-  { label: "✈️ Travel Apps",      search: "travel" },
-  { label: "⚡ Productivity",     search: "productivity" },
-  { label: "🎬 Free Movies",      search: "movie" },
-  { label: "🛠️ Dev Tools",        search: "developer" },
-  { label: "💰 Finance",          search: "finance" },
-  { label: "💪 Health",           search: "health" },
-];
-
-// ── Large Hero Discovery Card ──────────────────────────────────────────────
-function HeroCard({ item, user, onOpen, index }) {
+// ── Large Hero Card ──────────────────────────────────────────────────────────
+function HeroCard({ item, user, onPreview, index }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.08, duration: 0.4 }}
-      onClick={onOpen}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      onClick={() => onPreview(item)}
       className="shrink-0 cursor-pointer"
-      style={{ width: 280 }}
+      style={{ width: 270 }}
     >
       <div
         className="rounded-3xl overflow-hidden relative"
         style={{
           background: getGradient(item.category),
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          height: 200,
+          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+          height: 210,
         }}
       >
-        {/* Background blur orb */}
-        <div style={{
-          position: "absolute", top: -20, right: -20,
-          width: 120, height: 120, borderRadius: "50%",
-          background: "rgba(255,255,255,0.1)", filter: "blur(20px)",
-        }} />
+        {/* Decorative orbs */}
+        <div style={{ position: "absolute", top: -30, right: -30, width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.1)", filter: "blur(25px)" }} />
+        <div style={{ position: "absolute", bottom: -20, left: 20, width: 80, height: 80, borderRadius: "50%", background: "rgba(0,0,0,0.12)", filter: "blur(18px)" }} />
 
-        {/* Logo */}
+        {/* App logo */}
         <div className="absolute top-5 left-5">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
+          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
             <DiscoverLogo item={item} size="lg" />
           </div>
         </div>
@@ -79,149 +77,268 @@ function HeroCard({ item, user, onOpen, index }) {
         {/* Badges */}
         <div className="absolute top-5 right-4 flex flex-col gap-1 items-end">
           {item.is_featured && (
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.25)", color: "#fff" }}>🔥 HOT</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)" }}>
+              <PulseDot />
+              <span className="text-[9px] font-bold text-white">HOT</span>
+            </div>
           )}
-          {item.is_new && (
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.25)", color: "#fff" }}>✨ NEW</span>
-          )}
+          {item.is_new && <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: "rgba(255,255,255,0.22)" }}>✨ NEW</span>}
         </div>
 
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }}>
-          <h3 className="font-bold text-white text-base leading-tight mb-0.5 truncate">{item.title}</h3>
-          <p className="text-white/75 text-xs leading-snug line-clamp-2 mb-3">{item.description}</p>
-          <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-            {user && (
-              <div className="rounded-full overflow-hidden">
-                <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} compact />
+        {/* Bottom gradient content */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pt-8 pb-5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)" }}>
+          <h3 className="font-bold text-white text-[15px] leading-tight mb-1 truncate">{item.title}</h3>
+          <p className="text-white/75 text-[11px] leading-snug line-clamp-2 mb-3">{item.description}</p>
+
+          {/* Rating + pricing inline */}
+          <div className="flex items-center gap-2 mb-3">
+            {(item.avg_rating || 0) > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span className="text-[11px] font-bold text-white">{item.avg_rating.toFixed(1)}</span>
+                {item.review_count > 0 && <span className="text-[9px] text-white/60">({item.review_count})</span>}
               </div>
             )}
+            {item.pricing && (
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>
+                {item.pricing}
+              </span>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
             {item.link && (
               <a
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs font-bold px-4 py-1.5 rounded-full text-white"
-                style={{ backgroundColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)" }}
+                className="flex items-center gap-1.5 text-[11px] font-bold px-3.5 py-1.5 rounded-full text-white"
+                style={{ backgroundColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)" }}
               >
-                Try Tool <ExternalLink className="w-3 h-3" />
+                {item.pricing === "Free" ? "Try Free" : "Open"} <ExternalLink className="w-3 h-3" />
               </a>
             )}
+            {user && (
+              <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} compact />
+            )}
           </div>
+        </div>
+      </div>
+
+      {/* Tags below card */}
+      {item.tags?.length > 0 && (
+        <div className="flex gap-1.5 mt-2 px-1 overflow-hidden">
+          {item.tags.slice(0, 3).map((tag, i) => (
+            <span key={i} className="text-[9px] px-2 py-0.5 rounded-full truncate" style={{ backgroundColor: "var(--bg-card)", color: "var(--text-hint)", border: "1px solid var(--border-light)" }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ── Medium Card for category rows ──────────────────────────────────────────
+function MediumCard({ item, onPreview, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: Math.min(index * 0.04, 0.2) }}
+      onClick={() => onPreview(item)}
+      className="shrink-0 rounded-2xl overflow-hidden cursor-pointer"
+      style={{ width: 148, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
+    >
+      {/* Gradient banner */}
+      <div className="relative flex items-center justify-center" style={{ height: 88, background: getGradient(item.category) }}>
+        <div className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+          <DiscoverLogo item={item} size="sm" />
+        </div>
+        {item.is_featured && (
+          <div className="absolute top-2 left-2 flex items-center gap-1">
+            <PulseDot />
+          </div>
+        )}
+        {item.is_new && (
+          <span className="absolute top-2 right-2 text-[8px] font-bold bg-white/90 text-emerald-700 px-1.5 py-0.5 rounded-full">NEW</span>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="p-2.5">
+        <p className="text-[12px] font-bold leading-tight mb-1 truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
+        <p className="text-[10px] line-clamp-2 leading-snug mb-2" style={{ color: "var(--text-hint)" }}>{item.description}</p>
+
+        <div className="flex items-center justify-between">
+          {(item.avg_rating || 0) > 0 ? (
+            <div className="flex items-center gap-0.5">
+              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+              <span className="text-[10px] font-bold" style={{ color: "var(--text-secondary)" }}>{item.avg_rating.toFixed(1)}</span>
+            </div>
+          ) : <span />}
+          {item.pricing && (
+            <span className="text-[9px] font-semibold" style={{ color: item.pricing === "Free" ? "#059669" : "var(--text-hint)" }}>
+              {item.pricing === "Free" ? "Free" : item.pricing}
+            </span>
+          )}
         </div>
       </div>
     </motion.div>
   );
 }
 
-// ── Small Row Card ──────────────────────────────────────────────────────────
-function SmallCard({ item, onOpen }) {
-  return (
-    <motion.button
-      whileTap={{ scale: 0.95 }}
-      onClick={onOpen}
-      className="shrink-0 flex flex-col text-left rounded-2xl overflow-hidden"
-      style={{ width: 130, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-    >
-      <div className="h-20 flex items-center justify-center relative" style={{ background: getGradient(item.category) }}>
-        <div className="w-11 h-11 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center">
-          <DiscoverLogo item={item} size="sm" />
-        </div>
-        {item.is_new && (
-          <span className="absolute top-2 right-2 text-[8px] font-bold bg-white/90 text-emerald-700 px-1.5 py-0.5 rounded-full">NEW</span>
-        )}
-      </div>
-      <div className="p-2">
-        <p className="text-[11px] font-bold leading-tight truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        {item.pricing && <p className="text-[9px] mt-0.5 truncate" style={{ color: "var(--text-hint)" }}>{item.pricing}</p>}
-        {(item.avg_rating || 0) > 0 && (
-          <div className="flex items-center gap-0.5 mt-1">
-            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-            <span className="text-[9px] font-semibold" style={{ color: "var(--text-secondary)" }}>{item.avg_rating?.toFixed(1)}</span>
-          </div>
-        )}
-      </div>
-    </motion.button>
-  );
-}
-
-// ── Category Row ────────────────────────────────────────────────────────────
-function CategoryRow({ label, items, onOpen, onSeeAll }) {
+// ── Seamless Category Row (no borders/dividers) ────────────────────────────
+function SeamlessRow({ label, emoji, items, onPreview }) {
   if (!items.length) return null;
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between px-4 mb-3">
-        <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
-        <button onClick={onSeeAll} className="flex items-center gap-0.5 text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
-          See all <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+    <div className="mb-2">
+      <div className="flex items-center gap-2 px-4 mb-3 mt-6">
+        <span className="text-base">{emoji}</span>
+        <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
+        <span className="text-[10px] ml-auto" style={{ color: "var(--text-hint)" }}>{items.length} apps</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1">
-        {items.slice(0, 10).map(item => (
-          <SmallCard key={item.id} item={item} onOpen={() => onOpen(item)} />
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2">
+        {items.slice(0, 12).map((item, i) => (
+          <MediumCard key={item.id} item={item} onPreview={onPreview} index={i} />
         ))}
       </div>
     </div>
   );
 }
 
-// ── Try Something New Card ──────────────────────────────────────────────────
-function TryNewCard({ item, onOpen }) {
+// ── Surprise Me ─────────────────────────────────────────────────────────────
+function SurpriseBtn({ onClick }) {
   return (
-    <motion.div
-      whileTap={{ scale: 0.97 }}
-      onClick={onOpen}
-      className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-    >
-      <div className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ background: getGradient(item.category) }}>
-        <DiscoverLogo item={item} size="sm" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        <p className="text-xs line-clamp-1 mt-0.5" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
-      </div>
-      {item.link && (
-        <a
-          href={item.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={e => e.stopPropagation()}
-          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full text-white"
-          style={{ backgroundColor: "var(--accent-primary)" }}
-        >
-          Try
-        </a>
-      )}
-    </motion.div>
+    <div className="px-4 mt-6 mb-2">
+      <motion.button
+        whileTap={{ scale: 0.97 }}
+        onClick={onClick}
+        className="w-full py-4 rounded-3xl flex items-center justify-center gap-3 font-bold text-sm relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #2E6B4F, #4ade80 80%)",
+          color: "#fff",
+          boxShadow: "0 4px 24px rgba(46,107,79,0.35)",
+        }}
+      >
+        {/* Shimmer overlay */}
+        <motion.div
+          animate={{ x: ["−100%", "200%"] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)", transform: "skewX(-20deg)" }}
+        />
+        <Shuffle className="w-5 h-5" />
+        Surprise Me — Random Tool
+      </motion.button>
+    </div>
   );
 }
 
-// ── Main DiscoverExplorer ───────────────────────────────────────────────────
-export default function DiscoverExplorer({ items, isLoading, user, onItemClick, onChipSearch, greeting }) {
-  const [surpriseItem, setSurpriseItem] = useState(null);
+// ── Category Filter Bottom Sheet ────────────────────────────────────────────
+function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
+        />
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 30, stiffness: 320 }}
+          className="relative rounded-t-3xl pb-8 pt-4 px-4"
+          style={{ backgroundColor: "var(--bg-card)", zIndex: 1 }}
+        >
+          <div className="flex justify-center mb-4">
+            <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Filter by Category</h3>
+            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {CATEGORY_FILTERS.map(cat => {
+              const isActive = activeCategory === cat.id;
+              return (
+                <motion.button
+                  key={String(cat.id)}
+                  whileTap={{ scale: 0.94 }}
+                  onClick={() => { onChange(cat.id); onClose(); }}
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl font-semibold text-xs transition-all"
+                  style={{
+                    backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-subtle)",
+                    color: isActive ? "#fff" : "var(--text-secondary)",
+                    border: `1.5px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
+                    boxShadow: isActive ? "0 4px 14px rgba(46,107,79,0.25)" : "none",
+                  }}
+                >
+                  <span className="text-xl">{cat.emoji}</span>
+                  <span className="text-[11px] font-semibold leading-tight text-center">{cat.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+}
 
-  const featured = useMemo(() => items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4), [items]);
+// ── MAIN DiscoverExplorer ───────────────────────────────────────────────────
+const ROWS = [
+  { label: "Trending Tools",    emoji: "🔥", filter: i => i.is_featured },
+  { label: "AI-Powered",        emoji: "🤖", filter: i => i.tags?.some(t => /ai|gpt|llm|artificial|ml/i.test(t)) || i.description?.toLowerCase().includes("ai") },
+  { label: "Productivity",      emoji: "⚡", filter: i => i.category === "productivity" },
+  { label: "Study & Learning",  emoji: "📚", filter: i => i.category === "learning" },
+  { label: "Entertainment",     emoji: "🎬", filter: i => i.category === "entertainment" },
+  { label: "Developer Tools",   emoji: "🛠️", filter: i => i.category === "developer_tools" },
+  { label: "Health & Wellness", emoji: "💪", filter: i => i.category === "health" },
+  { label: "Lifestyle",         emoji: "🌿", filter: i => i.category === "lifestyle" },
+  { label: "Finance",           emoji: "💰", filter: i => i.category === "finance" },
+  { label: "Social",            emoji: "👥", filter: i => i.category === "social" },
+];
 
-  const tryNew = useMemo(() => {
-    const lesserKnown = items.filter(i => !i.is_featured && (i.avg_rating || 0) < 3.5);
-    return lesserKnown.sort(() => Math.random() - 0.5).slice(0, 6);
-  }, [items]);
+export default function DiscoverExplorer({ items, isLoading, user, onItemClick, onChipSearch }) {
+  const [previewItem, setPreviewItem] = useState(null);
+  const [showFilter, setShowFilter] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  const featured = useMemo(() =>
+    items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(0, 10),
+  [items]);
+
+  const filteredItems = useMemo(() =>
+    activeCategory ? items.filter(i => i.category === activeCategory) : items,
+  [items, activeCategory]);
 
   const handleSurprise = () => {
     if (!items.length) return;
     const pick = items[Math.floor(Math.random() * items.length)];
-    setSurpriseItem(pick);
-    onItemClick(pick);
+    setPreviewItem(pick);
   };
+
+  const activeCatLabel = CATEGORY_FILTERS.find(c => c.id === activeCategory);
 
   if (isLoading) {
     return (
-      <div className="px-4 pt-4 space-y-4">
-        <div className="h-8 w-48 rounded-xl animate-pulse" style={{ backgroundColor: "var(--bg-card)" }} />
-        <div className="h-[200px] rounded-3xl animate-pulse" style={{ backgroundColor: "var(--bg-card)" }} />
-        <div className="flex gap-3">
-          {[1,2,3].map(i => <div key={i} className="h-36 w-32 rounded-2xl animate-pulse shrink-0" style={{ backgroundColor: "var(--bg-card)" }} />)}
+      <div className="px-4 pt-4 space-y-5 pb-28">
+        <div className="flex gap-4 overflow-hidden">
+          {[1,2,3].map(i => <div key={i} className="shrink-0 rounded-3xl animate-pulse" style={{ width: 270, height: 210, backgroundColor: "var(--bg-card)" }} />)}
+        </div>
+        <div className="flex gap-3 overflow-hidden mt-4">
+          {[1,2,3,4].map(i => <div key={i} className="shrink-0 rounded-2xl animate-pulse" style={{ width: 148, height: 160, backgroundColor: "var(--bg-card)" }} />)}
+        </div>
+        <div className="flex gap-3 overflow-hidden">
+          {[1,2,3,4].map(i => <div key={i} className="shrink-0 rounded-2xl animate-pulse" style={{ width: 148, height: 160, backgroundColor: "var(--bg-card)" }} />)}
         </div>
       </div>
     );
@@ -229,66 +346,135 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
 
   return (
     <div className="pb-28">
-      {/* ── Hero featured cards ── */}
-      {featured.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center gap-2 px-4 mb-3">
-            <Sparkles className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-            <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Featured for You</h2>
-          </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-2">
-            {featured.slice(0, 8).map((item, i) => (
-              <HeroCard key={item.id} item={item} user={user} onOpen={() => onItemClick(item)} index={i} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Category rows ── */}
-      {CATEGORY_ROWS.map(row => {
-        const rowItems = items.filter(row.filter);
-        return (
-          <CategoryRow
-            key={row.label}
-            label={row.label}
-            items={rowItems}
-            onOpen={onItemClick}
-            onSeeAll={() => onChipSearch(row.label.replace(/^[\S]+ /, "").toLowerCase())}
-          />
-        );
-      })}
-
-      {/* ── Try Something New ── */}
-      {tryNew.length > 0 && (
-        <div className="px-4 mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-base">🌟</span>
-            <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Try Something New Today</h2>
-          </div>
-          <div className="space-y-2.5">
-            {tryNew.map(item => (
-              <TryNewCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Surprise Me ── */}
-      <div className="px-4 mb-6">
+      {/* ── Filter toggle bar ── */}
+      <div className="flex items-center justify-between px-4 mb-4">
         <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={handleSurprise}
-          className="w-full py-4 rounded-3xl flex items-center justify-center gap-3 font-bold text-sm"
+          whileTap={{ scale: 0.94 }}
+          onClick={() => setShowFilter(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold"
           style={{
-            background: "linear-gradient(135deg, var(--accent-primary), #4ade80)",
-            color: "#fff",
-            boxShadow: "0 4px 20px rgba(46,107,79,0.35)",
+            backgroundColor: activeCategory ? "var(--accent-primary)" : "var(--bg-card)",
+            color: activeCategory ? "#fff" : "var(--text-secondary)",
+            border: `1px solid ${activeCategory ? "var(--accent-primary)" : "var(--border-light)"}`,
+            boxShadow: activeCategory ? "0 2px 12px rgba(46,107,79,0.25)" : "none",
           }}
         >
-          <Shuffle className="w-5 h-5" />
-          Surprise Me — Open a Random Tool
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          {activeCatLabel ? `${activeCatLabel.emoji} ${activeCatLabel.label}` : "Filter"}
+          {activeCategory && (
+            <span onClick={e => { e.stopPropagation(); setActiveCategory(null); }} className="ml-1">
+              <X className="w-3 h-3" />
+            </span>
+          )}
         </motion.button>
+
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
+          <span className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>{filteredItems.length} tools</span>
+        </div>
       </div>
+
+      {/* ── If category filter active: show flat list ── */}
+      {activeCategory ? (
+        <div className="px-4 space-y-2.5">
+          {filteredItems.map((item, i) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03 }}
+              onClick={() => setPreviewItem(item)}
+              className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+            >
+              <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: getGradient(item.category) }}>
+                <DiscoverLogo item={item} size="sm" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
+                  {item.is_featured && <PulseDot />}
+                </div>
+                <p className="text-[11px] line-clamp-1" style={{ color: "var(--text-secondary)" }}>{item.description}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {(item.avg_rating || 0) > 0 && (
+                    <div className="flex items-center gap-0.5">
+                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                      <span className="text-[10px] font-bold" style={{ color: "var(--text-secondary)" }}>{item.avg_rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                  {item.pricing && <span className="text-[10px]" style={{ color: item.pricing === "Free" ? "#059669" : "var(--text-hint)" }}>{item.pricing}</span>}
+                  {item.tags?.slice(0, 2).map((t, idx) => (
+                    <span key={idx} className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{t}</span>
+                  ))}
+                </div>
+              </div>
+              {item.link && (
+                <a href={item.link} target="_blank" rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                  style={{ backgroundColor: "var(--accent-primary)" }}
+                >
+                  Try
+                </a>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* ── Featured hero row ── */}
+          {featured.length > 0 && (
+            <div className="mb-2">
+              <div className="flex items-center gap-2 px-4 mb-3">
+                <Sparkles className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Featured for You</h2>
+              </div>
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-3">
+                {featured.map((item, i) => (
+                  <HeroCard key={item.id} item={item} user={user} onPreview={setPreviewItem} index={i} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Seamless category rows — no dividers ── */}
+          {ROWS.map(row => {
+            const rowItems = items.filter(row.filter);
+            return (
+              <SeamlessRow
+                key={row.label}
+                label={row.label}
+                emoji={row.emoji}
+                items={rowItems}
+                onPreview={setPreviewItem}
+              />
+            );
+          })}
+
+          {/* ── Surprise Me ── */}
+          <SurpriseBtn onClick={handleSurprise} />
+        </>
+      )}
+
+      {/* ── App Preview Drawer ── */}
+      {previewItem && (
+        <AppPreviewDrawer
+          item={previewItem}
+          user={user}
+          onClose={() => setPreviewItem(null)}
+          onFullOpen={() => { onItemClick(previewItem); setPreviewItem(null); }}
+        />
+      )}
+
+      {/* ── Category Filter Sheet ── */}
+      {showFilter && (
+        <CategoryFilterSheet
+          activeCategory={activeCategory}
+          onChange={setActiveCategory}
+          onClose={() => setShowFilter(false)}
+        />
+      )}
     </div>
   );
 }
