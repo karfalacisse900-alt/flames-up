@@ -279,12 +279,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, ease: "easeOut" }}
-      className="relative"
-    >
+    <div className="relative">
       <div className="px-3 pt-3 pb-1">
         {/* ── Header ── */}
         <div className="flex items-center gap-2.5 mb-2.5">
