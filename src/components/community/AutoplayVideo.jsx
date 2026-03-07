@@ -15,6 +15,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   // eslint-disable-next-line no-unused-vars
@@ -144,13 +145,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
-        maxHeight: "80vh",
+        aspectRatio: loaded ? "4/5" : undefined,
+        maxHeight: loaded ? "80vh" : undefined,
         width: "100%",
         cursor: "pointer",
         userSelect: "none",
         background: loaded ? "#000" : "transparent",
-        display: loaded ? "block" : "none",
       }}
     >
       <video
@@ -160,8 +160,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         loop
         preload="metadata"
         onLoadedMetadata={() => setLoaded(true)}
-        onError={() => setLoaded(false)}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ display: loaded ? "block" : "none" }}
       />
 
       {/* Tap icon feedback */}
@@ -199,7 +199,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       )}
 
       {/* Bottom controls */}
-      <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
+      {loaded && <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
         <button
           onClick={toggleMute}
           className="p-2 rounded-full"
@@ -214,7 +214,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         >
           <Maximize2 className="w-4 h-4" />
         </button>
-      </div>
+      </div>}
 
       <style>{`
         @keyframes tapFade {
