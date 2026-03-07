@@ -12,7 +12,7 @@ export default function Home() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  const divider = <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />;
+  const divider = <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)" }} />;
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
