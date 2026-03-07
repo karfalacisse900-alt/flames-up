@@ -179,7 +179,7 @@ function MediumCard({ item, onPreview }) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
