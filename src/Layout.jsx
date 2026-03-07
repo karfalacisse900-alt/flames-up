@@ -103,7 +103,7 @@ export default function Layout({ children, currentPageName }) {
   const showSidebars = !isAdminPage && !hideNav;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "hidden", width: "100%", maxWidth: "100%" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "clip", width: "100%", maxWidth: "100%" }}>
 
       {/* Left sidebar — desktop only */}
       {showSidebars && <LeftSidebar currentPageName={currentPageName} unreadCount={unreadCount} />}
