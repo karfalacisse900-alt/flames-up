@@ -129,7 +129,7 @@ export default function Discover() {
       </div>
 
       {/* ── Content ── */}
-      <div className="pt-3">
+      <div className="pt-2">
         {activeTab === "dyk" ? (
           <DYKTab user={user} />
         ) : view === "explore" ? (
