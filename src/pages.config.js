@@ -56,7 +56,6 @@ import Collections from './pages/Collections';
 import CreatorDashboard from './pages/CreatorDashboard';
 import DailyChallenge from './pages/DailyChallenge';
 import DidYouKnow from './pages/DidYouKnow';
-import Discover from './pages/Discover';
 import DiscoverForum from './pages/DiscoverForum';
 import EditServiceProfile from './pages/EditServiceProfile';
 import Explore from './pages/Explore';
@@ -95,7 +94,6 @@ export const PAGES = {
     "CreatorDashboard": CreatorDashboard,
     "DailyChallenge": DailyChallenge,
     "DidYouKnow": DidYouKnow,
-    "Discover": Discover,
     "DiscoverForum": DiscoverForum,
     "EditServiceProfile": EditServiceProfile,
     "Explore": Explore,
