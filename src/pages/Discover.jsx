@@ -134,25 +134,7 @@ export default function Discover() {
           </div>
         )}
 
-        {/* Quick suggestion chips — only on explore view */}
-        {activeTab === "apps" && view === "explore" && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {QUICK_CHIPS.map(chip => (
-              <button
-                key={chip.search}
-                onClick={() => handleChipSearch(chip.search)}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
-                style={{
-                  backgroundColor: "var(--bg-card)",
-                  color: "var(--text-secondary)",
-                  border: "1px solid var(--border-light)",
-                }}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
+
       </div>
 
       {/* ── Content ── */}
