@@ -39,13 +39,14 @@ export function useLayoutStabilizer() {
       style.id = "layout-stabilizer-css";
       style.textContent = `
         html, body, #root {
-          overflow-x: hidden !important;
+          overflow-x: clip !important;
+          overflow-y: visible !important;
           max-width: 100vw !important;
           width: 100% !important;
         }
         body {
           touch-action: pan-y !important;
-          overscroll-behavior: none !important;
+          overscroll-behavior-x: none !important;
           -webkit-text-size-adjust: 100% !important;
           text-size-adjust: 100% !important;
         }
