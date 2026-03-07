@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Plus, ExternalLink, Star, TrendingUp, Sparkles, Flame } from "lucide-react";
+import { Plus, ExternalLink, Star, Sparkles, Flame } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
 import StarRating from "./StarRating";
 import BookmarkButton from "./BookmarkButton";
 import SubmitAppModal from "./SubmitAppModal.jsx";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const CATEGORIES = [
   { id: null,              label: "✨ All" },
@@ -74,7 +74,7 @@ function AppFeedCard({ item, user, onOpen, index }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.3) }}
-      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform h-full flex flex-col"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       onClick={onOpen}
     >
@@ -95,8 +95,8 @@ function AppFeedCard({ item, user, onOpen, index }) {
       </div>
 
       {/* Body */}
-      <div className="px-4 py-3">
-        <p className="text-xs leading-relaxed mb-3 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+      <div className="px-4 py-3 flex flex-col flex-1">
+        <p className="text-xs leading-relaxed mb-3 line-clamp-2 flex-1" style={{ color: "var(--text-secondary)" }}>
           {item.description}
         </p>
 
@@ -166,21 +166,26 @@ function SectionHeader({ icon, label }) {
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
-export default function DiscoverAppsTabNew({ items, isLoading, search, user, onItemClick }) {
-  const [category, setCategory] = useState(null);
+// category / onCategoryChange are now lifted from the parent (Discover page).
+// hideCategoryPills = true means the parent already rendered pills (desktop sidebar).
+export default function DiscoverAppsTabNew({ items, isLoading, search, user, onItemClick, category = null, onCategoryChange, hideCategoryPills = false }) {
+  const [internalCategory, setInternalCategory] = useState(null);
   const [showSubmit, setShowSubmit] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
-  const loaderRef = useRef(null);
   const trendingScrollRef = useRef(null);
   const trendingPausedRef = useRef(false);
   const trendingIndexRef = useRef(0);
+
+  // If category is controlled externally use it, else use internal
+  const activeCategory = onCategoryChange ? category : internalCategory;
+  const setActiveCategory = onCategoryChange ? onCategoryChange : setInternalCategory;
 
   // Auto-advance "Apps You Might Need" every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (trendingPausedRef.current || !trendingScrollRef.current) return;
       const container = trendingScrollRef.current;
-      const cardWidth = 144 + 12; // w-36 (144px) + gap-3 (12px)
+      const cardWidth = 144 + 12;
       const maxIndex = Math.floor(container.scrollWidth / cardWidth) - 1;
       trendingIndexRef.current = trendingIndexRef.current >= maxIndex ? 0 : trendingIndexRef.current + 1;
       container.scrollTo({ left: trendingIndexRef.current * cardWidth, behavior: "smooth" });
@@ -190,7 +195,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
 
   const filtered = useMemo(() => {
     let result = items.filter(item => {
-      const catMatch = category === null || item.category === category;
+      const catMatch = activeCategory === null || item.category === activeCategory;
       const searchTerm = (search || "").toLowerCase();
       const searchMatch = !searchTerm ||
         item.title?.toLowerCase().includes(searchTerm) ||
@@ -204,7 +209,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       if (a.is_featured !== b.is_featured) return b.is_featured ? 1 : -1;
       return (b.avg_rating || 0) - (a.avg_rating || 0);
     });
-  }, [items, category, search]);
+  }, [items, activeCategory, search]);
 
   // Infinite scroll via IntersectionObserver
   const observerRef = useCallback(node => {
@@ -228,9 +233,9 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
 
   if (isLoading) {
     return (
-      <div className="px-4 pt-2 pb-20 space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-40 rounded-2xl animate-pulse" style={{ backgroundColor: "var(--bg-card)" }} />
+      <div className="px-4 pt-2 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-44 rounded-2xl animate-pulse" style={{ backgroundColor: "var(--bg-card)" }} />
         ))}
       </div>
     );
@@ -238,36 +243,44 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
 
   return (
     <div className="pb-20">
-      {/* ── Category pills ── */}
-      <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide">
-        {CATEGORIES.map(c => {
-          const isActive = category === c.id;
-          return (
-            <button
-              key={String(c.id)}
-              onClick={() => { setCategory(c.id); setVisibleCount(12); }}
-              className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all chip"
-              style={{
-                backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                color: isActive ? "#fff" : "var(--text-secondary)",
-                border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                boxShadow: isActive ? "0 2px 8px rgba(46,107,79,0.3)" : "none",
-              }}
-            >
-              {c.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* ── Category pills — mobile only (desktop uses sidebar) ── */}
+      {!hideCategoryPills && (
+        <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide lg:hidden">
+          {CATEGORIES.map(c => {
+            const isActive = activeCategory === c.id;
+            return (
+              <button
+                key={String(c.id)}
+                onClick={() => { setActiveCategory(c.id); setVisibleCount(12); }}
+                className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all chip"
+                style={{
+                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: isActive ? "#fff" : "var(--text-secondary)",
+                  border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
+                  boxShadow: isActive ? "0 2px 8px rgba(46,107,79,0.3)" : "none",
+                }}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="px-4">
-        {/* ── Apps You Might Need (auto-advance every 10s) ── */}
-        {!search && category === null && trending.length > 0 && (
+        {/* ── Apps You Might Need ── */}
+        {!search && activeCategory === null && trending.length > 0 && (
           <>
             <SectionHeader icon="💡" label="Apps You Might Need" />
+            {/* Mobile: horizontal scroll. Desktop: 5-col grid */}
+            <div className="hidden lg:grid grid-cols-5 gap-3 mb-2">
+              {trending.slice(0, 5).map(item => (
+                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
+              ))}
+            </div>
             <div
+              className="lg:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
               ref={trendingScrollRef}
-              className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
               onMouseEnter={() => { trendingPausedRef.current = true; }}
               onMouseLeave={() => { trendingPausedRef.current = false; }}
               onTouchStart={() => { trendingPausedRef.current = true; }}
@@ -281,10 +294,15 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         )}
 
         {/* ── Recommended For You ── */}
-        {!search && category === null && newThisWeek.length > 0 && (
+        {!search && activeCategory === null && newThisWeek.length > 0 && (
           <>
             <SectionHeader icon="⭐" label="Recommended For You" />
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
+            <div className="hidden lg:grid grid-cols-5 gap-3 mb-2">
+              {newThisWeek.slice(0, 5).map(item => (
+                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
+              ))}
+            </div>
+            <div className="lg:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
               {newThisWeek.map(item => (
                 <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
               ))}
@@ -292,12 +310,12 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           </>
         )}
 
-        {/* ── Main feed ── */}
+        {/* ── Main feed header ── */}
         <div className="flex items-center justify-between mt-5 mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
             <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              {search ? `Results for "${search}"` : category ? CATEGORIES.find(c => c.id === category)?.label : "All Apps & Tools"}
+              {search ? `Results for "${search}"` : activeCategory ? CATEGORIES.find(c => c.id === activeCategory)?.label : "All Apps & Tools"}
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -314,19 +332,20 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           </div>
         </div>
 
+        {/* ── Grid: 1 col mobile, 2 col desktop ── */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🔍</p>
             <p className="text-sm" style={{ color: "var(--text-hint)" }}>No apps found</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {visibleItems.map((item, i) => (
               <AppFeedCard key={item.id} item={item} user={user} index={i} onOpen={() => onItemClick(item)} />
             ))}
-            {/* Infinite scroll sentinel */}
+            {/* Infinite scroll sentinel — spans full width */}
             {visibleCount < filtered.length && (
-              <div ref={observerRef} className="h-8 flex items-center justify-center">
+              <div ref={observerRef} className="col-span-full h-8 flex items-center justify-center">
                 <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: "var(--border-medium)", borderTopColor: "var(--accent-primary)" }} />
               </div>
             )}
