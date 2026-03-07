@@ -256,11 +256,10 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
             {CATEGORY_FILTERS.map(cat => {
               const isActive = activeCategory === cat.id;
               return (
-                <motion.button
+                <button
                   key={String(cat.id)}
-                  whileTap={{ scale: 0.94 }}
                   onClick={() => { onChange(cat.id); onClose(); }}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl font-semibold text-xs transition-all"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl font-semibold text-xs active:scale-95 transition-transform duration-150"
                   style={{
                     backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-subtle)",
                     color: isActive ? "#fff" : "var(--text-secondary)",
@@ -270,7 +269,7 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
                 >
                   <span className="text-xl">{cat.emoji}</span>
                   <span className="text-[11px] font-semibold leading-tight text-center">{cat.label}</span>
-                </motion.button>
+                </button>
               );
             })}
           </div>
