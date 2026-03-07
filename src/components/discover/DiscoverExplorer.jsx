@@ -138,14 +138,11 @@ function HeroCard({ item, user, onPreview }) {
 }
 
 // ── Medium Card for category rows ──────────────────────────────────────────
-function MediumCard({ item, onPreview, index }) {
+function MediumCard({ item, onPreview }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: Math.min(index * 0.04, 0.2) }}
+    <div
       onClick={() => onPreview(item)}
-      className="shrink-0 rounded-2xl overflow-hidden cursor-pointer"
+      className="shrink-0 rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform duration-150"
       style={{ width: 148, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
     >
       {/* Gradient banner */}
