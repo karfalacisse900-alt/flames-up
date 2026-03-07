@@ -211,7 +211,7 @@ export default function Groups() {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* List */}
       <div className="px-3 pt-4">
         {filteredGroups.length === 0 ? (
           <div className="py-16 text-center">
@@ -231,14 +231,13 @@ export default function Groups() {
             )}
           </div>
         ) : (
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-light)", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+          <div className="grid grid-cols-2 gap-3">
             {filteredGroups.map(group => (
               <GroupCard
                 key={group.id}
                 group={group}
                 membership={membershipMap[group.id]}
                 onOpen={handleOpenGroup}
-                onJoinDirect={handleJoin}
               />
             ))}
           </div>
