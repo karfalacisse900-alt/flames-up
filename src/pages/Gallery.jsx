@@ -143,14 +143,11 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
   });
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ animation: "fadeIn 0.15s ease" }}>
       <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      <div
         className="relative w-full flex flex-col rounded-3xl overflow-hidden"
-        style={{ height: "92dvh", maxWidth: 920, backgroundColor: "#0F0F0F", margin: "0 16px", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
+        style={{ height: "92dvh", maxWidth: 920, backgroundColor: "#0F0F0F", margin: "0 16px", boxShadow: "0 32px 80px rgba(0,0,0,0.6)", animation: "slideUp 0.18s ease" }}>
 
         <div className="flex flex-col md:flex-row h-full">
           {/* Image pane */}
