@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Home, Search, Users, Palette, User, Flame, Bell } from "lucide-react";
+import { Home, Search, Users, Palette, User, Flame, Bell, PenSquare } from "lucide-react";
 
 const navItems = [
-  { name: "Home",     icon: Home,    page: "Home" },
-  { name: "Discover", icon: Search,  page: "Discover" },
-  { name: "Groups",   icon: Users,   page: "Groups" },
-  { name: "Gallery",  icon: Palette, page: "Gallery" },
-  { name: "Profile",  icon: User,    page: "Profile" },
+  { name: "Home",        icon: Home,       page: "Home" },
+  { name: "Discover",    icon: Search,     page: "Discover" },
+  { name: "Groups",      icon: Users,      page: "Groups" },
+  { name: "Gallery",     icon: Palette,    page: "Gallery" },
+  { name: "Profile",     icon: User,       page: "Profile" },
 ];
+
+const createItem = { name: "Create Post", icon: PenSquare, page: "CreatePost" };
 
 export default function LeftSidebar({ currentPageName, unreadCount }) {
   const location = useLocation();
