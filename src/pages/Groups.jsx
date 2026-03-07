@@ -24,50 +24,56 @@ const CATEGORY_COLORS = {
 
 const FILTER_TABS = ["All", "My Groups", "Trending"];
 
-function GroupCard({ group, membership, onOpen }) {
+function GroupCard({ group, membership, onOpen, onJoinDirect }) {
   const grad = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
   const isMember = !!membership;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileTap={{ scale: 0.97 }}
+    <div
       onClick={() => onOpen(group)}
-      className="rounded-2xl overflow-hidden cursor-pointer"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}
+      className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-transform duration-100"
+      style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-subtle)" }}
     >
-      {/* Color banner */}
-      <div style={{ background: grad, height: 64, position: "relative" }}>
-        <div className="absolute inset-0 flex items-center px-4">
-          <span style={{ fontSize: 28 }}>{group.emoji || "💬"}</span>
-        </div>
-        {isMember && (
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-white font-semibold"
-            style={{ backgroundColor: "rgba(0,0,0,0.3)", fontSize: 10 }}>
-            Joined
-          </div>
-        )}
-        {group.is_private && (
-          <div className="absolute bottom-2 right-3">
-            <Lock className="w-3 h-3 text-white/70" />
-          </div>
-        )}
+      {/* Icon */}
+      <div className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+        style={{ background: grad }}>
+        {group.emoji || "💬"}
       </div>
 
-      <div className="px-3 py-3">
-        <h3 className="font-bold text-sm leading-tight mb-0.5 truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-          {group.name}
-        </h3>
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <h3 className="font-bold text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+            {group.name}
+          </h3>
+          {group.is_private && <Lock className="w-3 h-3 shrink-0" style={{ color: "var(--text-hint)" }} />}
+        </div>
         {group.description && (
-          <p className="text-xs mb-2 line-clamp-2" style={{ color: "var(--text-hint)" }}>{group.description}</p>
+          <p className="text-xs line-clamp-1 mb-1" style={{ color: "var(--text-hint)" }}>{group.description}</p>
         )}
-        <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-hint)" }}>
-          <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {group.member_count || 0}</span>
+        <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-hint)" }}>
+          <Users className="w-3 h-3" />
+          <span>{(group.member_count || 0).toLocaleString()} members</span>
+          <span className="mx-1">·</span>
           <span className="capitalize">{group.category}</span>
         </div>
       </div>
-    </motion.div>
+
+      {/* Action */}
+      {isMember ? (
+        <span className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full"
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+          Joined
+        </span>
+      ) : (
+        <button
+          onClick={e => { e.stopPropagation(); onJoinDirect(group); }}
+          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full text-white active:scale-95 transition-transform duration-150"
+          style={{ backgroundColor: "var(--accent-primary)" }}>
+          Join
+        </button>
+      )}
+    </div>
   );
 }
 
