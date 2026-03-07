@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Plus, ExternalLink, Star, TrendingUp, Sparkles, Flame } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import DiscoverLogo from "./DiscoverLogo";
