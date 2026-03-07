@@ -133,7 +133,7 @@ function HeroCard({ item, user, onPreview }) {
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
