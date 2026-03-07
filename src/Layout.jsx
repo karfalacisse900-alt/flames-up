@@ -100,23 +100,51 @@ export default function Layout({ children, currentPageName }) {
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
   const hideNav = swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live"].includes(currentPageName);
 
+  const showSidebars = !isAdminPage && !hideNav;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "hidden", width: "100%", maxWidth: "100%" }}>
+
+      {/* Left sidebar — desktop only */}
+      {showSidebars && <LeftSidebar currentPageName={currentPageName} unreadCount={unreadCount} />}
+
+      {/* Right sidebar — desktop only */}
+      {showSidebars && <RightSidebar />}
+
+      {/* Main content — offset by sidebars on large screens */}
+      <div
+        className={isAdminPage ? "w-full relative" : "relative"}
+        style={{
+          paddingBottom: hideNav ? 0 : "72px",
+          minHeight: "100dvh",
+          overflowX: "hidden",
+          // On lg+: shift right for left sidebar (240px). On xl+: also leave room for right sidebar (256px).
+          marginLeft: showSidebars ? undefined : "auto",
+          marginRight: showSidebars ? undefined : "auto",
+          maxWidth: isAdminPage ? "100%" : undefined,
+          width: "100%",
+        }}
+        // Tailwind responsive margins applied via className
+        data-page={currentPageName}
+      >
+        {/* Inner content width cap */}
         <div
-      className={isAdminPage ? "w-full relative" : "relative"}
-      style={{
-        paddingBottom: hideNav ? 0 : "72px",
-        minHeight: "100dvh",
-        overflowX: "hidden",
-        maxWidth: isAdminPage ? "100%" : WIDE_PAGES.includes(currentPageName) ? "1400px" : "512px",
-        width: "100%",
-        marginLeft: "auto",
-        marginRight: "auto",
-      }}
-      data-page={currentPageName}
-    >
+          className={
+            isAdminPage
+              ? "w-full"
+              : showSidebars
+              ? "lg:ml-60 xl:mr-64 mx-auto"
+              : "max-w-lg mx-auto"
+          }
+          style={
+            !isAdminPage && !showSidebars
+              ? { maxWidth: WIDE_PAGES.includes(currentPageName) ? "1400px" : "512px" }
+              : {}
+          }
+        >
           {children}
         </div>
+      </div>
 
       {!hideNav &&
       <nav
