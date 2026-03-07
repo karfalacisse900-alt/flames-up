@@ -60,10 +60,10 @@ export default function Discover() {
         className="sticky top-0 z-30 px-4 pt-5 pb-3"
         style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)" }}
       >
-        {/* Greeting + tab row */}
+        {/* Greeting row */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            {view === "browse" ? (
+            {view === "browse" && activeTab === "apps" ? (
               <button
                 onClick={() => { setView("explore"); setSearch(""); }}
                 className="flex items-center gap-1.5 text-sm font-semibold"
@@ -78,31 +78,32 @@ export default function Discover() {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Tab pills */}
-          <div className="flex gap-1.5">
-            {[
-              { id: "apps", icon: Compass,   label: "Apps" },
-              { id: "dyk",  icon: Lightbulb, label: "Facts" },
-            ].map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                  style={{
-                    backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
-                    color: isActive ? "#fff" : "var(--text-secondary)",
-                    border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                  }}
-                >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Tab bar — always visible */}
+        <div className="flex gap-2 mb-3">
+          {[
+            { id: "apps", icon: Compass,   label: "Apps & Tools" },
+            { id: "dyk",  icon: Lightbulb, label: "Did You Know" },
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all"
+                style={{
+                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: isActive ? "#fff" : "var(--text-secondary)",
+                  border: `1.5px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
+                  boxShadow: isActive ? "0 2px 10px rgba(46,107,79,0.25)" : "none",
+                }}
+              >
+                <tab.icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search bar — apps tab only */}
