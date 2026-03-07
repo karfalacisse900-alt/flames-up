@@ -247,8 +247,8 @@ function ArtworkDetailModal({ artwork, user, onClose, onLike }) {
             )}
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
