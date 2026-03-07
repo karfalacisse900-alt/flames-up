@@ -171,6 +171,22 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
   const [showSubmit, setShowSubmit] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const loaderRef = useRef(null);
+  const trendingScrollRef = useRef(null);
+  const trendingPausedRef = useRef(false);
+  const trendingIndexRef = useRef(0);
+
+  // Auto-advance "Apps You Might Need" every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (trendingPausedRef.current || !trendingScrollRef.current) return;
+      const container = trendingScrollRef.current;
+      const cardWidth = 144 + 12; // w-36 (144px) + gap-3 (12px)
+      const maxIndex = Math.floor(container.scrollWidth / cardWidth) - 1;
+      trendingIndexRef.current = trendingIndexRef.current >= maxIndex ? 0 : trendingIndexRef.current + 1;
+      container.scrollTo({ left: trendingIndexRef.current * cardWidth, behavior: "smooth" });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filtered = useMemo(() => {
     let result = items.filter(item => {
