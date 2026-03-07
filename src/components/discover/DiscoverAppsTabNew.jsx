@@ -261,11 +261,18 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       </div>
 
       <div className="px-4">
-        {/* ── Trending strip (shown only on "All" with no search) ── */}
+        {/* ── Apps You Might Need (auto-advance every 10s) ── */}
         {!search && category === null && trending.length > 0 && (
           <>
-            <SectionHeader icon="🔥" label="Trending Now" />
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
+            <SectionHeader icon="💡" label="Apps You Might Need" />
+            <div
+              ref={trendingScrollRef}
+              className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
+              onMouseEnter={() => { trendingPausedRef.current = true; }}
+              onMouseLeave={() => { trendingPausedRef.current = false; }}
+              onTouchStart={() => { trendingPausedRef.current = true; }}
+              onTouchEnd={() => { setTimeout(() => { trendingPausedRef.current = false; }, 2000); }}
+            >
               {trending.map(item => (
                 <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
               ))}
@@ -273,10 +280,10 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           </>
         )}
 
-        {/* ── New this week ── */}
+        {/* ── Recommended For You ── */}
         {!search && category === null && newThisWeek.length > 0 && (
           <>
-            <SectionHeader icon="✨" label="New This Week" />
+            <SectionHeader icon="⭐" label="Recommended For You" />
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
               {newThisWeek.map(item => (
                 <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
