@@ -88,13 +88,10 @@
 }
 
 html {
-  /* Lock width to prevent any horizontal overflow */
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
-  /* Prevent viewport resize on mobile keyboard open */
+  overflow-x: clip;
   height: -webkit-fill-available;
-  /* Disable pinch-zoom & double-tap zoom */
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
 }
@@ -105,31 +102,25 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   touch-action: pan-y;
-  overscroll-behavior: none;
-  /* Hard-lock horizontal overflow at body level */
-  overflow-x: hidden !important;
-  overflow-y: auto;
+  overscroll-behavior-x: none;
+  overflow-x: clip;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
-  /* Stable viewport on mobile */
   min-height: 100dvh;
   min-height: -webkit-fill-available;
-  /* Prevent text scaling on input focus (iOS zoom fix) */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* Ensure box-sizing is consistent */
   box-sizing: border-box;
   position: relative;
 }
 
 #root {
-  overflow-x: hidden !important;
-  overflow-y: auto;
+  overflow-x: clip;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
   position: relative;
-  /* Prevent layout shift from scrollbars appearing */
-  scrollbar-gutter: stable;
 }
 
 * {
