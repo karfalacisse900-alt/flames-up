@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Shuffle, Sparkles, Star, SlidersHorizontal, X, Flame, TrendingUp } from "lucide-react";
+import { ExternalLink, Shuffle, Sparkles, Star, SlidersHorizontal, X, TrendingUp } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 import BookmarkButton from "./BookmarkButton";
 import AppPreviewDrawer from "./AppPreviewDrawer";
