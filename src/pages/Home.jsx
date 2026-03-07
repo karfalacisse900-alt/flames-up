@@ -16,30 +16,10 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
-      {/* Mobile: fixed height scroll container with smooth scrolling */}
-      <div className="lg:hidden overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)", WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
-        <HomeHeader user={user} />
-        <div style={{ animation: "fadeSlideIn 0.35s ease forwards" }}>
-          <DidYouKnowSection user={user} />
-        </div>
-        {divider}
-        <div style={{ animation: "fadeIn 0.4s ease forwards" }}>
-          <CommunityFeed user={user} />
-        </div>
-      </div>
-
-      {/* Desktop: normal page scroll */}
-      <div className="hidden lg:block">
-        <HomeHeader user={user} />
-        <div style={{ animation: "fadeSlideIn 0.35s ease forwards" }}>
-          <DidYouKnowSection user={user} />
-        </div>
-        {divider}
-        <div style={{ animation: "fadeIn 0.4s ease forwards" }}>
-          <CommunityFeed user={user} />
-        </div>
-      </div>
-
+      <HomeHeader user={user} />
+      <DidYouKnowSection user={user} />
+      {divider}
+      <CommunityFeed user={user} />
       <WelcomePopup />
     </div>
   );
