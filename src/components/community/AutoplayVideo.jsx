@@ -15,6 +15,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   // eslint-disable-next-line no-unused-vars
