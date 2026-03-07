@@ -5,6 +5,7 @@ import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
+import DesktopFeed from "@/components/feed/DesktopFeed";
 
 export default function Home() {
   const [user, setUser] = useState(null);
