@@ -144,8 +144,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "9/16",
-        maxHeight: "70vh",
+        aspectRatio: "4/5",
+        maxHeight: "80vh",
         width: "100%",
         cursor: "pointer",
         userSelect: "none",
