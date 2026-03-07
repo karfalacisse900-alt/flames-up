@@ -205,8 +205,7 @@ export default function DidYouKnowSection({ user }) {
                 )}
               </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
+        </div>
       ) : (
         <Link to={createPageUrl("DidYouKnow")}
           className="flex items-center justify-center p-4 rounded-2xl text-sm"
