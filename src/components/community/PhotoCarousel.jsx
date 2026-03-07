@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function PhotoCarousel({ images, aspectRatio = "4/3" }) {
+export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
