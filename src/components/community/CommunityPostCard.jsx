@@ -145,12 +145,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   // ── Text-Only card layout ──────────────────────────────────────────────────
   if (isTextOnly) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
-        className="relative mx-3 my-2"
-      >
+      <div className="relative mx-3 my-2">
         <div className="rounded-3xl overflow-hidden"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
 
