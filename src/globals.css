@@ -472,7 +472,6 @@ button, a, input, textarea, select, [role="button"] {
 #root > div > div {
   overflow-x: clip;
   max-width: 100%;
-  overflow-y: visible;
 }
 
 /* Ensure all flex children never blow the container */
