@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
+
 import {
   Heart, X, Send, Flame, Clock, Star, Search,
   Sparkles, Upload, Loader2, Camera, Trophy, Grid3X3,
@@ -352,8 +352,8 @@ function ArtCard({ art, user, onSelect, onLike, index }) {
                     <Heart className="w-3.5 h-3.5 text-red-400" /> {isLiked ? "Unlike" : "Like"}
                   </button>
                 </div>
-                </>
-                )}
+              </>
+            )}
         </div>
 
         {/* Bottom info — hover only */}
@@ -430,7 +430,7 @@ function UploadModal({ user, onClose, qc }) {
       <div className="absolute inset-0 bg-black/75" onClick={onClose} />
       <div
         className="relative w-full max-w-lg rounded-t-3xl md:rounded-3xl p-6 space-y-4 overflow-y-auto"
-        style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)", animation: "slideUp 0.2s ease" }}
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)", animation: "slideUp 0.18s ease" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-8 h-1 rounded-full mx-auto md:hidden mb-1" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="flex items-center justify-between">
@@ -494,8 +494,6 @@ function MasonryGrid({ items, user, onSelect, onLike }) {
         @media (min-width: 1024px) { .masonry-responsive { columns: 4; column-gap: 12px; } }
         @media (min-width: 1280px) { .masonry-responsive { columns: 5; column-gap: 14px; } }
         @media (min-width: 1600px) { .masonry-responsive { columns: 6; column-gap: 16px; } }
-        @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
       {items.map((art, i) => (
         <ArtCard key={art.id} art={art} user={user} onSelect={onSelect} onLike={onLike} index={i} />
@@ -614,7 +612,7 @@ export default function Gallery() {
 
           {/* Search input */}
           {showSearch && (
-            <div className="mb-2">
+            <div className="mb-2 overflow-hidden">
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
                 <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search artworks, artists, tags…"
@@ -686,12 +684,8 @@ export default function Gallery() {
       </div>
 
       {/* Modals */}
-      <AnimatePresence>
-        {selected && <ArtworkDetailModal artwork={selected} user={user} onClose={() => setSelected(null)} onLike={handleLike} />}
-      </AnimatePresence>
-      <AnimatePresence>
-        {showUpload && <UploadModal user={user} onClose={() => setShowUpload(false)} qc={qc} />}
-      </AnimatePresence>
+      {selected && <ArtworkDetailModal artwork={selected} user={user} onClose={() => setSelected(null)} onLike={handleLike} />}
+      {showUpload && <UploadModal user={user} onClose={() => setShowUpload(false)} qc={qc} />}
     </div>
   );
 }
