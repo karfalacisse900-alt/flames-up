@@ -1,42 +1,46 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { ThumbsUp, Brain, ThumbsDown, MessageCircle, Share2, ExternalLink, CheckCircle, Users, AlertTriangle } from "lucide-react";
+import { MessageCircle, Share2, ExternalLink, CheckCircle, Users, AlertTriangle, Lightbulb } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import DYKComments from "./DYKComments";
 
 const CATEGORY_META = {
-  save_money:     { emoji: "💰", label: "Save Money",       color: "bg-green-100 text-green-700" },
-  apps_tech:      { emoji: "📱", label: "Apps & Tech",      color: "bg-blue-100 text-blue-700" },
-  travel:         { emoji: "🌎", label: "Travel",           color: "bg-sky-100 text-sky-700" },
-  city_services:  { emoji: "🏙", label: "City Services",    color: "bg-purple-100 text-purple-700" },
-  entertainment:  { emoji: "🎬", label: "Entertainment",    color: "bg-pink-100 text-pink-700" },
-  jobs:           { emoji: "💼", label: "Jobs & Opportunities", color: "bg-orange-100 text-orange-700" },
+  save_money:     { emoji: "💰", label: "Finance",       gradient: ["#10b981", "#059669"] },
+  apps_tech:      { emoji: "📱", label: "Tech",          gradient: ["#6366f1", "#4f46e5"] },
+  travel:         { emoji: "🌎", label: "World",         gradient: ["#0ea5e9", "#0284c7"] },
+  city_services:  { emoji: "🏙", label: "City",          gradient: ["#8b5cf6", "#7c3aed"] },
+  entertainment:  { emoji: "🎬", label: "Entertainment", gradient: ["#f43f5e", "#e11d48"] },
+  jobs:           { emoji: "🔬", label: "Science",       gradient: ["#f97316", "#ea580c"] },
 };
 
-const QUALITY = {
-  verified:      { icon: CheckCircle,    label: "Verified",       color: "text-emerald-600" },
-  community_tip: { icon: Users,          label: "Community Tip",  color: "text-blue-600" },
-  needs_source:  { icon: AlertTriangle,  label: "Needs Source",   color: "text-amber-500" },
+const QUALITY_META = {
+  verified:      { icon: CheckCircle,   label: "Verified",      bg: "bg-emerald-100 text-emerald-700" },
+  community_tip: { icon: Users,         label: "Community Tip", bg: "bg-blue-100 text-blue-700" },
+  needs_source:  { icon: AlertTriangle, label: "Needs Source",  bg: "bg-amber-100 text-amber-600" },
 };
 
 export default function DYKCard({ fact, user, onVoted }) {
   const [showComments, setShowComments] = useState(false);
   const [voting, setVoting] = useState(false);
+  const [localFact, setLocalFact] = useState(fact);
 
-  const myVote = fact.voted_by?.[user?.email];
-  const cat = CATEGORY_META[fact.category] || CATEGORY_META.apps_tech;
-  const quality = fact.quality_label ? QUALITY[fact.quality_label] : null;
+  const myVote = localFact.voted_by?.[user?.email];
+  const cat = CATEGORY_META[localFact.category] || CATEGORY_META.apps_tech;
+  const quality = localFact.quality_label ? QUALITY_META[localFact.quality_label] : null;
+  const gradient = `linear-gradient(135deg, ${cat.gradient[0]}, ${cat.gradient[1]})`;
+
+  const totalEngagement = (localFact.useful_count || 0) + (localFact.didnt_know_count || 0) + (localFact.comment_count || 0);
 
   async function handleVote(voteType) {
     if (!user || voting) return;
     setVoting(true);
-    const voted_by = { ...(fact.voted_by || {}) };
+    const voted_by = { ...(localFact.voted_by || {}) };
     const prev = voted_by[user.email];
 
-    let useful = fact.useful_count || 0;
-    let didnt = fact.didnt_know_count || 0;
-    let knew = fact.knew_count || 0;
+    let useful = localFact.useful_count || 0;
+    let didnt = localFact.didnt_know_count || 0;
+    let knew = localFact.knew_count || 0;
 
-    // Remove previous vote
     if (prev === "useful") useful = Math.max(0, useful - 1);
     if (prev === "didnt_know") didnt = Math.max(0, didnt - 1);
     if (prev === "knew") knew = Math.max(0, knew - 1);
@@ -50,120 +54,142 @@ export default function DYKCard({ fact, user, onVoted }) {
       if (voteType === "knew") knew++;
     }
 
-    await base44.entities.DidYouKnow.update(fact.id, {
-      useful_count: useful,
-      didnt_know_count: didnt,
-      knew_count: knew,
-      voted_by,
+    const updated = { ...localFact, useful_count: useful, didnt_know_count: didnt, knew_count: knew, voted_by };
+    setLocalFact(updated);
+
+    await base44.entities.DidYouKnow.update(localFact.id, {
+      useful_count: useful, didnt_know_count: didnt, knew_count: knew, voted_by,
     });
     setVoting(false);
     onVoted?.();
   }
 
   function handleShare() {
-    const text = fact.content;
-    if (navigator.share) {
-      navigator.share({ text });
-    } else {
-      navigator.clipboard.writeText(text);
-    }
+    const text = localFact.content;
+    if (navigator.share) navigator.share({ text });
+    else navigator.clipboard.writeText(text);
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden shadow-sm border" style={{ backgroundColor: "var(--bg-card, #fff)", borderColor: "var(--border-light, #e5e7eb)" }}>
-      {/* Header bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold tracking-widest" style={{ color: "var(--accent-primary, #6366f1)" }}>💡 DID YOU KNOW</span>
-          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${cat.color}`}>
-            {cat.emoji} {cat.label}
-          </span>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl overflow-hidden"
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+    >
+      {/* Gradient accent bar + category */}
+      <div className="h-2 w-full" style={{ background: gradient }} />
+
+      <div className="px-4 pt-3 pb-3">
+        {/* Top row: category pill + quality badge */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-base" style={{ background: gradient }}>
+              <span>{cat.emoji}</span>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--text-hint)" }}>Did You Know</p>
+              <p className="text-xs font-semibold leading-none" style={{ color: "var(--text-secondary)" }}>{cat.label}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {quality && (
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${quality.bg}`}>
+                <quality.icon className="w-3 h-3" /> {quality.label}
+              </span>
+            )}
+            {totalEngagement > 0 && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+                🔥 {totalEngagement}
+              </span>
+            )}
+          </div>
         </div>
-        {quality && (
-          <div className={`flex items-center gap-1 text-[11px] font-medium ${quality.color}`}>
-            <quality.icon className="w-3 h-3" />
-            {quality.label}
+
+        {/* Fact content */}
+        <p className="text-[15px] leading-relaxed font-semibold mb-3"
+          style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+          {localFact.content?.replace(/^(.+?)\n\1$/, "$1")}
+        </p>
+
+        {/* Image */}
+        {localFact.image_url && (
+          <div className="rounded-xl overflow-hidden mb-3">
+            <img src={localFact.image_url} alt="" className="w-full max-h-48 object-cover" />
+          </div>
+        )}
+
+        {/* Source link */}
+        {localFact.source_link && (
+          <a href={localFact.source_link} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs mb-3 font-medium"
+            style={{ color: cat.gradient[0] }}>
+            <ExternalLink className="w-3 h-3" /> View Source
+          </a>
+        )}
+
+        {/* Vote counts */}
+        {(localFact.useful_count > 0 || localFact.didnt_know_count > 0 || localFact.knew_count > 0) && (
+          <div className="flex gap-3 text-xs mb-2" style={{ color: "var(--text-hint)" }}>
+            {localFact.useful_count > 0 && <span>👍 {localFact.useful_count.toLocaleString()}</span>}
+            {localFact.didnt_know_count > 0 && <span>🤯 {localFact.didnt_know_count.toLocaleString()}</span>}
+            {localFact.knew_count > 0 && <span>✅ {localFact.knew_count.toLocaleString()}</span>}
+            {localFact.comment_count > 0 && <span>· {localFact.comment_count} comments</span>}
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="px-4 pb-3">
-        <p className="text-base leading-relaxed font-medium" style={{ color: "var(--text-primary, #111)" }}>
-          {fact.content && fact.content.replace(/^(.+?)\n\1$/, "$1")}
-        </p>
-        {fact.source_link && (
-          <a href={fact.source_link} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs mt-2 underline"
-            style={{ color: "var(--accent-primary, #6366f1)" }}>
-            <ExternalLink className="w-3 h-3" /> Source
-          </a>
-        )}
-      </div>
-
-      {fact.image_url && (
-        <img src={fact.image_url} alt="" className="w-full max-h-52 object-cover" />
-      )}
-
-      {/* Vote counts bar */}
-      <div className="px-4 py-1 flex gap-3 text-xs" style={{ color: "var(--text-hint, #9ca3af)" }}>
-        {(fact.useful_count > 0) && <span>👍 {fact.useful_count.toLocaleString()} useful</span>}
-        {(fact.didnt_know_count > 0) && <span>🤯 {fact.didnt_know_count.toLocaleString()}</span>}
-        {(fact.knew_count > 0) && <span>👎 {fact.knew_count.toLocaleString()} knew</span>}
-        {(fact.comment_count > 0) && <span>· {fact.comment_count} comments</span>}
-      </div>
-
       {/* Action row */}
-      <div className="flex items-center border-t px-2 py-1" style={{ borderColor: "var(--border-light, #e5e7eb)" }}>
-        <VoteBtn
-          icon="👍" label="Useful"
-          active={myVote === "useful"}
-          onClick={() => handleVote("useful")}
-        />
-        <VoteBtn
-          icon="🤯" label="I didn't know!"
-          active={myVote === "didnt_know"}
-          onClick={() => handleVote("didnt_know")}
-        />
-        <VoteBtn
-          icon="👎" label="Knew this"
-          active={myVote === "knew"}
-          onClick={() => handleVote("knew")}
-        />
+      <div className="flex items-center border-t px-1 py-1" style={{ borderColor: "var(--border-subtle)" }}>
+        <VoteBtn emoji="👍" label="Useful" active={myVote === "useful"} gradient={gradient} onClick={() => handleVote("useful")} />
+        <VoteBtn emoji="🤯" label="Mind blown" active={myVote === "didnt_know"} gradient={gradient} onClick={() => handleVote("didnt_know")} />
+        <VoteBtn emoji="✅" label="Knew it" active={myVote === "knew"} gradient={gradient} onClick={() => handleVote("knew")} />
         <button
           onClick={() => setShowComments(v => !v)}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-colors"
-          style={{ color: showComments ? "var(--accent-primary, #6366f1)" : "var(--text-secondary, #6b7280)" }}>
-          <MessageCircle className="w-4 h-4" />
-          Comment
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium"
+          style={{ color: showComments ? "var(--accent-primary)" : "var(--text-hint)" }}>
+          <MessageCircle className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Comment</span>
         </button>
         <button
           onClick={handleShare}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-colors"
-          style={{ color: "var(--text-secondary, #6b7280)" }}>
-          <Share2 className="w-4 h-4" />
-          Share
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium"
+          style={{ color: "var(--text-hint)" }}>
+          <Share2 className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Share</span>
         </button>
       </div>
 
-      {/* Comments section */}
-      {showComments && (
-        <div className="border-t px-4 py-3" style={{ borderColor: "var(--border-light, #e5e7eb)" }}>
-          <DYKComments factId={fact.id} user={user} onCommented={() => onVoted?.()} />
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-t overflow-hidden"
+            style={{ borderColor: "var(--border-subtle)" }}>
+            <div className="px-4 py-3">
+              <DYKComments factId={localFact.id} user={user} onCommented={() => onVoted?.()} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
-function VoteBtn({ icon, label, active, onClick }) {
+function VoteBtn({ emoji, label, active, gradient, onClick }) {
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.88 }}
       onClick={onClick}
-      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-colors"
-      style={{ color: active ? "var(--accent-primary, #6366f1)" : "var(--text-secondary, #6b7280)", fontWeight: active ? 700 : 500 }}>
-      <span>{icon}</span>
-      <span className="hidden sm:inline">{label}</span>
-    </button>
+      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium transition-all"
+      style={{
+        color: active ? "white" : "var(--text-hint)",
+        background: active ? gradient : "transparent",
+        fontWeight: active ? 700 : 500,
+      }}>
+      <span>{emoji}</span>
+    </motion.button>
   );
 }
