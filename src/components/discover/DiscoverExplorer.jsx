@@ -45,12 +45,9 @@ function PulseDot() {
 }
 
 // ── Large Hero Card ──────────────────────────────────────────────────────────
-function HeroCard({ item, user, onPreview, index }) {
+function HeroCard({ item, user, onPreview }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+    <div
       onClick={() => onPreview(item)}
       className="shrink-0 cursor-pointer"
       style={{ width: 270 }}
