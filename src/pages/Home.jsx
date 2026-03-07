@@ -16,31 +16,23 @@ export default function Home() {
 
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
-      <div className="overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
-        {/* Header */}
+      {/* ── Mobile layout (< lg) ── */}
+      <div className="lg:hidden overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
         <HomeHeader user={user} />
-
-        {/* Did You Know — subtle animated entrance */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-        >
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
           <DidYouKnowSection user={user} />
         </motion.div>
-
-        {/* Divider with gradient */}
         <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />
-
-        {/* Community Feed */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
           <CommunityFeed user={user} />
         </motion.div>
       </div>
+
+      {/* ── Desktop layout (>= lg) ── */}
+      <div className="hidden lg:block px-6 pt-6 max-w-2xl mx-auto">
+        <DesktopFeed user={user} />
+      </div>
+
       <WelcomePopup />
     </div>
   );
