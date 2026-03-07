@@ -290,6 +290,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
                 {post.author_avatar_url ? (
                   <img src={post.author_avatar_url} alt={post.author_name}
+                    loading="lazy" decoding="async"
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent hover:ring-[var(--accent-primary)] transition-all" />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
