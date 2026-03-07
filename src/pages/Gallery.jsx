@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
+
 import {
   Heart, X, Send, Flame, Clock, Star, Search,
   Sparkles, Upload, Loader2, Camera, Trophy, Grid3X3,
