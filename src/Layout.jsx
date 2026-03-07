@@ -185,7 +185,7 @@ export default function Layout({ children, currentPageName }) {
         </nav>
       }
 
-      {!hideNav && <AppAIAssistant />}
+      {!hideNav && <div className="lg:hidden"><AppAIAssistant /></div>}
       <MiniPlayerWrapper />
     </div>);
 
