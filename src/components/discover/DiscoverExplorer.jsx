@@ -179,24 +179,41 @@ function MediumCard({ item, onPreview }) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-// ── Seamless Category Row ──────────────────────────────────────────────────
+// ── Lazy Category Row — only renders cards when scrolled into view ──────────
 function SeamlessRow({ label, emoji, items, onPreview }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { rootMargin: "120px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   if (!items.length) return null;
   return (
-    <div className="mb-2">
+    <div ref={ref} className="mb-2">
       <div className="flex items-center gap-2 px-4 mb-3 mt-6">
         <span className="text-base">{emoji}</span>
         <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
         <span className="text-[10px] ml-auto" style={{ color: "var(--text-hint)" }}>{items.length} apps</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2" style={{ WebkitOverflowScrolling: "touch" }}>
-        {items.slice(0, 12).map(item => (
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2" style={{ minHeight: 160 }}>
+        {visible ? items.slice(0, 12).map(item => (
           <MediumCard key={item.id} item={item} onPreview={onPreview} />
-        ))}
+        )) : (
+          [1,2,3].map(i => (
+            <div key={i} className="shrink-0 rounded-2xl animate-pulse" style={{ width: 148, height: 160, backgroundColor: "var(--bg-card)" }} />
+          ))
+        )}
       </div>
     </div>
   );
@@ -371,14 +388,11 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
       {/* ── If category filter active: show flat list ── */}
       {activeCategory ? (
         <div className="px-4 space-y-2.5">
-          {filteredItems.map((item, i) => (
-            <motion.div
+          {filteredItems.map((item) => (
+            <div
               key={item.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
               onClick={() => setPreviewItem(item)}
-              className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer"
+              className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150 fade-slide-in"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
             >
               <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: getGradient(item.category) }}>
