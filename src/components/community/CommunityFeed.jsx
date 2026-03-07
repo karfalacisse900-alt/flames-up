@@ -209,13 +209,12 @@ export default function CommunityFeed({ user }) {
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
             <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community</p>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
             style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
             <Plus className="w-3 h-3" /> Post
-          </motion.button>
+          </button>
         </div>
         {/* Feed tabs */}
         <div className="flex gap-0 px-4 pt-2 pb-0">
