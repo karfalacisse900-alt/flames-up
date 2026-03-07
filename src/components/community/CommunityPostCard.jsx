@@ -1,14 +1,13 @@
-import React, { useState, useRef } from "react";
-import ReactMarkdown from "react-markdown";
+import React, { useState, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-
-import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Eye, Link as LinkIcon, EyeOff, MapPin } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Eye, Link as LinkIcon, EyeOff, MapPin, Heart } from "lucide-react";
 import AutoplayVideo from "./AutoplayVideo";
 import PhotoCarousel from "./PhotoCarousel";
 import SavePostModal from "./SavePostModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 const REACTIONS = ["❤️", "🔥", "😂", "😮", "👏", "💯"];
 
 function timeAgo(dateStr) {
@@ -25,26 +24,79 @@ function timeAgo(dateStr) {
 const avatarColors = ["#7C69C4", "#D98B62", "#3C6E5A", "#E05C7A", "#4A7FC1", "#B07843"];
 const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColors.length];
 
-// Detect if body is rich text (HTML/markdown)
 function isRichText(text) {
   return text && (/<[a-z][\s\S]*>/i.test(text) || /^#{1,6}\s|^\*\*|^\*[^*]|^- |^\d+\. /m.test(text));
 }
 
-// Strip HTML tags and return clean plain text
 function stripHtml(html) {
   if (!html) return "";
-  // First unescape any HTML entities that might be double-encoded
   const unescaped = html
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
   const div = document.createElement("div");
   div.innerHTML = unescaped;
-  const text = (div.textContent || div.innerText || "").trim();
-  // Replace multiple blank lines with a single one
-  return text.replace(/\n{3,}/g, "\n\n");
+  return (div.textContent || div.innerText || "").trim().replace(/\n{3,}/g, "\n\n");
+}
+
+// Dropdown menu — pure CSS animation
+function PostMenu({ isOwnPost, onCopyLink, onNotInterested, onDelete, onReport, onClose }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-30" onClick={onClose} />
+      <div
+        className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[152px]"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.14)",
+          border: "1px solid var(--border-light)",
+          animation: "fadeIn 0.12s ease",
+        }}
+      >
+        <button onClick={onCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-subtle)]" style={{ color: "var(--text-primary)" }}>
+          <LinkIcon className="w-3.5 h-3.5 shrink-0" /> Copy link
+        </button>
+        <button onClick={onNotInterested} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-subtle)]" style={{ color: "var(--text-primary)" }}>
+          <EyeOff className="w-3.5 h-3.5 shrink-0" /> Not interested
+        </button>
+        {isOwnPost && (
+          <button onClick={onDelete} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-subtle)]" style={{ color: "#E05C7A" }}>
+            <Trash2 className="w-3.5 h-3.5 shrink-0" /> Delete
+          </button>
+        )}
+        {!isOwnPost && (
+          <button onClick={onReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-[var(--bg-subtle)]" style={{ color: "#E05C7A" }}>
+            <Flag className="w-3.5 h-3.5 shrink-0" /> Report
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
+// Reactions picker — pure CSS animation
+function ReactionPicker({ onPick, onClose }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-30" onClick={onClose} />
+      <div
+        className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-40"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          border: "1px solid var(--border-light)",
+          animation: "fadeIn 0.1s ease",
+        }}
+      >
+        {REACTIONS.map(r => (
+          <button key={r} onClick={() => onPick(r)}
+            className="text-xl w-9 h-9 flex items-center justify-center rounded-full transition-transform active:scale-90"
+            style={{ backgroundColor: "var(--bg-subtle)" }}>
+            {r}
+          </button>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default function CommunityPostCard({ post, user, onUpvote }) {
@@ -54,6 +106,8 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const [reported, setReported] = useState(false);
   const [likeBounce, setLikeBounce] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [notInterested, setNotInterested] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const longPressTimer = useRef(null);
   const qc = useQueryClient();
 
@@ -62,20 +116,21 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const showAuthor = !post.is_anonymous && !!post.author_email;
   const isOwnPost = user?.email && post.author_email === user.email;
 
-  const handleDelete = async () => {
-    if (!window.confirm("Delete this post?")) return;
-    await base44.entities.CommunityPost.delete(post.id);
-    qc.invalidateQueries({ queryKey: ["communityPosts"] });
-  };
-
   const { data: followRecord } = useQuery({
     queryKey: ["followStatus", user?.email, post.author_email],
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email }),
     enabled: !!user?.email && !isOwnPost && !post.is_anonymous,
     select: (data) => data[0] || null,
   });
-
   const isFollowing = !!followRecord;
+
+  if (notInterested) return null;
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this post?")) return;
+    await base44.entities.CommunityPost.delete(post.id);
+    qc.invalidateQueries({ queryKey: ["communityPosts"] });
+  };
 
   const handleFollow = async () => {
     if (!user || isOwnPost) return;
@@ -104,24 +159,17 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const handleShare = () => {
     const url = `${window.location.origin}?post=${post.id}`;
     if (navigator.share) navigator.share({ title: "Post", url });
-    else { navigator.clipboard.writeText(url); }
-    setShowMenu(false);
+    else navigator.clipboard.writeText(url);
   };
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}?post=${post.id}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(`${window.location.origin}?post=${post.id}`);
     setShowMenu(false);
   };
-
-  const [notInterested, setNotInterested] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  if (notInterested) return null;
 
   const handleLike = () => {
     setLikeBounce(true);
     setTimeout(() => setLikeBounce(false), 500);
-    // Fire like notification (only when liking, not unliking, and not own post)
     if (!hasLiked && user?.email && post.author_email && post.author_email !== user.email) {
       base44.entities.Notification.create({
         recipient_email: post.author_email,
@@ -142,7 +190,58 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const bodyIsRich = isRichText(post.body);
   const isTextOnly = post.type === "text_only";
 
-  // ── Text-Only card layout ──────────────────────────────────────────────────
+  // ── Action row (shared between both card types) ────────────────────────────
+  const actionRow = (
+    <div className="flex items-center gap-0.5">
+      {/* Like */}
+      <div className="relative">
+        <button
+          onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
+          onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
+          onClick={handleLike}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${likeBounce ? "heart-bounce" : ""}`}
+          style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)" }}>
+          <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
+          {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
+        </button>
+        {showReactions && (
+          <ReactionPicker onPick={() => { handleLike(); setShowReactions(false); }} onClose={() => setShowReactions(false)} />
+        )}
+      </div>
+
+      {/* Comment */}
+      <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold"
+        style={{ color: "var(--text-secondary)" }}>
+        <MessageCircle className="w-4 h-4" />
+        {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
+      </Link>
+
+      {/* Share */}
+      <button onClick={handleShare}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold"
+        style={{ color: "var(--text-secondary)" }}>
+        <Share2 className="w-4 h-4" />
+      </button>
+
+      {/* Engagement score */}
+      {(post.engagement_score || 0) > 0 && (
+        <span className="flex items-center gap-1 px-2 py-1.5 text-xs" style={{ color: "var(--text-hint)" }}>
+          <Eye className="w-3.5 h-3.5" />
+          {post.engagement_score}
+        </span>
+      )}
+
+      {/* Save */}
+      <button onClick={() => user ? setShowSaveModal(true) : null}
+        className="ml-auto p-1.5 rounded-full transition-colors"
+        style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)" }}>
+        <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+      </button>
+    </div>
+  );
+
+  // ── Text-Only card ─────────────────────────────────────────────────────────
   if (isTextOnly) {
     return (
       <div className="relative mx-3 my-2">
@@ -155,7 +254,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               {showAuthor ? (
                 <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
                   {post.author_avatar_url ? (
-                    <img src={post.author_avatar_url} alt={post.author_name}
+                    <img src={post.author_avatar_url} alt={post.author_name} loading="lazy"
                       className="w-8 h-8 rounded-full object-cover" />
                   ) : (
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
@@ -186,44 +285,26 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                 <MoreHorizontal className="w-4 h-4" />
               </button>
               {showMenu && (
-                <div
-                  className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}>
-                  <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                    <LinkIcon className="w-3.5 h-3.5" /> Copy link
-                  </button>
-                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                    <EyeOff className="w-3.5 h-3.5" /> Not interested
-                  </button>
-                  {isOwnPost && (
-                    <button onClick={handleDelete} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                      <Trash2 className="w-3.5 h-3.5" /> Delete
-                    </button>
-                  )}
-                  {!isOwnPost && (
-                    <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                      <Flag className="w-3.5 h-3.5" /> Report post
-                    </button>
-                  )}
-                </div>
+                <PostMenu
+                  isOwnPost={isOwnPost}
+                  onCopyLink={handleCopyLink}
+                  onNotInterested={() => { setNotInterested(true); setShowMenu(false); }}
+                  onDelete={handleDelete}
+                  onReport={handleReport}
+                  onClose={() => setShowMenu(false)}
+                />
               )}
             </div>
           </div>
 
           {/* Big centered text */}
-          <div className="px-5 pb-5 text-center">
+          <div className="px-5 pb-4 text-center">
             {(() => {
               const cleanText = stripHtml(post.body);
               const fontSize = cleanText.length > 120 ? 16 : cleanText.length > 60 ? 19 : 22;
               return (
                 <p className="leading-relaxed whitespace-pre-line"
-                  style={{
-                    color: "var(--text-primary)",
-                    fontSize,
-                    fontWeight: 600,
-                    fontFamily: "var(--font-serif)",
-                    lineHeight: 1.45,
-                  }}>
+                  style={{ color: "var(--text-primary)", fontSize, fontWeight: 600, fontFamily: "var(--font-serif)", lineHeight: 1.45 }}>
                   {cleanText}
                 </p>
               );
@@ -231,76 +312,31 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-0.5 px-2 pb-3 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-            <div className="relative">
-              <button
-                onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
-                onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
-                onClick={handleLike}
-                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
-                style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
-                <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
-                {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
-              </button>
-              <AnimatePresence>
-                {showReactions && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.7, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.7 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                    className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}
-                    onMouseLeave={() => setShowReactions(false)}>
-                    {REACTIONS.map(r => (
-                      <motion.button key={r} whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
-                        onClick={() => { handleLike(); setShowReactions(false); }}
-                        className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
-                        style={{ backgroundColor: "var(--bg-subtle)" }}>{r}</motion.button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip" style={{ color: "var(--text-hint)" }}>
-              <MessageCircle className="w-4 h-4" />
-              {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
-            </Link>
-            <button onClick={handleShare} className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium chip" style={{ color: "var(--text-hint)" }}>
-              <Share2 className="w-4 h-4" />
-            </button>
-            <button onClick={() => user ? setShowSaveModal(true) : null}
-              className="ml-auto p-1.5 rounded-full transition-all chip"
-              style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
-              <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
-            </button>
+          <div className="px-2 pb-2 border-t" style={{ borderColor: "var(--border-subtle)", paddingTop: 4 }}>
+            {actionRow}
           </div>
         </div>
 
-        {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
-        <AnimatePresence>
-          {showSaveModal && <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />}
-        </AnimatePresence>
-      </motion.div>
+        {showSaveModal && <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />}
+      </div>
     );
   }
 
+  // ── Standard card ──────────────────────────────────────────────────────────
+  const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, ease: "easeOut" }}
-      className="relative"
-    >
+    <div className="relative">
       <div className="px-3 pt-3 pb-1">
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-center gap-2.5 mb-2.5">
           {/* Avatar */}
           <div className="shrink-0">
             {showAuthor ? (
               <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
                 {post.author_avatar_url ? (
-                  <img src={post.author_avatar_url} alt={post.author_name}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent hover:ring-[var(--accent-primary)] transition-all" />
+                  <img src={post.author_avatar_url} alt={post.author_name} loading="lazy"
+                    className="w-10 h-10 rounded-full object-cover" />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
                     style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}66)`, color: avatarColor }}>
@@ -310,13 +346,11 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               </Link>
             ) : (
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{ background: "linear-gradient(135deg, #ccc3, #ccc5)", color: "#999" }}>
-                ?
-              </div>
+                style={{ background: "linear-gradient(135deg, #ccc3, #ccc5)", color: "#999" }}>?</div>
             )}
           </div>
 
-          {/* Name + time */}
+          {/* Name + meta */}
           <div className="flex-1 min-w-0">
             {showAuthor ? (
               <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
@@ -347,11 +381,11 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
             </div>
           </div>
 
-          {/* Right actions */}
+          {/* Follow + three-dot */}
           <div className="flex items-center gap-1 shrink-0">
             {!isOwnPost && showAuthor && !!user && (
               <button onClick={handleFollow}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors"
                 style={{
                   borderColor: isFollowing ? "var(--accent-primary)" : "var(--border-light)",
                   color: isFollowing ? "var(--accent-primary)" : "var(--text-secondary)",
@@ -361,50 +395,32 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
                 {isFollowing ? "Following" : "Follow"}
               </button>
             )}
-            {isOwnPost && (
-              <button onClick={handleDelete} className="p-1.5 rounded-full" style={{ color: "#E05C7A" }}>
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-            {/* Three-dot menu */}
             <div className="relative">
               <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
                 <MoreHorizontal className="w-4 h-4" />
               </button>
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: -4 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)" }}>
-                    <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                      <LinkIcon className="w-3.5 h-3.5" /> Copy link
-                    </button>
-                    <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                      <EyeOff className="w-3.5 h-3.5" /> Not interested
-                    </button>
-                    {!isOwnPost && (
-                      <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                        <Flag className="w-3.5 h-3.5" /> Report post
-                      </button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {showMenu && (
+                <PostMenu
+                  isOwnPost={isOwnPost}
+                  onCopyLink={handleCopyLink}
+                  onNotInterested={() => { setNotInterested(true); setShowMenu(false); }}
+                  onDelete={handleDelete}
+                  onReport={handleReport}
+                  onClose={() => setShowMenu(false)}
+                />
+              )}
             </div>
           </div>
         </div>
 
-        {/* ── Title ── */}
+        {/* Title */}
         {post.title && (
           <p className="font-bold text-[15px] mb-1.5 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
             {post.title}
           </p>
         )}
 
-        {/* ── Body ── */}
+        {/* Body */}
         {post.body && (
           <div className="mb-2.5 text-sm leading-relaxed"
             style={{
@@ -422,29 +438,21 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           </div>
         )}
 
-        {/* ── Images (carousel if multiple, single if one) ── */}
-        {(() => {
-          const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
-          if (imgs.length === 0) return null;
-          return (
-            <div className="mb-2.5">
-              <PhotoCarousel images={imgs} aspectRatio="1/1" />
-            </div>
-          );
-        })()}
-
-        {/* ── Video ── */}
-        {post.video_url && (
-          <div className="mb-2.5 w-full">
-            <AutoplayVideo
-              src={post.video_url}
-              postId={post.id}
-              onDoubleTap={() => handleLike()}
-            />
+        {/* Images — lazy loaded */}
+        {imgs.length > 0 && (
+          <div className="mb-2.5">
+            <PhotoCarousel images={imgs} aspectRatio="1/1" />
           </div>
         )}
 
-        {/* ── List items ── */}
+        {/* Video */}
+        {post.video_url && (
+          <div className="mb-2.5 w-full">
+            <AutoplayVideo src={post.video_url} postId={post.id} onDoubleTap={handleLike} />
+          </div>
+        )}
+
+        {/* List items */}
         {post.type === "list" && post.list_items?.length > 0 && (
           <ol className="mb-2.5 space-y-1.5 pl-1">
             {post.list_items.map((item, i) => (
@@ -457,86 +465,18 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           </ol>
         )}
 
-        {/* ── Action row ── */}
-        <div className="flex items-center gap-0.5 -mx-1.5 mt-1">
-          {/* Like */}
-          <div className="relative">
-            <button
-              onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
-              onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
-              onClick={handleLike}
-              className={`flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
-              style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
-              <span className="text-[15px] leading-none" style={{ transition: "transform 0.2s" }}>{hasLiked ? "❤️" : "🤍"}</span>
-              {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
-            </button>
-            <AnimatePresence>
-              {showReactions && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7, y: 8 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                  className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}
-                  onMouseLeave={() => setShowReactions(false)}>
-                  {REACTIONS.map(r => (
-                    <motion.button key={r}
-                      whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
-                      onClick={() => { handleLike(); setShowReactions(false); }}
-                      className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
-                      style={{ backgroundColor: "var(--bg-subtle)" }}>
-                      {r}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Comment */}
-          <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip"
-            style={{ color: "var(--text-hint)" }}>
-            <MessageCircle className="w-4 h-4" />
-            {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
-          </Link>
-
-          {/* Share */}
-          <button onClick={handleShare}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium chip"
-            style={{ color: "var(--text-hint)" }}>
-            <Share2 className="w-4 h-4" />
-          </button>
-
-          {/* View count (if available) */}
-          {(post.engagement_score || 0) > 0 && (
-            <span className="flex items-center gap-1 px-2 py-1.5 text-xs" style={{ color: "var(--text-hint)" }}>
-              <Eye className="w-3.5 h-3.5" />
-              {post.engagement_score}
-            </span>
-          )}
-
-          {/* Save — pushed right */}
-          <button onClick={() => user ? setShowSaveModal(true) : null}
-            className="ml-auto p-1.5 rounded-full transition-all chip"
-            style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
-            <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
-          </button>
+        {/* Action row */}
+        <div className="-mx-1.5 mt-1">
+          {actionRow}
         </div>
       </div>
 
       {/* Divider */}
       <div style={{ height: 1, background: "linear-gradient(to right, transparent 16px, var(--border-subtle) 16px, var(--border-subtle) 90%, transparent)", margin: "4px 0 0 0" }} />
 
-      {/* Backdrop to close menu */}
-      {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
-
-      <AnimatePresence>
-        {showSaveModal && (
-          <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {showSaveModal && (
+        <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />
+      )}
+    </div>
   );
 }
