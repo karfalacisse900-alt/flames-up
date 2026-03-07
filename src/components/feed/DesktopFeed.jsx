@@ -8,9 +8,18 @@ export default function DesktopFeed({ user }) {
   const [visibleCount, setVisibleCount] = useState(10);
 
   useEffect(() => {
-    base44.entities.CommunityPost.list("-created_date", 40)
-      .then(all => setPosts(all.filter(p => p.moderation_status !== "rejected")))
-      .catch(() => {})
+    base44.entities.CommunityPost.filter(
+      { moderation_status: "approved" },
+      "-created_date",
+      40
+    )
+      .then(all => setPosts(all))
+      .catch(() => {
+        // fallback: try without filter
+        base44.entities.CommunityPost.list("-created_date", 40)
+          .then(all => setPosts(all.filter(p => p.moderation_status !== "rejected")))
+          .catch(() => {});
+      })
       .finally(() => setLoading(false));
   }, []);
 
