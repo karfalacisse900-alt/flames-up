@@ -179,24 +179,41 @@ function MediumCard({ item, onPreview }) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-// ── Seamless Category Row ──────────────────────────────────────────────────
+// ── Lazy Category Row — only renders cards when scrolled into view ──────────
 function SeamlessRow({ label, emoji, items, onPreview }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { rootMargin: "120px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   if (!items.length) return null;
   return (
-    <div className="mb-2">
+    <div ref={ref} className="mb-2">
       <div className="flex items-center gap-2 px-4 mb-3 mt-6">
         <span className="text-base">{emoji}</span>
         <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
         <span className="text-[10px] ml-auto" style={{ color: "var(--text-hint)" }}>{items.length} apps</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2" style={{ WebkitOverflowScrolling: "touch" }}>
-        {items.slice(0, 12).map(item => (
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2" style={{ minHeight: 160 }}>
+        {visible ? items.slice(0, 12).map(item => (
           <MediumCard key={item.id} item={item} onPreview={onPreview} />
-        ))}
+        )) : (
+          [1,2,3].map(i => (
+            <div key={i} className="shrink-0 rounded-2xl animate-pulse" style={{ width: 148, height: 160, backgroundColor: "var(--bg-card)" }} />
+          ))
+        )}
       </div>
     </div>
   );
@@ -206,18 +223,25 @@ function SeamlessRow({ label, emoji, items, onPreview }) {
 function SurpriseBtn({ onClick }) {
   return (
     <div className="px-4 mt-6 mb-2">
-      <button
+      <motion.button
+        whileTap={{ scale: 0.97 }}
         onClick={onClick}
-        className="w-full py-4 rounded-3xl flex items-center justify-center gap-3 font-bold text-sm active:scale-95 transition-transform duration-150"
+        className="w-full py-4 rounded-3xl flex items-center justify-center gap-3 font-bold text-sm relative overflow-hidden"
         style={{
           background: "linear-gradient(135deg, #2E6B4F, #4ade80 80%)",
           color: "#fff",
           boxShadow: "0 4px 24px rgba(46,107,79,0.35)",
         }}
       >
+        {/* Shimmer overlay */}
+        <motion.div
+          animate={{ x: ["−100%", "200%"] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)", transform: "skewX(-20deg)" }}
+        />
         <Shuffle className="w-5 h-5" />
         Surprise Me — Random Tool
-      </button>
+      </motion.button>
     </div>
   );
 }
@@ -233,7 +257,7 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
           exit={{ opacity: 0 }}
           onClick={onClose}
           className="absolute inset-0"
-          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+          style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
         />
         <motion.div
           initial={{ y: "100%" }}
@@ -256,10 +280,11 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
             {CATEGORY_FILTERS.map(cat => {
               const isActive = activeCategory === cat.id;
               return (
-                <button
+                <motion.button
                   key={String(cat.id)}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => { onChange(cat.id); onClose(); }}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl font-semibold text-xs active:scale-95 transition-transform duration-150"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl font-semibold text-xs transition-all"
                   style={{
                     backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-subtle)",
                     color: isActive ? "#fff" : "var(--text-secondary)",
@@ -269,7 +294,7 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
                 >
                   <span className="text-xl">{cat.emoji}</span>
                   <span className="text-[11px] font-semibold leading-tight text-center">{cat.label}</span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -334,9 +359,10 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
     <div className="pb-28">
       {/* ── Filter toggle bar ── */}
       <div className="flex items-center justify-between px-4 mb-4">
-        <button
+        <motion.button
+          whileTap={{ scale: 0.94 }}
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold active:scale-95 transition-transform duration-150"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold"
           style={{
             backgroundColor: activeCategory ? "var(--accent-primary)" : "var(--bg-card)",
             color: activeCategory ? "#fff" : "var(--text-secondary)",
@@ -351,7 +377,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               <X className="w-3 h-3" />
             </span>
           )}
-        </button>
+        </motion.button>
 
         <div className="flex items-center gap-1.5">
           <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} />
@@ -366,7 +392,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             <div
               key={item.id}
               onClick={() => setPreviewItem(item)}
-              className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150 fade-slide-in"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
             >
               <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ background: getGradient(item.category) }}>
@@ -414,7 +440,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               </div>
               <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-3">
                 {featured.map((item, i) => (
-                  <HeroCard key={item.id} item={item} user={user} onPreview={setPreviewItem} index={i} />
+                  <HeroCard key={item.id} item={item} user={user} onPreview={setPreviewItem} />
                 ))}
               </div>
             </div>
