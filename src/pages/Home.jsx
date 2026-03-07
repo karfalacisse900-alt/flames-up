@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { motion } from "framer-motion";
 import WelcomePopup from "../components/home/WelcomePopup";
 import CommunityFeed from "../components/community/CommunityFeed";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
+
 export default function Home() {
   const [user, setUser] = useState(null);
 
@@ -12,30 +12,32 @@ export default function Home() {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  const divider = <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />;
+
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
-      {/* Mobile: fixed height scroll container */}
-      <div className="lg:hidden overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)" }}>
+      {/* Mobile: fixed height scroll container with smooth scrolling */}
+      <div className="lg:hidden overflow-y-auto scrollbar-hide" style={{ height: "calc(100dvh - 64px)", WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}>
         <HomeHeader user={user} />
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
+        <div style={{ animation: "fadeSlideIn 0.35s ease forwards" }}>
           <DidYouKnowSection user={user} />
-        </motion.div>
-        <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
+        </div>
+        {divider}
+        <div style={{ animation: "fadeIn 0.4s ease forwards" }}>
           <CommunityFeed user={user} />
-        </motion.div>
+        </div>
       </div>
 
-      {/* Desktop: normal page scroll, no height constraint */}
+      {/* Desktop: normal page scroll */}
       <div className="hidden lg:block">
         <HomeHeader user={user} />
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
+        <div style={{ animation: "fadeSlideIn 0.35s ease forwards" }}>
           <DidYouKnowSection user={user} />
-        </motion.div>
-        <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)", margin: "0 0 4px" }} />
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
+        </div>
+        {divider}
+        <div style={{ animation: "fadeIn 0.4s ease forwards" }}>
           <CommunityFeed user={user} />
-        </motion.div>
+        </div>
       </div>
 
       <WelcomePopup />
