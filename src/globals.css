@@ -480,8 +480,9 @@ button, a, input, textarea, select, [role="button"] {
 
 /* Page-level wrapper overflow lock */
 #root > div > div {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
+  overflow-y: visible;
 }
 
 /* Ensure all flex children never blow the container */
