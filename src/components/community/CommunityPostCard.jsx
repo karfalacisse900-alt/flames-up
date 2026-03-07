@@ -473,7 +473,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
           {/* Comment */}
           <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium chip"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold chip"
             style={{ color: "var(--text-hint)" }}>
             <MessageCircle className="w-4 h-4" />
             {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
@@ -481,18 +481,10 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
 
           {/* Share */}
           <button onClick={handleShare}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium chip"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold chip"
             style={{ color: "var(--text-hint)" }}>
             <Share2 className="w-4 h-4" />
           </button>
-
-          {/* View count (if available) */}
-          {(post.engagement_score || 0) > 0 && (
-            <span className="flex items-center gap-1 px-2 py-1.5 text-xs" style={{ color: "var(--text-hint)" }}>
-              <Eye className="w-3.5 h-3.5" />
-              {post.engagement_score}
-            </span>
-          )}
 
           {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
@@ -509,11 +501,9 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
       {/* Backdrop to close menu */}
       {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
 
-      <AnimatePresence>
-        {showSaveModal && (
-          <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {showSaveModal && (
+        <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />
+      )}
+    </div>
   );
 }
