@@ -285,11 +285,7 @@ export default function CommunityFeed({ user }) {
             </button>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="py-16 text-center px-8"
-          >
+          <div className="py-16 text-center px-8" style={{ animation: "fadeIn 0.3s ease" }}>
             <div className="text-5xl mb-4">{activeTab === "nearby" ? "📍" : "💬"}</div>
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
               {activeTab === "nearby" ? `No posts from ${userCity} yet` : "Start the conversation"}
@@ -297,14 +293,13 @@ export default function CommunityFeed({ user }) {
             <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
               {activeTab === "nearby" ? "Be the first to post with your location tagged!" : "Be the first to share a thought with the community"}
             </p>
-            <motion.button
-              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            <button
               onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
               className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
               ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         ) : (
           filteredPosts.map((post, index) => renderPostCard(post, index))
         )}
