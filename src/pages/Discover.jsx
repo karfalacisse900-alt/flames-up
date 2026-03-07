@@ -7,16 +7,6 @@ import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
 import DYKTab from "@/components/discover/DYKTab";
 import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
 
-const QUICK_CHIPS = [
-  { label: "🤖 AI Tools",       search: "ai" },
-  { label: "📚 Study Tools",    search: "study" },
-  { label: "✈️ Travel Apps",    search: "travel" },
-  { label: "⚡ Productivity",   search: "productivity" },
-  { label: "🎬 Free Movies",    search: "movie" },
-  { label: "🛠️ Dev Tools",      search: "developer" },
-  { label: "💰 Finance",        search: "finance" },
-  { label: "💪 Health",         search: "health" },
-];
 
 function getGreeting() {
   const h = new Date().getHours();
