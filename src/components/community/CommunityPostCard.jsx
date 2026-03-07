@@ -121,6 +121,18 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
   const handleLike = () => {
     setLikeBounce(true);
     setTimeout(() => setLikeBounce(false), 500);
+    // Fire like notification (only when liking, not unliking, and not own post)
+    if (!hasLiked && user?.email && post.author_email && post.author_email !== user.email) {
+      base44.entities.Notification.create({
+        recipient_email: post.author_email,
+        actor_name: user.full_name || user.email,
+        actor_email: user.email,
+        type: "post_liked",
+        post_text: (post.title || post.body || "").slice(0, 100),
+        ref_id: post.id,
+        is_read: false,
+      }).catch(() => {});
+    }
     onUpvote();
   };
 
