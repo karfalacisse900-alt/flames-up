@@ -400,7 +400,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
                   Try
                 </a>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : (
