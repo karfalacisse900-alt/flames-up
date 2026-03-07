@@ -215,25 +215,16 @@ export default function DidYouKnowSection({ user }) {
       )}
 
       {/* Submit form modal */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 9999 }}
-            onClick={() => setShowForm(false)}>
-            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="w-full max-w-lg mx-auto rounded-t-3xl flex flex-col"
-              style={{ backgroundColor: "#FAFAF8", maxHeight: "90vh" }}
-              onClick={e => e.stopPropagation()}>
-              <div className="h-1.5 w-12 rounded-full mx-auto mt-3 mb-1" style={{ backgroundColor: "#CEC8BC" }} />
-              <div className="overflow-y-auto flex-1 pb-8">
-                <SubmitForm user={user} onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ["didYouKnow"] })} />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-lg mx-auto rounded-t-3xl flex flex-col" style={{ backgroundColor: "#FAFAF8", maxHeight: "90vh", animation: "slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1)" }} onClick={e => e.stopPropagation()}>
+            <div className="h-1.5 w-12 rounded-full mx-auto mt-3 mb-1" style={{ backgroundColor: "#CEC8BC" }} />
+            <div className="overflow-y-auto flex-1 pb-8">
+              <SubmitForm user={user} onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ["didYouKnow"] })} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
