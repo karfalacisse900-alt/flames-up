@@ -231,13 +231,14 @@ export default function Groups() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-light)", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
             {filteredGroups.map(group => (
               <GroupCard
                 key={group.id}
                 group={group}
                 membership={membershipMap[group.id]}
                 onOpen={handleOpenGroup}
+                onJoinDirect={handleJoin}
               />
             ))}
           </div>
