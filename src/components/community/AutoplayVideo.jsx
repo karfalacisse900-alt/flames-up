@@ -145,12 +145,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
-        maxHeight: "80vh",
+        aspectRatio: loaded ? "4/5" : undefined,
+        maxHeight: loaded ? "80vh" : undefined,
         width: "100%",
         cursor: "pointer",
         userSelect: "none",
-        background: "#000",
+        background: loaded ? "#000" : "transparent",
       }}
     >
       <video
@@ -159,7 +159,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         playsInline
         loop
         preload="metadata"
+        onLoadedMetadata={() => setLoaded(true)}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ display: loaded ? "block" : "none" }}
       />
 
       {/* Tap icon feedback */}
