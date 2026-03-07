@@ -199,22 +199,24 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       )}
 
       {/* Bottom controls */}
-      {loaded && <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
-        <button
-          onClick={toggleMute}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
-        >
-          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={openFullscreen}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
-      </div>}
+      {loaded && (
+        <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
+          <button
+            onClick={toggleMute}
+            className="p-2 rounded-full"
+            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
+          >
+            {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={openFullscreen}
+            className="p-2 rounded-full"
+            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <style>{`
         @keyframes tapFade {
