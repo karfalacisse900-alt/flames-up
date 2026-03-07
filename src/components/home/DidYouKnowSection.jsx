@@ -160,11 +160,9 @@ export default function DidYouKnowSection({ user }) {
 
       {/* Card */}
       {post ? (
-        <AnimatePresence mode="wait">
-          <motion.div key={post.id}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            className="p-4 rounded-2xl"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
+        <div key={post.id}
+          className="p-4 rounded-2xl fade-slide-in"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
             {post.title && (
               <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>
                 <KeywordHighlight text={post.title} />
