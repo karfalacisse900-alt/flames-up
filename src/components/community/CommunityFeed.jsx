@@ -160,12 +160,7 @@ export default function CommunityFeed({ user }) {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     return (
-      <motion.div
-        key={post.id}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4), ease: "easeOut" }}
-      >
+      <div key={post.id} className="fade-slide-in" style={{ animationDelay: `${Math.min(index * 0.03, 0.3)}s`, animationFillMode: "both" }}>
         {post.type === "debate" || post.type === "question" ? (
           <DebateCard post={post} debate={debate} user={user}
             onUpvote={() => user && upvoteMut.mutate({ post })}
@@ -179,7 +174,7 @@ export default function CommunityFeed({ user }) {
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
         )}
-      </motion.div>
+      </div>
     );
   };
 
