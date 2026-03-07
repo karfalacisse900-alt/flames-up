@@ -61,7 +61,7 @@ export default function Discover() {
         style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)", backdropFilter: "blur(12px)" }}
       >
         {/* Greeting row */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div>
             {view === "browse" && activeTab === "apps" ? (
               <button
