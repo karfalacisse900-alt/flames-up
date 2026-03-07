@@ -239,27 +239,20 @@ export default function CommunityFeed({ user }) {
       </div>
 
       {/* New posts floating pill */}
-      <AnimatePresence>
-        {newPostsAvailable > 0 && (
-          <motion.button
-            initial={{ opacity: 0, y: -20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            onClick={loadNewPosts}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-xl"
-            style={{
-              background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
-              color: "#fff",
-              boxShadow: "0 6px 24px rgba(46,107,79,0.45)",
-            }}>
-            <motion.span animate={{ y: [-2, 2, -2] }} transition={{ repeat: Infinity, duration: 1 }}>
-              <ArrowUp className="w-3.5 h-3.5" />
-            </motion.span>
-            {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {newPostsAvailable > 0 && (
+        <button
+          onClick={loadNewPosts}
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-xl"
+          style={{
+            background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+            color: "#fff",
+            boxShadow: "0 6px 24px rgba(46,107,79,0.45)",
+            animation: "slideUp 0.25s ease forwards",
+          }}>
+          <ArrowUp className="w-3.5 h-3.5" />
+          {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
+        </button>
+      )}
 
       {/* Daily Challenge Card */}
       {activeTab === "for_you" && (
