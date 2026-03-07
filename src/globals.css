@@ -475,7 +475,6 @@ button, a, input, textarea, select, [role="button"] {
 [role="dialog"], .fixed, [style*="position: fixed"] {
   max-width: 100vw !important;
   max-height: 100dvh !important;
-  overflow: hidden;
 }
 
 /* Page-level wrapper overflow lock */
