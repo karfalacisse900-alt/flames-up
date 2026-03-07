@@ -454,28 +454,21 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
               <span className="text-[15px] leading-none" style={{ transition: "transform 0.2s" }}>{hasLiked ? "❤️" : "🤍"}</span>
               {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
             </button>
-            <AnimatePresence>
-              {showReactions && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7, y: 8 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                  className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)" }}
-                  onMouseLeave={() => setShowReactions(false)}>
-                  {REACTIONS.map(r => (
-                    <motion.button key={r}
-                      whileHover={{ scale: 1.3 }} whileTap={{ scale: 0.85 }}
-                      onClick={() => { handleLike(); setShowReactions(false); }}
-                      className="text-xl w-9 h-9 flex items-center justify-center rounded-full"
-                      style={{ backgroundColor: "var(--bg-subtle)" }}>
-                      {r}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {showReactions && (
+              <div
+                className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
+                style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}
+                onMouseLeave={() => setShowReactions(false)}>
+                {REACTIONS.map(r => (
+                  <button key={r}
+                    onClick={() => { handleLike(); setShowReactions(false); }}
+                    className="text-xl w-9 h-9 flex items-center justify-center rounded-full chip"
+                    style={{ backgroundColor: "var(--bg-subtle)" }}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Comment */}
