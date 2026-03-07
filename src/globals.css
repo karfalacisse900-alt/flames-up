@@ -401,7 +401,7 @@ button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-pri
 
 /* FORCE THEME OVERRIDE */
 html, body, #root {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
 }
 
