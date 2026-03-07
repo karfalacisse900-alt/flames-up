@@ -81,6 +81,18 @@ export default function LeftSidebar({ currentPageName, unreadCount }) {
         })}
       </nav>
 
+      {/* Create Post CTA */}
+      <div className="px-3 mb-2">
+        <Link
+          to={createPageUrl(createItem.page)}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+          style={{ backgroundColor: "var(--accent-primary)", boxShadow: "0 2px 8px rgba(46,107,79,0.25)" }}
+        >
+          <createItem.icon className="w-4 h-4" />
+          Create Post
+        </Link>
+      </div>
+
       {/* Bottom accent */}
       <div
         className="mx-3 mt-2 pt-4 text-[11px]"
