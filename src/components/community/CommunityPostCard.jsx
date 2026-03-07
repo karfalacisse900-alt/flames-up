@@ -436,7 +436,7 @@ export default function CommunityPostCard({ post, user, onUpvote }) {
           if (imgs.length === 0) return null;
           return (
             <div className="mb-2.5">
-              <PhotoCarousel images={imgs} aspectRatio="4/3" />
+              <PhotoCarousel images={imgs} aspectRatio="9/16" />
             </div>
           );
         })()}
