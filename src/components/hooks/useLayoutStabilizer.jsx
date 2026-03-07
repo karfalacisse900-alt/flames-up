@@ -92,8 +92,10 @@ export function useLayoutStabilizer() {
           const cs = window.getComputedStyle(el);
           if (cs.position === "fixed") return;
           if (cs.overflowX === "hidden" || cs.overflowX === "clip") return;
-          el.style.overflowX = "hidden";
+          el.style.overflowX = "clip";
           el.style.maxWidth = "100%";
+          // Never override overflow-y — it breaks vertical scrolling
+          if (!el.style.overflowY) el.style.overflowY = "visible";
         } catch (_) {}
       });
     };
