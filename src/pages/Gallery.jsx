@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, X, Send, Flame, Clock, Star, Search,
   Sparkles, Upload, Loader2, Camera, Trophy, Grid3X3,
@@ -321,17 +321,12 @@ function ArtCard({ art, user, onSelect, onLike, index }) {
             style={{ background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.18)" }}>
             <MoreHorizontal className="w-3.5 h-3.5 text-white" />
           </button>
-          <AnimatePresence>
-            {menuOpen && (
+          {menuOpen && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: -4 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.88 }}
-                  transition={{ duration: 0.15 }}
+                <div
                   className="absolute right-0 top-8 z-40 w-44 rounded-2xl overflow-hidden"
-                  style={{ backgroundColor: "rgba(20,20,20,0.96)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
+                  style={{ backgroundColor: "rgba(20,20,20,0.96)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", animation: "fadeIn 0.12s ease" }}
                 >
                   {art.location_name && (
                     <button
@@ -432,14 +427,11 @@ function UploadModal({ user, onClose, qc }) {
   if (editingFile) return <PhotoEditor file={editingFile} onDone={handleEditorDone} onCancel={() => setEditingFile(null)} />;
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" style={{ animation: "fadeIn 0.15s ease" }}>
       <div className="absolute inset-0 bg-black/75" onClick={onClose} />
-      <motion.div
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 28, stiffness: 300 }}
+      <div
         className="relative w-full max-w-lg rounded-t-3xl md:rounded-3xl p-6 space-y-4 overflow-y-auto"
-        style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)" }}
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "92dvh", border: "1px solid var(--border-light)", animation: "slideUp 0.2s ease" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-8 h-1 rounded-full mx-auto md:hidden mb-1" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="flex items-center justify-between">
@@ -487,8 +479,8 @@ function UploadModal({ user, onClose, qc }) {
           style={{ background: "linear-gradient(135deg, #243D33, #2E6B4F)" }}>
           {uploading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "🎨 Upload to Gallery"}
         </button>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -620,16 +612,18 @@ export default function Gallery() {
           </div>
 
           {/* Search input */}
-          {showSearch && (
-            <div className="mb-2 overflow-hidden">
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
-                <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search artworks, artists, tags…"
-                  className="flex-1 text-sm bg-transparent outline-none" style={{ color: "var(--text-primary)" }} />
-                {searchQuery && <button onClick={() => setSearchQuery("")}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {showSearch && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mb-2 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+                  <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search artworks, artists, tags…"
+                    className="flex-1 text-sm bg-transparent outline-none" style={{ color: "var(--text-primary)" }} />
+                  {searchQuery && <button onClick={() => setSearchQuery("")}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Tabs */}
           <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
