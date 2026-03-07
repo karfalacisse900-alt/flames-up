@@ -81,7 +81,7 @@ export default function Discover() {
         </div>
 
         {/* Tab bar — always visible */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-2">
           {[
             { id: "apps", icon: Compass,   label: "Apps & Tools" },
             { id: "dyk",  icon: Lightbulb, label: "Did You Know" },
