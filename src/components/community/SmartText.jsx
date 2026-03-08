@@ -51,9 +51,9 @@ function saveToCache(text, entities) {
   } catch {}
 }
 
-// Quick pre-filter: only bother LLM if text likely has proper nouns
+// Quick pre-filter: skip very short texts or pure URLs
 function mightHaveEntities(text) {
-  return /[A-Z][a-zA-Z]/.test(text) || /#\w+/.test(text);
+  return text.length >= 15 && !/^https?:\/\/\S+$/.test(text.trim());
 }
 
 function extractHashtags(text) {
