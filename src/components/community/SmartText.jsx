@@ -100,8 +100,8 @@ Examples of BAD: "today", "watching", "listening", "really", "the", "my"`,
     const entities = Array.isArray(result?.entities) ? result.entities.filter(e => e && e.length > 1) : [];
     saveToCache(text, entities);
     return entities;
-  } catch {
-    saveToCache(text, []);
+  } catch (e) {
+    console.error("SmartText entity detection failed:", e);
     return [];
   }
 }
