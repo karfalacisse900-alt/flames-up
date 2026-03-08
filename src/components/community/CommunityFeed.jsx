@@ -18,7 +18,6 @@ export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
-  const [selectedPlace, setSelectedPlace] = useState(null);
   const [userCity, setUserCity] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const qc = useQueryClient();
@@ -174,7 +173,7 @@ export default function CommunityFeed({ user }) {
             onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-            onLocationClick={(loc) => setSelectedPlace(loc)}
+            onLocationClick={() => {}}
           />
         )}
       </div>
@@ -307,16 +306,6 @@ export default function CommunityFeed({ user }) {
           filteredPosts.map((post, index) => renderPostCard(post, index))
         )}
       </div>
-
-      {selectedPlace && (
-        <PlaceHub
-          locationName={selectedPlace.name || selectedPlace.city}
-          locationData={selectedPlace}
-          user={user}
-          onClose={() => setSelectedPlace(null)}
-          onUpvote={(post) => user && upvoteMut.mutate({ post })}
-        />
-      )}
 
       {showCreate && (
         <CreateCommunityPost
