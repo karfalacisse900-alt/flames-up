@@ -6,6 +6,12 @@ import { X, Plus, FolderOpen, Check } from "lucide-react";
 const DEFAULT_FOLDERS = ["Ideas", "Business", "Funny", "Videos", "Inspirational"];
 
 export default function SavePostModal({ post, user, onClose }) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const [folders, setFolders] = useState(DEFAULT_FOLDERS);
   const [savedFolders, setSavedFolders] = useState([]);
   const [newFolder, setNewFolder] = useState("");
