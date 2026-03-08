@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 
 import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin } from "lucide-react";
 import AutoplayVideo from "./AutoplayVideo";
+import WantToGoButton from "./WantToGoButton";
 import PhotoCarousel from "./PhotoCarousel";
 import SavePostModal from "./SavePostModal";
 import { createPageUrl } from "@/utils";
