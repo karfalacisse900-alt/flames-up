@@ -319,11 +319,25 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             )}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
-              {post.location_city && (
-                <span className="flex items-center gap-0.5 text-[11px]" style={{ color: "var(--text-hint)" }}>
+              {(post.location_name || post.location_city) && (
+                <button
+                  onClick={() => onLocationClick && onLocationClick({
+                    name: post.location_name || post.location_city,
+                    city: post.location_city,
+                    region: post.location_region,
+                    country: post.location_country,
+                    lat: post.location_lat,
+                    lng: post.location_lng,
+                  })}
+                  className="flex items-center gap-0.5 text-[11px] rounded-full px-1.5 py-0.5 transition-all"
+                  style={{
+                    color: "var(--accent-primary)",
+                    backgroundColor: "var(--accent-primary-light)",
+                    fontWeight: 600,
+                  }}>
                   <MapPin className="w-2.5 h-2.5" />
-                  {[post.location_city, post.location_region].filter(Boolean).join(", ")}
-                </span>
+                  {post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}
+                </button>
               )}
               {post.media_ref_title && (
                 <span className="text-[11px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
