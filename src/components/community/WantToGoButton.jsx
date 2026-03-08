@@ -18,6 +18,8 @@ export default function WantToGoButton({ post, user, compact = false }) {
 
   const saved = !!existing;
 
+  if (!locationName || !user?.email) return null;
+
   const toggle = async (e) => {
     e.stopPropagation();
     if (loading) return;
