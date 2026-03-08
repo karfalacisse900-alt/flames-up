@@ -224,15 +224,9 @@ function SurpriseBtn({ onClick }) {
 
 // ── Category Filter Bottom Sheet ────────────────────────────────────────────
 function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
-  React.useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 flex flex-col justify-end" style={{ zIndex: 80 }}>
+      <div className="fixed inset-0 z-50 flex flex-col justify-end">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -446,14 +440,12 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
       )}
 
       {/* ── App Preview Drawer ── */}
-      {previewItem && (
-        <AppPreviewDrawer
-          item={previewItem}
-          user={user}
-          onClose={() => setPreviewItem(null)}
-          onFullOpen={() => { onItemClick(previewItem); setPreviewItem(null); }}
-        />
-      )}
+      <AppPreviewDrawer
+        item={previewItem}
+        user={user}
+        onClose={() => setPreviewItem(null)}
+        onFullOpen={() => { onItemClick(previewItem); setPreviewItem(null); }}
+      />
 
       {/* ── Category Filter Sheet ── */}
       {showFilter && (
