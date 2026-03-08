@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Star, Zap, Globe, Smartphone, Monitor, CheckCircle2, ArrowRight } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
