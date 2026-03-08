@@ -457,6 +457,20 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
                 </button>
               </div>
 
+              {/* Smart Links toggle */}
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5" style={{ color: "#7C69C4" }} />
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Smart entity links</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "rgba(124,105,196,0.12)", color: "#7C69C4" }}>Auto-detect</span>
+                </div>
+                <button onClick={() => { const next = !smartLinks; setSmartLinks(next); setSmartLinksEnabled(next); }}
+                  className="w-10 h-5 rounded-full transition-all relative"
+                  style={{ backgroundColor: smartLinks ? "#7C69C4" : "var(--border-medium)" }}>
+                  <div className="w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all" style={{ left: smartLinks ? "calc(100% - 18px)" : "2px" }} />
+                </button>
+              </div>
+
               <button onClick={handleSubmit} disabled={saving}
                 className="w-full py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
                 style={{ backgroundColor: "#3C6E5A", boxShadow: "0 4px 16px rgba(60,110,90,0.35)", letterSpacing: "0.02em" }}>
