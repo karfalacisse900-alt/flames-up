@@ -308,6 +308,16 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
+      {selectedPlace && (
+        <PlaceHub
+          locationName={selectedPlace.name || selectedPlace.city}
+          locationData={selectedPlace}
+          user={user}
+          onClose={() => setSelectedPlace(null)}
+          onUpvote={(post) => user && upvoteMut.mutate({ post })}
+        />
+      )}
+
       {showCreate && (
         <CreateCommunityPost
           user={user}
