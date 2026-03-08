@@ -514,6 +514,11 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             <Share2 className="w-4 h-4" />
           </button>
 
+          {/* Want to go — only for location posts */}
+          {(post.location_name || post.location_city) && (
+            <WantToGoButton post={post} user={user} compact />
+          )}
+
           {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
             className="ml-auto p-1.5 rounded-full transition-all chip"
