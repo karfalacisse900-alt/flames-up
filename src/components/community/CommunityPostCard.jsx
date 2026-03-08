@@ -226,7 +226,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                     fontFamily: "var(--font-serif)",
                     lineHeight: 1.45,
                   }}>
-                  {cleanText}
+                  <SmartText text={cleanText} />
                 </p>
               );
             })()}
