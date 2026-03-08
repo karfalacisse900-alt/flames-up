@@ -56,6 +56,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
   const [mediaError, setMediaError] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [location, setLocation] = useState(null);
+  const [placeTags, setPlaceTags] = useState([]);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
