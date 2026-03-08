@@ -179,7 +179,7 @@ export default function SmartText({ text, className, style }) {
         setSegments(buildSegments(text, entities));
       }
     });
-  }, [text, enabled]);
+  }, [text]);
 
   const handleClick = (phrase, type) => {
     const q = type === "hashtag" ? phrase.slice(1) : phrase;
