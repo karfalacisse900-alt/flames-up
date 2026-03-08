@@ -10,8 +10,8 @@ export default function WantToGoButton({ post, user, compact = false }) {
   const locationName = post.location_name || post.location_city;
 
   const { data: existing } = useQuery({
-    queryKey: ["savedPlace", user.email, locationName],
-    queryFn: () => base44.entities.SavedPlace.filter({ user_email: user.email, location_name: locationName }),
+    queryKey: ["savedPlace", user?.email, locationName],
+    queryFn: () => base44.entities.SavedPlace.filter({ user_email: user?.email, location_name: locationName }),
     select: d => d[0] || null,
     enabled: !!user?.email && !!locationName,
   });
