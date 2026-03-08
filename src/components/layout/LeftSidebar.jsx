@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Home, Search, Users, Palette, User, Flame, Bell, PenSquare } from "lucide-react";
+import { Home, Search, Users, Palette, User, Flame, Bell, PenSquare, MapPin } from "lucide-react";
 
 const navItems = [
   { name: "Home",        icon: Home,       page: "Home" },
   { name: "Discover",    icon: Search,     page: "Discover" },
-  { name: "Groups",      icon: Users,      page: "Groups" },
+  { name: "Places",      icon: MapPin,     page: "Places" },
   { name: "Gallery",     icon: Palette,    page: "Gallery" },
   { name: "Profile",     icon: User,       page: "Profile" },
 ];
