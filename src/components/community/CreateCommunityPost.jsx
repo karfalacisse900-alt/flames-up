@@ -43,6 +43,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
   const [mediaType, setMediaType] = useState("general");
   const [mediaRef, setMediaRef] = useState("");
   const [isAnon, setIsAnon] = useState(false);
+  const [smartLinks, setSmartLinks] = useState(() => getSmartLinksEnabled());
   const [imageUrl, setImageUrl] = useState("");
   const [imageFiles, setImageFiles] = useState([]); // array of {file, preview}
   const [imageFile, setImageFile] = useState(null); // legacy single
