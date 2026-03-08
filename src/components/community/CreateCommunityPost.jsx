@@ -439,8 +439,11 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
                 ) : null}
               </div>
 
-              {/* Location tag */}
-              <LocationTagButton location={location} onLocation={setLocation} />
+              {/* Location search */}
+              <PlaceSearchInput location={location} onLocation={setLocation} placeholder="Tag a place (e.g. Bryant Park)" />
+
+              {/* Place tags */}
+              {location && <PlaceTagsSelector selected={placeTags} onChange={setPlaceTags} />}
 
               {/* Anonymous toggle */}
               <div className="flex items-center justify-between py-1">
