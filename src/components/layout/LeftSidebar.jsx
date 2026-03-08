@@ -8,7 +8,7 @@ const navItems = [
   { name: "Home",        icon: Home,       page: "Home" },
   { name: "Discover",    icon: Search,     page: "Discover" },
   { name: "Places",      icon: MapPin,     page: "Places" },
-  { name: "Gallery",     icon: Palette,    page: "Gallery" },
+  { name: "Groups",      icon: Users,      page: "Groups" },
   { name: "Profile",     icon: User,       page: "Profile" },
 ];
 
