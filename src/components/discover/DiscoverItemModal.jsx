@@ -25,6 +25,13 @@ const platformIcon = (p) => {
 };
 
 export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, allItems = [] }) {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [showShare, setShowShare] = useState(false);
