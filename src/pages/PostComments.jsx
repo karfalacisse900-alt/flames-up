@@ -256,7 +256,9 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
         ) : reply.type === "gif" && reply.gif_url ? (
           <img src={reply.gif_url} alt="GIF" className="rounded-xl mt-1 max-w-full" style={{ maxHeight: 200 }} />
         ) : (
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{reply.body}</p>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+            <SmartText text={reply.body} />
+          </p>
         )}
 
         <button onClick={() => setLiked(v => !v)}

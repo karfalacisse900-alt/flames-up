@@ -415,7 +415,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
             ) : (
               <p className="whitespace-pre-line">
-                {post.type === "quote_of_day" ? `"${post.body}"` : post.body}
+                <SmartText text={post.type === "quote_of_day" ? `"${post.body}"` : post.body} />
               </p>
             )}
           </div>
