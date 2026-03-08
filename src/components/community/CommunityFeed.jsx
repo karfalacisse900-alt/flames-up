@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Plus, ArrowUp, Zap, MapPin, Loader2 } from "lucide-react";
+import PlaceHub from "./PlaceHub";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
@@ -17,6 +18,7 @@ export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
+  const [selectedPlace, setSelectedPlace] = useState(null);
   const [userCity, setUserCity] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const qc = useQueryClient();
@@ -172,6 +174,7 @@ export default function CommunityFeed({ user }) {
             onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+            onLocationClick={(loc) => setSelectedPlace(loc)}
           />
         )}
       </div>
