@@ -224,9 +224,15 @@ function SurpriseBtn({ onClick }) {
 
 // ── Category Filter Bottom Sheet ────────────────────────────────────────────
 function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
+  React.useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex flex-col justify-end">
+      <div className="fixed inset-0 flex flex-col justify-end" style={{ zIndex: 80 }}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
