@@ -164,9 +164,9 @@ function buildHashtagOnly(text) {
 
 export default function SmartText({ text, className, style }) {
   const [segments, setSegments] = useState(null);
-  const enabled = getSmartLinksEnabled();
 
   useEffect(() => {
+    const enabled = getSmartLinksEnabled();
     if (!text) { setSegments([{ type: "text", text: "" }]); return; }
     if (!enabled) { setSegments([{ type: "text", text }]); return; }
 
