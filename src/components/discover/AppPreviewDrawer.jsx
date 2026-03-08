@@ -44,12 +44,23 @@ function getKeyFeatures(item) {
 }
 
 export default function AppPreviewDrawer({ item, user, onClose, onFullOpen }) {
+  // Lock body scroll when open, restore on close/unmount
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   if (!item) return null;
   const features = getKeyFeatures(item);
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex flex-col justify-end" style={{ pointerEvents: "auto" }}>
+      <div
+        className="fixed inset-0 flex flex-col justify-end"
+        style={{ zIndex: 80, pointerEvents: "auto" }}
+        onTouchMove={e => e.stopPropagation()}
+      >
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
