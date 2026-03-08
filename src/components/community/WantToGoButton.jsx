@@ -8,7 +8,6 @@ export default function WantToGoButton({ post, user, compact = false }) {
   const [loading, setLoading] = useState(false);
 
   const locationName = post.location_name || post.location_city;
-  if (!locationName || !user?.email) return null;
 
   const { data: existing } = useQuery({
     queryKey: ["savedPlace", user.email, locationName],
