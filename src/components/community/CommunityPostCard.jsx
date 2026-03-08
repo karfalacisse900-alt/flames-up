@@ -321,14 +321,12 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
               {(post.location_name || post.location_city) && (
                 <button
-                  onClick={() => onLocationClick && onLocationClick({
-                    name: post.location_name || post.location_city,
-                    city: post.location_city,
-                    region: post.location_region,
-                    country: post.location_country,
-                    lat: post.location_lat,
-                    lng: post.location_lng,
-                  })}
+                  onClick={() => {
+                    const query = post.location_lat && post.location_lng
+                      ? `${post.location_lat},${post.location_lng}`
+                      : encodeURIComponent([post.location_name, post.location_city, post.location_region, post.location_country].filter(Boolean).join(", "));
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
+                  }}
                   className="flex items-center gap-0.5 text-[11px] rounded-full px-1.5 py-0.5 transition-all"
                   style={{
                     color: "var(--accent-primary)",
