@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Mic, Square, Play, Pause, ImageIcon, Smile, Search, X, Trash2 } from "lucide-react";
+import SmartText from "../components/community/SmartText";
 import { checkContent, createModerationReport } from "../components/moderation/moderationHelper";
 import { requireVerified } from "../components/auth/EmailVerificationGate";
 import GifCard from "../components/feed/GifCard";
