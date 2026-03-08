@@ -444,6 +444,18 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
 
+        {/* ── Place tags ── */}
+        {post.place_tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2.5">
+            {post.place_tags.map(tag => (
+              <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                {tag === "food" ? "🍔" : tag === "events" ? "🎉" : tag === "park" ? "🌳" : tag === "coffee" ? "☕" : tag === "hidden_spot" ? "🔍" : tag === "free_activities" ? "🆓" : tag === "study_spot" ? "📚" : tag === "travel" ? "✈️" : "📍"} {tag.replace(/_/g, " ")}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* ── List items ── */}
         {post.type === "list" && post.list_items?.length > 0 && (
           <ol className="mb-2.5 space-y-1.5 pl-1">
