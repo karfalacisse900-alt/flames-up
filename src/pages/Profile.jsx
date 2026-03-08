@@ -185,7 +185,7 @@ export default function Profile() {
                 {showMore && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
-                    <div className="absolute right-0 top-10 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
+                    <div className="fixed right-4 top-20 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
                       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                       {[
                         { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },

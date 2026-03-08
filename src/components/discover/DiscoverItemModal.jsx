@@ -100,7 +100,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
       style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
       onClick={onClose} onTouchMove={e => e.stopPropagation()}>
       <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"

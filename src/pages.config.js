@@ -74,6 +74,7 @@ import Messages from './pages/Messages';
 import MyLibrary from './pages/MyLibrary';
 import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
+import Places from './pages/Places';
 import PostComments from './pages/PostComments';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
@@ -82,7 +83,6 @@ import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
-import Places from './pages/Places';
 import __Layout from './Layout.jsx';
 
 
@@ -114,6 +114,7 @@ export const PAGES = {
     "MyLibrary": MyLibrary,
     "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
+    "Places": Places,
     "PostComments": PostComments,
     "PostDetail": PostDetail,
     "Profile": Profile,
@@ -122,7 +123,6 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
-    "Places": Places,
 }
 
 export const pagesConfig = {
