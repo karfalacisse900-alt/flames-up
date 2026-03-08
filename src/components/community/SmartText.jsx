@@ -70,8 +70,7 @@ async function detectEntities(text) {
   const cached = getFromCache(text);
   if (cached !== null) return cached;
 
-  if (text.length < 15 || !mightHaveEntities(text)) {
-    saveToCache(text, []);
+  if (!mightHaveEntities(text)) {
     return [];
   }
 
