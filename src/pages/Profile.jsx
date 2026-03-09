@@ -238,23 +238,20 @@ export default function Profile() {
           </Link>
 
           {/* Stats row */}
-          <div className="flex gap-5 mt-4">
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{myPosts.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Posts</p>
-            </div>
-            <button onClick={() => setShowFollowers(true)} className="text-center" style={{ boxShadow: "none" }}>
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
-            </button>
-            <button onClick={() => setShowFollowing(true)} className="text-center" style={{ boxShadow: "none" }}>
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
-            </button>
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{computedBadges.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Badges</p>
-            </div>
+          <div className="flex gap-2 mt-4">
+            {[
+              { label: "Posts", value: myPosts.length, onClick: null },
+              { label: "Followers", value: followers.length, onClick: () => setShowFollowers(true) },
+              { label: "Following", value: following.length, onClick: () => setShowFollowing(true) },
+              { label: "Badges", value: computedBadges.length, onClick: null },
+            ].map(({ label, value, onClick }) => (
+              <button key={label} onClick={onClick || undefined}
+                className="flex-1 text-center py-2.5 rounded-2xl transition-all"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1.5px solid var(--border-light)", boxShadow: "none" }}>
+                <p className="text-base font-black" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{value}</p>
+                <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>{label}</p>
+              </button>
+            ))}
           </div>
         </div>
       </div>
