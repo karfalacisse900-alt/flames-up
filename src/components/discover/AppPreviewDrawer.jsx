@@ -39,12 +39,19 @@ function getKeyFeatures(item) {
 function DrawerContent({ item, user, onClose, onFullOpen }) {
   const features = getKeyFeatures(item);
 
-  // Lock body scroll while drawer is open
+  // Lock body scroll while drawer is open — always restore on unmount
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev || ""; };
   }, []);
+
+  // Close drawer on back-navigation / page change
+  useEffect(() => {
+    const handler = () => onClose();
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, [onClose]);
 
   return (
     <div
