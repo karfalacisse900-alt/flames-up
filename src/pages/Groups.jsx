@@ -400,10 +400,10 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────
 export default function Groups() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeMembership, setActiveMembership] = useState(null);
-  const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
