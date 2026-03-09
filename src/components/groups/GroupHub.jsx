@@ -328,6 +328,11 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
             </div>
           )}
 
+          {/* MEMBERS TAB */}
+          {activeTab === "members" && (
+            <GroupMembersTab group={group} user={user} isAdmin={isAdmin} />
+          )}
+
           {/* GAMES TAB */}
           {activeTab === "games" && (
             <GroupGamesTab group={group} user={user} isMember={isMember} />
