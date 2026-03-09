@@ -6,7 +6,6 @@ import PlaceHub from "./PlaceHub";
 import CreateCommunityPost from "./CreateCommunityPost";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
-import DailyChallengeCard from "./DailyChallengeCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 
@@ -14,7 +13,7 @@ import { rankFeedForUser, trackPostView } from "./feedRanking";
 
 export default function CommunityFeed({ user }) {
   const [showCreate, setShowCreate] = useState(false);
-  const [challengeContext, setChallengeContext] = useState(null); // {question}
+  const [challengeContext] = useState(null);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
@@ -254,18 +253,6 @@ export default function CommunityFeed({ user }) {
           <ArrowUp className="w-3.5 h-3.5" />
           {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
         </button>
-      )}
-
-      {/* Daily Challenge Card */}
-      {activeTab === "for_you" && (
-        <DailyChallengeCard
-          user={user}
-          onAnswerChallenge={(ch) => {
-            if (!requireVerified(user)) return;
-            setChallengeContext(ch);
-            setShowCreate(true);
-          }}
-        />
       )}
 
       {/* Feed */}
