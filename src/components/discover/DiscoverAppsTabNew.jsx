@@ -255,12 +255,13 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
               <button
                 key={String(c.id)}
                 onClick={() => { setActiveCategory(c.id); setVisibleCount(12); }}
-                className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all chip"
+                className="shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all chip"
                 style={{
-                  backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                  backgroundColor: isActive ? "#1E1E1E" : "var(--bg-card)",
                   color: isActive ? "#fff" : "var(--text-secondary)",
-                  border: `1px solid ${isActive ? "var(--accent-primary)" : "var(--border-light)"}`,
-                  boxShadow: isActive ? "0 2px 8px rgba(46,107,79,0.3)" : "none",
+                  border: `1.5px solid ${isActive ? "#1E1E1E" : "var(--border-light)"}`,
+                  boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                  letterSpacing: "-0.1px",
                 }}
               >
                 {c.label}
