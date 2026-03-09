@@ -53,7 +53,6 @@ import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
 import ArtStudio from './pages/ArtStudio';
 import Collections from './pages/Collections';
-import CreateGroup from './pages/CreateGroup';
 import CreatePost from './pages/CreatePost';
 import CreatorDashboard from './pages/CreatorDashboard';
 import DailyChallenge from './pages/DailyChallenge';
@@ -65,7 +64,6 @@ import Explore from './pages/Explore';
 import Gallery from './pages/Gallery';
 import GamePlay from './pages/GamePlay';
 import Games from './pages/Games';
-import Groups from './pages/Groups';
 import HallOfFame from './pages/HallOfFame';
 import HelpCenter from './pages/HelpCenter';
 import Home from './pages/Home';
@@ -84,6 +82,8 @@ import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
+import Groups from './pages/Groups';
+import CreateGroup from './pages/CreateGroup';
 import __Layout from './Layout.jsx';
 
 
@@ -94,7 +94,6 @@ export const PAGES = {
     "Art": Art,
     "ArtStudio": ArtStudio,
     "Collections": Collections,
-    "CreateGroup": CreateGroup,
     "CreatePost": CreatePost,
     "CreatorDashboard": CreatorDashboard,
     "DailyChallenge": DailyChallenge,
@@ -106,7 +105,6 @@ export const PAGES = {
     "Gallery": Gallery,
     "GamePlay": GamePlay,
     "Games": Games,
-    "Groups": Groups,
     "HallOfFame": HallOfFame,
     "HelpCenter": HelpCenter,
     "Home": Home,
@@ -125,6 +123,8 @@ export const PAGES = {
     "UserProfile": UserProfile,
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
+    "Groups": Groups,
+    "CreateGroup": CreateGroup,
 }
 
 export const pagesConfig = {

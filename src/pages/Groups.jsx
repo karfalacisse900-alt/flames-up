@@ -490,26 +490,22 @@ export default function Groups() {
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh", paddingBottom: 88 }}>
 
       {/* ── Hero Header ── */}
-      <div className="relative overflow-hidden px-5 pt-5 pb-4"
-        style={{ background: "linear-gradient(135deg, #2E6B4F14 0%, #4CAF7D0a 60%, var(--bg-app) 100%)", borderBottom: "1px solid var(--border-subtle)" }}>
-        {/* Blobs */}
-        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: "radial-gradient(circle, #4CAF7D, #2E6B4F)" }} />
-        <div className="absolute top-3 right-20 w-10 h-10 rounded-full pointer-events-none opacity-10" style={{ background: "#D98B62" }} />
-
-        <div className="flex items-start justify-between mb-4 relative z-10">
+      <div className="relative overflow-hidden px-5 pt-6 pb-4"
+        style={{ background: "linear-gradient(135deg, #1a3a2488 0%, #2E6B4F22 60%, var(--bg-app) 100%)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-widest uppercase mb-0.5" style={{ color: "var(--text-hint)" }}>Community ✦</p>
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-md"
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
                 <Users className="w-4 h-4 text-white" />
               </div>
-              <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>Groups</h1>
+              <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Groups</h1>
             </div>
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Join communities. Meet people.</p>
           </div>
           {user && (
             <button onClick={() => navigate(createPageUrl("CreateGroup"))}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-black text-white"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold text-white"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
               <Plus className="w-4 h-4" /> Create
             </button>
@@ -517,21 +513,19 @@ export default function Groups() {
         </div>
 
         {/* Main Tabs */}
-        <div className="flex gap-2 relative z-10">
+        <div className="flex gap-2">
           {[
-            { key: "discover", label: "⚡ Discover", icon: Zap },
-            { key: "map", label: "📍 Nearby", icon: MapPin },
-          ].map(({ key, label }) => (
+            { key: "discover", label: "Discover", icon: Zap },
+            { key: "map", label: "Nearby Explorer", icon: MapPin },
+          ].map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setMainTab(key)}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-semibold transition-all"
               style={{
-                backgroundColor: mainTab === key ? "#1E1E1E" : "var(--bg-card)",
+                backgroundColor: mainTab === key ? "var(--accent-primary)" : "var(--bg-card)",
                 color: mainTab === key ? "#fff" : "var(--text-secondary)",
-                border: `1.5px solid ${mainTab === key ? "#1E1E1E" : "var(--border-light)"}`,
-                boxShadow: mainTab === key ? "0 4px 14px rgba(0,0,0,0.2)" : "none",
-                letterSpacing: "-0.2px",
+                border: "1px solid var(--border-light)",
               }}>
-              {label}
+              <Icon className="w-3.5 h-3.5" />{label}
             </button>
           ))}
         </div>

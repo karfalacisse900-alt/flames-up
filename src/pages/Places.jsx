@@ -95,35 +95,28 @@ export default function PlacesPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20 relative overflow-hidden" style={{ backgroundColor: "rgba(242,237,228,0.97)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
-        {/* Blob decoration */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full pointer-events-none opacity-20" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
-
-        <div className="px-4 pt-4 pb-0 relative z-10">
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.96)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="px-4 pt-4 pb-0">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[11px] font-semibold tracking-widest uppercase mb-0.5" style={{ color: "var(--text-hint)" }}>Explore ✦</p>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-md" style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
-                  <MapPin className="w-4 h-4 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.5px" }}>Places</h1>
-              </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+              <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                Places
+              </h1>
             </div>
             {/* View toggle */}
-            <div className="flex gap-1.5">
+            <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
               {[
                 { key: "feed", icon: List },
                 { key: "map", icon: Map },
                 { key: "saved", icon: Bookmark },
               ].map(({ key, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)}
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all"
+                  className="p-1.5 rounded-lg transition-all"
                   style={{
-                    backgroundColor: viewMode === key ? "#1E1E1E" : "var(--bg-card)",
-                    color: viewMode === key ? "#fff" : "var(--text-hint)",
-                    border: `1.5px solid ${viewMode === key ? "#1E1E1E" : "var(--border-light)"}`,
-                    boxShadow: viewMode === key ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                    backgroundColor: viewMode === key ? "var(--bg-card)" : "transparent",
+                    color: viewMode === key ? "var(--accent-primary)" : "var(--text-hint)",
+                    boxShadow: viewMode === key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
                   }}>
                   <Icon className="w-4 h-4" />
                 </button>
@@ -132,17 +125,18 @@ export default function PlacesPage() {
           </div>
 
           {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3"
+            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+            <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search places, cities…"
-              className="w-full pl-10 pr-10 py-3 rounded-2xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", color: "var(--text-primary)" }}
+              className="flex-1 bg-transparent outline-none text-sm"
+              style={{ color: "var(--text-primary)" }}
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              <button onClick={() => setSearchQuery("")}>
                 <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
               </button>
             )}
