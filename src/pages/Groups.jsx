@@ -639,7 +639,7 @@ export default function Groups() {
                     <div className="text-5xl mb-3">👥</div>
                     <p className="font-bold text-base mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No groups yet</p>
                     {user && (
-                      <button onClick={() => setShowCreate(true)}
+                      <button onClick={() => navigate(createPageUrl("CreateGroup"))}
                         className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                         style={{ backgroundColor: "var(--accent-primary)" }}>Create a Group</button>
                     )}
