@@ -147,16 +147,26 @@ export default function Profile() {
   return (
     <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Profile header */}
-      <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
-        <div className="px-5 pb-5 pt-4">
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid var(--border-light)" }}>
+        {/* Organic gradient banner */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: activeTheme.banner, opacity: 0.7 }} />
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-20 pointer-events-none" style={{ background: `radial-gradient(circle, ${activeTheme.accent}, transparent)` }} />
+        <div className="absolute top-4 right-24 w-10 h-10 rounded-full opacity-15 pointer-events-none" style={{ background: activeTheme.accent }} />
+
+        <div className="relative z-10 px-5 pb-5 pt-5">
           <div className="flex items-start justify-between mb-3">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-card)" }}>
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                (user.display_name || user.full_name || "U")[0]?.toUpperCase()
-              )}
+            <div className="relative">
+              <div className="w-22 h-22 rounded-3xl overflow-hidden flex items-center justify-center text-3xl font-bold shrink-0 shadow-lg" style={{ width: 80, height: 80, backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", border: `3px solid ${activeTheme.accent}44` }}>
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  (user.display_name || user.full_name || "U")[0]?.toUpperCase()
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center" style={{ backgroundColor: activeTheme.accent }}>
+                <span className="text-[8px] text-white font-black">✓</span>
+              </div>
             </div>
             {/* Action buttons */}
             <div className="flex gap-2 items-center">
