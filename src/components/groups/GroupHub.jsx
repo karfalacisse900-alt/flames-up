@@ -131,7 +131,7 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
             <ArrowLeft className="w-4 h-4 text-white" />
           </button>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <h1 className="text-lg font-bold text-white truncate" style={{ fontFamily: "var(--font-serif)" }}>
                 {group.emoji || "💬"} {group.name}
               </h1>
@@ -139,10 +139,20 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
             </div>
             {group.description && <p className="text-xs text-white/70 truncate mt-0.5">{group.description}</p>}
           </div>
-          <button onClick={() => setShowMembers(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>
-            <Users className="w-3.5 h-3.5" /> {group.member_count || 0}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {isMember && (
+              <button onClick={() => setShowSafetyTools(true)}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                title="Safety tools">
+                <Shield className="w-4 h-4 text-white" />
+              </button>
+            )}
+            <button onClick={() => setShowMembers(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>
+              <Users className="w-3.5 h-3.5" /> {group.member_count || 0}
+            </button>
+          </div>
         </div>
 
         {/* Action bar */}
