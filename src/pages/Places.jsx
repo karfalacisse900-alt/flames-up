@@ -159,55 +159,7 @@ export default function PlacesPage() {
       {/* MAP VIEW */}
       {viewMode === "map" && (
         <div style={{ height: "calc(100vh - 140px)", position: "relative" }}>
-          {mapMarkers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <Map className="w-10 h-10" style={{ color: "var(--text-hint)" }} />
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No location posts yet</p>
-            </div>
-          ) : (
-            <>
-              <MapContainer
-                center={[mapMarkers[0].location_lat, mapMarkers[0].location_lng]}
-                zoom={12}
-                style={{ height: "100%", width: "100%" }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {mapMarkers.map(p => {
-                  const postCount = filteredPosts.filter(fp =>
-                    Math.abs((fp.location_lat||0) - p.location_lat) < 0.005 &&
-                    Math.abs((fp.location_lng||0) - p.location_lng) < 0.005
-                  ).length;
-                  return (
-                    <Marker key={p.id} position={[p.location_lat, p.location_lng]}>
-                      <Popup maxWidth={220}>
-                        <div style={{ fontFamily: "sans-serif", fontSize: 13 }}>
-                          <strong style={{ color: "#2E6B4F" }}>{p.location_name || p.location_city}</strong>
-                          {p.location_city && p.location_name !== p.location_city && (
-                            <div style={{ color: "#888", fontSize: 11 }}>{p.location_city}</div>
-                          )}
-                          <div style={{ color: "#555", marginTop: 4, fontSize: 12 }}>
-                            {(p.body || "").replace(/<[^>]*>/g, "").slice(0, 80)}{(p.body || "").length > 80 ? "…" : ""}
-                          </div>
-                          <div style={{ color: "#888", fontSize: 11, marginTop: 4 }}>
-                            {postCount} post{postCount !== 1 ? "s" : ""} here
-                          </div>
-                          <button
-                            onClick={() => openPlace({ name: p.location_name || p.location_city, city: p.location_city, region: p.location_region, lat: p.location_lat, lng: p.location_lng })}
-                            style={{ color: "#fff", backgroundColor: "#2E6B4F", fontWeight: 700, marginTop: 8, padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, width: "100%" }}>
-                            View Location Hub →
-                          </button>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-              </MapContainer>
-              {/* Map legend */}
-              <div className="absolute bottom-4 left-4 z-[400] px-3 py-2 rounded-xl text-xs font-semibold"
-                style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)", color: "var(--text-secondary)", backdropFilter: "blur(8px)" }}>
-                📍 {mapMarkers.length} location{mapMarkers.length !== 1 ? "s" : ""} · Tap markers to explore
-              </div>
-            </>
-          )}
+          <PlacesMapboxView posts={filteredPosts} onOpenPlace={openPlace} />
         </div>
       )}
 
