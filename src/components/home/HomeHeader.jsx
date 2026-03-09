@@ -15,23 +15,25 @@ export default function HomeHeader({ user }) {
 
   return (
     <div
-      className="px-5 pt-5 pb-4"
-      style={{
-        background: "linear-gradient(135deg, #2E6B4F10 0%, #D98B6208 100%)",
-        borderBottom: "1px solid var(--border-subtle)",
-      }}
+      className="relative overflow-hidden px-5 pt-5 pb-5"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
-      <div className="flex items-center justify-between">
+      {/* Organic background blobs */}
+      <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #E05C2A, #F97316)" }} />
+      <div className="absolute -top-2 right-20 w-14 h-14 rounded-full opacity-10 pointer-events-none" style={{ background: "#2E6B4F" }} />
+      <div className="absolute top-8 -left-4 w-20 h-20 rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
+
+      <div className="flex items-center justify-between relative z-10">
         {/* Left: logo + greeting */}
         <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}>
-              <Flame className="w-4 h-4 text-white fill-white" />
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-md" style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}>
+              <Flame className="w-4.5 h-4.5 text-white fill-white" style={{ width: 18, height: 18 }} />
             </div>
-            <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>flames-up</span>
+            <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)", letterSpacing: "-0.4px" }}>flames-up</span>
           </div>
-          <p className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>
-            {greeting()}{firstName ? `, ${firstName}` : ""}
+          <p className="text-xs font-semibold pl-1" style={{ color: "var(--text-hint)" }}>
+            {greeting()}{firstName ? `, ${firstName} ✦` : " ✦"}
           </p>
         </div>
 
@@ -39,32 +41,32 @@ export default function HomeHeader({ user }) {
         <div className="flex items-center gap-2">
           <Link
             to={createPageUrl("Discover")}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--accent-primary)" }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90"
+            style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", color: "var(--accent-primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
           >
             <Search className="w-4 h-4" />
           </Link>
           <Link
             to={createPageUrl("Notifications")}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-secondary)" }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-90"
+            style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", color: "var(--text-secondary)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
           >
             <Bell className="w-4 h-4" />
           </Link>
           {user && (
             <Link to={createPageUrl("Profile")}>
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white"
-                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black text-white shadow-md"
+                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 12px rgba(46,107,79,0.35)" }}
               >
-                {user.full_name?.[0]?.toUpperCase() || "?"}
+                {user.avatar_url
+                  ? <img src={user.avatar_url} alt="" className="w-full h-full object-cover rounded-2xl" />
+                  : user.full_name?.[0]?.toUpperCase() || "?"}
               </div>
             </Link>
           )}
         </div>
       </div>
-
-
     </div>
   );
 }
