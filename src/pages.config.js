@@ -83,6 +83,7 @@ import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
 import Groups from './pages/Groups';
+import CreateGroup from './pages/CreateGroup';
 import __Layout from './Layout.jsx';
 
 
@@ -123,6 +124,7 @@ export const PAGES = {
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
     "Groups": Groups,
+    "CreateGroup": CreateGroup,
 }
 
 export const pagesConfig = {
