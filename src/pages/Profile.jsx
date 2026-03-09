@@ -278,7 +278,7 @@ export default function Profile() {
         ))}
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-1">
-        <TabsList className="hidden">
+        <TabsList className="hidden" />
 
         <TabsContent value="posts" className="mt-4 space-y-3">
           {myPosts.length === 0 ? (
