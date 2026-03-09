@@ -52,6 +52,9 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const [reportingPost, setReportingPost] = useState(null);
   const [reportReason, setReportReason] = useState("");
   const [replyTo, setReplyTo] = useState(null);
+  const [showVerification, setShowVerification] = useState(false);
+  const [showSafetyTools, setShowSafetyTools] = useState(false);
+  const [showEventPrivacy, setShowEventPrivacy] = useState(false);
   const qc = useQueryClient();
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
