@@ -118,12 +118,16 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
   });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
-      onClick={onClose} onTouchMove={e => e.stopPropagation()}>
-      <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
+    <div
+      className="fixed inset-0 flex items-end justify-center sm:items-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9999, touchAction: "none" }}
+      onMouseDown={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
         style={{ boxShadow: "0 -8px 60px rgba(0,0,0,0.3)", maxHeight: "92dvh", backgroundColor: "#FAFAF8" }}
-        onClick={e => e.stopPropagation()}>
+        onMouseDown={e => e.stopPropagation()}
+      >
 
         {/* Hero gradient header */}
         <div className="shrink-0 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${cat.from}, ${cat.to})`, paddingTop: 20, paddingBottom: 24, paddingLeft: 20, paddingRight: 20 }}>
