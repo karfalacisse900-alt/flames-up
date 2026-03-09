@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Phone, Mail, BadgeCheck, Camera, CheckCircle, ChevronRight, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import LiveSelfieVerification from "./LiveSelfieVerification";
 
 const STEPS = ["overview", "email", "phone", "selfie", "done"];
 
@@ -281,15 +282,15 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
                   <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ backgroundColor: "#FDF4FF" }}>
                     <Camera className="w-6 h-6" style={{ color: "#9333EA" }} />
                   </div>
-                  <h3 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Selfie Verification</h3>
+                  <h3 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Live Selfie</h3>
                   <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                    Optional — upload a clear photo of your face. This helps attendees feel safe meeting you.
+                    Optional — take a live selfie with your camera. This helps attendees feel safe meeting you.
                   </p>
                 </div>
                 {selfieConfirmed ? (
                   <div className="flex flex-col items-center gap-3 py-4">
                     <CheckCircle className="w-12 h-12" style={{ color: "#2E6B4F" }} />
-                    <p className="font-bold text-base" style={{ color: "#2E6B4F" }}>Selfie Added!</p>
+                    <p className="font-bold text-base" style={{ color: "#2E6B4F" }}>Selfie Verified!</p>
                     <button onClick={() => setStep("done")}
                       className="w-full py-3.5 rounded-2xl text-sm font-bold text-white mt-2"
                       style={{ backgroundColor: "var(--accent-primary)" }}>
@@ -298,31 +299,24 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {selfieUrl ? (
-                      <div className="relative">
-                        <img src={selfieUrl} alt="Selfie" className="w-full h-48 object-cover rounded-2xl" />
-                        <button onClick={handleSelfieConfirm}
-                          className="w-full mt-3 py-3.5 rounded-2xl text-sm font-bold text-white"
-                          style={{ backgroundColor: "var(--accent-primary)" }}>
-                          Confirm Selfie
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="block cursor-pointer">
-                        <div className="flex flex-col items-center gap-2 py-8 rounded-2xl border-2 border-dashed"
-                          style={{ borderColor: "var(--border-medium)", backgroundColor: "var(--bg-subtle)" }}>
-                          <Camera className="w-8 h-8" style={{ color: "var(--text-hint)" }} />
-                          <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
-                            {uploading ? "Uploading…" : "Tap to upload selfie"}
-                          </p>
-                          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Reviewed by our safety team</p>
-                        </div>
-                        <input type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieUpload} disabled={uploading} />
-                      </label>
-                    )}
+                    <div className="px-4 py-3 rounded-xl text-xs" style={{ backgroundColor: "#FDF4FF", color: "#9333EA", border: "1px solid #E9D5FF" }}>
+                      📸 Uses your front camera — no upload needed. Your face is captured live.
+                    </div>
+                    <button onClick={() => setSelfieConfirmed("open_camera")}
+                      className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
+                      style={{ backgroundColor: "#9333EA", boxShadow: "0 4px 16px rgba(147,51,234,0.3)" }}>
+                      Open Live Camera
+                    </button>
                   </div>
                 )}
-                {!selfieConfirmed && (
+                {selfieConfirmed === "open_camera" && user && (
+                  <LiveSelfieVerification
+                    user={user}
+                    onClose={() => setSelfieConfirmed(false)}
+                    onVerified={() => { setSelfieConfirmed(true); setStep("done"); }}
+                  />
+                )}
+                {selfieConfirmed !== true && selfieConfirmed !== "open_camera" && (
                   <button onClick={() => setStep("done")} className="w-full text-xs py-2" style={{ color: "var(--text-hint)" }}>
                     Skip selfie
                   </button>
