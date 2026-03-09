@@ -225,24 +225,21 @@ function SurpriseBtn({ onClick }) {
 // ── Category Filter Bottom Sheet ────────────────────────────────────────────
 function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex flex-col justify-end">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0"
-          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
-        />
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 30, stiffness: 320 }}
-          className="relative rounded-t-3xl pb-8 pt-4 px-4"
-          style={{ backgroundColor: "var(--bg-card)", zIndex: 1 }}
-        >
+    <div
+      className="fixed inset-0 flex flex-col justify-end"
+      style={{ zIndex: 9998, touchAction: "none" }}
+      onMouseDown={onClose}
+    >
+      <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} />
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 320 }}
+        className="relative rounded-t-3xl pb-8 pt-4 px-4"
+        style={{ backgroundColor: "var(--bg-card)", zIndex: 1 }}
+        onMouseDown={e => e.stopPropagation()}
+      >
           <div className="flex justify-center mb-4">
             <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
           </div>
