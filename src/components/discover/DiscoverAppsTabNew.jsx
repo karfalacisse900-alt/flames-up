@@ -38,31 +38,30 @@ function getGradient(category) {
 
 // ── Trending strip card ─────────────────────────────────────────────────────
 function TrendingCard({ item, onOpen }) {
+  const [a, b] = CATEGORY_GRADIENTS[item.category] || CATEGORY_GRADIENTS.general;
   return (
     <motion.button
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.96 }}
       onClick={onOpen}
-      className="shrink-0 w-36 rounded-2xl overflow-hidden flex flex-col text-left"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+      className="shrink-0 rounded-3xl overflow-hidden flex flex-col text-left relative"
+      style={{ width: 148, background: `linear-gradient(150deg, ${a}18, ${b}30)`, border: `1.5px solid ${a}40` }}
     >
-      <div className="h-20 flex items-center justify-center relative" style={{ background: getGradient(item.category) }}>
-        <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/20 flex items-center justify-center">
+      <div className="px-3 pt-3 pb-2">
+        <div className="w-11 h-11 rounded-2xl overflow-hidden mb-2 shadow-md flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}>
           <DiscoverLogo item={item} size="sm" />
         </div>
-        {item.is_new && (
-          <span className="absolute top-2 right-2 text-[9px] font-bold bg-white/90 text-emerald-700 px-1.5 py-0.5 rounded-full">NEW</span>
-        )}
-      </div>
-      <div className="p-2.5">
-        <p className="text-xs font-bold leading-tight truncate" style={{ color: "var(--text-primary)" }}>{item.title}</p>
-        {item.pricing && <p className="text-[10px] mt-0.5" style={{ color: "var(--text-hint)" }}>{item.pricing}</p>}
+        <p className="text-xs font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{item.title}</p>
+        {item.pricing && <p className="text-[10px] mt-0.5 font-medium" style={{ color: a }}>{item.pricing}</p>}
         {(item.avg_rating || 0) > 0 && (
-          <div className="flex items-center gap-0.5 mt-1">
+          <div className="flex items-center gap-0.5 mt-1.5">
             <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-            <span className="text-[10px] font-semibold" style={{ color: "var(--text-secondary)" }}>{item.avg_rating?.toFixed(1)}</span>
+            <span className="text-[10px] font-bold" style={{ color: "var(--text-secondary)" }}>{item.avg_rating?.toFixed(1)}</span>
           </div>
         )}
       </div>
+      {item.is_new && (
+        <span className="absolute top-2.5 right-2.5 text-[9px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}>NEW</span>
+      )}
     </motion.button>
   );
 }
