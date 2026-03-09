@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, MapPin, Link as LinkIcon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const EVENT_TYPES = [
-  { key: "meetup", label: "Party Event", emoji: "🎉" },
-  { key: "watch_party", label: "Video Reaction", emoji: "🎥" },
-  { key: "gaming", label: "Mini-Games Night", emoji: "🎮" },
-  { key: "discussion", label: "Live Discussion", emoji: "🎤" },
-  { key: "qa_session", label: "Video Call", emoji: "📹" },
+  { key: "meetup", label: "Meetup", emoji: "🤝" },
+  { key: "watch_party", label: "Watch Party", emoji: "🎬" },
+  { key: "discussion", label: "Discussion", emoji: "💬" },
+  { key: "qa_session", label: "Q&A", emoji: "❓" },
   { key: "other", label: "Other", emoji: "📅" },
 ];
 
@@ -18,8 +17,12 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
   const [eventType, setEventType] = useState("meetup");
   const [eventDate, setEventDate] = useState("");
   const [duration, setDuration] = useState(60);
+  const [locationName, setLocationName] = useState(group.location_name || "");
+  const [locationAddress, setLocationAddress] = useState("");
   const [locationUrl, setLocationUrl] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const isRealWorld = group.group_type === "realworld";
 
   const handleSubmit = async () => {
     if (!title.trim() || !eventDate) return;
@@ -32,10 +35,13 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
       event_type: eventType,
       event_date: new Date(eventDate).toISOString(),
       duration_minutes: duration,
+      location_name: locationName.trim() || undefined,
+      location_address: locationAddress.trim() || undefined,
       location_url: locationUrl.trim() || undefined,
       creator_email: user.email,
       creator_name: user.full_name || user.email,
       rsvp_yes: [user.email],
+      rsvp_interested: [],
       rsvp_no: [],
       is_active: true,
     });
@@ -45,19 +51,14 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      onClick={onClose}>
+      <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="w-full max-w-lg mx-auto rounded-t-3xl overflow-hidden"
-        style={{ backgroundColor: "#F2EDE4", maxHeight: "90vh", overflowY: "auto" }}
-        onClick={e => e.stopPropagation()}
-      >
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "90vh", overflowY: "auto" }}
+        onClick={e => e.stopPropagation()}>
         <div className="h-1.5 w-12 rounded-full mx-auto mt-3" style={{ backgroundColor: "var(--border-medium)" }} />
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-4">
@@ -66,7 +67,7 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
           </div>
 
           <div className="space-y-4 pb-6">
-            {/* Event type */}
+            {/* Type */}
             <div>
               <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Event Type</p>
               <div className="flex flex-wrap gap-2">
@@ -88,7 +89,7 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
               className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
               style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
 
-            <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" rows={3}
+            <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" rows={2}
               className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
               style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
 
@@ -107,9 +108,31 @@ export default function CreateEventModal({ group, user, onClose, onCreated }) {
               </div>
             </div>
 
-            <input value={locationUrl} onChange={e => setLocationUrl(e.target.value)} placeholder="Link (Zoom, Meet, etc.) – optional"
-              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+            {/* Location fields */}
+            {isRealWorld ? (
+              <div className="space-y-2 p-3 rounded-xl" style={{ backgroundColor: "#E8F2EC", border: "1px solid #2E6B4F30" }}>
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" style={{ color: "#2E6B4F" }} />
+                  <p className="text-xs font-bold" style={{ color: "#2E6B4F" }}>Physical Location</p>
+                </div>
+                <input value={locationName} onChange={e => setLocationName(e.target.value)}
+                  placeholder="Location name (e.g. Central Park, Sunrise Yoga Studio)"
+                  className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.7)", border: "1px solid #2E6B4F30", color: "var(--text-primary)" }} />
+                <input value={locationAddress} onChange={e => setLocationAddress(e.target.value)}
+                  placeholder="Address (optional)"
+                  className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.7)", border: "1px solid #2E6B4F30", color: "var(--text-primary)" }} />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <LinkIcon className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+                <input value={locationUrl} onChange={e => setLocationUrl(e.target.value)}
+                  placeholder="Meeting link (Zoom, Google Meet, etc.) – optional"
+                  className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+              </div>
+            )}
 
             <button onClick={handleSubmit} disabled={saving || !title.trim() || !eventDate}
               className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-50 transition-all active:scale-95"
