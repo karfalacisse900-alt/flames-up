@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Bookmark, Map, List, TrendingUp, Search, X, Loader2 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapPin, Bookmark, Map, List, Search, X } from "lucide-react";
+import PlacesMapboxView from "@/components/places/PlacesMapboxView";
 import PlaceHub from "@/components/community/PlaceHub";
 import TrendingPlaces from "@/components/community/TrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
