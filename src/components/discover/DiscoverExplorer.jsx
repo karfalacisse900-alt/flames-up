@@ -454,13 +454,15 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
       />
 
       {/* ── Category Filter Sheet ── */}
-      {showFilter && (
-        <CategoryFilterSheet
-          activeCategory={activeCategory}
-          onChange={setActiveCategory}
-          onClose={() => setShowFilter(false)}
-        />
-      )}
+      <AnimatePresence>
+        {showFilter && (
+          <CategoryFilterSheet
+            activeCategory={activeCategory}
+            onChange={setActiveCategory}
+            onClose={() => setShowFilter(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
