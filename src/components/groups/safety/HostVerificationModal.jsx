@@ -190,32 +190,33 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
                 ) : !emailSent ? (
                   <div className="space-y-3">
                     <div className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE" }}>
-                      📧 A 6-digit code will be sent to your email
+                      📧 A 6-digit code will be sent to <strong>{user?.email}</strong>
                     </div>
-                    <button onClick={handleEmailVerify}
-                      className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
+                    {emailError && <p className="text-xs text-red-500 text-center">{emailError}</p>}
+                    <button onClick={handleEmailVerify} disabled={emailSending}
+                      className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
                       style={{ backgroundColor: "var(--accent-primary)" }}>
-                      Send Verification Code
-                    </button>
-                    <button onClick={() => { setEmailConfirmed(true); }}
-                      className="w-full py-2 text-xs"
-                      style={{ color: "var(--text-hint)" }}>
-                      Already verified — mark as done
+                      {emailSending ? "Sending…" : "Send Verification Code"}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Enter the 6-digit code sent to your email:</p>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Enter the 6-digit code sent to <strong>{user?.email}</strong>:</p>
                     <input
-                      value={emailCode} onChange={e => setEmailCode(e.target.value)}
-                      placeholder="Enter code" maxLength={6}
-                      className="w-full px-4 py-3 rounded-xl text-center text-xl font-bold tracking-widest outline-none"
-                      style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+                      value={emailCode} onChange={e => { setEmailCode(e.target.value); setEmailError(""); }}
+                      placeholder="000000" maxLength={6}
+                      className="w-full px-4 py-3 rounded-xl text-center text-2xl font-bold tracking-widest outline-none"
+                      style={{ backgroundColor: "var(--bg-subtle)", border: `1px solid ${emailError ? "#EF4444" : "var(--border-light)"}`, color: "var(--text-primary)" }}
                     />
-                    <button onClick={handleEmailCode} disabled={emailCode.length < 4}
+                    {emailError && <p className="text-xs text-red-500 text-center">{emailError}</p>}
+                    <button onClick={handleEmailCode} disabled={emailCode.length < 6 || emailChecking}
                       className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
                       style={{ backgroundColor: "var(--accent-primary)" }}>
-                      Verify Email
+                      {emailChecking ? "Verifying…" : "Verify Email"}
+                    </button>
+                    <button onClick={() => { setEmailSent(false); setEmailCode(""); setEmailError(""); }}
+                      className="w-full py-2 text-xs" style={{ color: "var(--text-hint)" }}>
+                      Resend code
                     </button>
                   </div>
                 )}
