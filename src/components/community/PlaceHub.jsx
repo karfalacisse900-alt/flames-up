@@ -4,10 +4,9 @@ import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X, MapPin, Bookmark, BookmarkCheck, Image, Video, MessageSquare,
-  Calendar, Lightbulb, Users, BellPlus, BellOff
+  Calendar, Lightbulb, Users, BellPlus, BellOff, Navigation
 } from "lucide-react";
 import CommunityPostCard from "./CommunityPostCard";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import PeopleHereNow from "@/components/places/PeopleHereNow";
 import LocationTipsTab from "@/components/places/LocationTipsTab";
 import LocationEventsTab from "@/components/places/LocationEventsTab";
