@@ -298,6 +298,15 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
   const [showFilter, setShowFilter] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
 
+  // Clear all overlays when component unmounts (page navigation)
+  useEffect(() => {
+    return () => {
+      setPreviewItem(null);
+      setShowFilter(false);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const featured = useMemo(() =>
     items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(0, 10),
   [items]);
