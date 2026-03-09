@@ -222,8 +222,8 @@ export default function Profile() {
           </div>
 
           {/* Name & bio */}
-          <h2 className="text-lg font-semibold mt-1" style={{ color: "var(--text-primary)" }}>{user.display_name || user.full_name}</h2>
-          {user.username && <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>{user.username}</p>}
+          <h2 className="text-xl font-bold mt-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.4px" }}>{user.display_name || user.full_name}</h2>
+          {user.username && <p className="text-xs font-bold" style={{ color: "var(--accent-primary)" }}>{user.username}</p>}
           {user.about_me && (
             <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
               {user.about_me}
