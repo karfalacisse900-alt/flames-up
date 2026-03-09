@@ -272,7 +272,7 @@ function CategoryFilterSheet({ activeCategory, onChange, onClose }) {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </div>
   );
 }
 
