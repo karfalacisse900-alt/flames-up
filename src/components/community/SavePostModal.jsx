@@ -67,8 +67,8 @@ export default function SavePostModal({ post, user, onClose }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+      className="fixed inset-0 flex items-end"
+      style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)", zIndex: 9999 }}
       onClick={onClose}
     >
       <motion.div

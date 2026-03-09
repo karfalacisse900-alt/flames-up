@@ -145,14 +145,22 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: loaded ? "4/5" : undefined,
-        maxHeight: loaded ? "80vh" : undefined,
+        aspectRatio: "4/5",
+        maxHeight: "56vh",
         width: "100%",
         cursor: "pointer",
         userSelect: "none",
-        background: loaded ? "#000" : "transparent",
+        background: "#1a1a1a",
       }}
     >
+      {/* Skeleton while loading */}
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "#1a1a1a" }}>
+          <div className="flex flex-col items-center gap-2 opacity-40">
+            <div className="w-10 h-10 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
+          </div>
+        </div>
+      )}
       <video
         ref={videoRef}
         src={src}
@@ -161,7 +169,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         preload="metadata"
         onLoadedMetadata={() => setLoaded(true)}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ display: loaded ? "block" : "none" }}
+        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
       />
 
       {/* Tap icon feedback */}

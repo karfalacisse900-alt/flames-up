@@ -49,7 +49,7 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
   return (
     <div
       className="fixed inset-0 flex flex-col justify-end"
-      style={{ zIndex: 80 }}
+      style={{ zIndex: 9999 }}
     >
       {/* Backdrop — click to close */}
       <motion.div
