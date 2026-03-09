@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import {
   Search, Plus, Users, Lock, MapPin, Globe, Flame,
   Star, ChevronRight, Zap, Navigation, X, Filter
 } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
-import CreateGroupModal from "@/components/groups/CreateGroupModal";
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const CATEGORY_GRADIENTS = {
