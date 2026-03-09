@@ -311,6 +311,30 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
           {/* EVENTS TAB */}
           {activeTab === "events" && (
             <div className="mt-3 pb-28">
+              {/* Verification prompt for admin/host */}
+              {isAdmin && group.group_type === "realworld" && user && (
+                <div className="mx-4 mb-3 px-3 py-3 rounded-2xl flex items-center gap-3"
+                  style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+                  <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: "#1D4ED8" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold" style={{ color: "#1D4ED8" }}>Get Verified Host badge</p>
+                    <p className="text-[11px]" style={{ color: "#3B82F6" }}>Build trust with attendees for your real-world events</p>
+                  </div>
+                  <button onClick={() => setShowVerification(true)}
+                    className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold text-white"
+                    style={{ backgroundColor: "#1D4ED8" }}>
+                    Verify
+                  </button>
+                </div>
+              )}
+              {/* Event privacy setting */}
+              {isMember && (
+                <button onClick={() => setShowEventPrivacy(true)}
+                  className="mx-4 mb-3 flex items-center gap-2 text-xs font-medium"
+                  style={{ color: "var(--text-hint)" }}>
+                  <Shield className="w-3 h-3" /> Event privacy settings
+                </button>
+              )}
               {upcomingEvents.length === 0 && pastEvents.length === 0 ? (
                 <div className="py-12 text-center px-8">
                   <div className="text-4xl mb-3">📅</div>
