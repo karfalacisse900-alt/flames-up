@@ -34,6 +34,7 @@ const CATEGORY_COLORS = {
 const TABS = [
   { key: "chat", label: "Chat", icon: MessageSquare },
   { key: "events", label: "Events", icon: Calendar },
+  { key: "members", label: "Members", icon: Users },
   { key: "games", label: "Games", icon: Gamepad2 },
   { key: "media", label: "Watch", icon: Film },
 ];
