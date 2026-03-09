@@ -257,24 +257,28 @@ export default function Profile() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
-        <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <MessageSquare className="w-3.5 h-3.5" /> Posts
-          </TabsTrigger>
-          <TabsTrigger value="liked" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Heart className="w-3.5 h-3.5" /> Liked
-          </TabsTrigger>
-          <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Medal className="w-3.5 h-3.5" /> Badges
-          </TabsTrigger>
-          <TabsTrigger value="saved_items" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <FolderOpen className="w-3.5 h-3.5" /> Apps
-          </TabsTrigger>
-          <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <Sparkles className="w-3.5 h-3.5" /> Interests
-          </TabsTrigger>
-        </TabsList>
+      <div className="px-5 mt-5 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+        {[
+          { value: "posts", icon: MessageSquare, label: "Posts" },
+          { value: "liked", icon: Heart, label: "Liked" },
+          { value: "badges", icon: Medal, label: "Badges" },
+          { value: "saved_items", icon: FolderOpen, label: "Apps" },
+          { value: "interests", icon: Sparkles, label: "Interests" },
+        ].map(({ value, icon: Icon, label }) => (
+          <button key={value} onClick={() => setActiveTab(value)}
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all"
+            style={{
+              backgroundColor: activeTab === value ? "#1E1E1E" : "var(--bg-card)",
+              color: activeTab === value ? "#fff" : "var(--text-secondary)",
+              border: `1.5px solid ${activeTab === value ? "#1E1E1E" : "var(--border-light)"}`,
+              boxShadow: activeTab === value ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+            }}>
+            <Icon className="w-3.5 h-3.5" /> {label}
+          </button>
+        ))}
+      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-1">
+        <TabsList className="hidden">
 
         <TabsContent value="posts" className="mt-4 space-y-3">
           {myPosts.length === 0 ? (
