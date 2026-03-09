@@ -72,34 +72,36 @@ export default function DYKCard({ fact, user, onVoted }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      transition={{ type: "spring", stiffness: 280, damping: 24 }}
+      className="rounded-3xl overflow-hidden"
+      style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
     >
-      {/* Gradient accent bar + category */}
-      <div className="h-2 w-full" style={{ background: gradient }} />
+      {/* Organic header band */}
+      <div className="relative overflow-hidden px-4 pt-4 pb-5" style={{ background: `linear-gradient(135deg, ${cat.gradient[0]}18, ${cat.gradient[1]}30)` }}>
+        {/* Decorative blobs */}
+        <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${cat.gradient[0]}, ${cat.gradient[1]})` }} />
+        <div className="absolute top-3 right-14 w-8 h-8 rounded-full opacity-15" style={{ background: cat.gradient[1] }} />
 
-      <div className="px-4 pt-3 pb-3">
-        {/* Top row: category pill + quality badge */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between relative z-10 mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-base" style={{ background: gradient }}>
+            <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-lg shadow-md" style={{ background: gradient }}>
               <span>{cat.emoji}</span>
             </div>
             <div>
-              <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--text-hint)" }}>Did You Know</p>
-              <p className="text-xs font-semibold leading-none" style={{ color: "var(--text-secondary)" }}>{cat.label}</p>
+              <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: cat.gradient[0] }}>Did You Know</p>
+              <p className="text-xs font-bold" style={{ color: "var(--text-secondary)" }}>{cat.label}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             {quality && (
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${quality.bg}`}>
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${quality.bg}`}>
                 <quality.icon className="w-3 h-3" /> {quality.label}
               </span>
             )}
             {totalEngagement > 0 && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ backgroundColor: "rgba(0,0,0,0.07)", color: "var(--text-secondary)" }}>
                 🔥 {totalEngagement}
               </span>
             )}
@@ -107,30 +109,32 @@ export default function DYKCard({ fact, user, onVoted }) {
         </div>
 
         {/* Fact content */}
-        <p className="text-[15px] leading-relaxed font-semibold mb-3"
+        <p className="text-base leading-relaxed font-bold relative z-10"
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
           {localFact.content?.replace(/^(.+?)\n\1$/, "$1")}
         </p>
+      </div>
 
+      <div className="px-4 pt-3 pb-3">
         {/* Image */}
         {localFact.image_url && (
-          <div className="rounded-xl overflow-hidden mb-3">
-            <img src={localFact.image_url} alt="" className="w-full max-h-48 object-cover" />
+          <div className="rounded-2xl overflow-hidden mb-3">
+            <img src={localFact.image_url} alt="" className="w-full max-h-52 object-cover" />
           </div>
         )}
 
         {/* Source link */}
         {localFact.source_link && (
           <a href={localFact.source_link} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs mb-3 font-medium"
-            style={{ color: cat.gradient[0] }}>
+            className="inline-flex items-center gap-1 text-xs mb-3 font-bold px-3 py-1.5 rounded-full"
+            style={{ backgroundColor: `${cat.gradient[0]}18`, color: cat.gradient[0] }}>
             <ExternalLink className="w-3 h-3" /> View Source
           </a>
         )}
 
         {/* Vote counts */}
         {(localFact.useful_count > 0 || localFact.didnt_know_count > 0 || localFact.knew_count > 0) && (
-          <div className="flex gap-3 text-xs mb-2" style={{ color: "var(--text-hint)" }}>
+          <div className="flex gap-3 text-xs mb-2 font-medium" style={{ color: "var(--text-hint)" }}>
             {localFact.useful_count > 0 && <span>👍 {localFact.useful_count.toLocaleString()}</span>}
             {localFact.didnt_know_count > 0 && <span>🤯 {localFact.didnt_know_count.toLocaleString()}</span>}
             {localFact.knew_count > 0 && <span>✅ {localFact.knew_count.toLocaleString()}</span>}
@@ -140,20 +144,20 @@ export default function DYKCard({ fact, user, onVoted }) {
       </div>
 
       {/* Action row */}
-      <div className="flex items-center border-t px-1 py-1" style={{ borderColor: "var(--border-subtle)" }}>
+      <div className="flex items-center border-t px-2 py-2 gap-1" style={{ borderColor: "var(--border-subtle)" }}>
         <VoteBtn emoji="👍" label="Useful" active={myVote === "useful"} gradient={gradient} onClick={() => handleVote("useful")} />
         <VoteBtn emoji="🤯" label="Mind blown" active={myVote === "didnt_know"} gradient={gradient} onClick={() => handleVote("didnt_know")} />
         <VoteBtn emoji="✅" label="Knew it" active={myVote === "knew"} gradient={gradient} onClick={() => handleVote("knew")} />
         <button
           onClick={() => setShowComments(v => !v)}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium"
-          style={{ color: showComments ? "var(--accent-primary)" : "var(--text-hint)" }}>
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-xs font-bold"
+          style={{ color: showComments ? cat.gradient[0] : "var(--text-hint)", backgroundColor: showComments ? `${cat.gradient[0]}12` : "transparent" }}>
           <MessageCircle className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Comment</span>
         </button>
         <button
           onClick={handleShare}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium"
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-xs font-bold"
           style={{ color: "var(--text-hint)" }}>
           <Share2 className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Share</span>
