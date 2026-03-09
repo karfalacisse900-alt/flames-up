@@ -95,28 +95,35 @@ export default function PlacesPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.96)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="px-4 pt-4 pb-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
-              <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                Places
-              </h1>
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.97)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="relative overflow-hidden px-4 pt-4 pb-3">
+          {/* Organic blobs */}
+          <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
+          <div className="absolute top-2 right-16 w-8 h-8 rounded-full opacity-15 pointer-events-none" style={{ background: "#D98B62" }} />
+
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-md" style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
+                <MapPin className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>Places</h1>
+                <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Explore your world ✦</p>
+              </div>
             </div>
             {/* View toggle */}
-            <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
+            <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
               {[
                 { key: "feed", icon: List },
                 { key: "map", icon: Map },
                 { key: "saved", icon: Bookmark },
               ].map(({ key, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)}
-                  className="p-1.5 rounded-lg transition-all"
+                  className="p-2 rounded-xl transition-all"
                   style={{
-                    backgroundColor: viewMode === key ? "var(--bg-card)" : "transparent",
-                    color: viewMode === key ? "var(--accent-primary)" : "var(--text-hint)",
-                    boxShadow: viewMode === key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                    backgroundColor: viewMode === key ? "#1E1E1E" : "transparent",
+                    color: viewMode === key ? "#fff" : "var(--text-hint)",
+                    boxShadow: viewMode === key ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
                   }}>
                   <Icon className="w-4 h-4" />
                 </button>
@@ -125,14 +132,14 @@ export default function PlacesPage() {
           </div>
 
           {/* Search */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3"
-            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl relative z-10"
+            style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
             <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search places, cities…"
-              className="flex-1 bg-transparent outline-none text-sm"
+              className="flex-1 bg-transparent outline-none text-sm font-medium"
               style={{ color: "var(--text-primary)" }}
             />
             {searchQuery && (
