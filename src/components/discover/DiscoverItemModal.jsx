@@ -25,12 +25,23 @@ const platformIcon = (p) => {
 };
 
 export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, allItems = [] }) {
-  // Lock body scroll when modal is open
+  // Robust scroll lock — always restores on unmount
   useEffect(() => {
     const prev = document.body.style.overflow;
+    const prevPos = document.body.style.position;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prev;
+      document.body.style.position = prevPos;
+    };
   }, []);
+
+  // Close on browser back / route change
+  useEffect(() => {
+    const handlePopState = () => onClose();
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [onClose]);
 
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
