@@ -431,6 +431,20 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
         {showModeration && (
           <GroupModerationPanel group={group} user={user} onClose={() => setShowModeration(false)} />
         )}
+        {showVerification && user && (
+          <HostVerificationModal user={user} onClose={() => setShowVerification(false)}
+            onVerified={() => setShowVerification(false)} />
+        )}
+        {showSafetyTools && user && (
+          <SafetyToolsMenu
+            groupId={group.id} groupName={group.name}
+            targetEmail={group.creator_email} targetName={group.creator_name || "Host"}
+            user={user} onClose={() => setShowSafetyTools(false)}
+            onLeft={() => { onLeave?.(); onBack?.(); }} />
+        )}
+        {showEventPrivacy && user && (
+          <EventSafetySettings user={user} onClose={() => setShowEventPrivacy(false)} />
+        )}
       </AnimatePresence>
     </div>
   );
