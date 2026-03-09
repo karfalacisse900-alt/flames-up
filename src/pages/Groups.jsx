@@ -504,7 +504,7 @@ export default function Groups() {
             <p className="text-xs" style={{ color: "var(--text-hint)" }}>Join communities. Meet people.</p>
           </div>
           {user && (
-            <button onClick={() => setShowCreate(true)}
+            <button onClick={() => navigate(createPageUrl("CreateGroup"))}
               className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold text-white"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
               <Plus className="w-4 h-4" /> Create
