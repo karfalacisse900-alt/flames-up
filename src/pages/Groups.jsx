@@ -658,11 +658,6 @@ export default function Groups() {
         </div>
       )}
 
-      <AnimatePresence>
-        {showCreate && user && (
-          <CreateGroupModal user={user} onClose={() => setShowCreate(false)} onCreated={handleCreated} />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
