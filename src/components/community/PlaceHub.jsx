@@ -106,90 +106,122 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
   const lng = locationData.lng || posts.find(p => p.location_lng)?.location_lng;
   const hasCoords = lat && lng;
 
+  // Mapbox token from env (served via backend or hardcoded public key path)
+  const MAPBOX_TOKEN_KEY = "MAPBOX_ACCESS_TOKEN";
+  const [mbToken, setMbToken] = React.useState(null);
+  React.useEffect(() => {
+    base44.functions.invoke("mapboxToken", {}).then(r => setMbToken(r.data?.token || r.data)).catch(() => {});
+  }, []);
+
+  const mapboxStaticUrl = hasCoords && mbToken
+    ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+2E6B4F(${lng},${lat})/${lng},${lat},15,0/700x200@2x?access_token=${mbToken}`
+    : null;
+
+  const openInMapbox = () => {
+    if (hasCoords) window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="shrink-0" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-start gap-3 px-4 pt-4 pb-3">
-          <button onClick={onClose} className="p-2 rounded-full mt-0.5" style={{ backgroundColor: "var(--bg-subtle)" }}>
-            <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-          </button>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="text-base font-bold truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                {locationName}
-              </h2>
-            </div>
-            {(locationData.city || locationData.country) && (
-              <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
-                {[locationData.city, locationData.region, locationData.country].filter(Boolean).join(", ")}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {user && (
-                <>
-                  <button onClick={toggleFollow} disabled={followLoading}
-                    className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border transition-all"
-                    style={{
-                      backgroundColor: isFollowing ? "var(--accent-primary)" : "transparent",
-                      borderColor: isFollowing ? "var(--accent-primary)" : "var(--border-medium)",
-                      color: isFollowing ? "#fff" : "var(--text-secondary)",
-                    }}>
-                    {isFollowing ? <BellOff className="w-3 h-3" /> : <BellPlus className="w-3 h-3" />}
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
-                  <button onClick={toggleSave} disabled={savedLoading}
-                    className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border transition-all"
-                    style={{
-                      backgroundColor: isSaved ? "#1D4ED8" : "transparent",
-                      borderColor: isSaved ? "#1D4ED8" : "var(--border-medium)",
-                      color: isSaved ? "#fff" : "var(--text-secondary)",
-                    }}>
-                    {isSaved ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
-                    {isSaved ? "Saved" : "Save"}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Mini map */}
-        {hasCoords && (
-          <div className="h-28 mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-light)" }}>
-            <MapContainer center={[lat, lng]} zoom={15} style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom={false} zoomControl={false} dragging={false} doubleClickZoom={false} attributionControl={false}>
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[lat, lng]}>
-                <Popup>{locationName}</Popup>
-              </Marker>
-            </MapContainer>
+      {/* Hero map banner */}
+      <div className="relative shrink-0 h-44 overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
+        {mapboxStaticUrl ? (
+          <img src={mapboxStaticUrl} alt="map" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #2E6B4F22, #4CAF7D33)" }}>
+            <MapPin className="w-10 h-10 opacity-30" style={{ color: "var(--accent-primary)" }} />
           </div>
         )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)" }} />
 
+        {/* Close button */}
+        <button onClick={onClose}
+          className="absolute top-4 left-4 p-2 rounded-full backdrop-blur-sm"
+          style={{ backgroundColor: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+          <X className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
+        </button>
+
+        {/* Directions button */}
+        {hasCoords && (
+          <button onClick={openInMapbox}
+            className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-sm"
+            style={{ backgroundColor: "rgba(255,255,255,0.9)", color: "var(--accent-primary)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+            <Navigation className="w-3 h-3" /> Directions
+          </button>
+        )}
+
+        {/* Location name over map */}
+        <div className="absolute bottom-3 left-4 right-4">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "var(--accent-primary)" }}>
+              <MapPin className="w-3 h-3 text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-white leading-tight drop-shadow-sm"
+              style={{ fontFamily: "var(--font-serif)" }}>
+              {locationName}
+            </h2>
+          </div>
+          {(locationData.city || locationData.country) && (
+            <p className="text-xs text-white/80 pl-6.5 drop-shadow-sm">
+              {[locationData.city, locationData.region, locationData.country].filter(Boolean).join(", ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Action bar */}
+      <div className="shrink-0 px-4 py-3 flex items-center justify-between"
+        style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
         {/* Stats */}
-        <div className="flex gap-4 px-5 pb-2 text-xs" style={{ color: "var(--text-hint)" }}>
+        <div className="flex gap-4 text-xs" style={{ color: "var(--text-hint)" }}>
           <span><strong style={{ color: "var(--text-primary)" }}>{posts.length}</strong> posts</span>
           <span><strong style={{ color: "var(--text-primary)" }}>{photoPosts.length}</strong> photos</span>
           <span><strong style={{ color: "var(--text-primary)" }}>{videoPosts.length}</strong> videos</span>
         </div>
-
-        {/* Tabs – horizontal scroll */}
-        <div className="flex gap-0 px-4 overflow-x-auto scrollbar-hide">
-          {TABS.map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap shrink-0"
+        {user && (
+          <div className="flex gap-2">
+            <button onClick={toggleFollow} disabled={followLoading}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
               style={{
-                borderColor: activeTab === tab.key ? "var(--accent-primary)" : "transparent",
-                color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-hint)",
-                backgroundColor: "transparent",
+                backgroundColor: isFollowing ? "var(--accent-primary)" : "var(--bg-subtle)",
+                color: isFollowing ? "#fff" : "var(--text-secondary)",
+                border: `1.5px solid ${isFollowing ? "var(--accent-primary)" : "var(--border-light)"}`,
               }}>
-              <tab.icon className="w-3.5 h-3.5" />
-              {tab.label}
+              {isFollowing ? <BellOff className="w-3 h-3" /> : <BellPlus className="w-3 h-3" />}
+              {isFollowing ? "Following" : "Follow"}
             </button>
-          ))}
-        </div>
+            <button onClick={toggleSave} disabled={savedLoading}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+              style={{
+                backgroundColor: isSaved ? "#2E6B4F" : "var(--bg-subtle)",
+                color: isSaved ? "#fff" : "var(--text-secondary)",
+                border: `1.5px solid ${isSaved ? "#2E6B4F" : "var(--border-light)"}`,
+              }}>
+              {isSaved ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
+              {isSaved ? "Saved" : "Save"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs – horizontal scroll */}
+      <div className="shrink-0 flex gap-0 px-4 overflow-x-auto scrollbar-hide"
+        style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        {TABS.map(tab => (
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap shrink-0"
+            style={{
+              borderColor: activeTab === tab.key ? "var(--accent-primary)" : "transparent",
+              color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-hint)",
+              backgroundColor: "transparent",
+            }}>
+            <tab.icon className="w-3.5 h-3.5" />
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
