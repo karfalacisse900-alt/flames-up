@@ -160,9 +160,10 @@ function AppFeedCard({ item, user, onOpen, index }) {
 // ── Section header ─────────────────────────────────────────────────────────
 function SectionHeader({ icon, label }) {
   return (
-    <div className="flex items-center gap-2 mb-3 mt-5">
+    <div className="flex items-center gap-2 mb-3 mt-6">
       <span className="text-base">{icon}</span>
-      <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
+      <h2 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>{label}</h2>
+      <div className="flex-1 h-px ml-1" style={{ backgroundColor: "var(--border-subtle)" }} />
     </div>
   );
 }
