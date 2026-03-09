@@ -257,12 +257,12 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
                       style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
                     />
                     <div className="px-4 py-3 rounded-xl text-xs" style={{ backgroundColor: "#F0FDF4", color: "#16A34A", border: "1px solid #BBF7D0" }}>
-                      🔒 Your phone number is encrypted and never visible to other users
+                      🔒 Your number is kept private and stored securely for identity verification only.
                     </div>
                     <button onClick={handlePhoneSubmit} disabled={!phone.trim()}
                       className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
                       style={{ backgroundColor: "var(--accent-primary)" }}>
-                      Verify Phone Number
+                      Submit Phone Number
                     </button>
                   </div>
                 )}
