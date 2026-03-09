@@ -68,57 +68,59 @@ function TrendingCard({ item, onOpen }) {
 
 // ── Feed card ───────────────────────────────────────────────────────────────
 function AppFeedCard({ item, user, onOpen, index }) {
+  const [a, b] = CATEGORY_GRADIENTS[item.category] || CATEGORY_GRADIENTS.general;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.04, 0.3) }}
-      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform h-full flex flex-col"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      transition={{ delay: Math.min(index * 0.04, 0.3), type: "spring", stiffness: 280, damping: 24 }}
+      className="rounded-3xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform h-full flex flex-col"
+      style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}
       onClick={onOpen}
     >
-      {/* Banner */}
-      <div className="h-16 relative flex items-center px-4 gap-3" style={{ background: getGradient(item.category) }}>
-        <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-          <DiscoverLogo item={item} size="md" />
+      {/* Top organic shape */}
+      <div className="relative h-24 overflow-hidden flex items-end px-4 pb-3" style={{ background: `linear-gradient(135deg, ${a}22, ${b}44)` }}>
+        {/* Blob decoration */}
+        <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-30" style={{ background: `radial-gradient(circle, ${a}, ${b})` }} />
+        <div className="absolute top-2 right-8 w-8 h-8 rounded-full opacity-20" style={{ background: b }} />
+
+        <div className="flex items-end gap-3 z-10 w-full">
+          <div className="w-13 h-13 rounded-2xl overflow-hidden shadow-lg flex-shrink-0" style={{ background: `linear-gradient(135deg, ${a}, ${b})`, width: 52, height: 52 }}>
+            <DiscoverLogo item={item} size="md" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-sm leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{item.title}</h3>
+            {item.brand_name && <p className="text-[11px] mt-0.5 font-medium" style={{ color: a }}>{item.brand_name}</p>}
+          </div>
+          {item.is_featured && (
+            <span className="shrink-0 flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full text-white" style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}>
+              🔥 Hot
+            </span>
+          )}
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm text-white leading-tight truncate">{item.title}</h3>
-          {item.brand_name && <p className="text-[11px] text-white/70 truncate">{item.brand_name}</p>}
-        </div>
-        {item.is_featured && (
-          <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">
-            <Flame className="w-3 h-3" /> Hot
-          </span>
-        )}
       </div>
 
       {/* Body */}
-      <div className="px-4 py-3 flex flex-col flex-1">
-        <p className="text-xs leading-relaxed mb-3 line-clamp-2 flex-1" style={{ color: "var(--text-secondary)" }}>
+      <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
+        <p className="text-[13px] leading-relaxed mb-3 line-clamp-2 flex-1" style={{ color: "var(--text-secondary)" }}>
           {item.description}
         </p>
 
         {/* Tags row */}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {item.pricing && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+            <span className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ backgroundColor: `${a}18`, color: a }}>
               {item.pricing}
             </span>
           )}
           {item.is_new && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
-              NEW
+            <span className="text-[11px] px-2.5 py-1 rounded-full font-black text-white" style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}>
+              ✦ NEW
             </span>
           )}
-          {item.tags?.slice(0, 3).map((tag, i) => (
-            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+          {item.tags?.slice(0, 2).map((tag, i) => (
+            <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
               {tag}
-            </span>
-          ))}
-          {item.platforms?.slice(0, 2).map((p, i) => (
-            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-              {p}
             </span>
           ))}
         </div>
@@ -129,7 +131,7 @@ function AppFeedCard({ item, user, onOpen, index }) {
             {(item.avg_rating || 0) > 0 ? (
               <StarRating value={item.avg_rating || 0} showCount count={item.review_count || 0} />
             ) : (
-              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>No reviews yet</span>
+              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>Be first to review</span>
             )}
           </div>
           <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
@@ -141,8 +143,9 @@ function AppFeedCard({ item, user, onOpen, index }) {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl text-white transition-transform hover:scale-105"
-                style={{ backgroundColor: "var(--accent-primary)" }}
+                className="flex items-center gap-1 text-xs font-black px-4 py-2 rounded-full text-white"
+                style={{ background: `linear-gradient(135deg, ${a}, ${b})`, boxShadow: `0 4px 12px ${a}44` }}
+                onClick={e => e.stopPropagation()}
               >
                 Open <ExternalLink className="w-3 h-3" />
               </a>
