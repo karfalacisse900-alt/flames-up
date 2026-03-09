@@ -10,6 +10,9 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
   const [emailSent, setEmailSent] = useState(false);
   const [emailCode, setEmailCode] = useState("");
   const [emailConfirmed, setEmailConfirmed] = useState(!!user?.is_email_verified);
+  const [emailError, setEmailError] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(false);
   const [phone, setPhone] = useState(user?.verification_phone || "");
   const [phoneConfirmed, setPhoneConfirmed] = useState(!!user?.is_phone_verified);
   const [selfieUrl, setSelfieUrl] = useState("");
@@ -18,20 +21,43 @@ export default function HostVerificationModal({ user, onClose, onVerified }) {
   const [saving, setSaving] = useState(false);
 
   const handleEmailVerify = async () => {
-    // Simulate sending – in production wire to a backend function
-    setEmailSent(true);
+    setEmailSending(true);
+    setEmailError("");
+    try {
+      const res = await base44.functions.invoke('sendVerificationEmail', {});
+      if (res.data?.success) {
+        setEmailSent(true);
+      } else {
+        setEmailError(res.data?.error || "Failed to send code. Try again.");
+      }
+    } catch (e) {
+      setEmailError("Failed to send code. Try again.");
+    }
+    setEmailSending(false);
   };
 
   const handleEmailCode = async () => {
-    if (emailCode.length < 4) return;
-    setEmailConfirmed(true);
-    await base44.auth.updateMe({ is_email_verified: true });
+    if (emailCode.length < 6) return;
+    setEmailChecking(true);
+    setEmailError("");
+    try {
+      const res = await base44.functions.invoke('checkVerificationCode', { code: emailCode, type: 'email' });
+      if (res.data?.success) {
+        setEmailConfirmed(true);
+      } else {
+        setEmailError(res.data?.error || "Incorrect code.");
+      }
+    } catch (e) {
+      setEmailError("Verification failed. Try again.");
+    }
+    setEmailChecking(false);
   };
 
   const handlePhoneSubmit = async () => {
     if (!phone.trim()) return;
-    setPhoneConfirmed(true);
+    // Store the phone number for admin review; mark as "submitted" (not SMS-verified)
     await base44.auth.updateMe({ is_phone_verified: true, verification_phone: phone.trim() });
+    setPhoneConfirmed(true);
   };
 
   const handleSelfieUpload = async (e) => {
