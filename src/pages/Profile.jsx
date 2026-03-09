@@ -147,11 +147,17 @@ export default function Profile() {
   return (
     <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Profile header */}
-      <div style={{ backgroundColor: activeTheme.bg, borderBottom: "1px solid var(--border-light)" }}>
-        <div className="px-5 pb-5 pt-4">
-          <div className="flex items-start justify-between mb-3">
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid var(--border-light)" }}>
+        {/* Banner with blobs */}
+        <div className="h-24 relative overflow-hidden" style={{ background: activeTheme.banner }}>
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-30" style={{ background: `radial-gradient(circle, ${activeTheme.accent}, transparent)` }} />
+          <div className="absolute top-2 right-20 w-10 h-10 rounded-full opacity-20" style={{ background: activeTheme.accent }} />
+        </div>
+
+        <div className="px-5 pb-5" style={{ marginTop: -32 }}>
+          <div className="flex items-end justify-between mb-3">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-card)" }}>
+            <div className="w-20 h-20 rounded-3xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0 border-4 shadow-xl" style={{ backgroundColor: "var(--bg-card)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", borderColor: "var(--bg-app)" }}>
               {user.avatar_url ? (
                 <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
               ) : (
@@ -159,26 +165,26 @@ export default function Profile() {
               )}
             </div>
             {/* Action buttons */}
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center pb-1">
             {user?.role === "admin" && (
-              <Link to={createPageUrl("AdminContentManager")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
+              <Link to={createPageUrl("AdminContentManager")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
                 <ShieldCheck className="w-3.5 h-3.5" /> Admin
               </Link>
             )}
-            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
+            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black text-white transition-all" style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 12px rgba(46,107,79,0.3)" }}>
               <Edit2 className="w-3.5 h-3.5" /> Edit
             </button>
-              <Link to={createPageUrl("Messages")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+              <Link to={createPageUrl("Messages")} className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)", backgroundColor: "var(--bg-card)" }}>
                 <MessageSquare className="w-4 h-4" />
               </Link>
-              <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
+              <Link to={createPageUrl("Wallet")} className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)", backgroundColor: "var(--bg-card)" }}>
                 <Wallet className="w-4 h-4" />
               </Link>
               <div className="relative">
                 <button
                   onClick={() => setShowMore(v => !v)}
-                  className="p-2 rounded-full border transition-all"
-                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+                  className="w-9 h-9 rounded-2xl flex items-center justify-center border transition-all"
+                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)", backgroundColor: "var(--bg-card)" }}
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
