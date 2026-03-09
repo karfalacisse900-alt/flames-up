@@ -31,6 +31,11 @@ export default function Discover() {
     base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
       .then(setItems)
       .finally(() => setIsLoading(false));
+    // Ensure modal & scroll lock are cleared when leaving this page
+    return () => {
+      setSelectedItem(null);
+      document.body.style.overflow = "";
+    };
   }, []);
 
   const handleChipSearch = (term) => {
