@@ -209,9 +209,26 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
         })}
       </div>
 
+      {/* Location banner for real-world groups */}
+      {group.group_type === "realworld" && (group.location_name || group.location_city) && activeTab === "chat" && (
+        <button
+          onClick={() => {
+            const q = encodeURIComponent([group.location_name, group.location_city].filter(Boolean).join(", "));
+            window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+          }}
+          className="mx-4 mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold w-[calc(100%-2rem)]"
+          style={{ backgroundColor: "#E8F2EC", color: "var(--accent-primary)", border: "1px solid #2E6B4F30" }}>
+          <MapPin className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">
+            {[group.location_name, group.location_city].filter(Boolean).join(" · ")}
+            {group.meeting_schedule && <span className="ml-1 font-normal" style={{ color: "var(--text-secondary)" }}>· {group.meeting_schedule}</span>}
+          </span>
+        </button>
+      )}
+
       {/* Rules */}
       {group.rules && activeTab === "chat" && (
-        <div className="mx-4 mt-3 px-3 py-2.5 rounded-xl text-xs" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+        <div className="mx-4 mt-2 px-3 py-2.5 rounded-xl text-xs" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
           📋 <strong>Rules:</strong> {group.rules}
         </div>
       )}
