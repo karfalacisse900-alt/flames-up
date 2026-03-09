@@ -187,11 +187,11 @@ function VoteBtn({ emoji, label, active, gradient, onClick }) {
     <motion.button
       whileTap={{ scale: 0.88 }}
       onClick={onClick}
-      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium transition-all"
+      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-sm font-bold transition-all"
       style={{
         color: active ? "white" : "var(--text-hint)",
         background: active ? gradient : "transparent",
-        fontWeight: active ? 700 : 500,
+        boxShadow: active ? "0 3px 10px rgba(0,0,0,0.15)" : "none",
       }}>
       <span>{emoji}</span>
     </motion.button>
