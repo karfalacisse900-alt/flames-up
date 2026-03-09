@@ -226,15 +226,14 @@ export default function Profile() {
           </div>
 
           {/* Name & bio */}
-          <h2 className="text-lg font-semibold mt-1" style={{ color: "var(--text-primary)" }}>{user.display_name || user.full_name}</h2>
-          {user.username && <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>{user.username}</p>}
+          <h2 className="text-xl font-bold mt-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>{user.display_name || user.full_name}</h2>
+          {user.username && <p className="text-xs font-bold mt-0.5" style={{ color: activeTheme.accent }}>{user.username}</p>}
           {user.about_me && (
-            <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
+            <div className="mt-3 p-3.5 rounded-2xl text-sm leading-relaxed" style={{ backgroundColor: "rgba(0,0,0,0.04)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
               {user.about_me}
             </div>
           )}
-          {user.bio && <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
-          {/* Hide email from profile view */}
+          {user.bio && <p className="text-sm mt-2 leading-relaxed font-medium" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
 
           {/* Coin balance */}
           <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
@@ -242,23 +241,19 @@ export default function Profile() {
           </Link>
 
           {/* Stats row */}
-          <div className="flex gap-5 mt-4">
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{myPosts.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Posts</p>
-            </div>
-            <button onClick={() => setShowFollowers(true)} className="text-center" style={{ boxShadow: "none" }}>
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
-            </button>
-            <button onClick={() => setShowFollowing(true)} className="text-center" style={{ boxShadow: "none" }}>
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
-            </button>
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{computedBadges.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Badges</p>
-            </div>
+          <div className="flex gap-2 mt-4">
+            {[
+              { label: "Posts", value: myPosts.length, onClick: null },
+              { label: "Followers", value: followers.length, onClick: () => setShowFollowers(true) },
+              { label: "Following", value: following.length, onClick: () => setShowFollowing(true) },
+              { label: "Badges", value: computedBadges.length, onClick: null },
+            ].map(({ label, value, onClick }) => (
+              <button key={label} onClick={onClick} className="flex-1 py-2.5 rounded-2xl text-center"
+                style={{ backgroundColor: "rgba(0,0,0,0.05)", boxShadow: "none", cursor: onClick ? "pointer" : "default" }}>
+                <p className="text-base font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</p>
+              </button>
+            ))}
           </div>
         </div>
       </div>
