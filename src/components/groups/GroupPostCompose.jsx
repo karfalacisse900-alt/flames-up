@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { X, ImageIcon, Loader2 } from "lucide-react";
+import { X, ImageIcon, Loader2, Paperclip, FileText } from "lucide-react";
 import { checkContent, createModerationReport } from "@/components/moderation/moderationHelper";
 import PhotoEditor from "@/components/editor/PhotoEditor";
 

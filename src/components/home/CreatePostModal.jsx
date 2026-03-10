@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2, Image, Upload } from "lucide-react";
+import { X, Eye, EyeOff, Sparkles, RefreshCw, Loader2, Plus, Trash2, Image, Paperclip, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
