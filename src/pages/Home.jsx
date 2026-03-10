@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import WelcomePopup from "../components/home/WelcomePopup";
-import CommunityFeed from "../components/community/CommunityFeed";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 
@@ -19,7 +18,6 @@ export default function Home() {
       <HomeHeader user={user} />
       <DidYouKnowSection user={user} />
       {divider}
-      <CommunityFeed user={user} />
       <WelcomePopup />
     </div>
   );

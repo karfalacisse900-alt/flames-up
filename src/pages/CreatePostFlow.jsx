@@ -98,7 +98,7 @@ export default function CreatePostFlow() {
       };
 
       await base44.entities.CommunityPost.create(postData);
-      navigate(createPageUrl("CommunityFeed"));
+      navigate(createPageUrl("Home"));
     } catch (error) {
       console.error("Error posting:", error);
       alert("Failed to post. Please try again.");
