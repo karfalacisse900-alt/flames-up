@@ -91,7 +91,7 @@
 html {
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
   height: -webkit-fill-available;
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
