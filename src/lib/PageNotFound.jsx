@@ -7,6 +7,12 @@ export default function PageNotFound({}) {
     const location = useLocation();
     const pageName = location.pathname.substring(1);
 
+    // If navigated to /login, redirect to the platform's auth system
+    if (pageName === 'login') {
+        base44.auth.redirectToLogin();
+        return null;
+    }
+
     const { data: authData, isFetched } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
