@@ -2,11 +2,12 @@ import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
 
-import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin, Heart } from "lucide-react";
 import AutoplayVideo from "./AutoplayVideo";
 import WantToGoButton from "./WantToGoButton";
 import PhotoCarousel from "./PhotoCarousel";
 import SavePostModal from "./SavePostModal";
+import TipButton from "./TipButton";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -197,6 +198,11 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                   <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
                     <EyeOff className="w-3.5 h-3.5" /> Not interested
                   </button>
+                  {!isOwnPost && user && (
+                    <div className="relative">
+                      <TipButton postAuthorEmail={post.author_email} postId={post.id} isMenu={true} />
+                    </div>
+                  )}
                   {isOwnPost && (
                     <button onClick={handleDelete} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
                       <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -376,22 +382,27 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                 <MoreHorizontal className="w-4 h-4" />
               </button>
               {showMenu && (
-                <div
-                  className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}>
-                  <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                    <LinkIcon className="w-3.5 h-3.5" /> Copy link
-                  </button>
-                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                    <EyeOff className="w-3.5 h-3.5" /> Not interested
-                  </button>
-                  {!isOwnPost && (
-                    <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                      <Flag className="w-3.5 h-3.5" /> Report post
+                  <div
+                    className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
+                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}>
+                    <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <LinkIcon className="w-3.5 h-3.5" /> Copy link
                     </button>
-                  )}
-                </div>
-              )}
+                    <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                      <EyeOff className="w-3.5 h-3.5" /> Not interested
+                    </button>
+                    {!isOwnPost && user && (
+                      <div className="w-full">
+                        <TipButton postAuthorEmail={post.author_email} postId={post.id} isMenu={true} />
+                      </div>
+                    )}
+                    {!isOwnPost && (
+                      <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
+                        <Flag className="w-3.5 h-3.5" /> Report post
+                      </button>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </div>
