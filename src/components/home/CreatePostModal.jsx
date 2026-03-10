@@ -57,6 +57,13 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       imageUrl = file_url;
     }
+    let documentUrl = null;
+    let documentName = null;
+    if (docFile) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: docFile });
+      documentUrl = file_url;
+      documentName = docFile.name;
+    }
 
     let pollData = {};
     if (type === "question" && answerType !== "open") {

@@ -51,6 +51,15 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
       imageUrl = file_url;
       setUploading(false);
     }
+    let documentUrl = null;
+    let documentName = null;
+    if (docFile) {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: docFile });
+      documentUrl = file_url;
+      documentName = docFile.name;
+      setUploading(false);
+    }
 
     const modResult = await checkContent(body);
 
