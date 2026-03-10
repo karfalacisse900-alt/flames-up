@@ -18,6 +18,7 @@ import VerifiedBadge from "./safety/VerifiedBadge";
 import HostVerificationModal from "./safety/HostVerificationModal";
 import SafetyToolsMenu from "./safety/SafetyToolsMenu";
 import EventSafetySettings from "./safety/EventSafetySettings";
+import GroupPreviewVideo from "./GroupPreviewVideo";
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
