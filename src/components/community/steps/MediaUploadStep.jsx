@@ -89,40 +89,40 @@ export default function MediaUploadStep({ mediaItems, setMediaItems }) {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         className="border-2 border-dashed rounded-2xl p-8 text-center transition-all"
-        style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-subtle)" }}
+        style={{ borderColor: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}
       >
-        <Upload className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-hint)" }} />
-        <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+        <Upload className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--accent-primary)" }} />
+        <p className="font-semibold mb-1" style={{ color: "var(--accent-primary)" }}>
           Drag media here
         </p>
-        <p className="text-xs mb-4" style={{ color: "var(--text-hint)" }}>
+        <p className="text-xs mb-4" style={{ color: "var(--text-secondary)" }}>
           or choose files below
         </p>
         <div className="flex gap-2 justify-center flex-wrap">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 rounded-lg font-semibold text-sm"
-            style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)" }}
-          >
-            <Image className="w-4 h-4 inline mr-1.5" />
-            Photos
-          </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 rounded-lg font-semibold text-sm"
-            style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)" }}
-          >
-            <Play className="w-4 h-4 inline mr-1.5" />
-            Videos
-          </button>
-          <button
-            onClick={() => cameraInputRef.current?.click()}
-            className="px-4 py-2 rounded-lg font-semibold text-sm"
-            style={{ backgroundColor: "var(--bg-card)", color: "var(--text-secondary)" }}
-          >
-            📹 Record
-          </button>
-        </div>
+           <button
+             onClick={() => fileInputRef.current?.click()}
+             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
+             style={{ backgroundColor: "var(--accent-primary)" }}
+           >
+             <Image className="w-4 h-4 inline mr-1.5" />
+             Photos
+           </button>
+           <button
+             onClick={() => fileInputRef.current?.click()}
+             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
+             style={{ backgroundColor: "var(--accent-primary)" }}
+           >
+             <Play className="w-4 h-4 inline mr-1.5" />
+             Videos
+           </button>
+           <button
+             onClick={() => cameraInputRef.current?.click()}
+             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
+             style={{ backgroundColor: "var(--accent-primary)" }}
+           >
+             📹 Record
+           </button>
+         </div>
       </div>
 
       <input
