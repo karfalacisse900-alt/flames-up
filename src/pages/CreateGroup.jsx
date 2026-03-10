@@ -420,21 +420,62 @@ export default function CreateGroup() {
           {/* ── LOCATION (real-world only) ── */}
           {groupType === "realworld" && (
             <section>
-              <SectionLabel>Location & Schedule</SectionLabel>
+              <SectionLabel>Meeting Location *</SectionLabel>
               <div className="p-4 rounded-3xl space-y-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <Field label="Location Name">
-                  <Input icon={MapPin} value={locationName} onChange={e => setLocationName(e.target.value)} placeholder="e.g. Central Park, Starbucks Downtown" />
+                <Field
+                  label="Meeting Address"
+                  hint="Enter a real public address where your group meets (e.g. Bryant Park, 42nd St, New York)">
+                  <div className="relative">
+                    {validatedAddress ? (
+                      <div className="flex items-start gap-2 px-3 py-3 rounded-2xl"
+                        style={{ backgroundColor: "#E8F2EC", border: "1.5px solid #2E6B4F" }}>
+                        <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#2E6B4F" }} />
+                        <p className="text-xs font-semibold flex-1" style={{ color: "#2E6B4F" }}>{validatedAddress.place_name}</p>
+                        <button onClick={clearAddress} className="shrink-0">
+                          <X className="w-4 h-4" style={{ color: "#2E6B4F" }} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: "var(--text-hint)" }} />
+                        <input
+                          value={addressInput}
+                          onChange={e => { setAddressInput(e.target.value); searchAddress(e.target.value); setValidatedAddress(null); }}
+                          placeholder="Search for a real address or place…"
+                          className="w-full pl-10 pr-4 py-3 rounded-2xl text-sm outline-none"
+                          style={{ backgroundColor: "var(--bg-subtle)", border: `1px solid ${addressError ? "#E05C7A" : "var(--border-light)"}`, color: "var(--text-primary)" }}
+                        />
+                        {addressSearching && (
+                          <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" style={{ color: "var(--text-hint)" }} />
+                        )}
+                      </>
+                    )}
+
+                    <AnimatePresence>
+                      {addressSuggestions.length > 0 && !validatedAddress && (
+                        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                          className="absolute left-0 right-0 top-full mt-1 z-50 rounded-2xl overflow-hidden"
+                          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}>
+                          {addressSuggestions.map((feature, i) => (
+                            <button key={feature.id || i} onClick={() => selectAddress(feature)}
+                              className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-[var(--bg-subtle)] transition-colors"
+                              style={{ borderBottom: i < addressSuggestions.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
+                              <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "var(--accent-primary)" }} />
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{feature.text}</p>
+                                <p className="text-[11px] truncate" style={{ color: "var(--text-hint)" }}>{feature.place_name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  {addressError && <p className="text-xs mt-1 font-medium" style={{ color: "#E05C7A" }}>{addressError}</p>}
                 </Field>
-                <Field label="City">
-                  <Input value={locationCity} onChange={e => setLocationCity(e.target.value)} placeholder="e.g. New York" />
-                </Field>
+
                 <Field label="Meeting Schedule">
                   <Input value={meetingSchedule} onChange={e => setMeetingSchedule(e.target.value)} placeholder="e.g. Every Saturday at 9AM" />
-                </Field>
-                <Field
-                  label="Google Maps URL"
-                  hint="Copy the link from Google Maps so your members can easily find you">
-                  <Input icon={MapPin} value={googleMapsUrl} onChange={e => setGoogleMapsUrl(e.target.value)} placeholder="https://maps.app.goo.gl/..." />
                 </Field>
               </div>
             </section>
