@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Plus, ArrowUp, Zap, MapPin, Loader2 } from "lucide-react";
+import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
-import CreatePostFlow from "./CreatePostFlow";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
@@ -12,8 +13,6 @@ import { rankFeedForUser, trackPostView } from "./feedRanking";
 
 
 export default function CommunityFeed({ user }) {
-  const [showCreate, setShowCreate] = useState(false);
-  const [challengeContext, setChallengeContext] = useState(null);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
@@ -210,12 +209,13 @@ export default function CommunityFeed({ user }) {
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
             <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community</p>
           </div>
-          <button
-            onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
+          <Link
+            to={createPageUrl("CreatePostFlow")}
+            onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
             style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
             <Plus className="w-3 h-3" /> Post
-          </button>
+          </Link>
         </div>
         {/* Feed tabs */}
         <div className="flex gap-0 px-4 pt-2 pb-0">
@@ -282,12 +282,13 @@ export default function CommunityFeed({ user }) {
             <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
               {activeTab === "nearby" ? "Be the first to post with your location tagged!" : "Be the first to share a thought with the community"}
             </p>
-            <button
-              onClick={() => { if (!requireVerified(user)) return; setShowCreate(true); }}
-              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
-              ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
-            </button>
+            <Link
+               to={createPageUrl("CreatePostFlow")}
+               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
+               className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
+               ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
+             </Link>
           </div>
         ) : (
           filteredPosts.map((post, index) => renderPostCard(post, index))
