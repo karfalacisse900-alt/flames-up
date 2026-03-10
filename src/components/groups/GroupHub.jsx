@@ -470,6 +470,42 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
         {showEventPrivacy && user && (
           <EventSafetySettings user={user} onClose={() => setShowEventPrivacy(false)} />
         )}
+        {showDeleteConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            onClick={() => setShowDeleteConfirm(false)}>
+            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="w-full max-w-lg mx-auto rounded-t-3xl p-5 pb-8"
+              style={{ backgroundColor: "var(--bg-card)" }}
+              onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ backgroundColor: "var(--border-medium)" }} />
+              <div className="text-center mb-5">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: "#FFF0F3" }}>
+                  <Trash2 className="w-6 h-6" style={{ color: "#E05C7A" }} />
+                </div>
+                <h3 className="text-base font-bold mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Delete "{group.name}"?</h3>
+                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  This will permanently delete the group and remove all members. This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-3 rounded-2xl text-sm font-semibold"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                  Cancel
+                </button>
+                <button onClick={handleDeleteGroup} disabled={deleting}
+                  className="flex-1 py-3 rounded-2xl text-sm font-bold text-white disabled:opacity-60"
+                  style={{ backgroundColor: "#E05C7A" }}>
+                  {deleting ? "Deleting…" : "Delete Group"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
