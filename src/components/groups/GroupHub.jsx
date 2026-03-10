@@ -77,6 +77,11 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
     return unsubscribe;
   }, [group.id]);
 
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["groupPosts", group.id],
+    queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 50),
+  });
+
   // Auto-scroll to bottom when posts update and chat tab is active
   useEffect(() => {
     if (activeTab === "chat") {
@@ -98,11 +103,6 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
     onBack();
   };
   const gradBg = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
-
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["groupPosts", group.id],
-    queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 50),
-  });
 
   const { data: events = [] } = useQuery({
     queryKey: ["groupEvents", group.id],
