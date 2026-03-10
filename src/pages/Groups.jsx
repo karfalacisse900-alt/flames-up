@@ -242,14 +242,21 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
       const emoji = CATEGORY_EMOJIS[group.category] || "💬";
       const isMember = !!membershipMap[group.id];
 
+      // Outer wrapper: fixed size, no transform (keeps anchor stable)
       const el = document.createElement("div");
-      el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.15s;";
-      el.innerHTML = `
+      el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;width:50px;";
+
+      // Inner wrapper: this one scales on hover (transform-origin bottom so anchor stays fixed)
+      const inner = document.createElement("div");
+      inner.style.cssText = "display:flex;flex-direction:column;align-items:center;transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);transform-origin:bottom center;will-change:transform;";
+      inner.innerHTML = `
         <div style="background:${getGrad(group.category)};border:2.5px solid ${isMember ? "#fff" : "#DCCBB8"};border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">${emoji}</div>
         <div style="background:${a};color:white;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:800;margin-top:3px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,0.18);">${group.name}</div>
       `;
-      el.addEventListener("mouseenter", () => { el.style.transform = "scale(1.12)"; });
-      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; });
+      el.appendChild(inner);
+
+      el.addEventListener("mouseenter", () => { inner.style.transform = "scale(1.15)"; });
+      el.addEventListener("mouseleave", () => { inner.style.transform = "scale(1)"; });
       el.addEventListener("click", e => { e.stopPropagation(); setSelectedGroup(group); });
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "bottom" })
