@@ -215,7 +215,7 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
     if (token) loadMapbox(token);
   }, [token]);
 
-  const requestLocation = useCallback(() => {
+  const requestLocation = () => {
     if (!navigator.geolocation) return;
     setLocationAsked(true);
     navigator.geolocation.getCurrentPosition(pos => {
@@ -228,13 +228,8 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
         el.style.cssText = "width:14px;height:14px;border-radius:50%;background:#2E6B4F;border:3px solid white;box-shadow:0 0 0 5px rgba(46,107,79,0.22),0 2px 8px rgba(0,0,0,0.3);";
         userMarkerRef.current = new window.mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(mapRef.current);
       }
-    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
-  }, []);
-
-  // Auto-request location on mount
-  useEffect(() => {
-    requestLocation();
-  }, []);
+    }, () => {});
+  };
 
   // Plot group markers
   useEffect(() => {
@@ -271,7 +266,8 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
     }
   }, [mapLoaded, realWorldGroups, membershipMap]);
 
-  const hasRealWorldGroups = groups.some(g => g.group_type === "realworld" && g.location_lat && g.location_lng);
+  const hasRealWorldGroups = groups.some(g => g.group_type === "realworld");
+  const groupsWithoutCoords = groups.filter(g => g.group_type === "realworld" && (!g.location_lat || !g.location_lng));
 
   return (
     <div className="pb-6">
