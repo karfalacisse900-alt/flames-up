@@ -502,14 +502,14 @@ export default function PostComments() {
 
         {/* Debate vote bar */}
         {debate && (
-          <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-hint)" }}>VOTE</p>
+          <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-card)" }}>
+            <p className="text-xs font-semibold mb-2" style={{ color: "var(--accent-primary)" }}>VOTE</p>
             <div className="flex gap-2">
               {[["a", debate.side_a_label, debate.side_a_votes || 0], ["b", debate.side_b_label, debate.side_b_votes || 0]].map(([side, label, votes]) => (
                 <div key={side} className="flex-1 px-3 py-2 rounded-xl text-xs text-center"
-                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", fontWeight: 600 }}>
                   <div className="font-semibold truncate">{label}</div>
-                  <div className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>{votes} votes</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--text-primary)", fontWeight: 700 }}>{votes} votes</div>
                 </div>
               ))}
             </div>
