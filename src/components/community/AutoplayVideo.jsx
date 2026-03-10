@@ -16,10 +16,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [buffering, setBuffering] = useState(true);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
-  // eslint-disable-next-line no-unused-vars
-  const [aspect, setAspect] = useState("9/16");
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
@@ -41,7 +40,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const doPlay = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
-    // Pause the previous active video
     if (activeVideo.ref && activeVideo.ref !== videoRef) {
       activeVideo.ref.current?.pause();
       activeVideo.setPlaying?.(false);
@@ -50,19 +48,20 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     activeVideo.setPlaying = setPlaying;
     v.muted = sessionPrefs.muted;
     setMuted(sessionPrefs.muted);
-    // Resume from saved position
     if (postId && videoProgress[postId] > 2) {
       v.currentTime = videoProgress[postId];
     }
     v.play().then(() => {
       setPlaying(true);
-      setSavedProgress(0); // hide banner once playing
-      // Save progress every second
+      setBuffering(false);
+      setSavedProgress(0);
       clearInterval(progressTimer.current);
       progressTimer.current = setInterval(() => {
         if (!v.paused && postId) videoProgress[postId] = Math.floor(v.currentTime);
       }, 1000);
-    }).catch(() => {});
+    }).catch(() => {
+      setBuffering(false);
+    });
   }, [postId]);
 
   const doPause = useCallback(() => {
@@ -74,9 +73,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     pauseGlobally();
   }, [pauseGlobally, postId]);
 
-
-
-  // IntersectionObserver for autoplay
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -113,7 +109,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     const v = videoRef.current;
     if (!v) return;
     if (v.requestFullscreen) v.requestFullscreen();
-    else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); // iOS Safari
+    else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
   };
 
   const handleTap = () => {
@@ -121,11 +117,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => {
       if (tapCount.current >= 2) {
-        // Double tap → like
         flashIcon("like");
         onDoubleTap?.();
       } else {
-        // Single tap → play/pause
         if (playing) {
           doPause();
           flashIcon("pause");
@@ -136,6 +130,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       }
       tapCount.current = 0;
     }, 250);
+  };
+
+  const markLoaded = () => {
+    setLoaded(true);
+    setBuffering(false);
   };
 
   return (
@@ -153,28 +152,52 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         background: "#1a1a1a",
       }}
     >
-      {/* Skeleton while loading */}
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "#1a1a1a" }}>
+      {/* Spinner — shown while buffering, hidden once loaded */}
+      {buffering && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundColor: "#1a1a1a", zIndex: 2 }}
+        >
           <div className="flex flex-col items-center gap-2 opacity-40">
             <div className="w-10 h-10 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
           </div>
         </div>
       )}
+
+      {/*
+        FIX — Black video bug:
+        1. opacity is always 1 — the video element is never hidden.
+           Previously `opacity: loaded ? 1 : 0` kept the video invisible if
+           onLoadedMetadata never fired (mobile autoplay policy, CORS, slow network).
+        2. preload="auto" instead of "metadata" so the browser downloads enough
+           data to render a first frame immediately.
+        3. muted={muted} prop keeps React's muted state in sync with the DOM attribute.
+        4. Multiple load events (onLoadedMetadata, onCanPlay, onLoadedData, onError)
+           all call markLoaded() so we catch whichever fires first.
+      */}
       <video
         ref={videoRef}
         src={src}
         playsInline
         loop
-        preload="metadata"
-        onLoadedMetadata={() => setLoaded(true)}
+        muted={muted}
+        preload="auto"
+        onLoadedMetadata={markLoaded}
+        onCanPlay={markLoaded}
+        onLoadedData={markLoaded}
+        onError={markLoaded}
+        onWaiting={() => setBuffering(true)}
+        onPlaying={() => { setBuffering(false); setLoaded(true); }}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+        style={{ opacity: 1, zIndex: 1 }}
       />
 
       {/* Tap icon feedback */}
       {showIcon && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ zIndex: 5 }}
+        >
           <div
             className="flex items-center justify-center rounded-full"
             style={{
@@ -199,7 +222,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       {savedProgress > 2 && !playing && (
         <div
           className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
-          style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", zIndex: 10 }}
+          style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", zIndex: 4 }}
         >
           <Play className="w-3 h-3" fill="white" />
           Continue from {Math.floor(savedProgress / 60)}:{String(savedProgress % 60).padStart(2, "0")}
@@ -208,7 +231,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
 
       {/* Bottom controls */}
       {loaded && (
-        <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto">
+        <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto" style={{ zIndex: 4 }}>
           <button
             onClick={toggleMute}
             className="p-2 rounded-full"
