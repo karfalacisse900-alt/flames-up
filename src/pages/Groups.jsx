@@ -290,10 +290,8 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
       <div className="px-4 mb-2 flex items-center justify-between">
         <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
           {realWorldGroups.length === 0
-            ? groupsWithoutCoords.length > 0
-              ? `${groupsWithoutCoords.length} group${groupsWithoutCoords.length > 1 ? "s" : ""} need a location to show`
-              : "No real-world groups yet"
-            : `${realWorldGroups.length} group${realWorldGroups.length !== 1 ? "s" : ""} on map${groupsWithoutCoords.length > 0 ? ` · ${groupsWithoutCoords.length} missing location` : ""}`}
+            ? "No real-world groups on map yet"
+            : `${realWorldGroups.length} group${realWorldGroups.length !== 1 ? "s" : ""} on map`}
         </p>
         {!userLocation && (
           <button onClick={requestLocation}
