@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import WelcomePopup from "../components/home/WelcomePopup";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
+import CommunityFeed from "../components/home/CommunityFeed";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -18,6 +19,7 @@ export default function Home() {
       <HomeHeader user={user} />
       <DidYouKnowSection user={user} />
       {divider}
+      <CommunityFeed user={user} />
       <WelcomePopup />
     </div>
   );
