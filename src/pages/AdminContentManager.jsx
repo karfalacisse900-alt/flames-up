@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, Edit2, Trash2, Loader2, AlertCircle, Bell, Filter, CheckSquare, Square, BarChart2, ArrowLeft, Camera, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import CreatorApplicationReview from "@/components/admin/CreatorApplicationReview";
 
 const STATUS_FILTERS = ["all", "pending", "approved", "rejected"];
 
@@ -235,7 +236,7 @@ export default function AdminContentManager() {
 
         {/* Main tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-          {[{ key: "submissions", label: "📝 Submissions", count: pendingSubs }, { key: "reviews", label: "⭐ Reviews", count: pendingRevs }, { key: "dyk", label: "💡 Did You Know", count: pendingDYK }, { key: "challenges", label: "📸 Challenges", count: 0 }].map(tab => (
+          {[{ key: "submissions", label: "📝 Submissions", count: pendingSubs }, { key: "creators", label: "⭐ Creator Apps", count: 0 }, { key: "reviews", label: "⭐ Reviews", count: pendingRevs }, { key: "dyk", label: "💡 Did You Know", count: pendingDYK }, { key: "challenges", label: "📸 Challenges", count: 0 }].map(tab => (
             <button key={tab.key} onClick={() => { setActiveTab(tab.key); setSelectedIds(new Set()); }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
               style={{ backgroundColor: activeTab === tab.key ? "var(--accent-primary)" : "var(--bg-card)", color: activeTab === tab.key ? "#fff" : "var(--text-secondary)", border: `1px solid ${activeTab === tab.key ? "var(--accent-primary)" : "var(--border-light)"}` }}>
@@ -290,6 +291,11 @@ export default function AdminContentManager() {
               </>
             )}
           </div>
+        )}
+
+        {/* Creator Applications */}
+        {activeTab === "creators" && (
+          <CreatorApplicationReview />
         )}
 
         {/* Submissions */}
