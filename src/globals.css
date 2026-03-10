@@ -257,7 +257,6 @@ nav, button, a[role="button"], .no-select {
     max-width: 100%;
   }
   #root > * {
-    overflow-x: clip;
     max-width: 100%;
   }
   img, video, canvas, svg {
