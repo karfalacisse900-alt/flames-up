@@ -477,6 +477,7 @@ export default function Groups() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [mainTab, setMainTab] = useState("discover"); // "discover" | "map"
+  const [showDiscoverFilters, setShowDiscoverFilters] = useState(false);
   const qc = useQueryClient();
 
   useEffect(() => {
