@@ -367,25 +367,81 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
               <span className="absolute bottom-2.5 left-3 text-xl">{selectedGroup.emoji || "💬"}</span>
             </div>
 
-            <div className="px-4 py-3">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{selectedGroup.name}</h3>
-                  {selectedGroup.description && (
-                    <p className="text-xs mt-0.5 line-clamp-2" style={{ color: "var(--text-hint)" }}>{selectedGroup.description}</p>
+            <div className="px-4 py-3 max-h-72 overflow-y-auto">
+              <div className="mb-2">
+                <h3 className="font-bold text-sm mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{selectedGroup.name}</h3>
+                {selectedGroup.description && (
+                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{selectedGroup.description}</p>
+                )}
+              </div>
+
+              {/* Location + members + category */}
+              <div className="flex flex-wrap items-center gap-2 text-[11px] mb-2" style={{ color: "var(--text-hint)" }}>
+                {(selectedGroup.location_city || selectedGroup.location_name) && (
+                  <span className="flex items-center gap-0.5" style={{ color: "var(--accent-primary)" }}>
+                    <MapPin className="w-3 h-3" />{selectedGroup.location_city || selectedGroup.location_name}
+                  </span>
+                )}
+                <span><Users className="w-3 h-3 inline mr-0.5" />{(selectedGroup.member_count || 0).toLocaleString()} members</span>
+                <span className="px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>{selectedGroup.category}</span>
+              </div>
+
+              {/* Schedule */}
+              {selectedGroup.meeting_schedule && (
+                <p className="text-xs mb-2 flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+                  📅 {selectedGroup.meeting_schedule}
+                </p>
+              )}
+
+              {/* Contact */}
+              {(selectedGroup.phone || selectedGroup.email) && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedGroup.phone && (
+                    <a href={`tel:${selectedGroup.phone}`} className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                      📞 {selectedGroup.phone}
+                    </a>
+                  )}
+                  {selectedGroup.email && (
+                    <a href={`mailto:${selectedGroup.email}`} className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                      ✉️ {selectedGroup.email}
+                    </a>
                   )}
                 </div>
-              </div>
-              <div className="flex items-center gap-3 text-[11px] mb-3" style={{ color: "var(--text-hint)" }}>
-                <span className="flex items-center gap-0.5" style={{ color: "var(--accent-primary)" }}>
-                  <MapPin className="w-3 h-3" />{selectedGroup.location_city || "Real-World"}
-                </span>
-                <span><Users className="w-3 h-3 inline mr-0.5" />{(selectedGroup.member_count || 0).toLocaleString()} members</span>
-                <span className="capitalize">{selectedGroup.category}</span>
-              </div>
-              {selectedGroup.meeting_schedule && (
-                <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>📅 {selectedGroup.meeting_schedule}</p>
               )}
+
+              {/* Social links */}
+              {(selectedGroup.social_instagram || selectedGroup.social_facebook || selectedGroup.social_whatsapp || selectedGroup.social_tiktok || selectedGroup.google_maps_url) && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {selectedGroup.google_maps_url && (
+                    <a href={selectedGroup.google_maps_url} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "#E8F5E9", color: "#2E6B4F" }}>🗺️ Maps</a>
+                  )}
+                  {selectedGroup.social_instagram && (
+                    <a href={selectedGroup.social_instagram} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "#FCE4EC", color: "#C2185B" }}>📸 Instagram</a>
+                  )}
+                  {selectedGroup.social_facebook && (
+                    <a href={selectedGroup.social_facebook} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "#E3F2FD", color: "#1565C0" }}>👥 Facebook</a>
+                  )}
+                  {selectedGroup.social_whatsapp && (
+                    <a href={selectedGroup.social_whatsapp} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "#E8F5E9", color: "#2E7D32" }}>💬 WhatsApp</a>
+                  )}
+                  {selectedGroup.social_tiktok && (
+                    <a href={selectedGroup.social_tiktok} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "#F3E5F5", color: "#6A1B9A" }}>🎵 TikTok</a>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <button onClick={() => { setSelectedGroup(null); onOpen(selectedGroup); }}
                   className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white"
