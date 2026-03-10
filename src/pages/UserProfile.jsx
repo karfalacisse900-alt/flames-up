@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, UserPlus, UserMinus, MessageSquare } from "lucide-react";
+import { ArrowLeft, UserPlus, UserMinus, MessageSquare, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+
+const PLATFORM_LABELS = {
+  fiverr: "Hire on Fiverr",
+  spotify: "Listen on Spotify",
+  shopify: "Visit Store",
+  instagram: "Follow on Instagram",
+  twitter: "Follow on Twitter",
+  tiktok: "Follow on TikTok",
+  youtube: "Subscribe on YouTube",
+  linkedin: "Connect on LinkedIn",
+  portfolio: "Visit Portfolio",
+};
 
 export default function UserProfile() {
   const [user, setUser] = useState(null);
@@ -81,7 +93,139 @@ export default function UserProfile() {
   }
 
   const isOwnProfile = user?.email === viewingUser.email;
+  const isCreatorViewing = viewingUser?.is_creator && !isOwnProfile;
 
+  // If viewing creator profile, show creator layout
+  if (isCreatorViewing) {
+    return (
+      <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+        {/* Header */}
+        <div style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+          <div className="px-5 pb-5 pt-4">
+            <Link to={createPageUrl("Home")} className="flex items-center gap-2 mb-3 text-sm font-medium" style={{ color: "var(--accent-primary)" }}>
+              <ArrowLeft className="w-4 h-4" /> Back
+            </Link>
+
+            <div className="flex items-start justify-between mb-4">
+              {/* Avatar */}
+              <div className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", border: "2px solid var(--accent-primary-light)" }}>
+                {viewingUser.avatar_url ? (
+                  <img src={viewingUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  (viewingUser.display_name || viewingUser.full_name || "U")[0]?.toUpperCase()
+                )}
+              </div>
+
+              {/* Action buttons */}
+              {user && (
+                <div className="flex flex-col gap-2">
+                  {isFollowing ? (
+                    <button
+                      onClick={handleUnfollow}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                      style={{ borderColor: "var(--text-hint)", color: "var(--text-secondary)" }}
+                    >
+                      <UserMinus className="w-3.5 h-3.5" /> Unfollow
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleFollow}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                      style={{ backgroundColor: "var(--accent-primary)" }}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" /> Follow
+                    </button>
+                  )}
+                  <Link
+                    to={createPageUrl("Messages") + `?with=${encodeURIComponent(viewingUser.email)}&name=${encodeURIComponent(viewingUser.display_name || viewingUser.full_name || "")}`}
+                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                    style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" /> Message
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Creator Info */}
+            <h2 className="text-xl font-bold flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
+              {viewingUser.display_name || viewingUser.full_name}
+              <span>⭐</span>
+            </h2>
+            {viewingUser.username && <p className="text-xs font-medium mt-1" style={{ color: "var(--accent-primary)" }}>{viewingUser.username}</p>}
+
+            {/* Creator Category */}
+            {viewingUser.creator_category && (
+              <p className="text-sm font-semibold mt-2 px-3 py-1 rounded-full inline-block" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                {viewingUser.creator_category.replace(/_/g, " ")}
+              </p>
+            )}
+
+            {/* Creator Description */}
+            {viewingUser.creator_description && (
+              <div className="mt-4 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}>
+                {viewingUser.creator_description}
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="flex gap-3 mt-4">
+              <div className="text-center flex-1">
+                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
+                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
+              </div>
+              <div className="text-center flex-1">
+                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
+                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* External Links & Services */}
+        {viewingUser.external_links && Object.keys(viewingUser.external_links).length > 0 && (
+          <div className="px-5 mt-6">
+            <p className="text-sm font-bold mb-3" style={{ color: "var(--text-primary)" }}>Connect & Hire</p>
+            <div className="space-y-2">
+              {Object.entries(viewingUser.external_links).map(([platform, url]) => (
+                <a
+                  key={platform}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border font-medium text-sm transition-all active:scale-95"
+                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--accent-primary)" }}
+                >
+                  <span style={{ fontSize: "18px" }}>🔗</span>
+                  <span className="flex-1">{PLATFORM_LABELS[platform] || platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Portfolio Link */}
+        {viewingUser.creator_portfolio_link && (
+          <div className="px-5 mt-4">
+            <a
+              href={viewingUser.creator_portfolio_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-xl border font-bold text-white transition-all"
+              style={{ backgroundColor: "var(--accent-primary)", borderColor: "var(--accent-primary)" }}
+            >
+              <span>🎨</span>
+              View Full Portfolio
+              <ExternalLink className="w-4 h-4 ml-auto" />
+            </a>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Regular user profile layout
   return (
     <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Header */}
