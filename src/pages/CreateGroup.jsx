@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   ArrowLeft, ImageIcon, X, MapPin, Phone, Mail, Globe,
-  Loader2, ChevronDown, ChevronUp, Check, Search
+  Loader2, ChevronDown, ChevronUp, Check, Search, Video
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -81,13 +81,16 @@ export default function CreateGroup() {
   const [rules, setRules] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // Logo + cover
+  // Logo + cover + preview video
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [previewVideoFile, setPreviewVideoFile] = useState(null);
+  const [previewVideoName, setPreviewVideoName] = useState(null);
   const logoRef = useRef(null);
   const coverRef = useRef(null);
+  const videoRef = useRef(null);
 
   // Contact
   const [phone, setPhone] = useState("");
