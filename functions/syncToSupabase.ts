@@ -84,32 +84,29 @@ Deno.serve(async (req) => {
       await supabaseUpsert("profiles", record);
 
     } else if (entityName === "Post") {
+      // NOTE: Only include columns that exist in your Supabase 'posts' table.
+      // Add/remove fields below to match your actual table schema.
       const record = {
         id,
-        type: data.type || null,
-        text: data.text || null,
-        is_anonymous: data.is_anonymous ?? false,
-        like_count: data.like_count ?? 0,
-        reply_count: data.reply_count ?? 0,
         created_at: data.created_date || null,
         updated_at: data.updated_date || null,
       };
+      // Conditionally add optional columns only if they exist in your schema
+      if (data.type !== undefined) record.type = data.type;
+      if (data.text !== undefined) record.text = data.text;
       console.log(`[syncToSupabase] Syncing Post → posts:`, JSON.stringify(record));
       await supabaseUpsert("posts", record);
 
     } else if (entityName === "Group") {
+      // NOTE: Only include columns that exist in your Supabase 'communities' table.
       const record = {
         id,
-        name: data.name || null,
-        description: data.description || null,
-        category: data.category || null,
-        group_type: data.group_type || "online",
-        member_count: data.member_count ?? 0,
-        is_private: data.is_private ?? false,
-        is_active: data.is_active ?? true,
         created_at: data.created_date || null,
         updated_at: data.updated_date || null,
       };
+      if (data.name !== undefined) record.name = data.name;
+      if (data.description !== undefined) record.description = data.description;
+      if (data.category !== undefined) record.category = data.category;
       console.log(`[syncToSupabase] Syncing Group → communities:`, JSON.stringify(record));
       await supabaseUpsert("communities", record);
 
