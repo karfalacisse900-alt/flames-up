@@ -215,7 +215,7 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
     if (token) loadMapbox(token);
   }, [token]);
 
-  const requestLocation = useCallback(() => {
+  const requestLocation = () => {
     if (!navigator.geolocation) return;
     setLocationAsked(true);
     navigator.geolocation.getCurrentPosition(pos => {
@@ -228,13 +228,8 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
         el.style.cssText = "width:14px;height:14px;border-radius:50%;background:#2E6B4F;border:3px solid white;box-shadow:0 0 0 5px rgba(46,107,79,0.22),0 2px 8px rgba(0,0,0,0.3);";
         userMarkerRef.current = new window.mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(mapRef.current);
       }
-    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
-  }, []);
-
-  // Auto-request location on mount
-  useEffect(() => {
-    requestLocation();
-  }, []);
+    }, () => {});
+  };
 
   // Plot group markers
   useEffect(() => {
@@ -271,8 +266,8 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
     }
   }, [mapLoaded, realWorldGroups, membershipMap]);
 
-  const hasRealWorldGroups = groups.some(g => g.group_type === "realworld" && g.location_lat && g.location_lng);
-  const hasRealWorldNoCoords = groups.some(g => g.group_type === "realworld" && (!g.location_lat || !g.location_lng));
+  const hasRealWorldGroups = groups.some(g => g.group_type === "realworld");
+  const groupsWithoutCoords = groups.filter(g => g.group_type === "realworld" && (!g.location_lat || !g.location_lng));
 
   return (
     <div className="pb-6">
@@ -330,6 +325,15 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
               <p className="text-2xl mb-1">📍</p>
               <p className="text-sm font-bold mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No real-world groups yet</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Create one to put your city on the map!</p>
+            </div>
+          </div>
+        )}
+        {mapLoaded && hasRealWorldGroups && realWorldGroups.length === 0 && groupsWithoutCoords.length > 0 && (
+          <div className="absolute inset-4 flex flex-col items-center justify-center rounded-3xl pointer-events-none">
+            <div className="px-5 py-4 rounded-2xl text-center" style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)" }}>
+              <p className="text-2xl mb-1">⚠️</p>
+              <p className="text-sm font-bold mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{groupsWithoutCoords.length} group{groupsWithoutCoords.length > 1 ? "s" : ""} missing location</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Edit your groups and add a precise location to show them on the map.</p>
             </div>
           </div>
         )}
