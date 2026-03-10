@@ -44,7 +44,8 @@ const TABS = [
   { key: "media", label: "Watch", icon: Film },
 ];
 
-export default function GroupHub({ group, user, membership, onBack, onJoin, onLeave, isMember }) {
+export default function GroupHub({ group: initialGroup, user, membership, onBack, onJoin, onLeave, isMember }) {
+  const [group, setGroup] = useState(initialGroup);
   const [activeTab, setActiveTab] = useState("chat");
   const [showCompose, setShowCompose] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
