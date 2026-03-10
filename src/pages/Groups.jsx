@@ -197,9 +197,14 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
   }, []);
 
   const realWorldGroups = useMemo(() =>
-    groups.filter(g => g.group_type === "realworld" && g.location_lat && g.location_lng)
-      .filter(g => catFilter === "all" || g.category === catFilter),
-    [groups, catFilter]);
+    groups
+      .filter(g => g.group_type === "realworld" && g.location_lat && g.location_lng)
+      .filter(g => catFilter === "all" || g.category === catFilter)
+      .filter(g => {
+        if (!userLocation) return true; // no user location = show all
+        return haversineMiles(userLocation, [g.location_lng, g.location_lat]) <= radiusMiles;
+      }),
+    [groups, catFilter, userLocation, radiusMiles]);
 
   const initMap = useCallback((accessToken, center = [-98.5795, 39.8283], zoom = 4) => {
     if (!mapContainer.current || mapRef.current) return;
