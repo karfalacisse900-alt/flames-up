@@ -66,18 +66,18 @@ export default function PostSettingsStep({
             <button
               key={option.value}
               onClick={() => handleSettingChange("privacy", option.value)}
-              className={`p-3 rounded-xl font-medium text-sm transition-all ${
+              className={`p-3 rounded-xl font-medium text-sm transition-all border-2 ${
                 postSettings.privacy === option.value
-                  ? "ring-2"
+                  ? ""
                   : ""
               }`}
               style={{
                 backgroundColor:
                   postSettings.privacy === option.value
-                    ? "var(--accent-primary-light)"
+                    ? "var(--accent-primary)"
                     : "var(--bg-card)",
-                color: "var(--text-primary)",
-                borderColor: "var(--border-light)",
+                color: postSettings.privacy === option.value ? "#fff" : "var(--text-primary)",
+                borderColor: postSettings.privacy === option.value ? "var(--accent-primary)" : "var(--border-light)",
               }}
             >
               <span className="text-base mr-1">{option.icon}</span>
@@ -184,7 +184,7 @@ export default function PostSettingsStep({
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="w-full p-3 rounded-xl font-semibold flex items-center justify-between"
-        style={{ backgroundColor: "var(--bg-card)" }}
+        style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
       >
         <span className="flex items-center gap-2">
           <Zap className="w-4 h-4" />
@@ -194,7 +194,7 @@ export default function PostSettingsStep({
       </button>
 
       {showAdvanced && (
-        <div className="space-y-3 p-3 rounded-xl" style={{ backgroundColor: "var(--bg-card)" }}>
+        <div className="space-y-3 p-3 rounded-xl" style={{ backgroundColor: "var(--accent-primary-light)", border: "1px solid var(--accent-primary)" }}>
           <label className="flex items-center justify-between cursor-pointer">
             <span className="text-sm font-semibold flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
