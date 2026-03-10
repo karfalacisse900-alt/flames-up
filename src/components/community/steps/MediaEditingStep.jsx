@@ -108,7 +108,7 @@ export default function MediaEditingStep({
       )}
 
       {/* Preview */}
-      <div className="rounded-2xl overflow-hidden bg-black relative aspect-square">
+      <div className="rounded-2xl overflow-hidden relative aspect-square" style={{ backgroundColor: "#1a1a1a", border: "2px solid var(--accent-primary)" }}>
         {isVideo ? (
           <video
             src={currentItem.preview}
@@ -130,26 +130,28 @@ export default function MediaEditingStep({
       <div className="flex gap-2">
         <button
           onClick={() => setEditMode("adjust")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${
+          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "adjust"
               ? "text-white"
-              : "text-gray-500"
+              : "text-gray-600"
           }`}
           style={{
             backgroundColor: editMode === "adjust" ? "var(--accent-primary)" : "var(--bg-card)",
+            border: editMode === "adjust" ? "none" : "1px solid var(--border-light)"
           }}
         >
           Adjust
         </button>
         <button
           onClick={() => setEditMode("text")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${
+          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "text"
               ? "text-white"
-              : "text-gray-500"
+              : "text-gray-600"
           }`}
           style={{
             backgroundColor: editMode === "text" ? "var(--accent-primary)" : "var(--bg-card)",
+            border: editMode === "text" ? "none" : "1px solid var(--border-light)"
           }}
         >
           <Type className="w-4 h-4 inline mr-1" />
@@ -157,13 +159,14 @@ export default function MediaEditingStep({
         </button>
         <button
           onClick={() => setEditMode("effects")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm ${
+          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "effects"
               ? "text-white"
-              : "text-gray-500"
+              : "text-gray-600"
           }`}
           style={{
             backgroundColor: editMode === "effects" ? "var(--accent-primary)" : "var(--bg-card)",
+            border: editMode === "effects" ? "none" : "1px solid var(--border-light)"
           }}
         >
           <Wand2 className="w-4 h-4 inline mr-1" />
@@ -258,8 +261,8 @@ export default function MediaEditingStep({
 
       {/* Text Mode */}
       {editMode === "text" && (
-        <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: "var(--bg-card)" }}>
-          <p style={{ color: "var(--text-hint)" }}>Text overlay & captions coming soon</p>
+        <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: "var(--accent-primary-light)", border: "2px dashed var(--accent-primary)" }}>
+          <p style={{ color: "var(--accent-primary)" }}>Text overlay & captions coming soon</p>
         </div>
       )}
 
@@ -269,10 +272,9 @@ export default function MediaEditingStep({
           {["Warm", "Cool", "B&W", "Vintage", "Vibrant"].map((filter) => (
             <button
               key={filter}
-              className="w-full py-3 rounded-lg font-semibold"
+              className="w-full py-3 rounded-lg font-semibold text-white"
               style={{
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-secondary)",
+                backgroundColor: "var(--accent-primary)",
               }}
             >
               {filter}
