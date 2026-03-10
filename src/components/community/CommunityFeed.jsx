@@ -294,15 +294,7 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
-      {showCreate && (
-        <CreatePostFlow
-          onClose={() => { setShowCreate(false); setChallengeContext(null); }}
-          onSuccess={async () => {
-            await qc.invalidateQueries({ queryKey: ["communityPosts"] });
-            await qc.invalidateQueries({ queryKey: ["communityDebates"] });
-            await refetch();
-          }} />
-      )}
+
     </div>
   );
 }
