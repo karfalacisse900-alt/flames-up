@@ -571,7 +571,7 @@ export default function CreateGroup() {
         {/* Sticky CTA */}
         <div className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-3 max-w-lg mx-auto"
           style={{ backgroundColor: "var(--bg-app)", borderTop: "1px solid var(--border-subtle)" }}>
-          <button onClick={handleCreate} disabled={!name.trim() || saving}
+          <button onClick={handleCreate} disabled={!name.trim() || saving || (groupType === "realworld" && !validatedAddress)}
             className="w-full py-4 rounded-2xl text-base font-bold text-white disabled:opacity-50 active:scale-95 transition-all"
             style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 20px rgba(46,107,79,0.4)" }}>
             {saving ? (
