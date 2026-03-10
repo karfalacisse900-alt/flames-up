@@ -177,6 +177,10 @@ export default function CreateGroup() {
 
   const handleCreate = async () => {
     if (!name.trim() || saving) return;
+    if (groupType === "realworld" && !validatedAddress) {
+      setAddressError("Please search and select a valid meeting address.");
+      return;
+    }
     setSaving(true);
     setUploading(true);
 
@@ -203,10 +207,11 @@ export default function CreateGroup() {
       creator_name: user.full_name || user.email,
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
-      location_name: locationName.trim() || undefined,
-      location_city: locationCity.trim() || undefined,
+      location_name: validatedAddress?.place_name || undefined,
+      location_city: validatedAddress?.city || undefined,
+      location_lat: validatedAddress?.lat || undefined,
+      location_lng: validatedAddress?.lng || undefined,
       meeting_schedule: meetingSchedule.trim() || undefined,
-      google_maps_url: googleMapsUrl.trim() || undefined,
       social_facebook: facebook.trim() || undefined,
       social_instagram: instagram.trim() || undefined,
       social_tiktok: tiktok.trim() || undefined,
