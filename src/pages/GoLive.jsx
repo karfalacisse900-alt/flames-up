@@ -29,6 +29,9 @@ export default function GoLive() {
     category: "just_chatting",
     thumbnail: null,
     thumbnailUrl: "",
+    city: user?.location_city || "",
+    region: user?.location_region || "",
+    country: user?.location_country || "",
   });
 
   useEffect(() => {
@@ -77,6 +80,9 @@ export default function GoLive() {
         viewers: [],
         stream_thumbnail: formData.thumbnailUrl,
         stream_start_time: new Date().toISOString(),
+        host_city: formData.city,
+        host_region: formData.region,
+        host_country: formData.country,
       });
 
       // Notify followers
