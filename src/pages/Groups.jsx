@@ -628,30 +628,60 @@ export default function Groups() {
             </div>
           </div>
 
-          {/* Type + Category filters */}
-          <div className="flex gap-2 px-4 pb-1">
-            {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
-              <button key={t.key} onClick={() => setTypeFilter(t.key)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
-                  color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
-                  border: "1px solid var(--border-light)",
-                }}>{t.label}</button>
-            ))}
+          {/* Filter toggle */}
+          <div className="px-4 pb-2 flex items-center gap-2">
+            <button onClick={() => setShowDiscoverFilters(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+              style={{
+                backgroundColor: showDiscoverFilters ? "var(--accent-primary)" : "var(--bg-card)",
+                color: showDiscoverFilters ? "#fff" : "var(--text-secondary)",
+                border: "1px solid var(--border-light)",
+              }}>
+              <Filter className="w-3 h-3" />
+              Filters
+              {(typeFilter !== "all" || categoryFilter !== "all") && (
+                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+              )}
+            </button>
+            {(typeFilter !== "all" || categoryFilter !== "all") && (
+              <button onClick={() => { setTypeFilter("all"); setCategoryFilter("all"); }}
+                className="text-xs font-semibold px-2 py-1 rounded-full"
+                style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
+                Clear
+              </button>
+            )}
           </div>
 
-          <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
-            {CATEGORY_TABS.map(c => (
-              <button key={c.key} onClick={() => setCategoryFilter(c.key)}
-                className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
-                  color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",
-                  border: "1px solid var(--border-light)",
-                }}>{c.emoji} {c.label}</button>
-            ))}
-          </div>
+          {/* Collapsible filter pills */}
+          <AnimatePresence>
+            {showDiscoverFilters && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
+                <div className="flex gap-2 px-4 pb-1 overflow-x-auto scrollbar-hide">
+                  {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
+                    <button key={t.key} onClick={() => setTypeFilter(t.key)}
+                      className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{
+                        backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
+                        color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
+                        border: "1px solid var(--border-light)",
+                      }}>{t.label}</button>
+                  ))}
+                </div>
+                <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
+                  {CATEGORY_TABS.map(c => (
+                    <button key={c.key} onClick={() => setCategoryFilter(c.key)}
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{
+                        backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
+                        color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",
+                        border: "1px solid var(--border-light)",
+                      }}>{c.emoji} {c.label}</button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Search results */}
           {isFiltering ? (
