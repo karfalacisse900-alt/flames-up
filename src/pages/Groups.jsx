@@ -161,6 +161,17 @@ function MyGroupChip({ group, onOpen }) {
 }
 
 // ── Nearby Explorer Map ───────────────────────────────────────────────────
+// Haversine distance in miles between two [lng, lat] coords
+function haversineMiles([lng1, lat1], [lng2, lat2]) {
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const RADIUS_OPTIONS = [5, 10, 25, 50, 100];
+
 function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -171,6 +182,7 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [catFilter, setCatFilter] = useState("all");
+  const [radiusMiles, setRadiusMiles] = useState(25);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
