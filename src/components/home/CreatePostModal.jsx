@@ -206,10 +206,12 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
             <FontPicker value={fontFamily} onChange={setFontFamily} />
           </div>
 
-          {/* Image attach */}
+          {/* Image & Document attach */}
           <div style={{ marginTop: 12 }}>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); e.target.value = ""; }} />
+            <input ref={docInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv,.pptx,.xlsx" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); e.target.value = ""; }} />
             {imagePreview ? (
               <div className="relative rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-light)" }}>
                 <img src={imagePreview} alt="attached" className="w-full max-h-48 object-cover" />

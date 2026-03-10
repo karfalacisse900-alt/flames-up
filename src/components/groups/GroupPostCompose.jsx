@@ -138,6 +138,8 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
 
           {/* Image/GIF */}
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
+          <input ref={docInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv,.pptx,.xlsx" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); e.target.value = ""; }} />
           {imagePreview ? (
             <div className="relative rounded-xl overflow-hidden">
               <img src={imagePreview} alt="" className="w-full max-h-52 object-cover" />
