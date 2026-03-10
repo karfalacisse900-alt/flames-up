@@ -52,13 +52,17 @@ export default function CreatePostFlow() {
   };
 
   const handlePost = async () => {
-    if (!user) return;
+    if (!user || mediaItems.length === 0) {
+      alert("Please add at least one media item");
+      return;
+    }
     
     setIsPosting(true);
     try {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type.startsWith("video");
       
+      // Upload all media files
       for (const item of mediaItems) {
         if (item.file) {
           const uploadedFile = await base44.integrations.Core.UploadFile({
@@ -70,39 +74,31 @@ export default function CreatePostFlow() {
 
       const postData = {
         type: "opinion",
-        body: postSettings.caption || "",
+        body: postSettings.caption || "Check out this post!",
         author_email: user.email,
-        author_name: user.full_name,
+        author_name: user.display_name || user.full_name || "Anonymous",
         author_avatar_url: user.avatar_url || "",
         is_anonymous: false,
         media_type: "general",
         video_url: isVideo ? uploadedUrls[0] : undefined,
-        image_urls: mediaItems.length > 1 || (mediaItems[0]?.type.startsWith("image")) ? uploadedUrls : undefined,
-        location_city: postSettings.location?.city,
-        location_region: postSettings.location?.region,
-        location_country: postSettings.location?.country,
-        location_lat: postSettings.location?.lat,
-        location_lng: postSettings.location?.lng,
-        location_name: postSettings.location?.name,
-        place_tags: postSettings.location ? [postSettings.location.type] : [],
-        moderation_status: "pending",
+        image_urls: !isVideo && uploadedUrls.length > 0 ? uploadedUrls : undefined,
+        location_city: postSettings.location?.city || undefined,
+        location_region: postSettings.location?.region || undefined,
+        location_country: postSettings.location?.country || undefined,
+        location_lat: postSettings.location?.lat || undefined,
+        location_lng: postSettings.location?.lng || undefined,
+        location_name: postSettings.location?.name || undefined,
+        place_tags: postSettings.location ? [postSettings.location.type || "place"] : [],
+        moderation_status: "approved",
         is_pinned: false,
         upvotes: 0,
         downvotes: 0,
         comment_count: 0,
+        engagement_score: 0,
       };
 
-      if (postSettings.link) {
-        postData.document_url = postSettings.link;
-        postData.document_name = `Link: ${postSettings.linkType}`;
-      }
-
-      if (postSettings.showInNearby && postSettings.location) {
-        postData.place_tags = [...(postData.place_tags || []), "nearby_discovery"];
-      }
-
       await base44.entities.CommunityPost.create(postData);
-      navigate(createPageUrl("Home"));
+      navigate(createPageUrl("CommunityFeed"));
     } catch (error) {
       console.error("Error posting:", error);
       alert("Failed to post. Please try again.");
@@ -142,7 +138,7 @@ export default function CreatePostFlow() {
           <MediaUploadStep
             mediaItems={mediaItems}
             setMediaItems={setMediaItems}
-            onNext={handleNext}
+            onNext={step < 3 ? handleNext : undefined}
           />
         )}
         
