@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X, Star, Globe, Smartphone, Monitor, Check, Minus } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 
