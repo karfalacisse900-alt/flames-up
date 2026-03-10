@@ -119,7 +119,7 @@ body {
 }
 
 #root {
-  overflow-x: clip;
+  overflow-x: hidden;
   overflow-y: visible;
   width: 100%;
   max-width: 100%;
