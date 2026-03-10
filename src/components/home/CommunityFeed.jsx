@@ -1,17 +1,29 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { MapPin, PenTool, Zap } from "lucide-react";
 import CommunityPostCard from "../community/CommunityPostCard";
 import TipButton from "../community/TipButton";
 
 export default function CommunityFeed({ user }) {
   const [posts, setPosts] = useState([]);
+  const [filterMode, setFilterMode] = useState("global"); // "global" or "nearby"
+  const [userCity, setUserCity] = useState(null);
   const qc = useQueryClient();
 
   const { data: allPosts = [], isLoading } = useQuery({
     queryKey: ["communityPosts"],
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
   });
+
+  // Get user location
+  useEffect(() => {
+    if (user?.location_city) {
+      setUserCity(user.location_city);
+    }
+  }, [user]);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -21,10 +33,14 @@ export default function CommunityFeed({ user }) {
     return unsubscribe;
   }, [qc]);
 
-  // Update posts when data changes
+  // Filter posts based on mode
   useEffect(() => {
-    setPosts(allPosts);
-  }, [allPosts]);
+    let filtered = allPosts;
+    if (filterMode === "nearby" && userCity) {
+      filtered = allPosts.filter(p => p.location_city === userCity);
+    }
+    setPosts(filtered);
+  }, [allPosts, filterMode, userCity]);
 
   const handleUpvote = async (post) => {
     if (!user) return;
@@ -51,32 +67,81 @@ export default function CommunityFeed({ user }) {
     );
   }
 
-  if (posts.length === 0) {
-    return (
-      <div className="px-4 py-12 text-center">
-        <p className="text-3xl mb-2">📝</p>
-        <p style={{ color: "var(--text-hint)" }}>No posts yet. Be the first to share!</p>
-      </div>
-    );
-  }
-
   return (
     <div className="pb-8">
-      {posts.map((post) => (
-        <div key={post.id} className="relative">
-          <CommunityPostCard
-            post={post}
-            user={user}
-            onUpvote={() => handleUpvote(post)}
-          />
-          {/* Tip button overlay on posts */}
-          {user && post.author_email !== user.email && (
-            <div className="absolute top-4 right-4 z-10">
-              <TipButton postAuthorEmail={post.author_email} postId={post.id} />
-            </div>
+      {/* Filter + Action bar */}
+      <div className="sticky top-16 z-20 px-4 py-3 flex items-center gap-2" style={{ backgroundColor: "var(--bg-app)" }}>
+        {/* Location Filter */}
+        <div className="flex gap-2 flex-1">
+          <button
+            onClick={() => setFilterMode("global")}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: filterMode === "global" ? "var(--accent-primary)" : "var(--bg-card)",
+              color: filterMode === "global" ? "#fff" : "var(--text-secondary)",
+              border: "1px solid " + (filterMode === "global" ? "var(--accent-primary)" : "var(--border-light)"),
+            }}>
+            🌍 Global
+          </button>
+          {userCity && (
+            <button
+              onClick={() => setFilterMode("nearby")}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1"
+              style={{
+                backgroundColor: filterMode === "nearby" ? "var(--accent-primary)" : "var(--bg-card)",
+                color: filterMode === "nearby" ? "#fff" : "var(--text-secondary)",
+                border: "1px solid " + (filterMode === "nearby" ? "var(--accent-primary)" : "var(--border-light)"),
+              }}>
+              <MapPin className="w-3 h-3" />
+              {userCity}
+            </button>
           )}
         </div>
-      ))}
+
+        {/* Create Post button */}
+        <Link
+          to={createPageUrl("CreatePostFlow")}
+          className="p-2 rounded-full flex items-center justify-center transition-all"
+          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+          <PenTool className="w-4 h-4" />
+        </Link>
+
+        {/* Go Live button */}
+        <Link
+          to={createPageUrl("GoLive")}
+          className="p-2 rounded-full flex items-center justify-center transition-all"
+          style={{ backgroundColor: "#E05C7A", color: "#fff" }}>
+          <Zap className="w-4 h-4" />
+        </Link>
+      </div>
+
+      {/* Posts list */}
+      {posts.length === 0 ? (
+        <div className="px-4 py-12 text-center">
+          <p className="text-3xl mb-2">📝</p>
+          <p style={{ color: "var(--text-hint)" }}>
+            {filterMode === "nearby" ? `No posts in ${userCity} yet.` : "No posts yet. Be the first to share!"}
+          </p>
+        </div>
+      ) : (
+        <div>
+          {posts.map((post) => (
+            <div key={post.id} className="relative">
+              <CommunityPostCard
+                post={post}
+                user={user}
+                onUpvote={() => handleUpvote(post)}
+              />
+              {/* Tip button overlay on posts */}
+              {user && post.author_email !== user.email && (
+                <div className="absolute top-4 right-4 z-10">
+                  <TipButton postAuthorEmail={post.author_email} postId={post.id} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
