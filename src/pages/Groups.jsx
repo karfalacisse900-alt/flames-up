@@ -170,9 +170,13 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
   const [token, setToken] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
-  const [locationAsked, setLocationAsked] = useState(false);
   const [catFilter, setCatFilter] = useState("all");
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Keep selectedGroup in a ref so marker click always has latest setter
+  const setSelectedGroupRef = useRef(setSelectedGroup);
+  useEffect(() => { setSelectedGroupRef.current = setSelectedGroup; }, []);
 
   useEffect(() => {
     base44.functions.invoke("mapboxToken", {}).then(res => {
@@ -217,7 +221,6 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
 
   const requestLocation = () => {
     if (!navigator.geolocation) return;
-    setLocationAsked(true);
     navigator.geolocation.getCurrentPosition(pos => {
       const { longitude, latitude } = pos.coords;
       setUserLocation([longitude, latitude]);
@@ -225,13 +228,14 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
         mapRef.current.flyTo({ center: [longitude, latitude], zoom: 11, duration: 1400 });
         if (userMarkerRef.current) userMarkerRef.current.remove();
         const el = document.createElement("div");
-        el.style.cssText = "width:14px;height:14px;border-radius:50%;background:#2E6B4F;border:3px solid white;box-shadow:0 0 0 5px rgba(46,107,79,0.22),0 2px 8px rgba(0,0,0,0.3);";
-        userMarkerRef.current = new window.mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(mapRef.current);
+        el.style.cssText = "width:14px;height:14px;border-radius:50%;background:#2E6B4F;border:3px solid white;box-shadow:0 0 0 5px rgba(46,107,79,0.22),0 2px 8px rgba(0,0,0,0.3);pointer-events:none;";
+        userMarkerRef.current = new window.mapboxgl.Marker({ element: el, anchor: "center" })
+          .setLngLat([longitude, latitude]).addTo(mapRef.current);
       }
     }, () => {});
   };
 
-  // Plot group markers
+  // Plot group markers — NO transforms, only opacity change on hover to keep position stable
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return;
     markersRef.current.forEach(m => m.remove());
@@ -242,22 +246,26 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
       const emoji = CATEGORY_EMOJIS[group.category] || "💬";
       const isMember = !!membershipMap[group.id];
 
-      // Outer wrapper: fixed size, no transform (keeps anchor stable)
       const el = document.createElement("div");
-      el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;width:50px;";
-
-      // Inner wrapper: this one scales on hover (transform-origin bottom so anchor stays fixed)
-      const inner = document.createElement("div");
-      inner.style.cssText = "display:flex;flex-direction:column;align-items:center;transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);transform-origin:bottom center;will-change:transform;";
-      inner.innerHTML = `
+      // No transform, no transition — purely static element so Mapbox positioning is stable
+      el.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:pointer;";
+      el.innerHTML = `
         <div style="background:${getGrad(group.category)};border:2.5px solid ${isMember ? "#fff" : "#DCCBB8"};border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">${emoji}</div>
         <div style="background:${a};color:white;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:800;margin-top:3px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,0.18);">${group.name}</div>
       `;
-      el.appendChild(inner);
 
-      el.addEventListener("mouseenter", () => { inner.style.transform = "scale(1.15)"; });
-      el.addEventListener("mouseleave", () => { inner.style.transform = "scale(1)"; });
-      el.addEventListener("click", e => { e.stopPropagation(); setSelectedGroup(group); });
+      // Use mousedown instead of click to avoid map drag triggering close
+      el.addEventListener("mousedown", e => { e.stopPropagation(); });
+      el.addEventListener("click", e => {
+        e.stopPropagation();
+        e.preventDefault();
+        setSelectedGroupRef.current(group);
+      });
+      el.addEventListener("touchend", e => {
+        e.stopPropagation();
+        e.preventDefault();
+        setSelectedGroupRef.current(group);
+      });
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([group.location_lng, group.location_lat])
@@ -265,7 +273,6 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
       markersRef.current.push(marker);
     });
 
-    // Fit bounds to all markers if any
     if (realWorldGroups.length > 0 && !userLocation) {
       const bounds = new window.mapboxgl.LngLatBounds();
       realWorldGroups.forEach(g => bounds.extend([g.location_lng, g.location_lat]));
@@ -273,51 +280,63 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
     }
   }, [mapLoaded, realWorldGroups, membershipMap]);
 
-  const hasRealWorldGroups = groups.some(g => g.group_type === "realworld");
-  const groupsWithoutCoords = groups.filter(g => g.group_type === "realworld" && (!g.location_lat || !g.location_lng));
-
   return (
     <div className="pb-6">
-      {/* Filter pills */}
-      <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide">
-        {CATEGORY_TABS.map(c => (
-          <button key={c.key} onClick={() => setCatFilter(c.key)}
-            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+      {/* Top bar: count + toggle filters + near me */}
+      <div className="px-4 py-3 flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
+          {realWorldGroups.length === 0 ? "No real-world groups on map" : `${realWorldGroups.length} group${realWorldGroups.length !== 1 ? "s" : ""} on map`}
+        </p>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowFilters(v => !v)}
+            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
             style={{
-              backgroundColor: catFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
-              color: catFilter === c.key ? "#fff" : "var(--text-secondary)",
+              backgroundColor: showFilters ? "var(--accent-primary)" : "var(--bg-card)",
+              color: showFilters ? "#fff" : "var(--text-secondary)",
               border: "1px solid var(--border-light)",
             }}>
-            {c.emoji} {c.label}
+            <Filter className="w-3 h-3" /> Filters {catFilter !== "all" ? `· ${catFilter}` : ""}
           </button>
-        ))}
+          {!userLocation ? (
+            <button onClick={requestLocation}
+              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
+              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+              <Navigation className="w-3 h-3" /> Near me
+            </button>
+          ) : (
+            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "var(--accent-primary)" }}>
+              <Navigation className="w-3 h-3" /> Active
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Stats bar */}
-      <div className="px-4 mb-2 flex items-center justify-between">
-        <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
-          {realWorldGroups.length === 0
-            ? "No real-world groups on map yet"
-            : `${realWorldGroups.length} group${realWorldGroups.length !== 1 ? "s" : ""} on map`}
-        </p>
-        {!userLocation && (
-          <button onClick={requestLocation}
-            className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-            <Navigation className="w-3 h-3" /> Near me
-          </button>
+      {/* Collapsible filter pills */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
+            <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide">
+              {CATEGORY_TABS.map(c => (
+                <button key={c.key} onClick={() => setCatFilter(c.key)}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{
+                    backgroundColor: catFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
+                    color: catFilter === c.key ? "#fff" : "var(--text-secondary)",
+                    border: "1px solid var(--border-light)",
+                  }}>
+                  {c.emoji} {c.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
         )}
-        {userLocation && (
-          <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "var(--accent-primary)" }}>
-            <Navigation className="w-3 h-3" /> Location active
-          </span>
-        )}
-      </div>
+      </AnimatePresence>
 
-      {/* Map */}
+      {/* Map container — popup overlays inside here */}
       <div className="px-4 relative">
         <div ref={mapContainer} className="w-full rounded-3xl overflow-hidden"
-          style={{ height: 420, border: "2px solid var(--border-medium)", boxShadow: "0 6px 24px rgba(0,0,0,0.14)" }} />
+          style={{ height: 480, border: "2px solid var(--border-medium)", boxShadow: "0 6px 24px rgba(0,0,0,0.14)" }} />
 
         {!mapLoaded && (
           <div className="absolute inset-4 flex items-center justify-center rounded-3xl" style={{ backgroundColor: "#E8E3D9" }}>
@@ -337,129 +356,113 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
             </div>
           </div>
         )}
-      </div>
 
-      <div className="px-4 mt-2">
-        <p className="text-[11px] text-center" style={{ color: "var(--text-hint)" }}>
-          Tap a pin to preview the group • Filter by interest above
-        </p>
-      </div>
+        {/* Group popup — overlaid at bottom of map */}
+        <AnimatePresence>
+          {selectedGroup && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 360, damping: 30 }}
+              className="absolute left-4 right-4 bottom-4 rounded-3xl overflow-hidden z-10"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 32px rgba(0,0,0,0.22)" }}>
 
-      {/* Selected group popup */}
-      <AnimatePresence>
-        {selectedGroup && (
-          <motion.div
-            initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="mx-4 mt-4 rounded-3xl overflow-hidden"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}>
-            {/* Cover strip */}
-            <div className="relative h-20 overflow-hidden">
-              {selectedGroup.cover_image_url
-                ? <img src={selectedGroup.cover_image_url} alt="" className="w-full h-full object-cover" />
-                : <div className="w-full h-full" style={{ background: getGrad(selectedGroup.category) }} />}
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }} />
-              <button onClick={() => setSelectedGroup(null)}
-                className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(6px)" }}>
-                <X className="w-3.5 h-3.5 text-white" />
-              </button>
-              <span className="absolute bottom-2.5 left-3 text-xl">{selectedGroup.emoji || "💬"}</span>
-            </div>
-
-            <div className="px-4 py-3 max-h-72 overflow-y-auto">
-              <div className="mb-2">
-                <h3 className="font-bold text-sm mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{selectedGroup.name}</h3>
-                {selectedGroup.description && (
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>{selectedGroup.description}</p>
-                )}
-              </div>
-
-              {/* Location + members + category */}
-              <div className="flex flex-wrap items-center gap-2 text-[11px] mb-2" style={{ color: "var(--text-hint)" }}>
-                {(selectedGroup.location_city || selectedGroup.location_name) && (
-                  <span className="flex items-center gap-0.5" style={{ color: "var(--accent-primary)" }}>
-                    <MapPin className="w-3 h-3" />{selectedGroup.location_city || selectedGroup.location_name}
-                  </span>
-                )}
-                <span><Users className="w-3 h-3 inline mr-0.5" />{(selectedGroup.member_count || 0).toLocaleString()} members</span>
-                <span className="px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>{selectedGroup.category}</span>
-              </div>
-
-              {/* Schedule */}
-              {selectedGroup.meeting_schedule && (
-                <p className="text-xs mb-2 flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-                  📅 {selectedGroup.meeting_schedule}
-                </p>
-              )}
-
-              {/* Contact */}
-              {(selectedGroup.phone || selectedGroup.email) && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedGroup.phone && (
-                    <a href={`tel:${selectedGroup.phone}`} className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                      📞 {selectedGroup.phone}
-                    </a>
-                  )}
-                  {selectedGroup.email && (
-                    <a href={`mailto:${selectedGroup.email}`} className="text-[11px] flex items-center gap-1 px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                      ✉️ {selectedGroup.email}
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {/* Social links */}
-              {(selectedGroup.social_instagram || selectedGroup.social_facebook || selectedGroup.social_whatsapp || selectedGroup.social_tiktok || selectedGroup.google_maps_url) && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {selectedGroup.google_maps_url && (
-                    <a href={selectedGroup.google_maps_url} target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "#E8F5E9", color: "#2E6B4F" }}>🗺️ Maps</a>
-                  )}
-                  {selectedGroup.social_instagram && (
-                    <a href={selectedGroup.social_instagram} target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "#FCE4EC", color: "#C2185B" }}>📸 Instagram</a>
-                  )}
-                  {selectedGroup.social_facebook && (
-                    <a href={selectedGroup.social_facebook} target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "#E3F2FD", color: "#1565C0" }}>👥 Facebook</a>
-                  )}
-                  {selectedGroup.social_whatsapp && (
-                    <a href={selectedGroup.social_whatsapp} target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "#E8F5E9", color: "#2E7D32" }}>💬 WhatsApp</a>
-                  )}
-                  {selectedGroup.social_tiktok && (
-                    <a href={selectedGroup.social_tiktok} target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "#F3E5F5", color: "#6A1B9A" }}>🎵 TikTok</a>
-                  )}
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <button onClick={() => { setSelectedGroup(null); onOpen(selectedGroup); }}
-                  className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white"
-                  style={{ background: getGrad(selectedGroup.category) }}>
-                  View Group
+              {/* Cover strip */}
+              <div className="relative h-16 overflow-hidden">
+                {selectedGroup.cover_image_url
+                  ? <img src={selectedGroup.cover_image_url} alt="" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full" style={{ background: getGrad(selectedGroup.category) }} />}
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }} />
+                <button onClick={() => setSelectedGroup(null)}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+                  <X className="w-3 h-3 text-white" />
                 </button>
-                {!membershipMap[selectedGroup.id] && (
-                  <button onClick={() => { onJoin(selectedGroup); setSelectedGroup(null); }}
-                    className="px-4 py-2.5 rounded-2xl text-sm font-bold"
-                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                    Join
-                  </button>
-                )}
+                <span className="absolute bottom-2 left-3 text-lg">{selectedGroup.emoji || "💬"}</span>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              <div className="px-3 py-2.5 max-h-56 overflow-y-auto">
+                {/* Name + description */}
+                <h3 className="font-bold text-sm leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{selectedGroup.name}</h3>
+                {selectedGroup.description && (
+                  <p className="text-xs mt-0.5 mb-1.5 line-clamp-2" style={{ color: "var(--text-hint)" }}>{selectedGroup.description}</p>
+                )}
+
+                {/* Meta row */}
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] mb-1.5" style={{ color: "var(--text-hint)" }}>
+                  {(selectedGroup.location_city || selectedGroup.location_name) && (
+                    <span className="flex items-center gap-0.5" style={{ color: "var(--accent-primary)" }}>
+                      <MapPin className="w-2.5 h-2.5" />{selectedGroup.location_city || selectedGroup.location_name}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-0.5"><Users className="w-2.5 h-2.5" />{(selectedGroup.member_count || 0).toLocaleString()}</span>
+                  <span className="px-1.5 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--bg-subtle)" }}>{selectedGroup.category}</span>
+                </div>
+
+                {/* Schedule */}
+                {selectedGroup.meeting_schedule && (
+                  <p className="text-[11px] mb-1.5" style={{ color: "var(--text-secondary)" }}>📅 {selectedGroup.meeting_schedule}</p>
+                )}
+
+                {/* Contact */}
+                {(selectedGroup.phone || selectedGroup.email) && (
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
+                    {selectedGroup.phone && (
+                      <a href={`tel:${selectedGroup.phone}`} className="text-[11px] px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>📞 {selectedGroup.phone}</a>
+                    )}
+                    {selectedGroup.email && (
+                      <a href={`mailto:${selectedGroup.email}`} className="text-[11px] px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>✉️ {selectedGroup.email}</a>
+                    )}
+                  </div>
+                )}
+
+                {/* Social links */}
+                {(selectedGroup.social_instagram || selectedGroup.social_facebook || selectedGroup.social_whatsapp || selectedGroup.social_tiktok || selectedGroup.google_maps_url) && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {selectedGroup.google_maps_url && (
+                      <a href={selectedGroup.google_maps_url} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#E8F5E9", color: "#2E6B4F" }}>🗺️ Maps</a>
+                    )}
+                    {selectedGroup.social_instagram && (
+                      <a href={selectedGroup.social_instagram} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FCE4EC", color: "#C2185B" }}>📸 Instagram</a>
+                    )}
+                    {selectedGroup.social_facebook && (
+                      <a href={selectedGroup.social_facebook} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#E3F2FD", color: "#1565C0" }}>👥 Facebook</a>
+                    )}
+                    {selectedGroup.social_whatsapp && (
+                      <a href={selectedGroup.social_whatsapp} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#E8F5E9", color: "#2E7D32" }}>💬 WhatsApp</a>
+                    )}
+                    {selectedGroup.social_tiktok && (
+                      <a href={selectedGroup.social_tiktok} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F3E5F5", color: "#6A1B9A" }}>🎵 TikTok</a>
+                    )}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <button onClick={() => { setSelectedGroup(null); onOpen(selectedGroup); }}
+                    className="flex-1 py-2 rounded-2xl text-xs font-bold text-white"
+                    style={{ background: getGrad(selectedGroup.category) }}>
+                    View Group
+                  </button>
+                  {!membershipMap[selectedGroup.id] && (
+                    <button onClick={() => { onJoin(selectedGroup); setSelectedGroup(null); }}
+                      className="px-3 py-2 rounded-2xl text-xs font-bold"
+                      style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                      Join
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
