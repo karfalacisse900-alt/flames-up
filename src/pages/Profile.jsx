@@ -10,7 +10,7 @@ import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import CreatorSection from "../components/profile/CreatorSection";
-import CreatorApplicationForm from "../components/creator/CreatorApplicationForm";
+
 import { getBalance } from "../components/coins/coinsHelper";
 
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,6 @@ export default function Profile() {
   const [boostPost, setBoostPost] = useState(null);
   const [showExport, setShowExport] = useState(false);
   const [showMore, setShowMore] = useState(false);
-  const [showCreatorApp, setShowCreatorApp] = useState(false);
   const queryClient = useQueryClient();
   const { data: coinBalance = 0 } = useQuery({
     queryKey: ["coinBalance", user?.email],
@@ -248,13 +247,13 @@ export default function Profile() {
 
           {/* Creator Application Button */}
           {!user.is_creator && (
-            <button
-              onClick={() => setShowCreatorApp(true)}
-              className="w-full py-2.5 rounded-2xl text-white font-bold text-sm mt-4 flex items-center justify-center gap-2"
+            <Link
+              to={createPageUrl("CreatorApplication")}
+              className="w-full py-2.5 rounded-2xl text-white font-bold text-sm mt-4 flex items-center justify-center gap-2 inline-block text-center"
               style={{ backgroundColor: "var(--accent-primary)" }}
             >
               ⭐ Apply to Become a Creator
-            </button>
+            </Link>
           )}
 
           {/* Stats row */}
@@ -499,16 +498,7 @@ export default function Profile() {
       {/* Export data modal */}
       <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
 
-      {/* Creator Application Modal */}
-      {showCreatorApp && (
-        <CreatorApplicationForm
-          user={user}
-          onClose={() => setShowCreatorApp(false)}
-          onSuccess={() => {
-            setUser((prev) => ({ ...prev, is_creator: true }));
-          }}
-        />
-      )}
+
 
       {/* Edit profile */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
