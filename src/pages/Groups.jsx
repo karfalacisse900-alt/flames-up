@@ -58,14 +58,38 @@ function getGrad(category) {
 function HeroGroupCard({ group, membership, onOpen, onJoin }) {
   const isMember = !!membership;
   const isRW = group.group_type === "realworld";
+  const [hovered, setHovered] = React.useState(false);
+  const videoRef = React.useRef(null);
+
+  const handleMouseEnter = () => {
+    setHovered(true);
+    if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.play().catch(() => {}); }
+  };
+  const handleMouseLeave = () => {
+    setHovered(false);
+    if (videoRef.current) { videoRef.current.pause(); }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       onClick={() => onOpen(group)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="cursor-pointer relative rounded-3xl overflow-hidden shrink-0"
       style={{ width: 220, height: 280, background: getGrad(group.category) }}>
+      {group.preview_video_url && (
+        <video
+          ref={videoRef}
+          src={group.preview_video_url}
+          muted loop playsInline
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+          style={{ opacity: hovered ? 1 : 0 }}
+        />
+      )}
       {group.cover_image_url && (
-        <img src={group.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        <img src={group.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300" loading="lazy"
+          style={{ opacity: hovered && group.preview_video_url ? 0 : 1 }} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.78) 50%, rgba(0,0,0,0.1) 100%)" }} />
       <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
