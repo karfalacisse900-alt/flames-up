@@ -14,6 +14,11 @@ const ROWS = [
 ];
 
 export default function CompareModal({ items, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   // highlight best values
   const getBest = (key) => {
     if (key === "avg_rating" || key === "review_count") {

@@ -14,6 +14,11 @@ const CATEGORIES = [
 ];
 
 export default function SubmitAppModal({ user, onClose, onSubmitted }) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [longDescription, setLongDescription] = useState("");
