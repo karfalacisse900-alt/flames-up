@@ -499,6 +499,17 @@ export default function Profile() {
       {/* Export data modal */}
       <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
 
+      {/* Creator Application Modal */}
+      {showCreatorApp && (
+        <CreatorApplicationForm
+          user={user}
+          onClose={() => setShowCreatorApp(false)}
+          onSuccess={() => {
+            setUser((prev) => ({ ...prev, is_creator: true }));
+          }}
+        />
+      )}
+
       {/* Edit profile */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="max-w-sm rounded-2xl">
