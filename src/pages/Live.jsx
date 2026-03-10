@@ -3,9 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Heart, MessageSquare, Users, Send } from "lucide-react";
-import LiveStreamChat from "../components/live/LiveStreamChat";
-import TipNotification from "../components/live/TipNotification";
+import { ArrowLeft, Heart, Users, Send } from "lucide-react";
+import LiveStreamChat from "../components/live/LiveStreamChat.jsx";
+import TipNotification from "../components/live/TipNotification.jsx";
 
 export default function Live() {
   const navigate = useNavigate();
