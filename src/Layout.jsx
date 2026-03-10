@@ -37,6 +37,29 @@ function FlamesUpLogo() {
 export default function Layout({ children, currentPageName }) {
   useLayoutStabilizer();
   const navigate = useNavigate();
+
+  // Disable pinch-zoom and double-tap zoom globally
+  useEffect(() => {
+    const preventZoom = (e) => { if (e.touches && e.touches.length > 1) e.preventDefault(); };
+    const preventDblTapZoom = (e) => { e.preventDefault(); };
+
+    document.addEventListener("touchmove", preventZoom, { passive: false });
+    document.addEventListener("gesturestart", preventDblTapZoom, { passive: false });
+    document.addEventListener("gesturechange", preventDblTapZoom, { passive: false });
+    document.addEventListener("gestureend", preventDblTapZoom, { passive: false });
+
+    // Prevent ctrl+scroll zoom on desktop
+    const preventWheelZoom = (e) => { if (e.ctrlKey) e.preventDefault(); };
+    document.addEventListener("wheel", preventWheelZoom, { passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", preventZoom);
+      document.removeEventListener("gesturestart", preventDblTapZoom);
+      document.removeEventListener("gesturechange", preventDblTapZoom);
+      document.removeEventListener("gestureend", preventDblTapZoom);
+      document.removeEventListener("wheel", preventWheelZoom);
+    };
+  }, []);
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
