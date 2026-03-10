@@ -115,34 +115,20 @@ export default function CreateGroup() {
   const [validatedAddress, setValidatedAddress] = useState(null); // { place_name, lat, lng, city }
   const [addressError, setAddressError] = useState("");
   const addressDebounceRef = useRef(null);
-  const [mapboxToken, setMapboxToken] = useState(null);
-
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showSocial, setShowSocial] = useState(false);
 
-  useEffect(() => {
-    base44.functions.invoke("mapboxToken", {}).then(res => {
-      if (res.data?.token) setMapboxToken(res.data.token);
-    }).catch(() => {});
-  }, []);
+  const { search: searchMapbox } = useLocationSearch();
 
   const searchAddress = (query) => {
-    if (!query.trim() || !mapboxToken) return;
-    clearTimeout(addressDebounceRef.current);
-    addressDebounceRef.current = setTimeout(async () => {
-      setAddressSearching(true);
-      setAddressError("");
-      try {
-        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=poi,address&limit=5`;
-        const res = await fetch(url);
-        const data = await res.json();
-        setAddressSuggestions(data.features || []);
-      } catch {
-        setAddressSuggestions([]);
-      }
+    if (!query.trim()) return;
+    setAddressSearching(true);
+    setAddressError("");
+    searchMapbox(query, (features) => {
+      setAddressSuggestions(features);
       setAddressSearching(false);
-    }, 350);
+    });
   };
 
   const selectAddress = (feature) => {
