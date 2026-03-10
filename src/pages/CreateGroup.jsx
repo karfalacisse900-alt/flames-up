@@ -173,6 +173,14 @@ export default function CreateGroup() {
     e.target.value = "";
   };
 
+  const handleVideoPick = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPreviewVideoFile(f);
+    setPreviewVideoName(f.name);
+    e.target.value = "";
+  };
+
   const uploadFile = async (file) => {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     return file_url;
@@ -189,8 +197,10 @@ export default function CreateGroup() {
 
     let logoUrl = null;
     let coverUrl = null;
+    let previewVideoUrl = null;
     if (logoFile) logoUrl = await uploadFile(logoFile);
     if (coverFile) coverUrl = await uploadFile(coverFile);
+    if (previewVideoFile) previewVideoUrl = await uploadFile(previewVideoFile);
     setUploading(false);
 
     const user = await base44.auth.me();
