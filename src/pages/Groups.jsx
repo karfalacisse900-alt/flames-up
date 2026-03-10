@@ -328,11 +328,46 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
         </div>
       </div>
 
-      {/* Collapsible filter pills */}
+      {/* Collapsible filter panels */}
       <AnimatePresence>
         {showFilters && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
+
+            {/* Radius slider */}
+            <div className="px-4 pb-3">
+              <div className="p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold" style={{ color: "var(--text-secondary)" }}>📍 Radius</p>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: userLocation ? "var(--accent-primary-light)" : "var(--bg-subtle)", color: userLocation ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                    {radiusMiles} mi {!userLocation && "· enable location first"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={5} max={100} step={5}
+                  value={radiusMiles}
+                  onChange={e => setRadiusMiles(Number(e.target.value))}
+                  disabled={!userLocation}
+                  className="w-full"
+                  style={{ accentColor: "var(--accent-primary)", opacity: userLocation ? 1 : 0.4 }}
+                />
+                <div className="flex justify-between mt-1">
+                  {RADIUS_OPTIONS.map(r => (
+                    <button key={r} onClick={() => userLocation && setRadiusMiles(r)}
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition-all"
+                      style={{
+                        backgroundColor: radiusMiles === r && userLocation ? "var(--accent-primary)" : "transparent",
+                        color: radiusMiles === r && userLocation ? "#fff" : "var(--text-hint)",
+                        opacity: userLocation ? 1 : 0.5,
+                      }}>{r}mi</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Category pills */}
             <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide">
               {CATEGORY_TABS.map(c => (
                 <button key={c.key} onClick={() => setCatFilter(c.key)}
