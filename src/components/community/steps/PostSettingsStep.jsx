@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { MapPin, Link as LinkIcon, Lock, MessageCircle, Copy, Eye, Zap } from "lucide-react";
+import { MapPin, Link as LinkIcon, Lock, MessageCircle, Copy, Eye, Zap, AlertCircle } from "lucide-react";
+import LocationTagButton from "../LocationTagButton";
 
 const LOCATION_TYPES = ["city", "place", "event", "venue"];
 const PRIVACY_OPTIONS = [
@@ -32,28 +33,35 @@ export default function PostSettingsStep({
   };
 
   return (
-    <div className="p-4 space-y-4 pb-20">
+    <div className="p-4 space-y-4 pb-32" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Caption */}
       <div>
-        <label className="text-sm font-semibold block mb-2" style={{ color: "var(--text-primary)" }}>
-          Caption
+        <label className="text-sm font-bold block mb-3" style={{ color: "var(--text-primary)", fontSize: "16px" }}>
+          ✨ Add Caption
         </label>
         <textarea
-          ref={captionRef}
           value={postSettings.caption}
           onChange={(e) => handleSettingChange("caption", e.target.value)}
-          placeholder="What's on your mind? ✨"
-          className="w-full p-3 rounded-xl text-sm outline-none resize-none"
+          placeholder="Share what's on your mind, ask a question, or tell a story…"
+          className="w-full p-4 rounded-2xl text-sm outline-none resize-none"
           style={{
-            backgroundColor: "var(--bg-subtle)",
-            border: "1px solid var(--border-light)",
+            backgroundColor: "var(--bg-card)",
+            border: "2px solid var(--border-light)",
             color: "var(--text-primary)",
-            minHeight: "100px",
+            minHeight: "120px",
+            fontFamily: "var(--font-sans)",
           }}
         />
-        <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
-          {postSettings.caption.length} characters
-        </p>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+            {postSettings.caption.length} characters
+          </p>
+          {postSettings.caption.length > 500 && (
+            <p className="text-xs flex items-center gap-1" style={{ color: "var(--accent-secondary)" }}>
+              <AlertCircle className="w-3 h-3" /> Getting long!
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Privacy */}
@@ -126,39 +134,14 @@ export default function PostSettingsStep({
 
       {/* Location */}
       <div>
-        <label className="text-sm font-semibold block mb-2 flex items-center gap-1">
+        <label className="text-sm font-semibold block mb-2 flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
           <MapPin className="w-4 h-4" />
-          Location Tag
+          Location Tag (Optional)
         </label>
-        {postSettings.location ? (
-          <div
-            className="p-3 rounded-xl flex items-center justify-between"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-          >
-            <div>
-              <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                {postSettings.location.name}
-              </p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-                {postSettings.location.city}, {postSettings.location.region}
-              </p>
-            </div>
-            <button
-              onClick={() => handleSettingChange("location", null)}
-              className="text-red-500 font-bold"
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
-          <button
-            className="w-full p-3 rounded-xl font-semibold"
-            style={{ backgroundColor: "var(--bg-card)", color: "var(--accent-primary)" }}
-          >
-            <MapPin className="w-4 h-4 inline mr-1.5" />
-            Add Location
-          </button>
-        )}
+        <LocationTagButton 
+          location={postSettings.location} 
+          onLocation={(loc) => handleSettingChange("location", loc)} 
+        />
       </div>
 
       {/* Show in Nearby */}
