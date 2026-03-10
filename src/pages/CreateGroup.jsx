@@ -229,6 +229,7 @@ export default function CreateGroup() {
       social_instagram: instagram.trim() || undefined,
       social_tiktok: tiktok.trim() || undefined,
       social_whatsapp: whatsapp.trim() || undefined,
+      preview_video_url: previewVideoUrl || undefined,
       member_count: 1,
       post_count: 0,
       is_active: true,
