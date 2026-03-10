@@ -227,24 +227,25 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
           </>
         )}
 
-      {/* Hidden file inputs */}
-      <input
-        ref={photoVideoInputRef}
-        type="file"
-        multiple
-        accept="image/*,video/*"
-        onChange={(e) => handleFileSelect(e.target.files || [])}
-        className="hidden"
-      />
-      
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
-        onChange={(e) => handleFileSelect(e.target.files || [])}
-        className="hidden"
-      />
+        {/* Hidden file inputs */}
+        <input
+          ref={photoVideoInputRef}
+          type="file"
+          multiple
+          accept="image/*,video/*"
+          onChange={(e) => handleFileSelect(e.target.files || [])}
+          className="hidden"
+        />
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+          onChange={(e) => handleFileSelect(e.target.files || [])}
+          className="hidden"
+        />
+      </div>
     </div>
   );
 }
