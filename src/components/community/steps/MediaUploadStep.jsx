@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { Upload, Play, Image, Music, X, GripVertical } from "lucide-react";
+import { Upload, Play, Image, Music, X, GripVertical, Cloud, FileUp } from "lucide-react";
 
-export default function MediaUploadStep({ mediaItems, setMediaItems }) {
+export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
+  const photoVideoInputRef = useRef(null);
   const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
   const dragCounter = useRef(0);
 
   const handleFileSelect = (files) => {
@@ -81,52 +81,155 @@ export default function MediaUploadStep({ mediaItems, setMediaItems }) {
   };
 
   return (
-    <div className="p-4 space-y-4 pb-20">
-      {/* Upload Zone */}
-      <div
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        className="border-2 border-dashed rounded-2xl p-8 text-center transition-all"
-        style={{ borderColor: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}
-      >
-        <Upload className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--accent-primary)" }} />
-        <p className="font-semibold mb-1" style={{ color: "var(--accent-primary)" }}>
-          Drag media here
-        </p>
-        <p className="text-xs mb-4" style={{ color: "var(--text-secondary)" }}>
-          or choose files below
-        </p>
-        <div className="flex gap-2 justify-center flex-wrap">
-           <button
-             onClick={() => fileInputRef.current?.click()}
-             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
-             style={{ backgroundColor: "var(--accent-primary)" }}
-           >
-             <Image className="w-4 h-4 inline mr-1.5" />
-             Photos
-           </button>
-           <button
-             onClick={() => fileInputRef.current?.click()}
-             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
-             style={{ backgroundColor: "var(--accent-primary)" }}
-           >
-             <Play className="w-4 h-4 inline mr-1.5" />
-             Videos
-           </button>
-           <button
-             onClick={() => cameraInputRef.current?.click()}
-             className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
-             style={{ backgroundColor: "var(--accent-primary)" }}
-           >
-             📹 Record
-           </button>
-         </div>
-      </div>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Main content */}
+      <div className="px-4 pt-6 max-w-2xl mx-auto">
+        {mediaItems.length === 0 ? (
+          <>
+            {/* Empty state - Large upload area */}
+            <div className="text-center mb-8">
+              <div className="text-6xl mb-4">📸</div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                Add Your Media
+              </h2>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Upload photos, videos, or files to share with the community
+              </p>
+            </div>
 
+            {/* Two main buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {/* Photos & Videos */}
+              <button
+                onClick={() => photoVideoInputRef.current?.click()}
+                className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
+                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}
+              >
+                <Cloud className="w-8 h-8" />
+                <div>
+                  <p className="text-base">📷 Photos</p>
+                  <p className="text-xs font-normal opacity-80">& Videos</p>
+                </div>
+              </button>
+
+              {/* File Upload */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
+                style={{ background: "linear-gradient(135deg, #D98B62, #E8A878)" }}
+              >
+                <FileUp className="w-8 h-8" />
+                <div>
+                  <p className="text-base">📄 Files</p>
+                  <p className="text-xs font-normal opacity-80">& Documents</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Drag and drop zone */}
+            <div
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="border-3 border-dashed rounded-2xl p-8 text-center transition-all"
+              style={{ borderColor: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}
+            >
+              <Upload className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--accent-primary)" }} />
+              <p className="font-bold mb-1 text-lg" style={{ color: "var(--accent-primary)" }}>
+                Drag & Drop Here
+              </p>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Drop your photos, videos, or files to start
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Selected media preview */}
+            <div className="mb-8">
+              <h3 className="text-lg font-bold mb-4" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {mediaItems.length} item{mediaItems.length !== 1 ? "s" : ""} selected
+              </h3>
+              <div className="space-y-3">
+                {mediaItems.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 p-4 rounded-2xl transition-all"
+                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                  >
+                    {/* Reorder controls */}
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => handleReorder(idx, "up")}
+                        disabled={idx === 0}
+                        className="px-2 py-1 rounded disabled:opacity-30 font-bold"
+                        style={{ color: "var(--accent-primary)" }}
+                      >
+                        ▲
+                      </button>
+                      <GripVertical className="w-4 h-4 mx-auto" style={{ color: "var(--text-hint)" }} />
+                      <button
+                        onClick={() => handleReorder(idx, "down")}
+                        disabled={idx === mediaItems.length - 1}
+                        className="px-2 py-1 rounded disabled:opacity-30 font-bold"
+                        style={{ color: "var(--accent-primary)" }}
+                      >
+                        ▼
+                      </button>
+                    </div>
+
+                    {/* Media preview */}
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2" style={{ borderColor: "var(--border-light)" }}>
+                      {item.type.startsWith("video") ? (
+                        <>
+                          <video src={item.preview} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
+                            <Play className="w-4 h-4 text-white fill-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <img src={item.preview} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                        {item.file.name.substring(0, 25)}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                        {item.type.startsWith("video") ? `${Math.round(item.duration)}s` : "Photo"}
+                      </p>
+                    </div>
+
+                    {/* Remove button */}
+                    <button
+                      onClick={() => handleRemove(item.id)}
+                      className="p-2 rounded-lg transition-all active:scale-95"
+                      style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add more button */}
+              <button
+                onClick={() => photoVideoInputRef.current?.click()}
+                className="w-full mt-4 py-3 rounded-2xl border-2 border-dashed font-bold transition-all"
+                style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}
+              >
+                + Add More Media
+              </button>
+            </div>
+          </>
+        )}
+
+      {/* Hidden file inputs */}
       <input
-        ref={fileInputRef}
+        ref={photoVideoInputRef}
         type="file"
         multiple
         accept="image/*,video/*"
@@ -135,81 +238,13 @@ export default function MediaUploadStep({ mediaItems, setMediaItems }) {
       />
       
       <input
-        ref={cameraInputRef}
+        ref={fileInputRef}
         type="file"
-        accept="video/*"
-        capture="environment"
+        multiple
+        accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
         onChange={(e) => handleFileSelect(e.target.files || [])}
         className="hidden"
       />
-
-      {/* Media List */}
-      {mediaItems.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase" style={{ color: "var(--text-hint)" }}>
-            {mediaItems.length} item{mediaItems.length !== 1 ? "s" : ""} selected
-          </p>
-          <div className="space-y-2">
-            {mediaItems.map((item, idx) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-3 rounded-xl"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-              >
-                {/* Drag handle */}
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => handleReorder(idx, "up")}
-                    disabled={idx === 0}
-                    className="p-1 disabled:opacity-30"
-                  >
-                    ▲
-                  </button>
-                  <GripVertical className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
-                  <button
-                    onClick={() => handleReorder(idx, "down")}
-                    disabled={idx === mediaItems.length - 1}
-                    className="p-1 disabled:opacity-30"
-                  >
-                    ▼
-                  </button>
-                </div>
-
-                {/* Preview */}
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                  {item.type.startsWith("video") ? (
-                    <>
-                      <video src={item.preview} className="w-full h-full object-cover" />
-                      <Play className="w-4 h-4 absolute top-1 right-1 text-white drop-shadow" />
-                    </>
-                  ) : (
-                    <img src={item.preview} alt="" className="w-full h-full object-cover" />
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
-                    {item.file.name.substring(0, 20)}...
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-                    {item.type.startsWith("video") ? `${Math.round(item.duration)}s` : "Photo"}
-                  </p>
-                </div>
-
-                {/* Remove */}
-                <button
-                  onClick={() => handleRemove(item.id)}
-                  className="p-2 rounded-lg"
-                  style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444" }}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
