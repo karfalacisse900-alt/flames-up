@@ -323,21 +323,12 @@ function NearbyExplorer({ groups, membershipMap, onOpen, onJoin }) {
           </div>
         )}
 
-        {mapLoaded && !hasRealWorldGroups && (
+        {mapLoaded && realWorldGroups.length === 0 && (
           <div className="absolute inset-4 flex flex-col items-center justify-center rounded-3xl pointer-events-none">
             <div className="px-5 py-4 rounded-2xl text-center" style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)" }}>
               <p className="text-2xl mb-1">📍</p>
               <p className="text-sm font-bold mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No real-world groups yet</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Create one to put your city on the map!</p>
-            </div>
-          </div>
-        )}
-        {mapLoaded && hasRealWorldGroups && realWorldGroups.length === 0 && groupsWithoutCoords.length > 0 && (
-          <div className="absolute inset-4 flex flex-col items-center justify-center rounded-3xl pointer-events-none">
-            <div className="px-5 py-4 rounded-2xl text-center" style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)" }}>
-              <p className="text-2xl mb-1">⚠️</p>
-              <p className="text-sm font-bold mb-0.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{groupsWithoutCoords.length} group{groupsWithoutCoords.length > 1 ? "s" : ""} missing location</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Edit your groups and add a precise location to show them on the map.</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Create a real-world group to put your city on the map!</p>
             </div>
           </div>
         )}
