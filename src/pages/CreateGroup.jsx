@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   ArrowLeft, ImageIcon, X, MapPin, Phone, Mail, Globe,
-  Loader2, Facebook, Instagram, ChevronDown, ChevronUp
+  Loader2, ChevronDown, ChevronUp, Check, Search
 } from "lucide-react";
 
 const CATEGORIES = [
