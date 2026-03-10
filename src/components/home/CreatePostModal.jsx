@@ -90,7 +90,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
     setText(""); setType("question"); setIsAnonymous(false); setFontFamily("serif");
     setAnswerType("open"); setMultiOptions(["", ""]);
     setShowAiPanel(false); setAiTopic("");
-    setImageFile(null); setImagePreview(null);
+    setImageFile(null); setImagePreview(null); setDocFile(null);
     setLoading(false);
     onCreated();
     onClose();

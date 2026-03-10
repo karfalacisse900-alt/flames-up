@@ -85,6 +85,7 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
     // Increment post count
     await base44.entities.Group.update(group.id, { post_count: (group.post_count || 0) + 1 });
 
+    setDocFile(null);
     setSaving(false);
     onCreated();
   };
