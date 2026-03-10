@@ -19,9 +19,11 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [editingFile, setEditingFile] = useState(null);
+  const [docFile, setDocFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
+  const docInputRef = useRef(null);
 
   const handleImagePick = (e) => {
     const f = e.target.files?.[0];

@@ -29,7 +29,9 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [editingFile, setEditingFile] = useState(null);
+  const [docFile, setDocFile] = useState(null);
   const fileInputRef = useRef();
+  const docInputRef = useRef();
 
   const handleImageFile = (f) => {
     setImageFile(f);
