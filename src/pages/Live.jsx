@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { ArrowLeft, Heart, Users, Send } from "lucide-react";
 import LiveStreamChat from "../components/live/LiveStreamChat.jsx";
 import TipNotification from "../components/live/TipNotification.jsx";
+import LocationFilter from "../components/location/LocationFilter";
 
 export default function Live() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Live() {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [notifications, setNotifications] = useState([]);
+  const [filterData, setFilterData] = useState({ type: "global" });
   const qc = useQueryClient();
   const messagesEndRef = useRef(null);
 
@@ -21,9 +23,30 @@ export default function Live() {
     base44.auth.me().then(setUser).catch(() => navigate(createPageUrl("Home")));
   }, []);
 
-  const { data: liveStreams = [] } = useQuery({
+  const { data: allLiveStreams = [] } = useQuery({
     queryKey: ["liveStreams"],
     queryFn: () => base44.entities.LiveStream.filter({ is_active: true }, "-created_date", 20),
+  });
+
+  // Filter streams by location
+  const liveStreams = allLiveStreams.filter((stream) => {
+    switch (filterData.type) {
+      case "global":
+        return true;
+      case "nearby":
+        return stream.host_city === user?.location_city;
+      case "country":
+        return stream.host_country === filterData.country;
+      case "city":
+        return stream.host_city === filterData.city;
+      case "search":
+        return (
+          stream.host_city?.toLowerCase().includes(filterData.search?.toLowerCase()) ||
+          stream.title?.toLowerCase().includes(filterData.search?.toLowerCase())
+        );
+      default:
+        return true;
+    }
   });
 
   const { data: streamMessages = [] } = useQuery({
@@ -129,6 +152,15 @@ export default function Live() {
           <h1 className="text-lg font-bold flex-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
             🔴 Live Streams
           </h1>
+        </div>
+
+        {/* Location Filter */}
+        <div className="px-4 py-3" style={{ backgroundColor: "var(--bg-app)" }}>
+          <LocationFilter 
+            onFilterChange={setFilterData}
+            userCity={user?.location_city}
+            userCountry={user?.location_country}
+          />
         </div>
 
         {/* Streams list */}
