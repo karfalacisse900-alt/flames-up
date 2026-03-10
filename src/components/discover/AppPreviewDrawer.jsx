@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Star, Zap, CheckCircle2, ArrowRight } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
@@ -39,26 +40,37 @@ function getKeyFeatures(item) {
 function DrawerContent({ item, user, onClose, onFullOpen }) {
   const features = getKeyFeatures(item);
 
-  // Lock body scroll while drawer is open — always restore on unmount
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev || ""; };
   }, []);
 
-  // Close drawer on back-navigation / page change
   useEffect(() => {
     const handler = () => onClose();
     window.addEventListener("popstate", handler);
     return () => window.removeEventListener("popstate", handler);
   }, [onClose]);
 
-  return (
+  /*
+    FIX — Overlay overlap bug:
+    The drawer was rendered inside DiscoverExplorer's DOM tree. Any ancestor
+    with overflow:hidden, a transform, or a lower z-index stacking context
+    was clipping or hiding the drawer/backdrop.
+
+    Solution: Use createPortal() to mount directly on document.body,
+    completely outside the Discover feed's DOM hierarchy. This guarantees
+    the backdrop and sheet always appear on top of everything.
+
+    Also added `isolation: "isolate"` on the root container to create a
+    clean stacking context above all page content.
+  */
+  const content = (
     <div
       className="fixed inset-0 flex flex-col justify-end"
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: 9999, isolation: "isolate" }}
     >
-      {/* Backdrop — click to close */}
+      {/* Backdrop */}
       <motion.div
         key="backdrop"
         initial={{ opacity: 0 }}
@@ -213,9 +225,10 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
       </motion.div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
 
-// Wrapper: AnimatePresence lives here, parent just passes item (null = closed)
 export default function AppPreviewDrawer({ item, user, onClose, onFullOpen }) {
   return (
     <AnimatePresence>
