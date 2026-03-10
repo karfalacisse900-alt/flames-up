@@ -163,6 +163,23 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
             </button>
           )}
 
+          {/* Document attachment */}
+          {docFile ? (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <FileText className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
+              <span className="text-xs flex-1 truncate" style={{ color: "var(--text-primary)" }}>{docFile.name}</span>
+              <button onClick={() => setDocFile(null)}>
+                <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => docInputRef.current?.click()}
+              className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 border transition-all"
+              style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
+              <Paperclip className="w-4 h-4" /> Attach Document
+            </button>
+          )}
+
           {/* Anonymous */}
           <div className="flex items-center justify-between py-1">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Post anonymously</p>

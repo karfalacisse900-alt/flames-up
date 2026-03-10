@@ -234,6 +234,23 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
                 <Image style={{ width: 14, height: 14 }} /> Add Photo
               </button>
             )}
+            {/* Document attachment */}
+            <div style={{ marginTop: 8 }}>
+              {docFile ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 10, border: "1px solid var(--border-light)", backgroundColor: "var(--bg-subtle)" }}>
+                  <FileText style={{ width: 16, height: 16, color: "var(--accent-primary)", flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, color: "var(--text-primary)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{docFile.name}</span>
+                  <button onClick={() => setDocFile(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                    <X style={{ width: 14, height: 14, color: "var(--text-hint)" }} />
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => docInputRef.current?.click()}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 10, border: "1px dashed var(--border-medium)", color: "var(--text-secondary)", fontSize: 12, fontWeight: 500, cursor: "pointer", background: "transparent" }}>
+                  <Paperclip style={{ width: 14, height: 14 }} /> Attach Document
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Answer type */}
