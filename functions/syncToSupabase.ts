@@ -1,43 +1,39 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 async function supabaseUpsert(table, record) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
+  const res = await fetch(url, {
     method: "POST",
     headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
       "Content-Type": "application/json",
-      "Prefer": "resolution=merge-duplicates,return=minimal",
+      "apikey": SUPABASE_SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Prefer": "resolution=merge-duplicates",
     },
     body: JSON.stringify(record),
   });
   if (!res.ok) {
-    const err = await res.text();
-    console.error(`[syncToSupabase] Upsert to '${table}' FAILED (${res.status}):`, err);
-    console.error(`[syncToSupabase] Record that failed:`, JSON.stringify(record));
-    throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${err}`);
+    const errText = await res.text();
+    throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
   }
-  console.log(`[syncToSupabase] Upserted to '${table}' id=${record.id}`);
 }
 
 async function supabaseDelete(table, id) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${String(id)}`, {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+  const res = await fetch(url, {
     method: "DELETE",
     headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "Content-Type": "application/json",
+      "apikey": SUPABASE_SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
     },
   });
   if (!res.ok) {
-    const err = await res.text();
-    console.error(`[syncToSupabase] Delete from '${table}' FAILED (${res.status}):`, err);
-    throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${err}`);
+    const errText = await res.text();
+    throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
   }
-  console.log(`[syncToSupabase] Deleted from '${table}' id=${id}`);
 }
 
 Deno.serve(async (req) => {
@@ -46,30 +42,16 @@ Deno.serve(async (req) => {
     const { event, data } = payload;
     const entityName = event?.entity_name;
     const eventType = event?.type;
-    const entityId = event?.entity_id;
+    const id = String(data?.id || event?.entity_id);
 
-    console.log(`[syncToSupabase] entity=${entityName} event=${eventType} id=${entityId}`);
+    console.log(`[syncToSupabase] entity=${entityName} event=${eventType} id=${id}`);
 
-    if (!entityName || !eventType) {
-      return Response.json({ error: "Missing event info" }, { status: 400 });
-    }
-
-    // --- DELETE ---
     if (eventType === "delete") {
-      const tableMap = { User: "profiles", Post: "posts", Group: "communities" };
-      const table = tableMap[entityName];
-      if (table) await supabaseDelete(table, entityId);
-      return Response.json({ success: true, action: "deleted", entity: entityName });
+      if (entityName === "Post") await supabaseDelete("posts", id);
+      else if (entityName === "User") await supabaseDelete("profiles", id);
+      else if (entityName === "Group") await supabaseDelete("communities", id);
+      return Response.json({ ok: true, action: "delete", entity: entityName });
     }
-
-    // --- UPSERT (create / update) ---
-    if (!data) {
-      console.error(`[syncToSupabase] No data in payload for entity=${entityName} id=${entityId}`);
-      return Response.json({ error: "No entity data in payload" }, { status: 400 });
-    }
-
-    // IMPORTANT: Base44 IDs are cast to String to ensure correct mapping to Supabase id column
-    const id = String(data.id);
 
     if (entityName === "User") {
       const record = {
@@ -84,7 +66,7 @@ Deno.serve(async (req) => {
       const record = {
         id,
         content: data.text || null,
-        user_id: data.created_by ? String(data.created_by) : null,
+        user_id: data.created_by || null,
         created_at: data.created_date || null,
       };
       console.log(`[syncToSupabase] Syncing Post → posts:`, JSON.stringify(record));
@@ -100,13 +82,12 @@ Deno.serve(async (req) => {
       await supabaseUpsert("communities", record);
 
     } else {
-      console.log(`[syncToSupabase] Unhandled entity: ${entityName} — skipping`);
-      return Response.json({ skipped: true, entity: entityName });
+      return Response.json({ ok: true, skipped: true, entity: entityName });
     }
 
-    return Response.json({ success: true, action: eventType, entity: entityName, id });
+    return Response.json({ ok: true, entity: entityName, id });
   } catch (error) {
-    console.error("[syncToSupabase] Fatal error:", error.message);
+    console.error(`[syncToSupabase] Fatal error:`, error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
