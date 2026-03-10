@@ -58,9 +58,27 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const qc = useQueryClient();
+  const chatBottomRef = useRef(null);
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
   const isCreator = user?.email === group.creator_email;
+
+  // Real-time subscription for new chat messages
+  useEffect(() => {
+    const unsubscribe = base44.entities.CommunityPost.subscribe((event) => {
+      if (event.data?.group_id === group.id || event.type === "create") {
+        qc.invalidateQueries({ queryKey: ["groupPosts", group.id] });
+      }
+    });
+    return unsubscribe;
+  }, [group.id]);
+
+  // Auto-scroll to bottom when posts update and chat tab is active
+  useEffect(() => {
+    if (activeTab === "chat") {
+      setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [posts, activeTab]);
 
   const handleDeleteGroup = async () => {
     if (!isCreator || deleting) return;
