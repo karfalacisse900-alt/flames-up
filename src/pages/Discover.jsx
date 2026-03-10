@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
 import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
 import DYKTab from "@/components/discover/DYKTab";
+import CreatorsTab from "@/components/discover/CreatorsTab";
 import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
 
 
@@ -84,11 +85,12 @@ export default function Discover() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-2 mb-3">
-          {[
-            { id: "apps", label: "🧰 Apps & Tools" },
-            { id: "dyk",  label: "💡 Did You Know" },
-          ].map(tab => {
+         <div className="flex gap-2 mb-3">
+           {[
+             { id: "apps", label: "🧰 Apps & Tools" },
+             { id: "creators", label: "⭐ Creators" },
+             { id: "dyk",  label: "💡 Did You Know" },
+           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -131,7 +133,9 @@ export default function Discover() {
 
       {/* ── Content ── */}
       <div className="pt-2">
-        {activeTab === "dyk" ? (
+        {activeTab === "creators" ? (
+          <CreatorsTab />
+        ) : activeTab === "dyk" ? (
           <DYKTab user={user} />
         ) : view === "explore" ? (
           <DiscoverExplorer
