@@ -78,6 +78,7 @@ export default function CreatePostModal({ open, onClose, onCreated, user }) {
       author_email: isAnonymous ? "" : (user?.email || ""),
       like_count: 0, reply_count: 0, liked_by: [],
       ...(imageUrl ? { image_url: imageUrl } : {}),
+      ...(documentUrl ? { document_url: documentUrl, document_name: documentName } : {}),
       ...pollData,
     });
     

@@ -70,6 +70,8 @@ export default function GroupPostCompose({ group, user, onClose, onCreated }) {
       author_avatar_url: isAnon ? "" : (user.avatar_url || ""),
       is_anonymous: isAnon,
       image_url: imageUrl || undefined,
+      document_url: documentUrl || undefined,
+      document_name: documentName || undefined,
       group_id: group.id,
       group_name: group.name,
       upvotes: 0, downvotes: 0, comment_count: 0, engagement_score: 0,
