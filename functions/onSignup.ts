@@ -1,4 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 
 const ADJECTIVES = ["calm", "moon", "soft", "wild", "cool", "bright", "quiet", "swift", "deep", "warm", "crisp", "pure", "bold", "vast", "still"];
 const NOUNS = ["walker", "reader", "dreamer", "seeker", "thinker", "coder", "artist", "writer", "builder", "mover", "maker", "runner", "rider", "mind", "soul"];
