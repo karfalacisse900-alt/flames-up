@@ -9,6 +9,8 @@ import InterestsSection from "../components/profile/InterestsSection";
 import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
+import CreatorSection from "../components/profile/CreatorSection";
+import CreatorApplicationForm from "../components/creator/CreatorApplicationForm";
 import { getBalance } from "../components/coins/coinsHelper";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,7 @@ export default function Profile() {
   const [boostPost, setBoostPost] = useState(null);
   const [showExport, setShowExport] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showCreatorApp, setShowCreatorApp] = useState(false);
   const queryClient = useQueryClient();
   const { data: coinBalance = 0 } = useQuery({
     queryKey: ["coinBalance", user?.email],
@@ -226,7 +229,10 @@ export default function Profile() {
           </div>
 
           {/* Name & bio */}
-          <h2 className="text-xl font-bold mt-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>{user.display_name || user.full_name}</h2>
+          <h2 className="text-xl font-bold mt-1 flex items-center gap-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>
+            {user.display_name || user.full_name}
+            {user.is_creator && <span style={{ fontSize: "16px" }}>⭐</span>}
+          </h2>
           {user.username && <p className="text-xs font-bold mt-0.5" style={{ color: activeTheme.accent }}>{user.username}</p>}
           {user.about_me && (
             <div className="mt-3 p-3.5 rounded-2xl text-sm leading-relaxed" style={{ backgroundColor: "rgba(0,0,0,0.04)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
@@ -239,6 +245,17 @@ export default function Profile() {
           <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
             <WalletWidget balance={coinBalance} />
           </Link>
+
+          {/* Creator Application Button */}
+          {!user.is_creator && (
+            <button
+              onClick={() => setShowCreatorApp(true)}
+              className="w-full py-2.5 rounded-2xl text-white font-bold text-sm mt-4 flex items-center justify-center gap-2"
+              style={{ backgroundColor: "var(--accent-primary)" }}
+            >
+              ⭐ Apply to Become a Creator
+            </button>
+          )}
 
           {/* Stats row */}
           <div className="flex gap-2 mt-4">
@@ -264,6 +281,11 @@ export default function Profile() {
           <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <MessageSquare className="w-3.5 h-3.5" /> Posts
           </TabsTrigger>
+          {user.is_creator && (
+            <TabsTrigger value="creator" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+              ⭐ Creator
+            </TabsTrigger>
+          )}
           <TabsTrigger value="liked" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Heart className="w-3.5 h-3.5" /> Liked
           </TabsTrigger>
@@ -279,36 +301,42 @@ export default function Profile() {
         </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-3">
-          {myPosts.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
-          ) : (
-            myPosts.map(post => (
-              <div key={post.id} className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
-                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
-                    <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
-                    <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
-                      <span>❤️ {post.like_count || 0}</span>
-                      <span>💬 {post.reply_count || 0}</span>
-                      <span>{new Date(post.created_date).toLocaleDateString()}</span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={async () => {
-                      if (!window.confirm("Delete this post?")) return;
-                      await base44.entities.Post.delete(post.id);
-                      queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
-                    }}
-                    className="p-1.5 rounded-full shrink-0" style={{ color: "var(--text-hint)" }}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </TabsContent>
+           {myPosts.length === 0 ? (
+             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
+           ) : (
+             myPosts.map(post => (
+               <div key={post.id} className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                 <div className="flex items-start justify-between gap-2">
+                   <div className="flex-1 min-w-0">
+                     <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
+                       style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
+                     <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
+                     <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
+                       <span>❤️ {post.like_count || 0}</span>
+                       <span>💬 {post.reply_count || 0}</span>
+                       <span>{new Date(post.created_date).toLocaleDateString()}</span>
+                     </p>
+                   </div>
+                   <button
+                     onClick={async () => {
+                       if (!window.confirm("Delete this post?")) return;
+                       await base44.entities.Post.delete(post.id);
+                       queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
+                     }}
+                     className="p-1.5 rounded-full shrink-0" style={{ color: "var(--text-hint)" }}>
+                     <Trash2 className="w-3.5 h-3.5" />
+                   </button>
+                 </div>
+               </div>
+             ))
+           )}
+         </TabsContent>
+
+         {user.is_creator && (
+           <TabsContent value="creator" className="mt-4">
+             <CreatorSection user={user} />
+           </TabsContent>
+         )}
 
         <TabsContent value="liked" className="mt-4 space-y-3">
           {likedPosts.length === 0 ? (
