@@ -95,6 +95,8 @@ html {
   height: -webkit-fill-available;
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
+  -ms-content-zooming: none;
+  -ms-user-select: none;
 }
 
 body {
