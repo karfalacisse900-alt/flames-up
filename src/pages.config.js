@@ -86,6 +86,7 @@ import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
 import CreatorApplication from './pages/CreatorApplication';
+import CommunityFeed from './pages/CommunityFeed';
 import __Layout from './Layout.jsx';
 
 
@@ -129,6 +130,7 @@ export const PAGES = {
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
     "CreatorApplication": CreatorApplication,
+    "CommunityFeed": CommunityFeed,
 }
 
 export const pagesConfig = {
