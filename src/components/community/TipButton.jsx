@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const TIP_PRESETS = [10, 25, 50, 100];
 
-export default function TipButton({ postAuthorEmail, postId }) {
+export default function TipButton({ postAuthorEmail, postId, isMenu }) {
   const [showTipModal, setShowTipModal] = useState(false);
   const [customCoins, setCustomCoins] = useState("");
   const [selectedPreset, setSelectedPreset] = useState(null);
@@ -57,13 +57,23 @@ export default function TipButton({ postAuthorEmail, postId }) {
 
   return (
     <>
-      <button
-        onClick={() => setShowTipModal(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
-        style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444" }}
-      >
-        <Heart className="w-3.5 h-3.5 fill-current" /> Tip
-      </button>
+      {isMenu ? (
+        <button
+          onClick={() => setShowTipModal(true)}
+          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left"
+          style={{ color: "#ef4444" }}
+        >
+          <Heart className="w-3.5 h-3.5 fill-current" /> Send Tip
+        </button>
+      ) : (
+        <button
+          onClick={() => setShowTipModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95"
+          style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444" }}
+        >
+          <Heart className="w-3.5 h-3.5 fill-current" /> Tip
+        </button>
+      )}
 
       <Dialog open={showTipModal} onOpenChange={setShowTipModal}>
         <DialogContent className="max-w-sm rounded-2xl">
