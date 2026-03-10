@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Plus, ArrowUp, Zap, MapPin, Loader2 } from "lucide-react";
 import PlaceHub from "./PlaceHub";
-import CreateCommunityPost from "./CreateCommunityPost";
+import CreatePostFlow from "./CreatePostFlow";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
@@ -295,11 +295,9 @@ export default function CommunityFeed({ user }) {
       </div>
 
       {showCreate && (
-        <CreateCommunityPost
-          user={user}
-          challengeContext={challengeContext}
+        <CreatePostFlow
           onClose={() => { setShowCreate(false); setChallengeContext(null); }}
-          onCreated={async () => {
+          onSuccess={async () => {
             await qc.invalidateQueries({ queryKey: ["communityPosts"] });
             await qc.invalidateQueries({ queryKey: ["communityDebates"] });
             await refetch();
