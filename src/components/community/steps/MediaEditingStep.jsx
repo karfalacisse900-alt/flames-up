@@ -59,7 +59,8 @@ export default function MediaEditingStep({
     if (contrast !== 0) filter += `contrast(${100 + contrast}%) `;
     if (saturation !== 0) filter += `saturate(${100 + saturation}%) `;
     if (exposure !== 0) filter += `brightness(${100 + exposure}%) `;
-    return filter;
+    if (currentItem?.edits?.effectFilter) filter += currentItem.edits.effectFilter + " ";
+    return filter.trim();
   };
 
   return (
@@ -269,15 +270,24 @@ export default function MediaEditingStep({
       {/* Effects Mode */}
       {editMode === "effects" && (
         <div className="space-y-2">
-          {["Warm", "Cool", "B&W", "Vintage", "Vibrant"].map((filter) => (
+          {[
+            { name: "Warm", filter: "sepia(0.4) saturate(1.2)" },
+            { name: "Cool", filter: "saturate(1.2) hue-rotate(-20deg)" },
+            { name: "B&W", filter: "grayscale(1)" },
+            { name: "Vintage", filter: "sepia(0.3) saturate(0.8)" },
+            { name: "Vibrant", filter: "saturate(1.8) contrast(1.1)" }
+          ].map(({ name, filter }) => (
             <button
-              key={filter}
-              className="w-full py-3 rounded-lg font-semibold text-white"
+              key={name}
+              onClick={() => applyEdits({ effectFilter: filter })}
+              className="w-full py-3 rounded-lg font-semibold text-white transition-all active:scale-95"
               style={{
-                backgroundColor: "var(--accent-primary)",
+                backgroundColor: currentItem?.edits?.effectFilter === filter ? "var(--accent-primary)" : "var(--bg-card)",
+                color: currentItem?.edits?.effectFilter === filter ? "#fff" : "var(--text-primary)",
+                border: currentItem?.edits?.effectFilter === filter ? "none" : "1px solid var(--border-light)"
               }}
             >
-              {filter}
+              {name}
             </button>
           ))}
         </div>
