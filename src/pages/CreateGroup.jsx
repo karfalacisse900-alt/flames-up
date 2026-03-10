@@ -385,6 +385,29 @@ export default function CreateGroup() {
                 )}
               </Field>
 
+              {/* Preview Video */}
+              <Field label="Group Preview Video" hint="Short clip showing what your group does (e.g. yoga session, run, meetup). Shown to people browsing groups.">
+                <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={handleVideoPick} />
+                {previewVideoName ? (
+                  <div className="flex items-center gap-2 px-3 py-3 rounded-2xl"
+                    style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+                    <Video className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
+                    <p className="text-xs font-semibold flex-1 truncate" style={{ color: "var(--text-primary)" }}>{previewVideoName}</p>
+                    <button onClick={() => { setPreviewVideoFile(null); setPreviewVideoName(null); }}
+                      className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "#FFF0F3", color: "#E05C7A" }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => videoRef.current?.click()}
+                    className="w-full py-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 text-sm font-medium"
+                    style={{ borderColor: "var(--border-medium)", color: "var(--text-hint)", backgroundColor: "var(--bg-subtle)" }}>
+                    <Video className="w-4 h-4" /> Upload preview video
+                  </button>
+                )}
+              </Field>
+
               {/* Name */}
               <Field label="Group Name *">
                 <Input value={name} onChange={e => setName(e.target.value)} maxLength={50}
