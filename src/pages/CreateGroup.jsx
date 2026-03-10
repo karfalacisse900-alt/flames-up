@@ -105,9 +105,59 @@ export default function CreateGroup() {
   const [tiktok, setTiktok] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
 
+  // Address search state
+  const [addressInput, setAddressInput] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [addressSearching, setAddressSearching] = useState(false);
+  const [validatedAddress, setValidatedAddress] = useState(null); // { place_name, lat, lng, city }
+  const [addressError, setAddressError] = useState("");
+  const addressDebounceRef = useRef(null);
+  const [mapboxToken, setMapboxToken] = useState(null);
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showSocial, setShowSocial] = useState(false);
+
+  useEffect(() => {
+    base44.functions.invoke("mapboxToken", {}).then(res => {
+      if (res.data?.token) setMapboxToken(res.data.token);
+    }).catch(() => {});
+  }, []);
+
+  const searchAddress = (query) => {
+    if (!query.trim() || !mapboxToken) return;
+    clearTimeout(addressDebounceRef.current);
+    addressDebounceRef.current = setTimeout(async () => {
+      setAddressSearching(true);
+      setAddressError("");
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=poi,address&limit=5`;
+        const res = await fetch(url);
+        const data = await res.json();
+        setAddressSuggestions(data.features || []);
+      } catch {
+        setAddressSuggestions([]);
+      }
+      setAddressSearching(false);
+    }, 350);
+  };
+
+  const selectAddress = (feature) => {
+    const [lng, lat] = feature.center;
+    const cityContext = feature.context?.find(c => c.id.startsWith("place.") || c.id.startsWith("locality."));
+    const city = cityContext?.text || feature.properties?.city || "";
+    setValidatedAddress({ place_name: feature.place_name, lat, lng, city });
+    setAddressInput(feature.place_name);
+    setAddressSuggestions([]);
+    setAddressError("");
+  };
+
+  const clearAddress = () => {
+    setValidatedAddress(null);
+    setAddressInput("");
+    setAddressSuggestions([]);
+    setAddressError("");
+  };
 
   const selectedCat = CATEGORIES.find(c => c.key === category);
 
