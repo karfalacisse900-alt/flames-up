@@ -511,6 +511,17 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
         {showEventPrivacy && user && (
           <EventSafetySettings user={user} onClose={() => setShowEventPrivacy(false)} />
         )}
+        {showEditGroup && isCreator && (
+          <EditGroupModal
+            group={group}
+            onClose={() => setShowEditGroup(false)}
+            onUpdated={(updatedGroup) => {
+              setGroup(updatedGroup);
+              qc.invalidateQueries({ queryKey: ["groups"] });
+              setShowEditGroup(false);
+            }}
+          />
+        )}
         {showDeleteConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end justify-center"
