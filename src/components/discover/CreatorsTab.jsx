@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Star, Filter, X } from "lucide-react";
+import { Star, Filter, X, ExternalLink } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 
@@ -64,52 +64,64 @@ export default function CreatorsTab() {
           <p style={{ color: "var(--text-hint)" }}>No creators in this category yet</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4">
+        <div className="grid grid-cols-1 gap-3 px-4">
           {filtered.map((creator) => (
-            <Link
+            <div
               key={creator.id}
-              to={createPageUrl(`UserProfile?email=${creator.email}`)}
-              className="rounded-2xl p-4 border cursor-pointer transition-transform hover:scale-[1.02]"
+              className="rounded-2xl p-4 border"
               style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}
             >
-              <div className="flex items-start gap-3">
+              <Link
+                to={createPageUrl(`UserProfile?email=${creator.email}`)}
+                className="flex items-start gap-4 mb-4"
+              >
                 {creator.avatar_url ? (
-                  <img src={creator.avatar_url} alt={creator.full_name} className="w-12 h-12 rounded-full object-cover" />
+                  <img src={creator.avatar_url} alt={creator.full_name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
                 ) : (
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold"
+                    className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0"
                     style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
                   >
                     {creator.full_name?.charAt(0)}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <p className="font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <p className="font-bold" style={{ color: "var(--text-primary)" }}>
                       {creator.full_name}
                     </p>
                     <span style={{ fontSize: "14px" }}>⭐</span>
                   </div>
-                  <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                  <p className="text-xs font-semibold mb-1" style={{ color: "var(--accent-primary)" }}>
                     {CATEGORIES.find((c) => c.id === creator.creator_category)?.label || creator.creator_category}
                   </p>
-                  <p className="text-xs mt-1 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
-                    {creator.creator_bio}
+                  <p className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                    {creator.creator_description || "Professional creator"}
                   </p>
-                  {creator.creator_links && Object.keys(creator.creator_links).length > 0 && (
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {Object.keys(creator.creator_links)
-                        .slice(0, 2)
-                        .map((platform) => (
-                          <span key={platform} className="text-[9px] px-2 py-0.5 rounded-full capitalize" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                            {platform}
-                          </span>
-                        ))}
-                    </div>
-                  )}
                 </div>
-              </div>
-            </Link>
+              </Link>
+
+              {/* External links */}
+              {creator.external_links && Object.keys(creator.external_links).length > 0 && (
+                <div className="space-y-1.5">
+                  {Object.entries(creator.external_links)
+                    .slice(0, 2)
+                    .map(([platform, url]) => (
+                      <a
+                        key={platform}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-all"
+                        style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                      </a>
+                    ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
