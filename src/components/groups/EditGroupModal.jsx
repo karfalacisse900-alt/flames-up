@@ -334,10 +334,13 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
                               className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left"
                               style={{ borderBottom: i < addressSuggestions.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
                               <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "var(--accent-primary)" }} />
-                              <div className="min-w-0">
+                              <div className="min-w-0 flex-1">
                                 <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{f.text}</p>
                                 <p className="text-[11px] truncate" style={{ color: "var(--text-hint)" }}>{f.place_name}</p>
                               </div>
+                              {f._distanceLabel && (
+                                <span className="text-[11px] shrink-0 font-medium" style={{ color: "var(--accent-primary)" }}>📍 {f._distanceLabel}</span>
+                              )}
                             </button>
                           ))}
                         </motion.div>
