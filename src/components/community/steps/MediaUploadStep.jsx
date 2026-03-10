@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Upload, Play, Image, Music, X, GripVertical, Cloud, FileUp } from "lucide-react";
+import { Upload, Play, Image, Music, X, GripVertical, Cloud, FileUp, Mic } from "lucide-react";
 
 export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
   const photoVideoInputRef = useRef(null);
@@ -97,7 +97,7 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
               </p>
             </div>
 
-            {/* Two main buttons */}
+            {/* Three main buttons */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {/* Photos & Videos */}
               <button
@@ -112,16 +112,16 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
                 </div>
               </button>
 
-              {/* File Upload */}
+              {/* Record Live */}
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => alert("Recording feature coming soon!")}
                 className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
-                style={{ background: "linear-gradient(135deg, #D98B62, #E8A878)" }}
+                style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
               >
-                <FileUp className="w-8 h-8" />
+                <Mic className="w-8 h-8" />
                 <div>
-                  <p className="text-base">📄 Files</p>
-                  <p className="text-xs font-normal opacity-80">& Documents</p>
+                  <p className="text-base">🎙️ Record</p>
+                  <p className="text-xs font-normal opacity-80">Live</p>
                 </div>
               </button>
             </div>
@@ -222,6 +222,15 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
                 style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}
               >
                 + Add More Media
+              </button>
+
+              {/* Next button */}
+              <button
+                onClick={onNext}
+                className="w-full mt-4 py-3 rounded-2xl text-white font-bold text-lg transition-all active:scale-95"
+                style={{ backgroundColor: "var(--accent-primary)" }}
+              >
+                Next: Edit Media
               </button>
             </div>
           </>
