@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, MapPin, BadgeCheck, Shield, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, MapPin, BadgeCheck, Shield, Trash2, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
