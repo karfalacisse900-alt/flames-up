@@ -60,6 +60,21 @@ export default function GroupHub({ group, user, membership, onBack, onJoin, onLe
   const qc = useQueryClient();
 
   const isAdmin = membership?.role === "admin" || membership?.role === "moderator";
+  const isCreator = user?.email === group.creator_email;
+
+  const handleDeleteGroup = async () => {
+    if (!isCreator || deleting) return;
+    setDeleting(true);
+    // Delete all members
+    const allMembers = await qc.fetchQuery({
+      queryKey: ["groupMembers", group.id],
+      queryFn: () => base44.entities.GroupMember.filter({ group_id: group.id }),
+    });
+    await Promise.all(allMembers.map(m => base44.entities.GroupMember.delete(m.id)));
+    await base44.entities.Group.update(group.id, { is_active: false });
+    setDeleting(false);
+    onBack();
+  };
   const gradBg = CATEGORY_COLORS[group.category] || CATEGORY_COLORS.general;
 
   const { data: posts = [], isLoading } = useQuery({
