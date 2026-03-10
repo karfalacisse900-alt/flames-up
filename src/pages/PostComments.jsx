@@ -470,14 +470,14 @@ export default function PostComments() {
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)", overflow: "hidden" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 shrink-0"
-        style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)", paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
-        <button onClick={goBack} className="p-2 rounded-full -ml-1" style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
+        style={{ background: "linear-gradient(135deg, var(--accent-primary), #4CAF7D)", borderBottom: "1px solid var(--border-light)", paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}>
+        <button onClick={goBack} className="p-2 rounded-full -ml-1" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+          <ArrowLeft className="w-4 h-4" style={{ color: "#fff" }} />
         </button>
-        <h1 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-base font-bold" style={{ color: "#fff" }}>
           {debate ? "Arguments" : "Comments"}
           {allReplies.length > 0 && (
-            <span className="ml-1.5 text-sm font-normal" style={{ color: "var(--text-hint)" }}>({allReplies.length})</span>
+            <span className="ml-1.5 text-sm font-normal" style={{ color: "rgba(255,255,255,0.7)" }}>({allReplies.length})</span>
           )}
         </h1>
       </div>
@@ -485,7 +485,20 @@ export default function PostComments() {
       {/* Scrollable content */}
       <div ref={listRef} className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
         {/* Post preview */}
-        {post && <PostPreview post={post} />}
+        {post && (
+          <div className="px-4 py-4" style={{ borderBottom: "2px solid var(--border-light)", backgroundColor: "var(--bg-card)" }}>
+            <p className="text-sm font-bold leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              {stripHtml(post.body || post.title || "").slice(0, 160)}...
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+                {post.is_anonymous ? "Anonymous" : post.author_name}
+              </span>
+              <span className="text-xs" style={{ color: "var(--text-hint)" }}>·</span>
+              <span className="text-xs" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+            </div>
+          </div>
+        )}
 
         {/* Debate vote bar */}
         {debate && (
@@ -534,8 +547,8 @@ export default function PostComments() {
       {/* Input bar */}
       {user && (
         <div className="shrink-0 px-3 py-3" style={{
-          backgroundColor: "var(--bg-nav)",
-          borderTop: "1px solid var(--border-light)",
+          backgroundColor: "var(--bg-card)",
+          borderTop: "2px solid var(--accent-primary-light)",
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)"
         }}>
           {/* Debate side selector */}
