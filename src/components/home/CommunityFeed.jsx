@@ -5,25 +5,17 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { MapPin, PenTool, Zap } from "lucide-react";
 import CommunityPostCard from "../community/CommunityPostCard";
-import TipButton from "../community/TipButton";
+import LocationFilter from "../location/LocationFilter";
 
 export default function CommunityFeed({ user }) {
   const [posts, setPosts] = useState([]);
-  const [filterMode, setFilterMode] = useState("global"); // "global" or "nearby"
-  const [userCity, setUserCity] = useState(null);
+  const [filterData, setFilterData] = useState({ type: "global" });
   const qc = useQueryClient();
 
   const { data: allPosts = [], isLoading } = useQuery({
     queryKey: ["communityPosts"],
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 100),
   });
-
-  // Get user location
-  useEffect(() => {
-    if (user?.location_city) {
-      setUserCity(user.location_city);
-    }
-  }, [user]);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -33,14 +25,46 @@ export default function CommunityFeed({ user }) {
     return unsubscribe;
   }, [qc]);
 
-  // Filter posts based on mode
+  // Filter posts based on location filter
   useEffect(() => {
     let filtered = allPosts;
-    if (filterMode === "nearby" && userCity) {
-      filtered = allPosts.filter(p => p.location_city === userCity);
+
+    switch (filterData.type) {
+      case "global":
+        filtered = allPosts;
+        break;
+      case "nearby":
+        if (user?.location_city) {
+          filtered = allPosts.filter(p => p.location_city === user.location_city);
+        }
+        break;
+      case "country":
+        if (filterData.country) {
+          filtered = allPosts.filter(p => p.location_country === filterData.country);
+        }
+        break;
+      case "city":
+        if (filterData.city) {
+          filtered = allPosts.filter(p => p.location_city === filterData.city);
+        }
+        break;
+      case "search":
+        if (filterData.search) {
+          const search = filterData.search.toLowerCase();
+          filtered = allPosts.filter(
+            p =>
+              p.location_name?.toLowerCase().includes(search) ||
+              p.location_city?.toLowerCase().includes(search) ||
+              p.location_region?.toLowerCase().includes(search)
+          );
+        }
+        break;
+      default:
+        filtered = allPosts;
     }
+
     setPosts(filtered);
-  }, [allPosts, filterMode, userCity]);
+  }, [allPosts, filterData, user]);
 
   const handleUpvote = async (post) => {
     if (!user) return;
@@ -70,48 +94,30 @@ export default function CommunityFeed({ user }) {
   return (
     <div className="pb-8">
       {/* Filter + Action bar */}
-      <div className="sticky top-16 z-20 px-4 py-3 flex items-center gap-2" style={{ backgroundColor: "var(--bg-app)" }}>
-        {/* Location Filter */}
-        <div className="flex gap-2 flex-1">
-          <button
-            onClick={() => setFilterMode("global")}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: filterMode === "global" ? "var(--accent-primary)" : "var(--bg-card)",
-              color: filterMode === "global" ? "#fff" : "var(--text-secondary)",
-              border: "1px solid " + (filterMode === "global" ? "var(--accent-primary)" : "var(--border-light)"),
-            }}>
-            🌍 Global
-          </button>
-          {userCity && (
-            <button
-              onClick={() => setFilterMode("nearby")}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1"
-              style={{
-                backgroundColor: filterMode === "nearby" ? "var(--accent-primary)" : "var(--bg-card)",
-                color: filterMode === "nearby" ? "#fff" : "var(--text-secondary)",
-                border: "1px solid " + (filterMode === "nearby" ? "var(--accent-primary)" : "var(--border-light)"),
-              }}>
-              <MapPin className="w-3 h-3" />
-              {userCity}
-            </button>
-          )}
-        </div>
+      <div className="sticky top-16 z-20 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-app)" }}>
+        {/* Location Filter Dropdown */}
+        <LocationFilter 
+          onFilterChange={setFilterData}
+          userCity={user?.location_city}
+          userCountry={user?.location_country}
+        />
 
         {/* Create Post button */}
         <Link
           to={createPageUrl("CreatePostFlow")}
-          className="p-2 rounded-full flex items-center justify-center transition-all"
-          style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+          className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-white"
+          style={{ backgroundColor: "var(--accent-primary)" }}>
           <PenTool className="w-4 h-4" />
+          Post
         </Link>
 
         {/* Go Live button */}
         <Link
           to={createPageUrl("GoLive")}
-          className="p-2 rounded-full flex items-center justify-center transition-all"
-          style={{ backgroundColor: "#E05C7A", color: "#fff" }}>
+          className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-white"
+          style={{ backgroundColor: "#E05C7A" }}>
           <Zap className="w-4 h-4" />
+          Live
         </Link>
       </div>
 
@@ -120,7 +126,7 @@ export default function CommunityFeed({ user }) {
         <div className="px-4 py-12 text-center">
           <p className="text-3xl mb-2">📝</p>
           <p style={{ color: "var(--text-hint)" }}>
-            {filterMode === "nearby" ? `No posts in ${userCity} yet.` : "No posts yet. Be the first to share!"}
+            No posts found. Be the first to share!
           </p>
         </div>
       ) : (
@@ -132,12 +138,6 @@ export default function CommunityFeed({ user }) {
                 user={user}
                 onUpvote={() => handleUpvote(post)}
               />
-              {/* Tip button overlay on posts */}
-              {user && post.author_email !== user.email && (
-                <div className="absolute top-4 right-4 z-10">
-                  <TipButton postAuthorEmail={post.author_email} postId={post.id} />
-                </div>
-              )}
             </div>
           ))}
         </div>
