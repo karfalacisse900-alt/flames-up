@@ -1,245 +1,249 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { usePullToRefresh } from "../components/hooks/usePullToRefresh";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Radio, Users, ChevronRight, Coins } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
-import { getBalance, addCoins } from "../components/coins/coinsHelper";
-
-const categoryEmoji = {
-  quotes_talk: "💭",
-  study_live: "📚",
-  advice: "🤝",
-  chill: "☕",
-  debate: "⚡",
-  creative: "🎨",
-};
-
-const categoryLabel = {
-  quotes_talk: "Quotes Talk",
-  study_live: "Study Live",
-  advice: "Advice",
-  chill: "Chill",
-  debate: "Debate",
-  creative: "Creative",
-};
+import { Link, useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { ArrowLeft, Heart, MessageSquare, Users, Send } from "lucide-react";
+import LiveStreamChat from "../components/live/LiveStreamChat";
+import TipNotification from "../components/live/TipNotification";
 
 export default function Live() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("chill");
-  const [entryPrice, setEntryPrice] = useState(0);
-  const [creating, setCreating] = useState(false);
-  const [enteringRoom, setEnteringRoom] = useState(null);
-  const queryClient = useQueryClient();
+  const [currentStream, setCurrentStream] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const qc = useQueryClient();
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => navigate(createPageUrl("Home")));
   }, []);
 
-  const { data: rooms = [], isLoading, refetch } = useQuery({
-    queryKey: ["liveRooms"],
-    queryFn: () => base44.entities.LiveRoom.filter({ is_active: true }, "-created_date"),
-    refetchInterval: 5000,
+  const { data: liveStreams = [] } = useQuery({
+    queryKey: ["liveStreams"],
+    queryFn: () => base44.entities.LiveStream.filter({ is_active: true }, "-created_date", 20),
   });
 
-  const handleRefresh = useCallback(async () => { await refetch(); }, [refetch]);
-  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(handleRefresh);
+  const { data: streamMessages = [] } = useQuery({
+    queryKey: ["streamMessages", currentStream?.id],
+    queryFn: () =>
+      currentStream
+        ? base44.entities.LiveStreamChat.filter({ stream_id: currentStream.id }, "created_date", 100)
+        : [],
+    enabled: !!currentStream?.id,
+    refetchInterval: 2000,
+  });
 
-  const handleCreateRoom = async () => {
-    if (!title.trim()) return;
-    setCreating(true);
-    try {
-      const room = await base44.entities.LiveRoom.create({
-        title: title.trim(),
-        category,
-        host_email: user?.email || "",
-        host_name: user?.full_name || "Host",
-        is_active: true,
-        viewer_count: 0,
-        viewers: [],
-        entry_price: Number(entryPrice) || 0,
-        top_supporters: [],
-        total_gifts_received: 0,
-      });
-      setTitle("");
-      setEntryPrice(0);
-      setShowCreate(false);
-      queryClient.invalidateQueries({ queryKey: ["liveRooms"] });
-      window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
-    } catch (err) {
-      console.error("Create room error:", err);
-      alert("Failed to create room. Please try again.");
-    } finally {
-      setCreating(false);
-    }
-  };
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [streamMessages]);
 
-  const handleEnterRoom = async (room) => {
-    if (!room.entry_price || room.entry_price === 0 || user?.email === room.host_email) {
-      window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
-      return;
-    }
-    // Paid room — charge coins
-    setEnteringRoom(room.id);
-    try {
-      const bal = await getBalance(user.email);
-      if (bal < room.entry_price) {
-        alert(`You need ⬡${room.entry_price} coins to enter this room. You have ⬡${bal}.`);
-        return;
+  useEffect(() => {
+    setMessages(streamMessages);
+  }, [streamMessages]);
+
+  // Subscribe to real-time chat updates
+  useEffect(() => {
+    if (!currentStream) return;
+    const unsubscribe = base44.entities.LiveStreamChat.subscribe((event) => {
+      if (event.data?.stream_id === currentStream.id) {
+        qc.invalidateQueries({ queryKey: ["streamMessages", currentStream.id] });
       }
-      await addCoins(user.email, -room.entry_price, "gift_sent", `Entry fee for "${room.title}"`, room.id);
-      await addCoins(room.host_email, room.entry_price, "gift_received", `Entry fee from ${user.full_name || user.email}`, room.id);
-      window.location.href = createPageUrl("LiveRoomView") + `?id=${room.id}`;
-    } catch (err) {
-      console.error("Enter room error:", err);
-      alert("Failed to enter room. Please try again.");
-    } finally {
-      setEnteringRoom(null);
+    });
+    return unsubscribe;
+  }, [currentStream, qc]);
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || !user || !currentStream) return;
+
+    try {
+      await base44.entities.LiveStreamChat.create({
+        stream_id: currentStream.id,
+        sender_email: user.email,
+        sender_name: user.display_name || user.full_name || "User",
+        message: chatInput,
+        type: "message",
+      });
+      setChatInput("");
+      qc.invalidateQueries({ queryKey: ["streamMessages", currentStream.id] });
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
+
+  const handleTip = async (amount) => {
+    if (!user || !currentStream) return;
+
+    try {
+      // Create tip notification in chat
+      await base44.entities.LiveStreamChat.create({
+        stream_id: currentStream.id,
+        sender_email: user.email,
+        sender_name: user.display_name || user.full_name || "User",
+        message: `Tipped ${amount} coins!`,
+        type: "tip_notification",
+        tip_amount: amount,
+      });
+
+      // Show notification
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          sender: user.display_name || user.full_name || "User",
+          amount,
+        },
+      ]);
+
+      // Remove notification after 5 seconds
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter((n) => n.id !== Date.now()));
+      }, 5000);
+
+      qc.invalidateQueries({ queryKey: ["streamMessages", currentStream.id] });
+      qc.invalidateQueries({ queryKey: ["liveStreams"] });
+    } catch (error) {
+      console.error("Error sending tip:", error);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)" }} />
+      </div>
+    );
+  }
+
+  if (!currentStream) {
+    return (
+      <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
+        {/* Header */}
+        <div className="sticky top-0 z-10 px-4 py-3 border-b flex items-center gap-3" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+          <Link to={createPageUrl("Home")} className="p-2 rounded-lg">
+            <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+          </Link>
+          <h1 className="text-lg font-bold flex-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+            🔴 Live Streams
+          </h1>
+        </div>
+
+        {/* Streams list */}
+        <div className="px-4 py-4 space-y-3">
+          {liveStreams.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-3xl mb-2">📺</p>
+              <p style={{ color: "var(--text-hint)" }}>No live streams right now</p>
+            </div>
+          ) : (
+            liveStreams.map((stream) => (
+              <button
+                key={stream.id}
+                onClick={() => setCurrentStream(stream)}
+                className="w-full text-left rounded-2xl p-4 border transition-all active:scale-95"
+                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}
+              >
+                <div className="flex items-start gap-3">
+                  {stream.stream_thumbnail ? (
+                    <img src={stream.stream_thumbnail} alt={stream.title} className="w-20 h-20 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl flex items-center justify-center text-2xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                      📺
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-red-600 text-sm font-bold">● LIVE</span>
+                      <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+                        {stream.viewer_count} viewers
+                      </span>
+                    </div>
+                    <h3 className="font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                      {stream.title}
+                    </h3>
+                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                      {stream.host_name}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      ref={containerRef}
-      className="overflow-y-auto overscroll-contain"
-      style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <PullIndicator />
+    <div className="flex flex-col h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="px-5 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-light)" }}>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Live</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-hint)" }}>Join or start a session</p>
-        </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-[#2E6B4F] text-white"
-          style={{}}
-        >
-          <Radio className="w-4 h-4" /> Go Live
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+        <button onClick={() => setCurrentStream(null)} className="p-2 rounded-lg">
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </button>
+        <div className="flex-1">
+          <h2 className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+            {currentStream.title}
+          </h2>
+          <p className="text-xs flex items-center gap-1" style={{ color: "var(--text-hint)" }}>
+            <Users className="w-3 h-3" /> {currentStream.viewer_count} viewers
+          </p>
+        </div>
       </div>
 
-      {/* Room list */}
-      <div className="px-5 space-y-3 mt-4">
-        {isLoading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
-          </div>
-        ) : rooms.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-4xl mb-3">🎙️</p>
-            <p className="text-lg" style={{ fontFamily: "var(--font-serif)", color: "var(--text-secondary)" }}>No live sessions right now</p>
-            <p className="text-sm mt-1" style={{ color: "var(--text-hint)" }}>Be the first to go live!</p>
-          </div>
-        ) : (
-          rooms.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => handleEnterRoom(room)}
-              disabled={enteringRoom === room.id}
-              className="w-full text-left rounded-2xl p-4 transition-all active:scale-[0.98]"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "var(--bg-app)" }}>
-                  {categoryEmoji[room.category] || "🎙️"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{room.title}</h3>
-                    {room.entry_price > 0 && (
-                      <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "var(--accent-secondary)", color: "#fff" }}>
-                        ⬡{room.entry_price}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs" style={{ color: "var(--text-hint)" }}>{room.host_name}</span>
-                    <span className="text-xs flex items-center gap-0.5" style={{ color: "var(--text-hint)" }}>
-                      <Users className="w-3 h-3" /> {room.viewer_count || 0}
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-secondary)" }}>
-                      {categoryLabel[room.category]}
-                    </span>
-                  </div>
-                  {room.top_supporters?.length > 0 && (
-                    <p className="text-[10px] mt-1 truncate" style={{ color: "var(--accent-secondary)" }}>
-                      ★ {room.top_supporters.slice(0, 2).map(s => s.name).join(", ")}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                  <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-                </div>
-              </div>
-            </button>
-          ))
+      {/* Live stream video placeholder */}
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: "#000" }}>
+        {currentStream.stream_thumbnail && (
+          <img src={currentStream.stream_thumbnail} alt="stream" className="w-full h-full object-cover" />
         )}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-white text-3xl">🔴</p>
+            <p className="text-white text-sm mt-2">Live Video Stream</p>
+            <p className="text-gray-400 text-xs mt-1">{currentStream.host_name}</p>
+          </div>
+        </div>
+
+        {/* Floating tip notifications */}
+        <div className="absolute top-4 right-4 space-y-2">
+          {notifications.map((notif) => (
+            <TipNotification key={notif.id} sender={notif.sender} amount={notif.amount} />
+          ))}
+        </div>
       </div>
 
-      {/* Create room dialog */}
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-sm p-0 overflow-hidden rounded-3xl" style={{ border: "none" }}>
-          {/* Gradient header */}
-          <div className="relative px-5 pt-5 pb-6 overflow-hidden" style={{ background: "linear-gradient(135deg, #E53E3E, #FF6B6B)" }}>
-            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-20" style={{ background: "radial-gradient(circle, white, transparent)" }} />
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(255,255,255,0.25)" }}>🎙️</div>
-              <div>
-                <h2 className="text-lg font-bold text-white">Go Live</h2>
-                <p className="text-white/60 text-xs">Start a live session for your community</p>
-              </div>
-            </div>
-          </div>
+      {/* Chat section */}
+      <div className="flex-1 flex flex-col border-t" style={{ borderColor: "var(--border-light)" }}>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+          {messages.map((msg) => (
+            <LiveStreamChat key={msg.id} message={msg} currentUser={user} />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
 
-          <div className="p-5 space-y-4" style={{ backgroundColor: "#FAFAF8" }}>
-            <Input
-              placeholder="Give your session a title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="rounded-2xl text-sm"
-              style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}
-            />
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="rounded-2xl" style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent style={{ backgroundColor: "#FAFAF8", borderColor: "#E2E8F0" }}>
-                {Object.entries(categoryLabel).map(([val, label]) => (
-                  <SelectItem key={val} value={val} style={{ color: "#1E293B" }}>{categoryEmoji[val]} {label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div>
-              <label className="text-xs font-bold mb-1.5 block" style={{ color: "#64748B" }}>Entry Price (coins) — 0 = free</label>
-              <Input
-                type="number" min={0} placeholder="0"
-                value={entryPrice}
-                onChange={(e) => setEntryPrice(Math.max(0, parseInt(e.target.value) || 0))}
-                className="rounded-2xl text-sm"
-                style={{ backgroundColor: "#F1F5F9", border: "1.5px solid #E2E8F0", color: "#1E293B" }}
-              />
-            </div>
-            <button onClick={handleCreateRoom} disabled={!title.trim() || creating}
-              className="w-full py-3.5 rounded-2xl text-sm font-bold text-white disabled:opacity-40"
-              style={{ background: "linear-gradient(135deg, #E53E3E, #FF6B6B)", boxShadow: "0 4px 20px #E53E3E40" }}>
-              {creating ? "Starting…" : "🎙️ Go Live"}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* Chat input */}
+        <div className="px-3 py-3 border-t flex gap-2" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+          <input
+            type="text"
+            placeholder="Send a message..."
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            className="flex-1 px-3 py-2 rounded-xl text-sm"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}
+          />
+          <button onClick={handleSendMessage} className="p-2 rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
+            <Send className="w-4 h-4" />
+          </button>
+          <button onClick={() => handleTip(10)} className="p-2 rounded-xl" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+            <Heart className="w-4 h-4 fill-current" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
