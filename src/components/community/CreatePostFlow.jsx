@@ -120,13 +120,13 @@ export default function CreatePostFlow({ onClose, onSuccess }) {
     <div className="fixed inset-0 z-50 bg-black" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 py-3 border-b flex items-center justify-between" 
-        style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
-        <button onClick={step === 1 ? onClose : handleBack} className="p-2 -m-2">
+        style={{ background: "linear-gradient(135deg, var(--accent-primary), #4CAF7D)", borderColor: "var(--accent-primary)" }}>
+        <button onClick={step === 1 ? onClose : handleBack} className="p-2 -m-2" style={{ color: "#fff" }}>
           {step === 1 ? <X className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
         </button>
         <div className="text-center flex-1">
-          <p className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>STEP {step} OF 3</p>
-          <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>{stepTitles[step - 1]}</h1>
+          <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>STEP {step} OF 3</p>
+          <h1 className="text-lg font-bold" style={{ color: "#fff" }}>{stepTitles[step - 1]}</h1>
         </div>
         <div className="w-10" />
       </div>
@@ -164,12 +164,12 @@ export default function CreatePostFlow({ onClose, onSuccess }) {
 
       {/* Footer */}
       <div className="sticky bottom-0 px-4 py-3 border-t gap-2 flex" 
-        style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+        style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--accent-primary-light)", borderTopWidth: "2px" }}>
         {step > 1 && (
           <button
             onClick={handleBack}
             className="flex-1 py-3 rounded-xl font-bold"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}
           >
             Back
           </button>
