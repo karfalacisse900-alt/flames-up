@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Upload, Play, Image, Music, X, GripVertical, Cloud, FileUp, Mic } from "lucide-react";
+import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
 
 export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
   const photoVideoInputRef = useRef(null);
