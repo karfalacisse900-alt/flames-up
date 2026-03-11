@@ -203,6 +203,8 @@ export default function Profile() {
                         { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
                         { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
                         { to: createPageUrl("CreatorDashboard"), icon: <BarChart2 className="w-4 h-4" />, label: "Creator Dashboard", color: "var(--accent-primary)" },
+                        ...(user?.is_creator ? [{ to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Edit Creator Profile", color: "#D98B62" }] : []),
+                        { to: createPageUrl("NotificationSettings"), icon: <Settings className="w-4 h-4" />, label: "Settings", color: "var(--text-secondary)" },
                         { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
                       ].map(({ to, icon, label, color }) => (
                         <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
