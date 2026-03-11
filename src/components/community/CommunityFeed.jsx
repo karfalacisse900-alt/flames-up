@@ -349,13 +349,11 @@ export default function CommunityFeed({ user }) {
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="py-16 text-center px-8" style={{ animation: "fadeIn 0.3s ease" }}>
-            <div className="text-5xl mb-4">{activeFilter === "nearby" ? "📍" : "💬"}</div>
+            <div className="text-5xl mb-4">{activeFilter === "nearby" ? "📍" : activeFilter === "global" ? "💬" : "🏙"}</div>
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              {activeFilter === "nearby" ? `No posts near you yet` : activeFilter === "country" && selectedCountry ? `No posts from ${selectedCountry} yet` : activeFilter === "city" && selectedCity ? `No posts from ${selectedCity} yet` : "Start the conversation"}
+              {activeFilter === "nearby" ? "No posts near you yet" : activeFilter === "global" ? "Start the conversation" : `No posts from ${activeFilter} yet`}
             </p>
-            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
-              Be the first to share something here!
-            </p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Be the first to share something here!</p>
             <Link
                to={createPageUrl("CreatePostFlow")}
                onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
