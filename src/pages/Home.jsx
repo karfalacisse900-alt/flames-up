@@ -4,7 +4,7 @@ import WelcomePopup from "../components/home/WelcomePopup";
 import WelcomePage from "../components/home/WelcomePage";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
-import CommunityFeed from "../components/home/CommunityFeed";
+import CommunityFeed from "../components/community/CommunityFeed";
 
 export default function Home() {
   const [user, setUser] = useState(null);
