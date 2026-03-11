@@ -537,6 +537,15 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
             onClose={() => setShowVideoCall(false)}
           />
         )}
+        {showStatusPost && user && isCreator && (
+          <PostStatusModal
+            user={user}
+            groupId={group.id}
+            groupName={group.name}
+            onClose={() => setShowStatusPost(false)}
+            onPosted={() => setShowStatusPost(false)}
+          />
+        )}
         {showDeleteConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end justify-center"
