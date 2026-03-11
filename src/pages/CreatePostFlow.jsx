@@ -167,6 +167,8 @@ export default function CreatePostFlow() {
             setPostSettings={setPostSettings}
             onNext={handlePost}
             isLoading={isPosting}
+            gpsLocation={gpsLocation}
+            gpsCoords={gpsCoords}
           />
         )}
       </div>
