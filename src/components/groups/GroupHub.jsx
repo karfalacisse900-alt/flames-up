@@ -181,12 +181,20 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {isMember && (
-              <button onClick={() => setShowSafetyTools(true)}
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                title="Safety tools">
-                <Shield className="w-4 h-4 text-white" />
-              </button>
+              <>
+                <button onClick={() => setShowVideoCall(true)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                  title="Video call">
+                  <Video className="w-4 h-4 text-white" />
+                </button>
+                <button onClick={() => setShowSafetyTools(true)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                  title="Safety tools">
+                  <Shield className="w-4 h-4 text-white" />
+                </button>
+              </>
             )}
             <button onClick={() => setShowMembers(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>
