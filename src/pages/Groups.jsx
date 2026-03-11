@@ -707,20 +707,20 @@ export default function Groups() {
             <button onClick={() => setShowDiscoverFilters(v => !v)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{
-                backgroundColor: showDiscoverFilters ? "#7C3AED" : "rgba(255,255,255,0.12)",
-                color: "#fff",
-                border: `1px solid ${showDiscoverFilters ? "#7C3AED" : "rgba(255,255,255,0.2)"}`,
+                backgroundColor: showDiscoverFilters ? "var(--accent-primary)" : "var(--bg-card)",
+                color: showDiscoverFilters ? "#fff" : "var(--text-secondary)",
+                border: `1px solid ${showDiscoverFilters ? "var(--accent-primary)" : "var(--border-light)"}`,
               }}>
               <Filter className="w-3 h-3" />
               Filters
               {(typeFilter !== "all" || categoryFilter !== "all") && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white opacity-70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
               )}
             </button>
             {(typeFilter !== "all" || categoryFilter !== "all") && (
               <button onClick={() => { setTypeFilter("all"); setCategoryFilter("all"); }}
                 className="text-xs font-semibold px-2 py-1 rounded-full"
-                style={{ color: "#fff", backgroundColor: "rgba(255,255,255,0.15)" }}>
+                style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
                 Clear
               </button>
             )}
