@@ -7,6 +7,7 @@ import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
+import VideoViewer from "./VideoViewer";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 
@@ -17,6 +18,8 @@ const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "
 export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
+  const [videoViewerOpen, setVideoViewerOpen] = useState(false);
+  const [videoStartIndex, setVideoStartIndex] = useState(0);
   // filter: "global" | "nearby" | city string
   const [activeFilter, setActiveFilter] = useState("global");
   const [showPicker, setShowPicker] = useState(false);
@@ -188,6 +191,13 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
+  const handleVideoTap = (post, index) => {
+    const videoPosts = filteredPosts.filter(p => p.video_url && p.video_url.trim());
+    const videoIndex = videoPosts.findIndex(p => p.id === post.id);
+    setVideoStartIndex(videoIndex >= 0 ? videoIndex : 0);
+    setVideoViewerOpen(true);
+  };
+
   const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
@@ -200,11 +210,14 @@ export default function CommunityFeed({ user }) {
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
           />
         ) : (
-          <CommunityPostCard post={post} user={user}
+          <CommunityPostCard 
+            post={post} 
+            user={user}
             onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
             onLocationClick={() => {}}
+            onVideoTap={post.video_url ? () => handleVideoTap(post, index) : undefined}
           />
         )}
       </div>
