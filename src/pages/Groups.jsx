@@ -668,15 +668,15 @@ export default function Groups() {
           {[
             { key: "discover", label: "Discover", icon: Zap },
             { key: "map", label: "Nearby", icon: MapPin },
-          ].map(({ key, label, icon: Icon }) => (
+          ].map(({ key, label, icon: TabIcon }) => (
             <button key={key} onClick={() => setMainTab(key)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
               style={{
-                backgroundColor: mainTab === key ? "#7C3AED" : "rgba(255,255,255,0.1)",
-                color: "#fff",
-                border: `1.5px solid ${mainTab === key ? "#7C3AED" : "rgba(255,255,255,0.2)"}`,
+                backgroundColor: mainTab === key ? "var(--accent-primary)" : "var(--bg-card)",
+                color: mainTab === key ? "#fff" : "var(--text-secondary)",
+                border: `1.5px solid ${mainTab === key ? "var(--accent-primary)" : "var(--border-light)"}`,
               }}>
-              <Icon className="w-3.5 h-3.5" />{label}
+              <TabIcon className="w-3.5 h-3.5" />{label}
             </button>
           ))}
         </div>
