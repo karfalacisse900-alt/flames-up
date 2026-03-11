@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Users, UserPlus, X } from "lucide-react";
+import { Plus, Users, Search, X } from "lucide-react";
 
-const COLORS = ["#2E6B4F", "#D98B62", "#6B4F2E", "#4A6B9F", "#8B4F6B"];
+const COLORS = ["#25D366", "#128C7E", "#075E54", "#9C27B0", "#FF5722", "#3F51B5", "#E91E63"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
+const getName = (name, email) => (!name || name === email) ? (email?.split("@")[0] || "User") : name;
 
 const timeAgo = (date) => {
   if (!date) return "";
@@ -13,7 +14,10 @@ const timeAgo = (date) => {
     if (diff < 60) return "now";
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    return `${Math.floor(diff / 86400)}d`;
+    const d = new Date(date);
+    const now = new Date();
+    if (diff < 604800 && d.getDate() !== now.getDate()) return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    return d.toLocaleDateString([], { day: "2-digit", month: "2-digit" });
   } catch { return ""; }
 };
 
@@ -32,24 +36,20 @@ function CreateGroupModal({ user, onClose, onCreated }) {
         base44.entities.Follow.filter({ following_email: user.email }),
       ]);
       const map = {};
-      sent.forEach(f => { map[f.following_email] = f.following_name || f.following_email; });
-      received.forEach(f => { map[f.follower_email] = f.follower_name || f.follower_email; });
+      sent.forEach(f => { map[f.following_email] = getName(f.following_name, f.following_email); });
+      received.forEach(f => { map[f.follower_email] = getName(f.follower_name, f.follower_email); });
       return Object.entries(map).map(([email, name]) => ({ email, name }));
     },
     enabled: !!user?.email,
   });
 
   const filtered = follows.filter(f =>
-    !search || f.name?.toLowerCase().includes(search.toLowerCase()) || f.email.toLowerCase().includes(search.toLowerCase())
+    !search || f.name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggleMember = (person) => {
-    setSelected(prev =>
-      prev.find(p => p.email === person.email)
-        ? prev.filter(p => p.email !== person.email)
-        : [...prev, person]
-    );
-  };
+  const toggle = (person) => setSelected(prev =>
+    prev.find(p => p.email === person.email) ? prev.filter(p => p.email !== person.email) : [...prev, person]
+  );
 
   const handleCreate = async () => {
     if (!name.trim() || selected.length === 0) return;
@@ -69,57 +69,72 @@ function CreateGroupModal({ user, onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={onClose}>
-      <div className="w-full rounded-t-3xl p-4" style={{ backgroundColor: "var(--bg-modal)", maxHeight: "80dvh", overflowY: "auto" }}
+    <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.55)" }} onClick={onClose}>
+      <div className="w-full rounded-t-3xl" style={{ backgroundColor: "#fff", maxHeight: "85dvh", overflow: "hidden" }}
         onClick={e => e.stopPropagation()}>
-        <div className="h-1.5 w-12 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--border-medium)" }} />
-        <h3 className="font-bold text-base mb-4" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-          New Group Chat
-        </h3>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b" style={{ borderColor: "#F0F0F0" }}>
+          <h3 className="font-bold text-lg" style={{ color: "#111" }}>New Group</h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F5F5F5" }}>
+            <X className="w-4 h-4" style={{ color: "#666" }} />
+          </button>
+        </div>
 
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="Group name…"
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none mb-3"
-          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+        <div className="px-4 py-3 border-b" style={{ borderColor: "#F0F0F0" }}>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Group name…"
+            className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-2"
+            style={{ backgroundColor: "#F5F5F5", color: "#111", border: "none" }} autoFocus />
 
-        {selected.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {selected.map(p => (
-              <button key={p.email} onClick={() => toggleMember(p)}
-                className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                {p.name} ×
-              </button>
-            ))}
+          {selected.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {selected.map(p => (
+                <button key={p.email} onClick={() => toggle(p)}
+                  className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold"
+                  style={{ backgroundColor: "#075E54", color: "#fff" }}>
+                  {p.name} ×
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-4 py-2 border-b" style={{ borderColor: "#F0F0F0" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full" style={{ backgroundColor: "#F5F5F5" }}>
+            <Search className="w-4 h-4" style={{ color: "#999" }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Add members…"
+              className="flex-1 bg-transparent text-sm outline-none" style={{ color: "#111" }} />
           </div>
-        )}
+        </div>
 
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Add members…"
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none mb-2"
-          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-
-        <div className="space-y-1 max-h-52 overflow-y-auto mb-4">
+        <div style={{ overflowY: "auto", maxHeight: "40dvh" }}>
           {filtered.map(f => {
             const isSelected = !!selected.find(p => p.email === f.email);
             return (
-              <button key={f.email} onClick={() => toggleMember(f)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl text-left"
-                style={{ backgroundColor: isSelected ? "var(--accent-primary-light)" : "var(--bg-subtle)" }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+              <button key={f.email} onClick={() => toggle(f)}
+                className="w-full flex items-center gap-3 px-5 py-3 text-left"
+                style={{ backgroundColor: isSelected ? "#E8F5E9" : "#fff", borderBottom: "1px solid #F9F9F9" }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0"
                   style={{ backgroundColor: avatarColor(f.email), color: "#fff" }}>
-                  {f.name?.[0]?.toUpperCase() || "?"}
+                  {f.name[0]?.toUpperCase()}
                 </div>
-                <span className="text-sm font-medium flex-1" style={{ color: "var(--text-primary)" }}>{f.name}</span>
-                {isSelected && <span className="text-xs font-bold" style={{ color: "var(--accent-primary)" }}>✓</span>}
+                <p className="font-medium text-[15px] flex-1" style={{ color: "#111" }}>{f.name}</p>
+                {isSelected && (
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: "#25D366" }}>
+                    <span className="text-white text-xs font-bold">✓</span>
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
 
-        <button onClick={handleCreate} disabled={!name.trim() || selected.length === 0 || creating}
-          className="w-full py-3 rounded-2xl font-bold text-sm text-white disabled:opacity-40"
-          style={{ backgroundColor: "var(--accent-primary)" }}>
-          {creating ? "Creating…" : `Create Group (${selected.length + 1} members)`}
-        </button>
+        <div className="px-4 py-3" style={{ borderTop: "1px solid #F0F0F0", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}>
+          <button onClick={handleCreate} disabled={!name.trim() || selected.length === 0 || creating}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm text-white disabled:opacity-40"
+            style={{ backgroundColor: "#25D366" }}>
+            {creating ? "Creating…" : `Create Group (${selected.length + 1} members)`}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -133,60 +148,62 @@ export default function GroupsTab({ user, onSelect }) {
     queryFn: () => base44.entities.GroupChat.filter({}),
     enabled: !!user?.email,
     refetchInterval: 10000,
-    select: (data) => data.filter(g => g.member_emails?.includes(user.email)),
+    select: (data) => data.filter(g => g.member_emails?.includes(user.email))
+      .sort((a, b) => new Date(b.last_message_at || b.created_date) - new Date(a.last_message_at || a.created_date)),
   });
 
   return (
-    <div>
-      <div className="px-4 mb-3">
-        <button onClick={() => setShowCreate(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
-          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px dashed var(--accent-primary)" }}>
-          <Plus className="w-4 h-4" />
-          Create New Group
-        </button>
-      </div>
+    <div style={{ backgroundColor: "#fff" }}>
+      {/* Create button */}
+      <button onClick={() => setShowCreate(true)}
+        className="w-full flex items-center gap-3 px-5 py-4 text-left border-b"
+        style={{ borderColor: "#F5F5F5" }}>
+        <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: "#25D366" }}>
+          <Plus className="w-6 h-6 text-white" />
+        </div>
+        <p className="font-semibold text-[15px]" style={{ color: "#111" }}>New Group</p>
+      </button>
 
-      <div className="space-y-0.5 px-2">
-        {allGroups.length === 0 ? (
-          <div className="text-center py-16">
-            <Users className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
-            <p className="text-sm" style={{ color: "var(--text-hint)" }}>No group chats yet</p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Create a group to chat with multiple people</p>
+      {allGroups.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: "#F0F8F0" }}>
+            <Users className="w-10 h-10" style={{ color: "#25D366" }} />
           </div>
-        ) : allGroups.map(group => (
-          <button key={group.id} onClick={() => onSelect({ type: "group", data: group })}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-            style={{ backgroundColor: "transparent" }}>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
-              style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
-              {group.photo_url
-                ? <img src={group.photo_url} alt="" className="w-full h-full rounded-2xl object-cover" />
-                : group.name?.[0]?.toUpperCase() || "G"}
+          <p className="text-base font-semibold mb-1" style={{ color: "#333" }}>No group chats yet</p>
+          <p className="text-sm text-center px-8" style={{ color: "#999" }}>Create a group to chat with multiple people at once</p>
+        </div>
+      ) : allGroups.map((group, idx) => (
+        <button key={group.id} onClick={() => onSelect({ type: "group", data: group })}
+          className="w-full flex items-center gap-3 px-4 py-3 text-left"
+          style={{ borderBottom: idx < allGroups.length - 1 ? "1px solid #F5F5F5" : "none" }}>
+
+          <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+            style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
+            {group.photo_url
+              ? <img src={group.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
+              : group.name?.[0]?.toUpperCase() || "G"}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-0.5">
+              <p className="font-semibold text-[15px] truncate" style={{ color: "#111" }}>{group.name}</p>
+              <span className="text-[12px] shrink-0 ml-2" style={{ color: "#999" }}>
+                {timeAgo(group.last_message_at)}
+              </span>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{group.name}</p>
-                <span className="text-[11px] shrink-0 ml-2" style={{ color: "var(--text-hint)" }}>
-                  {timeAgo(group.last_message_at)}
-                </span>
-              </div>
-              <p className="text-xs truncate mt-0.5" style={{ color: "var(--text-hint)" }}>
-                {group.last_message
-                  ? `${group.last_sender_name || "Someone"}: ${group.last_message}`
-                  : `${group.member_emails?.length || 0} members`}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
+            <p className="text-[13px] truncate" style={{ color: "#999" }}>
+              {group.last_message
+                ? `${group.last_sender_name || "Someone"}: ${group.last_message}`
+                : `${group.member_emails?.length || 0} members`}
+            </p>
+          </div>
+        </button>
+      ))}
 
       {showCreate && (
-        <CreateGroupModal
-          user={user}
-          onClose={() => setShowCreate(false)}
-          onCreated={(group) => { setShowCreate(false); onSelect({ type: "group", data: group }); }}
-        />
+        <CreateGroupModal user={user} onClose={() => setShowCreate(false)}
+          onCreated={(group) => { setShowCreate(false); onSelect({ type: "group", data: group }); }} />
       )}
     </div>
   );
