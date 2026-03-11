@@ -76,6 +76,8 @@ export default function CreatePostFlow() {
         }
       }
 
+      // Merge: manual location tag overrides GPS, but GPS fills any blanks
+      const manualLoc = postSettings.location;
       const postData = {
         type: "opinion",
         body: postSettings.caption || "Check out this post!",
@@ -86,13 +88,15 @@ export default function CreatePostFlow() {
         media_type: "general",
         video_url: isVideo ? uploadedUrls[0] : undefined,
         image_urls: !isVideo && uploadedUrls.length > 0 ? uploadedUrls : undefined,
-        location_city: postSettings.location?.city || undefined,
-        location_region: postSettings.location?.region || undefined,
-        location_country: postSettings.location?.country || undefined,
-        location_lat: postSettings.location?.lat || undefined,
-        location_lng: postSettings.location?.lng || undefined,
-        location_name: postSettings.location?.name || undefined,
-        place_tags: postSettings.location ? [postSettings.location.type || "place"] : [],
+        // Location: manual tag takes priority, GPS auto-fills the rest
+        location_name: manualLoc?.name || undefined,
+        location_city: manualLoc?.city || gpsLocation?.city || undefined,
+        location_region: manualLoc?.region || gpsLocation?.region || undefined,
+        location_country: manualLoc?.country || gpsLocation?.country || undefined,
+        location_lat: manualLoc?.lat || gpsCoords?.lat || undefined,
+        location_lng: manualLoc?.lng || gpsCoords?.lng || undefined,
+        location_hide_exact: postSettings.location_hide_exact || false,
+        place_tags: manualLoc ? [manualLoc.type || "place"] : [],
         moderation_status: "approved",
         is_pinned: false,
         upvotes: 0,
