@@ -387,7 +387,15 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
-
+      {/* Video viewer modal */}
+      {videoViewerOpen && (
+        <VideoViewer
+          videos={filteredPosts.filter(p => p.video_url && p.video_url.trim())}
+          initialIndex={videoStartIndex}
+          user={user}
+          onClose={() => setVideoViewerOpen(false)}
+        />
+      )}
     </div>
   );
 }
