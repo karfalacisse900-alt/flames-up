@@ -6,6 +6,7 @@ import MediaEditingStep from "../components/community/steps/MediaEditingStep";
 import PostSettingsStep from "../components/community/steps/PostSettingsStep";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
+import { useLocationDetection } from "../components/hooks/useLocationDetection";
 
 export default function CreatePostFlow() {
   const navigate = useNavigate();
