@@ -36,6 +36,9 @@ export default function CreatePostFlow() {
   
   const [isPosting, setIsPosting] = useState(false);
 
+  // Auto-detect GPS location in background
+  const { coords: gpsCoords, locationInfo: gpsLocation } = useLocationDetection({ autoDetect: true });
+
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => navigate(createPageUrl("Home")));
   }, []);
