@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Users, Settings, UserPlus, UserMinus, X, Crown } from "lucide-react";
+import { ArrowLeft, Users, MoreVertical, Phone, Video, X, UserMinus, Crown, LogOut } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import ChatInputBar from "./ChatInputBar";
+import VideoCallModal from "./VideoCallModal";
 
-const COLORS = ["#2E6B4F", "#D98B62", "#6B4F2E", "#4A6B9F", "#8B4F6B"];
+const COLORS = ["#25D366", "#128C7E", "#075E54", "#9C27B0", "#FF5722", "#3F51B5", "#E91E63"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
+const getName = (name, email) => (!name || name === email) ? (email?.split("@")[0] || "User") : name;
 
 function GroupInfoSheet({ group, user, onClose, onUpdate }) {
   const isAdmin = group.admin_emails?.includes(user.email);
 
-  const handleRemoveMember = async (email) => {
+  const handleRemove = async (email) => {
     if (!isAdmin || email === user.email) return;
     const updated = {
       member_emails: group.member_emails.filter(e => e !== email),
@@ -22,59 +24,71 @@ function GroupInfoSheet({ group, user, onClose, onUpdate }) {
     onUpdate({ ...group, ...updated });
   };
 
+  const handleLeave = async () => {
+    const updated = { member_emails: group.member_emails.filter(e => e !== user.email) };
+    await base44.entities.GroupChat.update(group.id, updated);
+    onClose("left");
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={onClose}>
-      <div className="w-full rounded-t-3xl p-4" style={{ backgroundColor: "var(--bg-modal)", maxHeight: "75dvh", overflowY: "auto" }}
+    <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.55)" }} onClick={() => onClose()}>
+      <div className="w-full rounded-t-3xl" style={{ backgroundColor: "#fff", maxHeight: "80dvh", overflow: "hidden" }}
         onClick={e => e.stopPropagation()}>
-        <div className="h-1.5 w-12 rounded-full mx-auto mb-4" style={{ backgroundColor: "var(--border-medium)" }} />
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-base" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-            {group.name}
-          </h3>
-          <button onClick={onClose}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "#F0F0F0" }}>
+          <div>
+            <h3 className="font-bold text-lg" style={{ color: "#111" }}>{group.name}</h3>
+            <p className="text-sm" style={{ color: "#999" }}>{group.member_emails?.length} members</p>
+          </div>
+          <button onClick={() => onClose()} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F5F5F5" }}>
+            <X className="w-4 h-4" style={{ color: "#666" }} />
+          </button>
         </div>
-        <p className="text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>
-          {group.member_emails?.length} Members
-        </p>
-        <div className="space-y-1">
-          {(group.member_emails || []).map(email => {
-            const name = group.member_names?.[email] || email;
+
+        {/* Members list */}
+        <div style={{ overflowY: "auto", maxHeight: "55dvh" }}>
+          {(group.member_emails || []).map((email) => {
+            const name = getName(group.member_names?.[email], email);
             const isGrpAdmin = group.admin_emails?.includes(email);
             return (
-              <div key={email} className="flex items-center gap-3 p-2.5 rounded-xl"
-                style={{ backgroundColor: "var(--bg-subtle)" }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+              <div key={email} className="flex items-center gap-3 px-5 py-3.5"
+                style={{ borderBottom: "1px solid #F9F9F9" }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold shrink-0"
                   style={{ backgroundColor: avatarColor(email), color: "#fff" }}>
-                  {name?.[0]?.toUpperCase() || "?"}
+                  {name[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{name}</p>
-                  {isGrpAdmin && (
-                    <p className="text-[10px] font-semibold" style={{ color: "var(--accent-primary)" }}>Admin</p>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-[15px]" style={{ color: "#111" }}>{name}</p>
+                    {isGrpAdmin && (
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full"
+                        style={{ backgroundColor: "#E8F5E9" }}>
+                        <Crown className="w-2.5 h-2.5" style={{ color: "#25D366" }} />
+                        <span className="text-[10px] font-bold" style={{ color: "#25D366" }}>Admin</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {isAdmin && email !== user.email && (
-                  <button onClick={() => handleRemoveMember(email)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(224,92,122,0.1)", color: "#E05C7A" }}>
-                    <UserMinus className="w-3.5 h-3.5" />
+                  <button onClick={() => handleRemove(email)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#FFEBEE" }}>
+                    <UserMinus className="w-3.5 h-3.5" style={{ color: "#E53935" }} />
                   </button>
                 )}
               </div>
             );
           })}
         </div>
-        {!group.member_emails?.includes(user.email) || (
-          <button onClick={async () => {
-            const updated = { member_emails: group.member_emails.filter(e => e !== user.email) };
-            await base44.entities.GroupChat.update(group.id, updated);
-            onClose();
-          }}
-            className="w-full mt-4 py-3 rounded-2xl font-semibold text-sm"
-            style={{ backgroundColor: "rgba(224,92,122,0.08)", color: "#E05C7A" }}>
-            Leave Group
+
+        {/* Leave button */}
+        <div className="px-5 py-4" style={{ borderTop: "1px solid #F0F0F0", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)" }}>
+          <button onClick={handleLeave}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#FFEBEE", color: "#E53935" }}>
+            <LogOut className="w-4 h-4" /> Leave Group
           </button>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -84,6 +98,8 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
   const [group, setGroup] = useState(initialGroup);
   const [replyTo, setReplyTo] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const endRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -105,19 +121,18 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
   }, [group.id, queryClient]);
 
   const createMsg = async (fields) => {
-    const msg = await base44.entities.GroupMessage.create({
+    await base44.entities.GroupMessage.create({
       group_id: group.id,
       sender_email: user.email,
-      sender_name: user.full_name || user.email,
+      sender_name: getName(user.full_name, user.email),
       ...(replyTo ? { reply_to_id: replyTo.id, reply_preview: replyTo.text || "Voice message" } : {}),
       ...fields,
     });
     setReplyTo(null);
-    // Update group last_message
     await base44.entities.GroupChat.update(group.id, {
       last_message: fields.text || (fields.audio_url ? "🎤 Voice" : fields.gif_url ? "GIF" : "📷 Media"),
       last_message_at: new Date().toISOString(),
-      last_sender_name: user.full_name || user.email,
+      last_sender_name: getName(user.full_name, user.email),
     });
     queryClient.invalidateQueries({ queryKey: ["groupMsg", group.id] });
     queryClient.invalidateQueries({ queryKey: ["myGroups", user.email] });
@@ -128,11 +143,7 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
     if (!msg) return;
     const reactions = { ...(msg.reactions || {}) };
     const existing = reactions[emoji] || [];
-    if (existing.includes(user.email)) {
-      reactions[emoji] = existing.filter(e => e !== user.email);
-    } else {
-      reactions[emoji] = [...existing, user.email];
-    }
+    reactions[emoji] = existing.includes(user.email) ? existing.filter(e => e !== user.email) : [...existing, user.email];
     await base44.entities.GroupMessage.update(msgId, { reactions });
     queryClient.invalidateQueries({ queryKey: ["groupMsg", group.id] });
   };
@@ -142,84 +153,149 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
     queryClient.invalidateQueries({ queryKey: ["groupMsg", group.id] });
   };
 
+  const memberCount = group.member_emails?.length || 0;
+
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 shrink-0"
-        style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 0px), 44px)" }}>
-        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
-        </button>
-        <button onClick={() => setShowInfo(true)} className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold shrink-0"
-            style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
-            {group.photo_url
-              ? <img src={group.photo_url} alt="" className="w-full h-full rounded-2xl object-cover" />
-              : group.name?.[0]?.toUpperCase() || "G"}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold truncate text-left" style={{ color: "var(--text-primary)" }}>{group.name}</p>
-            <p className="text-[11px] truncate text-left" style={{ color: "var(--text-hint)" }}>
-              {group.member_emails?.length} members
-            </p>
-          </div>
-        </button>
-        <button onClick={() => setShowInfo(true)} className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <Users className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-        </button>
-      </div>
+    <>
+      <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
+        {/* Header */}
+        <div className="flex items-center gap-2 px-3 shrink-0"
+          style={{
+            backgroundColor: "#075E54",
+            paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
+            paddingBottom: 10,
+          }}>
+          <button onClick={onBack} className="p-1 mr-1">
+            <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
+          </button>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: "none" }}>
-        {messages.length === 0 && (
-          <div className="text-center mt-12">
-            <p className="text-3xl mb-2">👥</p>
-            <p className="text-sm" style={{ color: "var(--text-hint)" }}>
-              Start the conversation in {group.name}
-            </p>
-          </div>
-        )}
-        {messages.map((msg, i) => {
-          const isMe = msg.sender_email === user.email;
-          const prevMsg = messages[i - 1];
-          const showSender = !isMe && (!prevMsg || prevMsg.sender_email !== msg.sender_email);
-          return (
-            <div key={msg.id}>
-              {showSender && (
-                <p className="text-[11px] font-semibold mt-3 mb-0.5 ml-1"
-                  style={{ color: avatarColor(msg.sender_email) }}>
-                  {msg.sender_name || msg.sender_email}
-                </p>
-              )}
-              <MessageBubble
-                message={msg}
-                isMe={isMe}
-                user={user}
-                onReply={setReplyTo}
-                onReact={handleReact}
-                onDelete={handleDelete}
-              />
+          <button onClick={() => setShowInfo(true)} className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+              style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
+              {group.photo_url
+                ? <img src={group.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
+                : group.name?.[0]?.toUpperCase() || "G"}
             </div>
-          );
-        })}
-        <div ref={endRef} />
-      </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="font-semibold text-[16px] truncate" style={{ color: "#fff" }}>{group.name}</p>
+              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+                {memberCount} members
+              </p>
+            </div>
+          </button>
 
-      <ChatInputBar
-        replyTo={replyTo}
-        onCancelReply={() => setReplyTo(null)}
-        onSendText={(text) => createMsg({ text, message_type: "text" })}
-        onSendVoice={(audio_url) => createMsg({ audio_url, message_type: "voice", text: "" })}
-        onSendMedia={(urls) => createMsg({ media_urls: urls, message_type: "image", text: "" })}
-        onSendGif={(gif_url) => createMsg({ gif_url, message_type: "gif", text: "" })}
-        onSendLocation={(loc) => createMsg({ location_data: loc, message_type: "location", text: "" })}
-      />
+          <div className="flex items-center gap-1">
+            <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
+              <Video className="w-5 h-5" style={{ color: "#fff" }} />
+            </button>
+            <button className="w-9 h-9 flex items-center justify-center">
+              <Phone className="w-5 h-5" style={{ color: "#fff" }} />
+            </button>
+            <div className="relative">
+              <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
+                <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
+              </button>
+              {showMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                  <div className="absolute right-0 top-10 z-50 rounded-xl shadow-xl overflow-hidden"
+                    style={{ backgroundColor: "#fff", minWidth: 180 }}>
+                    <button onClick={() => { setShowInfo(true); setShowMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 text-[14px]"
+                      style={{ color: "#333", borderBottom: "1px solid #F5F5F5" }}>
+                      <Users className="w-4 h-4" /> Group info
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
+          <div className="flex justify-center mb-4">
+            <div className="px-4 py-1.5 rounded-lg text-[12px] text-center"
+              style={{ backgroundColor: "rgba(255,248,196,0.9)", color: "#7B6914" }}>
+              🔒 Messages are private to this group
+            </div>
+          </div>
+
+          {messages.length === 0 && (
+            <div className="flex justify-center">
+              <div className="px-5 py-3 rounded-2xl text-[13px]"
+                style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#555" }}>
+                👋 Say hello to <strong>{group.name}</strong>!
+              </div>
+            </div>
+          )}
+
+          {messages.map((msg, idx) => {
+            const isMe = msg.sender_email === user.email;
+            const prevMsg = messages[idx - 1];
+            const showDate = !prevMsg || new Date(msg.created_date).toDateString() !== new Date(prevMsg.created_date).toDateString();
+            const showSender = !isMe && (!prevMsg || prevMsg.sender_email !== msg.sender_email || showDate);
+            const senderName = getName(msg.sender_name, msg.sender_email);
+
+            return (
+              <React.Fragment key={msg.id}>
+                {showDate && (
+                  <div className="flex justify-center my-3">
+                    <span className="px-3 py-1 rounded-full text-[12px] font-medium"
+                      style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#666" }}>
+                      {new Date(msg.created_date).toDateString() === new Date().toDateString()
+                        ? "Today"
+                        : new Date(msg.created_date).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
+                    </span>
+                  </div>
+                )}
+                {showSender && (
+                  <p className="text-[12px] font-semibold mb-0.5 ml-1"
+                    style={{ color: avatarColor(msg.sender_email) }}>
+                    {senderName}
+                  </p>
+                )}
+                <MessageBubble
+                  message={msg}
+                  isMe={isMe}
+                  user={user}
+                  onReply={setReplyTo}
+                  onReact={handleReact}
+                  onDelete={handleDelete}
+                />
+              </React.Fragment>
+            );
+          })}
+          <div ref={endRef} />
+        </div>
+
+        <ChatInputBar
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onSendText={(text) => createMsg({ text, message_type: "text" })}
+          onSendVoice={(audio_url) => createMsg({ audio_url, message_type: "voice", text: "" })}
+          onSendMedia={(urls) => createMsg({ media_urls: urls, message_type: "image", text: "" })}
+          onSendGif={(gif_url) => createMsg({ gif_url, message_type: "gif", text: "" })}
+          onSendLocation={(loc) => createMsg({ location_data: loc, message_type: "location", text: "" })}
+        />
+      </div>
 
       {showInfo && (
-        <GroupInfoSheet group={group} user={user} onClose={() => setShowInfo(false)} onUpdate={setGroup} />
+        <GroupInfoSheet group={group} user={user}
+          onClose={(action) => {
+            setShowInfo(false);
+            if (action === "left") onBack();
+          }}
+          onUpdate={setGroup} />
       )}
-    </div>
+
+      {showVideoCall && (
+        <VideoCallModal
+          roomName={`group-${group.id}`}
+          displayName={getName(user.full_name, user.email)}
+          onClose={() => setShowVideoCall(false)}
+        />
+      )}
+    </>
   );
 }
