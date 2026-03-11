@@ -229,6 +229,13 @@ export default function CreatorEditorStep({
         </div>
       )}
 
+      <MusicLibrarySheet
+        open={showMusicSheet}
+        onClose={() => setShowMusicSheet(false)}
+        onSelectTrack={(track) => { onSelectTrack?.(track); setShowMusicSheet(false); }}
+        selectedTrack={selectedTrack}
+      />
+
       {/* Bottom toolbar */}
       <div className="flex-shrink-0 flex items-center justify-around px-2 py-3"
         style={{ backgroundColor: "#0a0a0a", borderTop: "1px solid #1e1e1e" }}>
