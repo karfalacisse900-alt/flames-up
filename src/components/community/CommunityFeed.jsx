@@ -152,17 +152,16 @@ export default function CommunityFeed({ user }) {
     }
   }, [posts.map(p => p.id).join(",")]); // only re-run when post list changes (not on like updates)
 
-  const uniqueCountries = useMemo(() => {
-    return [...new Set(posts.map(p => p.location_country).filter(Boolean))].sort();
-  }, [posts]);
-
   const uniqueCities = useMemo(() => {
     return [...new Set(posts.map(p => p.location_city).filter(Boolean))].sort();
   }, [posts]);
 
-  const filteredCitySuggestions = useMemo(() => {
-    if (!cityInput.trim()) return [];
-    return uniqueCities.filter(c => c.toLowerCase().includes(cityInput.toLowerCase())).slice(0, 6);
+  const citySuggestions = useMemo(() => {
+    const q = cityInput.trim().toLowerCase();
+    if (!q) return POPULAR_CITIES.slice(0, 8);
+    const fromPosts = uniqueCities.filter(c => c.toLowerCase().includes(q));
+    const fromPopular = POPULAR_CITIES.filter(c => c.toLowerCase().includes(q) && !fromPosts.includes(c));
+    return [...fromPosts, ...fromPopular].slice(0, 8);
   }, [cityInput, uniqueCities]);
 
   const filteredPosts = useMemo(() => {
@@ -183,16 +182,9 @@ export default function CommunityFeed({ user }) {
       });
     }
 
-    if (activeFilter === "country" && selectedCountry) {
-      return base.filter(p => p.location_country?.toLowerCase() === selectedCountry.toLowerCase());
-    }
-
-    if (activeFilter === "city" && selectedCity) {
-      return base.filter(p => p.location_city?.toLowerCase() === selectedCity.toLowerCase());
-    }
-
-    return base;
-  }, [stablePostIds, posts, activeFilter, userCoords, selectedCountry, selectedCity]);
+    // city filter
+    return base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
+  }, [stablePostIds, posts, activeFilter, userCoords]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
