@@ -29,46 +29,14 @@ export default function CommunityFeed({ user }) {
     return unsubscribe;
   }, [qc]);
 
-  // Filter posts based on location filter
+  // Filter posts based on active tab
   useEffect(() => {
-    let filtered = allPosts;
-
-    switch (filterData.type) {
-      case "global":
-        filtered = allPosts;
-        break;
-      case "nearby":
-        if (user?.location_city) {
-          filtered = allPosts.filter(p => p.location_city === user.location_city);
-        }
-        break;
-      case "country":
-        if (filterData.country) {
-          filtered = allPosts.filter(p => p.location_country === filterData.country);
-        }
-        break;
-      case "city":
-        if (filterData.city) {
-          filtered = allPosts.filter(p => p.location_city === filterData.city);
-        }
-        break;
-      case "search":
-        if (filterData.search) {
-          const search = filterData.search.toLowerCase();
-          filtered = allPosts.filter(
-            p =>
-              p.location_name?.toLowerCase().includes(search) ||
-              p.location_city?.toLowerCase().includes(search) ||
-              p.location_region?.toLowerCase().includes(search)
-          );
-        }
-        break;
-      default:
-        filtered = allPosts;
+    if (activeTab === "nearby" && user?.location_city) {
+      setPosts(allPosts.filter(p => p.location_city === user.location_city));
+    } else {
+      setPosts(allPosts);
     }
-
-    setPosts(filtered);
-  }, [allPosts, filterData, user]);
+  }, [allPosts, activeTab, user]);
 
   const handleUpvote = async (post) => {
     if (!user) return;
