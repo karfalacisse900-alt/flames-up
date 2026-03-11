@@ -35,10 +35,24 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
   const handlePost = async () => {
     if (!text.trim()) return;
     setPosting(true);
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    
+    // Get or create user profile
+    let userProfile = await base44.entities.UserProfile.filter({ user_email: user.email });
+    if (!userProfile || userProfile.length === 0) {
+      userProfile = await base44.entities.UserProfile.create({
+        user_email: user.email,
+        user_name: user.full_name || user.email.split("@")[0],
+        status_count: 0,
+      });
+    } else {
+      userProfile = userProfile[0];
+    }
+
+    const expires = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
     await base44.entities.CreatorStatus.create({
       author_email: user.email,
       author_name: user.full_name || user.email?.split("@")[0] || "Creator",
+      creator_profile_id: userProfile.id,
       author_type: groupId ? "group_owner" : "creator",
       text: text.trim(),
       background: mediaUrl ? undefined : bg,
@@ -50,6 +64,12 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
       view_count: 0,
       viewed_by: [],
     });
+    
+    // Update profile status count
+    await base44.entities.UserProfile.update(userProfile.id, {
+      status_count: (userProfile.status_count || 0) + 1,
+    });
+    
     setPosting(false);
     onPosted?.();
     onClose();
@@ -132,7 +152,7 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
           <button onClick={handlePost} disabled={!text.trim() || posting}
             className="w-full py-3 rounded-2xl text-sm font-bold text-white disabled:opacity-50"
             style={{ background: bg }}>
-            {posting ? "Posting…" : groupId ? "Post Group Status" : "Post Status (24h)"}
+            {posting ? "Posting…" : groupId ? "Post Group Status" : "Post Status (48h)"}
           </button>
         </div>
       </motion.div>
