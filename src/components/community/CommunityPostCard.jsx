@@ -239,15 +239,15 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-0.5 px-2 pb-3 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          <div className="flex items-center px-2 pb-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
             <div className="relative">
               <button
                 onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
                 onClick={handleLike}
-                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
-                style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)" }}>
-                <span className="text-[15px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
+                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
+                style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+                <span className="text-[16px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
                 {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
               </button>
               {showReactions && (
@@ -258,24 +258,27 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                   {REACTIONS.map(r => (
                     <button key={r}
                       onClick={() => { handleLike(); setShowReactions(false); }}
-                      className="text-xl w-9 h-9 flex items-center justify-center rounded-full chip"
+                      className="text-xl w-10 h-10 flex items-center justify-center rounded-full chip"
                       style={{ backgroundColor: "var(--bg-subtle)" }}>{r}</button>
                   ))}
                 </div>
               )}
             </div>
             <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold chip" style={{ color: "var(--text-hint)" }}>
-              <MessageCircle className="w-4 h-4" />
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
+              style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+              <MessageCircle className="w-[18px] h-[18px]" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
             </Link>
-            <button onClick={handleShare} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold chip" style={{ color: "var(--text-hint)" }}>
-              <Share2 className="w-4 h-4" />
+            <button onClick={handleShare}
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
+              style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+              <Share2 className="w-[18px] h-[18px]" />
             </button>
             <button onClick={() => user ? setShowSaveModal(true) : null}
-              className="ml-auto p-1.5 rounded-full transition-all chip"
-              style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)" }}>
-              <Bookmark className="w-4 h-4" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+              className="ml-auto flex items-center justify-center rounded-full transition-all chip"
+              style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)", minWidth: 44, minHeight: 44 }}>
+              <Bookmark className="w-[18px] h-[18px]" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
             </button>
           </div>
         </div>
