@@ -237,112 +237,80 @@ export default function CommunityFeed({ user }) {
     <div style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}>
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="px-4 pt-2.5 pb-0 flex items-center justify-between">
+        <div className="px-4 pt-2.5 pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
             <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Community</p>
           </div>
-          <Link
-            to={createPageUrl("CreatePostFlow")}
-            onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-            style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
-            <Plus className="w-3 h-3" /> Post
-          </Link>
-        </div>
 
-        {/* Location filter tabs */}
-        <div className="flex gap-1.5 px-4 pt-2.5 pb-2 overflow-x-auto scrollbar-hide">
-          {/* Global */}
-          <button
-            onClick={() => { setActiveFilter("global"); setShowLocationPicker(false); }}
-            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: activeFilter === "global" ? "var(--accent-primary)" : "var(--bg-subtle)",
-              color: activeFilter === "global" ? "#fff" : "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}>
-            <Globe className="w-3 h-3" /> Global
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Single location toggle */}
+            <div className="relative" ref={pickerRef}>
+              <button
+                onClick={() => setShowPicker(p => !p)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+                style={{
+                  backgroundColor: activeFilter !== "global" ? "var(--accent-primary)" : "var(--bg-subtle)",
+                  color: activeFilter !== "global" ? "#fff" : "var(--text-secondary)",
+                  border: "1px solid var(--border-light)",
+                }}>
+                {activeFilter === "global" && <><Globe className="w-3 h-3" /> Global</>}
+                {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> Nearby</>}
+                {activeFilter !== "global" && activeFilter !== "nearby" && <><MapPin className="w-3 h-3" /> {activeFilter}</>}
+                <ChevronDown className="w-3 h-3" />
+              </button>
 
-          {/* Nearby */}
-          <button
-            onClick={() => { setActiveFilter("nearby"); setShowLocationPicker(false); }}
-            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: activeFilter === "nearby" ? "var(--accent-primary)" : "var(--bg-subtle)",
-              color: activeFilter === "nearby" ? "#fff" : "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}>
-            <MapPin className="w-3 h-3" /> Nearby
-          </button>
+              {showPicker && (
+                <div className="absolute right-0 top-9 w-64 rounded-2xl shadow-xl z-50 overflow-hidden"
+                  style={{ backgroundColor: "var(--bg-modal)", border: "1px solid var(--border-light)" }}>
+                  {/* Global & Nearby */}
+                  <div className="p-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                    <button onClick={() => { setActiveFilter("global"); setShowPicker(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all"
+                      style={{ backgroundColor: activeFilter === "global" ? "var(--accent-primary-light)" : "transparent", color: activeFilter === "global" ? "var(--accent-primary)" : "var(--text-primary)" }}>
+                      <Globe className="w-4 h-4" /> Global
+                    </button>
+                    <button onClick={() => { setActiveFilter("nearby"); setShowPicker(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all"
+                      style={{ backgroundColor: activeFilter === "nearby" ? "var(--accent-primary-light)" : "transparent", color: activeFilter === "nearby" ? "var(--accent-primary)" : "var(--text-primary)" }}>
+                      <MapPin className="w-4 h-4" /> Nearby (50km)
+                    </button>
+                  </div>
 
-          {/* Country picker */}
-          <button
-            onClick={() => { setActiveFilter("country"); setShowLocationPicker(p => activeFilter === "country" ? !p : true); }}
-            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: activeFilter === "country" ? "var(--accent-primary)" : "var(--bg-subtle)",
-              color: activeFilter === "country" ? "#fff" : "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}>
-            🌎 {selectedCountry || "Country"} <ChevronDown className="w-3 h-3" />
-          </button>
+                  {/* City search */}
+                  <div className="p-2">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={cityInput}
+                      onChange={(e) => setCityInput(e.target.value)}
+                      placeholder="Search city…"
+                      className="w-full px-3 py-1.5 rounded-xl text-sm outline-none mb-2"
+                      style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+                    />
+                    <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+                      {citySuggestions.map(c => (
+                        <button key={c} onClick={() => { setActiveFilter(c); setCityInput(""); setShowPicker(false); }}
+                          className="w-full text-left px-3 py-1.5 rounded-xl text-sm transition-all"
+                          style={{ backgroundColor: activeFilter === c ? "var(--accent-primary-light)" : "transparent", color: activeFilter === c ? "var(--accent-primary)" : "var(--text-primary)" }}>
+                          🏙 {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          {/* City picker */}
-          <button
-            onClick={() => { setActiveFilter("city"); setShowLocationPicker(p => activeFilter === "city" ? !p : true); }}
-            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={{
-              backgroundColor: activeFilter === "city" ? "var(--accent-primary)" : "var(--bg-subtle)",
-              color: activeFilter === "city" ? "#fff" : "var(--text-secondary)",
-              border: "1px solid var(--border-light)",
-            }}>
-            🏙 {selectedCity || "City"} <ChevronDown className="w-3 h-3" />
-          </button>
-        </div>
-
-        {/* Country dropdown */}
-        {activeFilter === "country" && showLocationPicker && (
-          <div className="px-4 pb-2">
-            <select
-              value={selectedCountry}
-              onChange={(e) => { setSelectedCountry(e.target.value); setShowLocationPicker(false); }}
-              className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-              autoFocus
-            >
-              <option value="">🌍 All Countries</option>
-              {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <Link
+              to={createPageUrl("CreatePostFlow")}
+              onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
+              <Plus className="w-3 h-3" /> Post
+            </Link>
           </div>
-        )}
-
-        {/* City search */}
-        {activeFilter === "city" && showLocationPicker && (
-          <div className="px-4 pb-2">
-            <input
-              autoFocus
-              type="text"
-              value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              placeholder="Type a city name…"
-              className="w-full px-3 py-2 rounded-xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
-            />
-            {filteredCitySuggestions.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {filteredCitySuggestions.map(c => (
-                  <button key={c} onClick={() => { setSelectedCity(c); setCityInput(c); setShowLocationPicker(false); }}
-                    className="px-2.5 py-1 rounded-full text-xs font-semibold"
-                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                    {c}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* New posts floating pill */}
