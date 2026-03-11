@@ -246,19 +246,26 @@ export default function CommunityFeed({ user }) {
           <div className="flex items-center gap-2">
             {/* Single location toggle */}
             <div className="relative" ref={pickerRef}>
-              <button
-                onClick={() => setShowPicker(p => !p)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  backgroundColor: activeFilter !== "global" ? "var(--accent-primary)" : "var(--bg-subtle)",
-                  color: activeFilter !== "global" ? "#fff" : "var(--text-secondary)",
-                  border: "1px solid var(--border-light)",
-                }}>
-                {activeFilter === "global" && <><Globe className="w-3 h-3" /> Global</>}
-                {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> Nearby</>}
-                {activeFilter !== "global" && activeFilter !== "nearby" && <><MapPin className="w-3 h-3" /> {activeFilter}</>}
-                <ChevronDown className="w-3 h-3" />
-              </button>
+              <div className="flex items-center rounded-full overflow-hidden" style={{ border: "1px solid var(--border-light)", backgroundColor: activeFilter !== "global" ? "var(--accent-primary)" : "var(--bg-subtle)" }}>
+                <button
+                  onClick={() => setShowPicker(p => !p)}
+                  className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-xs font-semibold transition-all"
+                  style={{ color: activeFilter !== "global" ? "#fff" : "var(--text-secondary)" }}>
+                  {activeFilter === "global" && <><Globe className="w-3 h-3" /> Global</>}
+                  {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> Nearby</>}
+                  {activeFilter !== "global" && activeFilter !== "nearby" && <><MapPin className="w-3 h-3" /> {activeFilter}</>}
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {/* X to reset to Global */}
+                {activeFilter !== "global" && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setActiveFilter("global"); setShowPicker(false); }}
+                    className="pr-2 pl-1 py-1.5 flex items-center"
+                    style={{ color: "#fff" }}>
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
 
               {showPicker && (
                 <div className="absolute right-0 top-9 w-64 rounded-2xl shadow-xl z-50 overflow-hidden"
