@@ -15,7 +15,13 @@ import { rankFeedForUser, trackPostView } from "./feedRanking";
 export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
-  const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "nearby"
+  // filter: "global" | "nearby" | "country" | "city"
+  const [activeFilter, setActiveFilter] = useState("global");
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [cityInput, setCityInput] = useState("");
+  const [userCoords, setUserCoords] = useState(null);
   const [userCity, setUserCity] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const qc = useQueryClient();
