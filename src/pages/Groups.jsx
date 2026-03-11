@@ -642,7 +642,7 @@ export default function Groups() {
   ];
 
   return (
-    <div style={{ minHeight: "100dvh", paddingBottom: 88, background: "linear-gradient(180deg, #1B1B3A 0%, #2D1B69 40%, #1a1a2e 100%)" }}>
+    <div style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
 
       {/* ── Header ── */}
       <div className="relative px-5 pt-6 pb-4"
