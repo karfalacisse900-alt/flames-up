@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
         id,
         content: data.text || null,
         created_at: data.created_date || null,
+        user_id: data.author_email || data.created_by || null,
       };
       console.log(`[syncToSupabase] Syncing Post → posts:`, JSON.stringify(record));
       await supabaseUpsert("posts", record);
