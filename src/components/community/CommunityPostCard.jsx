@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
 
-import { MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin, Heart } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, Plus, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin, Heart } from "lucide-react";
 import AutoplayVideo from "./AutoplayVideo";
 import WantToGoButton from "./WantToGoButton";
 import PhotoCarousel from "./PhotoCarousel";
@@ -364,14 +364,17 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           <div className="flex items-center gap-1 shrink-0">
             {!isOwnPost && showAuthor && !!user && (
               <button onClick={handleFollow}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
+                className="w-8 h-8 flex items-center justify-center rounded-full transition-all"
+                title={isFollowing ? "Following" : "Follow"}
                 style={{
-                  borderColor: isFollowing ? "var(--accent-primary)" : "var(--border-light)",
-                  color: isFollowing ? "var(--accent-primary)" : "var(--text-secondary)",
-                  backgroundColor: isFollowing ? "var(--accent-primary-light)" : "transparent",
+                  backgroundColor: isFollowing ? "rgba(46, 107, 79, 0.2)" : "rgba(0,0,0,0.05)",
+                  color: isFollowing ? "var(--accent-primary)" : "var(--text-hint)",
                 }}>
-                {isFollowing ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
-                {isFollowing ? "Following" : "Follow"}
+                {isFollowing ? (
+                  <Plus className="w-4 h-4 rotate-45" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
               </button>
             )}
             {isOwnPost && (
