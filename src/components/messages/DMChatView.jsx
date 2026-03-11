@@ -238,6 +238,14 @@ export default function DMChatView({ user, conversation, onBack }) {
       </div>
 
       {/* Input */}
+      {showVideoCall && (
+        <VideoCallModal
+          roomName={`dm-${convId}`}
+          displayName={user.full_name || user.email?.split("@")[0] || "User"}
+          onClose={() => setShowVideoCall(false)}
+        />
+      )}
+
       <ChatInputBar
         disabled={blocked}
         replyTo={replyTo}
