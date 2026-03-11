@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, UserX } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import ChatInputBar from "./ChatInputBar";
+import VideoCallModal from "./VideoCallModal";
 
 const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B", "#FFA500"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
@@ -14,6 +15,7 @@ export default function DMChatView({ user, conversation, onBack }) {
   const [showMenu, setShowMenu] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const endRef = useRef(null);
   const queryClient = useQueryClient();
   const convId = [user.email, conversation.email].sort().join("_");
