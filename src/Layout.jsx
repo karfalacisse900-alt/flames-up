@@ -122,14 +122,22 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const [statusViewerActive, setStatusViewerActive] = useState(false);
+  const [postViewerActive, setPostViewerActive] = useState(false);
+  
   useEffect(() => {
     const handler = (e) => setStatusViewerActive(e.detail?.active ?? false);
     window.addEventListener("statusviewermode", handler);
     return () => window.removeEventListener("statusviewermode", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = (e) => setPostViewerActive(e.detail?.active ?? false);
+    window.addEventListener("postviewermode", handler);
+    return () => window.removeEventListener("postviewermode", handler);
+  }, []);
+
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
-  const hideNav = statusViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer"].includes(currentPageName);
+  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer"].includes(currentPageName);
 
   const showSidebars = !isAdminPage && !hideNav;
 
