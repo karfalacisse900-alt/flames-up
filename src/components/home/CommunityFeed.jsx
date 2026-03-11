@@ -67,10 +67,13 @@ export default function CommunityFeed({ user }) {
     <div className="pb-8">
       {/* Sticky bar */}
       <div className="sticky top-0 z-20 px-4 pt-3 pb-0" style={{ backgroundColor: "var(--bg-app)" }}>
-        {/* Tab row + action buttons */}
-        <div className="flex items-center gap-2">
-          {/* Location Tabs */}
-          <div className="flex gap-1 flex-1">
+        {/* Toggle + Post button */}
+        <div className="flex items-center gap-3">
+          {/* Segmented Global / Nearby toggle */}
+          <div
+            className="flex flex-1 rounded-full p-0.5"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+          >
             {LOCATION_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -78,11 +81,10 @@ export default function CommunityFeed({ user }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all"
                   style={{
-                    backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                    backgroundColor: isActive ? "var(--accent-primary)" : "transparent",
                     color: isActive ? "#fff" : "var(--text-secondary)",
-                    border: isActive ? "none" : "1px solid var(--border-light)",
                   }}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -95,21 +97,11 @@ export default function CommunityFeed({ user }) {
           {/* Create Post */}
           <Link
             to={createPageUrl("CreatePostFlow")}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-white transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-white transition-all active:scale-95 flex-shrink-0"
             style={{ backgroundColor: "var(--accent-primary)" }}
           >
             <PenSquare className="w-3.5 h-3.5" />
             Post
-          </Link>
-
-          {/* Go Live */}
-          <Link
-            to={createPageUrl("GoLive")}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-white transition-all active:scale-95"
-            style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            Live
           </Link>
         </div>
 
