@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ImagePlus, Loader2 } from "lucide-react";
+import { X, ImagePlus, Video as VideoIcon, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const BG_PRESETS = [
@@ -17,16 +17,18 @@ const BG_PRESETS = [
 export default function PostStatusModal({ user, groupId, groupName, onClose, onPosted }) {
   const [text, setText] = useState("");
   const [bg, setBg] = useState(BG_PRESETS[0]);
-  const [imageUrl, setImageUrl] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
 
-  const handleImageUpload = async (e) => {
+  const handleMediaUpload = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setImageUrl(file_url);
+    setMediaUrl(file_url);
+    setMediaType(type);
     setUploading(false);
   };
 
@@ -39,8 +41,9 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
       author_name: user.full_name || user.email?.split("@")[0] || "Creator",
       author_type: groupId ? "group_owner" : "creator",
       text: text.trim(),
-      background: imageUrl ? undefined : bg,
-      image_url: imageUrl || undefined,
+      background: mediaUrl ? undefined : bg,
+      image_url: mediaType === "image" ? mediaUrl : undefined,
+      video_url: mediaType === "video" ? mediaUrl : undefined,
       group_id: groupId || undefined,
       group_name: groupName || undefined,
       expires_at: expires,
@@ -65,10 +68,13 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
 
         {/* Preview */}
         <div className="relative h-52 flex flex-col items-center justify-center p-6"
-          style={{ background: imageUrl ? undefined : bg, backgroundImage: imageUrl ? `url(${imageUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-          {imageUrl && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.35)" }} />}
-          <p className="relative z-10 text-white text-xl font-bold text-center leading-snug"
-            style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+          style={{ background: mediaUrl ? undefined : bg, backgroundImage: mediaType === "image" ? `url(${mediaUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+          {mediaType === "video" && (
+            <video src={mediaUrl} className="absolute inset-0 w-full h-full object-cover" />
+          )}
+          {mediaUrl && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.35)" }} />}
+          <p className="relative z-10 text-white text-2xl font-bold text-center leading-snug max-w-[90%]"
+            style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
             {text || "Your status text…"}
           </p>
           <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10"
@@ -89,7 +95,7 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
             style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
 
           {/* Background picker */}
-          {!imageUrl && (
+          {!mediaUrl && (
             <div>
               <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-hint)" }}>Background</p>
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -102,16 +108,22 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
             </div>
           )}
 
-          {/* Image upload */}
-          <div className="flex items-center gap-3">
+          {/* Media upload */}
+          <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer"
               style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
-              {imageUrl ? "Change photo" : "Add photo"}
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              {mediaType === "image" ? "Change photo" : "Add photo"}
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleMediaUpload(e, "image")} />
             </label>
-            {imageUrl && (
-              <button onClick={() => setImageUrl("")} className="text-xs font-semibold"
+            <label className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <VideoIcon className="w-4 h-4" />}
+              {mediaType === "video" ? "Change video" : "Add video"}
+              <input type="file" accept="video/*" className="hidden" onChange={(e) => handleMediaUpload(e, "video")} />
+            </label>
+            {mediaUrl && (
+              <button onClick={() => { setMediaUrl(""); setMediaType(null); }} className="text-xs font-semibold"
                 style={{ color: "#E05C7A" }}>Remove</button>
             )}
           </div>
