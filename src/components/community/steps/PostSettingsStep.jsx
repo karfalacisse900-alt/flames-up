@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { MapPin, Link as LinkIcon, Lock, MessageCircle, Copy, Eye, Zap, AlertCircle } from "lucide-react";
+import { MapPin, Link as LinkIcon, Lock, MessageCircle, Eye, Zap, AlertCircle, EyeOff } from "lucide-react";
 import LocationTagButton from "../LocationTagButton";
 
 const LOCATION_TYPES = ["city", "place", "event", "venue"];
