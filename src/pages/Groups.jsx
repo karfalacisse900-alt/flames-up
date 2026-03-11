@@ -649,18 +649,14 @@ export default function Groups() {
         style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Groups</h1>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>Join communities · Meet people</p>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Groups</h1>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Join communities · Meet people</p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
-              <Search className="w-5 h-5 text-white" />
-            </button>
             {user && (
               <button onClick={() => navigate(createPageUrl("CreateGroup"))}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
-                style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}>
+                style={{ backgroundColor: "var(--accent-primary)" }}>
                 <Plus className="w-4 h-4" /> Create
               </button>
             )}
