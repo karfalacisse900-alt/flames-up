@@ -137,9 +137,8 @@ export default function DMChatView({ user, conversation, onBack }) {
             : <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.75)" }}>tap for info</p>}
         </div>
         <div className="relative">
-          <button onClick={() => setShowMenu(v => !v)} className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--bg-subtle)" }}>
-            <MoreVertical className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+          <button onClick={() => setShowMenu(v => !v)} className="w-9 h-9 rounded-full flex items-center justify-center">
+            <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
           </button>
           {showMenu && (
             <>
