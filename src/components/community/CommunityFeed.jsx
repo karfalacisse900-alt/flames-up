@@ -41,6 +41,7 @@ export default function CommunityFeed({ user }) {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
+          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
           const data = await res.json();
           const addr = data.address || {};
@@ -53,8 +54,8 @@ export default function CommunityFeed({ user }) {
   };
 
   useEffect(() => {
-    if (activeTab === "nearby" && !userCity && !locationLoading) detectLocation();
-  }, [activeTab]);
+    if (activeFilter === "nearby" && !userCity && !locationLoading) detectLocation();
+  }, [activeFilter]);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
