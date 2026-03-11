@@ -1,37 +1,37 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 
-const COLORS = ["#2E6B4F", "#D98B62", "#6B4F2E", "#4A6B9F", "#8B4F6B"];
+const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B", "#FFA500"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
-const displayName = (name, email) => {
-  if (!name || name === email) return email?.split("@")[0] || "User";
-  return name;
-};
+const getName = (name, email) => (!name || name === email) ? (email?.split("@")[0] || "User") : name;
 
-const timeAgo = (date) => {
+const formatTime = (date) => {
   try {
-    const diff = (Date.now() - new Date(date)) / 1000;
-    if (diff < 60) return "now";
-    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    return `${Math.floor(diff / 86400)}d`;
+    const d = new Date(date);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 86400000 && d.getDate() === now.getDate()) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    if (diff < 604800000) {
+      return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    }
+    return d.toLocaleDateString([], { day: "2-digit", month: "2-digit" });
   } catch { return ""; }
 };
 
 const getPreview = (msg) => {
   if (!msg) return "";
-  if (msg.is_deleted) return "Message deleted";
+  if (msg.is_deleted) return "🚫 Deleted message";
   if (msg.audio_url || msg.message_type === "voice") return "🎤 Voice message";
-  if (msg.gif_url) return "GIF";
+  if (msg.gif_url) return "🎞 GIF";
   if (msg.media_urls?.length) return "📷 Photo";
   if (msg.message_type === "location") return "📍 Location";
   return msg.text || "";
 };
 
 export default function ConversationListTab({ user, tab, onSelect }) {
-  const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
 
   const { data: sentMessages = [] } = useQuery({
@@ -72,15 +72,13 @@ export default function ConversationListTab({ user, tab, onSelect }) {
     [...sentMessages, ...receivedMessages].forEach((m) => {
       const otherEmail = m.sender_email === user.email ? m.receiver_email : m.sender_email;
       const otherName = m.sender_email === user.email
-        ? (m.receiver_name || m.receiver_email)
-        : (m.sender_name || m.sender_email);
+        ? getName(m.receiver_name || m.receiver_email, m.receiver_email)
+        : getName(m.sender_name || m.sender_email, m.sender_email);
       if (!map[otherEmail]) {
         map[otherEmail] = { email: otherEmail, name: otherName, lastMessage: m, unread: 0 };
       } else if (new Date(m.created_date) > new Date(map[otherEmail].lastMessage.created_date)) {
         map[otherEmail].lastMessage = m;
-        if (!map[otherEmail].name || map[otherEmail].name === otherEmail) {
-          map[otherEmail].name = otherName;
-        }
+        if (!map[otherEmail].name) map[otherEmail].name = otherName;
       }
       if (m.receiver_email === user.email && !m.is_read) {
         map[otherEmail].unread = (map[otherEmail].unread || 0) + 1;
@@ -90,92 +88,72 @@ export default function ConversationListTab({ user, tab, onSelect }) {
     return Object.values(map)
       .map(c => ({
         ...c,
-        isRequest: !followingEmails.has(c.email)
-          && c.lastMessage.sender_email !== user.email
-          && c.unread > 0,
+        isRequest: !followingEmails.has(c.email) && c.lastMessage.sender_email !== user.email && c.unread > 0,
       }))
       .sort((a, b) => new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date));
   }, [sentMessages, receivedMessages, followingEmails, user.email]);
 
-  const filtered = conversations.filter(c => {
-    const matchSearch = !search
-      || c.name?.toLowerCase().includes(search.toLowerCase())
-      || c.email.toLowerCase().includes(search.toLowerCase());
-    if (tab === "requests") return matchSearch && c.isRequest;
-    return matchSearch && !c.isRequest;
-  });
+  const filtered = conversations.filter(c =>
+    tab === "requests" ? c.isRequest : !c.isRequest
+  );
+
+  if (filtered.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+        style={{ backgroundColor: "#F0F8F0" }}>
+        <span className="text-4xl">{tab === "requests" ? "📩" : "💬"}</span>
+      </div>
+      <p className="text-base font-semibold mb-1" style={{ color: "#333" }}>
+        {tab === "requests" ? "No message requests" : "No conversations yet"}
+      </p>
+      <p className="text-sm text-center px-8" style={{ color: "#999" }}>
+        {tab === "requests" ? "Messages from people you don't follow appear here" : "Start a new conversation using the pencil icon above"}
+      </p>
+    </div>
+  );
 
   return (
     <div>
-      {/* Search bar */}
-      <div className="px-4 mb-3">
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
-          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
-          <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={tab === "requests" ? "Search requests…" : "Search conversations…"}
-            className="flex-1 bg-transparent text-sm outline-none" style={{ color: "var(--text-primary)" }} />
-        </div>
-      </div>
+      {filtered.map((conv, idx) => (
+        <button key={conv.email} onClick={() => onSelect({ type: "dm", data: conv })}
+          className="w-full flex items-center gap-3 px-4 py-3 text-left"
+          style={{ borderBottom: idx < filtered.length - 1 ? "1px solid #F5F5F5" : "none", backgroundColor: "#fff" }}>
 
-      {/* List */}
-      <div className="space-y-0.5 px-2">
-        {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-3xl mb-3">{tab === "requests" ? "📩" : "💬"}</p>
-            <p className="text-sm" style={{ color: "var(--text-hint)" }}>
-              {tab === "requests" ? "No message requests" : "No conversations yet"}
-            </p>
-            {tab === "requests" && (
-              <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
-                Messages from people you don't follow appear here
-              </p>
-            )}
+          {/* Avatar */}
+          <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+            style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
+            {conv.name?.[0]?.toUpperCase() || "?"}
           </div>
-        ) : filtered.map(conv => {
-          const name = displayName(conv.name, conv.email);
-          return (
-            <button key={conv.email} onClick={() => onSelect({ type: "dm", data: { ...conv, name } })}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-colors"
-              style={{ backgroundColor: "transparent" }}>
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold"
-                  style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
-                  {name[0]?.toUpperCase() || "?"}
-                </div>
-                {conv.unread > 0 && (
-                  <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2"
-                    style={{ backgroundColor: "var(--accent-primary)", borderColor: "var(--bg-app)" }}>
-                    {conv.unread > 9 ? "9+" : conv.unread}
-                  </div>
-                )}
-              </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-[15px] truncate" style={{ color: "var(--text-primary)", fontWeight: conv.unread > 0 ? 700 : 500 }}>
-                    {name}
-                  </p>
-                  <span className="text-[11px] shrink-0 ml-2" style={{ color: conv.unread > 0 ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 600 : 400 }}>
-                    {timeAgo(conv.lastMessage.created_date)}
-                  </span>
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-0.5">
+              <p className="font-semibold text-[15px] truncate" style={{ color: "#111" }}>{conv.name}</p>
+              <span className="text-[12px] shrink-0 ml-2" style={{ color: conv.unread > 0 ? "#25D366" : "#999", fontWeight: conv.unread > 0 ? 600 : 400 }}>
+                {formatTime(conv.lastMessage.created_date)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] truncate flex-1" style={{ color: conv.unread > 0 ? "#333" : "#999", fontWeight: conv.unread > 0 ? 500 : 400 }}>
+                {conv.lastMessage.sender_email === user.email
+                  ? <span style={{ color: "#999" }}>You: </span>
+                  : null}
+                {getPreview(conv.lastMessage)}
+              </p>
+              {conv.unread > 0 && (
+                <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[11px] font-bold text-white ml-2 shrink-0"
+                  style={{ backgroundColor: "#25D366" }}>
+                  {conv.unread > 9 ? "9+" : conv.unread}
                 </div>
-                <div className="flex items-center justify-between mt-0.5">
-                  <p className="text-[13px] truncate flex-1"
-                    style={{ color: conv.unread > 0 ? "var(--text-secondary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 500 : 400 }}>
-                    {conv.lastMessage.sender_email === user.email ? "You: " : ""}{getPreview(conv.lastMessage)}
-                  </p>
-                  {tab === "requests" && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full ml-2 font-semibold shrink-0"
-                      style={{ backgroundColor: "#FFF3E0", color: "#E65100" }}>Request</span>
-                  )}
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              )}
+              {tab === "requests" && conv.unread === 0 && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full ml-2 font-semibold shrink-0"
+                  style={{ backgroundColor: "#FFF3E0", color: "#E65100" }}>Req</span>
+              )}
+            </div>
+          </div>
+        </button>
+      ))}
     </div>
   );
 }
