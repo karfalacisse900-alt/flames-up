@@ -75,9 +75,11 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
           style={{ backgroundColor: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <X className="w-5 h-5 text-white" />
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
-          style={{ backgroundColor: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}>
-          <Music className="w-4 h-4" /> Add Sound
+        <button onClick={() => setShowMusicSheet(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
+          style={{ backgroundColor: selectedTrack ? "rgba(46,107,79,0.75)" : "rgba(0,0,0,0.55)", border: `1px solid ${selectedTrack ? "rgba(76,175,125,0.7)" : "rgba(255,255,255,0.2)"}` }}>
+          <Music className="w-4 h-4" />
+          {selectedTrack ? selectedTrack.title : "Add Sound"}
         </button>
         <div style={{ width: 40 }} />
       </div>
