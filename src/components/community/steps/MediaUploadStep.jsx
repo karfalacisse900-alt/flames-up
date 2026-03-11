@@ -3,6 +3,7 @@ import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
 
 export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
   const photoVideoInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const dragCounter = useRef(0);
 
