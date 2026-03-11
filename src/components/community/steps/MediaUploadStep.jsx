@@ -248,6 +248,15 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
         />
         
         <input
+          ref={cameraInputRef}
+          type="file"
+          accept="video/*"
+          capture="environment"
+          onChange={(e) => handleFileSelect(e.target.files || [])}
+          className="hidden"
+        />
+
+        <input
           ref={fileInputRef}
           type="file"
           multiple
