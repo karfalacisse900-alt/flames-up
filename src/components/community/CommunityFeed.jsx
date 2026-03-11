@@ -370,12 +370,12 @@ export default function CommunityFeed({ user }) {
 
       {/* Feed */}
       <div className="pb-28">
-        {activeTab === "nearby" && locationLoading ? (
+        {activeFilter === "nearby" && locationLoading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />
             <p className="text-sm" style={{ color: "var(--text-hint)" }}>Finding your location…</p>
           </div>
-        ) : activeTab === "nearby" && !userCity ? (
+        ) : activeFilter === "nearby" && !userCoords ? (
           <div className="py-16 text-center px-8">
             <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Location access needed</p>
