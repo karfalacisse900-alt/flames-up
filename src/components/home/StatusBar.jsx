@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Heart, Send } from "lucide-react";
+import { Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostStatusModal from "./PostStatusModal";
 import { createPageUrl } from "@/utils";
-import { useNavigate } from "react-router-dom";
 
 const COLORS = ["#7C3AED", "#DB2777", "#EA580C", "#059669", "#0284C7", "#D97706"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
 const getName = (u) => u?.full_name || u?.email?.split("@")[0] || "User";
+const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥", "✨", "😮", "😢", "🙏"];
 
-function StatusViewer({ status, user, onClose, onNext, onPrev }) {
-  const [liked, setLiked] = useState(false);
-  const [msgText, setMsgText] = useState("");
-  const navigate = useNavigate();
+function StatusViewer({ status, user, onClose, onNext, onPrev, allStatuses }) {
+  const [reactions, setReactions] = useState(status.reactions || {});
+  const [reactionCounts, setReactionCounts] = useState(status.reaction_counts || {});
+  const [userReactions, setUserReactions] = useState({});
 
   useEffect(() => {
     // Mark as viewed
@@ -24,11 +24,39 @@ function StatusViewer({ status, user, onClose, onNext, onPrev }) {
         viewed_by: [...(status.viewed_by || []), user.email],
       }).catch(() => {});
     }
-  }, [status.id]);
+    
+    // Update user reactions
+    const userReacts = {};
+    Object.entries(reactions).forEach(([emoji, users]) => {
+      if (users?.includes(user?.email)) userReacts[emoji] = true;
+    });
+    setUserReactions(userReacts);
+  }, [status.id, reactions, user?.email]);
 
-  const handleSendMsg = () => {
-    if (!msgText.trim()) return;
-    navigate(createPageUrl(`Messages?with=${status.author_email}&name=${encodeURIComponent(status.author_name || "")}`));
+  const handleReact = async (emoji) => {
+    if (!user?.email) return;
+    
+    const newReactions = { ...reactions };
+    const newCounts = { ...reactionCounts };
+    
+    if (userReactions[emoji]) {
+      newReactions[emoji] = (newReactions[emoji] || []).filter(e => e !== user.email);
+      if (newReactions[emoji].length === 0) delete newReactions[emoji];
+      newCounts[emoji] = Math.max(0, (newCounts[emoji] || 0) - 1);
+      if (newCounts[emoji] === 0) delete newCounts[emoji];
+    } else {
+      newReactions[emoji] = [...(newReactions[emoji] || []), user.email];
+      newCounts[emoji] = (newCounts[emoji] || 0) + 1;
+    }
+
+    setReactions(newReactions);
+    setReactionCounts(newCounts);
+    setUserReactions({ ...userReactions, [emoji]: !userReactions[emoji] });
+
+    await base44.entities.CreatorStatus.update(status.id, {
+      reactions: newReactions,
+      reaction_counts: newCounts,
+    }).catch(() => {});
   };
 
   const bg = status.image_url
@@ -42,7 +70,6 @@ function StatusViewer({ status, user, onClose, onNext, onPrev }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex flex-col" style={{ ...bgStyle, maxWidth: 480, margin: "0 auto" }}>
-      {/* Overlay */}
       {status.image_url && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)" }} />}
 
       {/* Header */}
@@ -70,32 +97,50 @@ function StatusViewer({ status, user, onClose, onNext, onPrev }) {
         <div className="w-2/3 h-full" onClick={onNext} />
       </div>
 
-      {/* Text */}
-      <div className="relative z-10 px-6 pb-6">
-        <p className="text-white text-2xl font-bold leading-snug mb-6"
+      {/* Text & Video */}
+      <div className="relative z-10 px-6 pb-3">
+        {status.video_url && (
+          <video src={status.video_url} autoPlay muted loop playsInline
+            className="w-full h-32 object-cover rounded-2xl mb-3" />
+        )}
+        <p className="text-white text-2xl font-bold leading-snug"
           style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
           {status.text}
         </p>
+      </div>
 
-        {/* Message bar */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 flex items-center gap-2 px-4 py-3 rounded-full"
-            style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.35)" }}>
-            <input value={msgText} onChange={e => setMsgText(e.target.value)}
-              placeholder="Send message"
-              className="flex-1 bg-transparent text-sm outline-none text-white placeholder-white/60" />
-            {msgText && (
-              <button onClick={handleSendMsg}>
-                <Send className="w-4 h-4 text-white" />
+      {/* Reaction bar */}
+      <div className="relative z-10 flex items-center justify-between gap-2 px-4 py-3 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1.5">
+          {REACTION_EMOJIS.map(emoji => {
+            const count = reactionCounts[emoji] || 0;
+            const isReacted = userReactions[emoji];
+            return (
+              <button key={emoji} onClick={() => handleReact(emoji)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold shrink-0 transition-all"
+                style={{
+                  backgroundColor: isReacted ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  border: `1px solid ${isReacted ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.25)"}`,
+                }}>
+                <span>{emoji}</span>
+                {count > 0 && <span className="text-[10px]">{count}</span>}
               </button>
-            )}
-          </div>
-          <button onClick={() => setLiked(l => !l)}
-            className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-            <Heart className={`w-5 h-5 ${liked ? "text-red-400 fill-red-400" : "text-white"}`} />
-          </button>
+            );
+          })}
         </div>
+        {allStatuses.length > 1 && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={onPrev} className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <ChevronLeft className="w-4 h-4 text-white" />
+            </button>
+            <button onClick={onNext} className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -180,8 +225,9 @@ export default function StatusBar({ user }) {
           <StatusViewer
             status={activeViewer}
             user={user}
+            allStatuses={statuses}
             onClose={() => setViewIndex(null)}
-            onNext={() => setViewIndex(i => i < statuses.length - 1 ? i + 1 : null)}
+            onNext={() => setViewIndex(i => i < statuses.length - 1 ? i + 1 : i)}
             onPrev={() => setViewIndex(i => i > 0 ? i - 1 : i)}
           />
         )}
