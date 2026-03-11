@@ -10,6 +10,8 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
   const [frontCamera, setFrontCamera] = useState(false);
   const [stream, setStream] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [showMusicSheet, setShowMusicSheet] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const videoRef = useRef(null);
   const captureInputRef = useRef(null);
   const galleryInputRef = useRef(null);
