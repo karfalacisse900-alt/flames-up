@@ -2,13 +2,15 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown } from "lucide-react";
+import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
+
+const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "Sydney", "Toronto", "Dubai", "Berlin", "Mumbai", "São Paulo", "Seoul", "Amsterdam", "Barcelona", "Singapore"];
 
 
 
