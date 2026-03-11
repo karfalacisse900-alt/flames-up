@@ -74,7 +74,7 @@ export default function CreatePostFlow() {
         author_email: user.email,
         author_name: user.display_name || user.full_name || "Anonymous",
         author_avatar_url: user.avatar_url || "",
-        is_anonymous: false,
+        is_anonymous: postSettings.isAnonymous || false,
         media_type: "general",
         video_url: isVideo ? uploadedUrls[0] : undefined,
         image_urls: !isVideo && uploadedUrls.length > 0 ? uploadedUrls : undefined,

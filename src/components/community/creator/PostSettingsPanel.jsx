@@ -215,6 +215,7 @@ export default function PostSettingsPanel({
             { label: "Allow Remix",               key: "allowRemix" },
             { label: "Allow Sharing",             key: "allowSharing" },
             { label: "AI-Generated Content",      key: "isAIGenerated", icon: Bot },
+            { label: "Post Anonymously",          key: "isAnonymous" },
             ...(user?.is_creator ? [{ label: "Mark as Product/Service", key: "isProduct" }] : []),
           ].map(({ label, key }) => (
             <div key={key} className="px-4 py-3 flex items-center justify-between"
