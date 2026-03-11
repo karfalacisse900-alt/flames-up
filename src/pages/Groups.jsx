@@ -632,52 +632,53 @@ export default function Groups() {
     );
   }
 
+  const CARD_PALETTES = [
+    { bg: "#FBBF8A", text: "#7A3D00" },
+    { bg: "#86EFAC", text: "#14532D" },
+    { bg: "#C4B5FD", text: "#3B0764" },
+    { bg: "#93C5FD", text: "#1E3A5F" },
+    { bg: "#FCA5A5", text: "#7F1D1D" },
+    { bg: "#FDE68A", text: "#78350F" },
+  ];
+
   return (
-    <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh", paddingBottom: 88 }}>
+    <div style={{ minHeight: "100dvh", paddingBottom: 88, background: "linear-gradient(180deg, #1B1B3A 0%, #2D1B69 40%, #1a1a2e 100%)" }}>
 
-      {/* ── Hero Header ── */}
-      <div className="relative overflow-hidden px-5 pt-6 pb-4"
-        style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-        {/* Organic blobs */}
-        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-25 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
-        <div className="absolute top-3 right-24 w-10 h-10 rounded-full opacity-15 pointer-events-none" style={{ background: "#D98B62" }} />
-        <div className="absolute -top-4 -left-4 w-20 h-20 rounded-full opacity-10 pointer-events-none" style={{ background: "#4CAF7D" }} />
-
-        <div className="flex items-start justify-between mb-4 relative z-10">
+      {/* ── Header ── */}
+      <div className="relative px-5 pt-6 pb-4"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <div className="flex items-center gap-2.5 mb-1">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md"
-                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold leading-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)", letterSpacing: "-0.3px" }}>Groups</h1>
-                <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Join communities. Meet people. ✦</p>
-              </div>
-            </div>
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>Groups</h1>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>Join communities · Meet people</p>
           </div>
-          {user && (
-            <button onClick={() => navigate(createPageUrl("CreateGroup"))}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-black text-white"
-              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.4)" }}>
-              <Plus className="w-4 h-4" /> Create
+          <div className="flex items-center gap-2">
+            <button className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
+              <Search className="w-5 h-5 text-white" />
             </button>
-          )}
+            {user && (
+              <button onClick={() => navigate(createPageUrl("CreateGroup"))}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #7C3AED, #4F46E5)" }}>
+                <Plus className="w-4 h-4" /> Create
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Main Tabs */}
-        <div className="flex gap-2 relative z-10">
+        <div className="flex gap-2">
           {[
             { key: "discover", label: "Discover", icon: Zap },
-            { key: "map", label: "Nearby Explorer", icon: MapPin },
+            { key: "map", label: "Nearby", icon: MapPin },
           ].map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setMainTab(key)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-bold transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all"
               style={{
-                backgroundColor: mainTab === key ? "#1E1E1E" : "var(--bg-card)",
-                color: mainTab === key ? "#fff" : "var(--text-secondary)",
-                border: `1.5px solid ${mainTab === key ? "#1E1E1E" : "var(--border-light)"}`,
-                boxShadow: mainTab === key ? "0 4px 12px rgba(0,0,0,0.2)" : "none",
+                backgroundColor: mainTab === key ? "#7C3AED" : "rgba(255,255,255,0.1)",
+                color: "#fff",
+                border: `1.5px solid ${mainTab === key ? "#7C3AED" : "rgba(255,255,255,0.2)"}`,
               }}>
               <Icon className="w-3.5 h-3.5" />{label}
             </button>
