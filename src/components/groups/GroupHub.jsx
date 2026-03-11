@@ -521,6 +521,13 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
             }}
           />
         )}
+        {showVideoCall && user && (
+          <VideoCallModal
+            roomName={`group-${group.id}`}
+            displayName={user.full_name || user.email?.split("@")[0] || "User"}
+            onClose={() => setShowVideoCall(false)}
+          />
+        )}
         {showDeleteConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end justify-center"
