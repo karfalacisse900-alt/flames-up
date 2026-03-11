@@ -24,6 +24,8 @@ export default function PostSettingsStep({
   setPostSettings,
   onNext,
   isLoading,
+  gpsLocation,
+  gpsCoords,
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const captionRef = useRef(null);
