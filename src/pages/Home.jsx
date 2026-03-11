@@ -5,6 +5,7 @@ import WelcomePage from "../components/home/WelcomePage";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 import CommunityFeed from "../components/community/CommunityFeed";
+import StatusBar from "@/components/home/StatusBar";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -33,6 +34,8 @@ export default function Home() {
   return (
     <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
       <HomeHeader user={user} />
+      <StatusBar user={user} />
+      {divider}
       <DidYouKnowSection user={user} />
       {divider}
       <CommunityFeed user={user} />
