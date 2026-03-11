@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Home, Palette, User, Search, Flame, MessageCircle, MapPin } from "lucide-react";
+import { Home, Palette, User, Search, Flame, Users, MapPin } from "lucide-react";
 
 import AppAIAssistant from "@/components/AppAIAssistant";
 import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
@@ -11,11 +11,11 @@ import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 
 const navItems = [
-{ name: "Home",     icon: Home,          page: "Home" },
-{ name: "Discover", icon: Search,        page: "Discover" },
-{ name: "Places",   icon: MapPin,        page: "Places" },
-{ name: "Messages", icon: MessageCircle, page: "Messages" },
-{ name: "Profile",  icon: User,          page: "Profile" },
+{ name: "Home",    icon: Home,    page: "Home" },
+{ name: "Discover", icon: Search,  page: "Discover" },
+{ name: "Places",  icon: MapPin,  page: "Places" },
+{ name: "Groups",  icon: Users,   page: "Groups" },
+{ name: "Profile", icon: User,    page: "Profile" },
 ];
 
 const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
@@ -62,7 +62,6 @@ export default function Layout({ children, currentPageName }) {
   }, []);
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMessages, setUnreadMessages] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -82,16 +81,7 @@ export default function Layout({ children, currentPageName }) {
             fetchUnread();
           }
         });
-
-        // Unread messages badge
-        const fetchUnreadMsgs = () =>
-          base44.entities.DirectMessage.filter({ receiver_email: u.email, is_read: false }, "-created_date", 100)
-            .then(msgs => setUnreadMessages(msgs.length))
-            .catch(() => {});
-        fetchUnreadMsgs();
-        const unsubMsg = base44.entities.DirectMessage.subscribe(() => fetchUnreadMsgs());
-
-        return () => { unsub(); unsubMsg(); };
+        return unsub;
       }
     }).catch(() => {});
   }, []);
@@ -132,7 +122,7 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
-  const hideNav = swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "Messages"].includes(currentPageName);
+  const hideNav = swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow"].includes(currentPageName);
 
   const showSidebars = !isAdminPage && !hideNav;
 
@@ -152,11 +142,13 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: hideNav ? 0 : "72px",
           minHeight: "100dvh",
           overflowX: "clip",
+          // On lg+: shift right for left sidebar (240px). On xl+: also leave room for right sidebar (256px).
           marginLeft: showSidebars ? undefined : "auto",
           marginRight: showSidebars ? undefined : "auto",
           maxWidth: isAdminPage ? "100%" : undefined,
           width: "100%",
         }}
+        // Tailwind responsive margins applied via className
         data-page={currentPageName}
       >
         {/* Inner content width cap */}
@@ -196,7 +188,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="max-w-lg mx-auto flex justify-around items-center h-full px-2" style={{ maxWidth: "min(512px, 100vw)" }}>
                 {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
-                const badge = item.page === "Messages" ? unreadMessages : (item.page === "Notifications" ? unreadCount : 0);
+                const showBadge = item.page === "Notifications" && unreadCount > 0;
                 return (
                   <Link
                     key={item.name}
@@ -206,7 +198,7 @@ export default function Layout({ children, currentPageName }) {
                     style={{ color: isActive ? "var(--accent-primary)" : "var(--text-secondary)", fontWeight: isActive ? 600 : 400 }}>
 
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
-                  {badge > 0 &&
+                  {showBadge &&
                 <span style={{ position: "absolute", top: 2, right: 4, width: 8, height: 8, borderRadius: "50%", backgroundColor: "#E05C7A", border: "2px solid var(--bg-nav)" }} />
                 }
                   <span className="text-[11px] font-semibold tracking-wide">{item.name}</span>
