@@ -257,26 +257,99 @@ export default function CommunityFeed({ user }) {
             <Plus className="w-3 h-3" /> Post
           </Link>
         </div>
-        {/* Feed tabs */}
-        <div className="flex gap-0 px-4 pt-2 pb-0">
-          {[
-            { key: "for_you", label: "For You" },
-            { key: "nearby", label: "Nearby", icon: MapPin },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className="flex items-center gap-1 px-4 py-2 text-sm font-semibold border-b-2 transition-all"
-              style={{
-                borderColor: activeTab === tab.key ? "var(--accent-primary)" : "transparent",
-                color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-hint)",
-                backgroundColor: "transparent",
-              }}>
-              {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
-              {tab.label}
-            </button>
-          ))}
+
+        {/* Location filter tabs */}
+        <div className="flex gap-1.5 px-4 pt-2.5 pb-2 overflow-x-auto scrollbar-hide">
+          {/* Global */}
+          <button
+            onClick={() => { setActiveFilter("global"); setShowLocationPicker(false); }}
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: activeFilter === "global" ? "var(--accent-primary)" : "var(--bg-subtle)",
+              color: activeFilter === "global" ? "#fff" : "var(--text-secondary)",
+              border: "1px solid var(--border-light)",
+            }}>
+            <Globe className="w-3 h-3" /> Global
+          </button>
+
+          {/* Nearby */}
+          <button
+            onClick={() => { setActiveFilter("nearby"); setShowLocationPicker(false); }}
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: activeFilter === "nearby" ? "var(--accent-primary)" : "var(--bg-subtle)",
+              color: activeFilter === "nearby" ? "#fff" : "var(--text-secondary)",
+              border: "1px solid var(--border-light)",
+            }}>
+            <MapPin className="w-3 h-3" /> Nearby
+          </button>
+
+          {/* Country picker */}
+          <button
+            onClick={() => { setActiveFilter("country"); setShowLocationPicker(p => activeFilter === "country" ? !p : true); }}
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: activeFilter === "country" ? "var(--accent-primary)" : "var(--bg-subtle)",
+              color: activeFilter === "country" ? "#fff" : "var(--text-secondary)",
+              border: "1px solid var(--border-light)",
+            }}>
+            🌎 {selectedCountry || "Country"} <ChevronDown className="w-3 h-3" />
+          </button>
+
+          {/* City picker */}
+          <button
+            onClick={() => { setActiveFilter("city"); setShowLocationPicker(p => activeFilter === "city" ? !p : true); }}
+            className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: activeFilter === "city" ? "var(--accent-primary)" : "var(--bg-subtle)",
+              color: activeFilter === "city" ? "#fff" : "var(--text-secondary)",
+              border: "1px solid var(--border-light)",
+            }}>
+            🏙 {selectedCity || "City"} <ChevronDown className="w-3 h-3" />
+          </button>
         </div>
+
+        {/* Country dropdown */}
+        {activeFilter === "country" && showLocationPicker && (
+          <div className="px-4 pb-2">
+            <select
+              value={selectedCountry}
+              onChange={(e) => { setSelectedCountry(e.target.value); setShowLocationPicker(false); }}
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+              autoFocus
+            >
+              <option value="">🌍 All Countries</option>
+              {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        )}
+
+        {/* City search */}
+        {activeFilter === "city" && showLocationPicker && (
+          <div className="px-4 pb-2">
+            <input
+              autoFocus
+              type="text"
+              value={cityInput}
+              onChange={(e) => setCityInput(e.target.value)}
+              placeholder="Type a city name…"
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--accent-primary)", color: "var(--text-primary)" }}
+            />
+            {filteredCitySuggestions.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {filteredCitySuggestions.map(c => (
+                  <button key={c} onClick={() => { setSelectedCity(c); setCityInput(c); setShowLocationPicker(false); }}
+                    className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* New posts floating pill */}
