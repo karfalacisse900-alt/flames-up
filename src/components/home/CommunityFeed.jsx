@@ -13,7 +13,7 @@ const LOCATION_TABS = [
 
 export default function CommunityFeed({ user }) {
   const [posts, setPosts] = useState([]);
-  const [filterData, setFilterData] = useState({ type: "global" });
+  const [activeTab, setActiveTab] = useState("global");
   const qc = useQueryClient();
 
   const { data: allPosts = [], isLoading } = useQuery({
