@@ -42,28 +42,28 @@ export default function PostSettingsStep({
         <label className="text-sm font-bold block mb-3" style={{ color: "var(--text-primary)", fontSize: "16px" }}>
           ✨ Add Caption
         </label>
-        <textarea
-          value={postSettings.caption}
-          onChange={(e) => handleSettingChange("caption", e.target.value)}
-          placeholder="Share what's on your mind, ask a question, or tell a story…"
-          className="w-full p-4 rounded-2xl text-sm outline-none resize-none"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            border: "2px solid var(--border-light)",
-            color: "var(--text-primary)",
-            minHeight: "120px",
-            fontFamily: "var(--font-sans)",
-          }}
-        />
+        <div className="rounded-2xl overflow-hidden" style={{ border: "2px solid var(--border-light)", backgroundColor: "var(--bg-card)" }}>
+          <ReactQuill
+            theme="snow"
+            value={postSettings.caption}
+            onChange={(value) => handleSettingChange("caption", value)}
+            placeholder="Share what's on your mind, ask a question, or tell a story…"
+            modules={{
+              toolbar: [
+                ["bold", "italic"],
+                [{ list: "ordered" }, { list: "bullet" }],
+                ["link"],
+                ["clean"],
+              ],
+            }}
+            formats={["bold", "italic", "list", "bullet", "link"]}
+            style={{ fontFamily: "var(--font-sans)" }}
+          />
+        </div>
         <div className="flex justify-between items-center mt-2">
           <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-            {postSettings.caption.length} characters
+            Rich text supported: bold, italic, lists, links
           </p>
-          {postSettings.caption.length > 500 && (
-            <p className="text-xs flex items-center gap-1" style={{ color: "var(--accent-secondary)" }}>
-              <AlertCircle className="w-3 h-3" /> Getting long!
-            </p>
-          )}
         </div>
       </div>
 
