@@ -388,12 +388,12 @@ export default function CommunityFeed({ user }) {
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="py-16 text-center px-8" style={{ animation: "fadeIn 0.3s ease" }}>
-            <div className="text-5xl mb-4">{activeTab === "nearby" ? "📍" : "💬"}</div>
+            <div className="text-5xl mb-4">{activeFilter === "nearby" ? "📍" : "💬"}</div>
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              {activeTab === "nearby" ? `No posts from ${userCity} yet` : "Start the conversation"}
+              {activeFilter === "nearby" ? `No posts near you yet` : activeFilter === "country" && selectedCountry ? `No posts from ${selectedCountry} yet` : activeFilter === "city" && selectedCity ? `No posts from ${selectedCity} yet` : "Start the conversation"}
             </p>
             <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
-              {activeTab === "nearby" ? "Be the first to post with your location tagged!" : "Be the first to share a thought with the community"}
+              Be the first to share something here!
             </p>
             <Link
                to={createPageUrl("CreatePostFlow")}
