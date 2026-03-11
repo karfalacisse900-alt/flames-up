@@ -17,15 +17,13 @@ const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "
 export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
-  // filter: "global" | "nearby" | "country" | "city"
+  // filter: "global" | "nearby" | city string
   const [activeFilter, setActiveFilter] = useState("global");
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
   const [cityInput, setCityInput] = useState("");
   const [userCoords, setUserCoords] = useState(null);
-  const [userCity, setUserCity] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const pickerRef = useRef(null);
   const qc = useQueryClient();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
