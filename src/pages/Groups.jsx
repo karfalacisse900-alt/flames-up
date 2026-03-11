@@ -787,8 +787,8 @@ export default function Groups() {
               {/* My Groups */}
               {myGroups.length > 0 && (
                 <section className="px-4 pt-2">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    <Star className="w-3.5 h-3.5 text-yellow-400" /> My Groups
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
+                    <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups
                   </p>
                   <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                     {myGroups.map(g => <MyGroupChip key={g.id} group={g} onOpen={handleOpenGroup} />)}
