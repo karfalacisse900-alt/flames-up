@@ -65,32 +65,56 @@ export default function CommunityFeed({ user }) {
 
   return (
     <div className="pb-8">
-      {/* Filter + Action bar */}
-      <div className="sticky top-16 z-20 px-4 py-3 flex items-center gap-3" style={{ backgroundColor: "var(--bg-app)" }}>
-        {/* Location Filter Dropdown */}
-        <LocationFilter 
-          onFilterChange={setFilterData}
-          userCity={user?.location_city}
-          userCountry={user?.location_country}
-        />
+      {/* Sticky bar */}
+      <div className="sticky top-0 z-20 px-4 pt-3 pb-0" style={{ backgroundColor: "var(--bg-app)" }}>
+        {/* Tab row + action buttons */}
+        <div className="flex items-center gap-2">
+          {/* Location Tabs */}
+          <div className="flex gap-1 flex-1">
+            {LOCATION_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                  style={{
+                    backgroundColor: isActive ? "var(--accent-primary)" : "var(--bg-card)",
+                    color: isActive ? "#fff" : "var(--text-secondary)",
+                    border: isActive ? "none" : "1px solid var(--border-light)",
+                  }}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Create Post button */}
-        <Link
-          to={createPageUrl("CreatePostFlow")}
-          className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-white"
-          style={{ backgroundColor: "var(--accent-primary)" }}>
-          <PenTool className="w-4 h-4" />
-          Post
-        </Link>
+          {/* Create Post */}
+          <Link
+            to={createPageUrl("CreatePostFlow")}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-white transition-all active:scale-95"
+            style={{ backgroundColor: "var(--accent-primary)" }}
+          >
+            <PenSquare className="w-3.5 h-3.5" />
+            Post
+          </Link>
 
-        {/* Go Live button */}
-        <Link
-          to={createPageUrl("GoLive")}
-          className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-white"
-          style={{ backgroundColor: "#E05C7A" }}>
-          <Zap className="w-4 h-4" />
-          Live
-        </Link>
+          {/* Go Live */}
+          <Link
+            to={createPageUrl("GoLive")}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-white transition-all active:scale-95"
+            style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            Live
+          </Link>
+        </div>
+
+        {/* Underline divider */}
+        <div style={{ height: 1, backgroundColor: "var(--border-light)", marginTop: 12 }} />
       </div>
 
       {/* Posts list */}
