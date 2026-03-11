@@ -26,8 +26,11 @@ export default function CreatorEditorStep({
   setMediaItems,
   currentEditingIndex,
   setCurrentEditingIndex,
+  selectedTrack,
+  onSelectTrack,
 }) {
   const [activeTool, setActiveTool] = useState(null);
+  const [showMusicSheet, setShowMusicSheet] = useState(false);
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
@@ -194,9 +197,26 @@ export default function CreatorEditorStep({
           )}
 
           {activeTool === "sound" && (
-            <div className="text-center py-3 space-y-1">
-              <p className="text-sm font-medium text-white">Add background music</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Coming soon</p>
+            <div className="space-y-2">
+              {selectedTrack ? (
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                  style={{ backgroundColor: "rgba(46,107,79,0.25)", border: "1px solid rgba(46,107,79,0.5)" }}>
+                  <div className="w-2 h-2 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: "#4CAF7D" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-white truncate">{selectedTrack.title}</p>
+                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.45)" }}>{selectedTrack.artist_name}</p>
+                  </div>
+                  <button onClick={() => onSelectTrack(null)} className="text-xs px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>Remove</button>
+                </div>
+              ) : (
+                <p className="text-xs text-center pb-1" style={{ color: "rgba(255,255,255,0.3)" }}>No sound selected</p>
+              )}
+              <button onClick={() => setShowMusicSheet(true)}
+                className="w-full py-2.5 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#2E6B4F" }}>
+                <Music className="w-4 h-4" /> Browse Music Library
+              </button>
             </div>
           )}
 
