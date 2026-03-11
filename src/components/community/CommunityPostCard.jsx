@@ -49,7 +49,7 @@ function stripHtml(html) {
   return text.replace(/\n{3,}/g, "\n\n");
 }
 
-export default function CommunityPostCard({ post, user, onUpvote, onLocationClick }) {
+export default function CommunityPostCard({ post, user, onUpvote, onLocationClick, onVideoTap }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -448,7 +448,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
         {/* ── Video ── */}
         {post.video_url && post.video_url.trim() && (
-          <div className="mb-2.5 w-full">
+          <div className="mb-2.5 w-full cursor-pointer" onClick={onVideoTap}>
             <AutoplayVideo
               src={post.video_url}
               postId={post.id}
