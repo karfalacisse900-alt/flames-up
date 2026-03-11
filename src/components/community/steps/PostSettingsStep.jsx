@@ -134,36 +134,55 @@ export default function PostSettingsStep({
         />
       </div>
 
-      {/* Location */}
+      {/* Auto-detected location banner */}
+      {(gpsLocation?.city || gpsLocation?.country) && !postSettings.location && (
+        <div
+          className="p-3 rounded-xl flex items-center gap-2 text-sm"
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
+        >
+          <MapPin className="w-4 h-4 flex-shrink-0" />
+          <span>
+            📍 Auto-detected: <strong>
+              {[gpsLocation.city, gpsLocation.region, gpsLocation.country].filter(Boolean).join(", ")}
+            </strong>
+          </span>
+        </div>
+      )}
+
+      {/* Manual location tag */}
       <div>
         <label className="text-sm font-semibold block mb-2 flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
           <MapPin className="w-4 h-4" />
-          Location Tag (Optional)
+          Tag a Specific Place (Optional)
         </label>
         <LocationTagButton 
           location={postSettings.location} 
           onLocation={(loc) => handleSettingChange("location", loc)} 
         />
+        <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
+          e.g. Central Park, Brooklyn Bridge — GPS location is always stored automatically
+        </p>
       </div>
 
-      {/* Show in Nearby */}
-      {postSettings.location && (
-        <div
-          className="p-3 rounded-xl flex items-center justify-between"
-          style={{ backgroundColor: "var(--accent-primary-light)" }}
-        >
-          <label className="font-semibold text-sm flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Show in Nearby
-          </label>
-          <input
-            type="checkbox"
-            checked={postSettings.showInNearby}
-            onChange={(e) => handleSettingChange("showInNearby", e.target.checked)}
-            className="w-5 h-5 cursor-pointer"
-          />
-        </div>
-      )}
+      {/* Hide exact location privacy toggle */}
+      <div
+        className="p-3 rounded-xl flex items-center justify-between"
+        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+      >
+        <label className="font-semibold text-sm flex items-center gap-2 cursor-pointer">
+          <EyeOff className="w-4 h-4" />
+          Hide Exact Coordinates
+          <span className="font-normal text-xs" style={{ color: "var(--text-hint)" }}>
+            (show only city/country)
+          </span>
+        </label>
+        <input
+          type="checkbox"
+          checked={postSettings.location_hide_exact || false}
+          onChange={(e) => handleSettingChange("location_hide_exact", e.target.checked)}
+          className="w-5 h-5 cursor-pointer"
+        />
+      </div>
 
       {/* More Options */}
       <button
