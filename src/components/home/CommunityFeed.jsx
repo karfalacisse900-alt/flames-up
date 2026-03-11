@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { MapPin, PenTool, Zap } from "lucide-react";
+import { Globe, MapPin, PenSquare, Radio } from "lucide-react";
 import CommunityPostCard from "../community/CommunityPostCard";
-import LocationFilter from "../location/LocationFilter";
 
 export default function CommunityFeed({ user }) {
   const [posts, setPosts] = useState([]);
