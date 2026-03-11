@@ -61,6 +61,7 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditGroup, setShowEditGroup] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const qc = useQueryClient();
   const chatBottomRef = useRef(null);
 
