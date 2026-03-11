@@ -39,14 +39,8 @@ export default function CommunityFeed({ user }) {
     if (!navigator.geolocation) return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
-          const data = await res.json();
-          const addr = data.address || {};
-          setUserCity(addr.city || addr.town || addr.village || addr.county || "");
-        } catch {}
+      (pos) => {
+        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationLoading(false);
       },
       () => setLocationLoading(false)
@@ -54,8 +48,15 @@ export default function CommunityFeed({ user }) {
   };
 
   useEffect(() => {
-    if (activeFilter === "nearby" && !userCity && !locationLoading) detectLocation();
+    if (activeFilter === "nearby" && !userCoords && !locationLoading) detectLocation();
   }, [activeFilter]);
+
+  // Close picker on outside click
+  useEffect(() => {
+    const handler = (e) => { if (pickerRef.current && !pickerRef.current.contains(e.target)) setShowPicker(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
