@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { MapPin, Link as LinkIcon, Lock, MessageCircle, Eye, Zap, AlertCircle, EyeOff } from "lucide-react";
 import LocationTagButton from "../LocationTagButton";
+import ReactQuill from "react-quill";
 
 const LOCATION_TYPES = ["city", "place", "event", "venue"];
 const PRIVACY_OPTIONS = [
