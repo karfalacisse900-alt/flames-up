@@ -7,7 +7,7 @@ import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
-import VideoViewer from "./VideoViewer";
+import PostViewer from "./PostViewer";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 
@@ -191,10 +191,8 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const handleVideoTap = (post, index) => {
-    const videoPosts = filteredPosts.filter(p => p.video_url && p.video_url.trim());
-    const videoIndex = videoPosts.findIndex(p => p.id === post.id);
-    setVideoStartIndex(videoIndex >= 0 ? videoIndex : 0);
+  const handlePostTap = (postIndex) => {
+    setVideoStartIndex(postIndex);
     setVideoViewerOpen(true);
   };
 
@@ -217,7 +215,7 @@ export default function CommunityFeed({ user }) {
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
             onLocationClick={() => {}}
-            onVideoTap={post.video_url ? () => handleVideoTap(post, index) : undefined}
+            onTap={() => handlePostTap(index)}
           />
         )}
       </div>
@@ -387,10 +385,10 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
-      {/* Video viewer modal */}
+      {/* Post viewer modal */}
       {videoViewerOpen && (
-        <VideoViewer
-          videos={filteredPosts.filter(p => p.video_url && p.video_url.trim())}
+        <PostViewer
+          posts={filteredPosts}
           initialIndex={videoStartIndex}
           user={user}
           onClose={() => setVideoViewerOpen(false)}
