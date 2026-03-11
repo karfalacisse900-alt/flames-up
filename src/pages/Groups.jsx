@@ -695,13 +695,14 @@ export default function Groups() {
       {mainTab === "discover" && (
         <div>
           {/* Search */}
-          <div className="px-4 pt-3 pb-2">
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
+          <div className="px-4 pt-1 pb-3">
+            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl"
+              style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
+              <Search className="w-4 h-4" style={{ color: "rgba(255,255,255,0.5)" }} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search groups…"
-                className="w-full pl-10 pr-4 py-3 rounded-2xl text-sm outline-none"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: "#fff" }} />
             </div>
           </div>
 
