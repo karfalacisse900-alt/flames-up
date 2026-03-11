@@ -790,9 +790,9 @@ export default function Groups() {
             <>
               {/* My Groups */}
               {myGroups.length > 0 && (
-                <section className="px-4 pt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
-                    <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups
+                <section className="px-4 pt-2">
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    <Star className="w-3.5 h-3.5 text-yellow-400" /> My Groups
                   </p>
                   <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                     {myGroups.map(g => <MyGroupChip key={g.id} group={g} onOpen={handleOpenGroup} />)}
@@ -800,11 +800,11 @@ export default function Groups() {
                 </section>
               )}
 
-              {/* Trending */}
+              {/* Trending / Live */}
               {trendingGroups.length > 0 && (
                 <section className="pt-5 pb-2">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-4 mb-3" style={{ color: "var(--text-hint)" }}>
-                    <Flame className="w-3.5 h-3.5 text-orange-500" /> Trending
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-4 mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    <Flame className="w-3.5 h-3.5 text-orange-400" /> Trending Groups
                   </p>
                   <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-2">
                     {trendingGroups.map(g => (
@@ -815,27 +815,64 @@ export default function Groups() {
                 </section>
               )}
 
-              {/* All Groups */}
+              {/* All Groups — colorful cards like reference image */}
               <section className="px-4 pt-4 pb-6">
-                <p className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
-                  <Zap className="w-3.5 h-3.5" style={{ color: "var(--accent-primary)" }} /> All Communities
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    <Users className="w-3.5 h-3.5" /> Popular Groups
+                  </p>
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>See all</span>
+                </div>
                 {groups.length === 0 ? (
                   <div className="py-16 text-center">
                     <div className="text-5xl mb-3">👥</div>
-                    <p className="font-bold text-base mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No groups yet</p>
+                    <p className="font-bold text-base mb-1 text-white">No groups yet</p>
                     {user && (
                       <button onClick={() => navigate(createPageUrl("CreateGroup"))}
                         className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-                        style={{ backgroundColor: "var(--accent-primary)" }}>Create a Group</button>
+                        style={{ backgroundColor: "#7C3AED" }}>Create a Group</button>
                     )}
                   </div>
                 ) : (
-                  <div className="rounded-3xl overflow-hidden" style={{ border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                    {groups.map((g, i) => (
-                      <GroupRowCard key={g.id} group={g} membership={membershipMap[g.id]}
-                        onOpen={handleOpenGroup} onJoin={handleJoin} index={i} />
-                    ))}
+                  <div className="space-y-3">
+                    {groups.map((g, i) => {
+                      const palette = CARD_PALETTES[i % CARD_PALETTES.length];
+                      const isMember = !!membershipMap[g.id];
+                      return (
+                        <motion.div
+                          key={g.id}
+                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                          onClick={() => handleOpenGroup(g)}
+                          className="flex items-center gap-3 px-4 py-4 rounded-2xl cursor-pointer"
+                          style={{ backgroundColor: palette.bg }}>
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+                            {g.cover_image_url
+                              ? <img src={g.cover_image_url} alt="" className="w-full h-full rounded-2xl object-cover" />
+                              : <span className="text-2xl">{g.emoji || CATEGORY_EMOJIS[g.category] || "💬"}</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-[15px] truncate" style={{ color: palette.text }}>{g.name}</p>
+                            <p className="text-[12px] font-medium" style={{ color: `${palette.text}99` }}>
+                              {(g.member_count || 0).toLocaleString()} members · {g.category || "general"}
+                            </p>
+                          </div>
+                          {isMember ? (
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+                              <span className="text-lg">✓</span>
+                            </div>
+                          ) : (
+                            <button onClick={e => { e.stopPropagation(); handleJoin(g); }}
+                              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xl"
+                              style={{ backgroundColor: "rgba(0,0,0,0.15)", color: palette.text }}>
+                              +
+                            </button>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 )}
               </section>
