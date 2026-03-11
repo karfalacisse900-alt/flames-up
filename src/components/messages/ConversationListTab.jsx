@@ -132,44 +132,49 @@ export default function ConversationListTab({ user, tab, onSelect }) {
               </p>
             )}
           </div>
-        ) : filtered.map(conv => (
-          <button key={conv.email} onClick={() => onSelect({ type: "dm", data: conv })}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-colors"
-            style={{ backgroundColor: conv.unread > 0 ? "var(--accent-primary-light)" : "transparent" }}>
-            {/* Avatar */}
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold shrink-0"
-              style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
-              {conv.name?.[0]?.toUpperCase() || "?"}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm truncate" style={{ color: "var(--text-primary)", fontWeight: conv.unread > 0 ? 700 : 500 }}>
-                  {conv.name}
-                </p>
-                <span className="text-[11px] shrink-0 ml-2" style={{ color: "var(--text-hint)" }}>
-                  {timeAgo(conv.lastMessage.created_date)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-0.5">
-                <p className="text-xs truncate flex-1"
-                  style={{ color: conv.unread > 0 ? "var(--text-secondary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 600 : 400 }}>
-                  {conv.lastMessage.sender_email === user.email ? "You: " : ""}{getPreview(conv.lastMessage)}
-                </p>
+        ) : filtered.map(conv => {
+          const name = displayName(conv.name, conv.email);
+          return (
+            <button key={conv.email} onClick={() => onSelect({ type: "dm", data: { ...conv, name } })}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-colors"
+              style={{ backgroundColor: "transparent" }}>
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold"
+                  style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
+                  {name[0]?.toUpperCase() || "?"}
+                </div>
                 {conv.unread > 0 && (
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ml-2 shrink-0"
-                    style={{ backgroundColor: "var(--accent-primary)" }}>
+                  <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2"
+                    style={{ backgroundColor: "var(--accent-primary)", borderColor: "var(--bg-app)" }}>
                     {conv.unread > 9 ? "9+" : conv.unread}
                   </div>
                 )}
-                {tab === "requests" && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full ml-2 font-semibold"
-                    style={{ backgroundColor: "#FFF3E0", color: "#E65100" }}>Request</span>
-                )}
               </div>
-            </div>
-          </button>
-        ))}
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="text-[15px] truncate" style={{ color: "var(--text-primary)", fontWeight: conv.unread > 0 ? 700 : 500 }}>
+                    {name}
+                  </p>
+                  <span className="text-[11px] shrink-0 ml-2" style={{ color: conv.unread > 0 ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 600 : 400 }}>
+                    {timeAgo(conv.lastMessage.created_date)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-0.5">
+                  <p className="text-[13px] truncate flex-1"
+                    style={{ color: conv.unread > 0 ? "var(--text-secondary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 500 : 400 }}>
+                    {conv.lastMessage.sender_email === user.email ? "You: " : ""}{getPreview(conv.lastMessage)}
+                  </p>
+                  {tab === "requests" && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full ml-2 font-semibold shrink-0"
+                      style={{ backgroundColor: "#FFF3E0", color: "#E65100" }}>Request</span>
+                  )}
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
