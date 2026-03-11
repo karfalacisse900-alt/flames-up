@@ -854,18 +854,26 @@ export default function Groups() {
                               {(g.member_count || 0).toLocaleString()} members · {g.category || "general"}
                             </p>
                           </div>
-                          {isMember ? (
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Message bubble */}
+                            <button onClick={e => { e.stopPropagation(); handleOpenGroup(g); }}
+                              className="w-9 h-9 rounded-full flex items-center justify-center"
                               style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
-                              <span className="text-lg">✓</span>
-                            </div>
-                          ) : (
-                            <button onClick={e => { e.stopPropagation(); handleJoin(g); }}
-                              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold text-xl"
-                              style={{ backgroundColor: "rgba(0,0,0,0.15)", color: palette.text }}>
-                              +
+                              <MessageCircle className="w-4 h-4" style={{ color: palette.text }} />
                             </button>
-                          )}
+                            {isMember ? (
+                              <div className="w-9 h-9 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+                                <span className="text-base font-bold" style={{ color: palette.text }}>✓</span>
+                              </div>
+                            ) : (
+                              <button onClick={e => { e.stopPropagation(); handleJoin(g); }}
+                                className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xl"
+                                style={{ backgroundColor: "rgba(0,0,0,0.15)", color: palette.text }}>
+                                +
+                              </button>
+                            )}
+                          </div>
                         </motion.div>
                       );
                     })}
