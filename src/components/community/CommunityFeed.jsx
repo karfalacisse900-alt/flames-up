@@ -151,14 +151,47 @@ export default function CommunityFeed({ user }) {
     }
   }, [posts.map(p => p.id).join(",")]); // only re-run when post list changes (not on like updates)
 
+  const uniqueCountries = useMemo(() => {
+    return [...new Set(posts.map(p => p.location_country).filter(Boolean))].sort();
+  }, [posts]);
+
+  const uniqueCities = useMemo(() => {
+    return [...new Set(posts.map(p => p.location_city).filter(Boolean))].sort();
+  }, [posts]);
+
+  const filteredCitySuggestions = useMemo(() => {
+    if (!cityInput.trim()) return [];
+    return uniqueCities.filter(c => c.toLowerCase().includes(cityInput.toLowerCase())).slice(0, 6);
+  }, [cityInput, uniqueCities]);
+
   const filteredPosts = useMemo(() => {
     const postMap = new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p]));
     const base = stablePostIds.map(id => postMap.get(id)).filter(Boolean);
-    if (activeTab === "nearby" && userCity) {
-      return base.filter(p => p.location_city && p.location_city.toLowerCase() === userCity.toLowerCase());
+
+    if (activeFilter === "global") return base;
+
+    if (activeFilter === "nearby") {
+      if (!userCoords) return [];
+      return base.filter(p => {
+        if (!p.location_lat || !p.location_lng) return false;
+        const dLat = (p.location_lat - userCoords.lat) * (Math.PI / 180);
+        const dLng = (p.location_lng - userCoords.lng) * (Math.PI / 180);
+        const a = Math.sin(dLat/2)**2 + Math.cos(userCoords.lat * Math.PI/180) * Math.cos(p.location_lat * Math.PI/180) * Math.sin(dLng/2)**2;
+        const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return km <= 50;
+      });
     }
+
+    if (activeFilter === "country" && selectedCountry) {
+      return base.filter(p => p.location_country?.toLowerCase() === selectedCountry.toLowerCase());
+    }
+
+    if (activeFilter === "city" && selectedCity) {
+      return base.filter(p => p.location_city?.toLowerCase() === selectedCity.toLowerCase());
+    }
+
     return base;
-  }, [stablePostIds, posts, activeTab, userCity]);
+  }, [stablePostIds, posts, activeFilter, userCoords, selectedCountry, selectedCity]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
