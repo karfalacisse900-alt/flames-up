@@ -146,7 +146,7 @@ export default function DMChatView({ user, conversation, onBack }) {
 
         {/* Action icons */}
         <div className="flex items-center gap-1">
-          <button className="w-9 h-9 flex items-center justify-center">
+          <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
             <Video className="w-5 h-5" style={{ color: "#fff" }} />
           </button>
           <button className="w-9 h-9 flex items-center justify-center">
