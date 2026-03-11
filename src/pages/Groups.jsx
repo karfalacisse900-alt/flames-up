@@ -168,18 +168,18 @@ function MyGroupChip({ group, onOpen }) {
   const [a] = CATEGORY_GRADIENTS[group.category] || CATEGORY_GRADIENTS.general;
   return (
     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-      onClick={() => onOpen(group)}
-      className="cursor-pointer flex items-center gap-2.5 px-3 py-2.5 rounded-2xl shrink-0 active:scale-95 transition-transform"
-      style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)", minWidth: 140 }}>
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-        style={{ background: `linear-gradient(135deg, ${a}55, ${a}88)` }}>
-        {group.emoji || "💬"}
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-bold truncate text-white">{group.name}</p>
-        <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>{(group.member_count || 0).toLocaleString()} members</p>
-      </div>
-      <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }} />
+    onClick={() => onOpen(group)}
+    className="cursor-pointer flex items-center gap-2.5 px-3 py-2.5 rounded-2xl shrink-0 active:scale-95 transition-transform"
+    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minWidth: 140 }}>
+    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
+      style={{ background: `linear-gradient(135deg, ${a}44, ${a}77)` }}>
+      {group.emoji || "💬"}
+    </div>
+    <div className="min-w-0">
+      <p className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{group.name}</p>
+      <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{(group.member_count || 0).toLocaleString()} members</p>
+    </div>
+    <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-hint)" }} />
     </motion.div>
   );
 }
