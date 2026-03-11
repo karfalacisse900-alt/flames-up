@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   Search, Plus, Users, Lock, MapPin, Globe, Flame,
-  Star, ChevronRight, Zap, Navigation, X, Filter, SlidersHorizontal
+  Star, ChevronRight, Zap, Navigation, X, Filter, SlidersHorizontal, MessageCircle
 } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 
