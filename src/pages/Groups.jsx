@@ -799,8 +799,8 @@ export default function Groups() {
               {/* Trending / Live */}
               {trendingGroups.length > 0 && (
                 <section className="pt-5 pb-2">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-4 mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
-                    <Flame className="w-3.5 h-3.5 text-orange-400" /> Trending Groups
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-4 mb-3" style={{ color: "var(--text-hint)" }}>
+                    <Flame className="w-3.5 h-3.5 text-orange-500" /> Trending Groups
                   </p>
                   <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-2">
                     {trendingGroups.map(g => (
