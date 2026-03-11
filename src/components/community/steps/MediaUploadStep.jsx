@@ -113,16 +113,16 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
                 </div>
               </button>
 
-              {/* Record Live */}
+              {/* Camera Record */}
               <button
-                onClick={() => alert("Recording feature coming soon!")}
+                onClick={() => cameraInputRef.current?.click()}
                 className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
                 style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
               >
-                <Mic className="w-8 h-8" />
+                <Camera className="w-8 h-8" />
                 <div>
-                  <p className="text-base">🎙️ Record</p>
-                  <p className="text-xs font-normal opacity-80">Live</p>
+                  <p className="text-base">📷 Camera</p>
+                  <p className="text-xs font-normal opacity-80">Record Video</p>
                 </div>
               </button>
             </div>
