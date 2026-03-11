@@ -112,24 +112,29 @@ export default function DMChatView({ user, conversation, onBack }) {
     setShowMenu(false);
   };
 
+  const displayName = conversation.name && conversation.name !== conversation.email
+    ? conversation.name
+    : conversation.email?.split("@")[0] || "User";
+
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 shrink-0"
-        style={{ backgroundColor: "var(--bg-nav)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 0px), 44px)" }}>
-        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "var(--bg-subtle)" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
+      <div className="flex items-center gap-3 px-3 py-2.5 shrink-0"
+        style={{ backgroundColor: "var(--accent-primary)", paddingTop: "max(env(safe-area-inset-top, 0px), 44px)" }}>
+        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center">
+          <ArrowLeft className="w-5 h-5" style={{ color: "#fff" }} />
         </button>
         <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
           style={{ backgroundColor: avatarColor(conversation.email), color: "#fff" }}>
           {conversation.avatar_url
             ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-            : conversation.name?.[0]?.toUpperCase() || "?"}
+            : displayName[0]?.toUpperCase() || "?"}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{conversation.name}</p>
-          {muted && <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>Muted</p>}
+          <p className="text-[15px] font-semibold truncate" style={{ color: "#fff" }}>{displayName}</p>
+          {muted
+            ? <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>Muted</p>
+            : <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.75)" }}>tap for info</p>}
         </div>
         <div className="relative">
           <button onClick={() => setShowMenu(v => !v)} className="w-9 h-9 rounded-full flex items-center justify-center"
