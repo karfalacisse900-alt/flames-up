@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Type, Music, Mic, Sliders, Volume2, Wand2 } from "lucide-react";
+import MusicLibrarySheet from "../../music/MusicLibrarySheet";
 
 const TOOLS = [
   { id: "text",    icon: Type,    label: "Text" },
