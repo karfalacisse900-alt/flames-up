@@ -1,0 +1,180 @@
+import React, { useRef, useState, useEffect } from "react";
+import { X, RotateCcw, Zap, Sparkles, Clock, Music, Camera } from "lucide-react";
+
+const DURATIONS = ["15s", "60s", "3min"];
+
+export default function CameraUploadStep({ onMediaSelected, onClose }) {
+  const [selectedDuration, setSelectedDuration] = useState("60s");
+  const [flashOn, setFlashOn] = useState(false);
+  const [frontCamera, setFrontCamera] = useState(false);
+  const [stream, setStream] = useState(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const videoRef = useRef(null);
+  const captureInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+
+  const startCamera = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: frontCamera ? "user" : "environment" },
+        audio: false,
+      });
+      setStream(s);
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+        videoRef.current.play();
+      }
+      setCameraActive(true);
+    } catch {
+      setCameraActive(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    setStream(null);
+    setCameraActive(false);
+  };
+
+  useEffect(() => {
+    startCamera();
+    return () => stopCamera();
+  }, [frontCamera]);
+
+  const handleFiles = (files) => {
+    if (!files?.length) return;
+    const items = Array.from(files).map((file) => ({
+      id: Date.now() + Math.random(),
+      file,
+      preview: URL.createObjectURL(file),
+      type: file.type,
+      duration: 0,
+      edits: {},
+    }));
+    stopCamera();
+    onMediaSelected(items);
+  };
+
+  const TOOLS = [
+    { icon: RotateCcw, label: "Flip", action: () => setFrontCamera((v) => !v) },
+    { icon: Zap, label: "Flash", active: flashOn, action: () => setFlashOn((v) => !v) },
+    { icon: Sparkles, label: "Beauty", action: () => {} },
+    { icon: Clock, label: "Timer", action: () => {} },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#000" }}>
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pb-3"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 44px)" }}>
+        <button onClick={() => { stopCamera(); onClose(); }}
+          className="w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.15)" }}>
+          <X className="w-5 h-5 text-white" />
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}>
+          <Music className="w-4 h-4" /> Add Sound
+        </button>
+        <div style={{ width: 40 }} />
+      </div>
+
+      {/* Camera viewport */}
+      <div className="absolute inset-0">
+        {cameraActive ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+            style={{ transform: frontCamera ? "scaleX(-1)" : "none" }}
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-4"
+            style={{ backgroundColor: "#0d0d0d" }}>
+            <div className="w-24 h-24 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "2px dashed rgba(255,255,255,0.2)" }}>
+              <Camera className="w-10 h-10 text-white opacity-30" />
+            </div>
+            <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>
+              Tap record or upload from gallery
+            </p>
+          </div>
+        )}
+        {/* Vignette */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)" }} />
+        {/* Rule of thirds grid */}
+        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{ backgroundImage: "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)", backgroundSize: "33.33% 33.33%" }} />
+      </div>
+
+      {/* Right side tools */}
+      <div className="absolute right-3 z-20 flex flex-col gap-5"
+        style={{ top: "50%", transform: "translateY(-50%)" }}>
+        {TOOLS.map(({ icon: Icon, label, active, action }) => (
+          <button key={label} onClick={action} className="flex flex-col items-center gap-1.5">
+            <div className="w-11 h-11 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: active ? "rgba(255,215,0,0.22)" : "rgba(0,0,0,0.55)",
+                border: `1.5px solid ${active ? "rgba(255,215,0,0.7)" : "rgba(255,255,255,0.25)"}`,
+              }}>
+              <Icon className="w-5 h-5" style={{ color: active ? "#FFD700" : "#fff" }} />
+            </div>
+            <span className="text-white text-[10px] font-semibold drop-shadow">{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom controls */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-5"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)", paddingTop: 16 }}>
+        {/* Duration pills */}
+        <div className="flex justify-center gap-2 mb-6">
+          {DURATIONS.map((d) => (
+            <button key={d} onClick={() => setSelectedDuration(d)}
+              className="px-5 py-1.5 rounded-full text-sm font-bold transition-all"
+              style={{
+                backgroundColor: selectedDuration === d ? "#fff" : "rgba(255,255,255,0.16)",
+                color: selectedDuration === d ? "#000" : "#fff",
+              }}>
+              {d}
+            </button>
+          ))}
+        </div>
+
+        {/* Record row */}
+        <div className="flex items-center justify-between">
+          {/* Gallery button */}
+          <button onClick={() => galleryInputRef.current?.click()}
+            className="flex flex-col items-center gap-1.5">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+              style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.25)" }}>
+              🖼️
+            </div>
+            <span className="text-white text-[10px] font-semibold">Gallery</span>
+          </button>
+
+          {/* Record / capture button */}
+          <button onClick={() => captureInputRef.current?.click()}
+            className="relative flex items-center justify-center active:scale-95 transition-transform"
+            style={{ width: 88, height: 88 }}>
+            <div className="absolute inset-0 rounded-full"
+              style={{ border: "3px solid rgba(255,255,255,0.45)" }} />
+            <div className="w-[68px] h-[68px] rounded-full bg-white shadow-lg" />
+          </button>
+
+          {/* Balanced spacer */}
+          <div style={{ width: 56 }} />
+        </div>
+      </div>
+
+      {/* Hidden file inputs */}
+      <input ref={captureInputRef} type="file" accept="image/*,video/*" capture="environment"
+        className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      <input ref={galleryInputRef} type="file" accept="image/*,video/*" multiple
+        className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+    </div>
+  );
+}
