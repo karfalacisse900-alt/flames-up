@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, MessageCircle, Share2, UserPlus, UserCheck } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, Plus } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
@@ -99,6 +99,8 @@ export default function PostViewer({ posts, initialIndex, user, onClose }) {
 
   if (!currentPost) return null;
 
+  const mediaHeight = 65; // 65% of screen for media
+
   return (
     <AnimatePresence>
       <motion.div
@@ -118,45 +120,105 @@ export default function PostViewer({ posts, initialIndex, user, onClose }) {
           <X className="w-5 h-5 text-white" />
         </button>
 
-        {/* Main post container */}
+        {/* Main container */}
         <div className="w-full h-full flex items-center justify-center">
           <div className="relative w-full max-w-lg h-full flex flex-col bg-black">
-            {/* Media content */}
-            <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-black">
-              {currentPost.video_url ? (
-                <video
-                  src={currentPost.video_url}
-                  autoPlay
-                  playsInline
-                  muted={false}
-                  className="w-full h-full object-cover"
-                />
-              ) : currentPost.image_urls?.[0] || currentPost.image_url ? (
-                <img
-                  src={currentPost.image_urls?.[0] || currentPost.image_url}
-                  alt="post"
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-800 to-black">
-                  <p className="text-white/60 text-center px-6">{currentPost.title || currentPost.body || "Post"}</p>
-                </div>
-              )}
-
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-black/30 to-transparent" />
+            {/* Media - Fixed height, proper aspect ratio */}
+            <div className="w-full flex-shrink-0" style={{ height: `${mediaHeight}vh`, backgroundColor: "#000" }}>
+              <div className="w-full h-full flex items-center justify-center bg-black relative overflow-hidden">
+                {currentPost.video_url ? (
+                  <video
+                    src={currentPost.video_url}
+                    autoPlay
+                    playsInline
+                    muted={false}
+                    className="w-full h-full object-contain"
+                  />
+                ) : currentPost.image_urls?.[0] || currentPost.image_url ? (
+                  <img
+                    src={currentPost.image_urls?.[0] || currentPost.image_url}
+                    alt="post"
+                    loading="lazy"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-800 to-black p-6">
+                    <p className="text-white/60 text-center text-sm">{currentPost.title || currentPost.body || "Post"}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Right action buttons */}
-            <div className="absolute right-4 bottom-28 z-40 flex flex-col gap-6">
+            {/* Info panel - Scrollable, fixed positioning */}
+            <div className="flex-1 flex flex-col bg-black overflow-y-auto scrollbar-hide">
+              <div className="flex-1 flex flex-col p-4 pb-20">
+                {/* Author card */}
+                <div className="flex items-center gap-3 mb-4">
+                  <Link to={createPageUrl(`UserProfile?email=${currentPost.author_email}`)} className="flex-1">
+                    <div className="flex items-center gap-3">
+                      {currentPost.author_avatar_url ? (
+                        <img src={currentPost.author_avatar_url} alt={currentPost.author_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0" style={{ backgroundColor: getAvatarColor(currentPost.author_name) }}>
+                          {(currentPost.author_name?.[0] || "U").toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-white font-bold text-sm truncate">{currentPost.author_name || "User"}</p>
+                        <p className="text-white/50 text-xs">Creator</p>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {currentPost.author_email !== user?.email && user && (
+                    <button
+                      onClick={handleFollow}
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+                      style={{
+                        backgroundColor: isFollowing ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.25)",
+                        color: "#fff",
+                      }}
+                      title={isFollowing ? "Following" : "Follow"}
+                    >
+                      {isFollowing ? (
+                        <Plus className="w-5 h-5 rotate-45" />
+                      ) : (
+                        <Plus className="w-5 h-5" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Caption section */}
+                {(currentPost.body || currentPost.title) && (
+                  <div className="mb-4">
+                    <p className="text-white text-sm leading-relaxed whitespace-pre-wrap break-words">
+                      {currentPost.body || currentPost.title}
+                    </p>
+                  </div>
+                )}
+
+                {/* Tags/metadata */}
+                {currentPost.location_name && (
+                  <div className="flex items-center gap-2 mb-4 text-white/70 text-xs">
+                    <span>📍 {currentPost.location_name}</span>
+                  </div>
+                )}
+
+                {/* Spacer */}
+                <div className="flex-1" />
+              </div>
+            </div>
+
+            {/* Fixed action buttons - Bottom overlay */}
+            <div className="absolute bottom-4 right-4 z-40 flex flex-col gap-4">
               {/* Like */}
               <button
                 onClick={handleLike}
-                className={`flex flex-col items-center gap-2 transition-all ${likeBounce ? "scale-125" : ""}`}
+                className={`flex flex-col items-center gap-1.5 transition-all ${likeBounce ? "scale-125" : ""}`}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-                  <span className="text-2xl">{hasLiked ? "❤️" : "🤍"}</span>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                  <span className="text-3xl">{hasLiked ? "❤️" : "🤍"}</span>
                 </div>
                 <span className="text-xs font-bold text-white">{currentPost.upvotes || 0}</span>
               </button>
@@ -164,10 +226,10 @@ export default function PostViewer({ posts, initialIndex, user, onClose }) {
               {/* Comment */}
               <Link
                 to={createPageUrl(`PostComments?postId=${currentPost.id}`)}
-                className="flex flex-col items-center gap-2"
+                className="flex flex-col items-center gap-1.5"
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-                  <MessageCircle className="w-5 h-5 text-white" />
+                <div className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                  <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-xs font-bold text-white">{currentPost.comment_count || 0}</span>
               </Link>
@@ -175,56 +237,12 @@ export default function PostViewer({ posts, initialIndex, user, onClose }) {
               {/* Share */}
               <button
                 onClick={handleShare}
-                className="flex flex-col items-center gap-2"
+                className="flex flex-col items-center gap-1.5"
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-                  <Share2 className="w-5 h-5 text-white" />
+                <div className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+                  <Share2 className="w-6 h-6 text-white" />
                 </div>
               </button>
-            </div>
-
-            {/* Bottom info panel */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 z-40">
-              {/* Author section */}
-              <div className="flex items-end gap-3 mb-3">
-                <div className="flex-1">
-                  <Link to={createPageUrl(`UserProfile?email=${currentPost.author_email}`)} className="flex items-center gap-2 mb-2">
-                    {currentPost.author_avatar_url ? (
-                      <img src={currentPost.author_avatar_url} alt={currentPost.author_name} className="w-10 h-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style={{ backgroundColor: getAvatarColor(currentPost.author_name) }}>
-                        {(currentPost.author_name?.[0] || "U").toUpperCase()}
-                      </div>
-                    )}
-                    <p className="text-white font-bold text-sm">{currentPost.author_name || "User"}</p>
-                  </Link>
-
-                  {/* Caption */}
-                  <div className="max-h-20 overflow-y-auto scrollbar-hide">
-                    {currentPost.body && (
-                      <p className="text-white/90 text-sm leading-relaxed line-clamp-3">{currentPost.body}</p>
-                    )}
-                    {currentPost.title && !currentPost.body && (
-                      <p className="text-white font-semibold text-sm">{currentPost.title}</p>
-                    )}
-                  </div>
-                </div>
-
-                {currentPost.author_email !== user?.email && user && (
-                  <button
-                    onClick={handleFollow}
-                    className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1 shrink-0"
-                    style={{
-                      borderColor: isFollowing ? "#fff" : "rgba(255,255,255,0.4)",
-                      color: "#fff",
-                      backgroundColor: isFollowing ? "rgba(255,255,255,0.2)" : "transparent",
-                    }}
-                  >
-                    {isFollowing ? <UserCheck className="w-3 h-3" /> : <UserPlus className="w-3 h-3" />}
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
-                )}
-              </div>
             </div>
 
             {/* Position indicator */}
@@ -236,11 +254,9 @@ export default function PostViewer({ posts, initialIndex, user, onClose }) {
 
             {/* Swipe hint */}
             {posts.length > 1 && (
-              <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 pointer-events-none text-white/40 text-xs font-medium text-center">
-                <div className="flex justify-between px-6 opacity-40">
-                  <span>↑</span>
-                  <span>↓</span>
-                </div>
+              <div className="absolute top-4 right-4 text-white/40 text-xs flex flex-col items-center gap-1 z-40">
+                <span>↑</span>
+                <span>↓</span>
               </div>
             )}
           </div>
