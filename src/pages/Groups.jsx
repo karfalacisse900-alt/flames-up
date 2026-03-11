@@ -814,10 +814,10 @@ export default function Groups() {
               {/* All Groups — colorful cards like reference image */}
               <section className="px-4 pt-4 pb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
                     <Users className="w-3.5 h-3.5" /> Popular Groups
                   </p>
-                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>See all</span>
+                  <span className="text-xs" style={{ color: "var(--text-hint)" }}>See all</span>
                 </div>
                 {groups.length === 0 ? (
                   <div className="py-16 text-center">
