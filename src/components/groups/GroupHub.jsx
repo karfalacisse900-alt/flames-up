@@ -444,11 +444,6 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
             <GroupMembersTab group={group} user={user} isAdmin={isAdmin} />
           )}
 
-          {/* GAMES TAB */}
-          {activeTab === "games" && (
-            <GroupGamesTab group={group} user={user} isMember={isMember} />
-          )}
-
           {/* MEDIA / WATCH TAB */}
           {activeTab === "media" && (
             <GroupReactionTab group={group} user={user} isMember={isMember} />
