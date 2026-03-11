@@ -37,38 +37,58 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
   };
 
   return (
-    <div className={`flex ${isMe ? "justify-end" : "justify-start"} relative mb-1`}>
-      <div className={`max-w-[78%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+    <div className={`flex ${isMe ? "justify-end" : "justify-start"} relative mb-2`} style={{ alignItems: "flex-end", gap: 6 }}>
+      {/* Avatar for received messages */}
+      {!isMe && (
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mb-1"
+          style={{ backgroundColor: "#4A6B9F", color: "#fff" }}>
+          {(message.sender_name || "?")[0]?.toUpperCase()}
+        </div>
+      )}
+
+      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`} style={{ maxWidth: "72%" }}>
 
         {/* Reply quote */}
         {message.reply_preview && !isDeleted && (
-          <div className="px-3 py-1.5 rounded-t-xl text-xs border-l-2 mb-0.5 max-w-full overflow-hidden"
-            style={{ backgroundColor: "var(--bg-subtle)", borderLeftColor: "var(--accent-primary)", color: "var(--text-hint)", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+          <div className="px-3 py-1.5 rounded-xl text-xs mb-1 max-w-full overflow-hidden"
+            style={{
+              backgroundColor: isMe ? "rgba(255,255,255,0.2)" : "var(--bg-subtle)",
+              borderLeft: "3px solid",
+              borderLeftColor: isMe ? "rgba(255,255,255,0.6)" : "var(--accent-primary)",
+              color: isMe ? "rgba(255,255,255,0.85)" : "var(--text-secondary)",
+              whiteSpace: "nowrap", textOverflow: "ellipsis"
+            }}>
             ↩ {message.reply_preview}
           </div>
         )}
 
         {/* Bubble */}
         <div {...longPress}
-          className={`rounded-2xl select-none ${isMe ? "rounded-tr-sm" : "rounded-tl-sm"}`}
+          className="select-none"
           style={{
-            backgroundColor: isDeleted ? "transparent" : isMe ? "var(--accent-primary)" : "var(--bg-card)",
+            backgroundColor: isDeleted
+              ? "transparent"
+              : isMe ? "var(--accent-primary)" : "#fff",
             color: isDeleted ? "var(--text-hint)" : isMe ? "#fff" : "var(--text-primary)",
-            border: isDeleted ? "1px dashed var(--border-medium)" : isMe ? "none" : "1px solid var(--border-light)",
-            padding: isVoice && !isDeleted ? "8px 12px" : "10px 14px",
+            border: isDeleted
+              ? "1px dashed var(--border-medium)"
+              : isMe ? "none" : "1px solid var(--border-light)",
+            borderRadius: isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+            padding: isVoice && !isDeleted ? "10px 14px" : hasMedia || hasGif ? "6px" : "10px 14px 8px",
             cursor: "pointer",
+            boxShadow: isMe ? "none" : "0 1px 3px rgba(0,0,0,0.08)",
           }}>
           {isDeleted ? (
-            <p className="text-xs italic">🚫 This message was deleted</p>
+            <p className="text-xs italic" style={{ color: "var(--text-hint)" }}>🚫 This message was deleted</p>
           ) : isVoice ? (
-            <audio src={message.audio_url} controls className="h-8 max-w-[200px]"
-              style={{ filter: isMe ? "invert(1) hue-rotate(180deg)" : "none" }} />
+            <audio src={message.audio_url} controls className="h-8"
+              style={{ minWidth: 180, maxWidth: 220, filter: isMe ? "invert(1) hue-rotate(180deg)" : "none" }} />
           ) : hasGif ? (
-            <img src={message.gif_url} alt="GIF" className="rounded-xl max-w-[200px] block" />
+            <img src={message.gif_url} alt="GIF" className="rounded-2xl block" style={{ maxWidth: 220 }} />
           ) : hasMedia ? (
             <div className="grid gap-1" style={{ gridTemplateColumns: message.media_urls.length > 1 ? "1fr 1fr" : "1fr" }}>
               {message.media_urls.map((url, i) => (
-                <img key={i} src={url} alt="" className="rounded-xl w-full object-cover" style={{ maxHeight: 200 }} />
+                <img key={i} src={url} alt="" className="rounded-2xl w-full object-cover" style={{ maxHeight: 200 }} />
               ))}
             </div>
           ) : isLocation ? (
@@ -76,11 +96,36 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
               <span>📍</span><span>{message.location_data?.name || "Shared location"}</span>
             </div>
           ) : (
-            <p className="text-sm leading-relaxed" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-              {message.text}
-            </p>
+            <div>
+              <p className="text-[14.5px] leading-snug" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: "var(--font-sans)" }}>
+                {message.text}
+              </p>
+              {/* Time inline for text messages */}
+              <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-end"}`}>
+                <span style={{ fontSize: 11, color: isMe ? "rgba(255,255,255,0.65)" : "var(--text-hint)", lineHeight: 1 }}>
+                  {formatTime(message.created_date)}
+                </span>
+                {isMe && !isDeleted && (
+                  <span style={{ fontSize: 11, color: message.is_read ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)", lineHeight: 1 }}>
+                    {message.is_read ? "✓✓" : "✓"}
+                  </span>
+                )}
+              </div>
+            </div>
           )}
         </div>
+
+        {/* Time for non-text messages */}
+        {(isVoice || hasGif || hasMedia || isLocation || isDeleted) && (
+          <div className={`flex items-center gap-1 mt-0.5 ${isMe ? "justify-end" : "justify-start"}`}>
+            <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>{formatTime(message.created_date)}</span>
+            {isMe && !isDeleted && (
+              <span className="text-[11px]" style={{ color: message.is_read ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                {message.is_read ? "✓✓" : "✓"}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Reactions */}
         {reactionEntries.length > 0 && (
@@ -97,16 +142,6 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
             ))}
           </div>
         )}
-
-        {/* Time + read receipt */}
-        <div className={`flex items-center gap-1 mt-0.5 ${isMe ? "justify-end" : "justify-start"}`}>
-          <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{formatTime(message.created_date)}</span>
-          {isMe && !isDeleted && (
-            <span className="text-[10px]" style={{ color: message.is_read ? "var(--accent-primary)" : "var(--text-hint)" }}>
-              {message.is_read ? "✓✓" : "✓"}
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Context menu */}

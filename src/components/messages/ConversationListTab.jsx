@@ -5,6 +5,10 @@ import { Search } from "lucide-react";
 
 const COLORS = ["#2E6B4F", "#D98B62", "#6B4F2E", "#4A6B9F", "#8B4F6B"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
+const displayName = (name, email) => {
+  if (!name || name === email) return email?.split("@")[0] || "User";
+  return name;
+};
 
 const timeAgo = (date) => {
   try {
