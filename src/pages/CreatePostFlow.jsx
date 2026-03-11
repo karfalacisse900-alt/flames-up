@@ -17,6 +17,7 @@ export default function CreatePostFlow() {
 
   const [mediaItems, setMediaItems] = useState([]);
   const [currentEditingIndex, setCurrentEditingIndex] = useState(0);
+  const [selectedTrack, setSelectedTrack] = useState(null);
 
   const [postSettings, setPostSettings] = useState({
     caption: "",
@@ -175,6 +176,8 @@ export default function CreatePostFlow() {
             setMediaItems={setMediaItems}
             currentEditingIndex={currentEditingIndex}
             setCurrentEditingIndex={setCurrentEditingIndex}
+            selectedTrack={selectedTrack}
+            onSelectTrack={setSelectedTrack}
           />
         )}
 
