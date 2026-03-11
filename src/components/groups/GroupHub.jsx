@@ -246,8 +246,14 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
                     <Settings className="w-4 h-4 text-white" />
                   </button>
                   {isCreator && (
-                    <>
-                      <button onClick={() => setShowEditGroup(true)}
+                   <>
+                     <button onClick={() => setShowStatusPost(true)}
+                       className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                       style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                       title="Post status">
+                       <Radio className="w-4 h-4 text-white" />
+                     </button>
+                     <button onClick={() => setShowEditGroup(true)}
                         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                         style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
                         title="Edit group">
