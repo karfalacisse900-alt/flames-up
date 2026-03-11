@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Send, Mic, Square, Image, X, MapPin } from "lucide-react";
+import { Send, Mic, Square, Paperclip, X, MapPin, Image, Smile } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onSendGif, onSendLocation, replyTo, onCancelReply, disabled }) {
@@ -78,36 +78,40 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
   };
 
   return (
-    <div style={{ backgroundColor: "var(--bg-nav)", borderTop: "1px solid var(--border-light)" }}>
+    <div style={{ backgroundColor: "#F0F0F0", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+
       {/* Reply strip */}
       {replyTo && (
-        <div className="flex items-center gap-2 px-4 py-2 border-b" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-subtle)" }}>
-          <div className="flex-1 border-l-2 pl-2 text-xs truncate"
-            style={{ borderLeftColor: "var(--accent-primary)", color: "var(--text-secondary)" }}>
-            ↩ Replying: {replyTo.text || "Voice message"}
+        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
+          <div className="flex-1 border-l-4 pl-3 py-1 rounded" style={{ borderLeftColor: "#25D366", backgroundColor: "#F5F5F5" }}>
+            <p className="text-[12px] font-semibold" style={{ color: "#25D366" }}>Replying</p>
+            <p className="text-[13px] truncate" style={{ color: "#555" }}>{replyTo.text || "Voice message"}</p>
           </div>
-          <button onClick={onCancelReply}><X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} /></button>
+          <button onClick={onCancelReply} className="p-1">
+            <X className="w-4 h-4" style={{ color: "#999" }} />
+          </button>
         </div>
       )}
 
       {/* GIF panel */}
       {showGif && (
-        <div className="px-3 py-2 border-b" style={{ borderColor: "var(--border-light)" }}>
+        <div className="px-3 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
           <div className="flex gap-2 mb-2">
             <input value={gifQuery} onChange={e => setGifQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && searchGifs()}
-              placeholder="Search GIFs..." className="flex-1 px-3 py-1.5 rounded-xl text-sm outline-none"
-              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-            <button onClick={searchGifs} className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white"
-              style={{ backgroundColor: "var(--accent-primary)" }}>Go</button>
+              placeholder="Search GIFs…"
+              className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
+              style={{ backgroundColor: "#F5F5F5", border: "none", color: "#111" }} />
+            <button onClick={searchGifs} className="px-4 py-2 rounded-full text-sm font-semibold text-white"
+              style={{ backgroundColor: "#25D366" }}>Search</button>
             <button onClick={() => { setShowGif(false); setGifs([]); }}>
-              <X className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <X className="w-5 h-5" style={{ color: "#999" }} />
             </button>
           </div>
           {loadingGifs ? (
-            <p className="text-xs text-center py-2" style={{ color: "var(--text-hint)" }}>Searching…</p>
+            <p className="text-xs text-center py-2" style={{ color: "#999" }}>Searching…</p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {gifs.map((gif, i) => {
                 const url = gif.images?.fixed_height?.url || gif.url || gif;
                 return (
@@ -124,57 +128,82 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* Attach panel */}
       {showAttach && (
-        <div className="flex gap-3 px-4 py-3 border-b" style={{ borderColor: "var(--border-light)" }}>
+        <div className="grid grid-cols-3 gap-3 px-6 py-4" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
           {[
-            { icon: "🖼️", label: "Photo/Video", action: () => fileRef.current?.click() },
-            { icon: "GIF", label: "GIF", action: () => { setShowAttach(false); setShowGif(true); } },
-            { icon: "📍", label: "Location", action: shareLocation },
-          ].map(({ icon, label, action }) => (
-            <button key={label} onClick={action}
-              className="flex flex-col items-center gap-1 p-3 rounded-2xl flex-1"
-              style={{ backgroundColor: "var(--bg-subtle)" }}>
-              <span className="text-xl">{icon}</span>
-              <span className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</span>
+            { icon: Image, label: "Photo & Video", color: "#E040FB", action: () => fileRef.current?.click() },
+            { icon: Smile, label: "GIF", color: "#FF9800", action: () => { setShowAttach(false); setShowGif(true); } },
+            { icon: MapPin, label: "Location", color: "#F44336", action: shareLocation },
+          ].map(({ icon: Icon, label, color, action }) => (
+            <button key={label} onClick={action} className="flex flex-col items-center gap-2">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: color }}>
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[12px] font-medium" style={{ color: "#555" }}>{label}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Main row */}
-      <div className="flex items-end gap-2 px-3 py-2.5"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}>
-        <button onClick={() => { setShowAttach(v => !v); setShowGif(false); }}
-          className="p-2.5 rounded-full shrink-0"
-          style={{ backgroundColor: showAttach ? "var(--accent-primary-light)" : "var(--bg-subtle)", color: showAttach ? "var(--accent-primary)" : "var(--text-secondary)" }}>
-          {showAttach ? <X className="w-4 h-4" /> : <Image className="w-4 h-4" />}
-        </button>
+      {/* Recording indicator */}
+      {recording && (
+        <div className="flex items-center gap-3 px-5 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#F44336" }} />
+          <span className="text-sm font-medium" style={{ color: "#F44336" }}>Recording… tap stop when done</span>
+        </div>
+      )}
 
-        <textarea ref={textRef} value={text}
-          onChange={e => setText(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-          placeholder={disabled ? "Blocked" : uploading ? "Uploading…" : "Message…"}
-          disabled={disabled || uploading}
-          rows={1}
-          className="flex-1 px-4 py-2.5 rounded-2xl text-sm resize-none outline-none"
-          style={{
-            backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)",
-            color: "var(--text-primary)", maxHeight: 120, minHeight: 42, lineHeight: "1.4",
-          }} />
+      {/* Main input row */}
+      <div className="flex items-end gap-2 px-2 py-2">
+        {/* Left: paperclip + emoji */}
+        <div className="flex items-center gap-1">
+          <button onClick={() => { setShowAttach(v => !v); setShowGif(false); }}
+            className="w-10 h-10 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: showAttach ? "#25D366" : "#fff" }}>
+            {showAttach
+              ? <X className="w-5 h-5" style={{ color: "#fff" }} />
+              : <Paperclip className="w-5 h-5" style={{ color: "#666" }} />}
+          </button>
+        </div>
 
+        {/* Text input */}
+        <div className="flex-1 flex items-end rounded-3xl px-4 py-2"
+          style={{ backgroundColor: "#fff", minHeight: 44, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <textarea
+            ref={textRef}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder={disabled ? "You have blocked this user" : uploading ? "Uploading…" : "Message"}
+            disabled={disabled || uploading}
+            rows={1}
+            className="flex-1 bg-transparent text-sm resize-none outline-none"
+            style={{ color: "#111", maxHeight: 120, lineHeight: "1.5", paddingTop: 2 }}
+          />
+        </div>
+
+        {/* Right: send or mic */}
         {text.trim() ? (
-          <button onClick={handleSend} className="p-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: "var(--accent-primary)" }}>
-            <Send className="w-4 h-4 text-white" />
+          <button onClick={handleSend}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "#25D366", boxShadow: "0 2px 6px rgba(37,211,102,0.4)" }}>
+            <Send className="w-5 h-5 text-white" />
           </button>
         ) : (
-          <button onPointerDown={startRecording} onPointerUp={stopRecording}
+          <button
+            onPointerDown={startRecording}
+            onPointerUp={stopRecording}
             disabled={disabled}
-            className={`p-2.5 rounded-full shrink-0 ${recording ? "animate-pulse" : ""}`}
-            style={{ backgroundColor: recording ? "rgba(224,92,122,0.2)" : "var(--bg-subtle)", color: recording ? "#E05C7A" : "var(--text-secondary)" }}>
-            {recording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+            style={{
+              backgroundColor: recording ? "#F44336" : "#25D366",
+              boxShadow: `0 2px 6px ${recording ? "rgba(244,67,54,0.4)" : "rgba(37,211,102,0.4)"}`,
+            }}>
+            {recording ? <Square className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
           </button>
         )}
       </div>
+
       <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileChange} />
     </div>
   );
