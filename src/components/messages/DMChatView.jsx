@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical, Ban, AlertTriangle, UserX, VolumeX } from "lucide-react";
+import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, UserX } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import ChatInputBar from "./ChatInputBar";
 
-const COLORS = ["#2E6B4F", "#D98B62", "#6B4F2E", "#4A6B9F", "#8B4F6B"];
+const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B", "#FFA500"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
+const getName = (name, email) => (!name || name === email) ? (email?.split("@")[0] || "User") : name;
 
 export default function DMChatView({ user, conversation, onBack }) {
   const [replyTo, setReplyTo] = useState(null);
@@ -16,6 +17,7 @@ export default function DMChatView({ user, conversation, onBack }) {
   const endRef = useRef(null);
   const queryClient = useQueryClient();
   const convId = [user.email, conversation.email].sort().join("_");
+  const displayName = getName(conversation.name, conversation.email);
 
   useEffect(() => {
     const blockedList = JSON.parse(localStorage.getItem("blocked_users") || "[]");
@@ -72,11 +74,9 @@ export default function DMChatView({ user, conversation, onBack }) {
     if (!msg) return;
     const reactions = { ...(msg.reactions || {}) };
     const existing = reactions[emoji] || [];
-    if (existing.includes(user.email)) {
-      reactions[emoji] = existing.filter(e => e !== user.email);
-    } else {
-      reactions[emoji] = [...existing, user.email];
-    }
+    reactions[emoji] = existing.includes(user.email)
+      ? existing.filter(e => e !== user.email)
+      : [...existing, user.email];
     await base44.entities.DirectMessage.update(msgId, { reactions });
     queryClient.invalidateQueries({ queryKey: ["dm", convId] });
   };
@@ -112,86 +112,126 @@ export default function DMChatView({ user, conversation, onBack }) {
     setShowMenu(false);
   };
 
-  const displayName = conversation.name && conversation.name !== conversation.email
-    ? conversation.name
-    : conversation.email?.split("@")[0] || "User";
-
   return (
     <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
+
       {/* Header */}
-      <div className="flex items-center gap-3 px-3 py-2.5 shrink-0"
-        style={{ backgroundColor: "var(--accent-primary)", paddingTop: "max(env(safe-area-inset-top, 0px), 44px)" }}>
-        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5" style={{ color: "#fff" }} />
+      <div className="flex items-center gap-2 px-3 shrink-0"
+        style={{
+          backgroundColor: "#075E54",
+          paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
+          paddingBottom: 10,
+        }}>
+        <button onClick={onBack} className="p-1 mr-1">
+          <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
         </button>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+
+        {/* Avatar */}
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
           style={{ backgroundColor: avatarColor(conversation.email), color: "#fff" }}>
           {conversation.avatar_url
             ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
             : displayName[0]?.toUpperCase() || "?"}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-semibold truncate" style={{ color: "#fff" }}>{displayName}</p>
-          {muted
-            ? <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>Muted</p>
-            : <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.75)" }}>tap for info</p>}
+
+        {/* Name + status */}
+        <div className="flex-1 min-w-0 ml-1">
+          <p className="font-semibold text-[16px] truncate" style={{ color: "#fff" }}>{displayName}</p>
+          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+            {muted ? "🔇 Muted" : "tap here for contact info"}
+          </p>
         </div>
-        <div className="relative">
-          <button onClick={() => setShowMenu(v => !v)} className="w-9 h-9 rounded-full flex items-center justify-center">
-            <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
+
+        {/* Action icons */}
+        <div className="flex items-center gap-1">
+          <button className="w-9 h-9 flex items-center justify-center">
+            <Video className="w-5 h-5" style={{ color: "#fff" }} />
           </button>
-          {showMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-10 z-50 rounded-2xl shadow-lg border overflow-hidden"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", minWidth: 180 }}>
-                {[
-                  { icon: VolumeX, label: muted ? "Unmute" : "Mute", action: handleMute },
-                  { icon: Ban, label: blocked ? "Unblock" : "Block User", action: handleBlock, danger: !blocked },
-                  { icon: AlertTriangle, label: "Report", action: () => setShowMenu(false), danger: true },
-                ].map(({ icon: Icon, label, action, danger }) => (
-                  <button key={label} onClick={action}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm"
-                    style={{ color: danger ? "#E05C7A" : "var(--text-primary)" }}>
-                    <Icon className="w-4 h-4" /> {label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <button className="w-9 h-9 flex items-center justify-center">
+            <Phone className="w-5 h-5" style={{ color: "#fff" }} />
+          </button>
+          <div className="relative">
+            <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
+              <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-10 z-50 rounded-xl shadow-xl overflow-hidden"
+                  style={{ backgroundColor: "#fff", minWidth: 200 }}>
+                  {[
+                    { icon: VolumeX, label: muted ? "Unmute" : "Mute notifications", action: handleMute },
+                    { icon: Ban, label: blocked ? "Unblock" : "Block", action: handleBlock, danger: !blocked },
+                    { icon: AlertTriangle, label: "Report", action: () => setShowMenu(false), danger: true },
+                  ].map(({ icon: Icon, label, action, danger }) => (
+                    <button key={label} onClick={action}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 text-[14px]"
+                      style={{ color: danger ? "#E53935" : "#333", borderBottom: "1px solid #F5F5F5" }}>
+                      <Icon className="w-4 h-4" /> {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Blocked banner */}
       {blocked && (
-        <div className="mx-4 mt-3 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm"
-          style={{ backgroundColor: "rgba(224,92,122,0.08)", color: "#E05C7A", border: "1px solid rgba(224,92,122,0.2)" }}>
+        <div className="mx-4 mt-2 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm shrink-0"
+          style={{ backgroundColor: "#FFEBEE", color: "#C62828" }}>
           <UserX className="w-4 h-4 shrink-0" />
-          You have blocked this user.
+          You have blocked this user. Unblock to send messages.
         </div>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 py-4"
-        style={{ scrollbarWidth: "none", backgroundImage: "radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)", backgroundSize: "24px 24px" }}>
-        {visibleMessages.length === 0 && (
-          <div className="text-center mt-12">
-            <div className="inline-block px-4 py-2 rounded-xl text-sm mb-2"
-              style={{ backgroundColor: "rgba(255,255,255,0.8)", color: "var(--text-secondary)" }}>
-              👋 Say hi to {displayName}!
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
+        {/* Encrypted notice */}
+        <div className="flex justify-center mb-4">
+          <div className="px-4 py-1.5 rounded-lg text-[12px] text-center max-w-[280px]"
+            style={{ backgroundColor: "rgba(255,248,196,0.9)", color: "#7B6914" }}>
+            🔒 Messages are private
+          </div>
+        </div>
+
+        {visibleMessages.length === 0 && !blocked && (
+          <div className="flex justify-center">
+            <div className="px-5 py-3 rounded-2xl text-[13px]"
+              style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#555" }}>
+              👋 Say hello to <strong>{displayName}</strong>!
             </div>
           </div>
         )}
-        {visibleMessages.map(msg => (
-          <MessageBubble key={msg.id}
-            message={msg}
-            isMe={msg.sender_email === user.email}
-            user={user}
-            onReply={setReplyTo}
-            onReact={handleReact}
-            onDelete={handleDelete}
-          />
-        ))}
+
+        {/* Group messages by date */}
+        {visibleMessages.map((msg, idx) => {
+          const prevMsg = visibleMessages[idx - 1];
+          const showDate = !prevMsg || new Date(msg.created_date).toDateString() !== new Date(prevMsg.created_date).toDateString();
+          return (
+            <React.Fragment key={msg.id}>
+              {showDate && (
+                <div className="flex justify-center my-3">
+                  <span className="px-3 py-1 rounded-full text-[12px] font-medium"
+                    style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#666" }}>
+                    {new Date(msg.created_date).toDateString() === new Date().toDateString()
+                      ? "Today"
+                      : new Date(msg.created_date).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
+                  </span>
+                </div>
+              )}
+              <MessageBubble
+                message={msg}
+                isMe={msg.sender_email === user.email}
+                user={user}
+                onReply={setReplyTo}
+                onReact={handleReact}
+                onDelete={handleDelete}
+              />
+            </React.Fragment>
+          );
+        })}
         <div ref={endRef} />
       </div>
 
