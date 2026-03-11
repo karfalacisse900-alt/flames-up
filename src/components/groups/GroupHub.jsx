@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Gamepad2, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, MapPin, BadgeCheck, Shield, Trash2, Pencil } from "lucide-react";
+import { ArrowLeft, Users, Lock, Globe, MessageSquare, Calendar, Film, CalendarPlus, ShieldAlert, Settings, Plus, Flag, MapPin, BadgeCheck, Shield, Trash2, Pencil, Video } from "lucide-react";
+import VideoCallModal from "@/components/messages/VideoCallModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
@@ -41,7 +42,6 @@ const TABS = [
   { key: "chat", label: "Chat", icon: MessageSquare },
   { key: "events", label: "Events", icon: Calendar },
   { key: "members", label: "Members", icon: Users },
-  { key: "games", label: "Games", icon: Gamepad2 },
   { key: "media", label: "Watch", icon: Film },
 ];
 
