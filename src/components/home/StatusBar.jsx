@@ -222,14 +222,17 @@ export default function StatusBar({ user }) {
 
       <AnimatePresence>
         {activeViewer && (
-          <StatusViewer
-            status={activeViewer}
-            user={user}
-            allStatuses={statuses}
-            onClose={() => setViewIndex(null)}
-            onNext={() => setViewIndex(i => i < statuses.length - 1 ? i + 1 : i)}
-            onPrev={() => setViewIndex(i => i > 0 ? i - 1 : i)}
-          />
+          <>
+            {(() => { window.dispatchEvent(new CustomEvent("statusviewermode", { detail: { active: true } })); return null; })()}
+            <StatusViewer
+              status={activeViewer}
+              user={user}
+              allStatuses={statuses}
+              onClose={() => { setViewIndex(null); window.dispatchEvent(new CustomEvent("statusviewermode", { detail: { active: false } })); }}
+              onNext={() => setViewIndex(i => i < statuses.length - 1 ? i + 1 : i)}
+              onPrev={() => setViewIndex(i => i > 0 ? i - 1 : i)}
+            />
+          </>
         )}
         {showPost && (
           <PostStatusModal
