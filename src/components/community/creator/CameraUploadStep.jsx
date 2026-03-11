@@ -175,6 +175,13 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
         </div>
       </div>
 
+      <MusicLibrarySheet
+        open={showMusicSheet}
+        onClose={() => setShowMusicSheet(false)}
+        onSelectTrack={(track) => { setSelectedTrack(track); setShowMusicSheet(false); }}
+        selectedTrack={selectedTrack}
+      />
+
       {/* Hidden file inputs */}
       <input ref={captureInputRef} type="file" accept="image/*,video/*" capture="environment"
         className="hidden" onChange={(e) => handleFiles(e.target.files)} />
