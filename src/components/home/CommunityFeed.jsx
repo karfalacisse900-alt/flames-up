@@ -6,6 +6,11 @@ import { createPageUrl } from "@/utils";
 import { Globe, MapPin, PenSquare, Radio } from "lucide-react";
 import CommunityPostCard from "../community/CommunityPostCard";
 
+const LOCATION_TABS = [
+  { id: "global", label: "Global", icon: Globe },
+  { id: "nearby", label: "Nearby", icon: MapPin },
+];
+
 export default function CommunityFeed({ user }) {
   const [posts, setPosts] = useState([]);
   const [filterData, setFilterData] = useState({ type: "global" });
