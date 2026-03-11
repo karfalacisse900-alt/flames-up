@@ -400,7 +400,7 @@ export default function CommunityFeed({ user }) {
                onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
                className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
-               ✦ {activeTab === "nearby" ? "Post from here" : "Create First Post"}
+               ✦ {activeFilter === "nearby" ? "Post from here" : "Create First Post"}
              </Link>
           </div>
         ) : (
