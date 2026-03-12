@@ -6,7 +6,6 @@ import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 import CommunityFeed from "../components/community/CommunityFeed";
 import StatusBar from "@/components/home/StatusBar";
-import LiveActivityFeed from "@/components/feed/LiveActivityFeed";
 
 export default function Home() {
   const [user, setUser] = useState(null);
