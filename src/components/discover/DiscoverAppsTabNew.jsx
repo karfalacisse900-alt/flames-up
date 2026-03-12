@@ -291,12 +291,9 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         {!search && activeCategory === null && newThisWeek.length > 0 && (
           <>
             <SectionHeader icon="⭐" label="Recommended For You" />
-            <div className="masonry-grid mb-2" style={{ 
-              columnCount: window.innerWidth >= 1024 ? 5 : window.innerWidth >= 768 ? 3 : 2,
-              columnGap: '12px'
-            }}>
+            <div className="masonry-grid mb-2">
               {newThisWeek.map((item, i) => (
-                <div key={item.id} style={{ breakInside: 'avoid', marginBottom: '12px' }}>
+                <div key={item.id} className="masonry-item">
                   <TrendingCard item={item} onOpen={() => onItemClick(item)} />
                 </div>
               ))}
