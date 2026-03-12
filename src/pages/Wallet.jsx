@@ -142,54 +142,63 @@ export default function Wallet() {
           <CreditCard className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
           <h3 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>Get More Coins</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
           {COIN_PACKAGES.map(pkg => (
-            <button
+            <motion.button
               key={pkg.id}
               onClick={() => handleBuy(pkg)}
               disabled={buyLoading === pkg.id}
-              className="relative rounded-2xl p-4 text-left transition-all active:scale-95"
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full relative rounded-2xl p-5 text-left transition-all flex items-center justify-between"
               style={{
                 backgroundColor: pkg.popular ? "var(--accent-primary)" : "var(--bg-card)",
-                border: pkg.popular ? "none" : "1px solid var(--border-light)",
-                boxShadow: pkg.popular ? "0 8px 24px rgba(46,107,79,0.3)" : "none",
+                border: pkg.popular ? "2px solid var(--accent-primary-hover)" : "1px solid var(--border-light)",
+                boxShadow: pkg.popular ? "var(--elevation-3)" : "var(--elevation-1)",
               }}
             >
               {pkg.popular && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-3 right-6 px-3 py-1 rounded-full text-[11px] font-bold"
                   style={{ backgroundColor: "#D98B62", color: "#fff" }}>
-                  MOST POPULAR
-                </span>
+                  ⭐ POPULAR
+                </motion.span>
               )}
-              <div className="flex items-baseline gap-1.5 mb-1">
-                <p className="text-2xl">{pkg.emoji}</p>
-                <p className="text-lg font-bold" style={{ color: pkg.popular ? "#fff" : "var(--text-primary)" }}>
-                  {pkg.coins.toLocaleString()}
-                </p>
-                <p className="text-xs font-semibold" style={{ color: pkg.popular ? "rgba(255,255,255,0.7)" : "var(--text-hint)" }}>
-                  ⬡
-                </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-3xl">{pkg.emoji}</p>
+                  <div>
+                    <p className="text-lg font-black" style={{ color: pkg.popular ? "#fff" : "var(--text-primary)" }}>
+                      {pkg.coins.toLocaleString()} ⬡
+                    </p>
+                    <p className="text-xs" style={{ color: pkg.popular ? "rgba(255,255,255,0.6)" : "var(--text-hint)" }}>
+                      {pkg.label}
+                    </p>
+                  </div>
+                </div>
+                {pkg.bonus && (
+                  <p className="text-[10px] font-bold px-2 py-0.5 rounded inline-block" style={{ color: pkg.popular ? "rgba(255,255,255,0.9)" : "var(--accent-secondary)", backgroundColor: pkg.popular ? "rgba(255,255,255,0.15)" : "var(--accent-primary-light)" }}>
+                    ✨ {pkg.bonus}
+                  </p>
+                )}
               </div>
-              {pkg.bonus && (
-                <p className="text-[10px] font-bold px-2 py-1 rounded-lg mb-2" style={{ color: pkg.popular ? "rgba(255,255,255,0.9)" : "var(--accent-secondary)", backgroundColor: pkg.popular ? "rgba(255,255,255,0.15)" : "var(--accent-primary-light)" }}>
-                  ✨ {pkg.bonus}
-                </p>
-              )}
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm font-bold" style={{ color: pkg.popular ? "#fff" : "var(--accent-primary)" }}>
+              <div className="text-right flex flex-col items-end gap-2">
+                <span className="text-base font-black" style={{ color: pkg.popular ? "#fff" : "var(--accent-primary)" }}>
                   {pkg.price}
                 </span>
                 {buyLoading === pkg.id ? (
-                  <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: pkg.popular ? "#fff" : "var(--accent-primary)", borderTopColor: "transparent" }} />
+                  <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: pkg.popular ? "#fff" : "var(--accent-primary)", borderTopColor: "transparent" }} />
                 ) : (
-                  <Sparkles className="w-4 h-4" style={{ color: pkg.popular ? "rgba(255,255,255,0.7)" : "var(--text-hint)" }} />
+                  <Sparkles className="w-5 h-5" style={{ color: pkg.popular ? "rgba(255,255,255,0.8)" : "var(--accent-primary)" }} />
                 )}
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
-        <p className="text-[10px] text-center mt-3" style={{ color: "var(--text-hint)" }}>
-          Coins are used to send gifts, buy art, and boost posts. No real money value.
+        <p className="text-[10px] text-center mt-4" style={{ color: "var(--text-hint)" }}>
+          🎁 Coins earned through activities never expire • Use for gifts, art, boosts & more
         </p>
       </div>
 

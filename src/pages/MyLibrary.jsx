@@ -27,11 +27,13 @@ export default function MyLibrary() {
   });
 
   const { data: postDetails = [] } = useQuery({
-    queryKey: ["postDetails", savedPosts],
+    queryKey: ["postDetails", savedPosts.map(sp => sp.post_id).join(",")],
     queryFn: async () => {
       if (!savedPosts.length) return [];
-      const posts = await base44.entities.Post.list();
-      return posts.filter(p => savedPosts.some(sp => sp.post_id === p.id));
+      const posts = await Promise.all(
+        savedPosts.map(sp => base44.entities.Post.list().then(all => all.find(p => p.id === sp.post_id)))
+      );
+      return posts.filter(Boolean);
     },
     enabled: savedPosts.length > 0,
   });
@@ -94,33 +96,30 @@ export default function MyLibrary() {
                       </span>
                     </h3>
                     <div className="space-y-2">
-                      {items.map(item => {
-                        const post = postDetails.find(p => p.id === item.post_id);
-                        return (
-                          <Link
-                            key={item.id}
-                            to={createPageUrl(`PostDetail?id=${item.post_id}`)}
-                            className="block rounded-2xl p-4 transition-all"
-                            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="text-lg">
-                                {item.post_type === "question" && "❓"}
-                                {item.post_type === "quote" && "💬"}
-                                {item.post_type === "concern" && "⚠️"}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium line-clamp-2" style={{ color: "var(--text-primary)" }}>
-                                  {item.post_preview}
-                                </p>
-                                <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
-                                  {new Date(item.created_date).toLocaleDateString()}
-                                </p>
-                              </div>
+                      {items.map(item => (
+                        <Link
+                          key={item.id}
+                          to={createPageUrl(`PostDetail?id=${item.post_id}`)}
+                          className="block rounded-2xl p-4 transition-all hover:elevation-2"
+                          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-lg">
+                              {item.post_type === "question" && "❓"}
+                              {item.post_type === "quote" && "💬"}
+                              {item.post_type === "concern" && "⚠️"}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium line-clamp-2" style={{ color: "var(--text-primary)" }}>
+                                {item.post_preview || "Untitled"}
+                              </p>
+                              <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
+                                {new Date(item.created_date).toLocaleDateString()}
+                              </p>
                             </div>
-                          </Link>
-                        );
-                      })}
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 ))}
