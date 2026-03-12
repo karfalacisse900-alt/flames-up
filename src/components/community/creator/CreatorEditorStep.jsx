@@ -102,9 +102,14 @@ export default function CreatorEditorStep({
 
         {/* Text overlay preview */}
         {textOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="px-5 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.65)" }}>
-              <p className="text-white text-xl font-bold text-center">{textOverlay}</p>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8">
+            <div className="px-5 py-2.5 rounded-xl max-w-full" style={{ backgroundColor: "rgba(0,0,0,0.65)" }}>
+              <p className="text-white text-xl font-bold text-center break-words" style={{ 
+                overflowWrap: "break-word", 
+                wordBreak: "break-word",
+                maxWidth: "100%",
+                hyphens: "auto"
+              }}>{textOverlay}</p>
             </div>
           </div>
         )}
@@ -221,9 +226,18 @@ export default function CreatorEditorStep({
           )}
 
           {activeTool === "voice" && (
-            <div className="text-center py-3 space-y-1">
-              <p className="text-sm font-medium text-white">Record a voiceover</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Coming soon</p>
+            <div className="text-center py-3">
+              <p className="text-sm font-medium text-white mb-3">Record a voiceover</p>
+              <button
+                className="w-full py-3 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#2E6B4F" }}
+                onClick={() => {
+                  // Voice recording functionality would go here
+                  alert("Voice recording feature will be implemented soon!");
+                }}
+              >
+                <Mic className="w-4 h-4" /> Start Recording
+              </button>
             </div>
           )}
         </div>
