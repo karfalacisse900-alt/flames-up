@@ -392,6 +392,9 @@ export default function CommunityFeed({ user }) {
           initialIndex={videoStartIndex}
           user={user}
           onClose={() => setVideoViewerOpen(false)}
+          activeFilter={activeFilter}
+          onFilterChange={(f) => { setActiveFilter(f); setVideoStartIndex(0); }}
+          allCities={uniqueCities}
         />
       )}
     </div>
