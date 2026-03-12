@@ -193,10 +193,14 @@ function SeamlessRow({ label, emoji, items, onPreview }) {
         <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{label}</h2>
         <span className="text-[10px] ml-auto" style={{ color: "var(--text-hint)" }}>{items.length} apps</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2" style={{ WebkitOverflowScrolling: "touch" }}>
-        {items.slice(0, 12).map(item => (
-          <MediumCard key={item.id} item={item} onPreview={onPreview} />
-        ))}
+      <div className="px-4">
+        <div className="masonry-grid">
+          {items.slice(0, 12).map(item => (
+            <div key={item.id} className="masonry-item">
+              <MediumCard item={item} onPreview={onPreview} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
