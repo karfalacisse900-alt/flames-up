@@ -3,14 +3,13 @@ import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CameraUploadStep from "./CameraUploadStep";
 
-export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
+export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, setSelectedMode }) {
   const photoVideoInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const dragCounter = useRef(0);
   const [compressing, setCompressing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedMode, setSelectedMode] = useState("60s");
 
   const compressMedia = async (file) => {
     try {
