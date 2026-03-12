@@ -4,7 +4,7 @@ import MusicLibrarySheet from "../../music/MusicLibrarySheet";
 
 const MODES = ["Photo", "15s", "60s", "3min"];
 
-export default function CameraUploadStep({ onMediaSelected, onClose }) {
+export default function CameraUploadStep({ onMediaSelected, onClose, setSelectedMode }) {
   const [selectedMode, setSelectedMode] = useState("60s");
   const [flashOn, setFlashOn] = useState(false);
   const [frontCamera, setFrontCamera] = useState(false);
