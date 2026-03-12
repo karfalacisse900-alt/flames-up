@@ -222,10 +222,17 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
                   <Plus className="w-4 h-4" /> Post to group…
                 </button>
               )}
-              {isAdmin && (
-                <>
-                  {activeTab === "events" && (
-                    <button onClick={() => setShowCreateEvent(true)}
+               {isMember && !isAdmin && (
+                 <button onClick={onLeave}
+                   className="flex-1 py-2 rounded-xl text-sm font-bold"
+                   style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}>
+                   Leave Group
+                 </button>
+               )}
+               {isAdmin && (
+                 <>
+                   {activeTab === "events" && (
+                     <button onClick={() => setShowCreateEvent(true)}
                       className="flex-1 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
                       style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
                       <CalendarPlus className="w-4 h-4" /> New Event
