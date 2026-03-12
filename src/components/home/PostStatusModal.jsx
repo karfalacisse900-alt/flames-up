@@ -36,16 +36,23 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
     if (!text.trim()) return;
     setPosting(true);
     
-    // Get or create user profile
-    let userProfile = await base44.entities.UserProfile.filter({ user_email: user.email });
-    if (!userProfile || userProfile.length === 0) {
+    // Get or create user profile (upsert — prevent duplicates)
+    const existingProfiles = await base44.entities.UserProfile.filter({ user_email: user.email });
+    let userProfile;
+    if (existingProfiles.length > 0) {
+      userProfile = existingProfiles[0];
+      // Clean up any duplicates
+      if (existingProfiles.length > 1) {
+        for (let i = 1; i < existingProfiles.length; i++) {
+          base44.entities.UserProfile.delete(existingProfiles[i].id).catch(() => {});
+        }
+      }
+    } else {
       userProfile = await base44.entities.UserProfile.create({
         user_email: user.email,
         user_name: user.full_name || user.email.split("@")[0],
         status_count: 0,
       });
-    } else {
-      userProfile = userProfile[0];
     }
 
     const expires = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
