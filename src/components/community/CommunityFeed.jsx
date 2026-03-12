@@ -191,7 +191,7 @@ export default function CommunityFeed({ user }) {
       base = base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
     }
 
-    if (feedTab === "foryou" && user?.email) {
+    if (user?.email) {
       // Rank by: followed authors first, then liked/interacted posts, then recency+engagement
       const likedIds = new Set(posts.filter(p => p.upvoted_by?.includes(user.email)).map(p => p.id));
       return [...base].sort((a, b) => {
