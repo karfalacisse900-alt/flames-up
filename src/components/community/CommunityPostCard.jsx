@@ -28,6 +28,17 @@ function timeAgo(dateStr) {
 const avatarColors = ["#7C69C4", "#D98B62", "#3C6E5A", "#E05C7A", "#4A7FC1", "#B07843"];
 const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColors.length];
 
+function PollDisplay({ postId, pollId, user }) {
+  const { data: poll, isLoading } = useQuery({
+    queryKey: ["poll", pollId],
+    queryFn: () => base44.entities.Poll.filter({ id: pollId }),
+    select: (data) => data[0] || null,
+  });
+
+  if (isLoading || !poll) return null;
+  return <PollComponent poll={poll} currentUserEmail={user?.email || ""} isReadOnly={!user} />;
+}
+
 // Detect if body is rich text (HTML/markdown)
 function isRichText(text) {
   return text && (/<[a-z][\s\S]*>/i.test(text) || /^#{1,6}\s|^\*\*|^\*[^*]|^- |^\d+\. /m.test(text));
