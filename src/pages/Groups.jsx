@@ -699,7 +699,12 @@ export default function Groups() {
 
       {/* ── MAP TAB ── */}
       {mainTab === "map" && (
-        <NearbyExplorer groups={groups} membershipMap={membershipMap} onOpen={handleOpenGroup} onJoin={handleJoin} />
+        <NearbyExplorer 
+          groups={groups} 
+          membershipMap={membershipMap} 
+          onOpen={handleOpenGroup} 
+          onJoin={handleJoin} 
+        />
       )}
 
       {/* ── DISCOVER TAB ── */}
