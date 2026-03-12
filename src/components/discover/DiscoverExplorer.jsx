@@ -418,35 +418,15 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
                 <h2 className="text-[13px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Featured for You</h2>
               </div>
               
-              {/* Desktop: Animated grid */}
-              <div className="hidden lg:block px-4 mb-2 overflow-hidden" style={{ height: 440 }}>
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Column 1: Scroll down */}
-                  <div className="flex flex-col gap-4 animate-scroll-down">
-                    {[...featured.slice(0, 3), ...featured.slice(0, 3)].map((item, i) => (
-                      <HeroCard key={`col1-${i}`} item={item} user={user} onPreview={setPreviewItem} />
-                    ))}
-                  </div>
-                  {/* Column 2: Scroll up */}
-                  <div className="flex flex-col gap-4 animate-scroll-up">
-                    {[...featured.slice(2, 5), ...featured.slice(2, 5)].map((item, i) => (
-                      <HeroCard key={`col2-${i}`} item={item} user={user} onPreview={setPreviewItem} />
-                    ))}
-                  </div>
-                  {/* Column 3: Scroll down */}
-                  <div className="flex flex-col gap-4 animate-scroll-down">
-                    {[...featured.slice(4, 7), ...featured.slice(4, 7)].map((item, i) => (
-                      <HeroCard key={`col3-${i}`} item={item} user={user} onPreview={setPreviewItem} />
-                    ))}
-                  </div>
+              {/* Responsive masonry grid */}
+              <div className="px-4">
+                <div className="masonry-grid">
+                  {featured.map(item => (
+                    <div key={item.id} className="masonry-item">
+                      <HeroCard item={item} user={user} onPreview={setPreviewItem} />
+                    </div>
+                  ))}
                 </div>
-              </div>
-              
-              {/* Mobile: Horizontal scroll */}
-              <div className="lg:hidden flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-3" style={{ WebkitOverflowScrolling: "touch" }}>
-                {featured.map(item => (
-                  <HeroCard key={item.id} item={item} user={user} onPreview={setPreviewItem} />
-                ))}
               </div>
             </div>
           )}
