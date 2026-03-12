@@ -335,6 +335,16 @@ export default function MediaEditingStep({
           ))}
         </div>
       )}
+
+      {/* Trim Modal */}
+      {showTrimmer && isVideo && currentItem?.file && (
+        <VideoTrimmer
+          videoFile={currentItem.file}
+          maxDurationMs={getDurationMs()}
+          onTrimmed={handleTrimVideo}
+          onCancel={() => setShowTrimmer(false)}
+        />
+      )}
     </div>
   );
 }
