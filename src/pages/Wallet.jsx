@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { getWallet, claimDailyCheckin } from "../components/coins/coinsHelper";
 import { motion, AnimatePresence } from "framer-motion";
+import UniqueStatusBadge from "../components/coins/UniqueStatusBadge";
 
 const typeConfig = {
   daily_checkin: { icon: CheckCircle, color: "text-emerald-500", label: "Daily Check-in" },
@@ -90,30 +91,35 @@ export default function Wallet() {
       </div>
 
       {/* Balance hero */}
-      <div className="mx-5 mt-5">
-        <div className="rounded-3xl p-6 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%)" }}>
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 0%, transparent 50%)" }} />
-          <p className="text-white/70 text-xs font-medium uppercase tracking-widest mb-1">Your Balance</p>
-          <p className="text-6xl font-bold text-white mt-1">{balance}</p>
-          <p className="text-white/60 text-sm mt-1">⬡ coins</p>
+       <div className="mx-5 mt-5 space-y-4">
+         <div className="rounded-3xl p-8 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%)" }}>
+           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 0%, transparent 50%)" }} />
+           <div className="absolute top-4 right-4 w-24 h-24 rounded-full opacity-20" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent)" }} />
 
-          <div className="flex gap-2 justify-center mt-5">
-            <button
-              onClick={handleCheckin}
-              disabled={claimLoading}
-              className="px-5 py-2 rounded-2xl text-sm font-semibold transition-all border border-white/30"
-              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "#fff" }}
-            >
-              {claimLoading ? "Claiming..." : "✅ Daily Bonus"}
-            </button>
-            <Link
-              to={createPageUrl("Referral")}
-              className="px-5 py-2 rounded-2xl text-sm font-semibold transition-all border border-white/30"
-              style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "#fff" }}
-            >
-              🎁 Refer & Earn
-            </Link>
-          </div>
+           <p className="text-white/70 text-xs font-medium uppercase tracking-widest mb-2">Your Balance</p>
+           <div className="flex items-baseline justify-center gap-2 mb-1">
+             <p className="text-7xl font-black text-white">{balance}</p>
+             <p className="text-2xl text-white/80 font-bold mb-1">⬡</p>
+           </div>
+           <p className="text-white/60 text-xs tracking-wider">coins available</p>
+
+           <div className="mt-6 flex gap-3 justify-center flex-wrap">
+             <button
+               onClick={handleCheckin}
+               disabled={claimLoading}
+               className="px-6 py-3 rounded-2xl text-sm font-bold transition-all border-2 border-white/40 hover:border-white/60"
+               style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#fff" }}
+             >
+               {claimLoading ? "Claiming..." : "✅ Daily Bonus"}
+             </button>
+             <Link
+               to={createPageUrl("Referral")}
+               className="px-6 py-3 rounded-2xl text-sm font-bold transition-all border-2 border-white/40 hover:border-white/60"
+               style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#fff" }}
+             >
+               🎁 Refer & Earn
+             </Link>
+           </div>
 
           <AnimatePresence>
             {claimMsg && (
@@ -122,8 +128,13 @@ export default function Wallet() {
               </motion.p>
             )}
           </AnimatePresence>
-        </div>
-      </div>
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex justify-center">
+          <UniqueStatusBadge balance={balance} />
+          </div>
+          </div>
 
       {/* Buy coins */}
       <div className="mx-5 mt-8">
