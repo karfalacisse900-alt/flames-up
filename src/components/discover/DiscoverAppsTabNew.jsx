@@ -294,14 +294,14 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         {!search && activeCategory === null && newThisWeek.length > 0 && (
           <>
             <SectionHeader icon="⭐" label="Recommended For You" />
-            <div className="hidden lg:grid grid-cols-5 gap-3 mb-2">
-              {newThisWeek.slice(0, 5).map(item => (
-                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
-              ))}
-            </div>
-            <div className="lg:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
-              {newThisWeek.map(item => (
-                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
+            <div className="masonry-grid mb-2" style={{ 
+              columnCount: window.innerWidth >= 1024 ? 5 : window.innerWidth >= 768 ? 3 : 2,
+              columnGap: '12px'
+            }}>
+              {newThisWeek.map((item, i) => (
+                <div key={item.id} style={{ breakInside: 'avoid', marginBottom: '12px' }}>
+                  <TrendingCard item={item} onOpen={() => onItemClick(item)} />
+                </div>
               ))}
             </div>
           </>
