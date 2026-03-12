@@ -34,6 +34,7 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   const touchStartY = useRef(0);
   const touchStartX = useRef(0);
   const videoRef = useRef(null);
+  const playTimerRef = useRef(null);
   const qc = useQueryClient();
 
   const currentPost = posts[currentIndex];
