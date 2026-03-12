@@ -275,20 +275,9 @@ export default function CommunityFeed({ user }) {
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="px-4 pt-2.5 pb-2 flex items-center justify-between">
-          {/* Feed tabs */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setFeedTab("foryou")}
-              className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{ backgroundColor: feedTab === "foryou" ? "var(--accent-primary)" : "transparent", color: feedTab === "foryou" ? "#fff" : "var(--text-secondary)" }}>
-              ✦ For You
-            </button>
-            <button
-              onClick={() => setFeedTab("latest")}
-              className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{ backgroundColor: feedTab === "latest" ? "var(--accent-primary)" : "transparent", color: feedTab === "latest" ? "#fff" : "var(--text-secondary)" }}>
-              Latest
-            </button>
+          <div className="flex items-center gap-1.5">
+            <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>For You</p>
           </div>
 
           <div className="flex items-center gap-2">

@@ -219,9 +219,13 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
                   </div>
                   {currentPost.author_email !== user?.email && user && (
                     <button onClick={handleFollow}
-                      className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                      style={{ backgroundColor: isFollowing ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.25)", border: "1.5px solid rgba(255,255,255,0.4)" }}>
-                      <Plus className={`w-5 h-5 text-white transition-transform ${isFollowing ? "rotate-45" : ""}`} />
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+                      style={{
+                        background: isFollowing ? "rgba(255,255,255,0.15)" : "linear-gradient(135deg, #4CAF7D, #2E6B4F)",
+                        border: isFollowing ? "1.5px solid rgba(255,255,255,0.4)" : "none",
+                        boxShadow: isFollowing ? "none" : "0 2px 8px rgba(76,175,125,0.5)",
+                      }}>
+                      <Plus className={`w-4 h-4 text-white transition-transform ${isFollowing ? "rotate-45" : ""}`} />
                     </button>
                   )}
                 </div>

@@ -364,17 +364,13 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           <div className="flex items-center gap-1 shrink-0">
             {!isOwnPost && showAuthor && !!user && (
               <button onClick={handleFollow}
-                className="w-8 h-8 flex items-center justify-center rounded-full transition-all"
-                title={isFollowing ? "Following" : "Follow"}
+                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
                 style={{
-                  backgroundColor: isFollowing ? "rgba(46, 107, 79, 0.2)" : "rgba(0,0,0,0.05)",
-                  color: isFollowing ? "var(--accent-primary)" : "var(--text-hint)",
+                  backgroundColor: isFollowing ? "var(--accent-primary-light)" : "var(--accent-primary)",
+                  color: isFollowing ? "var(--accent-primary)" : "#fff",
+                  border: isFollowing ? "1px solid var(--accent-primary)" : "none",
                 }}>
-                {isFollowing ? (
-                  <Plus className="w-4 h-4 rotate-45" />
-                ) : (
-                  <Plus className="w-4 h-4" />
-                )}
+                {isFollowing ? "Following" : "Follow"}
               </button>
             )}
             {isOwnPost && (
