@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Search, Plus, MapPin, Users, DollarSign, Star, ChevronRight, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import CreateGroupModal from "@/components/groups/CreateGroupModal";
-import GroupCard from "@/components/groups/GroupCard";
+import CreateGroupModal from "@/components/groups/CreateGroupModal.jsx";
+import GroupCard from "@/components/groups/GroupCard.jsx";
 
 const CATEGORIES = [
   { id: "all", label: "All Groups" },
