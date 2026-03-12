@@ -5,7 +5,7 @@ import MusicLibrarySheet from "../../music/MusicLibrarySheet";
 const MODES = ["Photo", "15s", "60s", "3min"];
 
 export default function CameraUploadStep({ onMediaSelected, onClose }) {
-  const [selectedDuration, setSelectedDuration] = useState("60s");
+  const [selectedMode, setSelectedMode] = useState("60s");
   const [flashOn, setFlashOn] = useState(false);
   const [frontCamera, setFrontCamera] = useState(false);
   const [stream, setStream] = useState(null);
@@ -15,6 +15,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   const recordingIntervalRef = useRef(null);
