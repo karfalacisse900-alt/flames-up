@@ -141,9 +141,9 @@ export default function SavePostModal({ post, user, onClose }) {
                     }}
                   />
                   <button onClick={addFolder} disabled={!newFolder.trim()}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: "#2E6B4F", color: "#fff", boxShadow: "0 4px 12px rgba(46,107,79,0.3)" }}>
-                    <Plus className="w-5 h-5" />
+                   className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                   style={{ backgroundColor: "var(--accent-primary)", color: "#fff", boxShadow: "0 4px 12px rgba(46,107,79,0.3)" }}>
+                   <Plus className="w-5 h-5" />
                   </button>
                 </div>
               </div>

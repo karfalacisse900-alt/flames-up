@@ -126,10 +126,10 @@ export default function Wallet() {
       </div>
 
       {/* Buy coins */}
-      <div className="mx-5 mt-6">
-        <div className="flex items-center gap-2 mb-3">
-          <CreditCard className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-          <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Buy Coins</h3>
+      <div className="mx-5 mt-8">
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCard className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+          <h3 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>Get More Coins</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {COIN_PACKAGES.map(pkg => (
@@ -150,17 +150,22 @@ export default function Wallet() {
                   MOST POPULAR
                 </span>
               )}
-              <p className="text-2xl mb-1">{pkg.emoji}</p>
-              <p className="text-lg font-bold" style={{ color: pkg.popular ? "#fff" : "var(--text-primary)" }}>
-                {pkg.coins.toLocaleString()} ⬡
-              </p>
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <p className="text-2xl">{pkg.emoji}</p>
+                <p className="text-lg font-bold" style={{ color: pkg.popular ? "#fff" : "var(--text-primary)" }}>
+                  {pkg.coins.toLocaleString()}
+                </p>
+                <p className="text-xs font-semibold" style={{ color: pkg.popular ? "rgba(255,255,255,0.7)" : "var(--text-hint)" }}>
+                  ⬡
+                </p>
+              </div>
               {pkg.bonus && (
-                <p className="text-[11px] font-semibold mb-1" style={{ color: pkg.popular ? "rgba(255,255,255,0.75)" : "var(--accent-secondary)" }}>
-                  {pkg.bonus}
+                <p className="text-[10px] font-bold px-2 py-1 rounded-lg mb-2" style={{ color: pkg.popular ? "rgba(255,255,255,0.9)" : "var(--accent-secondary)", backgroundColor: pkg.popular ? "rgba(255,255,255,0.15)" : "var(--accent-primary-light)" }}>
+                  ✨ {pkg.bonus}
                 </p>
               )}
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-base font-bold" style={{ color: pkg.popular ? "#fff" : "var(--accent-primary)" }}>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-sm font-bold" style={{ color: pkg.popular ? "#fff" : "var(--accent-primary)" }}>
                   {pkg.price}
                 </span>
                 {buyLoading === pkg.id ? (
