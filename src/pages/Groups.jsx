@@ -922,6 +922,17 @@ export default function Groups() {
         </div>
       )}
 
+      {/* Trending Groups Swiper */}
+      {showTrendingSwiper && (
+        <TrendingGroupsSwiper
+          groups={trendingGroups}
+          onDismiss={(group) => setDismissedGroups(prev => new Set([...prev, group.id]))}
+          onJoin={handleJoin}
+          onOpen={(group) => { setShowTrendingSwiper(false); handleOpenGroup(group); }}
+          onClose={() => setShowTrendingSwiper(false)}
+        />
+      )}
+
     </div>
   );
 }
