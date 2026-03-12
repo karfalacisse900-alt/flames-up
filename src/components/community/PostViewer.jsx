@@ -207,6 +207,17 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
                 </div>
               )}
 
+              {/* Silent preload for next post (invisible, muted, no autoplay) */}
+              {posts[currentIndex + 1]?.video_url && (
+                <video
+                  key={`preload-${currentIndex + 1}`}
+                  src={posts[currentIndex + 1].video_url}
+                  muted playsInline preload="auto"
+                  className="absolute w-0 h-0 opacity-0 pointer-events-none"
+                  aria-hidden="true"
+                />
+              )}
+
               {/* Bottom gradient */}
               <div className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none"
                 style={{ background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 45%, transparent 100%)" }} />
