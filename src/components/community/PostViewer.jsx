@@ -129,11 +129,23 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   }, [currentPost?.id]);
 
   const nextPost = useCallback(() => {
-    if (currentIndex < posts.length - 1) { setDirection(1); setCurrentIndex(i => i + 1); }
+    if (isAnimating.current) return;
+    if (currentIndex < posts.length - 1) {
+      isAnimating.current = true;
+      setDirection(1);
+      setCurrentIndex(i => i + 1);
+      setTimeout(() => { isAnimating.current = false; }, 350);
+    }
   }, [currentIndex, posts.length]);
 
   const prevPost = useCallback(() => {
-    if (currentIndex > 0) { setDirection(-1); setCurrentIndex(i => i - 1); }
+    if (isAnimating.current) return;
+    if (currentIndex > 0) {
+      isAnimating.current = true;
+      setDirection(-1);
+      setCurrentIndex(i => i - 1);
+      setTimeout(() => { isAnimating.current = false; }, 350);
+    }
   }, [currentIndex]);
 
   const handleTouchStart = (e) => {
@@ -146,7 +158,7 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
     if (showComments || showRegionPicker) return;
     const dy = touchStartY.current - e.changedTouches[0].clientY;
     const dx = Math.abs(touchStartX.current - e.changedTouches[0].clientX);
-    if (Math.abs(dy) > 50 && dx < 80) {
+    if (Math.abs(dy) > 40 && dx < 100) {
       if (dy > 0) nextPost(); else prevPost();
     }
   };
