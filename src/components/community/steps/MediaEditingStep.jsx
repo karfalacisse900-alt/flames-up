@@ -20,6 +20,11 @@ export default function MediaEditingStep({
   const currentItem = mediaItems[currentEditingIndex];
   const isVideo = currentItem?.type.startsWith("video");
 
+  const getDurationMs = () => {
+    const map = { "Photo": 0, "15s": 15000, "60s": 60000, "3min": 180000 };
+    return map[selectedMode] || 60000;
+  };
+
   const applyEdits = (updates) => {
     setMediaItems((prev) => {
       const newItems = [...prev];
@@ -29,6 +34,24 @@ export default function MediaEditingStep({
       };
       return newItems;
     });
+  };
+
+  const handleTrimVideo = (trimmedFile) => {
+    setMediaItems((prev) => {
+      const newItems = [...prev];
+      newItems[currentEditingIndex] = {
+        ...newItems[currentEditingIndex],
+        file: trimmedFile,
+        preview: URL.createObjectURL(trimmedFile),
+        edits: {
+          ...newItems[currentEditingIndex].edits,
+          trimStart: trimmedFile.startTime,
+          trimEnd: trimmedFile.endTime,
+        },
+      };
+      return newItems;
+    });
+    setShowTrimmer(false);
   };
 
   const handleBrightnessChange = (value) => {
