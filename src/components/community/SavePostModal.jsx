@@ -53,6 +53,8 @@ export default function SavePostModal({ post, user, onClose }) {
         folder,
       });
       setSavedFolders(prev => [...prev, folder]);
+      // Auto-close after saving
+      setTimeout(() => onClose(), 400);
     }
     setSaving(null);
   };
@@ -70,66 +72,80 @@ export default function SavePostModal({ post, user, onClose }) {
   return createPortal(
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-end"
-      style={{ backgroundColor: "#FEF3C7", zIndex: 9999 }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(30,30,30,0.75)", backdropFilter: "blur(8px)", zIndex: 9999 }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-lg mx-auto rounded-t-3xl overflow-hidden"
-        style={{ backgroundColor: "var(--bg-card)", maxHeight: "70vh", overflowY: "auto" }}
+        className="w-full max-w-md rounded-3xl overflow-hidden"
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "80vh", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="h-1.5 w-12 rounded-full mx-auto mt-3" style={{ backgroundColor: "var(--border-medium)" }} />
-        <div className="px-5 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-              <h2 className="text-base font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Save to Collection</h2>
+        <div className="px-6 pt-5 pb-4 overflow-y-auto" style={{ maxHeight: "calc(80vh - 20px)" }}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent-primary-light)" }}>
+                <FolderOpen className="w-4.5 h-4.5" style={{ color: "var(--accent-primary)" }} />
+              </div>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Save to Collection</h2>
             </div>
-            <button onClick={onClose}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>
+            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-gray-100">
+              <X className="w-4.5 h-4.5" style={{ color: "var(--text-secondary)" }} />
+            </button>
           </div>
 
           {loading ? (
-            <div className="py-6 flex justify-center">
-              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+            <div className="py-8 flex justify-center">
+              <div className="w-6 h-6 border-3 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
             </div>
           ) : (
-            <div className="space-y-2 pb-4">
+            <div className="space-y-2.5">
               {folders.map(folder => {
                 const saved = savedFolders.includes(folder);
                 return (
                   <button key={folder} onClick={() => toggle(folder)} disabled={saving === folder}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+                    className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]"
                     style={{
                       backgroundColor: saved ? "var(--accent-primary-light)" : "var(--bg-subtle)",
-                      border: `1px solid ${saved ? "var(--accent-primary)" : "var(--border-light)"}`,
+                      border: `2px solid ${saved ? "var(--accent-primary)" : "transparent"}`,
+                      boxShadow: saved ? "0 4px 12px rgba(46,107,79,0.15)" : "none",
                     }}>
                     <div className="flex items-center gap-3">
-                      <span className="text-base">📁</span>
-                      <span className="text-sm font-medium" style={{ color: saved ? "var(--accent-primary)" : "var(--text-primary)" }}>{folder}</span>
+                      <span className="text-lg">📁</span>
+                      <span className="text-sm font-semibold" style={{ color: saved ? "var(--accent-primary)" : "var(--text-primary)" }}>{folder}</span>
                     </div>
-                    {saved && <Check className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />}
+                    {saving === folder ? (
+                      <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)" }} />
+                    ) : saved ? (
+                      <Check className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+                    ) : null}
                   </button>
                 );
               })}
 
               {/* New folder input */}
-              <div className="flex gap-2 mt-3">
-                <input
-                  value={newFolder}
-                  onChange={e => setNewFolder(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && addFolder()}
-                  placeholder="New collection name..."
-                  className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-                  style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-                />
-                <button onClick={addFolder}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                  style={{ backgroundColor: "var(--accent-primary)" }}>
-                  <Plus className="w-4 h-4" />
-                </button>
+              <div className="pt-2 mt-3 border-t" style={{ borderColor: "var(--border-light)" }}>
+                <div className="flex gap-2">
+                  <input
+                    value={newFolder}
+                    onChange={e => setNewFolder(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && addFolder()}
+                    placeholder="Create new collection..."
+                    className="flex-1 px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-2"
+                    style={{ 
+                      backgroundColor: "var(--bg-subtle)", 
+                      border: "2px solid var(--border-light)", 
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                  <button onClick={addFolder} disabled={!newFolder.trim()}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: "#2E6B4F", color: "#fff", boxShadow: "0 4px 12px rgba(46,107,79,0.3)" }}>
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -121,10 +121,10 @@ export default function AppAIAssistant() {
             onMouseDown={handleDragStart}
             onTouchStart={handleDragStart}
             onClick={() => !dragging.current && setOpen(true)}
-            className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing select-none"
-            style={{ ...btnStyle, backgroundColor: "var(--accent-primary)", color: "#fff" }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing select-none transition-all hover:scale-105"
+            style={{ ...btnStyle, backgroundColor: "#2E6B4F", color: "#fff", boxShadow: "0 8px 24px rgba(46,107,79,0.35)" }}
           >
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="w-6 h-6" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -137,23 +137,25 @@ export default function AppAIAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="fixed bottom-20 right-3 left-3 z-[9999] max-w-sm mx-auto rounded-3xl flex flex-col overflow-hidden"
+            className="fixed bottom-20 right-3 left-3 z-[9999] max-w-md mx-auto rounded-3xl flex flex-col overflow-hidden"
             style={{
-              backgroundColor: "#FAFAF8",
-              border: "2px solid var(--accent-primary)",
-              boxShadow: "0 20px 60px rgba(46,107,79,0.4)",
-              maxHeight: "70vh",
+              backgroundColor: "var(--bg-card)",
+              border: "2px solid #2E6B4F",
+              boxShadow: "0 24px 80px rgba(46,107,79,0.3)",
+              maxHeight: "75vh",
             }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 shrink-0"
-              style={{ backgroundColor: "var(--accent-primary)", borderRadius: "24px 24px 0 0" }}>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-white" />
-                <p className="text-sm font-semibold text-white">App Assistant</p>
+            <div className="flex items-center justify-between px-5 py-4 shrink-0"
+              style={{ backgroundColor: "#2E6B4F", borderRadius: "24px 24px 0 0" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Sparkles className="w-4.5 h-4.5 text-white" />
+                </div>
+                <p className="text-base font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>App Assistant</p>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white opacity-80 hover:opacity-100">
-                <X className="w-4 h-4" />
+              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
+                <X className="w-4.5 h-4.5 text-white" />
               </button>
             </div>
 
@@ -163,11 +165,12 @@ export default function AppAIAssistant() {
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className="max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed"
+                    className="max-w-[82%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed"
                     style={{
-                      backgroundColor: m.role === "user" ? "var(--accent-primary)" : "var(--bg-subtle)",
+                      backgroundColor: m.role === "user" ? "#2E6B4F" : "var(--bg-subtle)",
                       color: m.role === "user" ? "#fff" : "var(--text-primary)",
-                      borderRadius: m.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                      borderRadius: m.role === "user" ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+                      boxShadow: m.role === "user" ? "0 2px 8px rgba(46,107,79,0.2)" : "none",
                     }}
                   >
                     {m.content}
@@ -215,10 +218,10 @@ export default function AppAIAssistant() {
                 <button
                   type="submit"
                   disabled={!input.trim() || loading}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center disabled:opacity-40"
-                  style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: "#2E6B4F", color: "#fff", boxShadow: "0 4px 12px rgba(46,107,79,0.3)" }}
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-4 h-4" />
                 </button>
               </form>
             </div>
