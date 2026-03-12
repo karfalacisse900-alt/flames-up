@@ -251,7 +251,14 @@ export default function CommunityFeed({ user }) {
   }
 
   return (
-    <div style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}>
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
+    >
+      <PullIndicator />
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="px-4 pt-2.5 pb-2.5 flex items-center justify-between">
