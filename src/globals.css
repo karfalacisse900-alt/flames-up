@@ -328,6 +328,36 @@ nav, button, a[role="button"], .no-select {
   }
 }
 
+/* ── Discover Apps Masonry ── */
+.masonry-grid {
+  columns: 2;
+  column-gap: 12px;
+}
+@media (min-width: 768px) {
+  .masonry-grid {
+    columns: 3;
+    column-gap: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .masonry-grid {
+    columns: 4;
+    column-gap: 12px;
+  }
+}
+@media (min-width: 1280px) {
+  .masonry-grid {
+    columns: 5;
+    column-gap: 14px;
+  }
+}
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  display: inline-block;
+  width: 100%;
+}
+
 /* ── Desktop layout: wider container for non-mobile pages ── */
 @media (min-width: 768px) {
   /* The layout wraps pages inside max-w-lg mx-auto — on desktop we override it */
