@@ -926,9 +926,9 @@ export default function Groups() {
       {showTrendingSwiper && (
         <TrendingGroupsSwiper
           groups={trendingGroups}
+          membershipMap={membershipMap}
           onDismiss={(group) => setDismissedGroups(prev => new Set([...prev, group.id]))}
           onJoin={handleJoin}
-          onOpen={(group) => { setShowTrendingSwiper(false); handleOpenGroup(group); }}
           onClose={() => setShowTrendingSwiper(false)}
         />
       )}
