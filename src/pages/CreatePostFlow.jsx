@@ -34,6 +34,7 @@ export default function CreatePostFlow() {
     isEvent: false,
     isProduct: false,
     isAIGenerated: false,
+    poll: null,
   });
 
   const [isPosting, setIsPosting] = useState(false);
