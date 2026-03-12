@@ -447,7 +447,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
         {/* ── Video ── */}
         {post.video_url && post.video_url.trim() && (
-          <div className="mb-2.5 w-full cursor-pointer" onClick={onTap}>
+          <div className="mb-2.5 w-full">
             <AutoplayVideo
               src={post.video_url}
               postId={post.id}
