@@ -59,6 +59,15 @@ export default function Discover() {
 
   const firstName = user?.full_name?.split(" ")[0] || "";
 
+  const doRefresh = useCallback(async () => {
+    setIsLoading(true);
+    await base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
+      .then(setItems)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(doRefresh);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
 
