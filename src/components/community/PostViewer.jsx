@@ -81,8 +81,12 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
     return () => {};
   }, []);
 
+  // Only reset index when filter actually CHANGES (not on mount)
   useEffect(() => {
-    setCurrentIndex(0);
+    if (prevActiveFilter.current !== activeFilter) {
+      prevActiveFilter.current = activeFilter;
+      setCurrentIndex(0);
+    }
   }, [activeFilter]);
 
   const { data: followRecord } = useQuery({
