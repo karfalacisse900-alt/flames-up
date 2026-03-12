@@ -32,7 +32,7 @@ export default function CreateGroupModal({ open, onClose }) {
   const [coverFile, setCoverFile] = useState(null);
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       base44.auth.me().then(setUser).catch(() => {});
     }
