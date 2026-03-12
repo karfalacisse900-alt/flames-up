@@ -342,6 +342,23 @@ nav, button, a[role="button"], .no-select {
   }
 }
 
+/* ── Animated scrolling columns for Discover grid ── */
+@keyframes scroll-down {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+@keyframes scroll-up {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+.animate-scroll-down {
+  animation: scroll-down 20s linear infinite;
+}
+.animate-scroll-up {
+  animation: scroll-up 20s linear infinite;
+}
+
 /* ── Global Tailwind utility overrides ── */
 .bg-white    { background-color: var(--bg-card) !important; }
 .bg-gray-50  { background-color: var(--bg-subtle) !important; }

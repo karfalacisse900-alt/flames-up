@@ -272,16 +272,34 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
       )}
 
       <div className="px-4">
-        {/* ── Apps You Might Need ── */}
+        {/* ── Apps You Might Need — Animated Grid ── */}
         {!search && activeCategory === null && trending.length > 0 && (
           <>
             <SectionHeader icon="💡" label="Apps You Might Need" />
-            {/* Mobile: horizontal scroll. Desktop: 5-col grid */}
-            <div className="hidden lg:grid grid-cols-5 gap-3 mb-2">
-              {trending.slice(0, 5).map(item => (
-                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
-              ))}
+            {/* Desktop: 3-column animated grid */}
+            <div className="hidden lg:block mb-2 overflow-hidden" style={{ height: 340 }}>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Column 1: Scroll down */}
+                <div className="flex flex-col gap-3 animate-scroll-down">
+                  {[...trending.slice(0, 4), ...trending.slice(0, 4)].map((item, i) => (
+                    <TrendingCard key={`col1-${i}`} item={item} onOpen={() => onItemClick(item)} />
+                  ))}
+                </div>
+                {/* Column 2: Scroll up */}
+                <div className="flex flex-col gap-3 animate-scroll-up">
+                  {[...trending.slice(2, 6), ...trending.slice(2, 6)].map((item, i) => (
+                    <TrendingCard key={`col2-${i}`} item={item} onOpen={() => onItemClick(item)} />
+                  ))}
+                </div>
+                {/* Column 3: Scroll down */}
+                <div className="flex flex-col gap-3 animate-scroll-down">
+                  {[...trending.slice(4, 8), ...trending.slice(4, 8)].map((item, i) => (
+                    <TrendingCard key={`col3-${i}`} item={item} onOpen={() => onItemClick(item)} />
+                  ))}
+                </div>
+              </div>
             </div>
+            {/* Mobile: horizontal scroll */}
             <div
               className="lg:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
               ref={trendingScrollRef}
