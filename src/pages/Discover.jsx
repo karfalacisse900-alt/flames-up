@@ -69,7 +69,15 @@ export default function Discover() {
   const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(doRefresh);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-app)" }}
+    >
+      <PullIndicator />
 
       {/* ── Sticky Header ── */}
       <div
