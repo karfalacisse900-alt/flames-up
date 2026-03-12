@@ -220,6 +220,9 @@ export default function Profile() {
                       <button onClick={() => { setShowMore(false); setShowExport(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
                         <Download className="w-4 h-4" /> Export Data
                       </button>
+                      <button onClick={() => { setShowMore(false); setShowAIDeleteModal(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#D97706", borderBottom: "1px solid var(--border-light)" }}>
+                        <Zap className="w-4 h-4" /> Delete AI Data
+                      </button>
                       <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
                         <LogOut className="w-4 h-4" /> Sign Out
                       </button>
