@@ -287,6 +287,9 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
         className="hidden" onChange={(e) => handleFiles(e.target.files)} />
       <input ref={galleryInputRef} type="file" accept="image/*,video/*" multiple
         className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
