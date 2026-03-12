@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Star, Zap, CheckCircle2, ArrowRight } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
@@ -53,10 +54,12 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
     return () => window.removeEventListener("popstate", handler);
   }, [onClose]);
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 flex flex-col justify-end"
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: 9999, backgroundColor: "var(--bg-app)" }}
     >
       {/* Backdrop — click to close */}
       <motion.div
@@ -67,7 +70,7 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
         transition={{ duration: 0.2 }}
         onClick={onClose}
         className="absolute inset-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}
+        style={{ backgroundColor: "var(--bg-app)", backdropFilter: "none", WebkitBackdropFilter: "none" }}
       />
 
       {/* Drawer sheet */}
@@ -211,7 +214,8 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
           </div>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

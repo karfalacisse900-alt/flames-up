@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -121,9 +122,11 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
     if (hasCoords) window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80]"
+      className="fixed inset-0 z-[9999]"
       style={{
         backgroundColor: "var(--bg-app)",
         opacity: 1,
@@ -357,6 +360,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
         )}
       </AnimatePresence>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

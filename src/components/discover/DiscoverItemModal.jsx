@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, ExternalLink, ThumbsUp, Send, Globe, Smartphone, Monitor, Bookmark, BookmarkCheck, Share2, Twitter, Link2, Check, Star, Zap, Users, Crown } from "lucide-react";
@@ -117,10 +118,12 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
     onSuccess: () => qc.invalidateQueries(["reviews", item.id]),
   });
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 flex items-end justify-center sm:items-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9999, touchAction: "none" }}
+      style={{ backgroundColor: "var(--bg-app)", zIndex: 9999, touchAction: "none" }}
       onMouseDown={onClose}
     >
       <div
@@ -288,6 +291,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
