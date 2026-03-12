@@ -145,8 +145,9 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   };
 
   const handleClose = useCallback(() => {
-    // Restore background videos to muted autoplay
-    document.querySelectorAll("video").forEach(v => { v.muted = true; });
+    if (playTimerRef.current) clearTimeout(playTimerRef.current);
+    // Pause and mute all videos when leaving immersive mode
+    document.querySelectorAll("video").forEach(v => { v.pause(); v.muted = true; });
     window.dispatchEvent(new CustomEvent("postviewermode", { detail: { active: false } }));
     onClose();
   }, [onClose]);
