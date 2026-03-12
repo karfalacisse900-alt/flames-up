@@ -277,7 +277,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           <>
             <SectionHeader icon="💡" label="Apps You Might Need" />
             {/* Desktop: 3-column animated grid */}
-            <div className="hidden lg:block mb-2 overflow-hidden" style={{ height: 340 }}>
+            <div className="hidden md:block mb-2 overflow-hidden" style={{ height: 340 }}>
               <div className="grid grid-cols-3 gap-3">
                 {/* Column 1: Scroll down */}
                 <div className="flex flex-col gap-3 animate-scroll-down">
