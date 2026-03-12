@@ -23,6 +23,7 @@ export default function PostSettingsPanel({
   const [showMore, setShowMore] = useState(false);
   const [hashtagInput, setHashtagInput] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showPollCreator, setShowPollCreator] = useState(false);
 
   const set = (field, value) => setPostSettings((prev) => ({ ...prev, [field]: value }));
 
