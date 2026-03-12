@@ -174,16 +174,15 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
 
       {/* Camera viewport */}
       <div className="absolute inset-0">
-        {cameraActive ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-            style={{ transform: frontCamera ? "scaleX(-1)" : "none" }}
-          />
-        ) : (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full object-cover"
+          style={{ transform: frontCamera ? "scaleX(-1)" : "none", opacity: cameraActive ? 1 : 0 }}
+        />
+        {!cameraActive && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4"
             style={{ backgroundColor: "#0d0d0d" }}>
             <div className="w-24 h-24 rounded-full flex items-center justify-center"
