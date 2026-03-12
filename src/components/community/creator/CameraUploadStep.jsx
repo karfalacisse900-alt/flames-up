@@ -226,11 +226,11 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
         {/* Mode pills */}
         <div className="flex justify-center gap-2 mb-6">
           {MODES.map((mode) => (
-            <button key={mode} onClick={() => setSelectedMode(mode)} disabled={isRecording}
+            <button key={mode} onClick={() => setCameraMode(mode)} disabled={isRecording}
               className="px-5 py-1.5 rounded-full text-sm font-bold transition-all disabled:opacity-50"
               style={{
-                backgroundColor: selectedMode === mode ? "#fff" : "rgba(255,255,255,0.16)",
-                color: selectedMode === mode ? "#000" : "#fff",
+                backgroundColor: cameraMode === mode ? "#fff" : "rgba(255,255,255,0.16)",
+                color: cameraMode === mode ? "#000" : "#fff",
               }}>
               {mode}
             </button>
