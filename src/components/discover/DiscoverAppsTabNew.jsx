@@ -276,40 +276,15 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
         {!search && activeCategory === null && trending.length > 0 && (
           <>
             <SectionHeader icon="💡" label="Apps You Might Need" />
-            {/* Desktop: 3-column animated grid */}
-            <div className="hidden md:block mb-2 overflow-hidden" style={{ height: 340 }}>
-              <div className="grid grid-cols-3 gap-3">
-                {/* Column 1: Scroll down */}
-                <div className="flex flex-col gap-3 animate-scroll-down">
-                  {[...trending.slice(0, 4), ...trending.slice(0, 4)].map((item, i) => (
-                    <TrendingCard key={`col1-${i}`} item={item} onOpen={() => onItemClick(item)} />
-                  ))}
+            {/* Masonry Grid Layout */}
+            <div className="masonry-grid mb-2" style={{ 
+              columnCount: window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : 2,
+              columnGap: '12px'
+            }}>
+              {trending.map((item, i) => (
+                <div key={item.id} style={{ breakInside: 'avoid', marginBottom: '12px' }}>
+                  <TrendingCard item={item} onOpen={() => onItemClick(item)} />
                 </div>
-                {/* Column 2: Scroll up */}
-                <div className="flex flex-col gap-3 animate-scroll-up">
-                  {[...trending.slice(2, 6), ...trending.slice(2, 6)].map((item, i) => (
-                    <TrendingCard key={`col2-${i}`} item={item} onOpen={() => onItemClick(item)} />
-                  ))}
-                </div>
-                {/* Column 3: Scroll down */}
-                <div className="flex flex-col gap-3 animate-scroll-down">
-                  {[...trending.slice(4, 8), ...trending.slice(4, 8)].map((item, i) => (
-                    <TrendingCard key={`col3-${i}`} item={item} onOpen={() => onItemClick(item)} />
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Mobile: horizontal scroll */}
-            <div
-              className="md:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
-              ref={trendingScrollRef}
-              onMouseEnter={() => { trendingPausedRef.current = true; }}
-              onMouseLeave={() => { trendingPausedRef.current = false; }}
-              onTouchStart={() => { trendingPausedRef.current = true; }}
-              onTouchEnd={() => { setTimeout(() => { trendingPausedRef.current = false; }, 2000); }}
-            >
-              {trending.map(item => (
-                <TrendingCard key={item.id} item={item} onOpen={() => onItemClick(item)} />
               ))}
             </div>
           </>
