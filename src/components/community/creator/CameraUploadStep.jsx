@@ -205,8 +205,8 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
         {/* Duration pills */}
         <div className="flex justify-center gap-2 mb-6">
           {DURATIONS.map((d) => (
-            <button key={d} onClick={() => setSelectedDuration(d)}
-              className="px-5 py-1.5 rounded-full text-sm font-bold transition-all"
+            <button key={d} onClick={() => setSelectedDuration(d)} disabled={isRecording}
+              className="px-5 py-1.5 rounded-full text-sm font-bold transition-all disabled:opacity-50"
               style={{
                 backgroundColor: selectedDuration === d ? "#fff" : "rgba(255,255,255,0.16)",
                 color: selectedDuration === d ? "#000" : "#fff",
@@ -216,11 +216,20 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
           ))}
         </div>
 
+        {/* Recording timer */}
+        {isRecording && (
+          <div className="flex justify-center mb-6">
+            <div className="text-white text-lg font-bold">
+              {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, "0")}
+            </div>
+          </div>
+        )}
+
         {/* Record row */}
         <div className="flex items-center justify-between">
           {/* Gallery button */}
-          <button onClick={() => galleryInputRef.current?.click()}
-            className="flex flex-col items-center gap-1.5">
+          <button onClick={() => galleryInputRef.current?.click()} disabled={isRecording}
+            className="flex flex-col items-center gap-1.5 disabled:opacity-50">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
               style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "2px solid rgba(255,255,255,0.25)" }}>
               🖼️
@@ -229,12 +238,16 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
           </button>
 
           {/* Record / capture button */}
-          <button onClick={() => captureInputRef.current?.click()}
+          <button onClick={isRecording ? stopRecording : startRecording}
             className="relative flex items-center justify-center active:scale-95 transition-transform"
             style={{ width: 88, height: 88 }}>
             <div className="absolute inset-0 rounded-full"
               style={{ border: "3px solid rgba(255,255,255,0.45)" }} />
-            <div className="w-[68px] h-[68px] rounded-full bg-white shadow-lg" />
+            <div className="w-[68px] h-[68px] rounded-full"
+              style={{
+                backgroundColor: isRecording ? "#E53E3E" : "#fff",
+                boxShadow: isRecording ? "0 0 0 10px rgba(229,62,62,0.3)" : "0 4px 12px rgba(0,0,0,0.3)",
+              }} />
           </button>
 
           {/* Balanced spacer */}
