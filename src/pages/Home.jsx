@@ -41,6 +41,7 @@ export default function Home() {
       {divider}
       <CommunityFeed user={user} />
       <WelcomePopup />
+      {user && <LiveActivityFeed maxItems={8} autoRefreshMs={4000} />}
     </div>
   );
 }
