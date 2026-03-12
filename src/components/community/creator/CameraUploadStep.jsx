@@ -142,7 +142,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
       edits: {},
     }));
     stopCamera();
-    if (setSelectedMode) setSelectedMode(selectedMode);
+    if (setSelectedMode) setSelectedMode(cameraMode);
     onMediaSelected(items);
   };
 
