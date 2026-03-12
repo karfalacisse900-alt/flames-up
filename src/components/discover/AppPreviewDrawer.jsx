@@ -59,7 +59,7 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
   return createPortal(
     <div
       className="fixed inset-0 flex flex-col justify-end"
-      style={{ zIndex: 9999, backgroundColor: "var(--bg-app)" }}
+      style={{ zIndex: 9999, backgroundColor: "#D1FAE5" }}
     >
       {/* Backdrop — click to close */}
       <motion.div
@@ -70,7 +70,7 @@ function DrawerContent({ item, user, onClose, onFullOpen }) {
         transition={{ duration: 0.2 }}
         onClick={onClose}
         className="absolute inset-0"
-        style={{ backgroundColor: "var(--bg-app)", backdropFilter: "none", WebkitBackdropFilter: "none" }}
+        style={{ backgroundColor: "#D1FAE5" }}
       />
 
       {/* Drawer sheet */}

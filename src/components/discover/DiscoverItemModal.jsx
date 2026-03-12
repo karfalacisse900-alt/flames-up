@@ -123,7 +123,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
   return createPortal(
     <div
       className="fixed inset-0 flex items-end justify-center sm:items-center"
-      style={{ backgroundColor: "var(--bg-app)", zIndex: 9999, touchAction: "none" }}
+      style={{ backgroundColor: "#E8F2EC", zIndex: 9999, touchAction: "none" }}
       onMouseDown={onClose}
     >
       <div
