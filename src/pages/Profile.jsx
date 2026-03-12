@@ -10,6 +10,8 @@ import ActivityHistory from "../components/profile/ActivityHistory";
 import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import CreatorSection from "../components/profile/CreatorSection";
+import AIAssistantDeletion from "../components/profile/AIAssistantDeletion";
+import { usePresenceDetection } from "../components/hooks/usePresenceDetection";
 
 import { getBalance } from "../components/coins/coinsHelper";
 
