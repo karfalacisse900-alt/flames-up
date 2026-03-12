@@ -192,6 +192,59 @@ export default function PostSettingsPanel({
         </div>
       )}
 
+      {/* Create Poll */}
+      {!postSettings.poll && (
+        <button onClick={() => setShowPollCreator(true)}
+          className="w-full px-4 py-3 flex items-center justify-between"
+          style={{ borderBottom: "1px solid var(--border-light)" }}>
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Add Poll</span>
+          </div>
+          <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+        </button>
+      )}
+
+      {/* Poll Creator Modal */}
+      {showPollCreator && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
+          <div className="w-full bg-white rounded-t-3xl p-4" style={{ backgroundColor: "var(--bg-card)", maxHeight: "80vh", overflowY: "auto" }}>
+            <PollCreator
+              onPollCreate={(pollData) => {
+                set("poll", pollData);
+                setShowPollCreator(false);
+              }}
+              onCancel={() => setShowPollCreator(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Poll Preview */}
+      {postSettings.poll && (
+        <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Poll Added</span>
+            </div>
+            <button onClick={() => set("poll", null)} className="text-xs font-semibold" style={{ color: "#E53E3E" }}>
+              Remove
+            </button>
+          </div>
+          <p className="text-sm mb-2" style={{ color: "var(--text-primary)" }}>
+            {postSettings.poll.question}
+          </p>
+          <div className="space-y-1.5">
+            {postSettings.poll.options.map((opt) => (
+              <div key={opt.id} className="text-xs px-2 py-1.5 rounded-lg" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                • {opt.text}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Tag Friends */}
       <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-light)" }}>
         <div className="flex items-center gap-2">
