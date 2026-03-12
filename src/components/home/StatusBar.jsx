@@ -15,8 +15,6 @@ export default function StatusBar({ user }) {
   const navigate = useNavigate();
   const [showPost, setShowPost] = useState(false);
 
-  const isCreator = user?.role === "creator" || user?.role === "admin";
-
   const { data: statuses = [] } = useQuery({
     queryKey: ["creatorStatuses"],
     queryFn: async () => {
@@ -35,7 +33,7 @@ export default function StatusBar({ user }) {
       .catch(() => {});
   }, [user?.email]);
 
-  const canPost = isCreator || !!groupAdminOf;
+  const canPost = !!user;
 
   const authorGroups = useMemo(() => {
     const map = new Map();
