@@ -457,6 +457,13 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
 
+        {/* ── Poll ── */}
+        {post.poll_id && (
+          <div className="mb-2.5">
+            <PollDisplay postId={post.id} pollId={post.poll_id} user={user} />
+          </div>
+        )}
+
         {/* ── Place tags ── */}
         {post.place_tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2.5">
