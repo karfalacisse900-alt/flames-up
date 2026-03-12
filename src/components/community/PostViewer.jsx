@@ -40,21 +40,37 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   const currentPost = posts[currentIndex];
   const hasLiked = user?.email && currentPost?.upvoted_by?.includes(user.email);
 
-  // Stop ALL videos immediately on index change, then play only the current one after transition
+  // Strictly controlled media playback:
+  // 1. Immediately stop ALL videos/audio everywhere
+  // 2. Wait for slide transition to complete
+  // 3. Only then play the current post's video with audio
   useEffect(() => {
-    // Immediately pause everything (prevents audio bleed during slide animation)
-    document.querySelectorAll("video").forEach(v => { v.pause(); v.muted = true; });
+    // Step 1: Kill any in-flight play timer
+    if (playTimerRef.current) clearTimeout(playTimerRef.current);
 
-    // After slide transition completes (280ms), play current video with audio
-    const timer = setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.muted = false;
-        videoRef.current.currentTime = 0;
-        videoRef.current.play().catch(() => {});
-      }
-    }, 320);
-    return () => clearTimeout(timer);
-  }, [currentIndex]);
+    // Step 2: Immediately silence and pause every video on the page
+    document.querySelectorAll("video").forEach(v => {
+      v.pause();
+      v.muted = true;
+    });
+
+    const currentPost = posts[currentIndex];
+    if (!currentPost?.video_url) return; // nothing to play
+
+    // Step 3: After transition completes, play only the active video
+    playTimerRef.current = setTimeout(() => {
+      const vid = videoRef.current;
+      if (!vid) return;
+      // Guard: ensure this is still the active post
+      vid.muted = false;
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }, 340); // slightly longer than the 280ms transition
+
+    return () => {
+      if (playTimerRef.current) clearTimeout(playTimerRef.current);
+    };
+  }, [currentIndex, posts]);
 
   // Unmute when viewer opens
   useEffect(() => {
