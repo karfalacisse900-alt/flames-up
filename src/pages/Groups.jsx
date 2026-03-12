@@ -617,6 +617,7 @@ export default function Groups() {
 
   const [dismissedGroups, setDismissedGroups] = useState(new Set());
   const [showTrendingSwiper, setShowTrendingSwiper] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
 
   const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
   const trendingGroups = useMemo(() => 
