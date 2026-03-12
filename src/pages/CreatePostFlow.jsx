@@ -96,7 +96,22 @@ export default function CreatePostFlow() {
         is_creator_post: user.is_creator || false,
       };
 
-      await base44.entities.CommunityPost.create(postData);
+      const createdPost = await base44.entities.CommunityPost.create(postData);
+
+      // Create poll if one was added
+      if (postSettings.poll) {
+        const pollData = {
+          post_id: createdPost.id,
+          ...postSettings.poll,
+        };
+        await base44.entities.Poll.create(pollData);
+
+        // Update post with poll_id
+        await base44.entities.CommunityPost.update(createdPost.id, {
+          poll_id: (await base44.entities.Poll.filter({ post_id: createdPost.id }))[0].id,
+        });
+      }
+
       navigate(createPageUrl("Home"));
     } catch (err) {
       console.error("Post error:", err);
