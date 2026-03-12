@@ -183,12 +183,13 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
               transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
               className="absolute inset-0"
             >
-              {/* Media */}
+              {/* Media — NO autoPlay; playback is controlled programmatically */}
               {currentPost.video_url ? (
                 <video
                   ref={videoRef}
                   src={currentPost.video_url}
-                  autoPlay playsInline loop
+                  playsInline loop muted
+                  preload="auto"
                   className="w-full h-full object-cover"
                 />
               ) : currentPost.image_urls?.[0] || currentPost.image_url ? (
