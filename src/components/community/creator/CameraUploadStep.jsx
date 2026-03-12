@@ -47,7 +47,26 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
 
   const getDurationMs = () => {
     const map = { "15s": 15000, "60s": 60000, "3min": 180000 };
-    return map[selectedDuration] || 60000;
+    return map[selectedMode] || 60000;
+  };
+
+  const takePhoto = () => {
+    if (!videoRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    if (frontCamera) {
+      ctx.scale(-1, 1);
+      ctx.drawImage(videoRef.current, -canvas.width, 0);
+    } else {
+      ctx.drawImage(videoRef.current, 0, 0);
+    }
+    canvas.toBlob((blob) => {
+      const file = new File([blob], `photo-${Date.now()}.png`, { type: "image/png" });
+      handleFiles([file]);
+    }, "image/png");
   };
 
   const startRecording = async () => {
