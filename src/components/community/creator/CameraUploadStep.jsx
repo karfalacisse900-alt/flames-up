@@ -99,8 +99,17 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
 
   useEffect(() => {
     startCamera();
-    return () => stopCamera();
+    return () => {
+      stopCamera();
+      if (isRecording) stopRecording();
+    };
   }, [frontCamera]);
+
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    };
+  }, []);
 
   const handleFiles = (files) => {
     if (!files?.length) return;
