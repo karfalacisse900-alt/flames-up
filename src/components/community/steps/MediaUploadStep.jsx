@@ -318,9 +318,9 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
             onMediaSelected={(items) => {
               handleFileSelect(items.map(item => item.file));
               setShowCamera(false);
-              setSelectedMode("60s");
             }}
             onClose={() => setShowCamera(false)}
+            setSelectedMode={setSelectedMode}
           />
         )}
       </div>
