@@ -222,16 +222,16 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
       {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 z-20 px-5"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)", paddingTop: 16 }}>
-        {/* Duration pills */}
+        {/* Mode pills */}
         <div className="flex justify-center gap-2 mb-6">
-          {DURATIONS.map((d) => (
-            <button key={d} onClick={() => setSelectedDuration(d)} disabled={isRecording}
+          {MODES.map((mode) => (
+            <button key={mode} onClick={() => setSelectedMode(mode)} disabled={isRecording}
               className="px-5 py-1.5 rounded-full text-sm font-bold transition-all disabled:opacity-50"
               style={{
-                backgroundColor: selectedDuration === d ? "#fff" : "rgba(255,255,255,0.16)",
-                color: selectedDuration === d ? "#000" : "#fff",
+                backgroundColor: selectedMode === mode ? "#fff" : "rgba(255,255,255,0.16)",
+                color: selectedMode === mode ? "#000" : "#fff",
               }}>
-              {d}
+              {mode}
             </button>
           ))}
         </div>
@@ -257,8 +257,8 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
             <span className="text-white text-[10px] font-semibold">Gallery</span>
           </button>
 
-          {/* Record / capture button */}
-          <button onClick={isRecording ? stopRecording : startRecording}
+          {/* Capture button - Photo or Video */}
+          <button onClick={selectedMode === "Photo" ? takePhoto : (isRecording ? stopRecording : startRecording)}
             className="relative flex items-center justify-center active:scale-95 transition-transform"
             style={{ width: 88, height: 88 }}>
             <div className="absolute inset-0 rounded-full"
