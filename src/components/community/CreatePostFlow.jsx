@@ -139,6 +139,7 @@ export default function CreatePostFlow({ onClose, onSuccess }) {
             mediaItems={mediaItems}
             setMediaItems={setMediaItems}
             onNext={handleNext}
+            setSelectedMode={setSelectedMode}
           />
         )}
         
