@@ -263,7 +263,6 @@ export default function CommunityFeed({ user }) {
       onTouchEnd={handleTouchEnd}
       style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
     >
-      <PullIndicator />
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ 
         background: "linear-gradient(180deg, rgba(242,237,228,0.98), rgba(242,237,228,0.8))", 
