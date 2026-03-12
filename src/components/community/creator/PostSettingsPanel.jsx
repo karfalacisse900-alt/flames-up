@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import {
-  MapPin, EyeOff, ChevronRight, Hash, Globe, Link as LinkIcon, Users, Bot,
+  MapPin, EyeOff, ChevronRight, Hash, Globe, Link as LinkIcon, Users, Bot, BarChart3,
 } from "lucide-react";
 import LocationTagButton from "../LocationTagButton";
 import ReactQuill from "react-quill";
+import PollCreator from "../PollCreator";
 
 const PRIVACY_OPTIONS = [
   { value: "public",    label: "Everyone", icon: "🌍" },
