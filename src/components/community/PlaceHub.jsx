@@ -122,7 +122,22 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div
+      className="fixed inset-0 z-[80]"
+      style={{
+        backgroundColor: "rgba(15, 20, 18, 0.72)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      }}
+    >
+      <div
+        className="absolute inset-0 flex flex-col overflow-hidden"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          color: "var(--text-primary)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+        }}
+      >
       {/* Hero map banner */}
       <div className="relative shrink-0 h-44 overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
         {mapboxStaticUrl ? (
