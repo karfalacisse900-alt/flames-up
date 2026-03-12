@@ -7,7 +7,6 @@ import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
-import GroupPreviewCard from "./GroupPreviewCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
@@ -31,26 +30,10 @@ export default function CommunityFeed({ user }) {
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
+    // Only show posts that don't belong to any group (group_id is null/undefined)
     queryFn: async () => {
-      const allPosts = await base44.entities.CommunityPost.list("-created_date", 100);
-      const groupPosts = await base44.entities.Group.list("-created_date", 50).then(groups => 
-        groups.filter(g => g.preview_video_url || g.cover_image_url).map(g => ({
-          id: `group_${g.id}`,
-          type: "group_preview",
-          group_id: g.id,
-          group_name: g.name,
-          emoji: g.emoji,
-          description: g.description,
-          cover_image_url: g.cover_image_url,
-          preview_video_url: g.preview_video_url,
-          category: g.category,
-          member_count: g.member_count,
-          created_date: g.created_date,
-          is_paid: g.is_paid,
-          monthly_fee: g.monthly_fee,
-        }))
-      );
-      return [...allPosts.filter(p => !p.group_id), ...groupPosts];
+      const all = await base44.entities.CommunityPost.list("-created_date", 100);
+      return all.filter(p => !p.group_id);
     },
   });
 
@@ -224,18 +207,12 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const handleGroupOpen = (group) => {
-    window.location.href = createPageUrl(`Groups?groupId=${group.group_id}`);
-  };
-
   const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
-    if (user?.email && post.type !== "group_preview") trackPostView(post.id);
+    if (user?.email) trackPostView(post.id);
     return (
       <div key={post.id} className="fade-slide-in" style={{ animationDelay: `${Math.min(index * 0.03, 0.3)}s`, animationFillMode: "both" }}>
-        {post.type === "group_preview" ? (
-          <GroupPreviewCard group={post} onOpen={handleGroupOpen} />
-        ) : post.type === "debate" || post.type === "question" ? (
+        {post.type === "debate" || post.type === "question" ? (
           <DebateCard post={post} debate={debate} user={user}
             onUpvote={() => user && upvoteMut.mutate({ post })}
             isExpanded={expandedPost === post.id}

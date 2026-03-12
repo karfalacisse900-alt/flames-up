@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap, CreditCard } from "lucide-react";
+import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap } from "lucide-react";
 import SavedItems from "../components/profile/SavedItems";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
@@ -11,7 +11,6 @@ import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import CreatorSection from "../components/profile/CreatorSection";
 import AIAssistantDeletion from "../components/profile/AIAssistantDeletion";
-import SubscriptionManagement from "../components/profile/SubscriptionManagement";
 import { usePresenceDetection } from "../components/hooks/usePresenceDetection";
 
 import { getBalance } from "../components/coins/coinsHelper";
@@ -315,10 +314,7 @@ export default function Profile() {
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
-            <CreditCard className="w-3.5 h-3.5" /> Subscriptions
-          </TabsTrigger>
-          </TabsList>
+        </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-3">
            {myPosts.length === 0 ? (
@@ -403,16 +399,12 @@ export default function Profile() {
         </TabsContent>
 
         <TabsContent value="interests" className="mt-4">
-           <InterestsSection user={user} onUpdated={setUser} />
-         </TabsContent>
+          <InterestsSection user={user} onUpdated={setUser} />
+        </TabsContent>
 
-         <TabsContent value="subscriptions" className="mt-4">
-           <SubscriptionManagement user={user} />
-         </TabsContent>
-
-         <TabsContent value="activity" className="mt-4">
-           <ActivityHistory user={user} />
-         </TabsContent>
+        <TabsContent value="activity" className="mt-4">
+          <ActivityHistory user={user} />
+        </TabsContent>
 
       </Tabs>
 

@@ -22,8 +22,6 @@ import EventSafetySettings from "./safety/EventSafetySettings";
 import GroupPreviewVideo from "./GroupPreviewVideo";
 import EditGroupModal from "./EditGroupModal";
 import PostStatusModal from "@/components/home/PostStatusModal";
-import GroupPaymentFlow from "./GroupPaymentFlow";
-import GroupReviewSection from "./GroupReviewSection";
 import { AnimatePresence as AnimatePresenceLocal } from "framer-motion";
 
 const CATEGORY_COLORS = {
@@ -209,19 +207,14 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
         </div>
 
         {/* Action bar */}
-         <div className="px-4 mt-1 pb-3 flex items-center gap-2">
-           {!isMember ? (
-             <button onClick={onJoin} className="flex-1 py-2 rounded-xl text-sm font-bold"
-               style={{ backgroundColor: "rgba(255,255,255,0.9)", color: "#2E6B4F" }}>
-               Join Group
-             </button>
-           ) : isMember ? (
-             <button onClick={onLeave} className="flex-1 py-2 rounded-xl text-sm font-bold"
-               style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
-               Leave Group
-             </button>
-           ) : (
-             <>
+        <div className="px-4 mt-1 pb-3 flex items-center gap-2">
+          {!isMember ? (
+            <button onClick={onJoin} className="flex-1 py-2 rounded-xl text-sm font-bold"
+              style={{ backgroundColor: "rgba(255,255,255,0.9)", color: "#2E6B4F" }}>
+              Join Group
+            </button>
+          ) : (
+            <>
               {activeTab === "chat" && (
                 <button onClick={() => setShowCompose(true)}
                   className="flex-1 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
@@ -330,16 +323,11 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
         </div>
       )}
 
-      {/* Paid group payment flow */}
-      {!isMember && group.is_paid && (
-        <GroupPaymentFlow group={group} user={user} onSuccess={() => onJoin()} />
-      )}
-
       {/* Tab content */}
       <AnimatePresence mode="wait">
         <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
           {/* CHAT TAB */}
-          {activeTab === "chat" && isMember && (
+          {activeTab === "chat" && (
             <div style={{ paddingBottom: 120 }}>
               {/* Pinned posts first */}
               {visiblePosts.filter(p => p.is_pinned).map(post => (
@@ -468,11 +456,6 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
           {/* MEDIA / WATCH TAB */}
           {activeTab === "media" && (
             <GroupReactionTab group={group} user={user} isMember={isMember} />
-          )}
-
-          {/* REVIEWS TAB - shown at bottom for all members */}
-          {activeTab === "chat" && isMember && (
-            <GroupReviewSection groupId={group.id} groupName={group.name} group={group} user={user} isMember={isMember} />
           )}
         </motion.div>
       </AnimatePresence>
