@@ -343,7 +343,7 @@ export default function CommunityFeed({ user }) {
                       ))}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 
