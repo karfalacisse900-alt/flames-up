@@ -98,6 +98,11 @@ export default function CommunityFeed({ user }) {
 
   const loadNewPosts = () => { refetch(); setNewPostsAvailable(0); };
 
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(async () => {
+    await refetch();
+    setNewPostsAvailable(0);
+  });
+
   const upvoteMut = useMutation({
     mutationFn: ({ post }) => {
       if (!requireVerified(user)) throw new Error("Email not verified");
