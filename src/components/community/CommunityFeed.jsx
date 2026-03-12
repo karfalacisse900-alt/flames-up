@@ -205,7 +205,7 @@ export default function CommunityFeed({ user }) {
       });
     }
     return base;
-  }, [stablePostIds, posts, activeFilter, userCoords, feedTab, user?.email, followedEmails]);
+  }, [stablePostIds, posts, activeFilter, userCoords, user?.email, followedEmails]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
