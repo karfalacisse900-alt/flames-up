@@ -137,11 +137,11 @@ export default function AppAIAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="fixed bottom-20 right-3 left-3 z-50 max-w-sm mx-auto rounded-3xl flex flex-col overflow-hidden"
+            className="fixed bottom-20 right-3 left-3 z-[9999] max-w-sm mx-auto rounded-3xl flex flex-col overflow-hidden"
             style={{
-              backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border-light)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+              backgroundColor: "#FAFAF8",
+              border: "2px solid var(--accent-primary)",
+              boxShadow: "0 20px 60px rgba(46,107,79,0.4)",
               maxHeight: "70vh",
             }}
           >

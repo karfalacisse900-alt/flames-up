@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { X, Plus, FolderOpen, Check } from "lucide-react";
@@ -64,11 +65,13 @@ export default function SavePostModal({ post, user, onClose }) {
     toggle(name);
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 flex items-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)", zIndex: 9999 }}
+      style={{ backgroundColor: "#FEF3C7", zIndex: 9999 }}
       onClick={onClose}
     >
       <motion.div
@@ -132,6 +135,7 @@ export default function SavePostModal({ post, user, onClose }) {
           )}
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
