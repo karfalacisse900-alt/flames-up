@@ -12,7 +12,12 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
   const [cameraActive, setCameraActive] = useState(false);
   const [showMusicSheet, setShowMusicSheet] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const videoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const recordingIntervalRef = useRef(null);
   const captureInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
