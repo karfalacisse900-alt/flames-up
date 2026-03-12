@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X, Eye } from "lucide-react";
+import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
@@ -26,7 +26,6 @@ export default function CommunityFeed({ user }) {
   const [locationLoading, setLocationLoading] = useState(false);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
-  const navigate = useNavigate();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
@@ -338,12 +337,6 @@ export default function CommunityFeed({ user }) {
               )}
             </div>
 
-            <button
-              onClick={() => navigate(`${createPageUrl("ImmersiveFeed")}?filter=${encodeURIComponent(activeFilter)}`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
-              <Eye className="w-3 h-3" /> Immersive
-            </button>
             <Link
               to={createPageUrl("CreatePostFlow")}
               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}

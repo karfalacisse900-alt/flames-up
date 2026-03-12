@@ -125,9 +125,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
     <div
       className="fixed inset-0 z-[80]"
       style={{
-        backgroundColor: "rgba(15, 20, 18, 0.72)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        backgroundColor: "var(--bg-app)",
       }}
     >
       <div
