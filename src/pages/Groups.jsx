@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 import GroupMessageBubble from "@/components/groups/GroupMessageBubble";
-import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
+import TrendingGroupsSwiper from "@/components/groups/TrendingGroupsSwiper";
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const CATEGORY_GRADIENTS = {
@@ -616,6 +616,7 @@ export default function Groups() {
   };
 
   const [dismissedGroups, setDismissedGroups] = useState(new Set());
+  const [showTrendingSwiper, setShowTrendingSwiper] = useState(false);
 
   const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
   const trendingGroups = useMemo(() => 
@@ -810,18 +811,38 @@ export default function Groups() {
               {/* Trending / Live */}
               {trendingGroups.length > 0 && (
                 <section className="pt-5 pb-2">
-                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-4 mb-3" style={{ color: "var(--text-hint)" }}>
-                    <Flame className="w-3.5 h-3.5 text-orange-500" /> Trending Groups
-                  </p>
+                  <div className="flex items-center justify-between px-4 mb-3">
+                    <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
+                      <Flame className="w-3.5 h-3.5 text-orange-500" /> Trending Groups
+                    </p>
+                    <button
+                      onClick={() => setShowTrendingSwiper(true)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                      style={{ backgroundColor: "var(--accent-primary)" }}>
+                      Preview All
+                    </button>
+                  </div>
                   <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-2">
-                    {trendingGroups.map(g => (
-                      <TrendingGroupCard
+                    {trendingGroups.slice(0, 4).map((g, i) => (
+                      <div
                         key={g.id}
-                        group={g}
-                        onDismiss={() => setDismissedGroups(prev => new Set([...prev, g.id]))}
-                        onJoin={handleJoin}
-                        onOpen={handleOpenGroup}
-                      />
+                        onClick={() => handleOpenGroup(g)}
+                        className="shrink-0 cursor-pointer rounded-2xl overflow-hidden"
+                        style={{ width: 160, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                        <div className="aspect-square relative" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                          {g.cover_image_url ? (
+                            <img src={g.cover_image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-4xl">{g.emoji || "💬"}</div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <h4 className="font-bold text-sm line-clamp-1 mb-0.5" style={{ color: "var(--text-primary)" }}>{g.name}</h4>
+                          <p className="text-[11px]" style={{ color: "var(--text-hint)" }}>
+                            {(g.member_count || 0).toLocaleString()} members
+                          </p>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </section>
