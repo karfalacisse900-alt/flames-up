@@ -259,7 +259,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
           </button>
 
           {/* Capture button - Photo or Video */}
-          <button onClick={selectedMode === "Photo" ? takePhoto : (isRecording ? stopRecording : startRecording)}
+          <button onClick={cameraMode === "Photo" ? takePhoto : (isRecording ? stopRecording : startRecording)}
             className="relative flex items-center justify-center active:scale-95 transition-transform"
             style={{ width: 88, height: 88 }}>
             <div className="absolute inset-0 rounded-full"
