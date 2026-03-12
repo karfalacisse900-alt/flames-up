@@ -301,12 +301,7 @@ export default function CommunityFeed({ user }) {
               </div>
 
               {showPicker && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="absolute right-0 top-9 w-64 rounded-2xl shadow-lg z-50 overflow-hidden"
+                <div className="absolute right-0 top-9 w-64 rounded-2xl shadow-lg z-50 overflow-hidden"
                   style={{ backgroundColor: "var(--bg-modal)", border: "1px solid var(--border-light)", backdropFilter: "blur(12px)" }}>
                   {/* Global & Nearby */}
                   <div className="p-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
@@ -343,7 +338,7 @@ export default function CommunityFeed({ user }) {
                       ))}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
             </div>
 
