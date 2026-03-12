@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronLeft, ChevronRight, MessageCircle, Send } from "lucide-react";
 import { base44 } from "@/api/base44Client";
