@@ -8,7 +8,7 @@ export default function GroupCard({ group, isMember, onJoin, isJoining }) {
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
