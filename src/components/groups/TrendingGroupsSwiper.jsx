@@ -89,6 +89,11 @@ function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends })
                       playsInline
                       muted
                       autoPlay
+                      preload="auto"
+                      onLoadedData={(e) => {
+                        e.currentTarget.muted = true;
+                        e.currentTarget.play().catch(() => {});
+                      }}
                     />
                     <div className="absolute top-2 left-2">
                       <Play className="w-4 h-4 text-white drop-shadow-lg" fill="white" />

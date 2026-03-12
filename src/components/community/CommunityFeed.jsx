@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X } from "lucide-react";
+import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X, Eye } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
-import PostViewer from "./PostViewer";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
@@ -19,8 +18,6 @@ const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "
 export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
-  const [videoViewerOpen, setVideoViewerOpen] = useState(false);
-  const [videoStartIndex, setVideoStartIndex] = useState(0);
   // filter: "global" | "nearby" | city string
   const [activeFilter, setActiveFilter] = useState("global");
   const [showPicker, setShowPicker] = useState(false);
@@ -29,6 +26,7 @@ export default function CommunityFeed({ user }) {
   const [locationLoading, setLocationLoading] = useState(false);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["communityPosts"],
@@ -209,13 +207,6 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const [immersiveMode, setImmersiveMode] = useState(false);
-
-  const openImmersiveViewer = (startIndex) => {
-    setVideoStartIndex(startIndex);
-    setVideoViewerOpen(true);
-  };
-
   const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
@@ -348,10 +339,10 @@ export default function CommunityFeed({ user }) {
             </div>
 
             <button
-              onClick={() => openImmersiveViewer(0)}
+              onClick={() => navigate(`${createPageUrl("ImmersiveFeed")}?filter=${encodeURIComponent(activeFilter)}`)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
               style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
-              <Zap className="w-3 h-3" /> View
+              <Eye className="w-3 h-3" /> Immersive
             </button>
             <Link
               to={createPageUrl("CreatePostFlow")}
@@ -418,18 +409,7 @@ export default function CommunityFeed({ user }) {
         )}
       </div>
 
-      {/* Post viewer modal */}
-      {videoViewerOpen && (
-        <PostViewer
-          posts={filteredPosts}
-          initialIndex={videoStartIndex}
-          user={user}
-          onClose={() => setVideoViewerOpen(false)}
-          activeFilter={activeFilter}
-          onFilterChange={(f) => { setActiveFilter(f); setVideoStartIndex(0); }}
-          allCities={uniqueCities}
-        />
-      )}
+
     </div>
   );
 }
