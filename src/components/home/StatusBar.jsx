@@ -9,6 +9,7 @@ const COLORS = ["#7C3AED", "#DB2777", "#EA580C", "#059669", "#0284C7", "#D97706"
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥", "✨", "😮", "😢", "🙏"];
 
+// ── Status Viewer (with reactions + comments) ──────────────
 function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev }) {
   const [reactions, setReactions] = useState(status.reactions || {});
   const [reactionCounts, setReactionCounts] = useState(status.reaction_counts || {});
@@ -79,6 +80,7 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
       {(status.image_url || status.video_url) && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.45)" }} />}
       {status.video_url && <video src={status.video_url} autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" />}
 
+      {/* Header */}
       <div className="relative z-10 flex items-center gap-3 px-4 pt-10 pb-3">
         <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0"
           style={{ backgroundColor: avatarColor(status.author_email), color: "#fff" }}>
@@ -97,18 +99,21 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
         </button>
       </div>
 
-      <div className="relative z-10 flex-1 flex">
+      {/* Tap nav zones */}
+      <div className="relative z-10 flex-1 flex" onClick={(e) => { e.stopPropagation(); }}>
         <div className="w-1/3 h-full cursor-pointer" onClick={hasPrev ? onPrev : undefined} />
         <div className="flex-1 h-full" />
         <div className="w-1/3 h-full cursor-pointer" onClick={hasNext ? onNext : undefined} />
       </div>
 
+      {/* Status text */}
       <div className="relative z-10 px-6 pb-2">
         <p className="text-white text-2xl font-bold leading-snug" style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
           {status.text}
         </p>
       </div>
 
+      {/* Reaction row */}
       <div className="relative z-10 flex items-center gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-1.5 flex-1">
           {REACTION_EMOJIS.map(emoji => {
@@ -124,6 +129,7 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
             );
           })}
         </div>
+        {/* Comment toggle */}
         <button onClick={() => { setShowComments(v => !v); setTimeout(() => inputRef.current?.focus(), 100); }}
           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0"
           style={{ backgroundColor: showComments ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.14)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)" }}>
@@ -132,11 +138,13 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
         </button>
       </div>
 
+      {/* Comments panel */}
       <AnimatePresence>
         {showComments && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="relative z-10 overflow-hidden"
             style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(12px)" }}>
+            {/* Comment list */}
             <div className="max-h-40 overflow-y-auto px-4 pt-3 pb-1">
               {comments.length === 0 ? (
                 <p className="text-white/50 text-xs text-center py-3">No comments yet. Be first!</p>
@@ -155,6 +163,7 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
                 ))
               )}
             </div>
+            {/* Comment input */}
             {user ? (
               <div className="flex items-center gap-2 px-3 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
                 <input ref={inputRef} value={commentText} onChange={e => setCommentText(e.target.value)}
@@ -176,6 +185,7 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
         )}
       </AnimatePresence>
 
+      {/* Nav arrows + safe bottom */}
       <div className="relative z-10 flex items-center justify-between px-4 py-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}>
         <button onClick={hasPrev ? onPrev : undefined} className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
           style={{ backgroundColor: hasPrev ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)", opacity: hasPrev ? 1 : 0.3 }}>
@@ -191,9 +201,10 @@ function StatusViewer({ status, user, onClose, onNext, onPrev, hasNext, hasPrev 
   );
 }
 
+// ── Main StatusBar ─────────────────────────────────────────
 export default function StatusBar({ user }) {
   const qc = useQueryClient();
-  const [viewerGroup, setViewerGroup] = useState(null);
+  const [viewerGroup, setViewerGroup] = useState(null); // array of statuses for one author
   const [viewerIdx, setViewerIdx] = useState(0);
   const [showPost, setShowPost] = useState(false);
 
@@ -219,13 +230,14 @@ export default function StatusBar({ user }) {
 
   const canPost = isCreator || !!groupAdminOf;
 
+  // Group statuses by author_email — one circle per user
   const authorGroups = useMemo(() => {
     const map = new Map();
     statuses.forEach(s => {
       if (!map.has(s.author_email)) map.set(s.author_email, []);
       map.get(s.author_email).push(s);
     });
-    return Array.from(map.values());
+    return Array.from(map.values()); // each is an array of statuses for one author
   }, [statuses]);
 
   if (authorGroups.length === 0 && !canPost) return null;
@@ -249,6 +261,7 @@ export default function StatusBar({ user }) {
     if (viewerIdx < viewerGroup.length - 1) {
       setViewerIdx(i => i + 1);
     } else {
+      // Move to next author group
       const currGroupIdx = authorGroups.findIndex(g => g[0].author_email === viewerGroup[0].author_email);
       if (currGroupIdx < authorGroups.length - 1) {
         setViewerGroup(authorGroups[currGroupIdx + 1]);
@@ -286,6 +299,7 @@ export default function StatusBar({ user }) {
             </button>
           )}
 
+          {/* One circle per author */}
           {authorGroups.map((group) => {
             const latest = group[0];
             const allViewed = group.every(s => s.viewed_by?.includes(user?.email));
@@ -301,6 +315,7 @@ export default function StatusBar({ user }) {
                       {initials}
                     </div>
                   </div>
+                  {/* Count badge if multiple */}
                   {group.length > 1 && (
                     <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
                       style={{ backgroundColor: "var(--accent-primary)", border: "2px solid var(--bg-app)" }}>
