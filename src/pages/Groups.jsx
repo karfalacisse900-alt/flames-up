@@ -11,6 +11,8 @@ import {
 import GroupHub from "@/components/groups/GroupHub";
 import GroupMessageBubble from "@/components/groups/GroupMessageBubble";
 import TrendingGroupsSwiper from "@/components/groups/TrendingGroupsSwiper";
+import GroupDiscovery from "@/components/groups/GroupDiscovery";
+import NearbyExplorer from "@/components/groups/NearbyExplorer";
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const CATEGORY_GRADIENTS = {
