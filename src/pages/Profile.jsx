@@ -11,6 +11,7 @@ import BoostPostModal from "../components/home/BoostPostModal";
 import WalletWidget from "../components/coins/WalletWidget";
 import CreatorSection from "../components/profile/CreatorSection";
 import AIAssistantDeletion from "../components/profile/AIAssistantDeletion";
+import SubscriptionManagement from "../components/profile/SubscriptionManagement";
 import { usePresenceDetection } from "../components/hooks/usePresenceDetection";
 
 import { getBalance } from "../components/coins/coinsHelper";
@@ -314,7 +315,10 @@ export default function Profile() {
           <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-        </TabsList>
+          <TabsTrigger value="subscriptions" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <Wallet className="w-3.5 h-3.5" /> Groups
+          </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="posts" className="mt-4 space-y-3">
            {myPosts.length === 0 ? (
@@ -399,12 +403,16 @@ export default function Profile() {
         </TabsContent>
 
         <TabsContent value="interests" className="mt-4">
-          <InterestsSection user={user} onUpdated={setUser} />
-        </TabsContent>
+           <InterestsSection user={user} onUpdated={setUser} />
+         </TabsContent>
 
-        <TabsContent value="activity" className="mt-4">
-          <ActivityHistory user={user} />
-        </TabsContent>
+         <TabsContent value="subscriptions" className="mt-4">
+           <SubscriptionManagement user={user} />
+         </TabsContent>
+
+         <TabsContent value="activity" className="mt-4">
+           <ActivityHistory user={user} />
+         </TabsContent>
 
       </Tabs>
 
