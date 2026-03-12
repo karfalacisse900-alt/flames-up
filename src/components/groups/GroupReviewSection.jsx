@@ -3,7 +3,7 @@ import { Star, MessageCircle, ThumbsUp } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function GroupReviewSection({ groupId, groupName, user, isMember }) {
+export default function GroupReviewSection({ groupId, groupName, group, user, isMember }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState("");
