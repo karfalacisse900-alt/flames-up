@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 
 // Aspect ratio rules by media type
 function getAspectStyle(mediaType) {
