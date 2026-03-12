@@ -176,13 +176,11 @@ export default function CommunityFeed({ user }) {
 
   const filteredPosts = useMemo(() => {
     const postMap = new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p]));
-    const base = stablePostIds.map(id => postMap.get(id)).filter(Boolean);
-
-    if (activeFilter === "global") return base;
+    let base = stablePostIds.map(id => postMap.get(id)).filter(Boolean);
 
     if (activeFilter === "nearby") {
       if (!userCoords) return [];
-      return base.filter(p => {
+      base = base.filter(p => {
         if (!p.location_lat || !p.location_lng) return false;
         const dLat = (p.location_lat - userCoords.lat) * (Math.PI / 180);
         const dLng = (p.location_lng - userCoords.lng) * (Math.PI / 180);
@@ -190,11 +188,25 @@ export default function CommunityFeed({ user }) {
         const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return km <= 50;
       });
+    } else if (activeFilter !== "global") {
+      base = base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
     }
 
-    // city filter
-    return base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
-  }, [stablePostIds, posts, activeFilter, userCoords]);
+    if (feedTab === "foryou" && user?.email) {
+      // Rank by: followed authors first, then liked/interacted posts, then recency+engagement
+      const likedIds = new Set(posts.filter(p => p.upvoted_by?.includes(user.email)).map(p => p.id));
+      return [...base].sort((a, b) => {
+        const aFollowed = followedEmails.includes(a.author_email) ? 20 : 0;
+        const bFollowed = followedEmails.includes(b.author_email) ? 20 : 0;
+        const aLiked = likedIds.has(a.id) ? 5 : 0;
+        const bLiked = likedIds.has(b.id) ? 5 : 0;
+        const aScore = (a.engagement_score || 0) + aFollowed + aLiked;
+        const bScore = (b.engagement_score || 0) + bFollowed + bLiked;
+        return bScore - aScore;
+      });
+    }
+    return base;
+  }, [stablePostIds, posts, activeFilter, userCoords, feedTab, user?.email, followedEmails]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
