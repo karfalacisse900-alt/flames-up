@@ -301,7 +301,7 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
             </div>
             {/* Mobile: horizontal scroll */}
             <div
-              className="lg:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
+              className="md:hidden flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
               ref={trendingScrollRef}
               onMouseEnter={() => { trendingPausedRef.current = true; }}
               onMouseLeave={() => { trendingPausedRef.current = false; }}
