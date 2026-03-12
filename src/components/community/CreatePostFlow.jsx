@@ -148,6 +148,7 @@ export default function CreatePostFlow({ onClose, onSuccess }) {
             setMediaItems={setMediaItems}
             currentEditingIndex={currentEditingIndex}
             setCurrentEditingIndex={setCurrentEditingIndex}
+            selectedMode={selectedMode}
             onNext={handleNext}
           />
         )}
