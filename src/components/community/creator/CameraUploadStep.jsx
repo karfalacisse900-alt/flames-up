@@ -237,9 +237,13 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
           ))}
         </div>
 
-        {/* Recording timer */}
+        {/* Recording timer & recording indicator */}
         {isRecording && (
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center items-center gap-3 mb-6">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: "rgba(229,62,62,0.25)", border: "1px solid rgba(229,62,62,0.6)" }}>
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#E53E3E", animation: "pulse 1s infinite" }} />
+              <span className="text-white text-sm font-bold">REC</span>
+            </div>
             <div className="text-white text-lg font-bold">
               {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, "0")}
             </div>
