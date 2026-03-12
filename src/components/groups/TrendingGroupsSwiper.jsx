@@ -18,11 +18,14 @@ function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends })
   );
 
   useEffect(() => {
-    // Auto-play first video if exists
-    const firstVideo = videoRefs.current[0];
-    if (firstVideo) {
-      firstVideo.play().catch(() => {});
-    }
+    // Auto-play all videos
+    videoRefs.current.forEach(vid => {
+      if (vid) {
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.play().catch(() => {});
+      }
+    });
     return () => {
       videoRefs.current.forEach(vid => {
         if (vid) vid.pause();
@@ -85,6 +88,7 @@ function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends })
                       loop
                       playsInline
                       muted
+                      autoPlay
                     />
                     <div className="absolute top-2 left-2">
                       <Play className="w-4 h-4 text-white drop-shadow-lg" fill="white" />
