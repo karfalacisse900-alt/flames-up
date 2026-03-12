@@ -138,7 +138,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
           boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
         }}
       >
-      {/* Hero map banner */}
+        {/* Hero map banner */}
       <div className="relative shrink-0 h-44 overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
         {mapboxStaticUrl ? (
           <img src={mapboxStaticUrl} alt="map" className="w-full h-full object-cover" />
