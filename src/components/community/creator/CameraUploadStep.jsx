@@ -44,6 +44,59 @@ export default function CameraUploadStep({ onMediaSelected, onClose }) {
     setCameraActive(false);
   };
 
+  const getDurationMs = () => {
+    const map = { "15s": 15000, "60s": 60000, "3min": 180000 };
+    return map[selectedDuration] || 60000;
+  };
+
+  const startRecording = async () => {
+    if (!stream) return;
+    try {
+      recordedChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        const file = new File([blob], `video-${Date.now()}.webm`, { type: "video/webm" });
+        handleFiles([file]);
+      };
+
+      mediaRecorder.start();
+
+      const durationMs = getDurationMs();
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime((t) => {
+          const newTime = t + 1;
+          if (newTime * 1000 >= durationMs) {
+            mediaRecorder.stop();
+            clearInterval(recordingIntervalRef.current);
+            setIsRecording(false);
+            return 0;
+          }
+          return newTime;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error("Recording error:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      clearInterval(recordingIntervalRef.current);
+      setIsRecording(false);
+      setRecordingTime(0);
+    }
+  };
+
   useEffect(() => {
     startCamera();
     return () => stopCamera();
