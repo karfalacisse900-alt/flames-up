@@ -10,6 +10,7 @@ import CommunityPostCard from "./CommunityPostCard";
 import PostViewer from "./PostViewer";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
 const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "Sydney", "Toronto", "Dubai", "Berlin", "Mumbai", "São Paulo", "Seoul", "Amsterdam", "Barcelona", "Singapore"];
 
