@@ -233,18 +233,26 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Name & bio */}
-          <h2 className="text-xl font-bold mt-1 flex items-center gap-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>
-            {user.display_name || user.full_name}
-            {user.is_creator && <span style={{ fontSize: "16px" }}>⭐</span>}
-          </h2>
+          {/* Name & bio with online indicator */}
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold mt-1 flex items-center gap-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>
+              {user.display_name || user.full_name}
+              {user.is_creator && <span style={{ fontSize: "16px" }}>⭐</span>}
+            </h2>
+            {isOnline && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(76, 175, 125, 0.15)", color: "var(--accent-primary)" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "var(--accent-primary)" }} />
+                Online
+              </span>
+            )}
+          </div>
           {user.username && <p className="text-xs font-bold mt-0.5" style={{ color: activeTheme.accent }}>{user.username}</p>}
+          {user.bio && <p className="text-sm mt-2 leading-relaxed font-medium" style={{ color: "var(--text-secondary)" }}>"{user.bio}"</p>}
           {user.about_me && (
             <div className="mt-3 p-3.5 rounded-2xl text-sm leading-relaxed" style={{ backgroundColor: "rgba(0,0,0,0.04)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
               {user.about_me}
             </div>
           )}
-          {user.bio && <p className="text-sm mt-2 leading-relaxed font-medium" style={{ color: "var(--text-secondary)" }}>{user.bio}</p>}
 
           {/* Coin balance */}
           <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
