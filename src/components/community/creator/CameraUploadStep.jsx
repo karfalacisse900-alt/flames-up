@@ -47,7 +47,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
 
   const getDurationMs = () => {
     const map = { "15s": 15000, "60s": 60000, "3min": 180000 };
-    return map[selectedMode] || 60000;
+    return map[cameraMode] || 60000;
   };
 
   const takePhoto = () => {
