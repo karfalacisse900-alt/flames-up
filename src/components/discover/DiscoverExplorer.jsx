@@ -142,8 +142,8 @@ function MediumCard({ item, onPreview }) {
   return (
     <div
       onClick={() => onPreview(item)}
-      className="shrink-0 rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform duration-150"
-      style={{ width: 148, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
+      className="rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform duration-150 w-full"
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
     >
       {/* Gradient banner */}
       <div className="relative flex items-center justify-center" style={{ height: 88, background: getGradient(item.category) }}>
