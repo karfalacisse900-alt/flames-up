@@ -209,8 +209,10 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const handlePostTap = (postIndex) => {
-    setVideoStartIndex(postIndex);
+  const [immersiveMode, setImmersiveMode] = useState(false);
+
+  const openImmersiveViewer = (startIndex) => {
+    setVideoStartIndex(startIndex);
     setVideoViewerOpen(true);
   };
 
@@ -233,7 +235,7 @@ export default function CommunityFeed({ user }) {
             isExpanded={expandedPost === post.id}
             onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
             onLocationClick={() => {}}
-            onTap={() => handlePostTap(index)}
+            onTap={() => {}}
           />
         )}
       </div>
@@ -345,6 +347,12 @@ export default function CommunityFeed({ user }) {
               )}
             </div>
 
+            <button
+              onClick={() => openImmersiveViewer(0)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+              <Zap className="w-3 h-3" /> View
+            </button>
             <Link
               to={createPageUrl("CreatePostFlow")}
               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}

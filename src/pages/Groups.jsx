@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 import GroupMessageBubble from "@/components/groups/GroupMessageBubble";
+import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const CATEGORY_GRADIENTS = {
@@ -614,8 +615,15 @@ export default function Groups() {
     setActiveGroup(group);
   };
 
+  const [dismissedGroups, setDismissedGroups] = useState(new Set());
+
   const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
-  const trendingGroups = useMemo(() => [...groups].sort((a, b) => (b.member_count || 0) - (a.member_count || 0)).slice(0, 8), [groups]);
+  const trendingGroups = useMemo(() => 
+    [...groups]
+      .filter(g => !membershipMap[g.id] && !dismissedGroups.has(g.id))
+      .sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
+      .slice(0, 8), 
+    [groups, membershipMap, dismissedGroups]);
 
   const filteredGroups = useMemo(() => groups.filter(g => {
     const matchSearch = !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.description?.toLowerCase().includes(search.toLowerCase());
@@ -807,8 +815,13 @@ export default function Groups() {
                   </p>
                   <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-2">
                     {trendingGroups.map(g => (
-                      <HeroGroupCard key={g.id} group={g} membership={membershipMap[g.id]}
-                        onOpen={handleOpenGroup} onJoin={handleJoin} />
+                      <TrendingGroupCard
+                        key={g.id}
+                        group={g}
+                        onDismiss={() => setDismissedGroups(prev => new Set([...prev, g.id]))}
+                        onJoin={handleJoin}
+                        onOpen={handleOpenGroup}
+                      />
                     ))}
                   </div>
                 </section>
