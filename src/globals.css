@@ -9,31 +9,38 @@
   --font-serif: 'Lora', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* ── Design Tokens ── */
+  /* ── 60-30-10 Color Strategy ── */
+  /* 60% - Dominant (backgrounds) */
   --bg-app:     #F2EDE4;
   --bg-card:    #FAFAF8;
   --bg-nav:     #FAFAF8;
   --bg-subtle:  #EDE8DF;
   --bg-modal:   #FAFAF8;
 
-  /* ── Text ── */
+  /* 30% - Secondary (supporting elements) */
   --text-primary:   #1E1E1E;
   --text-secondary: #5C5C5C;
   --text-hint:      #A0A0A0;
-
-  /* ── Primary Brand Green ── */
-  --accent-primary:       #2E6B4F;
-  --accent-primary-hover: #224F3A;
-  --accent-primary-light: #E8F2EC;
-
-  /* ── Secondary / Caramel ── */
-  --accent-secondary:       #D98B62;
-  --accent-secondary-hover: #C07A52;
-
-  /* ── Borders ── */
   --border-light:  #E5DFD5;
   --border-medium: #CEC8BC;
   --border-subtle: #EDE9E3;
+
+  /* 10% - Accent (CTAs, focus) */
+  --accent-primary:       #2E6B4F;
+  --accent-primary-hover: #224F3A;
+  --accent-primary-light: #E8F2EC;
+  --accent-secondary:       #D98B62;
+  --accent-secondary-hover: #C07A52;
+
+  /* ── Elevation System (Z-axis depth) ── */
+  --elevation-1: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --elevation-2: 0 3px 6px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  --elevation-3: 0 6px 12px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06);
+  --elevation-4: 0 12px 24px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
+  --elevation-5: 0 24px 48px rgba(0,0,0,0.15), 0 16px 32px rgba(0,0,0,0.1);
+
+  /* ── Touch Target Sizing ── */
+  --touch-target-min: 44px;
 
   /* Safe area */
   --safe-top:    env(safe-area-inset-top, 0px);
@@ -132,23 +139,49 @@ body {
 
 /* ── Micro-interactions & depth ── */
 button {
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease, box-shadow 0.15s ease !important;
-  /* Isolate transforms so they never affect layout of siblings */
-  will-change: transform;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              box-shadow 0.2s ease, 
+              opacity 0.15s ease !important;
+  will-change: transform, box-shadow;
   transform-origin: center;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
 }
-button:active {
-  transform: scale(0.93) !important;
-  opacity: 0.85;
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--elevation-3);
+}
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.97) !important;
+  box-shadow: var(--elevation-1);
+  opacity: 0.9;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Card elevation */
+/* ── Elevation Classes (Layering System) ── */
+.elevation-1 { box-shadow: var(--elevation-1); }
+.elevation-2 { box-shadow: var(--elevation-2); }
+.elevation-3 { box-shadow: var(--elevation-3); }
+.elevation-4 { box-shadow: var(--elevation-4); }
+.elevation-5 { box-shadow: var(--elevation-5); }
+
+/* Card with depth */
 .card-elevated {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--elevation-2);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: box-shadow, transform;
 }
 .card-elevated:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
+}
+.card-elevated:active {
+  box-shadow: var(--elevation-1);
+  transform: translateY(0);
 }
 
 /* Chip / Filter pill */
@@ -208,11 +241,21 @@ button:active {
 .wave-bar:nth-child(4) { animation-delay: 0.36s; }
 .wave-bar:nth-child(5) { animation-delay: 0.48s; }
 
+/* ── Input Fields (Depth & Focus) ── */
 input, textarea, select {
   font-size: 16px !important;
+  min-height: var(--touch-target-min);
   background-color: var(--bg-subtle) !important;
   color: var(--text-primary) !important;
-  border-color: var(--border-light) !important;
+  border: 2px solid var(--border-light) !important;
+  box-shadow: var(--elevation-1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: var(--elevation-2), 0 0 0 3px var(--accent-primary-light) !important;
+  transform: translateY(-1px);
+  outline: none;
 }
 input::placeholder, textarea::placeholder {
   color: var(--text-hint) !important;
@@ -358,13 +401,34 @@ nav, button, a[role="button"], .no-select {
   width: 100%;
 }
 
+/* ── Interactive Layer States ── */
+.interactive-layer {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.interactive-layer:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--elevation-3);
+}
+.interactive-layer:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--elevation-1);
+}
+
+/* ── Touch Target Standards ── */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ── Desktop layout: wider container for non-mobile pages ── */
 @media (min-width: 768px) {
-  /* The layout wraps pages inside max-w-lg mx-auto — on desktop we override it */
   .desktop-wide {
     max-width: 1200px !important;
   }
-  /* Community feed posts should not be full mobile-card width on desktop */
   .community-post-desktop {
     max-width: 680px;
     margin-left: auto;
@@ -389,15 +453,48 @@ nav, button, a[role="button"], .no-select {
   animation: scroll-up 20s linear infinite;
 }
 
+/* ── Primary Button Style (10% Accent) ── */
+.btn-primary {
+  background-color: var(--accent-primary);
+  color: white;
+  box-shadow: var(--elevation-2);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  min-height: var(--touch-target-min);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--accent-primary-hover);
+  box-shadow: var(--elevation-3);
+}
+
+/* ── Secondary Button (30% Secondary) ── */
+.btn-secondary {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--elevation-1);
+  border: 2px solid var(--border-light);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+  min-height: var(--touch-target-min);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-card);
+  border-color: var(--border-medium);
+  box-shadow: var(--elevation-2);
+}
+
 /* ── Global Tailwind utility overrides ── */
 .bg-white    { background-color: var(--bg-card) !important; }
 .bg-gray-50  { background-color: var(--bg-subtle) !important; }
 .bg-gray-100 { background-color: var(--bg-card) !important; }
 
-button.bg-primary, [class*="bg-primary"]    { background-color: var(--accent-primary) !important; }
+button.bg-primary, [class*="bg-primary"]    { background-color: var(--accent-primary) !important; box-shadow: var(--elevation-2); }
 button.bg-blue-500, button.bg-blue-600,
-button.bg-blue-700                          { background-color: var(--accent-primary) !important; }
-button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-primary) !important; }
+button.bg-blue-700                          { background-color: var(--accent-primary) !important; box-shadow: var(--elevation-2); }
+button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-primary) !important; box-shadow: var(--elevation-2); }
 
 .text-gray-400 { color: var(--text-hint) !important; }
 .text-gray-500 { color: var(--text-hint) !important; }
@@ -448,11 +545,18 @@ button.bg-indigo-500, button.bg-indigo-600  { background-color: var(--accent-pri
   background-color: var(--accent-primary-light) !important;
 }
 
-/* ── Modal Overlay Color ── */
+/* ── Modal Overlay (Depth Layer) ── */
 [data-radix-dialog-overlay],
 [data-radix-alert-dialog-overlay] {
-  background-color: rgba(20, 38, 28, 0.65) !important;
-  backdrop-filter: blur(4px) !important;
+  background-color: rgba(20, 38, 28, 0.75) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  animation: fadeIn 0.2s ease;
+}
+
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content] {
+  box-shadow: var(--elevation-5) !important;
+  border: 1px solid var(--border-light) !important;
 }
 
 /* ── Prevent horizontal overflow without clipping vertical/modal content ── */
@@ -482,28 +586,43 @@ body {
 }
 
 /* ── Dark Mode ── */
+/* ── Typography Scale (Readability) ── */
+h1, .h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+h2, .h2 { font-size: 1.5rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+h3, .h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+h4, .h4 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
+p, .body { font-size: 1rem; line-height: 1.6; }
+.caption { font-size: 0.875rem; line-height: 1.5; }
+.small { font-size: 0.75rem; line-height: 1.4; }
+
+@media (min-width: 768px) {
+  h1, .h1 { font-size: 2.5rem; }
+  h2, .h2 { font-size: 2rem; }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
+    /* 60% - Dominant */
     --bg-app:     #111111;
     --bg-card:    #1C1C1C;
     --bg-nav:     #181818;
     --bg-subtle:  #242424;
     --bg-modal:   #1C1C1C;
 
+    /* 30% - Secondary */
     --text-primary:   #F0EDE6;
     --text-secondary: #A8A29E;
     --text-hint:      #6B7280;
-
-    --accent-primary:       #4CAF7D;
-    --accent-primary-hover: #3B9B6A;
-    --accent-primary-light: #152C21;
-
-    --accent-secondary:       #D98B62;
-    --accent-secondary-hover: #C07A52;
-
     --border-light:  #2C2C2C;
     --border-medium: #3A3A3A;
     --border-subtle: #1E1E1E;
+
+    /* 10% - Accent */
+    --accent-primary:       #4CAF7D;
+    --accent-primary-hover: #3B9B6A;
+    --accent-primary-light: #152C21;
+    --accent-secondary:       #D98B62;
+    --accent-secondary-hover: #C07A52;
 
     /* shadcn/ui HSL variables */
     --background:       0 0% 7%;
