@@ -359,20 +359,29 @@ export default function CommunityFeed({ user }) {
       </div>
 
       {/* New posts floating pill */}
-      {newPostsAvailable > 0 && (
-        <button
-          onClick={loadNewPosts}
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold"
-          style={{
-            background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
-            color: "#fff",
-            boxShadow: "0 6px 24px rgba(46,107,79,0.45)",
-            animation: "slideUp 0.25s ease",
-          }}>
-          <ArrowUp className="w-3.5 h-3.5" />
-          {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
-        </button>
-      )}
+      <AnimatePresence>
+        {newPostsAvailable > 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            onClick={loadNewPosts}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold"
+            whileHover={{ scale: 1.05, y: -25 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+              color: "#fff",
+              boxShadow: "0 8px 32px rgba(46,107,79,0.4)",
+            }}>
+            <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+              <ArrowUp className="w-3.5 h-3.5" />
+            </motion.div>
+            {newPostsAvailable} new post{newPostsAvailable !== 1 ? "s" : ""}
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Feed */}
       <div className="pb-28">
