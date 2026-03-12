@@ -164,7 +164,7 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
 
               {/* Camera Record */}
               <button
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={() => setShowCamera(true)}
                 className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
                 style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
               >
