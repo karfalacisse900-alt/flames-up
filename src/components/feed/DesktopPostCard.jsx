@@ -28,7 +28,32 @@ function AvatarPlaceholder({ name, size = 36 }) {
 function MediaContent({ post }) {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [isBuffered, setIsBuffered] = useState(false);
   const videoRef = useRef(null);
+  const BUFFER_THRESHOLD = 0.3;
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+
+    const handleProgress = () => {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const duration = video.duration;
+        const bufferedPercent = bufferedEnd / duration;
+
+        if (bufferedPercent >= BUFFER_THRESHOLD && !isBuffered) {
+          setIsBuffered(true);
+          // Auto-play when buffer threshold met
+          video.play()?.catch(err => console.log('Autoplay prevented:', err));
+          setVideoPlaying(true);
+        }
+      }
+    };
+
+    video.addEventListener('progress', handleProgress);
+    return () => video.removeEventListener('progress', handleProgress);
+  }, [isBuffered]);
 
   if (post.video_url) {
     return (
@@ -41,12 +66,18 @@ function MediaContent({ post }) {
           loop
           muted
           playsInline
+          preload="metadata"
           onLoadedData={() => setLoaded(true)}
           onMouseEnter={() => { videoRef.current?.play(); setVideoPlaying(true); }}
           onMouseLeave={() => { videoRef.current?.pause(); setVideoPlaying(false); videoRef.current && (videoRef.current.currentTime = 0); }}
         />
         {!loaded && <div className="absolute inset-0 animate-pulse" style={{ backgroundColor: "var(--bg-subtle)" }} />}
-        {!videoPlaying && loaded && (
+        {!isBuffered && loaded && (
+          <div className="absolute bottom-3 left-3 text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "#fff" }}>
+            Buffering...
+          </div>
+        )}
+        {!videoPlaying && loaded && isBuffered && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
               <Play className="w-5 h-5 text-white fill-white ml-0.5" />
