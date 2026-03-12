@@ -323,28 +323,24 @@ export default function DiscoverAppsTabNew({ items, isLoading, search, user, onI
           </div>
         </div>
 
-        {/* ── Masonry Grid ── */}
+        {/* ── Grid: 1 col mobile, 2 col desktop ── */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🔍</p>
             <p className="text-sm" style={{ color: "var(--text-hint)" }}>No apps found</p>
           </div>
         ) : (
-          <>
-            <div className="masonry-grid">
-              {visibleItems.map((item, i) => (
-                <div key={item.id} className="masonry-item">
-                  <AppFeedCard item={item} user={user} index={i} onOpen={() => onItemClick(item)} />
-                </div>
-              ))}
-            </div>
-            {/* Infinite scroll sentinel */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {visibleItems.map((item, i) => (
+              <AppFeedCard key={item.id} item={item} user={user} index={i} onOpen={() => onItemClick(item)} />
+            ))}
+            {/* Infinite scroll sentinel — spans full width */}
             {visibleCount < filtered.length && (
-              <div ref={observerRef} className="h-8 flex items-center justify-center mt-3">
+              <div ref={observerRef} className="col-span-full h-8 flex items-center justify-center">
                 <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: "var(--border-medium)", borderTopColor: "var(--accent-primary)" }} />
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
