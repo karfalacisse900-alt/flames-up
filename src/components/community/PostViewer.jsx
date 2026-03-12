@@ -211,6 +211,7 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
                   playsInline loop muted
                   preload="auto"
                   className="w-full h-full object-cover"
+                  style={{ pointerEvents: "none" }}
                 />
               ) : currentPost.image_urls?.[0] || currentPost.image_url ? (
                 <img
