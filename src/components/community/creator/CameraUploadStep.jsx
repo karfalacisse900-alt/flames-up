@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { X, RotateCcw, Zap, Sparkles, Clock, Music, Camera } from "lucide-react";
 import MusicLibrarySheet from "../../music/MusicLibrarySheet";
 
-const DURATIONS = ["15s", "60s", "3min"];
+const MODES = ["Photo", "15s", "60s", "3min"];
 
 export default function CameraUploadStep({ onMediaSelected, onClose }) {
   const [selectedDuration, setSelectedDuration] = useState("60s");
