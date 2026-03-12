@@ -1,33 +1,73 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
   const photoVideoInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const dragCounter = useRef(0);
+  const [compressing, setCompressing] = useState(false);
 
-  const handleFileSelect = (files) => {
-    Array.from(files).forEach((file) => {
+  const compressMedia = async (file) => {
+    try {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+      
+      // Only compress images and videos
+      if (!isImage && !isVideo) return file;
+
+      // For small files (<500KB), skip compression
+      if (file.size < 500000) return file;
+
+      setCompressing(true);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', isImage ? 'image' : 'video');
+      
+      const response = await base44.functions.invoke('compressMedia', formData);
+      
+      setCompressing(false);
+      
+      // If compression succeeded and we have a URL, fetch and return as file
+      if (response.data?.file_url && response.data?.compressed) {
+        const blob = await fetch(response.data.file_url).then(r => r.blob());
+        return new File([blob], file.name, { type: file.type });
+      }
+      
+      return file;
+    } catch (error) {
+      console.error('Compression failed:', error);
+      setCompressing(false);
+      return file; // Return original on error
+    }
+  };
+
+  const handleFileSelect = async (files) => {
+    for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
         alert("Please select images or videos only");
-        return;
+        continue;
       }
+
+      // Compress before creating preview
+      const processedFile = await compressMedia(file);
 
       const reader = new FileReader();
       reader.onload = (e) => {
         const preview = e.target.result;
         const item = {
           id: Date.now() + Math.random(),
-          file,
+          file: processedFile,
           preview,
-          type: file.type,
+          type: processedFile.type,
           duration: 0,
           edits: {},
         };
 
         // Get video duration
-        if (file.type.startsWith("video/")) {
+        if (processedFile.type.startsWith("video/")) {
           const video = document.createElement("video");
           video.onloadedmetadata = () => {
             item.duration = video.duration;
@@ -37,8 +77,8 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
 
         setMediaItems((prev) => [...prev, item]);
       };
-      reader.readAsDataURL(file);
-    });
+      reader.readAsDataURL(processedFile);
+    }
   };
 
   const handleDragEnter = (e) => {
@@ -96,6 +136,12 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext }) {
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 Upload photos, videos, or files to share with the community
               </p>
+              {compressing && (
+                <div className="mt-4 flex items-center justify-center gap-2 text-sm" style={{ color: "var(--accent-primary)" }}>
+                  <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+                  Compressing media...
+                </div>
+              )}
             </div>
 
             {/* Three main buttons */}
