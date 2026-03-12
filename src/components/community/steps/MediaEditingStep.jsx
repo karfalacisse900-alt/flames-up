@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Wand2, Type, Music, Volume2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wand2, Type, Music, Volume2, Scissors } from "lucide-react";
+import VideoTrimmer from "./VideoTrimmer";
 
 export default function MediaEditingStep({
   mediaItems,
   setMediaItems,
   currentEditingIndex,
   setCurrentEditingIndex,
+  selectedMode,
 }) {
-  const [editMode, setEditMode] = useState("adjust"); // adjust, text, effects
+  const [editMode, setEditMode] = useState("adjust"); // adjust, text, effects, trim
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
   const [exposure, setExposure] = useState(0);
   const [volume, setVolume] = useState(100);
+  const [showTrimmer, setShowTrimmer] = useState(false);
 
   const currentItem = mediaItems[currentEditingIndex];
   const isVideo = currentItem?.type.startsWith("video");
