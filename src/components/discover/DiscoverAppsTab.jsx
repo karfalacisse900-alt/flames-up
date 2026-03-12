@@ -335,8 +335,44 @@ export default function DiscoverAppsTab({ items, isLoading, search, user, onItem
         )}
       </AnimatePresence>
 
-      {/* Featured Hero */}
-      {showHero && <HeroCard item={featuredItem} onOpen={() => onItemClick(featuredItem)} user={user} />}
+      {/* Featured Hero — with animated grid on desktop */}
+      {showHero && (
+        <>
+          {/* Desktop: Animated 3-column grid */}
+          <div className="hidden lg:block px-4 mb-4 overflow-hidden" style={{ height: 360 }}>
+            <div className="grid grid-cols-3 gap-4">
+              {/* Column 1: Scroll down */}
+              <div className="flex flex-col gap-4 animate-scroll-down">
+                {[featuredItem, ...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(0, 2), featuredItem, ...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(0, 2)].map((item, i) => (
+                  <div key={`col1-${i}`} className="shrink-0" style={{ minHeight: 160 }}>
+                    <HeroCard item={item} onOpen={() => onItemClick(item)} user={user} />
+                  </div>
+                ))}
+              </div>
+              {/* Column 2: Scroll up */}
+              <div className="flex flex-col gap-4 animate-scroll-up">
+                {[...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(1, 4), ...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(1, 4)].map((item, i) => (
+                  <div key={`col2-${i}`} className="shrink-0" style={{ minHeight: 160 }}>
+                    <HeroCard item={item} onOpen={() => onItemClick(item)} user={user} />
+                  </div>
+                ))}
+              </div>
+              {/* Column 3: Scroll down */}
+              <div className="flex flex-col gap-4 animate-scroll-down">
+                {[...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(2, 5), ...items.filter(i => i.is_featured || (i.avg_rating || 0) >= 4).slice(2, 5)].map((item, i) => (
+                  <div key={`col3-${i}`} className="shrink-0" style={{ minHeight: 160 }}>
+                    <HeroCard item={item} onOpen={() => onItemClick(item)} user={user} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Mobile: Single hero card */}
+          <div className="lg:hidden">
+            <HeroCard item={featuredItem} onOpen={() => onItemClick(featuredItem)} user={user} />
+          </div>
+        </>
+      )}
 
       {/* Billboard for non-search/filter state */}
       {activeCategory === "all" && !search && smartFilter === "all" && (
