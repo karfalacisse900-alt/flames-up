@@ -9,7 +9,10 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: false,
-    allowedHosts: "all",
+
+    // allow ALL hosts
+    allowedHosts: true,
+
     hmr: {
       protocol: "wss",
       clientPort: 443
@@ -18,7 +21,8 @@ export default defineConfig({
 
   preview: {
     host: true,
-    port: 5173
+    port: 5173,
+    allowedHosts: true
   },
 
   plugins: [
