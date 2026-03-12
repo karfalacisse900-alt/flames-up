@@ -154,10 +154,10 @@ export default function MediaEditingStep({
       </div>
 
       {/* Edit Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => setEditMode("adjust")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+          className={`flex-1 min-w-20 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "adjust"
               ? "text-white"
               : "text-gray-600"
@@ -171,7 +171,7 @@ export default function MediaEditingStep({
         </button>
         <button
           onClick={() => setEditMode("text")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+          className={`flex-1 min-w-20 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "text"
               ? "text-white"
               : "text-gray-600"
@@ -186,7 +186,7 @@ export default function MediaEditingStep({
         </button>
         <button
           onClick={() => setEditMode("effects")}
-          className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+          className={`flex-1 min-w-20 py-2.5 rounded-lg font-semibold text-sm transition-all ${
             editMode === "effects"
               ? "text-white"
               : "text-gray-600"
@@ -199,6 +199,23 @@ export default function MediaEditingStep({
           <Wand2 className="w-4 h-4 inline mr-1" />
           FX
         </button>
+        {isVideo && selectedMode !== "Photo" && (
+          <button
+            onClick={() => setShowTrimmer(true)}
+            className={`flex-1 min-w-20 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+              editMode === "trim"
+                ? "text-white"
+                : "text-gray-600"
+            }`}
+            style={{
+              backgroundColor: editMode === "trim" ? "var(--accent-primary)" : "var(--bg-card)",
+              border: editMode === "trim" ? "none" : "1px solid var(--border-light)"
+            }}
+          >
+            <Scissors className="w-4 h-4 inline mr-1" />
+            Trim
+          </button>
+        )}
       </div>
 
       {/* Adjust Mode */}
