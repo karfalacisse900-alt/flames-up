@@ -347,6 +347,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
           />
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
