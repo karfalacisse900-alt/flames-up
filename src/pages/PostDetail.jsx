@@ -27,6 +27,15 @@ export default function PostDetail() {
   const [followLoading, setFollowLoading] = useState(false);
   const queryClient = useQueryClient();
 
+  const { data: post } = useQuery({
+    queryKey: ["post", postId],
+    queryFn: async () => {
+      const posts = await base44.entities.Post.filter({ id: postId });
+      return posts[0];
+    },
+    enabled: !!postId,
+  });
+
   const hasLiked = user?.email && post?.liked_by?.includes(user.email);
 
   const likeMut = useMutation({
@@ -69,15 +78,6 @@ export default function PostDetail() {
       }
     }).catch(() => {});
   }, [postId]);
-
-  const { data: post } = useQuery({
-    queryKey: ["post", postId],
-    queryFn: async () => {
-      const posts = await base44.entities.Post.filter({ id: postId });
-      return posts[0];
-    },
-    enabled: !!postId,
-  });
 
   const { data: replies = [], refetch: refetchReplies } = useQuery({
     queryKey: ["replies", postId],
