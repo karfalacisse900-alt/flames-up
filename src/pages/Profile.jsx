@@ -515,6 +515,13 @@ export default function Profile() {
       {/* Export data modal */}
       <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
 
+      {/* AI Assistant deletion modal */}
+      <AIAssistantDeletion 
+        user={user} 
+        isOpen={showAIDeleteModal} 
+        onClose={() => setShowAIDeleteModal(false)} 
+      />
+
 
 
       {/* Edit profile */}
