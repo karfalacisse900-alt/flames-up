@@ -8,6 +8,7 @@ import PostSettingsStep from "./steps/PostSettingsStep";
 export default function CreatePostFlow({ onClose, onSuccess }) {
   const [user, setUser] = useState(null);
   const [step, setStep] = useState(1);
+  const [selectedMode, setSelectedMode] = useState("60s"); // Photo, 15s, 60s, 3min
   
   // Media state
   const [mediaItems, setMediaItems] = useState([]); // Array of { id, file, preview, type, duration, edits }
