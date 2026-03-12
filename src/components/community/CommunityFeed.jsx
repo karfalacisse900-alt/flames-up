@@ -21,6 +21,7 @@ export default function CommunityFeed({ user }) {
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [videoViewerOpen, setVideoViewerOpen] = useState(false);
   const [videoStartIndex, setVideoStartIndex] = useState(0);
+  const [feedTab, setFeedTab] = useState("foryou");
   // filter: "global" | "nearby" | city string
   const [activeFilter, setActiveFilter] = useState("global");
   const [showPicker, setShowPicker] = useState(false);

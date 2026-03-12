@@ -39,21 +39,19 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   const currentPost = posts[currentIndex];
   const hasLiked = user?.email && currentPost?.upvoted_by?.includes(user.email);
 
-  // Stop ALL background videos, play only current viewer video
+  // Stop ALL videos immediately on index change, then play only the current one after transition
   useEffect(() => {
+    // Immediately pause everything (prevents audio bleed during slide animation)
+    document.querySelectorAll("video").forEach(v => { v.pause(); v.muted = true; });
+
+    // After slide transition completes (280ms), play current video with audio
     const timer = setTimeout(() => {
-      document.querySelectorAll("video").forEach(v => {
-        if (v !== videoRef.current) {
-          v.pause();
-          v.muted = true;
-        }
-      });
       if (videoRef.current) {
         videoRef.current.muted = false;
         videoRef.current.currentTime = 0;
         videoRef.current.play().catch(() => {});
       }
-    }, 80);
+    }, 320);
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
