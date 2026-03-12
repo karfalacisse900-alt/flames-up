@@ -25,7 +25,7 @@ const slideVariants = {
 };
 
 export default function PostViewer({ posts, initialIndex, user, onClose, activeFilter, onFilterChange, allCities = [] }) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex || 0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex ?? 0);
   const [direction, setDirection] = useState(1);
   const [likeBounce, setLikeBounce] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -35,6 +35,9 @@ export default function PostViewer({ posts, initialIndex, user, onClose, activeF
   const touchStartX = useRef(0);
   const videoRef = useRef(null);
   const playTimerRef = useRef(null);
+  const isAnimating = useRef(false);
+  // Track previous activeFilter to avoid resetting on mount
+  const prevActiveFilter = useRef(activeFilter);
   const qc = useQueryClient();
 
   const currentPost = posts[currentIndex];
