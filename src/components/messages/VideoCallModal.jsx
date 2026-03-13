@@ -24,7 +24,7 @@ export default function VideoCallModal({ roomName, displayName, onClose }) {
         style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#25D366" }} />
-          <span className="text-white font-semibold text-sm">Live Call</span>
+          <span className="text-white font-semibold text-sm">Call in progress</span>
         </div>
         <button onClick={() => {
           if (window.confirm("Leave the call?")) onClose();
