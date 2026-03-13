@@ -59,8 +59,36 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
   const [draftSaved, setDraftSaved] = useState(false);
   const [location, setLocation] = useState(null);
   const [placeTags, setPlaceTags] = useState([]);
+  const [autoDetectedLocation, setAutoDetectedLocation] = useState(null);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
+
+  // Auto-detect user's current location on mount
+  useEffect(() => {
+    if (!navigator.geolocation || location) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+          const data = await res.json();
+          const detectedLoc = {
+            name: data.address?.suburb || data.address?.neighbourhood || data.address?.city_district || null,
+            city: data.address?.city || data.address?.town || null,
+            region: data.address?.state || data.address?.county || null,
+            country: data.address?.country || null,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setAutoDetectedLocation(detectedLoc);
+          // Auto-apply if user hasn't manually set a location
+          if (!location) setLocation(detectedLoc);
+        } catch (err) {
+          console.log("Location detection failed:", err);
+        }
+      },
+      () => {}
+    );
+  }, []);
 
   const isBodyEmpty = (html) => {
     const txt = (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s/g, '').trim();
