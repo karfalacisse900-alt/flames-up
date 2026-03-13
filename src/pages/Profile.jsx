@@ -154,10 +154,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="overflow-y-auto overscroll-contain px-3 py-3 md:px-6 md:py-5" style={{ background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 26%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 24%), var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-      <div className="max-w-5xl mx-auto">
+    <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
       {/* Profile header */}
-      <div className="relative overflow-hidden rounded-[28px] card-elevated" style={{ border: "1px solid var(--border-light)", backgroundColor: "var(--bg-card)" }}>
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid var(--border-light)" }}>
         {/* Organic gradient banner */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: activeTheme.banner, opacity: 0.7 }} />
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-20 pointer-events-none" style={{ background: `radial-gradient(circle, ${activeTheme.accent}, transparent)` }} />
@@ -278,17 +277,17 @@ export default function Profile() {
           )}
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+          <div className="flex gap-2 mt-4">
             {[
               { label: "Posts", value: myPosts.length, onClick: null },
               { label: "Followers", value: followers.length, onClick: () => setShowFollowers(true) },
               { label: "Following", value: following.length, onClick: () => setShowFollowing(true) },
               { label: "Badges", value: computedBadges.length, onClick: null },
             ].map(({ label, value, onClick }) => (
-              <button key={label} onClick={onClick} className="px-4 py-4 rounded-[24px] text-center"
-                style={{ backgroundColor: "rgba(255,255,255,0.74)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)", backdropFilter: "blur(10px)", cursor: onClick ? "pointer" : "default" }}>
-                <p className="text-xl font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] mt-1" style={{ color: "var(--text-hint)" }}>{label}</p>
+              <button key={label} onClick={onClick} className="flex-1 py-2.5 rounded-2xl text-center"
+                style={{ backgroundColor: "rgba(0,0,0,0.05)", boxShadow: "none", cursor: onClick ? "pointer" : "default" }}>
+                <p className="text-base font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</p>
               </button>
             ))}
           </div>
@@ -296,8 +295,7 @@ export default function Profile() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-4 rounded-[28px] border card-elevated p-3 md:p-4" style={{ backgroundColor: "rgba(255,255,255,0.82)", borderColor: "var(--border-light)", backdropFilter: "blur(10px)" }}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-1 mt-1">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
         <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
           <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
             <MessageSquare className="w-3.5 h-3.5" /> Posts
@@ -329,7 +327,7 @@ export default function Profile() {
              <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
            ) : (
              myPosts.map(post => (
-               <div key={post.id} className="rounded-[24px] p-4 md:p-5 card-elevated" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+               <div key={post.id} className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                  <div className="flex items-start justify-between gap-2">
                    <div className="flex-1 min-w-0">
                      <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
@@ -419,8 +417,6 @@ export default function Profile() {
          </TabsContent>
 
       </Tabs>
-      </div>
-      </div>
 
       {/* Followers dialog */}
       <Dialog open={showFollowers} onOpenChange={setShowFollowers}>

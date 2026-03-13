@@ -157,45 +157,43 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
 
   return (
     <>
-      <div className="flex flex-col" style={{ height: "100dvh", background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 22%), var(--bg-app)" }}>
+      <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 mx-3 mt-3 shrink-0 rounded-[28px] border card-elevated"
+        <div className="flex items-center gap-2 px-3 shrink-0"
           style={{
-            backgroundColor: "rgba(255,255,255,0.82)",
-            borderColor: "var(--border-light)",
-            paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
-            paddingBottom: 12,
-            backdropFilter: "blur(12px)",
+            backgroundColor: "#075E54",
+            paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
+            paddingBottom: 10,
           }}>
-          <button onClick={onBack} className="p-1 mr-1 rounded-2xl">
-            <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
+          <button onClick={onBack} className="p-1 mr-1">
+            <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
           </button>
 
           <button onClick={() => setShowInfo(true)} className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
-              style={{ background: `linear-gradient(135deg, ${avatarColor(group.name)}, var(--accent-primary))`, color: "#fff" }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
+              style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
               {group.photo_url
                 ? <img src={group.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
                 : group.name?.[0]?.toUpperCase() || "G"}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{group.name}</p>
-              <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
+              <p className="font-semibold text-[16px] truncate" style={{ color: "#fff" }}>{group.name}</p>
+              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
                 {memberCount} members
               </p>
             </div>
           </button>
 
           <div className="flex items-center gap-1">
-            <button className="w-9 h-9 flex items-center justify-center rounded-2xl" onClick={() => setShowVideoCall(true)}>
-              <Video className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+            <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
+              <Video className="w-5 h-5" style={{ color: "#fff" }} />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center rounded-2xl">
-              <Phone className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+            <button className="w-9 h-9 flex items-center justify-center">
+              <Phone className="w-5 h-5" style={{ color: "#fff" }} />
             </button>
             <div className="relative">
-              <button className="w-9 h-9 flex items-center justify-center rounded-2xl" onClick={() => setShowMenu(v => !v)}>
-                <MoreVertical className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+              <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
+                <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
               </button>
               {showMenu && (
                 <>
@@ -215,7 +213,7 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: "none" }}>
+        <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
           <div className="flex justify-center mb-4">
             <div className="px-4 py-1.5 rounded-lg text-[12px] text-center"
               style={{ backgroundColor: "rgba(255,248,196,0.9)", color: "#7B6914" }}>

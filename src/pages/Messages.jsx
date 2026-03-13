@@ -101,55 +101,50 @@ export default function Messages() {
   if (activeChat?.type === "group") return <GroupChatView user={user} group={activeChat.data} onBack={() => setActiveChat(null)} />;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 24%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 24%), var(--bg-app)" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#fff" }}>
       {/* Header */}
-      <div className="shrink-0 px-3 pt-3 md:px-5" style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}>
-        <div className="rounded-[28px] overflow-hidden card-elevated border" style={{ backgroundColor: "rgba(255,255,255,0.82)", borderColor: "var(--border-light)", backdropFilter: "blur(12px)" }}>
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-3">
-              <Link to={createPageUrl("Profile")} className="w-10 h-10 rounded-2xl flex items-center justify-center border" style={{ borderColor: "var(--border-light)", color: "var(--text-primary)", backgroundColor: "rgba(255,255,255,0.76)" }}>
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div>
-                <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)", letterSpacing: -0.3, fontFamily: "var(--font-serif)" }}>Messages</h1>
-                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Clean, private conversations</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setShowNewMsg(true)} className="w-10 h-10 rounded-2xl flex items-center justify-center text-white" style={{ backgroundColor: "var(--accent-primary)", boxShadow: "var(--elevation-2)" }}>
-                <Edit3 className="w-5 h-5" />
-              </button>
-            </div>
+      <div className="shrink-0"
+        style={{ backgroundColor: "#075E54", paddingTop: "env(safe-area-inset-top, 0px)" }}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Link to={createPageUrl("Profile")}>
+              <ArrowLeft className="w-5 h-5" style={{ color: "#fff" }} />
+            </Link>
+            <h1 className="text-xl font-bold" style={{ color: "#fff", letterSpacing: 0.3 }}>Messages</h1>
           </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowNewMsg(true)}>
+              <Edit3 className="w-5 h-5" style={{ color: "#fff" }} />
+            </button>
+          </div>
+        </div>
 
-          {/* Search */}
-          <div className="px-4 pb-3">
-            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ backgroundColor: "var(--bg-subtle)", borderColor: "var(--border-light)" }}>
-              <Search className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <span className="text-sm" style={{ color: "var(--text-hint)" }}>Search conversations</span>
-            </div>
+        {/* Search */}
+        <div className="px-4 pb-3">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+            <Search className="w-4 h-4" style={{ color: "rgba(255,255,255,0.7)" }} />
+            <span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Search…</span>
           </div>
+        </div>
 
-          {/* Tabs */}
-          <div className="flex gap-2 px-3 pb-3">
-            {TABS.map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className="flex-1 py-2.5 text-sm font-semibold text-center transition-all rounded-2xl"
-                style={{
-                  color: activeTab === tab ? "white" : "var(--text-secondary)",
-                  backgroundColor: activeTab === tab ? "var(--accent-primary)" : "transparent",
-                  border: activeTab === tab ? "1px solid var(--accent-primary)" : "1px solid transparent",
-                  boxShadow: activeTab === tab ? "var(--elevation-2)" : "none",
-                }}>
-                {tab}
-              </button>
-            ))}
-          </div>
+        {/* Tabs */}
+        <div className="flex px-2">
+          {TABS.map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className="flex-1 py-2.5 text-sm font-semibold text-center transition-all"
+              style={{
+                color: "#fff",
+                borderBottom: activeTab === tab ? "3px solid #25D366" : "3px solid transparent",
+                opacity: activeTab === tab ? 1 : 0.65,
+              }}>
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-3 pb-3 md:px-5 md:pb-5">
+      <div className="flex-1 overflow-y-auto">
         {activeTab === "Groups" ? (
           <GroupsTab user={user} onSelect={setActiveChat} />
         ) : (
