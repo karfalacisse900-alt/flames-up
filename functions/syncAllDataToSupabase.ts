@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     console.log('Starting focused sync (limit 5 for testing)...');
 
     const errors = [];
-    const LIMIT = 5; // Test with 5 records first
+    const LIMIT = 100; // Sync all users and posts
 
     // Hard-coded entity names based on schema
     const USER_ENTITY = 'User';
@@ -79,7 +79,6 @@ Deno.serve(async (req) => {
         
         const postData = {
           id: String(post.id),
-          title: post.title || null,
           content: post.content || post.text || null,
         };
 
