@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     console.log(`[syncToSupabase] entity=${entityName} event=${eventType} id=${id}`);
 
     if (eventType === "delete") {
-      if (entityName === "Post") await supabaseDelete("posts", id);
+      if (entityName === "Post" || entityName === "CommunityPost") await supabaseDelete("posts", id);
       else if (entityName === "User") await supabaseDelete("profiles", id);
       else if (entityName === "Group") await supabaseDelete("communities", id);
       return Response.json({ ok: true, action: "delete", entity: entityName });
@@ -62,14 +62,15 @@ Deno.serve(async (req) => {
       console.log(`[syncToSupabase] Syncing User → profiles:`, JSON.stringify(record));
       await supabaseUpsert("profiles", record);
 
-    } else if (entityName === "Post") {
+    } else if (entityName === "Post" || entityName === "CommunityPost") {
       const record = {
         id,
-        content: data.text || null,
+        content: data.body || data.text || null,
         created_at: data.created_date || null,
-        user_id: data.author_email || data.created_by || null,
+        user_id: String(data.created_by_id || data.author_email || data.created_by || null),
+        media_url: data.image_url || data.video_url || null,
       };
-      console.log(`[syncToSupabase] Syncing Post → posts:`, JSON.stringify(record));
+      console.log(`[syncToSupabase] Syncing ${entityName} → posts:`, JSON.stringify(record));
       await supabaseUpsert("posts", record);
 
     } else if (entityName === "Group") {
