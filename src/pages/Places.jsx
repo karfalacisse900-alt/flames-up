@@ -17,6 +17,7 @@ export default function PlacesPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPlace, setSelectedPlace] = useState(null); // { name, city, ... }
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAllPlaces, setShowAllPlaces] = useState(false);
   const qc = useQueryClient();
 
   React.useEffect(() => {
@@ -25,17 +26,18 @@ export default function PlacesPage() {
 
   const { data: places = [] } = useQuery({
     queryKey: ["realPlaces"],
-    queryFn: () => base44.entities.Place.list("-post_count", 50),
+    queryFn: () => base44.entities.Place.list("-follower_count", 50),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["placeFeedPosts"],
     queryFn: async () => {
-      const all = await base44.entities.CommunityPost.list("-created_date", 200);
+      const all = await base44.entities.CommunityPost.list("-created_date", 100);
       // Only show posts with a location
       return all.filter(p => !p.group_id && (p.location_name || p.location_city));
     },
-    staleTime: 30000,
+    staleTime: 60000,
   });
 
   const { data: savedPlaces = [] } = useQuery({
@@ -234,9 +236,23 @@ export default function PlacesPage() {
       {/* FEED VIEW */}
       {viewMode === "feed" && (
         <div>
+          {/* Trending places strip - MAIN SECTION */}
+          <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
+
+          {/* See More Button */}
+          {places.length > 0 && !showAllPlaces && (
+            <div className="px-4 pb-3">
+              <button onClick={() => setShowAllPlaces(true)}
+                className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+                style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--border-medium)", color: "var(--text-primary)" }}>
+                🌍 See All Popular Places ({places.length})
+              </button>
+            </div>
+          )}
+
           {/* Seed Places Button (only for admins or if no places) */}
           {user?.role === "admin" && places.length < 10 && (
-            <div className="px-4 pt-4">
+            <div className="px-4 pb-3">
               <button onClick={seedPlaces} disabled={seedingPlaces}
                 className="w-full py-3 rounded-2xl text-sm font-bold transition-all"
                 style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", opacity: seedingPlaces ? 0.6 : 1 }}>
@@ -245,21 +261,28 @@ export default function PlacesPage() {
             </div>
           )}
 
-          {/* Real Places Grid */}
-          {places.length > 0 && (
+          {/* Popular Places Grid (shown after clicking See More) */}
+          {places.length > 0 && showAllPlaces && (
             <div className="px-4 py-4">
-              <h2 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                Popular Places
-              </h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  Popular Places
+                </h2>
+                <button onClick={() => setShowAllPlaces(false)}
+                  className="text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                  Hide
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-3">
-                {places.slice(0, 6).map(place => (
+                {places.map(place => (
                   <Link key={place.id}
                     to={createPageUrl(`PlaceDetail?placeId=${place.id}`)}
                     className="rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
                     style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                     {place.cover_image_url ? (
                       <div className="w-full" style={{ aspectRatio: "16/9", position: "relative" }}>
-                        <img src={place.cover_image_url} alt={place.name} className="w-full h-full object-cover" />
+                        <img src={place.cover_image_url} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
                         {place.is_verified && (
                           <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
                             ✓
@@ -275,25 +298,18 @@ export default function PlacesPage() {
                       <p className="text-sm font-bold mb-0.5 truncate" style={{ color: "var(--text-primary)" }}>
                         {place.name}
                       </p>
-                      <p className="text-xs mb-2 truncate" style={{ color: "var(--text-hint)" }}>
+                      <p className="text-[10px] mb-1.5 truncate" style={{ color: "var(--text-hint)" }}>
                         {[place.city, place.region].filter(Boolean).join(", ")}
                       </p>
-                      {place.post_count > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
-                            {place.post_count} posts
-                          </span>
-                        </div>
-                      )}
+                      <p className="text-[10px] line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                        {place.description}
+                      </p>
                     </div>
                   </Link>
                 ))}
               </div>
             </div>
           )}
-
-          {/* Trending places strip */}
-          <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
 
           {/* Divider */}
           <div className="mx-4 mb-2" style={{ height: 1, backgroundColor: "var(--border-subtle)" }} />
