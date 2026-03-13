@@ -56,41 +56,33 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen, mu
         </div>
       </div>
 
-      {/* Content preview thumbnails - horizontal row */}
+      {/* Content preview thumbnails */}
       {previewPosts.length > 0 && (
         <div className="px-4 pb-4">
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {previewPosts.map((post) => {
               const isVideo = !!post.video_url;
-              const mediaUrl = isVideo ? post.video_url : post.media_urls?.[0];
+              const mediaUrl = isVideo ? post.video_url : (post.media_urls?.[0] || post.image_url);
               return (
                 <div
                   key={post.id}
-                  className="relative flex-1 aspect-[3/4] rounded-xl overflow-hidden"
+                  className="relative aspect-[3/4] rounded-2xl overflow-hidden"
                   style={{ backgroundColor: "var(--bg-subtle)" }}>
                   {mediaUrl ? (
-                    <>
-                      {isVideo ? (
-                        <video src={mediaUrl} className="w-full h-full object-cover" />
-                      ) : (
-                        <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
-                      )}
-                      {isVideo && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
-                            <Play className="w-4 h-4 ml-0.5" style={{ color: "#000" }} fill="#000" />
-                          </div>
-                        </div>
-                      )}
-                      {post.view_count && (
-                        <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                          style={{ backgroundColor: "rgba(0,0,0,0.7)" }}>
-                          {post.view_count > 999 ? `${(post.view_count / 1000).toFixed(1)}K` : post.view_count}
-                        </div>
-                      )}
-                    </>
+                    isVideo ? (
+                      <video src={mediaUrl} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                    ) : (
+                      <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    )
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">📷</div>
+                    <div className="w-full h-full flex items-center justify-center text-2xl">📷</div>
+                  )}
+                  {isVideo && (
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: "rgba(0,0,0,0.55)", color: "white" }}>
+                      <Play className="w-3 h-3 fill-white text-white" />
+                      <span className="text-[10px] font-bold">Video</span>
+                    </div>
                   )}
                 </div>
               );
@@ -110,8 +102,8 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen, mu
         <button
           onClick={(e) => { e.stopPropagation(); onJoin(group); }}
           className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white"
-          style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
-          Join Group
+          style={{ background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))" }}>
+          Join
         </button>
       </div>
     </div>

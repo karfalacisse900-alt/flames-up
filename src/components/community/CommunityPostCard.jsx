@@ -532,6 +532,14 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             <span className="text-sm font-semibold">Share</span>
           </button>
 
+          {/* More */}
+          <button onClick={() => setShowMenu(v => !v)}
+            className="flex items-center gap-2 px-3 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)" }}>
+            <MoreHorizontal className="w-6 h-6" strokeWidth={2} />
+            <span className="text-sm font-semibold">More</span>
+          </button>
+
           {/* Want to go — only for location posts */}
           {(post.location_name || post.location_city) && (
             <WantToGoButton post={post} user={user} compact />
