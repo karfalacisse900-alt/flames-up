@@ -12,14 +12,14 @@ import RightSidebar from "@/components/layout/RightSidebar";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
-{ name: "Map", icon: MapPin,  page: "CampusMap" },
+{ name: "Places", icon: MapPin,  page: "Places" },
 { name: "Discover", icon: Search,  page: "Discover" },
 { name: "Groups",  icon: Users,   page: "Groups" },
 { name: "Profile", icon: User,    page: "Profile" },
 ];
 
 const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
-const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore", "Groups", "Places", "CampusMap"];
+const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore", "Groups", "Places"];
 
 
 // Flames-Up Logo component
@@ -137,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
-  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "CampusMap"].includes(currentPageName);
+  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer"].includes(currentPageName);
 
   const showSidebars = !isAdminPage && !hideNav;
 
