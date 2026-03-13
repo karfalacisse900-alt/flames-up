@@ -303,7 +303,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
   return (
     <div className="relative mb-4">
-      {/* Modern card container */}
+      {/* Modern card container - NO horizontal padding for edge-to-edge media */}
       <div className="mx-auto" style={{ maxWidth: "640px" }}>
         {/* ── HEADER SECTION ── */}
         <div className="flex items-center justify-between px-4 py-3">
@@ -441,19 +441,19 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
 
-        {/* ── MEDIA SECTION (DOMINANT VISUAL) ── */}
+        {/* ── MEDIA SECTION (EDGE-TO-EDGE, FULL-WIDTH) ── */}
         {(() => {
           const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
           if (imgs.length === 0 && !post.video_url) return null;
           return (
-            <div className="w-full" style={{ marginBottom: "12px" }}>
+            <div className="w-screen relative" style={{ marginLeft: "calc(-50vw + 50%)", marginBottom: "12px", maxWidth: "100vw" }}>
               {imgs.length > 0 && (
-                <div style={{ borderRadius: "0" }}>
+                <div className="w-full">
                   <PhotoCarousel images={imgs} aspectRatio="4/5" />
                 </div>
               )}
               {post.video_url && post.video_url.trim() && (
-                <div style={{ borderRadius: "0" }}>
+                <div className="w-full">
                   <AutoplayVideo
                     src={post.video_url}
                     postId={post.id}
