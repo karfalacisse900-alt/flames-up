@@ -149,62 +149,78 @@ export default function CampusMap() {
 
   // Add campus location markers
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !map.current.loaded()) return;
 
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
+    const addMarkers = () => {
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
 
-    if (showCampusLocations) {
-      CAMPUS_LOCATIONS.forEach(loc => {
-        const el = document.createElement("div");
-        el.className = "campus-marker";
-        el.innerHTML = `<div style="background: white; border: 2px solid #2E6B4F; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${loc.emoji}</div>`;
-        el.addEventListener("click", () => setSelectedLocation(loc));
+      if (showCampusLocations) {
+        CAMPUS_LOCATIONS.forEach(loc => {
+          const el = document.createElement("div");
+          el.className = "campus-marker";
+          el.innerHTML = `<div style="background: white; border: 2px solid #2E6B4F; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${loc.emoji}</div>`;
+          el.addEventListener("click", () => setSelectedLocation(loc));
 
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([loc.lng, loc.lat])
-          .addTo(map.current);
+          const marker = new mapboxgl.Marker({ element: el })
+            .setLngLat([loc.lng, loc.lat])
+            .addTo(map.current);
 
-        markersRef.current.push(marker);
-      });
+          markersRef.current.push(marker);
+        });
+      }
+    };
+
+    if (map.current.loaded()) {
+      addMarkers();
+    } else {
+      map.current.on('load', addMarkers);
     }
   }, [showCampusLocations]);
 
   // Add activity markers
   useEffect(() => {
-    if (!map.current || !showActivities) return;
+    if (!map.current || !showActivities || !map.current.loaded()) return;
 
-    const activityMarkers = [];
+    const addActivityMarkers = () => {
+      const activityMarkers = [];
 
-    livePosts.forEach(post => {
-      const el = document.createElement("div");
-      el.innerHTML = `<div style="background: linear-gradient(135deg, #E05C2A, #F97316); border: 2px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(224,92,42,0.4);">⚡</div>`;
-      el.addEventListener("click", () => setSelectedPost(post));
+      livePosts.forEach(post => {
+        const el = document.createElement("div");
+        el.innerHTML = `<div style="background: linear-gradient(135deg, #E05C2A, #F97316); border: 2px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(224,92,42,0.4);">⚡</div>`;
+        el.addEventListener("click", () => setSelectedPost(post));
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([post.location_lng, post.location_lat])
-        .addTo(map.current);
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([post.location_lng, post.location_lat])
+          .addTo(map.current);
 
-      activityMarkers.push(marker);
-      markersRef.current.push(marker);
-    });
+        activityMarkers.push(marker);
+        markersRef.current.push(marker);
+      });
 
-    communityPosts.slice(0, 50).forEach(post => {
-      const el = document.createElement("div");
-      el.innerHTML = `<div style="background: #D98B62; border: 2px solid white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; box-shadow: 0 2px 6px rgba(217,139,98,0.3);">📍</div>`;
-      el.addEventListener("click", () => setSelectedPost(post));
+      communityPosts.slice(0, 50).forEach(post => {
+        const el = document.createElement("div");
+        el.innerHTML = `<div style="background: #D98B62; border: 2px solid white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; box-shadow: 0 2px 6px rgba(217,139,98,0.3);">📍</div>`;
+        el.addEventListener("click", () => setSelectedPost(post));
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([post.location_lng, post.location_lat])
-        .addTo(map.current);
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([post.location_lng, post.location_lat])
+          .addTo(map.current);
 
-      activityMarkers.push(marker);
-      markersRef.current.push(marker);
-    });
+        activityMarkers.push(marker);
+        markersRef.current.push(marker);
+      });
 
-    return () => {
-      activityMarkers.forEach(m => m.remove());
+      return () => {
+        activityMarkers.forEach(m => m.remove());
+      };
     };
+
+    if (map.current.loaded()) {
+      return addActivityMarkers();
+    } else {
+      map.current.on('load', addActivityMarkers);
+    }
   }, [livePosts, communityPosts, showActivities]);
 
   const getDirections = async (destination, mode = "walking") => {
