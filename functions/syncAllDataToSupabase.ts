@@ -9,29 +9,25 @@ const supabase = createClient(
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    // Only allow admin users to run this sync
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Unauthorized - Admin only' }, { status: 403 });
-    }
 
     console.log('Starting full data sync to Supabase...');
 
-    // 1. Sync all users to profiles table
+    const errors = [];
+
+    // 1. Sync ALL users to profiles table
     const allUsers = await base44.asServiceRole.entities.User.list();
     console.log(`Found ${allUsers.length} users to sync`);
 
     let usersSynced = 0;
-    let usersSkipped = 0;
 
-    for (const u of allUsers) {
+    for (let i = 0; i < allUsers.length; i++) {
+      const u = allUsers[i];
       try {
-        console.log(`Syncing user: ${u.email} (ID: ${u.id})`);
+        console.log(`[${i + 1}/${allUsers.length}] Syncing user: ${u.email} (ID: ${u.id})`);
         
         const userData = {
           id: String(u.id),
-          email: u.email,
+          email: u.email || '',
           full_name: u.full_name || null,
           display_name: u.display_name || null,
           username: u.username || null,
@@ -39,14 +35,12 @@ Deno.serve(async (req) => {
           bio: u.bio || null,
           about_me: u.about_me || null,
           role: u.role || 'user',
-          is_creator: u.is_creator || false,
+          is_creator: Boolean(u.is_creator),
           profile_theme: u.profile_theme || 'default',
-          badges: u.badges || [],
-          created_at: u.created_date,
-          updated_at: u.updated_date || u.created_date,
+          badges: Array.isArray(u.badges) ? u.badges : [],
+          created_at: u.created_date || new Date().toISOString(),
+          updated_at: u.updated_date || u.created_date || new Date().toISOString(),
         };
-
-        console.log(`User data prepared:`, JSON.stringify(userData, null, 2));
 
         const { data, error } = await supabase
           .from('profiles')
@@ -56,55 +50,63 @@ Deno.serve(async (req) => {
           });
 
         if (error) {
-          console.error(`❌ Error syncing user ${u.email}:`, error);
-          console.error(`Error details:`, JSON.stringify(error, null, 2));
-          usersSkipped++;
+          console.error(`❌ FAILED user ${u.email}:`, error);
+          errors.push({
+            type: 'user',
+            email: u.email,
+            id: String(u.id),
+            error: error.message,
+            details: error
+          });
         } else {
-          console.log(`✅ Successfully synced user ${u.email}`);
+          console.log(`✅ SUCCESS user ${u.email}`);
           usersSynced++;
         }
       } catch (err) {
-        console.error(`❌ Exception syncing user ${u.email}:`, err);
-        console.error(`Exception stack:`, err.stack);
-        usersSkipped++;
+        console.error(`❌ EXCEPTION user ${u.email}:`, err);
+        errors.push({
+          type: 'user',
+          email: u.email,
+          id: String(u.id),
+          error: err.message,
+          stack: err.stack
+        });
       }
     }
 
-    // 2. Sync all community posts
+    // 2. Sync ALL community posts
     const allPosts = await base44.asServiceRole.entities.CommunityPost.list();
     console.log(`Found ${allPosts.length} community posts to sync`);
 
     let postsSynced = 0;
-    let postsSkipped = 0;
 
-    for (const post of allPosts) {
+    for (let i = 0; i < allPosts.length; i++) {
+      const post = allPosts[i];
       try {
-        console.log(`Syncing post: ${post.id} by ${post.author_email}`);
+        console.log(`[${i + 1}/${allPosts.length}] Syncing post: ${post.id}`);
         
         const postData = {
           id: String(post.id),
-          author_email: post.author_email,
+          author_email: post.author_email || '',
           author_name: post.author_name || null,
           type: post.type || 'text',
           content: post.content || post.text || null,
-          media_urls: post.media_urls || [],
+          media_urls: Array.isArray(post.media_urls) ? post.media_urls : [],
           location_name: post.location_name || null,
           location_city: post.location_city || null,
           location_lat: post.location_lat || null,
           location_lng: post.location_lng || null,
-          upvotes: post.upvotes || 0,
-          upvoted_by: post.upvoted_by || [],
-          downvotes: post.downvotes || 0,
-          comment_count: post.comment_count || 0,
-          engagement_score: post.engagement_score || 0,
+          upvotes: Number(post.upvotes) || 0,
+          upvoted_by: Array.isArray(post.upvoted_by) ? post.upvoted_by : [],
+          downvotes: Number(post.downvotes) || 0,
+          comment_count: Number(post.comment_count) || 0,
+          engagement_score: Number(post.engagement_score) || 0,
           group_id: post.group_id ? String(post.group_id) : null,
-          is_pinned: post.is_pinned || false,
+          is_pinned: Boolean(post.is_pinned),
           moderation_status: post.moderation_status || 'approved',
-          created_at: post.created_date,
-          updated_at: post.updated_date || post.created_date,
+          created_at: post.created_date || new Date().toISOString(),
+          updated_at: post.updated_date || post.created_date || new Date().toISOString(),
         };
-
-        console.log(`Post data prepared:`, JSON.stringify(postData, null, 2));
 
         const { data, error } = await supabase
           .from('posts')
@@ -114,17 +116,27 @@ Deno.serve(async (req) => {
           });
 
         if (error) {
-          console.error(`❌ Error syncing post ${post.id}:`, error);
-          console.error(`Error details:`, JSON.stringify(error, null, 2));
-          postsSkipped++;
+          console.error(`❌ FAILED post ${post.id}:`, error);
+          errors.push({
+            type: 'post',
+            id: String(post.id),
+            author: post.author_email,
+            error: error.message,
+            details: error
+          });
         } else {
-          console.log(`✅ Successfully synced post ${post.id}`);
+          console.log(`✅ SUCCESS post ${post.id}`);
           postsSynced++;
         }
       } catch (err) {
-        console.error(`❌ Exception syncing post ${post.id}:`, err);
-        console.error(`Exception stack:`, err.stack);
-        postsSkipped++;
+        console.error(`❌ EXCEPTION post ${post.id}:`, err);
+        errors.push({
+          type: 'post',
+          id: String(post.id),
+          author: post.author_email,
+          error: err.message,
+          stack: err.stack
+        });
       }
     }
 
@@ -133,24 +145,27 @@ Deno.serve(async (req) => {
       users: {
         total: allUsers.length,
         synced: usersSynced,
-        skipped: usersSkipped,
+        failed: allUsers.length - usersSynced,
       },
       posts: {
         total: allPosts.length,
         synced: postsSynced,
-        skipped: postsSkipped,
+        failed: allPosts.length - postsSynced,
       },
+      errors: errors,
+      error_count: errors.length,
       timestamp: new Date().toISOString(),
     };
 
-    console.log('Sync completed:', summary);
+    console.log('Sync completed:', JSON.stringify(summary, null, 2));
 
     return Response.json(summary, { status: 200 });
   } catch (error) {
-    console.error('Sync error:', error);
+    console.error('Fatal sync error:', error);
     return Response.json({ 
+      success: false,
       error: error.message,
-      success: false 
+      stack: error.stack
     }, { status: 500 });
   }
 });
