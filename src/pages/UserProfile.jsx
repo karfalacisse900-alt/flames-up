@@ -141,166 +141,142 @@ export default function UserProfile() {
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3" 
+      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 safe-top" 
         style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
         <button onClick={() => navigate(-1)} className="p-2 -ml-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-bold flex-1" style={{ fontFamily: "var(--font-serif)" }}>
-          Profile
-        </h1>
       </div>
 
-      {/* Profile Header */}
-      <div className="px-4 py-6" style={{ backgroundColor: "var(--bg-card)" }}>
-        <div className="flex items-start gap-4 mb-4">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full overflow-hidden" 
-              style={{ border: "3px solid var(--accent-primary)" }}>
-              {profileUser.avatar_url ? (
-                <img src={profileUser.avatar_url} alt={profileUser.full_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-3xl font-bold"
-                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                  {profileUser.full_name?.[0]?.toUpperCase() || "?"}
-                </div>
-              )}
+      {/* Profile Header Card */}
+      <div className="px-4 py-5 mt-2">
+        <div className="rounded-[28px] overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+          <div className="p-6">
+            {/* Avatar & Name */}
+            <div className="flex items-start gap-4 mb-5">
+              <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0" 
+                style={{ border: "3px solid var(--accent-primary)" }}>
+                {profileUser.avatar_url ? (
+                  <img src={profileUser.avatar_url} alt={profileUser.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-2xl font-bold"
+                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                    {profileUser.full_name?.[0]?.toUpperCase() || "?"}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[22px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  {profileUser.full_name}
+                </h2>
+                {profile.bio && (
+                  <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                    {profile.bio}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Name & Bio */}
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "var(--font-serif)" }}>
-              {profileUser.full_name}
-            </h2>
-            {profile.bio && (
-              <p className="text-sm mb-3 whitespace-pre-wrap" style={{ color: "var(--text-secondary)" }}>
-                {profile.bio}
-              </p>
+            {/* Profile Details Grid */}
+            {(profile.age || profile.major || profile.graduation_year || profile.location) && (
+              <div className="grid grid-cols-2 gap-3 mb-5 pb-5" style={{ borderBottom: "1px solid #edf2f7" }}>
+                {profile.age && !profile.hide_age && (
+                  <div className="text-sm">
+                    <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 600, marginBottom: "4px" }}>Age</p>
+                    <p style={{ color: "var(--text-primary)", fontWeight: 500 }}>{profile.age}</p>
+                  </div>
+                )}
+                {profile.major && (
+                  <div className="text-sm">
+                    <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 600, marginBottom: "4px" }}>Major</p>
+                    <p style={{ color: "var(--text-primary)", fontWeight: 500 }}>{profile.major}</p>
+                  </div>
+                )}
+                {profile.graduation_year && !profile.hide_graduation && (
+                  <div className="text-sm">
+                    <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 600, marginBottom: "4px" }}>Graduation</p>
+                    <p style={{ color: "var(--text-primary)", fontWeight: 500 }}>Class of {profile.graduation_year}</p>
+                  </div>
+                )}
+                {profile.location && !profile.hide_location && (
+                  <div className="text-sm">
+                    <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 600, marginBottom: "4px" }}>Location</p>
+                    <p style={{ color: "var(--text-primary)", fontWeight: 500 }}>{profile.location}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Interests */}
+            {profile.interests && profile.interests.length > 0 && !profile.hide_interests && (
+              <div className="mb-5">
+                <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Interests & Hobbies
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {profile.interests.map((interest, idx) => (
+                    <span key={idx} className="px-3 py-1.5 rounded-full text-xs font-medium"
+                      style={{ backgroundColor: "#f0f4ff", color: "var(--accent-primary)" }}>
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Looking For */}
+            {profile.looking_for && profile.looking_for.length > 0 && (
+              <div className="mb-5">
+                <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Looking For
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {profile.looking_for.map((item, idx) => (
+                    <span key={idx} className="px-3 py-1.5 rounded-full text-xs font-medium" style={{ backgroundColor: "#f8f9fc", color: "var(--text-primary)", border: "1px solid #e0e7f1" }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {!isOwnProfile && currentUser && (
+              <div className="flex gap-2 mt-6 pt-5" style={{ borderTop: "1px solid #edf2f7" }}>
+                <Button onClick={handleMessage} className="flex-1 rounded-full h-10" style={{ backgroundColor: "var(--accent-primary)", color: "white" }}>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Message
+                </Button>
+                <Button onClick={handleFollow} variant="outline" className="flex-1 rounded-full h-10">
+                  {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                  {isFollowing ? "Following" : "Follow"}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleReport}>
+                      <Flag className="w-4 h-4 mr-2" />
+                      Report
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleBlock} className="text-red-600">
+                      <UserX className="w-4 h-4 mr-2" />
+                      Block
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {isOwnProfile && (
+              <Button onClick={() => navigate("/Profile")} className="w-full mt-6 rounded-full h-10" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}>
+                Edit Profile
+              </Button>
             )}
           </div>
-        </div>
-
-        {/* Profile Details */}
-        <div className="space-y-2 mb-4">
-          {profile.age && !profile.hide_age && (
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <span>{profile.age} years old</span>
-            </div>
-          )}
-          {profile.major && (
-            <div className="flex items-center gap-2 text-sm">
-              <GraduationCap className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <span>{profile.major}</span>
-            </div>
-          )}
-          {profile.graduation_year && !profile.hide_graduation && (
-            <div className="flex items-center gap-2 text-sm">
-              <Briefcase className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <span>Class of {profile.graduation_year}</span>
-            </div>
-          )}
-          {profile.location && !profile.hide_location && (
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <span>{profile.location}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Interests */}
-        {profile.interests && profile.interests.length > 0 && !profile.hide_interests && (
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>
-              Interests & Hobbies
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.interests.map((interest, idx) => (
-                <span key={idx} className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                  {interest}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Looking For */}
-        {profile.looking_for && profile.looking_for.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>
-              Looking For
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.looking_for.map((item, idx) => (
-                <span key={idx} className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        {!isOwnProfile && currentUser && (
-          <div className="flex gap-2 mt-4">
-            <Button onClick={handleMessage} className="flex-1" style={{ backgroundColor: "var(--accent-primary)" }}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
-            </Button>
-            <Button onClick={handleFollow} variant="outline" className="flex-1">
-              {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-              {isFollowing ? "Following" : "Follow"}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleReport}>
-                  <Flag className="w-4 h-4 mr-2" />
-                  Report
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleBlock} className="text-red-600">
-                  <UserX className="w-4 h-4 mr-2" />
-                  Block
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
-
-        {isOwnProfile && (
-          <Button onClick={() => navigate("/Profile")} className="w-full mt-4" variant="outline">
-            Edit Profile
-          </Button>
-        )}
-      </div>
-
-      {/* Activity Stats */}
-      <div className="grid grid-cols-3 gap-4 px-4 py-4" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
-        <div className="text-center">
-          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
-            {userPosts.length}
-          </div>
-          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Posts</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
-            {groupCount}
-          </div>
-          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Groups</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
-            {livePosts.length}
-          </div>
-          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Live</div>
         </div>
       </div>
 
