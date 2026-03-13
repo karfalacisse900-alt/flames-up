@@ -157,7 +157,7 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
 
   return (
     <>
-      <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
+      <div className="flex flex-col" style={{ height: "100dvh", background: "linear-gradient(180deg, #f8f5ff 0%, #eef2ff 45%, #ecfeff 100%)" }}>
         {/* Header */}
         <div className="mx-3 mt-3 flex items-center gap-2 px-3 shrink-0 rounded-[24px]"
           style={{

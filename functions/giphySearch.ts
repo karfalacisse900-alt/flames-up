@@ -2,12 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    createClientFromRequest(req);
 
     // Parse payload from POST body
     let payload = {};
@@ -19,22 +14,25 @@ Deno.serve(async (req) => {
 
     const query = payload.q || '';
     const limit = payload.limit || '20';
-
-    if (!query.trim()) {
-      return Response.json({ data: [], pagination: { count: 0 } });
-    }
+    const normalizedQuery = String(query).trim().toLowerCase();
 
     const apiKey = Deno.env.get('GIPHY_API_KEY');
     if (!apiKey) {
       return Response.json({ error: 'GIPHY_API_KEY not configured' }, { status: 500 });
     }
 
-    const giphyUrl = new URL('https://api.giphy.com/v1/gifs/search');
+    const giphyUrl = new URL(
+      !normalizedQuery || normalizedQuery === 'trending'
+        ? 'https://api.giphy.com/v1/gifs/trending'
+        : 'https://api.giphy.com/v1/gifs/search'
+    );
     giphyUrl.searchParams.append('api_key', apiKey);
-    giphyUrl.searchParams.append('q', query);
+    if (normalizedQuery && normalizedQuery !== 'trending') {
+      giphyUrl.searchParams.append('q', query);
+      giphyUrl.searchParams.append('lang', 'en');
+    }
     giphyUrl.searchParams.append('limit', limit);
     giphyUrl.searchParams.append('rating', 'pg-13');
-    giphyUrl.searchParams.append('lang', 'en');
 
     const response = await fetch(giphyUrl.toString());
 
@@ -56,6 +54,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       data: gifs,
+      gifs,
       pagination: {
         count: gifs.length,
         total: data.pagination?.total_count || 0,

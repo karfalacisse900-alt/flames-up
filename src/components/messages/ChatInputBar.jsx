@@ -95,7 +95,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* GIF panel */}
       {showGif && (
-        <div className="px-3 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
+        <div className="px-3 py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
           <div className="flex gap-2 mb-2">
             <input value={gifQuery} onChange={e => setGifQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && searchGifs()}
@@ -162,7 +162,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
             style={{ background: showAttach ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "var(--bg-subtle)", color: showAttach ? "#fff" : "var(--text-secondary)" }}>
             {showAttach
               ? <X className="w-5 h-5" style={{ color: "#fff" }} />
-              : <Paperclip className="w-5 h-5" style={{ color: "#666" }} />}
+              : <Paperclip className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />}
           </button>
         </div>
 

@@ -35,7 +35,7 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
     ? "var(--bg-subtle)"
     : isMe
     ? "linear-gradient(135deg, #7C3AED, #DB2777)"
-    : "linear-gradient(135deg, #ffffff, #f8f5ff)";
+    : "linear-gradient(135deg, #eff6ff, #f5f3ff)";
   const bubbleRadius = isMe
     ? "20px 6px 20px 20px"
     : "6px 20px 20px 20px";
