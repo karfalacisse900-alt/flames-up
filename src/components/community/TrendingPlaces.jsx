@@ -4,13 +4,20 @@ import { base44 } from "@/api/base44Client";
 import { MapPin, TrendingUp, Flame } from "lucide-react";
 
 export default function TrendingPlaces({ onSelectPlace }) {
+  // Fetch real places from database
+  const { data: realPlaces = [] } = useQuery({
+    queryKey: ["realPlaces"],
+    queryFn: () => base44.entities.Place.list("-follower_count", 50),
+    staleTime: 10 * 60 * 1000,
+  });
+
   const { data: posts = [] } = useQuery({
     queryKey: ["communityPostsForTrending"],
     queryFn: () => base44.entities.CommunityPost.list("-created_date", 200),
     staleTime: 5 * 60 * 1000,
   });
 
-  // Aggregate by location_name or location_city
+  // Aggregate by location_name or location_city from posts
   const placeMap = {};
   for (const p of posts) {
     const name = p.location_name || p.location_city;
@@ -37,9 +44,42 @@ export default function TrendingPlaces({ onSelectPlace }) {
     }
   }
 
-  const trending = Object.values(placeMap)
-    .sort((a, b) => (b.postCount * 3 + b.likeCount) - (a.postCount * 3 + a.likeCount))
-    .slice(0, 8);
+  // Convert real places to trending format
+  const realPlacesFormatted = realPlaces.map(p => ({
+    name: p.name,
+    city: p.city || "",
+    region: p.region || "",
+    country: p.country || "",
+    lat: p.lat,
+    lng: p.lng,
+    postCount: p.post_count || 0,
+    likeCount: p.follower_count || 0,
+    coverImage: p.cover_image_url,
+    hasMedia: !!p.cover_image_url,
+    description: p.description,
+    isRealPlace: true,
+  }));
+
+  // Merge real places with trending posts, prioritize real places
+  const allPlaces = [...realPlacesFormatted, ...Object.values(placeMap)];
+  const uniquePlaces = [];
+  const seen = new Set();
+  
+  for (const place of allPlaces) {
+    if (!seen.has(place.name)) {
+      seen.add(place.name);
+      uniquePlaces.push(place);
+    }
+  }
+
+  const trending = uniquePlaces
+    .sort((a, b) => {
+      // Prioritize real verified places
+      if (a.isRealPlace && !b.isRealPlace) return -1;
+      if (!a.isRealPlace && b.isRealPlace) return 1;
+      return (b.postCount * 3 + b.likeCount) - (a.postCount * 3 + a.likeCount);
+    })
+    .slice(0, 12);
 
   if (trending.length === 0) return null;
 
@@ -72,7 +112,12 @@ export default function TrendingPlaces({ onSelectPlace }) {
               </div>
             </div>
             <div className="px-2.5 py-2">
-              <p className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{place.name}</p>
+              <div className="flex items-center gap-1 mb-0.5">
+                <p className="text-xs font-bold truncate flex-1" style={{ color: "var(--text-primary)" }}>{place.name}</p>
+                {place.isRealPlace && (
+                  <span className="text-blue-500 text-[10px]">✓</span>
+                )}
+              </div>
               {place.city && place.city !== place.name && (
                 <p className="text-[10px] truncate" style={{ color: "var(--text-hint)" }}>{place.city}</p>
               )}
