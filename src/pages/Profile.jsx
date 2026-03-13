@@ -293,27 +293,27 @@ export default function Profile() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
         <TabsList className="w-full h-auto gap-2 p-0 bg-transparent flex overflow-x-auto scrollbar-hide justify-start">
-          <TabsTrigger value="posts" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="posts" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <MessageSquare className="w-3.5 h-3.5" /> Posts
           </TabsTrigger>
           {user.is_creator && (
-            <TabsTrigger value="creator" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+            <TabsTrigger value="creator" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
               ⭐ Creator
             </TabsTrigger>
           )}
-          <TabsTrigger value="liked" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="liked" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <Heart className="w-3.5 h-3.5" /> Liked
           </TabsTrigger>
-          <TabsTrigger value="badges" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="badges" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <Medal className="w-3.5 h-3.5" /> Badges
           </TabsTrigger>
-          <TabsTrigger value="saved_items" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="saved_items" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <FolderOpen className="w-3.5 h-3.5" /> Apps
           </TabsTrigger>
-          <TabsTrigger value="interests" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="interests" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
+          <TabsTrigger value="subscriptions" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
             <Wallet className="w-3.5 h-3.5" /> Groups
           </TabsTrigger>
           </TabsList>
