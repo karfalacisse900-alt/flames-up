@@ -6,20 +6,20 @@ import { useQuery } from "@tanstack/react-query";
 export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen, mutualMembers = [] }) {
   const { data: posts = [] } = useQuery({
     queryKey: ["groupPosts", group.id],
-    queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 3),
+    queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 8),
   });
 
-  const previewPosts = posts.filter(p => p.media_urls?.length > 0 || p.video_url).slice(0, 3);
+  const previewPosts = posts.filter(p => p.media_urls?.length > 0 || p.video_url || p.image_url).slice(0, 4);
 
   return (
     <div
       onClick={() => onOpen(group)}
-      className="shrink-0 rounded-3xl overflow-hidden cursor-pointer"
+      className="shrink-0 rounded-[28px] overflow-hidden cursor-pointer"
       style={{
-        width: 360,
+        width: "100%",
         backgroundColor: "var(--bg-card)",
         border: "1px solid var(--border-light)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "var(--elevation-3)",
       }}>
       
       {/* Top section */}
@@ -33,10 +33,10 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen, mu
 
         <div className="flex items-center gap-3 mb-3">
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
-            style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
-            {group.cover_image_url ? (
-              <img src={group.cover_image_url} alt="" className="w-full h-full rounded-full object-cover" />
+            className="w-14 h-14 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))" }}>
+            {group.logo_url || group.cover_image_url ? (
+              <img src={group.logo_url || group.cover_image_url} alt="" className="w-full h-full rounded-full object-cover" loading="lazy" />
             ) : (
               <span>{group.emoji || "💬"}</span>
             )}

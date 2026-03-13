@@ -495,6 +495,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
               style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)" }}>
               <Heart className="w-6 h-6" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
+              <span className="text-sm font-semibold">Like</span>
               {(post.upvotes || 0) > 0 && <span className="text-sm font-semibold">{post.upvotes}</span>}
             </button>
             {showReactions && (
@@ -519,6 +520,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             className="flex items-center gap-2 px-3 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)" }}>
             <MessageCircle className="w-6 h-6" strokeWidth={2} />
+            <span className="text-sm font-semibold">Comment</span>
             {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
           </Link>
 
@@ -527,6 +529,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             className="flex items-center gap-2 px-3 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)" }}>
             <Share2 className="w-6 h-6" strokeWidth={2} />
+            <span className="text-sm font-semibold">Share</span>
           </button>
 
           {/* Want to go — only for location posts */}

@@ -77,6 +77,7 @@ export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
         src={images[0]}
         alt=""
         loading="lazy"
+        decoding="async"
         className="w-full"
         style={{ borderRadius: 16, aspectRatio, objectFit: "cover", display: "block", border: "1px solid var(--border-subtle)" }}
       />
@@ -119,6 +120,7 @@ export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
               src={images[current]}
               alt={`Photo ${current + 1} of ${count}`}
               loading="lazy"
+              decoding="async"
               draggable="false"
               style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", display: "block" }}
             />

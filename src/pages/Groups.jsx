@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 import GroupMessageBubble from "@/components/groups/GroupMessageBubble";
-import TrendingGroupsSwiper from "@/components/groups/TrendingGroupsSwiper";
+import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
 import GroupReviewSection from "@/components/groups/GroupReviewSection";
 
@@ -123,6 +123,7 @@ export default function Groups() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDiscoverFilters, setShowDiscoverFilters] = useState(false);
+  const [dismissedGroupIds, setDismissedGroupIds] = useState([]);
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -180,7 +181,12 @@ export default function Groups() {
     setActiveGroup(group);
   };
 
+  const handleDismissDiscover = (group) => {
+    setDismissedGroupIds(prev => prev.includes(group.id) ? prev : [...prev, group.id]);
+  };
+
   const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
+  const discoverGroups = useMemo(() => groups.filter(g => !membershipMap[g.id] && !dismissedGroupIds.includes(g.id)), [groups, membershipMap, dismissedGroupIds]);
   
   const filteredGroups = useMemo(() => groups.filter(g => {
     const matchSearch = !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.description?.toLowerCase().includes(search.toLowerCase());
@@ -309,6 +315,30 @@ export default function Groups() {
           </>
         ) : (
           <>
+            {/* Discover Groups */}
+            {discoverGroups.length > 0 && (
+              <section className="mb-6">
+                <div className="flex items-center justify-between mb-3 px-0.5">
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
+                    <Flame className="w-3.5 h-3.5 text-orange-500" /> Discover Groups
+                  </p>
+                  <span className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Swipe to explore</span>
+                </div>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4 pb-2">
+                  {discoverGroups.slice(0, 12).map(group => (
+                    <div key={group.id} className="shrink-0 snap-center w-[82vw] max-w-[360px]">
+                      <TrendingGroupCard
+                        group={group}
+                        onDismiss={() => handleDismissDiscover(group)}
+                        onJoin={handleJoin}
+                        onOpen={handleOpenGroup}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* My Groups */}
             {myGroups.length > 0 && (
               <section className="mb-6">

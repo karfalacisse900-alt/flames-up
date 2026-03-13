@@ -52,15 +52,19 @@ export default function StatusBar({ user }) {
 
   return (
     <>
-      <div className="px-4 py-3">
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+      <div className="px-4 pt-3 pb-4">
+        <div className="flex items-center justify-between mb-3 px-0.5">
+          <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Stories</p>
+          <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Tap to view</p>
+        </div>
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 snap-x snap-mandatory scroll-smooth">
           {canPost && (
-            <button onClick={() => setShowPost(true)} className="flex flex-col items-center gap-1.5 shrink-0">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center relative"
+            <button onClick={() => setShowPost(true)} className="flex flex-col items-center gap-1.5 shrink-0 snap-start">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center relative"
                 style={{ border: "2.5px dashed var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
                 <Plus className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />
               </div>
-              <span className="text-[11px] font-semibold" style={{ color: "var(--text-secondary)" }}>Add Status</span>
+              <span className="text-[11px] font-semibold max-w-[64px] truncate text-center" style={{ color: "var(--text-secondary)" }}>Add Story</span>
             </button>
           )}
 
@@ -70,9 +74,9 @@ export default function StatusBar({ user }) {
             const initials = (latest.author_name || "U")[0]?.toUpperCase();
             return (
               <button key={latest.author_email} onClick={() => openGroup(group)}
-                className="flex flex-col items-center gap-1.5 shrink-0">
+                className="flex flex-col items-center gap-1.5 shrink-0 snap-start">
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-full p-0.5"
+                  <div className="w-16 h-16 rounded-full p-[3px]"
                     style={{ background: allViewed ? "var(--border-medium)" : (latest.background || "linear-gradient(135deg, #7C3AED, #DB2777)") }}>
                     <div className="w-full h-full rounded-full flex items-center justify-center font-bold text-lg"
                       style={{ backgroundColor: avatarColor(latest.author_email), color: "#fff", border: "2px solid var(--bg-app)" }}>
@@ -86,7 +90,7 @@ export default function StatusBar({ user }) {
                     </div>
                   )}
                 </div>
-                <span className="text-[11px] font-semibold max-w-[56px] truncate text-center"
+                <span className="text-[11px] font-semibold max-w-[64px] truncate text-center"
                   style={{ color: "var(--text-secondary)" }}>
                   {latest.group_name || latest.author_name?.split(" ")[0] || "User"}
                 </span>
@@ -100,8 +104,8 @@ export default function StatusBar({ user }) {
         {showPost && (
           <PostStatusModal
             user={user}
-            groupId={groupAdminOf && !isCreator ? groupAdminOf.group_id : undefined}
-            groupName={groupAdminOf && !isCreator ? groupAdminOf.group_name : undefined}
+            groupId={groupAdminOf?.group_id}
+            groupName={groupAdminOf?.group_name}
             onClose={() => setShowPost(false)}
             onPosted={() => qc.invalidateQueries({ queryKey: ["creatorStatuses"] })}
           />
