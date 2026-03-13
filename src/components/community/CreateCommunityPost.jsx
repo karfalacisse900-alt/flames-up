@@ -256,7 +256,27 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       tags: challengeContext ? ["daily_challenge"] : undefined,
     };
 
-    await base44.entities.CommunityPost.create(postData);
+    const newPost = await base44.entities.CommunityPost.create(postData);
+    
+    // Sync to Supabase
+    try {
+      const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+      const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/community_posts`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_SERVICE_ROLE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates",
+        },
+        body: JSON.stringify({ id: String(newPost.id), content: cleanedBody }),
+      });
+      if (!sbRes.ok) console.error("Supabase sync failed:", await sbRes.text());
+    } catch (err) {
+      console.error("Supabase sync error:", err);
+    }
+
     setSaving(false);
     await clearDraft();
     onCreated();
