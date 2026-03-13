@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Delete all posts from Supabase community_posts table
-    const deleteRes = await fetch(`${SUPABASE_URL}/rest/v1/community_posts?id=gt.0`, {
+    // Delete all posts from Supabase posts table
+    const deleteRes = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=gt.0`, {
       method: "DELETE",
       headers: {
         "apikey": SUPABASE_SERVICE_ROLE_KEY,
@@ -28,10 +28,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Delete failed", details: errText }, { status: 500 });
     }
 
-    console.log("Cleared all posts from Supabase community_posts table");
+    console.log("Cleared all posts from Supabase posts table");
     return Response.json({ 
       success: true, 
-      message: "All posts cleared from Supabase community_posts table" 
+      message: "All posts cleared from Supabase posts table" 
     });
 
   } catch (error) {

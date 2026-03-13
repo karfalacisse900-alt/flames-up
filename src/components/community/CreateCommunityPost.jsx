@@ -269,7 +269,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
         content: cleanedBody || newPost.body || newPost.text || ''
       };
       
-      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/community_posts`, {
+      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
         method: "POST",
         headers: {
           "apikey": SUPABASE_SERVICE_ROLE_KEY,
