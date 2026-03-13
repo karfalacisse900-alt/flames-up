@@ -149,17 +149,26 @@ export default function NowBoard() {
             <p style={{ color: "var(--text-hint)" }}>No statuses yet. Be the first to post! 🚀</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-            {statuses.map(status => (
-              <div key={status.id} className="break-inside-avoid mb-4">
-                <NowStatusCard
-                  status={status}
-                  currentUser={user}
-                  onView={() => setViewingStatus(status)}
-                  onRefresh={() => refetch()}
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-max">
+            {statuses.map(status => {
+              const totalReactions = Object.values(status.reactions || {}).reduce((a, b) => a + b, 0);
+              const remixCount = status.remix_count || 0;
+              const engagement = totalReactions + remixCount;
+              let rowSpan = "row-span-1";
+              if (engagement > 10) rowSpan = "row-span-2";
+              if (engagement > 20 || status.content_type === "video") rowSpan = "row-span-3";
+
+              return (
+                <div key={status.id} className={rowSpan}>
+                  <NowStatusCard
+                    status={status}
+                    currentUser={user}
+                    onView={() => setViewingStatus(status)}
+                    onRefresh={() => refetch()}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

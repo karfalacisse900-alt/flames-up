@@ -88,13 +88,13 @@ export default function CreateNowStatusModal({ user, onClose, onCreated }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }}
       onClick={onClose}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
         style={{ backgroundColor: "var(--bg-card)" }}
         onClick={(e) => e.stopPropagation()}
       >
