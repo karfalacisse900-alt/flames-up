@@ -157,16 +157,18 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
 
   return (
     <>
-      <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
+      <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "var(--bg-app)" }}>
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 shrink-0"
+        <div className="mx-3 mt-3 flex items-center gap-2 px-3 shrink-0 rounded-[24px]"
           style={{
-            backgroundColor: "#075E54",
-            paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
-            paddingBottom: 10,
+            backgroundColor: "var(--bg-card)",
+            border: "1px solid var(--border-light)",
+            boxShadow: "var(--elevation-2)",
+            paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
+            paddingBottom: 12,
           }}>
           <button onClick={onBack} className="p-1 mr-1">
-            <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
+            <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
           </button>
 
           <button onClick={() => setShowInfo(true)} className="flex items-center gap-2 flex-1 min-w-0">
@@ -177,8 +179,8 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
                 : group.name?.[0]?.toUpperCase() || "G"}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="font-semibold text-[16px] truncate" style={{ color: "#fff" }}>{group.name}</p>
-              <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{group.name}</p>
+              <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
                 {memberCount} members
               </p>
             </div>

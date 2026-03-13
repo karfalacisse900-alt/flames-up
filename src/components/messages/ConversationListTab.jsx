@@ -113,15 +113,15 @@ export default function ConversationListTab({ user, tab, onSelect }) {
   );
 
   return (
-    <div>
-      {filtered.map((conv, idx) => (
+    <div className="space-y-3">
+      {filtered.map((conv) => (
         <button key={conv.email} onClick={() => onSelect({ type: "dm", data: conv })}
-          className="w-full flex items-center gap-3 px-4 py-3 text-left"
-          style={{ borderBottom: idx < filtered.length - 1 ? "1px solid #F5F5F5" : "none", backgroundColor: "#fff" }}>
+          className="w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-[24px]"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)" }}>
 
           {/* Avatar */}
-          <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
-            style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
+          <div className="w-[54px] h-[54px] rounded-2xl flex items-center justify-center text-xl font-bold shrink-0"
+            style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, var(--accent-primary))`, color: "#fff" }}>
             {conv.name?.[0]?.toUpperCase() || "?"}
           </div>
 

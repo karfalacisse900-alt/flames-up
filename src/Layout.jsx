@@ -12,7 +12,6 @@ import RightSidebar from "@/components/layout/RightSidebar";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
-{ name: "Now",     icon: Flame,   page: "NowBoard" },
 { name: "Places", icon: MapPin,  page: "Places" },
 { name: "Discover", icon: Search,  page: "Discover" },
 { name: "Groups",  icon: Users,   page: "Groups" },
@@ -20,7 +19,7 @@ const navItems = [
 ];
 
 const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
-const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore", "Groups", "Places", "NowBoard"];
+const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Art", "ArtStudio", "Explore", "Groups", "Places"];
 
 
 // Flames-Up Logo component
