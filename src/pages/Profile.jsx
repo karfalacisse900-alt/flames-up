@@ -35,7 +35,6 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileTheme, setProfileTheme] = useState("default");
-  const [activeTab, setActiveTab] = useState("posts");
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
