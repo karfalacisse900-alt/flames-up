@@ -48,7 +48,7 @@ export default function Profile() {
         eyebrow="Profile redesign"
         title={`This is a real redesign, ${user.full_name?.split(" ")[0] || "there"}`}
         description="The structure is now broader, more visual, and more asymmetrical so it stops feeling like the same old stacked profile page."
-        action={<button className="rounded-2xl px-4 py-3 text-sm font-semibold" style={{ backgroundColor: "var(--accent-primary)", color: "white" }}>Edit profile</button>}
+        action={null}
       />
 
       <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">

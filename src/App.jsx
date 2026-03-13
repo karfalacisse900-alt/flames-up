@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Groups from './pages/Groups';
 import Discover from './pages/Discover';
+import CreatePost from './pages/CreatePost';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
       <Route path="/Messages" element={<LayoutWrapper currentPageName="Messages"><Messages /></LayoutWrapper>} />
       <Route path="/Groups" element={<LayoutWrapper currentPageName="Groups"><Groups /></LayoutWrapper>} />
       <Route path="/Discover" element={<LayoutWrapper currentPageName="Discover"><Discover /></LayoutWrapper>} />
+      <Route path="/CreatePost" element={<LayoutWrapper currentPageName="CreatePost"><CreatePost /></LayoutWrapper>} />
       <Route path="/NowBoard" element={<Navigate to="/Home" replace />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route

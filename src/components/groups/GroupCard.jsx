@@ -1,7 +1,7 @@
 import React from "react";
-import { Users, ArrowRight } from "lucide-react";
+import { Users, Check, ArrowRight } from "lucide-react";
 
-export default function GroupCard({ group }) {
+export default function GroupCard({ group, onJoin, isJoined, isJoining }) {
   const title = group?.name || group?.title || "Community Group";
   const description = group?.description || "A curated space for people with shared interests, conversations, and ongoing activity.";
   const category = group?.category || "community";
@@ -20,8 +20,17 @@ export default function GroupCard({ group }) {
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
             <Users className="h-3.5 w-3.5" /> {members} members
           </div>
-          <button className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-            Explore <ArrowRight className="h-4 w-4" />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onJoin?.(group);
+            }}
+            disabled={isJoined || isJoining}
+            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold disabled:opacity-60"
+            style={{ backgroundColor: isJoined ? "rgba(20,184,166,0.12)" : "var(--accent-primary-light)", color: isJoined ? "var(--accent-secondary)" : "var(--accent-primary)" }}
+          >
+            {isJoined ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+            {isJoined ? "Joined" : isJoining ? "Joining..." : "Join"}
           </button>
         </div>
       </div>

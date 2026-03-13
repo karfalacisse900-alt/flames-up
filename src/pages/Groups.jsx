@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Layers3, Sparkles, Users } from "lucide-react";
@@ -6,15 +6,51 @@ import PageIntroCard from "@/components/shared/PageIntroCard";
 import GroupCard from "@/components/groups/GroupCard";
 
 export default function Groups() {
-  const { data: groups = [] } = useQuery({
+  const [user, setUser] = useState(null);
+  const [joiningId, setJoiningId] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  const { data: groups = [], refetch } = useQuery({
     queryKey: ["groups-redesign"],
     queryFn: () => base44.entities.Group.list("-created_date", 24),
     initialData: [],
   });
 
+  const { data: memberships = [] } = useQuery({
+    queryKey: ["group-memberships", user?.email],
+    enabled: !!user?.email,
+    queryFn: () => base44.entities.GroupMember.filter({ user_email: user.email }, "-created_date", 200),
+    initialData: [],
+  });
+
   const featured = groups.slice(0, 6);
   const categories = useMemo(() => Array.from(new Set(groups.map((group) => group.category).filter(Boolean))).slice(0, 5), [groups]);
+  const joinedIds = useMemo(() => new Set(memberships.map((member) => member.group_id)), [memberships]);
   const hero = featured[0];
+
+  const handleJoin = async (group) => {
+    if (!user) {
+      await base44.auth.redirectToLogin(window.location.pathname);
+      return;
+    }
+    if (joinedIds.has(group.id) || joiningId) return;
+    setJoiningId(group.id);
+    await base44.entities.GroupMember.create({
+      group_id: group.id,
+      group_name: group.name,
+      user_email: user.email,
+      user_name: user.full_name || user.email,
+      role: "member",
+      joined_at: new Date().toISOString(),
+    });
+    await base44.entities.Group.update(group.id, { member_count: (group.member_count || 0) + 1 });
+    setJoiningId(null);
+    refetch();
+    window.location.reload();
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-8">
@@ -59,7 +95,7 @@ export default function Groups() {
       <section className="masonry-grid">
         {groups.map((group) => (
           <div key={group.id} className="masonry-item">
-            <GroupCard group={group} />
+            <GroupCard group={group} onJoin={handleJoin} isJoined={joinedIds.has(group.id)} isJoining={joiningId === group.id} />
           </div>
         ))}
       </section>
