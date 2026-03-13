@@ -248,6 +248,29 @@ export default function UserProfile() {
               </div>
             )}
 
+            {/* Website & Social Links */}
+            {(profile.website || profile.social_links?.length > 0) && (
+              <div className="mb-5">
+                <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Links
+                </p>
+                <div className="space-y-2">
+                  {profile.website && (
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm hover:underline"
+                      style={{ color: "var(--accent-primary)" }}>
+                      🌐 Website
+                    </a>
+                  )}
+                  {profile.social_links?.map((link, idx) => (
+                    <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm hover:underline"
+                      style={{ color: "var(--accent-primary)" }}>
+                      {link.platform}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             {!isOwnProfile && currentUser && (
               <div className="flex gap-2 mt-6 pt-5" style={{ borderTop: "1px solid #edf2f7" }}>
