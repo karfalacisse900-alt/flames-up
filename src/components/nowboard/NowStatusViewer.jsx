@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MessageSquare, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import NowStatusComments from "./NowStatusComments";
 
 const REACTIONS = ["🔥", "😂", "👏", "🤯", "💡"];
 
@@ -142,16 +143,13 @@ export default function NowStatusViewer({ status, currentUser, onClose, onRefres
               })}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "var(--border-light)" }}>
-              <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-semibold transition-all"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                <MessageSquare className="w-4 h-4" /> Reply
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-semibold transition-all"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                <Share2 className="w-4 h-4" /> Share
-              </button>
+            {/* Comments Section */}
+            <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--border-light)" }}>
+              <NowStatusComments
+                statusId={status.id}
+                currentUser={currentUser}
+                onRefresh={onRefresh}
+              />
             </div>
           </div>
         </motion.div>

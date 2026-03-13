@@ -12,6 +12,7 @@ import RightSidebar from "@/components/layout/RightSidebar";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
+{ name: "Now",     icon: Flame,   page: "NowBoard" },
 { name: "Places", icon: MapPin,  page: "Places" },
 { name: "Discover", icon: Search,  page: "Discover" },
 { name: "Groups",  icon: Users,   page: "Groups" },
