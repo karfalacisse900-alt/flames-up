@@ -180,7 +180,7 @@ export default function CampusMap() {
         duration: Math.ceil(route.duration / 60),
       });
 
-      if (map.current.getSource("route")) {
+      if (map.current && map.current.getSource && map.current.getSource("route")) {
         map.current.removeLayer("route");
         map.current.removeSource("route");
       }
@@ -221,7 +221,7 @@ export default function CampusMap() {
   const clearDirections = () => {
     setDirectionsMode(null);
     setRouteInfo(null);
-    if (map.current.getSource("route")) {
+    if (map.current && map.current.getSource && map.current.getSource("route")) {
       map.current.removeLayer("route");
       map.current.removeSource("route");
     }
