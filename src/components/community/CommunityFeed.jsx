@@ -140,23 +140,15 @@ export default function CommunityFeed({ user }) {
 
   const followedEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
 
-  // Stable post order — sorted once on load by created_date, never re-sorted on likes
-  const [stablePostIds, setStablePostIds] = useState([]);
-
-  useEffect(() => {
-    if (posts.length > 0) {
-      const list = posts.filter(p => p.type !== "review");
-      const ranked = user?.email
-        ? rankFeedForUser(list, user.email, debates, followedEmails)
-        : [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-      setStablePostIds(prev => {
-        // Only add new posts to front; keep existing order intact
-        const existingIds = new Set(prev);
-        const newIds = ranked.filter(p => !existingIds.has(p.id)).map(p => p.id);
-        return newIds.length > 0 ? [...newIds, ...prev] : prev.length === 0 ? ranked.map(p => p.id) : prev;
-      });
-    }
-  }, [posts.map(p => p.id).join(",")]); // only re-run when post list changes (not on like updates)
+  // Stable post order — sorted once on load, never re-sorted on likes
+  const stablePostIds = useMemo(() => {
+    if (posts.length === 0) return [];
+    const list = posts.filter(p => p.type !== "review");
+    const ranked = user?.email
+      ? rankFeedForUser(list, user.email, debates, followedEmails)
+      : [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    return ranked.map(p => p.id);
+  }, [posts.map(p => p.id).sort().join(","), user?.email, debates.length, followedEmails.join(",")]);
 
   const uniqueCities = useMemo(() => {
     return [...new Set(posts.map(p => p.location_city).filter(Boolean))].sort();
@@ -188,21 +180,9 @@ export default function CommunityFeed({ user }) {
       base = base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
     }
 
-    if (user?.email) {
-      // Rank by: followed authors first, then liked/interacted posts, then recency+engagement
-      const likedIds = new Set(posts.filter(p => p.upvoted_by?.includes(user.email)).map(p => p.id));
-      return [...base].sort((a, b) => {
-        const aFollowed = followedEmails.includes(a.author_email) ? 20 : 0;
-        const bFollowed = followedEmails.includes(b.author_email) ? 20 : 0;
-        const aLiked = likedIds.has(a.id) ? 5 : 0;
-        const bLiked = likedIds.has(b.id) ? 5 : 0;
-        const aScore = (a.engagement_score || 0) + aFollowed + aLiked;
-        const bScore = (b.engagement_score || 0) + bFollowed + bLiked;
-        return bScore - aScore;
-      });
-    }
+    // Return in stable order (DO NOT re-sort after likes)
     return base;
-  }, [stablePostIds, posts, activeFilter, userCoords, user?.email, followedEmails]);
+  }, [stablePostIds, posts, activeFilter, userCoords]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
