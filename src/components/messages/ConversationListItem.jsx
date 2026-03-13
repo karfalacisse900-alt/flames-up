@@ -5,15 +5,17 @@ export default function ConversationListItem({ conversation, isActive, onClick }
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-[24px] border p-4 text-left"
+      className="w-full rounded-[26px] border p-4 text-left"
       style={{
-        backgroundColor: isActive ? "var(--accent-primary-light)" : "var(--bg-card)",
-        borderColor: isActive ? "rgba(79,70,229,0.22)" : "var(--border-light)",
+        background: isActive
+          ? "linear-gradient(135deg, rgba(79,70,229,0.16), rgba(255,255,255,0.96))"
+          : "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92))",
+        borderColor: isActive ? "rgba(79,70,229,0.22)" : "rgba(148,163,184,0.16)",
         boxShadow: isActive ? "var(--elevation-2)" : "var(--elevation-1)",
       }}
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold" style={{ backgroundColor: "rgba(79,70,229,0.12)", color: "var(--accent-primary)" }}>
+        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] text-sm font-bold" style={{ backgroundColor: "rgba(79,70,229,0.12)", color: "var(--accent-primary)" }}>
           {(conversation.name || "?").slice(0, 2).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
@@ -21,7 +23,7 @@ export default function ConversationListItem({ conversation, isActive, onClick }
             <p className="truncate text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{conversation.name}</p>
             <ChevronRight className="h-4 w-4" style={{ color: "var(--text-hint)" }} />
           </div>
-          <p className="mt-1 truncate text-xs" style={{ color: "var(--text-secondary)" }}>{conversation.preview}</p>
+          <p className="mt-1 truncate text-xs leading-5" style={{ color: "var(--text-secondary)" }}>{conversation.preview}</p>
         </div>
       </div>
     </button>

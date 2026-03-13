@@ -8,14 +8,15 @@ export default function GroupCard({ group }) {
   const members = group?.member_count || group?.members_count || group?.participant_count || 0;
 
   return (
-    <div className="rounded-[28px] border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
-      <div className="mb-5 flex h-32 items-end rounded-[22px] p-4" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.16), rgba(20,184,166,0.12))" }}>
-        <span className="rounded-full px-3 py-1 text-xs font-semibold capitalize" style={{ backgroundColor: "rgba(255,255,255,0.7)", color: "var(--text-primary)" }}>{category}</span>
+    <div className="overflow-hidden rounded-[30px] border" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-2)" }}>
+      <div className="relative h-36 p-5" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.18), rgba(20,184,166,0.12) 55%, rgba(255,255,255,0.9))" }}>
+        <div className="absolute right-4 top-4 h-16 w-16 rounded-full" style={{ background: "rgba(255,255,255,0.35)" }} />
+        <span className="relative z-10 rounded-full px-3 py-1 text-xs font-semibold capitalize" style={{ backgroundColor: "rgba(255,255,255,0.76)", color: "var(--text-primary)" }}>{category}</span>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4 p-5">
         <h3 className="h4" style={{ color: "var(--text-primary)" }}>{title}</h3>
-        <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>{description}</p>
-        <div className="flex items-center justify-between pt-2">
+        <p className="text-sm leading-7" style={{ color: "var(--text-secondary)" }}>{description}</p>
+        <div className="flex items-center justify-between gap-3 pt-1">
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
             <Users className="h-3.5 w-3.5" /> {members} members
           </div>

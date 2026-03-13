@@ -69,7 +69,7 @@ export default function Messages() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-8">
-      <PageIntroCard eyebrow="Messages redesign" title="More like a communication studio" description="This version uses a wider composition, floating conversation cards, and a stronger split between inbox, chat, and contact focus." />
+      <PageIntroCard eyebrow="Messages redesign" title="A real messaging workspace" description="This version moves away from the simple stacked inbox pattern and feels more like a dedicated communication dashboard." />
 
       {!user ? (
         <div className="rounded-[30px] border p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
@@ -78,30 +78,22 @@ export default function Messages() {
       ) : (
         <>
           <section className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.12), rgba(79,70,229,0.04))" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Inbox</div>
-              <div className="mt-3 text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{conversations.length}</div>
+            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.12), rgba(255,255,255,0.92))" }}>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Conversations</div>
+              <div className="mt-3 text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{conversations.length}</div>
             </div>
-            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04))" }}>
+            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(20,184,166,0.12), rgba(255,255,255,0.92))" }}>
               <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Messages</div>
-              <div className="mt-3 text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{messages.length}</div>
+              <div className="mt-3 text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{messages.length}</div>
             </div>
-            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(15,23,42,0.06), rgba(15,23,42,0.02))" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Style</div>
-              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}><Sparkles className="h-4 w-4" /> Less list-heavy</div>
+            <div className="rounded-[28px] p-5" style={{ background: "linear-gradient(135deg, rgba(15,23,42,0.06), rgba(255,255,255,0.92))" }}>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Experience</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}><Sparkles className="h-4 w-4" /> Wider and cleaner</div>
             </div>
           </section>
 
-          <div className="flex gap-3 overflow-x-auto pb-1 xl:hidden">
-            {filteredConversations.map((conversation) => (
-              <button key={conversation.id} onClick={() => setSelectedId(conversation.id)} className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold" style={{ backgroundColor: activeConversation?.id === conversation.id ? "var(--accent-primary)" : "var(--bg-subtle)", color: activeConversation?.id === conversation.id ? "white" : "var(--text-secondary)" }}>
-                {conversation.name}
-              </button>
-            ))}
-          </div>
-
-          <section className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_280px]">
-            <div className="hidden xl:block rounded-[32px] border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
+          <section className="grid gap-6 xl:grid-cols-[350px_minmax(0,1fr)_280px]">
+            <div className="rounded-[34px] border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-2)" }}>
               <div className="relative mb-5">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--text-hint)" }} />
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations" className="w-full pl-11 pr-4 py-3 text-sm" />
@@ -110,35 +102,38 @@ export default function Messages() {
                 {filteredConversations.map((conversation) => (
                   <ConversationListItem key={conversation.id} conversation={conversation} isActive={activeConversation?.id === conversation.id} onClick={() => setSelectedId(conversation.id)} />
                 ))}
+                {!filteredConversations.length ? <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No conversations yet.</p> : null}
               </div>
             </div>
 
-            <div className="rounded-[32px] border p-5 md:p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
+            <div className="rounded-[34px] border p-5 md:p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-3)" }}>
               {activeConversation ? (
                 <div className="space-y-5">
                   <div className="flex items-center justify-between gap-3 border-b pb-4" style={{ borderColor: "var(--border-light)" }}>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-bold" style={{ backgroundColor: "rgba(79,70,229,0.12)", color: "var(--accent-primary)" }}>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-[18px] font-bold" style={{ backgroundColor: "rgba(79,70,229,0.12)", color: "var(--accent-primary)" }}>
                         {activeConversation.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <h2 className="h4" style={{ color: "var(--text-primary)" }}>{activeConversation.name}</h2>
-                        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Focused conversation view</p>
+                        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Active conversation</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 max-h-[460px] overflow-y-auto pr-1">
-                    {activeConversation.messages.slice().reverse().map((item) => {
-                      const mine = item.sender_email === user.email;
-                      return (
-                        <div key={item.id} className={`flex ${mine ? "justify-end md:col-start-2 xl:col-start-auto" : "justify-start"}`}>
-                          <div className="max-w-[92%] rounded-[24px] px-4 py-3 text-sm leading-6" style={{ backgroundColor: mine ? "var(--accent-primary)" : "var(--bg-subtle)", color: mine ? "white" : "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
-                            {item.text || "Shared media"}
+                  <div className="rounded-[28px] p-4 md:p-5" style={{ background: "linear-gradient(180deg, rgba(248,250,252,0.9), rgba(241,245,249,0.8))" }}>
+                    <div className="grid gap-3 max-h-[460px] overflow-y-auto pr-1">
+                      {activeConversation.messages.slice().reverse().map((item) => {
+                        const mine = item.sender_email === user.email;
+                        return (
+                          <div key={item.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                            <div className="max-w-[85%] rounded-[24px] px-4 py-3 text-sm leading-7" style={{ backgroundColor: mine ? "var(--accent-primary)" : "white", color: mine ? "white" : "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+                              {item.text || "Shared media"}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="flex gap-3 border-t pt-4" style={{ borderColor: "var(--border-light)" }}>
@@ -158,9 +153,15 @@ export default function Messages() {
               )}
             </div>
 
-            <div className="rounded-[32px] border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-1)" }}>
-              <h3 className="h4" style={{ color: "var(--text-primary)" }}>Conversation focus</h3>
-              <p className="mt-2 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>The layout is now wider and more magazine-like, with the inbox separated from the active chat so it doesn’t read like one long stacked list.</p>
+            <div className="grid gap-4">
+              <div className="rounded-[30px] border p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-1)" }}>
+                <h3 className="h4" style={{ color: "var(--text-primary)" }}>Focus panel</h3>
+                <p className="mt-3 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>The inbox, conversation, and side context are now visually separated, so the page feels designed rather than stacked.</p>
+              </div>
+              <div className="rounded-[30px] border p-5" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.10), rgba(20,184,166,0.08))", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-1)" }}>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Current chat</div>
+                <p className="mt-3 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{activeConversation?.name || "No chat selected"}</p>
+              </div>
             </div>
           </section>
         </>
