@@ -413,6 +413,7 @@ export default function Profile() {
          </TabsContent>
 
       </Tabs>
+      </div>
 
       {/* Followers dialog */}
       <Dialog open={showFollowers} onOpenChange={setShowFollowers}>
