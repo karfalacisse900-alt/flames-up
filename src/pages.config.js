@@ -52,6 +52,7 @@ import AdminContentManager from './pages/AdminContentManager';
 import AdminModeration from './pages/AdminModeration';
 import Art from './pages/Art';
 import ArtStudio from './pages/ArtStudio';
+import CampusMap from './pages/CampusMap';
 import Collections from './pages/Collections';
 import CreateGroup from './pages/CreateGroup';
 import CreatePost from './pages/CreatePost';
@@ -78,16 +79,18 @@ import Messages from './pages/Messages';
 import MyLibrary from './pages/MyLibrary';
 import NotificationSettings from './pages/NotificationSettings';
 import Notifications from './pages/Notifications';
+import NowBoard from './pages/NowBoard';
+import PlaceDetail from './pages/PlaceDetail';
 import Places from './pages/Places';
 import PostComments from './pages/PostComments';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Referral from './pages/Referral';
 import Shop from './pages/Shop';
+import StatusViewer from './pages/StatusViewer';
 import UserProfile from './pages/UserProfile';
 import Wallet from './pages/Wallet';
 import WeeklyChallenges from './pages/WeeklyChallenges';
-import StatusViewer from './pages/StatusViewer';
 import __Layout from './Layout.jsx';
 
 
@@ -97,6 +100,7 @@ export const PAGES = {
     "AdminModeration": AdminModeration,
     "Art": Art,
     "ArtStudio": ArtStudio,
+    "CampusMap": CampusMap,
     "Collections": Collections,
     "CreateGroup": CreateGroup,
     "CreatePost": CreatePost,
@@ -123,16 +127,18 @@ export const PAGES = {
     "MyLibrary": MyLibrary,
     "NotificationSettings": NotificationSettings,
     "Notifications": Notifications,
+    "NowBoard": NowBoard,
+    "PlaceDetail": PlaceDetail,
     "Places": Places,
     "PostComments": PostComments,
     "PostDetail": PostDetail,
     "Profile": Profile,
     "Referral": Referral,
     "Shop": Shop,
+    "StatusViewer": StatusViewer,
     "UserProfile": UserProfile,
     "Wallet": Wallet,
     "WeeklyChallenges": WeeklyChallenges,
-    "StatusViewer": StatusViewer,
 }
 
 export const pagesConfig = {

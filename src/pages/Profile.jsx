@@ -154,170 +154,166 @@ export default function Profile() {
   }
 
   return (
-    <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-      {/* Profile header */}
-      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid var(--border-light)" }}>
-        {/* Organic gradient banner */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: activeTheme.banner, opacity: 0.7 }} />
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-20 pointer-events-none" style={{ background: `radial-gradient(circle, ${activeTheme.accent}, transparent)` }} />
-        <div className="absolute top-4 right-24 w-10 h-10 rounded-full opacity-15 pointer-events-none" style={{ background: activeTheme.accent }} />
-
-        <div className="relative z-10 px-5 pb-5 pt-5">
-          <div className="flex items-start justify-between mb-3">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="w-22 h-22 rounded-3xl overflow-hidden flex items-center justify-center text-3xl font-bold shrink-0 shadow-lg" style={{ width: 80, height: 80, backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", border: `3px solid ${activeTheme.accent}44` }}>
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  (user.display_name || user.full_name || "U")[0]?.toUpperCase()
-                )}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center" style={{ backgroundColor: activeTheme.accent }}>
-                <span className="text-[8px] text-white font-black">✓</span>
-              </div>
-            </div>
-            {/* Action buttons */}
-            <div className="flex gap-2 items-center">
-            {user?.role === "admin" && (
-              <Link to={createPageUrl("AdminContentManager")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
-                <ShieldCheck className="w-3.5 h-3.5" /> Admin
-              </Link>
-            )}
-            <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
-              <Edit2 className="w-3.5 h-3.5" /> Edit Profile
-            </button>
-              <Link to={createPageUrl("Messages")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                <MessageSquare className="w-4 h-4" />
-              </Link>
-              <Link to={createPageUrl("Wallet")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--accent-secondary)" }}>
-                <Wallet className="w-4 h-4" />
-              </Link>
-              <div className="relative">
-                <button
-                  onClick={() => setShowMore(v => !v)}
-                  className="p-2 rounded-full border transition-all"
-                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-                {showMore && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
-                    <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
-                      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                      {[
-                        { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
-                        { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                        { to: createPageUrl("CreatorDashboard"), icon: <BarChart2 className="w-4 h-4" />, label: "Creator Dashboard", color: "var(--accent-primary)" },
-                        ...(user?.is_creator ? [{ to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Edit Creator Profile", color: "#D98B62" }] : []),
-                        { to: createPageUrl("NotificationSettings"), icon: <Settings className="w-4 h-4" />, label: "Settings", color: "var(--text-secondary)" },
-                        { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
-                      ].map(({ to, icon, label, color }) => (
-                        <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
-                          style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
-                          <span style={{ color }}>{icon}</span>
-                          {label}
-                        </Link>
-                      ))}
-                      <button onClick={() => { setShowMore(false); setShowExport(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
-                        <Download className="w-4 h-4" /> Export Data
-                      </button>
-                      <button onClick={() => { setShowMore(false); setShowAIDeleteModal(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#D97706", borderBottom: "1px solid var(--border-light)" }}>
-                        <Zap className="w-4 h-4" /> Delete AI Data
-                      </button>
-                      <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
-                        <LogOut className="w-4 h-4" /> Sign Out
-                      </button>
-                      <button onClick={() => { setShowMore(false); setShowDeleteConfirm(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#E53E3E" }}>
-                        <Trash2 className="w-4 h-4" /> Delete Account
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Name & bio with online indicator */}
+    <div className="overflow-y-auto overscroll-contain px-4 pt-4 pb-8" style={{ backgroundColor: "#f3f6fb", minHeight: "calc(100dvh - 64px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
+      <div className="max-w-lg mx-auto">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Profile</h1>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold mt-1 flex items-center gap-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>
-              {user.display_name || user.full_name}
-              {user.is_creator && <span style={{ fontSize: "16px" }}>⭐</span>}
-            </h2>
-            {isOnline && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(76, 175, 125, 0.15)", color: "var(--accent-primary)" }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "var(--accent-primary)" }} />
-                Online
-              </span>
-            )}
-          </div>
-          {user.username && <p className="text-xs font-bold mt-0.5" style={{ color: activeTheme.accent }}>{user.username}</p>}
-          {user.bio && <p className="text-sm mt-2 leading-relaxed font-medium" style={{ color: "var(--text-secondary)" }}>"{user.bio}"</p>}
-          {user.about_me && (
-            <div className="mt-3 p-3.5 rounded-2xl text-sm leading-relaxed" style={{ backgroundColor: "rgba(0,0,0,0.04)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
-              {user.about_me}
-            </div>
-          )}
-
-          {/* Coin balance */}
-          <Link to={createPageUrl("Wallet")} className="inline-block mt-3">
-            <WalletWidget balance={coinBalance} />
-          </Link>
-
-          {/* Creator Application Button */}
-          {!user.is_creator && (
-            <Link
-              to={createPageUrl("CreatorApplication")}
-              className="w-full py-2.5 rounded-2xl text-white font-bold text-sm mt-4 flex items-center justify-center gap-2 inline-block text-center"
-              style={{ backgroundColor: "var(--accent-primary)" }}
-            >
-              ⭐ Apply to Become a Creator
+            <Link to={createPageUrl("Messages")} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+              <MessageSquare className="w-4 h-4" />
             </Link>
-          )}
-
-          {/* Stats row */}
-          <div className="flex gap-2 mt-4">
-            {[
-              { label: "Posts", value: myPosts.length, onClick: null },
-              { label: "Followers", value: followers.length, onClick: () => setShowFollowers(true) },
-              { label: "Following", value: following.length, onClick: () => setShowFollowing(true) },
-              { label: "Badges", value: computedBadges.length, onClick: null },
-            ].map(({ label, value, onClick }) => (
-              <button key={label} onClick={onClick} className="flex-1 py-2.5 rounded-2xl text-center"
-                style={{ backgroundColor: "rgba(0,0,0,0.05)", boxShadow: "none", cursor: onClick ? "pointer" : "default" }}>
-                <p className="text-base font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</p>
+            <button onClick={() => setShowEdit(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+              <Edit2 className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button onClick={() => setShowMore(v => !v)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+                <MoreHorizontal className="w-4 h-4" />
               </button>
-            ))}
+              {showMore && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
+                  <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
+                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    {[
+                      { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
+                      { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
+                      { to: createPageUrl("CreatorDashboard"), icon: <BarChart2 className="w-4 h-4" />, label: "Creator Dashboard", color: "var(--accent-primary)" },
+                      ...(user?.is_creator ? [{ to: createPageUrl("EditServiceProfile"), icon: <Briefcase className="w-4 h-4" />, label: "Edit Creator Profile", color: "#D98B62" }] : []),
+                      { to: createPageUrl("NotificationSettings"), icon: <Settings className="w-4 h-4" />, label: "Settings", color: "var(--text-secondary)" },
+                      { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
+                    ].map(({ to, icon, label, color }) => (
+                      <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
+                        style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                        <span style={{ color }}>{icon}</span>
+                        {label}
+                      </Link>
+                    ))}
+                    <button onClick={() => { setShowMore(false); setShowExport(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+                      <Download className="w-4 h-4" /> Export Data
+                    </button>
+                    <button onClick={() => { setShowMore(false); setShowAIDeleteModal(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#D97706", borderBottom: "1px solid var(--border-light)" }}>
+                      <Zap className="w-4 h-4" /> Delete AI Data
+                    </button>
+                    <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                    <button onClick={() => { setShowMore(false); setShowDeleteConfirm(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#E53E3E" }}>
+                      <Trash2 className="w-4 h-4" /> Delete Account
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+
+        <div className="relative overflow-hidden rounded-[34px] p-4 md:p-5" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
+          <div className="absolute inset-x-0 top-0 h-28" style={{ background: activeTheme.banner, opacity: 0.18 }} />
+          <div className="relative">
+            <div className="flex items-start gap-4 pt-2">
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold"
+                  style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    (user.display_name || user.full_name || "U")[0]?.toUpperCase()
+                  )}
+                </div>
+                {isOnline && <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full" style={{ backgroundColor: "#c7f036", border: "2px solid white" }} />}
+              </div>
+
+              <div className="flex-1 min-w-0 pt-2">
+                <h2 className="text-[26px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  {user.display_name || user.full_name}
+                </h2>
+                {user.username && <p className="text-sm mt-1 font-semibold" style={{ color: "var(--text-hint)" }}>{user.username}</p>}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {user.interests?.slice(0, 2).map((item) => (
+                    <span key={item} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                      {item}
+                    </span>
+                  ))}
+                  {!user.interests?.length && user.is_creator && (
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                      Creator
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {(user.bio || user.about_me) && (
+              <div className="mt-4 rounded-[24px] px-4 py-3" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
+                {user.bio && <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{user.bio}</p>}
+                {user.about_me && <p className="text-sm mt-1.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.about_me}</p>}
+              </div>
+            )}
+
+            <div className="grid grid-cols-4 gap-2 mt-4">
+              {[
+                { label: "posts", value: myPosts.length, onClick: null },
+                { label: "followers", value: followers.length, onClick: () => setShowFollowers(true) },
+                { label: "following", value: following.length, onClick: () => setShowFollowing(true) },
+                { label: "badges", value: computedBadges.length, onClick: null },
+              ].map(({ label, value, onClick }) => (
+                <button key={label} onClick={onClick} className="rounded-[22px] px-2 py-3 text-center"
+                  style={{ backgroundColor: "#fbfcfe", border: "1px solid #edf2f7", boxShadow: "0 2px 8px rgba(15,23,42,0.03)", cursor: onClick ? "pointer" : "default" }}>
+                  <p className="text-lg font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</p>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setShowEdit(true)} className="flex-1 py-3 rounded-full text-sm font-semibold"
+                style={{ backgroundColor: "#fff", border: "1px solid var(--border-medium)", color: "var(--text-primary)" }}>
+                Edit profile
+              </button>
+              <Link to={createPageUrl("Messages")} className="flex-1 py-3 rounded-full text-sm font-semibold text-center"
+                style={{ backgroundColor: "#fff", border: "1px solid var(--border-medium)", color: "var(--text-primary)" }}>
+                Message
+              </Link>
+            </div>
+
+            <Link to={createPageUrl("Wallet")} className="block mt-4">
+              <WalletWidget balance={coinBalance} />
+            </Link>
+
+            {!user.is_creator && (
+              <Link to={createPageUrl("CreatorApplication")}
+                className="w-full py-3 rounded-[24px] text-white font-bold text-sm mt-4 flex items-center justify-center gap-2 inline-block text-center"
+                style={{ backgroundColor: "#111" }}>
+                Apply to Become a Creator
+              </Link>
+            )}
+          </div>
+        </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="px-5 mt-4">
-        <TabsList className="rounded-xl w-full flex-wrap h-auto gap-1 p-1" style={{ backgroundColor: "var(--bg-card)" }}>
-          <TabsTrigger value="posts" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+        <TabsList className="w-full h-auto gap-2 p-0 bg-transparent flex overflow-x-auto scrollbar-hide justify-start">
+          <TabsTrigger value="posts" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <MessageSquare className="w-3.5 h-3.5" /> Posts
           </TabsTrigger>
           {user.is_creator && (
-            <TabsTrigger value="creator" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+            <TabsTrigger value="creator" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
               ⭐ Creator
             </TabsTrigger>
           )}
-          <TabsTrigger value="liked" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+          <TabsTrigger value="liked" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <Heart className="w-3.5 h-3.5" /> Liked
           </TabsTrigger>
-          <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+          <TabsTrigger value="badges" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <Medal className="w-3.5 h-3.5" /> Badges
           </TabsTrigger>
-          <TabsTrigger value="saved_items" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+          <TabsTrigger value="saved_items" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <FolderOpen className="w-3.5 h-3.5" /> Apps
           </TabsTrigger>
-          <TabsTrigger value="interests" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+          <TabsTrigger value="interests" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <Sparkles className="w-3.5 h-3.5" /> Interests
           </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="flex-1 rounded-lg data-[state=active]:bg-[var(--bg-app)] gap-1 text-xs">
+          <TabsTrigger value="subscriptions" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap data-[state=active]:text-white gap-1" style={{ borderColor: "var(--border-medium)" }}>
             <Wallet className="w-3.5 h-3.5" /> Groups
           </TabsTrigger>
           </TabsList>
@@ -327,7 +323,7 @@ export default function Profile() {
              <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
            ) : (
              myPosts.map(post => (
-               <div key={post.id} className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+               <div key={post.id} className="rounded-[28px] p-4" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
                  <div className="flex items-start justify-between gap-2">
                    <div className="flex-1 min-w-0">
                      <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
@@ -366,7 +362,7 @@ export default function Profile() {
           ) : (
             likedPosts.map(post => (
               <Link key={post.id} to={createPageUrl(`PostDetail?id=${post.id}`)}>
-                <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <div className="rounded-[28px] p-4" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
                   <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
                     style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
                   <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
