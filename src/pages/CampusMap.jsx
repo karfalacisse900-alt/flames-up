@@ -3,8 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Navigation, X, Clock, Users, Bike, Car, PersonStanding } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import mapboxgl from "npm:mapbox-gl@3.1.0";
-import "npm:mapbox-gl@3.1.0/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 const PACE_CENTER = { lng: -74.0059, lat: 40.7114 };
 
