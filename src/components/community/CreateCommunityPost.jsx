@@ -266,7 +266,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       // Map Base44 fields to Supabase columns
       const supabaseData = {
         id: String(newPost.id),
-        content: cleanedBody || newPost.body || newPost.text || ''
+        content: cleanedBody || newPost.body || newPost.text || '',
+        user_id: String(newPost.created_by_id || user?.id || ''),
+        media_url: finalImageUrl || finalVideoUrl || null,
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {

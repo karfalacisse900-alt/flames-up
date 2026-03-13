@@ -77,6 +77,8 @@ Deno.serve(async (req) => {
       const profileRecord = {
         id: String(freshUser.id),
         email: String(freshUser.email || ''),
+        full_name: String(freshUser.full_name || ''),
+        avatar_url: String(freshUser.avatar_url || ''),
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
