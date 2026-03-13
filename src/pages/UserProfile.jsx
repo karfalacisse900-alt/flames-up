@@ -136,7 +136,22 @@ export default function UserProfile() {
   }
 
   const isOwnProfile = currentUser?.email === email;
-  const profile = profileUser.profile_data || {};
+  // Get profile data from user object itself
+  const profile = {
+    bio: profileUser?.bio,
+    age: profileUser?.age,
+    major: profileUser?.major,
+    graduation_year: profileUser?.graduation_year,
+    location: profileUser?.location,
+    interests: profileUser?.interests,
+    looking_for: profileUser?.looking_for,
+    website: profileUser?.website,
+    social_links: profileUser?.social_links,
+    hide_age: profileUser?.hide_age,
+    hide_graduation: profileUser?.hide_graduation,
+    hide_location: profileUser?.hide_location,
+    hide_interests: profileUser?.hide_interests,
+  };
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
