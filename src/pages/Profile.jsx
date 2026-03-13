@@ -290,129 +290,32 @@ export default function Profile() {
           </div>
         </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-        <TabsList className="w-full h-auto gap-2 p-0 bg-transparent flex overflow-x-auto scrollbar-hide justify-start">
-          <TabsTrigger value="posts" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <MessageSquare className="w-3.5 h-3.5" /> Posts
-          </TabsTrigger>
-          {user.is_creator && (
-            <TabsTrigger value="creator" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-              ⭐ Creator
-            </TabsTrigger>
-          )}
-          <TabsTrigger value="liked" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <Heart className="w-3.5 h-3.5" /> Liked
-          </TabsTrigger>
-          <TabsTrigger value="badges" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <Medal className="w-3.5 h-3.5" /> Badges
-          </TabsTrigger>
-          <TabsTrigger value="saved_items" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <FolderOpen className="w-3.5 h-3.5" /> Apps
-          </TabsTrigger>
-          <TabsTrigger value="interests" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <Sparkles className="w-3.5 h-3.5" /> Interests
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions" className="rounded-full px-4 py-2.5 border text-xs whitespace-nowrap gap-1 bg-white text-[var(--text-primary)] data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border-black" style={{ borderColor: "var(--border-medium)" }}>
-            <Wallet className="w-3.5 h-3.5" /> Groups
-          </TabsTrigger>
-          </TabsList>
-
-        <TabsContent value="posts" className="mt-4 space-y-3">
-           {myPosts.length === 0 ? (
-             <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No posts yet</p>
-           ) : (
-             myPosts.map(post => (
-               <div key={post.id} className="rounded-[28px] p-4" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
-                 <div className="flex items-start justify-between gap-2">
-                   <div className="flex-1 min-w-0">
-                     <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
-                       style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
-                     <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
-                     <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
-                       <span>❤️ {post.like_count || 0}</span>
-                       <span>💬 {post.reply_count || 0}</span>
-                       <span>{new Date(post.created_date).toLocaleDateString()}</span>
-                     </p>
-                   </div>
-                   <button
-                     onClick={async () => {
-                       if (!window.confirm("Delete this post?")) return;
-                       await base44.entities.Post.delete(post.id);
-                       queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
-                     }}
-                     className="p-1.5 rounded-full shrink-0" style={{ color: "var(--text-hint)" }}>
-                     <Trash2 className="w-3.5 h-3.5" />
-                   </button>
-                 </div>
-               </div>
-             ))
-           )}
-         </TabsContent>
-
-         {user.is_creator && (
-           <TabsContent value="creator" className="mt-4">
-             <CreatorSection user={user} />
-           </TabsContent>
-         )}
-
-        <TabsContent value="liked" className="mt-4 space-y-3">
-          {likedPosts.length === 0 ? (
-            <p className="text-center text-sm py-8" style={{ color: "var(--text-hint)" }}>No liked posts yet</p>
-          ) : (
-            likedPosts.map(post => (
-              <Link key={post.id} to={createPageUrl(`PostDetail?id=${post.id}`)}>
-                <div className="rounded-[28px] p-4" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full capitalize font-medium mr-2"
-                    style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>{post.type}</span>
-                  <p className="text-sm mt-2 leading-relaxed line-clamp-3" style={{ color: "var(--text-primary)", fontFamily: post.font_family === "serif" ? "var(--font-serif)" : "var(--font-sans)" }}>{post.text}</p>
-                  <p className="text-xs mt-1.5 flex items-center gap-2" style={{ color: "var(--text-hint)" }}>
-                    <span>by {post.is_anonymous ? "Anonymous" : post.author_name}</span>
-                    <span>❤️ {post.like_count || 0}</span>
-                  </p>
+        {/* Gallery Grid */}
+        {myPosts.length === 0 ? (
+          <p className="text-center text-sm py-8 mt-4" style={{ color: "var(--text-hint)" }}>No posts yet</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {myPosts.map(post => (
+              <div key={post.id} className="relative aspect-square rounded-[20px] overflow-hidden group cursor-pointer"
+                style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
+                  <p className="text-white text-xs line-clamp-2">{post.text}</p>
                 </div>
-              </Link>
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="badges" className="mt-4">
-          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Earned by being active in the community</p>
-          <BadgesSection badges={computedBadges} />
-          {computedBadges.length < Object.keys(BADGE_DEFINITIONS).length && (
-            <div className="mt-4 space-y-2">
-              <p className="text-xs font-semibold px-1" style={{ color: "var(--text-hint)" }}>Locked badges</p>
-              {Object.entries(BADGE_DEFINITIONS).filter(([k]) => !computedBadges.includes(k)).map(([key, badge]) => (
-                <div key={key} className="flex items-center gap-3 p-3 rounded-xl opacity-40" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                  <span className="text-xl grayscale">{badge.emoji}</span>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{badge.label}</p>
-                    <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{badge.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="saved_items" className="mt-4">
-          <p className="text-xs mb-3 px-1" style={{ color: "var(--text-hint)" }}>Your saved apps, products & services</p>
-          <SavedItems user={user} />
-        </TabsContent>
-
-        <TabsContent value="interests" className="mt-4">
-           <InterestsSection user={user} onUpdated={setUser} />
-         </TabsContent>
-
-         <TabsContent value="subscriptions" className="mt-4">
-           <SubscriptionManagement user={user} />
-         </TabsContent>
-
-         <TabsContent value="activity" className="mt-4">
-           <ActivityHistory user={user} />
-         </TabsContent>
-
-      </Tabs>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (!window.confirm("Delete this post?")) return;
+                    await base44.entities.Post.delete(post.id);
+                    queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
+                  }}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  style={{ color: "var(--text-hint)" }}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Followers dialog */}
