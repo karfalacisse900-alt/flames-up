@@ -27,33 +27,45 @@ Deno.serve(async (req) => {
 
     for (const u of allUsers) {
       try {
-        const { error } = await supabase
+        console.log(`Syncing user: ${u.email} (ID: ${u.id})`);
+        
+        const userData = {
+          id: String(u.id),
+          email: u.email,
+          full_name: u.full_name || null,
+          display_name: u.display_name || null,
+          username: u.username || null,
+          avatar_url: u.avatar_url || null,
+          bio: u.bio || null,
+          about_me: u.about_me || null,
+          role: u.role || 'user',
+          is_creator: u.is_creator || false,
+          profile_theme: u.profile_theme || 'default',
+          badges: u.badges || [],
+          created_at: u.created_date,
+          updated_at: u.updated_date || u.created_date,
+        };
+
+        console.log(`User data prepared:`, JSON.stringify(userData, null, 2));
+
+        const { data, error } = await supabase
           .from('profiles')
-          .upsert({
-            id: u.id,
-            email: u.email,
-            full_name: u.full_name || null,
-            display_name: u.display_name || null,
-            username: u.username || null,
-            avatar_url: u.avatar_url || null,
-            bio: u.bio || null,
-            about_me: u.about_me || null,
-            role: u.role || 'user',
-            is_creator: u.is_creator || false,
-            profile_theme: u.profile_theme || 'default',
-            badges: u.badges || [],
-            created_at: u.created_date,
-            updated_at: u.updated_date || u.created_date,
-          }, { onConflict: 'id' });
+          .upsert(userData, { 
+            onConflict: 'id',
+            ignoreDuplicates: false
+          });
 
         if (error) {
-          console.error(`Error syncing user ${u.email}:`, error.message);
+          console.error(`❌ Error syncing user ${u.email}:`, error);
+          console.error(`Error details:`, JSON.stringify(error, null, 2));
           usersSkipped++;
         } else {
+          console.log(`✅ Successfully synced user ${u.email}`);
           usersSynced++;
         }
       } catch (err) {
-        console.error(`Failed to sync user ${u.email}:`, err.message);
+        console.error(`❌ Exception syncing user ${u.email}:`, err);
+        console.error(`Exception stack:`, err.stack);
         usersSkipped++;
       }
     }
@@ -67,39 +79,51 @@ Deno.serve(async (req) => {
 
     for (const post of allPosts) {
       try {
-        const { error } = await supabase
+        console.log(`Syncing post: ${post.id} by ${post.author_email}`);
+        
+        const postData = {
+          id: String(post.id),
+          author_email: post.author_email,
+          author_name: post.author_name || null,
+          type: post.type || 'text',
+          content: post.content || post.text || null,
+          media_urls: post.media_urls || [],
+          location_name: post.location_name || null,
+          location_city: post.location_city || null,
+          location_lat: post.location_lat || null,
+          location_lng: post.location_lng || null,
+          upvotes: post.upvotes || 0,
+          upvoted_by: post.upvoted_by || [],
+          downvotes: post.downvotes || 0,
+          comment_count: post.comment_count || 0,
+          engagement_score: post.engagement_score || 0,
+          group_id: post.group_id ? String(post.group_id) : null,
+          is_pinned: post.is_pinned || false,
+          moderation_status: post.moderation_status || 'approved',
+          created_at: post.created_date,
+          updated_at: post.updated_date || post.created_date,
+        };
+
+        console.log(`Post data prepared:`, JSON.stringify(postData, null, 2));
+
+        const { data, error } = await supabase
           .from('posts')
-          .upsert({
-            id: post.id,
-            author_email: post.author_email,
-            author_name: post.author_name || null,
-            type: post.type || 'text',
-            content: post.content || post.text || null,
-            media_urls: post.media_urls || [],
-            location_name: post.location_name || null,
-            location_city: post.location_city || null,
-            location_lat: post.location_lat || null,
-            location_lng: post.location_lng || null,
-            upvotes: post.upvotes || 0,
-            upvoted_by: post.upvoted_by || [],
-            downvotes: post.downvotes || 0,
-            comment_count: post.comment_count || 0,
-            engagement_score: post.engagement_score || 0,
-            group_id: post.group_id || null,
-            is_pinned: post.is_pinned || false,
-            moderation_status: post.moderation_status || 'approved',
-            created_at: post.created_date,
-            updated_at: post.updated_date || post.created_date,
-          }, { onConflict: 'id' });
+          .upsert(postData, { 
+            onConflict: 'id',
+            ignoreDuplicates: false
+          });
 
         if (error) {
-          console.error(`Error syncing post ${post.id}:`, error.message);
+          console.error(`❌ Error syncing post ${post.id}:`, error);
+          console.error(`Error details:`, JSON.stringify(error, null, 2));
           postsSkipped++;
         } else {
+          console.log(`✅ Successfully synced post ${post.id}`);
           postsSynced++;
         }
       } catch (err) {
-        console.error(`Failed to sync post ${post.id}:`, err.message);
+        console.error(`❌ Exception syncing post ${post.id}:`, err);
+        console.error(`Exception stack:`, err.stack);
         postsSkipped++;
       }
     }
