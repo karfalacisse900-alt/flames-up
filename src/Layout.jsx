@@ -157,13 +157,9 @@ export default function Layout({ children, currentPageName }) {
           paddingBottom: hideNav ? 0 : "72px",
           minHeight: "100dvh",
           overflowX: "clip",
-          // On lg+: shift right for left sidebar (240px). On xl+: also leave room for right sidebar (256px).
-          marginLeft: showSidebars ? undefined : "auto",
-          marginRight: showSidebars ? undefined : "auto",
           maxWidth: isAdminPage ? "100%" : undefined,
           width: "100%",
         }}
-        // Tailwind responsive margins applied via className
         data-page={currentPageName}
       >
         {/* Inner content width cap */}
@@ -172,7 +168,7 @@ export default function Layout({ children, currentPageName }) {
             isAdminPage
               ? "w-full"
               : showSidebars
-              ? "lg:ml-60 xl:mr-64 mx-auto"
+              ? "lg:ml-60 xl:mr-64"
               : "max-w-lg mx-auto"
           }
           style={
