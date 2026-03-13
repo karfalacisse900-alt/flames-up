@@ -143,7 +143,7 @@ export default function Layout({ children, currentPageName }) {
   const showSidebars = !isAdminPage && !hideNav;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "clip", width: "100%", maxWidth: "100%" }}>
+    <div className="min-h-screen" style={{ background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 34%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 30%), var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "clip", width: "100%", maxWidth: "100%" }}>
 
       {/* Left sidebar — desktop only */}
       {showSidebars && <LeftSidebar currentPageName={currentPageName} unreadCount={unreadCount} />}
@@ -178,7 +178,9 @@ export default function Layout({ children, currentPageName }) {
               : {}
           }
         >
+        <div className="app-page-shell">
           {children}
+        </div>
         </div>
       </div>
 
