@@ -8,6 +8,8 @@ import TrendingPlaces from "@/components/community/TrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import { requireVerified } from "@/components/auth/EmailVerificationGate";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function PlacesPage() {
   const [user, setUser] = useState(null);
@@ -20,6 +22,11 @@ export default function PlacesPage() {
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  const { data: places = [] } = useQuery({
+    queryKey: ["realPlaces"],
+    queryFn: () => base44.entities.Place.list("-post_count", 50),
+  });
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["placeFeedPosts"],
@@ -213,6 +220,53 @@ export default function PlacesPage() {
       {/* FEED VIEW */}
       {viewMode === "feed" && (
         <div>
+          {/* Real Places Grid */}
+          {places.length > 0 && (
+            <div className="px-4 py-4">
+              <h2 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                Popular Places
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                {places.slice(0, 6).map(place => (
+                  <Link key={place.id}
+                    to={createPageUrl(`PlaceDetail?placeId=${place.id}`)}
+                    className="rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
+                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    {place.cover_image_url ? (
+                      <div className="w-full" style={{ aspectRatio: "16/9", position: "relative" }}>
+                        <img src={place.cover_image_url} alt={place.name} className="w-full h-full object-cover" />
+                        {place.is_verified && (
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full flex items-center justify-center text-4xl" style={{ aspectRatio: "16/9", backgroundColor: "var(--bg-subtle)" }}>
+                        {place.category === "park" ? "🌳" : place.category === "library" ? "📚" : place.category === "cafe" ? "☕" : "📍"}
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <p className="text-sm font-bold mb-0.5 truncate" style={{ color: "var(--text-primary)" }}>
+                        {place.name}
+                      </p>
+                      <p className="text-xs mb-2 truncate" style={{ color: "var(--text-hint)" }}>
+                        {[place.city, place.region].filter(Boolean).join(", ")}
+                      </p>
+                      {place.post_count > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>
+                            {place.post_count} posts
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Trending places strip */}
           <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
 
