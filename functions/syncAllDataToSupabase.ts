@@ -36,7 +36,6 @@ Deno.serve(async (req) => {
         const userData = {
           id: String(u.id),
           email: u.email || '',
-          display_name: u.display_name || null,
         };
 
         const { error } = await supabase
@@ -82,7 +81,6 @@ Deno.serve(async (req) => {
           id: String(post.id),
           title: post.title || null,
           content: post.content || post.text || null,
-          author_id: post.created_by ? String(post.created_by) : null,
         };
 
         const { error } = await supabase
