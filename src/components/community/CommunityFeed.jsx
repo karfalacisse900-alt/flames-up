@@ -36,20 +36,57 @@ export default function CommunityFeed({ user }) {
     },
   });
 
+  // Reverse geocode coords to get neighborhood/area name
+  const [detectedArea, setDetectedArea] = useState(null);
+  
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const data = await res.json();
+      const area = data.address?.suburb || data.address?.neighbourhood || data.address?.city_district || data.address?.city || data.address?.town || null;
+      return area;
+    } catch {
+      return null;
+    }
+  };
+
   const detectLocation = () => {
     if (!navigator.geolocation) return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      async (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserCoords(coords);
+        const area = await reverseGeocode(coords.lat, coords.lng);
+        setDetectedArea(area);
         setLocationLoading(false);
       },
       () => setLocationLoading(false)
     );
   };
 
+  // Auto-detect location on mount for nearby feed
   useEffect(() => {
     if (activeFilter === "nearby" && !userCoords && !locationLoading) detectLocation();
+  }, [activeFilter]);
+
+  // Continuously track location updates
+  useEffect(() => {
+    if (activeFilter !== "nearby") return;
+    let watchId;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        async (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserCoords(coords);
+          const area = await reverseGeocode(coords.lat, coords.lng);
+          setDetectedArea(area);
+        },
+        () => {},
+        { enableHighAccuracy: false, maximumAge: 30000 }
+      );
+    }
+    return () => { if (watchId) navigator.geolocation.clearWatch(watchId); };
   }, [activeFilter]);
 
   // Close picker on outside click
@@ -168,14 +205,22 @@ export default function CommunityFeed({ user }) {
 
     if (activeFilter === "nearby") {
       if (!userCoords) return [];
-      base = base.filter(p => {
-        if (!p.location_lat || !p.location_lng) return false;
-        const dLat = (p.location_lat - userCoords.lat) * (Math.PI / 180);
-        const dLng = (p.location_lng - userCoords.lng) * (Math.PI / 180);
-        const a = Math.sin(dLat/2)**2 + Math.cos(userCoords.lat * Math.PI/180) * Math.cos(p.location_lat * Math.PI/180) * Math.sin(dLng/2)**2;
-        const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return km <= 50;
-      });
+      // Dynamic radius: 25km in dense cities, up to 100km in rural areas
+      const postsWithDistance = base
+        .filter(p => p.location_lat && p.location_lng)
+        .map(p => {
+          const dLat = (p.location_lat - userCoords.lat) * (Math.PI / 180);
+          const dLng = (p.location_lng - userCoords.lng) * (Math.PI / 180);
+          const a = Math.sin(dLat/2)**2 + Math.cos(userCoords.lat * Math.PI/180) * Math.cos(p.location_lat * Math.PI/180) * Math.sin(dLng/2)**2;
+          const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          return { ...p, distance: km };
+        })
+        .sort((a, b) => a.distance - b.distance);
+      
+      // Adaptive radius: if we have posts within 10km, limit to 25km; else expand to 100km
+      const hasNearby = postsWithDistance.some(p => p.distance <= 10);
+      const maxRadius = hasNearby ? 25 : 100;
+      base = postsWithDistance.filter(p => p.distance <= maxRadius);
     } else if (activeFilter !== "global") {
       base = base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
     }
@@ -264,7 +309,7 @@ export default function CommunityFeed({ user }) {
                   className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-xs font-semibold transition-all"
                   style={{ color: activeFilter !== "global" ? "#fff" : "var(--text-secondary)" }}>
                   {activeFilter === "global" && <><Globe className="w-3 h-3" /> Global</>}
-                  {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> Nearby</>}
+                  {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> {detectedArea || "Nearby"}</>}
                   {activeFilter !== "global" && activeFilter !== "nearby" && <><MapPin className="w-3 h-3" /> {activeFilter}</>}
                   <ChevronDown className="w-3 h-3" />
                 </button>
@@ -292,7 +337,7 @@ export default function CommunityFeed({ user }) {
                     <button onClick={() => { setActiveFilter("nearby"); setShowPicker(false); }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all"
                       style={{ backgroundColor: activeFilter === "nearby" ? "var(--accent-primary-light)" : "transparent", color: activeFilter === "nearby" ? "var(--accent-primary)" : "var(--text-primary)" }}>
-                      <MapPin className="w-4 h-4" /> Nearby (50km)
+                      <MapPin className="w-4 h-4" /> Nearby {detectedArea && `(${detectedArea})`}
                     </button>
                   </div>
 
