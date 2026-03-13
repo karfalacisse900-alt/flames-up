@@ -115,14 +115,16 @@ export default function DMChatView({ user, conversation, onBack }) {
   };
 
   return (
-    <div className="flex flex-col" style={{ height: "100dvh", backgroundColor: "#ECE5DD" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 22%), var(--bg-app)" }}>
 
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 shrink-0"
+      <div className="flex items-center gap-2 px-3 mx-3 mt-3 rounded-[28px] shrink-0 border card-elevated"
         style={{
-          backgroundColor: "#075E54",
-          paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
-          paddingBottom: 10,
+          backgroundColor: "rgba(255,255,255,0.82)",
+          borderColor: "var(--border-light)",
+          paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
+          paddingBottom: 12,
+          backdropFilter: "blur(12px)"
         }}>
         <button onClick={onBack} className="p-1 mr-1">
           <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
@@ -189,7 +191,7 @@ export default function DMChatView({ user, conversation, onBack }) {
       )}
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
+      <div className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: "none" }}>
         {/* Encrypted notice */}
         <div className="flex justify-center mb-4">
           <div className="px-4 py-1.5 rounded-lg text-[12px] text-center max-w-[280px]"

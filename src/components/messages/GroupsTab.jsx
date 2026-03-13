@@ -153,11 +153,11 @@ export default function GroupsTab({ user, onSelect }) {
   });
 
   return (
-    <div style={{ backgroundColor: "#fff" }}>
+    <div className="space-y-3 pt-1">
       {/* Create button */}
       <button onClick={() => setShowCreate(true)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left border-b"
-        style={{ borderColor: "#F5F5F5" }}>
+        className="w-full flex items-center gap-3 px-5 py-4 text-left rounded-[24px] card-elevated"
+        style={{ border: "1px solid var(--border-light)", backgroundColor: "rgba(255,255,255,0.82)", backdropFilter: "blur(8px)" }}>
         <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center shrink-0"
           style={{ backgroundColor: "#25D366" }}>
           <Plus className="w-6 h-6 text-white" />
@@ -173,10 +173,10 @@ export default function GroupsTab({ user, onSelect }) {
           <p className="text-base font-semibold mb-1" style={{ color: "#333" }}>No group chats yet</p>
           <p className="text-sm text-center px-8" style={{ color: "#999" }}>Create a group to chat with multiple people at once</p>
         </div>
-      ) : allGroups.map((group, idx) => (
+      ) : allGroups.map((group) => (
         <button key={group.id} onClick={() => onSelect({ type: "group", data: group })}
-          className="w-full flex items-center gap-3 px-4 py-3 text-left"
-          style={{ borderBottom: idx < allGroups.length - 1 ? "1px solid #F5F5F5" : "none" }}>
+          className="w-full flex items-center gap-3 px-4 py-4 text-left rounded-[24px] card-elevated"
+          style={{ border: "1px solid var(--border-light)", backgroundColor: "rgba(255,255,255,0.82)", backdropFilter: "blur(8px)" }}>
 
           <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
             style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
