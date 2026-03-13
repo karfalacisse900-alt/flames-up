@@ -118,16 +118,16 @@ export default function DMChatView({ user, conversation, onBack }) {
     <div className="flex flex-col" style={{ height: "100dvh", background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 22%), var(--bg-app)" }}>
 
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 mx-3 mt-3 shrink-0 rounded-[28px] border card-elevated"
+      <div className="flex items-center gap-2 px-3 mx-3 mt-3 rounded-[28px] shrink-0 border card-elevated"
         style={{
           backgroundColor: "rgba(255,255,255,0.82)",
           borderColor: "var(--border-light)",
           paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
           paddingBottom: 12,
-          backdropFilter: "blur(12px)",
+          backdropFilter: "blur(12px)"
         }}>
         <button onClick={onBack} className="p-1 mr-1">
-          <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
+          <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
         </button>
 
         {/* Avatar */}
@@ -140,8 +140,8 @@ export default function DMChatView({ user, conversation, onBack }) {
 
         {/* Name + status */}
         <div className="flex-1 min-w-0 ml-1">
-          <p className="font-semibold text-[16px] truncate" style={{ color: "#fff" }}>{displayName}</p>
-          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.75)" }}>
+          <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{displayName}</p>
+          <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
             {muted ? "🔇 Muted" : "tap here for contact info"}
           </p>
         </div>
@@ -149,14 +149,14 @@ export default function DMChatView({ user, conversation, onBack }) {
         {/* Action icons */}
         <div className="flex items-center gap-1">
           <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
-            <Video className="w-5 h-5" style={{ color: "#fff" }} />
+            <Video className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
           </button>
           <button className="w-9 h-9 flex items-center justify-center">
-            <Phone className="w-5 h-5" style={{ color: "#fff" }} />
+            <Phone className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
           </button>
           <div className="relative">
             <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
-              <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
+              <MoreVertical className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
             </button>
             {showMenu && (
               <>
@@ -191,7 +191,7 @@ export default function DMChatView({ user, conversation, onBack }) {
       )}
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
+      <div className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: "none" }}>
         {/* Encrypted notice */}
         <div className="flex justify-center mb-4">
           <div className="px-4 py-1.5 rounded-lg text-[12px] text-center max-w-[280px]"
