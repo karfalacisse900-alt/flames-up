@@ -302,184 +302,181 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
   }
 
   return (
-    <div className="relative">
-      <div className="px-3 pt-3 pb-1">
-        {/* ── Header ── */}
-        <div className="flex items-center gap-2.5 mb-2.5">
-          {/* Avatar */}
-          <div className="shrink-0">
-            {showAuthor ? (
-              <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
-                {post.author_avatar_url ? (
-                  <img src={post.author_avatar_url} alt={post.author_name}
-                    loading="lazy" decoding="async"
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent hover:ring-[var(--accent-primary)] transition-all" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                    style={{ background: `linear-gradient(135deg, ${avatarColor}33, ${avatarColor}66)`, color: avatarColor }}>
-                    {initials}
-                  </div>
-                )}
-              </Link>
-            ) : (
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{ background: "linear-gradient(135deg, #ccc3, #ccc5)", color: "#999" }}>
-                ?
-              </div>
-            )}
-          </div>
+    <div className="relative mb-4">
+      {/* Modern card container */}
+      <div className="mx-auto" style={{ maxWidth: "640px" }}>
+        {/* ── HEADER SECTION ── */}
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Profile Picture */}
+            <div className="shrink-0">
+              {showAuthor ? (
+                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
+                  {post.author_avatar_url ? (
+                    <img src={post.author_avatar_url} alt={post.author_name}
+                      loading="lazy" decoding="async"
+                      className="w-11 h-11 rounded-full object-cover"
+                      style={{ border: "2px solid var(--border-light)" }} />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
+                      style={{ background: `linear-gradient(135deg, ${avatarColor}55, ${avatarColor}88)`, color: avatarColor, border: "2px solid var(--border-light)" }}>
+                      {initials}
+                    </div>
+                  )}
+                </Link>
+              ) : (
+                <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: "linear-gradient(135deg, #ddd, #bbb)", color: "#888", border: "2px solid var(--border-light)" }}>
+                  ?
+                </div>
+              )}
+            </div>
 
-          {/* Name + time */}
-          <div className="flex-1 min-w-0">
-            {showAuthor ? (
-              <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
-                className="text-sm font-bold block truncate" style={{ color: "var(--text-primary)" }}>
-                {post.author_name || "User"}
-              </Link>
-            ) : (
-              <span className="text-sm font-bold block" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
-            )}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
-              {(post.location_name || post.location_city) && (
-                <button
-                  onClick={() => {
-                    const query = post.location_lat && post.location_lng
-                      ? `${post.location_lat},${post.location_lng}`
-                      : encodeURIComponent([post.location_name, post.location_city, post.location_region, post.location_country].filter(Boolean).join(", "));
-                    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
-                  }}
-                  className="flex items-center gap-0.5 text-[11px] rounded-full px-1.5 py-0.5 transition-all"
-                  style={{
-                    color: "var(--accent-primary)",
-                    backgroundColor: "var(--accent-primary-light)",
-                    fontWeight: 600,
-                  }}>
-                  <MapPin className="w-2.5 h-2.5" />
-                  {post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}
-                </button>
+            {/* Username + Meta Info */}
+            <div className="flex-1 min-w-0">
+              {showAuthor ? (
+                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
+                  className="text-sm font-bold block truncate leading-tight" style={{ color: "var(--text-primary)" }}>
+                  {post.author_name || "User"}
+                </Link>
+              ) : (
+                <span className="text-sm font-bold block leading-tight" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
               )}
-              {post.media_ref_title && (
-                <span className="text-[11px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-hint)" }}>
-                  🎬 {post.media_ref_title}
-                </span>
-              )}
-              {post.tags?.includes("daily_challenge") && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: "#1A423144", color: "#2E6B4F" }}>
-                  ⚡ Challenge
-                </span>
-              )}
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+                {(post.location_name || post.location_city) && (
+                  <>
+                    <span style={{ color: "var(--text-hint)" }}>•</span>
+                    <button
+                      onClick={() => {
+                        const query = post.location_lat && post.location_lng
+                          ? `${post.location_lat},${post.location_lng}`
+                          : encodeURIComponent([post.location_name, post.location_city, post.location_region, post.location_country].filter(Boolean).join(", "));
+                        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
+                      }}
+                      className="flex items-center gap-1 text-xs font-semibold"
+                      style={{ color: "var(--accent-primary)" }}>
+                      <MapPin className="w-3 h-3" />
+                      {post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             {!isOwnPost && showAuthor && !!user && (
               <button onClick={handleFollow}
-                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  backgroundColor: isFollowing ? "var(--accent-primary-light)" : "var(--accent-primary)",
-                  color: isFollowing ? "var(--accent-primary)" : "#fff",
-                  border: isFollowing ? "1px solid var(--accent-primary)" : "none",
+                  backgroundColor: isFollowing ? "transparent" : "var(--accent-primary)",
+                  color: isFollowing ? "var(--text-secondary)" : "#fff",
+                  border: `1.5px solid ${isFollowing ? "var(--border-medium)" : "var(--accent-primary)"}`,
                 }}>
                 {isFollowing ? "Following" : "Follow"}
               </button>
             )}
-            {isOwnPost && (
-              <button onClick={handleDelete} className="p-1.5 rounded-full" style={{ color: "#E05C7A" }}>
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
             {/* Three-dot menu */}
             <div className="relative">
-              <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
-                <MoreHorizontal className="w-4 h-4" />
+              <button onClick={() => setShowMenu(v => !v)} className="p-2 rounded-full hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-hint)" }}>
+                <MoreHorizontal className="w-5 h-5" />
               </button>
               {showMenu && (
-                  <div
-                    className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                    style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}>
-                    <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                      <LinkIcon className="w-3.5 h-3.5" /> Copy link
+                <div
+                  className="absolute right-0 top-full mt-2 rounded-2xl overflow-hidden z-40 min-w-[160px]"
+                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 12px 40px rgba(0,0,0,0.15)", border: "1px solid var(--border-light)" }}>
+                  <button onClick={handleCopyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                    <LinkIcon className="w-4 h-4" /> Copy link
+                  </button>
+                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                    <EyeOff className="w-4 h-4" /> Not interested
+                  </button>
+                  {!isOwnPost && user && (
+                    <div className="w-full">
+                      <TipButton postAuthorEmail={post.author_email} postId={post.id} isMenu={true} />
+                    </div>
+                  )}
+                  {isOwnPost && (
+                    <button onClick={handleDelete} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "#E05C7A" }}>
+                      <Trash2 className="w-4 h-4" /> Delete
                     </button>
-                    <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
-                      <EyeOff className="w-3.5 h-3.5" /> Not interested
+                  )}
+                  {!isOwnPost && (
+                    <button onClick={handleReport} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "#E05C7A" }}>
+                      <Flag className="w-4 h-4" /> Report post
                     </button>
-                    {!isOwnPost && user && (
-                      <div className="w-full">
-                        <TipButton postAuthorEmail={post.author_email} postId={post.id} isMenu={true} />
-                      </div>
-                    )}
-                    {!isOwnPost && (
-                      <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                        <Flag className="w-3.5 h-3.5" /> Report post
-                      </button>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* ── Title ── */}
-        {post.title && (
-          <p className="font-bold text-[15px] mb-1.5 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-            {post.title}
-          </p>
-        )}
-
-        {/* ── Body ── */}
-        {post.body && (
-          <div className="mb-2.5 text-sm leading-relaxed"
-            style={{
-              color: "var(--text-secondary)",
-              fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
-              fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
-            }}>
-            {bodyIsRich ? (
-              <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
-            ) : (
-              <p className="whitespace-pre-line">
-                <SmartText text={post.type === "quote_of_day" ? `"${post.body}"` : post.body} />
-              </p>
+        {/* ── CAPTION (ABOVE MEDIA) ── */}
+        {(post.title || post.body) && (
+          <div className="px-4 pb-3">
+            {post.title && (
+              <h3 className="font-bold text-base mb-1.5 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {post.title}
+              </h3>
+            )}
+            {post.body && (
+              <div className="text-[15px] leading-relaxed"
+                style={{
+                  color: "var(--text-secondary)",
+                  fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
+                  fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+                }}>
+                {bodyIsRich ? (
+                  <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
+                ) : (
+                  <p className="whitespace-pre-line">
+                    <SmartText text={post.type === "quote_of_day" ? `"${post.body}"` : post.body} />
+                  </p>
+                )}
+              </div>
             )}
           </div>
         )}
 
-        {/* ── Images (carousel if multiple, single if one) ── */}
+        {/* ── MEDIA SECTION (DOMINANT VISUAL) ── */}
         {(() => {
           const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
-          if (imgs.length === 0) return null;
+          if (imgs.length === 0 && !post.video_url) return null;
           return (
-            <div className="mb-2.5">
-              <PhotoCarousel images={imgs} aspectRatio="1/1" />
+            <div className="w-full" style={{ marginBottom: "12px" }}>
+              {imgs.length > 0 && (
+                <div style={{ borderRadius: "0" }}>
+                  <PhotoCarousel images={imgs} aspectRatio="4/5" />
+                </div>
+              )}
+              {post.video_url && post.video_url.trim() && (
+                <div style={{ borderRadius: "0" }}>
+                  <AutoplayVideo
+                    src={post.video_url}
+                    postId={post.id}
+                    onDoubleTap={() => handleLike()}
+                  />
+                </div>
+              )}
             </div>
           );
         })()}
 
-        {/* ── Video ── */}
-        {post.video_url && post.video_url.trim() && (
-          <div className="mb-2.5 w-full">
-            <AutoplayVideo
-              src={post.video_url}
-              postId={post.id}
-              onDoubleTap={() => handleLike()}
-            />
-          </div>
-        )}
-
         {/* ── Poll ── */}
         {post.poll_id && (
-          <div className="mb-2.5">
+          <div className="px-4 mb-3">
             <PollDisplay postId={post.id} pollId={post.poll_id} user={user} />
           </div>
         )}
 
         {/* ── Place tags ── */}
         {post.place_tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2.5">
+          <div className="flex flex-wrap gap-2 px-4 mb-3">
             {post.place_tags.map(tag => (
-              <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full font-semibold"
+              <span key={tag} className="text-xs px-3 py-1.5 rounded-full font-semibold"
                 style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
                 {tag === "food" ? "🍔" : tag === "events" ? "🎉" : tag === "park" ? "🌳" : tag === "coffee" ? "☕" : tag === "hidden_spot" ? "🔍" : tag === "free_activities" ? "🆓" : tag === "study_spot" ? "📚" : tag === "travel" ? "✈️" : "📍"} {tag.replace(/_/g, " ")}
               </span>
@@ -487,41 +484,28 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
 
-        {/* ── List items ── */}
-        {post.type === "list" && post.list_items?.length > 0 && (
-          <ol className="mb-2.5 space-y-1.5 pl-1">
-            {post.list_items.map((item, i) => (
-              <li key={i} className="text-sm flex gap-2.5 items-start">
-                <span className="text-xs font-bold shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>{i + 1}</span>
-                <span style={{ color: "var(--text-secondary)" }}>{item}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {/* ── Action row ── */}
-        <div className="flex items-center mt-2 pb-1">
+        {/* ── ENGAGEMENT ACTIONS ── */}
+        <div className="flex items-center px-2 py-2 gap-1">
           {/* Like */}
           <div className="relative">
             <button
               onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
               onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
               onClick={handleLike}
-              className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
-              style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
-              <span className="text-[16px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
-              {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
+              style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)" }}>
+              <Heart className="w-6 h-6" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
+              {(post.upvotes || 0) > 0 && <span className="text-sm font-semibold">{post.upvotes}</span>}
             </button>
             {showReactions && (
               <div
-                className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}
+                className="absolute bottom-full left-0 mb-2 flex gap-1.5 p-2.5 rounded-2xl z-30"
+                style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid var(--border-light)" }}
                 onMouseLeave={() => setShowReactions(false)}>
                 {REACTIONS.map(r => (
                   <button key={r}
                     onClick={() => { handleLike(); setShowReactions(false); }}
-                    className="text-xl w-10 h-10 flex items-center justify-center rounded-full chip"
+                    className="text-2xl w-11 h-11 flex items-center justify-center rounded-full transition-transform hover:scale-110"
                     style={{ backgroundColor: "var(--bg-subtle)" }}>
                     {r}
                   </button>
@@ -532,17 +516,17 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
           {/* Comment */}
           <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
-            style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
-            <MessageCircle className="w-[18px] h-[18px]" />
-            {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
+            className="flex items-center gap-2 px-3 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)" }}>
+            <MessageCircle className="w-6 h-6" strokeWidth={2} />
+            {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
           </Link>
 
           {/* Share */}
           <button onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
-            style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
-            <Share2 className="w-[18px] h-[18px]" />
+            className="flex items-center gap-2 px-3 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)" }}>
+            <Share2 className="w-6 h-6" strokeWidth={2} />
           </button>
 
           {/* Want to go — only for location posts */}
@@ -552,15 +536,31 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
           {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
-            className="ml-auto flex items-center justify-center rounded-full transition-all chip"
-            style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)", minWidth: 44, minHeight: 44 }}>
-            <Bookmark className="w-[18px] h-[18px]" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+            className="ml-auto flex items-center justify-center p-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)" }}>
+            <Bookmark className="w-6 h-6" strokeWidth={2} style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
           </button>
         </div>
+
+        {/* Engagement summary */}
+        {((post.upvotes || 0) > 0 || (post.comment_count || 0) > 0) && (
+          <div className="px-4 pb-2 flex items-center gap-3 text-xs font-medium" style={{ color: "var(--text-hint)" }}>
+            {(post.upvotes || 0) > 0 && <span>{post.upvotes} {post.upvotes === 1 ? "like" : "likes"}</span>}
+            {(post.comment_count || 0) > 0 && <span>{post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}</span>}
+          </div>
+        )}
+
+        {post.tags?.includes("daily_challenge") && (
+          <div className="px-4 pb-3">
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: "#1A423122", color: "#2E6B4F" }}>
+              ⚡ Daily Challenge Entry
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: "linear-gradient(to right, transparent 16px, var(--border-subtle) 16px, var(--border-subtle) 90%, transparent)", margin: "4px 0 0 0" }} />
+      <div className="h-px mx-4 mt-3" style={{ backgroundColor: "var(--border-subtle)" }} />
 
       {/* Backdrop to close menu */}
       {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
