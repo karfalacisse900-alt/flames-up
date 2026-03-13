@@ -99,6 +99,20 @@ export default function PlacesPage() {
   const openPlace = (place) => setSelectedPlace(place);
   const closePlace = () => setSelectedPlace(null);
 
+  const [seedingPlaces, setSeedingPlaces] = useState(false);
+  const seedPlaces = async () => {
+    setSeedingPlaces(true);
+    try {
+      const res = await base44.functions.invoke('seedRealPlaces', {});
+      qc.invalidateQueries({ queryKey: ["realPlaces"] });
+      alert(`✅ ${res.data.message || 'Places seeded successfully!'}`);
+    } catch (err) {
+      alert('❌ Error seeding places. Check console.');
+      console.error(err);
+    }
+    setSeedingPlaces(false);
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
@@ -220,6 +234,17 @@ export default function PlacesPage() {
       {/* FEED VIEW */}
       {viewMode === "feed" && (
         <div>
+          {/* Seed Places Button (only for admins or if no places) */}
+          {user?.role === "admin" && places.length < 10 && (
+            <div className="px-4 pt-4">
+              <button onClick={seedPlaces} disabled={seedingPlaces}
+                className="w-full py-3 rounded-2xl text-sm font-bold transition-all"
+                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", opacity: seedingPlaces ? 0.6 : 1 }}>
+                {seedingPlaces ? "⏳ Seeding places..." : "🌍 Seed 24 Popular Places"}
+              </button>
+            </div>
+          )}
+
           {/* Real Places Grid */}
           {places.length > 0 && (
             <div className="px-4 py-4">
