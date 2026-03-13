@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Volume2, VolumeX, Maximize2, Pause, Play } from "lucide-react";
+import { Volume2, VolumeX, Pause, Play } from "lucide-react";
 
 // Session-level mute preference — unmuted by default
 const sessionPrefs = { muted: false };
@@ -104,13 +104,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     setMuted(next);
   };
 
-  const openFullscreen = (e) => {
-    e.stopPropagation();
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.requestFullscreen) v.requestFullscreen();
-    else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
-  };
 
   const handleTap = () => {
     tapCount.current += 1;
@@ -238,13 +231,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
             style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
           >
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={openFullscreen}
-            className="p-2 rounded-full"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
-          >
-            <Maximize2 className="w-4 h-4" />
           </button>
         </div>
       )}

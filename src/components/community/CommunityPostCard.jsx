@@ -371,9 +371,10 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               <button onClick={handleFollow}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  backgroundColor: isFollowing ? "transparent" : "var(--accent-primary)",
-                  color: isFollowing ? "var(--text-secondary)" : "#fff",
-                  border: `1.5px solid ${isFollowing ? "var(--border-medium)" : "var(--accent-primary)"}`,
+                  backgroundColor: isFollowing ? "var(--accent-primary-light)" : "var(--bg-card)",
+                  color: isFollowing ? "var(--accent-primary)" : "#111",
+                  border: `1.5px solid ${isFollowing ? "var(--accent-primary)" : "var(--border-medium)"}`,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
                 }}>
                 {isFollowing ? "Following" : "Follow"}
               </button>
@@ -553,13 +554,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </button>
         </div>
 
-        {/* Engagement summary */}
-        {((post.upvotes || 0) > 0 || (post.comment_count || 0) > 0) && (
-          <div className="px-4 pb-2 flex items-center gap-3 text-xs font-medium" style={{ color: "var(--text-hint)" }}>
-            {(post.upvotes || 0) > 0 && <span>{post.upvotes} {post.upvotes === 1 ? "like" : "likes"}</span>}
-            {(post.comment_count || 0) > 0 && <span>{post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}</span>}
-          </div>
-        )}
 
         {post.tags?.includes("daily_challenge") && (
           <div className="px-4 pb-3">

@@ -223,49 +223,54 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
   const isOwn = currentUserEmail && reply.author_email === currentUserEmail;
 
   return (
-    <div className="flex gap-3 py-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-      {reply.author_avatar_url ? (
-        <img src={reply.author_avatar_url} alt={reply.author_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
-      ) : (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-          style={{ background: `linear-gradient(135deg, ${color}33, ${color}55)`, color }}>
-          {(reply.author_name?.[0] || "U").toUpperCase()}
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            {reply.author_name || "Anonymous"}
-          </span>
-          <span className="text-xs" style={{ color: "var(--text-hint)" }}>
-            {timeAgo(reply.created_date)}
-          </span>
-          {isOwn && (
-            <button onClick={() => onDelete(reply)} className="ml-auto p-1 rounded-full" style={{ color: "#E05C7A" }}>
-              <Trash2 className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-
-        {reply.type === "voice" ? (
-          <VoicePlayer audioUrl={reply.audio_url} />
-        ) : reply.type === "image" && reply.image_url ? (
-          <img src={reply.image_url} alt="comment" className="rounded-xl mt-1 max-w-full object-cover" style={{ maxHeight: 240 }} />
-        ) : reply.type === "sticker" ? (
-          <span className="text-4xl">{reply.body}</span>
-        ) : reply.type === "gif" && reply.gif_url ? (
-          <img src={reply.gif_url} alt="GIF" className="rounded-xl mt-1 max-w-full" style={{ maxHeight: 200 }} />
+    <div className="rounded-[22px] p-4 mt-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)" }}>
+      <div className="flex gap-3">
+        {reply.author_avatar_url ? (
+          <img src={reply.author_avatar_url} alt={reply.author_name} className="w-9 h-9 rounded-full object-cover shrink-0" />
         ) : (
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
-            <SmartText text={reply.body} />
-          </p>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+            style={{ background: `linear-gradient(135deg, ${color}33, ${color}55)`, color }}>
+            {(reply.author_name?.[0] || "U").toUpperCase()}
+          </div>
         )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              {reply.author_name || "Anonymous"}
+            </span>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+              • {timeAgo(reply.created_date)}
+            </span>
+            {isOwn && (
+              <button onClick={() => onDelete(reply)} className="ml-auto p-1 rounded-full" style={{ color: "#E05C7A" }}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
-        <button onClick={() => setLiked(v => !v)}
-          className="mt-1.5 text-xs flex items-center gap-1"
-          style={{ color: liked ? "#E05C7A" : "var(--text-hint)" }}>
-          {liked ? "❤️" : "🤍"} <span>Like</span>
-        </button>
+          {reply.type === "voice" ? (
+            <VoicePlayer audioUrl={reply.audio_url} />
+          ) : reply.type === "image" && reply.image_url ? (
+            <img src={reply.image_url} alt="comment" className="rounded-2xl mt-1 max-w-full object-cover" style={{ maxHeight: 240 }} />
+          ) : reply.type === "sticker" ? (
+            <span className="text-4xl">{reply.body}</span>
+          ) : reply.type === "gif" && reply.gif_url ? (
+            <img src={reply.gif_url} alt="GIF" className="rounded-2xl mt-1 max-w-full" style={{ maxHeight: 200 }} />
+          ) : (
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+              <SmartText text={reply.body} />
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 mt-3">
+            <button onClick={() => setLiked(v => !v)}
+              className="text-xs flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+              style={{ color: liked ? "#E05C7A" : "var(--text-hint)", backgroundColor: "var(--bg-subtle)" }}>
+              {liked ? "😊" : "🙂"} <span>1</span>
+            </button>
+            <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Reply</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -517,7 +522,7 @@ export default function PostComments() {
         )}
 
         {/* Comments list */}
-        <div className="px-4">
+        <div className="px-4 py-3" style={{ backgroundColor: "#f6f8fc" }}>
           {allReplies.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-5xl mb-3">💬</p>
@@ -565,8 +570,8 @@ export default function PostComments() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl"
-            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+          <div className="flex items-center gap-2 px-3 py-3 rounded-[22px]"
+            style={{ backgroundColor: "#fff", border: "2px solid #dbe4ff", boxShadow: "0 2px 10px rgba(15,23,42,0.04)" }}>
             <input
               ref={inputRef}
               value={commentText}
