@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Navigation, X, Users, Bike, Car, PersonStanding } from "lucide-react";
+import { MapPin, Navigation, X, Users, Bike, Car, PersonStanding, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -26,10 +26,14 @@ export default function CampusMap() {
   const [routeInfo, setRouteInfo] = useState(null);
   const [travelMode, setTravelMode] = useState("walking");
   const [showActivities, setShowActivities] = useState(true);
+  const [showCampusLocations, setShowCampusLocations] = useState(true);
+  const [autoCentering, setAutoCentering] = useState(false);
   
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markersRef = useRef([]);
+  const userMarkerRef = useRef(null);
+  const watchIdRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -54,22 +58,61 @@ export default function CampusMap() {
     refetchInterval: 60000,
   });
 
-  // Get user location
+  // Live GPS tracking
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lng: position.coords.longitude,
-            lat: position.coords.latitude,
-          });
-        },
-        (error) => {
-          console.log("Location access denied, using campus center");
+    if (!navigator.geolocation) return;
+
+    // Initial position
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newPos = {
+          lng: position.coords.longitude,
+          lat: position.coords.latitude,
+        };
+        setUserLocation(newPos);
+        
+        if (autoCentering && map.current) {
+          map.current.flyTo({ center: [newPos.lng, newPos.lat], zoom: 17 });
         }
-      );
-    }
-  }, []);
+      },
+      (error) => {
+        console.log("Location access denied, using campus center");
+      }
+    );
+
+    // Watch position for live tracking
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        const newPos = {
+          lng: position.coords.longitude,
+          lat: position.coords.latitude,
+        };
+        setUserLocation(newPos);
+
+        // Update user marker
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLngLat([newPos.lng, newPos.lat]);
+        }
+
+        // Auto-center if enabled
+        if (autoCentering && map.current) {
+          map.current.easeTo({ center: [newPos.lng, newPos.lat], duration: 1000 });
+        }
+      },
+      (error) => console.log("GPS tracking error:", error),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 10000
+      }
+    );
+
+    return () => {
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [autoCentering]);
 
   // Initialize map
   useEffect(() => {
@@ -89,13 +132,17 @@ export default function CampusMap() {
 
     // Add user location marker if available
     if (userLocation) {
-      new mapboxgl.Marker({ color: "#2E6B4F" })
+      const el = document.createElement("div");
+      el.innerHTML = `<div style="background: #2E6B4F; border: 3px solid white; border-radius: 50%; width: 18px; height: 18px; box-shadow: 0 0 0 4px rgba(46,107,79,0.3), 0 2px 8px rgba(0,0,0,0.3);"></div>`;
+      
+      userMarkerRef.current = new mapboxgl.Marker({ element: el })
         .setLngLat([userLocation.lng, userLocation.lat])
         .addTo(map.current);
     }
 
     return () => {
       markersRef.current.forEach(m => m.remove());
+      if (userMarkerRef.current) userMarkerRef.current.remove();
       if (map.current) map.current.remove();
     };
   }, [userLocation]);
@@ -107,19 +154,21 @@ export default function CampusMap() {
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    CAMPUS_LOCATIONS.forEach(loc => {
-      const el = document.createElement("div");
-      el.className = "campus-marker";
-      el.innerHTML = `<div style="background: white; border: 2px solid #2E6B4F; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${loc.emoji}</div>`;
-      el.addEventListener("click", () => setSelectedLocation(loc));
+    if (showCampusLocations) {
+      CAMPUS_LOCATIONS.forEach(loc => {
+        const el = document.createElement("div");
+        el.className = "campus-marker";
+        el.innerHTML = `<div style="background: white; border: 2px solid #2E6B4F; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${loc.emoji}</div>`;
+        el.addEventListener("click", () => setSelectedLocation(loc));
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([loc.lng, loc.lat])
-        .addTo(map.current);
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([loc.lng, loc.lat])
+          .addTo(map.current);
 
-      markersRef.current.push(marker);
-    });
-  }, []);
+        markersRef.current.push(marker);
+      });
+    }
+  }, [showCampusLocations]);
 
   // Add activity markers
   useEffect(() => {
@@ -232,13 +281,28 @@ export default function CampusMap() {
       <div ref={mapContainer} className="absolute inset-0" />
 
       {/* Top controls */}
-      <div className="absolute top-4 left-4 right-4 flex gap-2 z-10">
+      <div className="absolute top-4 left-4 right-4 flex gap-2 z-10 flex-wrap">
         <Button
           onClick={() => setShowActivities(v => !v)}
           variant={showActivities ? "default" : "outline"}
           size="sm"
           style={{ backgroundColor: showActivities ? "var(--accent-primary)" : "white" }}>
-          {showActivities ? "🔥 Activities On" : "Activities Off"}
+          {showActivities ? "🔥 Activities" : "Activities"}
+        </Button>
+        <Button
+          onClick={() => setShowCampusLocations(v => !v)}
+          variant={showCampusLocations ? "default" : "outline"}
+          size="sm"
+          style={{ backgroundColor: showCampusLocations ? "var(--accent-primary)" : "white" }}>
+          {showCampusLocations ? "📍 Campus" : "Campus"}
+        </Button>
+        <Button
+          onClick={() => setAutoCentering(v => !v)}
+          variant={autoCentering ? "default" : "outline"}
+          size="sm"
+          style={{ backgroundColor: autoCentering ? "var(--accent-primary)" : "white" }}>
+          <Crosshair className="w-4 h-4 mr-1" />
+          {autoCentering ? "Auto" : "Manual"}
         </Button>
       </div>
 
