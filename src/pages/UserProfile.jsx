@@ -1,350 +1,346 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, UserPlus, UserMinus, MessageSquare, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-
-const PLATFORM_LABELS = {
-  fiverr: "Hire on Fiverr",
-  spotify: "Listen on Spotify",
-  shopify: "Visit Store",
-  instagram: "Follow on Instagram",
-  twitter: "Follow on Twitter",
-  tiktok: "Follow on TikTok",
-  youtube: "Subscribe on YouTube",
-  linkedin: "Connect on LinkedIn",
-  portfolio: "Visit Portfolio",
-};
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { 
+  MessageCircle, UserPlus, UserCheck, MoreVertical, MapPin, 
+  Calendar, GraduationCap, Briefcase, Users, FileText, 
+  Zap, ArrowLeft, Flag, UserX 
+} from "lucide-react";
+import CommunityPostCard from "@/components/community/CommunityPostCard";
+import LivePostCard from "@/components/live/LivePostCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function UserProfile() {
-  const [user, setUser] = useState(null);
-  const [viewingUser, setViewingUser] = useState(null);
-  const qc = useQueryClient();
+  const { email } = useParams();
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get("email");
-    if (email) {
-      base44.entities.User.list().then(users => {
-        const found = users.find(u => u.email === email);
-        if (found) setViewingUser(found);
-      });
-    }
+    base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: followers = [], refetch: refetchFollowers } = useQuery({
-    queryKey: ["profileFollowers", viewingUser?.email],
-    queryFn: () => base44.entities.Follow.filter({ following_email: viewingUser.email }),
-    enabled: !!viewingUser?.email,
+  const { data: profileUser } = useQuery({
+    queryKey: ["user", email],
+    queryFn: async () => {
+      const users = await base44.entities.User.filter({ email });
+      return users[0] || null;
+    },
+    enabled: !!email,
   });
-
-  const { data: following = [] } = useQuery({
-    queryKey: ["profileFollowing", viewingUser?.email],
-    queryFn: () => base44.entities.Follow.filter({ follower_email: viewingUser.email }),
-    enabled: !!viewingUser?.email,
-  });
-
-  const isFollowing = user && viewingUser
-    ? followers.some(f => f.follower_email === user.email)
-    : false;
 
   const { data: userPosts = [] } = useQuery({
-    queryKey: ["userPosts", viewingUser?.email],
-    queryFn: () => viewingUser?.email ? base44.entities.CommunityPost.filter({ author_email: viewingUser.email }, "-created_date", 30) : [],
-    enabled: !!viewingUser?.email,
+    queryKey: ["userPosts", email],
+    queryFn: () => base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 50),
+    enabled: !!email,
   });
 
-  const { data: userArt = [] } = useQuery({
-    queryKey: ["userArt", viewingUser?.email],
-    queryFn: () => viewingUser?.email ? base44.entities.ArtPiece.filter({ creator_email: viewingUser.email }, "-created_date", 30) : [],
-    enabled: !!viewingUser?.email,
+  const { data: livePosts = [] } = useQuery({
+    queryKey: ["userLivePosts", email],
+    queryFn: async () => {
+      const posts = await base44.entities.LivePost.filter({ author_email: email }, "-created_date", 20);
+      const now = new Date();
+      return posts.filter(p => new Date(p.expires_at) > now);
+    },
+    enabled: !!email,
   });
+
+  const { data: groupCount = 0 } = useQuery({
+    queryKey: ["userGroups", email],
+    queryFn: async () => {
+      const memberships = await base44.entities.GroupMember.filter({ user_email: email });
+      return memberships.length;
+    },
+    enabled: !!email,
+  });
+
+  const { data: followData } = useQuery({
+    queryKey: ["followStatus", email, currentUser?.email],
+    queryFn: async () => {
+      if (!currentUser?.email || currentUser.email === email) return null;
+      const follows = await base44.entities.Follow.filter({
+        follower_email: currentUser.email,
+        following_email: email,
+      });
+      return follows[0] || null;
+    },
+    enabled: !!currentUser?.email && currentUser?.email !== email,
+  });
+
+  useEffect(() => {
+    setIsFollowing(!!followData);
+  }, [followData]);
 
   const handleFollow = async () => {
-    if (!user || !viewingUser) return;
-    await base44.entities.Follow.create({
-      follower_email: user.email,
-      follower_name: user.full_name || user.email,
-      following_email: viewingUser.email,
-      following_name: viewingUser.full_name || viewingUser.email,
-    });
-    qc.invalidateQueries({ queryKey: ["profileFollowers", viewingUser.email] });
-    qc.invalidateQueries({ queryKey: ["myFollows", user.email] });
-  };
-
-  const handleUnfollow = async () => {
-    if (!user || !viewingUser) return;
-    const myFollowRecord = followers.find(f => f.follower_email === user.email);
-    if (myFollowRecord) {
-      await base44.entities.Follow.delete(myFollowRecord.id);
+    if (!currentUser) {
+      alert("Please log in to follow users");
+      return;
     }
-    qc.invalidateQueries({ queryKey: ["profileFollowers", viewingUser.email] });
-    qc.invalidateQueries({ queryKey: ["myFollows", user.email] });
+
+    if (isFollowing && followData) {
+      await base44.entities.Follow.delete(followData.id);
+      setIsFollowing(false);
+    } else {
+      await base44.entities.Follow.create({
+        follower_email: currentUser.email,
+        follower_name: currentUser.full_name,
+        following_email: email,
+        following_name: profileUser?.full_name,
+      });
+      setIsFollowing(true);
+    }
   };
 
-  if (!viewingUser) {
+  const handleMessage = () => {
+    if (!currentUser) {
+      alert("Please log in to send messages");
+      return;
+    }
+    navigate("/Messages");
+  };
+
+  const handleReport = () => {
+    if (!currentUser) return;
+    base44.entities.Report.create({
+      content_type: "user",
+      content_id: email,
+      reason: "Reported from profile",
+      reporter_email: currentUser.email,
+    });
+    alert("User reported. Our team will review this.");
+  };
+
+  const handleBlock = async () => {
+    if (!currentUser) return;
+    await base44.entities.BlockedUser.create({
+      blocker_email: currentUser.email,
+      blocked_email: email,
+    });
+    alert("User blocked");
+    navigate(-1);
+  };
+
+  if (!profileUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full" />
       </div>
     );
   }
 
-  const isOwnProfile = user?.email === viewingUser.email;
-  const isCreatorViewing = viewingUser?.is_creator && !isOwnProfile;
+  const isOwnProfile = currentUser?.email === email;
+  const profile = profileUser.profile_data || {};
 
-  // If viewing creator profile, show creator layout
-  if (isCreatorViewing) {
-    return (
-      <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-        {/* Header */}
-        <div style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-          <div className="px-5 pb-5 pt-4">
-            <Link to={createPageUrl("Home")} className="flex items-center gap-2 mb-3 text-sm font-medium" style={{ color: "var(--accent-primary)" }}>
-              <ArrowLeft className="w-4 h-4" /> Back
-            </Link>
+  return (
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Header */}
+      <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3" 
+        style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-lg font-bold flex-1" style={{ fontFamily: "var(--font-serif)" }}>
+          Profile
+        </h1>
+      </div>
 
-            <div className="flex items-start justify-between mb-4">
-              {/* Avatar */}
-              <div className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)", border: "2px solid var(--accent-primary-light)" }}>
-                {viewingUser.avatar_url ? (
-                  <img src={viewingUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  (viewingUser.display_name || viewingUser.full_name || "U")[0]?.toUpperCase()
-                )}
-              </div>
-
-              {/* Action buttons */}
-              {user && (
-                <div className="flex flex-col gap-2">
-                  {isFollowing ? (
-                    <button
-                      onClick={handleUnfollow}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                      style={{ borderColor: "var(--text-hint)", color: "var(--text-secondary)" }}
-                    >
-                      <UserMinus className="w-3.5 h-3.5" /> Unfollow
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleFollow}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
-                      style={{ backgroundColor: "var(--accent-primary)" }}
-                    >
-                      <UserPlus className="w-3.5 h-3.5" /> Follow
-                    </button>
-                  )}
-                  <Link
-                    to={createPageUrl("Messages") + `?with=${encodeURIComponent(viewingUser.email)}&name=${encodeURIComponent(viewingUser.display_name || viewingUser.full_name || "")}`}
-                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                    style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" /> Message
-                  </Link>
+      {/* Profile Header */}
+      <div className="px-4 py-6" style={{ backgroundColor: "var(--bg-card)" }}>
+        <div className="flex items-start gap-4 mb-4">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden" 
+              style={{ border: "3px solid var(--accent-primary)" }}>
+              {profileUser.avatar_url ? (
+                <img src={profileUser.avatar_url} alt={profileUser.full_name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-3xl font-bold"
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                  {profileUser.full_name?.[0]?.toUpperCase() || "?"}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Creator Info */}
-            <h2 className="text-xl font-bold flex items-center gap-1" style={{ color: "var(--text-primary)" }}>
-              {viewingUser.display_name || viewingUser.full_name}
-              <span>⭐</span>
+          {/* Name & Bio */}
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold mb-1" style={{ fontFamily: "var(--font-serif)" }}>
+              {profileUser.full_name}
             </h2>
-            {viewingUser.username && <p className="text-xs font-medium mt-1" style={{ color: "var(--accent-primary)" }}>{viewingUser.username}</p>}
-
-            {/* Creator Category */}
-            {viewingUser.creator_category && (
-              <p className="text-sm font-semibold mt-2 px-3 py-1 rounded-full inline-block" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                {viewingUser.creator_category.replace(/_/g, " ")}
+            {profile.bio && (
+              <p className="text-sm mb-3 whitespace-pre-wrap" style={{ color: "var(--text-secondary)" }}>
+                {profile.bio}
               </p>
             )}
-
-            {/* Creator Description */}
-            {viewingUser.creator_description && (
-              <div className="mt-4 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}>
-                {viewingUser.creator_description}
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="flex gap-3 mt-4">
-              <div className="text-center flex-1">
-                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
-                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
-              </div>
-              <div className="text-center flex-1">
-                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
-                <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* External Links & Services */}
-        {viewingUser.external_links && Object.keys(viewingUser.external_links).length > 0 && (
-          <div className="px-5 mt-6">
-            <p className="text-sm font-bold mb-3" style={{ color: "var(--text-primary)" }}>Connect & Hire</p>
-            <div className="space-y-2">
-              {Object.entries(viewingUser.external_links).map(([platform, url]) => (
-                <a
-                  key={platform}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl border font-medium text-sm transition-all active:scale-95"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", color: "var(--accent-primary)" }}
-                >
-                  <span style={{ fontSize: "18px" }}>🔗</span>
-                  <span className="flex-1">{PLATFORM_LABELS[platform] || platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Portfolio Link */}
-        {viewingUser.creator_portfolio_link && (
-          <div className="px-5 mt-4">
-            <a
-              href={viewingUser.creator_portfolio_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-xl border font-bold text-white transition-all"
-              style={{ backgroundColor: "var(--accent-primary)", borderColor: "var(--accent-primary)" }}
-            >
-              <span>🎨</span>
-              View Full Portfolio
-              <ExternalLink className="w-4 h-4 ml-auto" />
-            </a>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Regular user profile layout
-  return (
-    <div className="overflow-y-auto overscroll-contain" style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-      {/* Header */}
-      <div style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="px-5 pb-5 pt-4">
-          <Link to={createPageUrl("Home")} className="flex items-center gap-2 mb-3 text-sm font-medium" style={{ color: "var(--accent-primary)" }}>
-            <ArrowLeft className="w-4 h-4" /> Back
-          </Link>
-
-          <div className="flex items-start justify-between mb-3">
-            {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)", fontFamily: "var(--font-serif)" }}>
-              {viewingUser.avatar_url ? (
-                <img src={viewingUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                (viewingUser.display_name || viewingUser.full_name || "U")[0]?.toUpperCase()
-              )}
-            </div>
-
-            {/* Action buttons */}
-            {!isOwnProfile && user && (
-              <div className="flex gap-2">
-                {isFollowing ? (
-                  <button
-                    onClick={handleUnfollow}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                    style={{ borderColor: "var(--text-hint)", color: "var(--text-secondary)" }}
-                  >
-                    <UserMinus className="w-3.5 h-3.5" /> Unfollow
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleFollow}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white"
-                    style={{ backgroundColor: "var(--accent-primary)" }}
-                  >
-                    <UserPlus className="w-3.5 h-3.5" /> Follow
-                  </button>
-                )}
-                <Link
-                  to={createPageUrl("Messages") + `?with=${encodeURIComponent(viewingUser.email)}&name=${encodeURIComponent(viewingUser.display_name || viewingUser.full_name || "")}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                  style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}
-                >
-                  <MessageSquare className="w-3.5 h-3.5" /> Message
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Name & bio */}
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>{viewingUser.display_name || viewingUser.full_name}</h2>
-          {viewingUser.username && <p className="text-xs font-medium" style={{ color: "var(--accent-primary)" }}>{viewingUser.username}</p>}
-          {viewingUser.about_me && (
-            <div className="mt-3 p-3 rounded-xl text-sm leading-relaxed" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)", fontFamily: "var(--font-serif)" }}>
-              {viewingUser.about_me}
+        {/* Profile Details */}
+        <div className="space-y-2 mb-4">
+          {profile.age && !profile.hide_age && (
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <span>{profile.age} years old</span>
             </div>
           )}
+          {profile.major && (
+            <div className="flex items-center gap-2 text-sm">
+              <GraduationCap className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <span>{profile.major}</span>
+            </div>
+          )}
+          {profile.graduation_year && !profile.hide_graduation && (
+            <div className="flex items-center gap-2 text-sm">
+              <Briefcase className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <span>Class of {profile.graduation_year}</span>
+            </div>
+          )}
+          {profile.location && !profile.hide_location && (
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+              <span>{profile.location}</span>
+            </div>
+          )}
+        </div>
 
-          {/* Skills */}
-          {viewingUser.skills?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {viewingUser.skills.map((skill, i) => (
-                <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)" }}>
-                  {skill}
+        {/* Interests */}
+        {profile.interests && profile.interests.length > 0 && !profile.hide_interests && (
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>
+              Interests & Hobbies
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.interests.map((interest, idx) => (
+                <span key={idx} className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                  {interest}
                 </span>
               ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Stats */}
-          <div className="flex gap-5 mt-4">
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{userPosts.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Posts</p>
-            </div>
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{followers.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Followers</p>
-            </div>
-            <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{following.length}</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Following</p>
+        {/* Looking For */}
+        {profile.looking_for && profile.looking_for.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>
+              Looking For
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.looking_for.map((item, idx) => (
+                <span key={idx} className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}>
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
+        )}
+
+        {/* Action Buttons */}
+        {!isOwnProfile && currentUser && (
+          <div className="flex gap-2 mt-4">
+            <Button onClick={handleMessage} className="flex-1" style={{ backgroundColor: "var(--accent-primary)" }}>
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
+            </Button>
+            <Button onClick={handleFollow} variant="outline" className="flex-1">
+              {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleReport}>
+                  <Flag className="w-4 h-4 mr-2" />
+                  Report
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBlock} className="text-red-600">
+                  <UserX className="w-4 h-4 mr-2" />
+                  Block
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {isOwnProfile && (
+          <Button onClick={() => navigate("/Profile")} className="w-full mt-4" variant="outline">
+            Edit Profile
+          </Button>
+        )}
+      </div>
+
+      {/* Activity Stats */}
+      <div className="grid grid-cols-3 gap-4 px-4 py-4" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
+        <div className="text-center">
+          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
+            {userPosts.length}
+          </div>
+          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Posts</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
+            {groupCount}
+          </div>
+          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Groups</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold" style={{ color: "var(--accent-primary)" }}>
+            {livePosts.length}
+          </div>
+          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>Live</div>
         </div>
       </div>
 
-      {/* Posts */}
-      {userPosts.length > 0 && (
-        <div className="px-5 mt-4">
-          <h3 className="font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Posts ({userPosts.length})</h3>
+      {/* Live Activities */}
+      {livePosts.length > 0 && (
+        <div className="mt-4 px-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-5 h-5" style={{ color: "var(--accent-secondary)" }} />
+            <h3 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)" }}>
+              Live Activities
+            </h3>
+          </div>
           <div className="space-y-3">
-            {userPosts.map(post => (
-              <div key={post.id} className="p-3 rounded-xl border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
-                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{post.title || post.body}</p>
-                <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>❤️ {post.upvotes || 0} • 💬 {post.comment_count || 0}</p>
-              </div>
+            {livePosts.map(post => (
+              <LivePostCard key={post.id} post={post} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Art */}
-      {userArt.length > 0 && (
-        <div className="px-5 mt-4 mb-8">
-          <h3 className="font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Art ({userArt.length})</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {userArt.map(art => (
-              <div key={art.id} className="rounded-xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <img src={art.image_url} alt={art.title} className="aspect-square w-full object-cover" />
-                <div className="p-2">
-                  <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{art.title}</p>
-                </div>
-              </div>
+      {/* Recent Posts */}
+      <div className="mt-4 px-4">
+        <div className="flex items-center gap-2 mb-3">
+          <FileText className="w-5 h-5" style={{ color: "var(--text-hint)" }} />
+          <h3 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)" }}>
+            Recent Posts
+          </h3>
+        </div>
+        {userPosts.length === 0 ? (
+          <div className="text-center py-12" style={{ color: "var(--text-hint)" }}>
+            <p>No posts yet</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {userPosts.map(post => (
+              <CommunityPostCard key={post.id} post={post} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
