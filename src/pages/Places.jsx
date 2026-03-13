@@ -140,8 +140,8 @@ export default function PlacesPage() {
               {/* Add Place Button */}
               <button onClick={() => user ? setShowAddPlaceModal(true) : base44.auth.redirectToLogin()}
                 className="p-2 rounded-xl transition-all active:scale-90"
-                style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
-                <Plus className="w-4 h-4" />
+                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <Plus className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
               </button>
 
               {/* View toggle */}
