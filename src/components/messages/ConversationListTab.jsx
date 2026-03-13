@@ -120,8 +120,8 @@ export default function ConversationListTab({ user, tab, onSelect }) {
           style={{ border: "1px solid var(--border-light)", backgroundColor: "rgba(255,255,255,0.82)", backdropFilter: "blur(8px)" }}>
 
           {/* Avatar */}
-          <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-xl font-bold shrink-0"
-            style={{ backgroundColor: avatarColor(conv.email), color: "#fff" }}>
+          <div className="w-[54px] h-[54px] rounded-2xl flex items-center justify-center text-xl font-bold shrink-0"
+            style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, var(--accent-primary))`, color: "#fff", boxShadow: "var(--elevation-1)" }}>
             {conv.name?.[0]?.toUpperCase() || "?"}
           </div>
 

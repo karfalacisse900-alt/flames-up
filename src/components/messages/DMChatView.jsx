@@ -118,21 +118,21 @@ export default function DMChatView({ user, conversation, onBack }) {
     <div className="flex flex-col" style={{ height: "100dvh", background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 22%), var(--bg-app)" }}>
 
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 mx-3 mt-3 rounded-[28px] shrink-0 border card-elevated"
+      <div className="flex items-center gap-2 px-3 mx-3 mt-3 shrink-0 rounded-[28px] border card-elevated"
         style={{
           backgroundColor: "rgba(255,255,255,0.82)",
           borderColor: "var(--border-light)",
           paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
           paddingBottom: 12,
-          backdropFilter: "blur(12px)"
+          backdropFilter: "blur(12px)",
         }}>
-        <button onClick={onBack} className="p-1 mr-1">
+        <button onClick={onBack} className="p-1 mr-1 rounded-2xl">
           <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
         </button>
 
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
-          style={{ backgroundColor: avatarColor(conversation.email), color: "#fff" }}>
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
+          style={{ background: `linear-gradient(135deg, ${avatarColor(conversation.email)}, var(--accent-primary))`, color: "#fff" }}>
           {conversation.avatar_url
             ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
             : displayName[0]?.toUpperCase() || "?"}
@@ -148,15 +148,15 @@ export default function DMChatView({ user, conversation, onBack }) {
 
         {/* Action icons */}
         <div className="flex items-center gap-1">
-          <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
-            <Video className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+          <button className="w-9 h-9 flex items-center justify-center rounded-2xl" onClick={() => setShowVideoCall(true)}>
+            <Video className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
           </button>
-          <button className="w-9 h-9 flex items-center justify-center">
-            <Phone className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+          <button className="w-9 h-9 flex items-center justify-center rounded-2xl">
+            <Phone className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
           </button>
           <div className="relative">
-            <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
-              <MoreVertical className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+            <button className="w-9 h-9 flex items-center justify-center rounded-2xl" onClick={() => setShowMenu(v => !v)}>
+              <MoreVertical className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
             </button>
             {showMenu && (
               <>
