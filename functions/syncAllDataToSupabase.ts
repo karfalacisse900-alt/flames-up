@@ -36,18 +36,7 @@ Deno.serve(async (req) => {
         const userData = {
           id: String(u.id),
           email: u.email || '',
-          full_name: u.full_name || null,
           display_name: u.display_name || null,
-          username: u.username || null,
-          avatar_url: u.avatar_url || null,
-          bio: u.bio || null,
-          about_me: u.about_me || null,
-          role: u.role || 'user',
-          is_creator: Boolean(u.is_creator),
-          profile_theme: u.profile_theme || 'default',
-          badges: Array.isArray(u.badges) ? u.badges : [],
-          created_at: u.created_date || new Date().toISOString(),
-          updated_at: u.updated_date || u.created_date || new Date().toISOString(),
         };
 
         const { error } = await supabase
@@ -91,25 +80,9 @@ Deno.serve(async (req) => {
         
         const postData = {
           id: String(post.id),
-          author_email: post.author_email || '',
-          author_name: post.author_name || null,
-          type: post.type || 'text',
+          title: post.title || null,
           content: post.content || post.text || null,
-          media_urls: Array.isArray(post.media_urls) ? post.media_urls : [],
-          location_name: post.location_name || null,
-          location_city: post.location_city || null,
-          location_lat: post.location_lat || null,
-          location_lng: post.location_lng || null,
-          upvotes: Number(post.upvotes) || 0,
-          upvoted_by: Array.isArray(post.upvoted_by) ? post.upvoted_by : [],
-          downvotes: Number(post.downvotes) || 0,
-          comment_count: Number(post.comment_count) || 0,
-          engagement_score: Number(post.engagement_score) || 0,
-          group_id: post.group_id ? String(post.group_id) : null,
-          is_pinned: Boolean(post.is_pinned),
-          moderation_status: post.moderation_status || 'approved',
-          created_at: post.created_date || new Date().toISOString(),
-          updated_at: post.updated_date || post.created_date || new Date().toISOString(),
+          author_id: post.created_by ? String(post.created_by) : null,
         };
 
         const { error } = await supabase
