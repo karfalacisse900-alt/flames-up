@@ -15,8 +15,9 @@ Deno.serve(async (req) => {
     const errors = [];
 
     // 1. Sync ALL users to profiles table
+    console.log('Attempting to fetch users...');
     const allUsers = await base44.asServiceRole.entities.User.list();
-    console.log(`Found ${allUsers.length} users to sync`);
+    console.log(`Found ${allUsers.length} users in User entity`);
 
     let usersSynced = 0;
 
@@ -74,9 +75,26 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. Sync ALL community posts
-    const allPosts = await base44.asServiceRole.entities.CommunityPost.list();
-    console.log(`Found ${allPosts.length} community posts to sync`);
+    // 2. Sync ALL posts - try both CommunityPost and Post entities
+    console.log('Attempting to fetch posts...');
+    let allPosts = [];
+    try {
+      allPosts = await base44.asServiceRole.entities.CommunityPost.list();
+      console.log(`Found ${allPosts.length} posts in CommunityPost entity`);
+    } catch (err) {
+      console.log('CommunityPost entity not found, trying Post entity...');
+      try {
+        allPosts = await base44.asServiceRole.entities.Post.list();
+        console.log(`Found ${allPosts.length} posts in Post entity`);
+      } catch (err2) {
+        console.error('Could not find posts in either CommunityPost or Post entity');
+        errors.push({
+          type: 'fatal',
+          error: 'No post entity found',
+          details: `CommunityPost error: ${err.message}, Post error: ${err2.message}`
+        });
+      }
+    }
 
     let postsSynced = 0;
 
