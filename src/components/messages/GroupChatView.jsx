@@ -159,13 +159,13 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
     <>
       <div className="flex flex-col" style={{ height: "100dvh", background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 22%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 22%), var(--bg-app)" }}>
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 mx-3 mt-3 rounded-[28px] shrink-0 border card-elevated"
+        <div className="flex items-center gap-2 px-3 mx-3 mt-3 shrink-0 rounded-[28px] border card-elevated"
           style={{
             backgroundColor: "rgba(255,255,255,0.82)",
             borderColor: "var(--border-light)",
             paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
             paddingBottom: 12,
-            backdropFilter: "blur(12px)"
+            backdropFilter: "blur(12px)",
           }}>
           <button onClick={onBack} className="p-1 mr-1">
             <ArrowLeft className="w-6 h-6" style={{ color: "#fff" }} />
