@@ -13,6 +13,8 @@ import CreatorSection from "../components/profile/CreatorSection";
 import AIAssistantDeletion from "../components/profile/AIAssistantDeletion";
 import SubscriptionManagement from "../components/profile/SubscriptionManagement";
 import { usePresenceDetection } from "../components/hooks/usePresenceDetection";
+import ProfileEditor from "../components/profile/ProfileEditor";
+import ProfileView from "../components/profile/ProfileView";
 
 import { getBalance } from "../components/coins/coinsHelper";
 
@@ -183,7 +185,7 @@ export default function Profile() {
               </Link>
             )}
             <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all" style={{ borderColor: "var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "transparent" }}>
-              <Edit2 className="w-3.5 h-3.5" /> Edit
+              <Edit2 className="w-3.5 h-3.5" /> Edit Profile
             </button>
               <Link to={createPageUrl("Messages")} className="p-2 rounded-full border transition-all" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
                 <MessageSquare className="w-4 h-4" />
@@ -532,70 +534,17 @@ export default function Profile() {
 
 
 
-      {/* Edit profile */}
-      <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Edit Profile</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-
-            {/* Avatar upload */}
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center text-2xl font-semibold shrink-0" style={{ backgroundColor: "var(--bg-app)", color: "var(--accent-primary)" }}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  (displayName || user?.full_name || "U")[0]?.toUpperCase()
-                )}
-              </div>
-              <div>
-                <label className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium" style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)" }}>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                  {avatarUploading ? "Uploading..." : "Change Photo"}
-                </label>
-                {avatarUrl && (
-                  <button onClick={() => setAvatarUrl("")} className="mt-1 text-[11px]" style={{ color: "var(--accent-secondary)" }}>Remove</button>
-                )}
-              </div>
-            </div>
-            <Input placeholder="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="rounded-xl" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
-            <div>
-              <Input
-                placeholder="Username (e.g. @cooluser)"
-                value={username.startsWith("@") ? username.slice(1) : username}
-                onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
-                className="rounded-xl"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}
-              />
-              <p className="text-[11px] mt-1 px-1" style={{ color: "var(--text-hint)" }}>Unique username — letters, numbers & underscores only</p>
-            </div>
-            <Textarea placeholder="Short bio (one-liner)" value={bio} onChange={(e) => setBio(e.target.value)} className="rounded-xl resize-none" rows={2} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
-            <Textarea placeholder="About Me — tell your story, share your passions…" value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} className="rounded-xl resize-none" rows={4} style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }} />
-            {/* Theme picker */}
-            <div>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Profile Theme</p>
-              <div className="flex gap-2 flex-wrap">
-                {Object.entries(THEMES).map(([key, theme]) => (
-                  <button
-                    key={key}
-                    onClick={() => setProfileTheme(key)}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-all"
-                    style={{
-                      background: theme.banner,
-                      color: theme.accent,
-                      borderColor: profileTheme === key ? theme.accent : "transparent",
-                    }}
-                  >
-                    {theme.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <Button onClick={handleSaveProfile} className="w-full rounded-xl text-white" style={{ backgroundColor: "var(--accent-primary)" }}>Save Changes</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Edit profile - New comprehensive editor */}
+      {showEdit && (
+        <ProfileEditor
+          user={user}
+          onClose={() => setShowEdit(false)}
+          onUpdated={() => {
+            base44.auth.me().then(u => setUser(u));
+            queryClient.invalidateQueries();
+          }}
+        />
+      )}
     </div>
   );
 }
