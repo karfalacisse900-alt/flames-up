@@ -78,14 +78,14 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
   };
 
   return (
-    <div style={{ backgroundColor: "#F0F0F0", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <div style={{ backgroundColor: "var(--bg-card)", paddingBottom: "env(safe-area-inset-bottom, 0px)", borderTop: "1px solid var(--border-light)", boxShadow: "0 -8px 24px rgba(15,23,42,0.06)" }}>
 
       {/* Reply strip */}
       {replyTo && (
-        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
-          <div className="flex-1 border-l-4 pl-3 py-1 rounded" style={{ borderLeftColor: "#25D366", backgroundColor: "#F5F5F5" }}>
-            <p className="text-[12px] font-semibold" style={{ color: "#25D366" }}>Replying</p>
-            <p className="text-[13px] truncate" style={{ color: "#555" }}>{replyTo.text || "Voice message"}</p>
+        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
+          <div className="flex-1 border-l-4 pl-3 py-1 rounded-xl" style={{ borderLeftColor: "#8B5CF6", backgroundColor: "#f3ecff" }}>
+            <p className="text-[12px] font-semibold" style={{ color: "#7C3AED" }}>Replying</p>
+            <p className="text-[13px] truncate" style={{ color: "var(--text-secondary)" }}>{replyTo.text || "Voice message"}</p>
           </div>
           <button onClick={onCancelReply} className="p-1">
             <X className="w-4 h-4" style={{ color: "#999" }} />
@@ -159,7 +159,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
         <div className="flex items-center gap-1">
           <button onClick={() => { setShowAttach(v => !v); setShowGif(false); }}
             className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: showAttach ? "#25D366" : "#fff" }}>
+            style={{ background: showAttach ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "var(--bg-subtle)", color: showAttach ? "#fff" : "var(--text-secondary)" }}>
             {showAttach
               ? <X className="w-5 h-5" style={{ color: "#fff" }} />
               : <Paperclip className="w-5 h-5" style={{ color: "#666" }} />}
@@ -168,7 +168,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
         {/* Text input */}
         <div className="flex-1 flex items-end rounded-3xl px-4 py-2"
-          style={{ backgroundColor: "#fff", minHeight: 44, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          style={{ background: "linear-gradient(135deg, #ffffff, #f8f5ff)", minHeight: 44, border: "1px solid #ede9fe", boxShadow: "0 4px 14px rgba(15,23,42,0.06)" }}>
           <textarea
             ref={textRef}
             value={text}
@@ -186,7 +186,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
         {text.trim() ? (
           <button onClick={handleSend}
             className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: "#25D366", boxShadow: "0 2px 6px rgba(37,211,102,0.4)" }}>
+            style={{ background: "linear-gradient(135deg, #7C3AED, #DB2777)", boxShadow: "0 8px 18px rgba(124,58,237,0.32)" }}>
             <Send className="w-5 h-5 text-white" />
           </button>
         ) : (
@@ -196,8 +196,8 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
             disabled={disabled}
             className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
             style={{
-              backgroundColor: recording ? "#F44336" : "#25D366",
-              boxShadow: `0 2px 6px ${recording ? "rgba(244,67,54,0.4)" : "rgba(37,211,102,0.4)"}`,
+              background: recording ? "linear-gradient(135deg, #ef4444, #f97316)" : "linear-gradient(135deg, #7C3AED, #DB2777)",
+              boxShadow: recording ? "0 8px 18px rgba(239,68,68,0.28)" : "0 8px 18px rgba(124,58,237,0.32)",
             }}>
             {recording ? <Square className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
           </button>

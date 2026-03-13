@@ -172,8 +172,8 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
           </button>
 
           <button onClick={() => setShowInfo(true)} className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0"
-              style={{ backgroundColor: avatarColor(group.name), color: "#fff" }}>
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
+              style={{ background: `linear-gradient(135deg, ${avatarColor(group.name)}, #7C3AED)`, color: "#fff" }}>
               {group.photo_url
                 ? <img src={group.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
                 : group.name?.[0]?.toUpperCase() || "G"}
@@ -187,15 +187,15 @@ export default function GroupChatView({ user, group: initialGroup, onBack }) {
           </button>
 
           <div className="flex items-center gap-1">
-            <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowVideoCall(true)}>
-              <Video className="w-5 h-5" style={{ color: "#fff" }} />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowVideoCall(true)} style={{ backgroundColor: "#f3ecff" }}>
+              <Video className="w-5 h-5" style={{ color: "#7C3AED" }} />
             </button>
-            <button className="w-9 h-9 flex items-center justify-center">
-              <Phone className="w-5 h-5" style={{ color: "#fff" }} />
+            <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "#ecfeff" }}>
+              <Phone className="w-5 h-5" style={{ color: "#0F766E" }} />
             </button>
             <div className="relative">
-              <button className="w-9 h-9 flex items-center justify-center" onClick={() => setShowMenu(v => !v)}>
-                <MoreVertical className="w-5 h-5" style={{ color: "#fff" }} />
+              <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowMenu(v => !v)} style={{ backgroundColor: "#f8fafc" }}>
+                <MoreVertical className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
               </button>
               {showMenu && (
                 <>

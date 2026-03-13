@@ -31,11 +31,14 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
 
   const handleReact = (emoji) => { onReact?.(message.id, emoji); setShowMenu(false); };
 
-  // WhatsApp bubble tail via CSS-like approach using border trick
-  const bubbleBg = isDeleted ? "transparent" : isMe ? "#DCF8C6" : "#fff";
+  const bubbleBg = isDeleted
+    ? "var(--bg-subtle)"
+    : isMe
+    ? "linear-gradient(135deg, #7C3AED, #DB2777)"
+    : "linear-gradient(135deg, #ffffff, #f8f5ff)";
   const bubbleRadius = isMe
-    ? "18px 2px 18px 18px"
-    : "2px 18px 18px 18px";
+    ? "20px 6px 20px 20px"
+    : "6px 20px 20px 20px";
 
   return (
     <div className={`flex mb-1 ${isMe ? "justify-end" : "justify-start"}`} style={{ paddingLeft: isMe ? 60 : 0, paddingRight: isMe ? 0 : 60 }}>
@@ -43,14 +46,14 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
 
         {/* Reply quote */}
         {message.reply_preview && !isDeleted && (
-          <div className="w-full mb-1 px-3 py-1.5 rounded-xl text-xs overflow-hidden"
+          <div className="w-full mb-1 px-3 py-2 rounded-2xl text-xs overflow-hidden"
             style={{
-              backgroundColor: isMe ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.05)",
-              borderLeft: `3px solid ${isMe ? "#25D366" : "#128C7E"}`,
-              color: "#555",
+              backgroundColor: isMe ? "rgba(255,255,255,0.18)" : "#f3ecff",
+              borderLeft: `3px solid ${isMe ? "#F9A8D4" : "#8B5CF6"}`,
+              color: isMe ? "rgba(255,255,255,0.88)" : "#5B4B8A",
               maxWidth: 260,
             }}>
-            <span style={{ color: "#128C7E", fontWeight: 600 }}>↩ Reply</span>
+            <span style={{ color: isMe ? "#fff" : "#7C3AED", fontWeight: 700 }}>↩ Reply</span>
             <p className="truncate mt-0.5">{message.reply_preview}</p>
           </div>
         )}
@@ -60,18 +63,18 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
           {...longPress}
           className="select-none relative"
           style={{
-            backgroundColor: bubbleBg,
+            background: bubbleBg,
             borderRadius: bubbleRadius,
-            border: isDeleted ? "1px dashed #ccc" : "none",
-            boxShadow: isDeleted ? "none" : "0 1px 2px rgba(0,0,0,0.13)",
-            padding: isOnlyMedia ? 4 : isVoice ? "8px 12px" : "7px 12px 6px",
+            border: isDeleted ? "1px solid var(--border-light)" : (isMe ? "none" : "1px solid #ede9fe"),
+            boxShadow: isDeleted ? "none" : "0 10px 24px rgba(15,23,42,0.08)",
+            padding: isOnlyMedia ? 4 : isVoice ? "8px 12px" : "8px 12px 7px",
             cursor: "pointer",
             maxWidth: 280,
             minWidth: isVoice ? 180 : undefined,
           }}>
 
           {isDeleted ? (
-            <p className="text-sm italic px-1" style={{ color: "#aaa" }}>🚫 This message was deleted</p>
+            <p className="text-sm italic px-1" style={{ color: "var(--text-hint)" }}>🚫 This message was deleted</p>
 
           ) : isVoice ? (
             <audio src={message.audio_url} controls style={{ height: 32, minWidth: 180, maxWidth: 240 }} />
@@ -88,13 +91,13 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
             </div>
 
           ) : isLocation ? (
-            <div className="flex items-center gap-2 text-sm py-1" style={{ color: "#333" }}>
+            <div className="flex items-center gap-2 text-sm py-1" style={{ color: isMe ? "#fff" : "var(--text-primary)" }}>
               <span className="text-lg">📍</span>
               <span>{message.location_data?.name || "Shared location"}</span>
             </div>
 
           ) : (
-            <p style={{ fontSize: 14.5, lineHeight: 1.45, color: isDeleted ? "#aaa" : "#111", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            <p style={{ fontSize: 14.5, lineHeight: 1.45, color: isDeleted ? "var(--text-hint)" : isMe ? "#fff" : "var(--text-primary)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {message.text}
             </p>
           )}
@@ -102,9 +105,9 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
           {/* Time + read receipt (inside bubble for text, outside for media) */}
           {!isDeleted && !isOnlyMedia && !hasGif && (
             <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-end"}`} style={{ minWidth: 50 }}>
-              <span style={{ fontSize: 11, color: "#999", lineHeight: 1 }}>{formatTime(message.created_date)}</span>
+              <span style={{ fontSize: 11, color: isMe ? "rgba(255,255,255,0.78)" : "var(--text-hint)", lineHeight: 1 }}>{formatTime(message.created_date)}</span>
               {isMe && (
-                <span style={{ fontSize: 11, color: message.is_read ? "#34B7F1" : "#aaa", lineHeight: 1, fontWeight: 700 }}>
+                <span style={{ fontSize: 11, color: message.is_read ? "#BFDBFE" : "rgba(255,255,255,0.7)", lineHeight: 1, fontWeight: 700 }}>
                   {message.is_read ? "✓✓" : "✓"}
                 </span>
               )}
@@ -115,9 +118,9 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
         {/* Time outside for media */}
         {!isDeleted && (isOnlyMedia || hasGif) && (
           <div className="flex items-center gap-1 mt-0.5 px-1">
-            <span style={{ fontSize: 11, color: "#999" }}>{formatTime(message.created_date)}</span>
+            <span style={{ fontSize: 11, color: "var(--text-hint)" }}>{formatTime(message.created_date)}</span>
             {isMe && (
-              <span style={{ fontSize: 11, color: message.is_read ? "#34B7F1" : "#aaa", fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: "var(--accent-primary)", fontWeight: 700 }}>
                 {message.is_read ? "✓✓" : "✓"}
               </span>
             )}
@@ -131,8 +134,8 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
               <button key={emoji} onClick={() => handleReact(emoji)}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]"
                 style={{
-                  backgroundColor: emails.includes(user?.email) ? "#E8F5E9" : "#fff",
-                  border: `1px solid ${emails.includes(user?.email) ? "#25D366" : "#ddd"}`,
+                  backgroundColor: emails.includes(user?.email) ? "#ede9fe" : "#fff",
+                  border: `1px solid ${emails.includes(user?.email) ? "#8B5CF6" : "#ddd"}`,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                 }}>
                 {emoji} <span style={{ color: "#555" }}>{emails.length}</span>
@@ -150,9 +153,10 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
             style={{
               bottom: "30%",
               [isMe ? "right" : "left"]: 16,
-              backgroundColor: "#fff",
+              backgroundColor: "var(--bg-card)",
               minWidth: 200,
-              border: "1px solid #F0F0F0",
+              border: "1px solid var(--border-light)",
+              boxShadow: "var(--elevation-4)",
             }}>
             {/* Emoji bar */}
             <div className="flex gap-2 px-4 py-3" style={{ borderBottom: "1px solid #F5F5F5" }}>
