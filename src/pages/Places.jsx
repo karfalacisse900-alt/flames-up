@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Bookmark, Map, List, Search, X } from "lucide-react";
+import { MapPin, Bookmark, Map, List, Search, X, Plus } from "lucide-react";
 import PlacesMapboxView from "@/components/places/PlacesMapboxView";
 import PlaceHub from "@/components/community/PlaceHub";
 import TrendingPlaces from "@/components/community/TrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
+import AddPlaceModal from "@/components/places/AddPlaceModal";
 import { requireVerified } from "@/components/auth/EmailVerificationGate";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -18,6 +19,7 @@ export default function PlacesPage() {
   const [selectedPlace, setSelectedPlace] = useState(null); // { name, city, ... }
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
+  const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
   const qc = useQueryClient();
 
   React.useEffect(() => {
@@ -134,23 +136,32 @@ export default function PlacesPage() {
                 <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Explore your world ✦</p>
               </div>
             </div>
-            {/* View toggle */}
-            <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              {[
-                { key: "feed", icon: List },
-                { key: "map", icon: Map },
-                { key: "saved", icon: Bookmark },
-              ].map(({ key, icon: Icon }) => (
-                <button key={key} onClick={() => setViewMode(key)}
-                  className="p-2 rounded-xl transition-all"
-                  style={{
-                    backgroundColor: viewMode === key ? "#1E1E1E" : "transparent",
-                    color: viewMode === key ? "#fff" : "var(--text-hint)",
-                    boxShadow: viewMode === key ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
-                  }}>
-                  <Icon className="w-4 h-4" />
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              {/* Add Place Button */}
+              <button onClick={() => user ? setShowAddPlaceModal(true) : base44.auth.redirectToLogin()}
+                className="p-2 rounded-xl transition-all active:scale-90"
+                style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+                <Plus className="w-4 h-4" />
+              </button>
+
+              {/* View toggle */}
+              <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                {[
+                  { key: "feed", icon: List },
+                  { key: "map", icon: Map },
+                  { key: "saved", icon: Bookmark },
+                ].map(({ key, icon: Icon }) => (
+                  <button key={key} onClick={() => setViewMode(key)}
+                    className="p-2 rounded-xl transition-all"
+                    style={{
+                      backgroundColor: viewMode === key ? "#1E1E1E" : "transparent",
+                      color: viewMode === key ? "#fff" : "var(--text-hint)",
+                      boxShadow: viewMode === key ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
+                    }}>
+                    <Icon className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -358,6 +369,15 @@ export default function PlacesPage() {
           user={user}
           onClose={closePlace}
           onUpvote={(post) => upvoteMut.mutate({ post })}
+        />
+      )}
+
+      {/* Add Place Modal */}
+      {showAddPlaceModal && (
+        <AddPlaceModal
+          user={user}
+          onClose={() => setShowAddPlaceModal(false)}
+          onSuccess={() => qc.invalidateQueries({ queryKey: ["realPlaces"] })}
         />
       )}
     </div>
