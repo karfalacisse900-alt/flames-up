@@ -69,13 +69,16 @@ Deno.serve(async (req) => {
       console.log(`Initialized user ${user.email}: username=${updates.username}, referral=${updates.referral_code}`);
     }
 
-    // Sync new user to Supabase profiles table
+    // Sync new user to Supabase profiles table - await properly
     try {
       const freshUser = await base44.auth.me();
+      
+      // Map Base44 fields to Supabase columns
       const profileRecord = {
         id: String(freshUser.id),
-        email: freshUser.email || '',
+        email: String(freshUser.email || ''),
       };
+      
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
         method: "POST",
         headers: {
@@ -86,6 +89,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify(profileRecord),
       });
+      
       if (!sbRes.ok) {
         const errText = await sbRes.text();
         console.error("Supabase profile sync failed:", sbRes.status, errText);
