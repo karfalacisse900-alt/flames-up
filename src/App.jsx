@@ -1,16 +1,16 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
+import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Profile from './pages/Profile';
-import Messages from './pages/Messages';
-import Groups from './pages/Groups';
-import Discover from './pages/Discover';
-import CreatePost from './pages/CreatePost';
+import Live from './pages/Live';
+import UserProfile from './pages/UserProfile';
+import PlaceDetail from './pages/PlaceDetail';
+import NowBoard from './pages/NowBoard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -51,12 +51,6 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
-      <Route path="/Profile" element={<LayoutWrapper currentPageName="Profile"><Profile /></LayoutWrapper>} />
-      <Route path="/Messages" element={<LayoutWrapper currentPageName="Messages"><Messages /></LayoutWrapper>} />
-      <Route path="/Groups" element={<LayoutWrapper currentPageName="Groups"><Groups /></LayoutWrapper>} />
-      <Route path="/Discover" element={<LayoutWrapper currentPageName="Discover"><Discover /></LayoutWrapper>} />
-      <Route path="/CreatePost" element={<LayoutWrapper currentPageName="CreatePost"><CreatePost /></LayoutWrapper>} />
-      <Route path="/NowBoard" element={<Navigate to="/Home" replace />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
@@ -68,6 +62,10 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><Live /></LayoutWrapper>} />
+      <Route path="/user/:email" element={<LayoutWrapper currentPageName="UserProfile"><UserProfile /></LayoutWrapper>} />
+      <Route path="/PlaceDetail" element={<LayoutWrapper currentPageName="PlaceDetail"><PlaceDetail /></LayoutWrapper>} />
+      <Route path="/NowBoard" element={<LayoutWrapper currentPageName="NowBoard"><NowBoard /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -80,6 +78,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <NavigationTracker />
           <AuthenticatedApp />
         </Router>
         <Toaster />

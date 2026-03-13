@@ -1,108 +1,189 @@
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Compass, Search, Sparkles } from "lucide-react";
-import DiscoverItemCard from "@/components/discover/DiscoverItemCard";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
+import { Search, X, Compass, Lightbulb, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
+import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
+import DYKTab from "@/components/discover/DYKTab";
+import CreatorsTab from "@/components/discover/CreatorsTab";
+import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
+
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function Discover() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [user, setUser]           = useState(null);
+  const [items, setItems]         = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch]       = useState("");
+  const [activeTab, setActiveTab] = useState("apps");
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  const { data: items = [] } = useQuery({
-    queryKey: ["discover-redesign"],
-    queryFn: async () => {
-      const all = await base44.entities.DiscoverItem.list("-updated_date", 36);
-      return all.filter((item) => item.is_approved !== false);
-    },
-    initialData: [],
-  });
+  // "explore" = Spotify home view; "browse" = filtered list/search
+  const [view, setView] = useState("explore");
 
-  const categories = useMemo(() => ["all", ...Array.from(new Set(items.map((item) => item.category).filter(Boolean)))], [items]);
-  const filtered = useMemo(() => items.filter((item) => {
-    const searchMatch = `${item.title} ${item.description}`.toLowerCase().includes(search.toLowerCase());
-    const categoryMatch = category === "all" || item.category === category;
-    return searchMatch && categoryMatch;
-  }), [items, search, category]);
-  const featured = filtered.find((item) => item.is_featured) || filtered[0];
-  const spotlight = filtered.slice(0, 4);
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+    base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
+      .then(setItems)
+      .finally(() => setIsLoading(false));
+    // Ensure modal & scroll lock are cleared when leaving this page
+    return () => {
+      setSelectedItem(null);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  const handleChipSearch = (term) => {
+    setSearch(term);
+    setView("browse");
+  };
+
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    if (val) setView("browse");
+    else setView("explore");
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearch("");
+    setView("explore");
+  };
+
+  const firstName = user?.full_name?.split(" ")[0] || "";
+
+  const doRefresh = useCallback(async () => {
+    setIsLoading(true);
+    await base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
+      .then(setItems)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(doRefresh);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-8">
-      <section className="overflow-hidden rounded-[40px] border" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.16), rgba(20,184,166,0.08), #fff)", borderColor: "rgba(148,163,184,0.18)", boxShadow: "var(--elevation-4)" }}>
-        <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="p-8 md:p-10">
-            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.74)", color: "var(--accent-primary)" }}>
-              <Compass className="h-3.5 w-3.5" /> Discover redesigned
-            </div>
-            <h1 className="mt-6 h1" style={{ color: "var(--text-primary)" }}>A cleaner discovery canvas</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 md:text-base" style={{ color: "var(--text-secondary)" }}>This version uses a hero search stage, spotlight highlights, and a gallery field so the page feels curated instead of repetitive.</p>
-          </div>
-          <div className="grid gap-4 p-6 md:p-8 md:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-[28px] border p-5" style={{ backgroundColor: "rgba(255,255,255,0.78)", borderColor: "rgba(148,163,184,0.16)" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Items</div>
-              <div className="mt-3 text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{filtered.length}</div>
-            </div>
-            <div className="rounded-[28px] border p-5" style={{ backgroundColor: "rgba(255,255,255,0.78)", borderColor: "rgba(148,163,184,0.16)" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Categories</div>
-              <div className="mt-3 text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{categories.length - 1}</div>
-            </div>
-            <div className="rounded-[28px] border p-5" style={{ backgroundColor: "rgba(255,255,255,0.78)", borderColor: "rgba(148,163,184,0.16)" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Focus</div>
-              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}><Sparkles className="h-4 w-4" /> Curated flow</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-app)" }}
+    >
+      <PullIndicator />
 
-      <section className="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
-        <div className="overflow-hidden rounded-[36px] border" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-3)" }}>
-          <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="p-6 md:p-8" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.14), rgba(20,184,166,0.10), rgba(255,255,255,0.95))" }}>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--text-hint)" }} />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tools, ideas, and recommendations" className="w-full pl-11 pr-4 py-3 text-sm" />
-              </div>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {categories.map((item) => (
-                  <button key={item} onClick={() => setCategory(item)} className="rounded-full px-3 py-2 text-sm font-semibold capitalize" style={{ backgroundColor: category === item ? "var(--accent-primary)" : "rgba(255,255,255,0.74)", color: category === item ? "white" : "var(--text-secondary)", boxShadow: category === item ? "var(--elevation-1)" : "none" }}>
-                    {item}
-                  </button>
-                ))}
-              </div>
+      {/* ── Sticky Header ── */}
+      <div
+        className="sticky top-0 z-30 px-4 pt-4 pb-3"
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)", backdropFilter: "blur(16px)" }}
+      >
+        {/* Greeting row */}
+        <div className="flex items-center justify-between mb-3">
+          {view === "browse" && activeTab === "apps" ? (
+            <button
+              onClick={() => { setView("explore"); setSearch(""); }}
+              className="flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          ) : (
+            <div>
+              <p className="text-[11px] font-medium tracking-wide uppercase" style={{ color: "var(--text-hint)" }}>{getGreeting()}{firstName ? `, ${firstName}` : ""} ✦</p>
+              <h1 className="text-2xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Discover</h1>
             </div>
-            <div className="p-6 md:p-8">
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Featured</div>
-              <h2 className="mt-4 h3" style={{ color: "var(--text-primary)" }}>{featured?.title || "Explore something new"}</h2>
-              <p className="mt-3 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>{featured?.long_description || featured?.description || "A clearer, calmer layout helps the best discoveries stand out without crowding the page."}</p>
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="rounded-[34px] border p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-2)" }}>
-          <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>Why this is different</div>
-          <p className="mt-4 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>The page now moves like a magazine layout — hero, highlight, spotlight, then gallery — instead of repeating one card rhythm.</p>
+        {/* Tab bar */}
+         <div className="flex gap-2 mb-3">
+           {[
+             { id: "apps", label: "🧰 Apps & Tools" },
+             { id: "creators", label: "⭐ Creators" },
+             { id: "dyk",  label: "💡 Did You Know" },
+           ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className="flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold transition-all"
+                style={{
+                  backgroundColor: isActive ? "#1E1E1E" : "var(--bg-card)",
+                  color: isActive ? "#fff" : "var(--text-secondary)",
+                  border: `1.5px solid ${isActive ? "#1E1E1E" : "var(--border-light)"}`,
+                  boxShadow: isActive ? "0 4px 14px rgba(0,0,0,0.2)" : "none",
+                  letterSpacing: "-0.2px",
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
-      </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {spotlight.map((item, index) => (
-          <div key={item.id} className={index === 0 ? "md:col-span-2 xl:col-span-2" : ""}>
-            <div className="rounded-[30px] border p-5 h-full" style={{ background: index === 0 ? "linear-gradient(135deg, rgba(79,70,229,0.12), rgba(20,184,166,0.08))" : "var(--bg-card)", borderColor: "rgba(148,163,184,0.16)", boxShadow: "var(--elevation-1)" }}>
-              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-hint)" }}>{item.category}</div>
-              <h3 className="mt-3 h4" style={{ color: "var(--text-primary)" }}>{item.title}</h3>
-              <p className="mt-2 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>{(item.long_description || item.description || "").slice(0, index === 0 ? 200 : 100)}</p>
-            </div>
+        {/* Search bar — apps tab only */}
+        {activeTab === "apps" && (
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-hint)" }} />
+            <input
+              value={search}
+              onChange={e => handleSearchChange(e.target.value)}
+              placeholder="Search apps, tools, websites…"
+              className="w-full pl-10 pr-10 py-3 rounded-2xl text-sm outline-none"
+              style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", color: "var(--text-primary)" }}
+            />
+            {search && (
+              <button onClick={() => { setSearch(""); setView("explore"); }} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+              </button>
+            )}
           </div>
-        ))}
-      </section>
+        )}
+      </div>
 
-      <section className="masonry-grid">
-        {filtered.map((item) => (
-          <div key={item.id} className="masonry-item">
-            <DiscoverItemCard item={item} />
-          </div>
-        ))}
-      </section>
+      {/* ── Content ── */}
+      <div className="pt-2">
+        {activeTab === "creators" ? (
+          <CreatorsTab />
+        ) : activeTab === "dyk" ? (
+          <DYKTab user={user} />
+        ) : view === "explore" ? (
+          <DiscoverExplorer
+            items={items}
+            isLoading={isLoading}
+            user={user}
+            onItemClick={setSelectedItem}
+            onChipSearch={handleChipSearch}
+            greeting={getGreeting()}
+          />
+        ) : (
+          <DiscoverAppsTabNew
+            items={items}
+            isLoading={isLoading}
+            search={search}
+            user={user}
+            onItemClick={setSelectedItem}
+            hideCategoryPills={false}
+          />
+        )}
+      </div>
+
+      {/* ── Item detail modal ── */}
+      {selectedItem && (
+        <DiscoverItemModal
+          item={selectedItem}
+          user={user}
+          onClose={() => setSelectedItem(null)}
+        />
+      )}
     </div>
   );
 }
