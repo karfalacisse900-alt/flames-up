@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const ADJECTIVES = ["calm", "moon", "soft", "wild", "cool", "bright", "quiet", "swift", "deep", "warm", "crisp", "pure", "bold", "vast", "still"];
 const NOUNS = ["walker", "reader", "dreamer", "seeker", "thinker", "coder", "artist", "writer", "builder", "mover", "maker", "runner", "rider", "mind", "soul"];
@@ -69,24 +69,18 @@ Deno.serve(async (req) => {
       console.log(`Initialized user ${user.email}: username=${updates.username}, referral=${updates.referral_code}`);
     }
 
-    // Sync new user to Supabase profiles table (fires your profile-creation trigger)
+    // Sync new user to Supabase profiles table
     try {
       const freshUser = await base44.auth.me();
       const profileRecord = {
-        id: freshUser.id,
-        email: freshUser.email,
-        full_name: freshUser.full_name,
-        role: freshUser.role || "user",
-        username: updates.username || freshUser.username,
-        referral_code: updates.referral_code || freshUser.referral_code,
-        created_at: freshUser.created_date,
-        updated_at: freshUser.updated_date,
+        id: String(freshUser.id),
+        email: freshUser.email || '',
       };
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
         method: "POST",
         headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "apikey": SUPABASE_SERVICE_ROLE_KEY,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
           "Content-Type": "application/json",
           "Prefer": "resolution=merge-duplicates",
         },
