@@ -248,31 +248,7 @@ export default function Profile() {
               </div>
             )}
 
-            <div className="grid grid-cols-4 gap-2 mt-4">
-              {[
-                { label: "posts", value: myPosts.length, onClick: null },
-                { label: "followers", value: followers.length, onClick: () => setShowFollowers(true) },
-                { label: "following", value: following.length, onClick: () => setShowFollowing(true) },
-                { label: "badges", value: computedBadges.length, onClick: null },
-              ].map(({ label, value, onClick }) => (
-                <button key={label} onClick={onClick} className="rounded-[22px] px-2 py-3 text-center"
-                  style={{ backgroundColor: "#fbfcfe", border: "1px solid #edf2f7", boxShadow: "0 2px 8px rgba(15,23,42,0.03)", cursor: onClick ? "pointer" : "default" }}>
-                  <p className="text-lg font-black" style={{ color: "var(--text-primary)" }}>{value}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</p>
-                </button>
-              ))}
-            </div>
 
-            <div className="flex gap-2 mt-4">
-              <button onClick={() => setShowEdit(true)} className="flex-1 py-3 rounded-full text-sm font-semibold"
-                style={{ backgroundColor: "#fff", border: "1px solid var(--border-medium)", color: "var(--text-primary)" }}>
-                Edit profile
-              </button>
-              <Link to={createPageUrl("Messages")} className="flex-1 py-3 rounded-full text-sm font-semibold text-center"
-                style={{ backgroundColor: "#fff", border: "1px solid var(--border-medium)", color: "var(--text-primary)" }}>
-                Message
-              </Link>
-            </div>
 
             <Link to={createPageUrl("Wallet")} className="block mt-4">
               <WalletWidget balance={coinBalance} />
