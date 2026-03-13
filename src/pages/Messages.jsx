@@ -1,158 +1,139 @@
-import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { Edit3, ArrowLeft, MessageSquare, Users, Inbox, Search, X } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
-import ConversationListTab from "../components/messages/ConversationListTab";
-import GroupsTab from "../components/messages/GroupsTab";
-import DMChatView from "../components/messages/DMChatView";
-import GroupChatView from "../components/messages/GroupChatView";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-
-const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B"];
-const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
-const getName = (name, email) => (!name || name === email) ? (email?.split("@")[0] || "User") : name;
-
-function NewMessageSheet({ user, onSelect, onClose }) {
-  const [search, setSearch] = useState("");
-
-  const { data: follows = [] } = useQuery({
-    queryKey: ["msgFollows", user?.email],
-    queryFn: async () => {
-      const [sent, received] = await Promise.all([
-        base44.entities.Follow.filter({ follower_email: user.email }),
-        base44.entities.Follow.filter({ following_email: user.email }),
-      ]);
-      const map = {};
-      sent.forEach(f => { map[f.following_email] = f.following_name || f.following_email; });
-      received.forEach(f => { map[f.follower_email] = f.follower_name || f.follower_email; });
-      return Object.entries(map).map(([email, name]) => ({ email, name: getName(name, email) }));
-    },
-    enabled: !!user?.email,
-  });
-
-  const filtered = follows.filter(f =>
-    !search || f.name?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.55)" }} onClick={onClose}>
-      <div className="w-full rounded-t-3xl" style={{ backgroundColor: "#fff", maxHeight: "80dvh", overflow: "hidden" }}
-        onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "#F0F0F0" }}>
-          <h3 className="font-bold text-lg" style={{ color: "#111" }}>New Chat</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F5F5F5" }}>
-            <X className="w-4 h-4" style={{ color: "#666" }} />
-          </button>
-        </div>
-        <div className="px-4 py-3 border-b" style={{ borderColor: "#F0F0F0" }}>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-full" style={{ backgroundColor: "#F5F5F5" }}>
-            <Search className="w-4 h-4" style={{ color: "#999" }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search contacts…"
-              className="flex-1 bg-transparent text-sm outline-none" style={{ color: "#111" }} autoFocus />
-          </div>
-        </div>
-        <div style={{ overflowY: "auto", maxHeight: "55dvh" }}>
-          {filtered.length === 0 ? (
-            <p className="text-sm text-center py-10" style={{ color: "#999" }}>
-              {follows.length === 0 ? "Follow someone to start chatting" : "No contacts found"}
-            </p>
-          ) : filtered.map(f => (
-            <button key={f.email} onClick={() => { onSelect({ type: "dm", data: { email: f.email, name: f.name } }); onClose(); }}
-              className="w-full flex items-center gap-3 px-5 py-3.5 text-left"
-              style={{ borderBottom: "1px solid #F9F9F9" }}>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
-                style={{ backgroundColor: avatarColor(f.email), color: "#fff" }}>
-                {f.name[0]?.toUpperCase()}
-              </div>
-              <p className="font-medium text-[15px]" style={{ color: "#111" }}>{f.name}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const TABS = ["All", "Groups", "Requests"];
+import { base44 } from "@/api/base44Client";
+import { MessageSquare, Search, Send } from "lucide-react";
+import PageIntroCard from "@/components/shared/PageIntroCard";
+import ConversationListItem from "@/components/messages/ConversationListItem";
 
 export default function Messages() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("All");
-  const [activeChat, setActiveChat] = useState(null);
-  const [showNewMsg, setShowNewMsg] = useState(false);
-
-  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const withEmail = params.get("with");
-    const withName = params.get("name");
-    if (withEmail) setActiveChat({ type: "dm", data: { email: withEmail, name: getName(withName, withEmail) } });
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
-  if (!user) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#fff" }}>
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "#25D366", borderTopColor: "transparent" }} />
-    </div>
-  );
+  const { data: messages = [], refetch } = useQuery({
+    queryKey: ["direct-messages", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const all = await base44.entities.DirectMessage.list("-created_date", 120);
+      return all.filter((item) => item.sender_email === user.email || item.receiver_email === user.email);
+    },
+    initialData: [],
+  });
 
-  if (activeChat?.type === "dm") return <DMChatView user={user} conversation={activeChat.data} onBack={() => setActiveChat(null)} />;
-  if (activeChat?.type === "group") return <GroupChatView user={user} group={activeChat.data} onBack={() => setActiveChat(null)} />;
+  const conversations = useMemo(() => {
+    if (!user?.email) return [];
+    const map = new Map();
+    messages.forEach((item) => {
+      const otherEmail = item.sender_email === user.email ? item.receiver_email : item.sender_email;
+      const otherName = item.sender_email === user.email ? (item.receiver_name || item.receiver_email) : (item.sender_name || item.sender_email);
+      if (!map.has(item.conversation_id)) {
+        map.set(item.conversation_id, {
+          id: item.conversation_id,
+          email: otherEmail,
+          name: otherName || "Conversation",
+          preview: item.text || "Shared media",
+          messages: [],
+        });
+      }
+      map.get(item.conversation_id).messages.push(item);
+    });
+    return Array.from(map.values());
+  }, [messages, user]);
+
+  const filteredConversations = useMemo(() => conversations.filter((item) => item.name?.toLowerCase().includes(search.toLowerCase())), [conversations, search]);
+  const activeConversation = filteredConversations.find((item) => item.id === selectedId) || filteredConversations[0];
+
+  useEffect(() => {
+    if (!selectedId && filteredConversations[0]) setSelectedId(filteredConversations[0].id);
+  }, [filteredConversations, selectedId]);
+
+  const handleSend = async () => {
+    if (!user || !activeConversation || !draft.trim()) return;
+    await base44.entities.DirectMessage.create({
+      conversation_id: activeConversation.id,
+      sender_email: user.email,
+      sender_name: user.full_name || user.email,
+      receiver_email: activeConversation.email,
+      text: draft.trim(),
+      message_type: "text",
+      is_read: false,
+    });
+    setDraft("");
+    refetch();
+  };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#fff" }}>
-      {/* Header */}
-      <div className="shrink-0"
-        style={{ backgroundColor: "#075E54", paddingTop: "env(safe-area-inset-top, 0px)" }}>
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Link to={createPageUrl("Profile")}>
-              <ArrowLeft className="w-5 h-5" style={{ color: "#fff" }} />
-            </Link>
-            <h1 className="text-xl font-bold" style={{ color: "#fff", letterSpacing: 0.3 }}>Messages</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setShowNewMsg(true)}>
-              <Edit3 className="w-5 h-5" style={{ color: "#fff" }} />
-            </button>
-          </div>
+    <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8 space-y-6">
+      <PageIntroCard eyebrow="Messages redesign" title="Calmer conversations" description="A cleaner messaging layout with softer cards, clearer hierarchy, and improved mobile readability." />
+
+      {!user ? (
+        <div className="rounded-[30px] border p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
+          <p style={{ color: "var(--text-secondary)" }}>Log in to view your conversations.</p>
         </div>
-
-        {/* Search */}
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-            <Search className="w-4 h-4" style={{ color: "rgba(255,255,255,0.7)" }} />
-            <span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>Search…</span>
+      ) : (
+        <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <div className="rounded-[30px] border p-4 md:p-5" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--text-hint)" }} />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations" className="w-full pl-11 pr-4 py-3 text-sm" />
+            </div>
+            <div className="space-y-3">
+              {filteredConversations.map((conversation) => (
+                <ConversationListItem key={conversation.id} conversation={conversation} isActive={activeConversation?.id === conversation.id} onClick={() => setSelectedId(conversation.id)} />
+              ))}
+              {!filteredConversations.length && <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No conversations yet.</p>}
+            </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex px-2">
-          {TABS.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className="flex-1 py-2.5 text-sm font-semibold text-center transition-all"
-              style={{
-                color: "#fff",
-                borderBottom: activeTab === tab ? "3px solid #25D366" : "3px solid transparent",
-                opacity: activeTab === tab ? 1 : 0.65,
-              }}>
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="rounded-[30px] border p-5 md:p-6" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)", boxShadow: "var(--elevation-2)" }}>
+            {activeConversation ? (
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 border-b pb-4" style={{ borderColor: "var(--border-light)" }}>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl font-bold" style={{ backgroundColor: "rgba(79,70,229,0.12)", color: "var(--accent-primary)" }}>
+                    {activeConversation.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="h4" style={{ color: "var(--text-primary)" }}>{activeConversation.name}</h2>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Direct conversation</p>
+                  </div>
+                </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {activeTab === "Groups" ? (
-          <GroupsTab user={user} onSelect={setActiveChat} />
-        ) : (
-          <ConversationListTab user={user} tab={activeTab === "Requests" ? "requests" : "all"} onSelect={setActiveChat} />
-        )}
-      </div>
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                  {activeConversation.messages.slice().reverse().map((item) => {
+                    const mine = item.sender_email === user.email;
+                    return (
+                      <div key={item.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                        <div className="max-w-[85%] rounded-[24px] px-4 py-3 text-sm leading-6" style={{ backgroundColor: mine ? "var(--accent-primary)" : "var(--bg-subtle)", color: mine ? "white" : "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+                          {item.text || "Shared media"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
-      {showNewMsg && <NewMessageSheet user={user} onSelect={setActiveChat} onClose={() => setShowNewMsg(false)} />}
+                <div className="flex gap-3 border-t pt-4" style={{ borderColor: "var(--border-light)" }}>
+                  <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Write a message" className="flex-1 px-4 py-3 text-sm" />
+                  <button onClick={handleSend} className="inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold" style={{ backgroundColor: "var(--accent-primary)", color: "white" }}>
+                    <Send className="h-4 w-4" /> Send
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex min-h-[320px] items-center justify-center rounded-[24px]" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                <div className="text-center">
+                  <MessageSquare className="mx-auto h-8 w-8" style={{ color: "var(--accent-primary)" }} />
+                  <p className="mt-3 text-sm" style={{ color: "var(--text-secondary)" }}>Choose a conversation to start reading messages.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
