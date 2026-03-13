@@ -53,7 +53,7 @@ export default function NowStatusViewer({ status, currentUser, onClose, onRefres
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+        style={{ backgroundColor: "rgba(20, 38, 28, 0.78)", backdropFilter: "blur(12px)" }}
         onClick={onClose}
       >
         <motion.div

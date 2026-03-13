@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPin, Flame, Clock, Plus, Sparkles } from "lucide-react";
@@ -149,12 +149,9 @@ export default function NowBoard() {
             <p style={{ color: "var(--text-hint)" }}>No statuses yet. Be the first to post! 🚀</p>
           </div>
         ) : (
-          <div style={{
-            columnCount: window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : window.innerWidth < 1280 ? 3 : 4,
-            columnGap: "1rem"
-          }}>
+          <div className="masonry-grid">
             {statuses.map(status => (
-              <div key={status.id} style={{ breakInside: "avoid", marginBottom: "1rem" }}>
+              <div key={status.id} className="masonry-item">
                 <NowStatusCard
                   status={status}
                   currentUser={user}

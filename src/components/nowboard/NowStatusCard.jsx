@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MessageSquare, Heart, Share2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { base44 } from "@/api/base44Client";
 
 const REACTIONS = ["🔥", "😂", "👏", "🤯", "💡"];
 
