@@ -73,12 +73,12 @@ Deno.serve(async (req) => {
     try {
       const freshUser = await base44.auth.me();
       
-      // Map Base44 fields to Supabase columns
+      // Map Base44 fields to Supabase columns - ensure NOT NULL
       const profileRecord = {
         id: String(freshUser.id),
-        email: String(freshUser.email || ''),
-        full_name: String(freshUser.full_name || ''),
-        avatar_url: String(freshUser.avatar_url || ''),
+        email: freshUser.email || 'unknown@flames-up.com',
+        full_name: freshUser.full_name || freshUser.display_name || freshUser.username || 'Anonymous User',
+        avatar_url: freshUser.avatar_url || '',
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {

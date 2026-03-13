@@ -56,8 +56,9 @@ Deno.serve(async (req) => {
     if (entityName === "User") {
       const record = {
         id,
-        email: data.email || null,
-        full_name: data.full_name || null,
+        email: data.email || 'unknown@flames-up.com',
+        full_name: data.full_name || data.display_name || data.username || 'Anonymous User',
+        avatar_url: data.avatar_url || '',
       };
       console.log(`[syncToSupabase] Syncing User → profiles:`, JSON.stringify(record));
       await supabaseUpsert("profiles", record);
