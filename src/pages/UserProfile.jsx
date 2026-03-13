@@ -38,27 +38,20 @@ export default function UserProfile() {
 
   const { data: userPosts = [] } = useQuery({
     queryKey: ["userPosts", email],
-    queryFn: () => base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 50),
+    queryFn: () => base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 30),
     enabled: !!email,
+    staleTime: 60000,
   });
 
   const { data: livePosts = [] } = useQuery({
     queryKey: ["userLivePosts", email],
     queryFn: async () => {
-      const posts = await base44.entities.LivePost.filter({ author_email: email }, "-created_date", 20);
+      const posts = await base44.entities.LivePost.filter({ author_email: email }, "-created_date", 10);
       const now = new Date();
       return posts.filter(p => new Date(p.expires_at) > now);
     },
     enabled: !!email,
-  });
-
-  const { data: groupCount = 0 } = useQuery({
-    queryKey: ["userGroups", email],
-    queryFn: async () => {
-      const memberships = await base44.entities.GroupMember.filter({ user_email: email });
-      return memberships.length;
-    },
-    enabled: !!email,
+    staleTime: 60000,
   });
 
   const { data: followData } = useQuery({
