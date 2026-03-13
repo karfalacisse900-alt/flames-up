@@ -209,26 +209,27 @@ export default function CommunityFeed({ user }) {
   const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
-    return (
-      <div key={post.id} className="fade-slide-in" style={{ animationDelay: `${Math.min(index * 0.03, 0.3)}s`, animationFillMode: "both" }}>
-        {post.type === "debate" || post.type === "question" ? (
-          <DebateCard post={post} debate={debate} user={user}
-            onUpvote={() => user && upvoteMut.mutate({ post })}
-            isExpanded={expandedPost === post.id}
-            onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-          />
-        ) : (
-          <CommunityPostCard 
-            post={post} 
-            user={user}
-            onUpvote={() => user && upvoteMut.mutate({ post })}
-            isExpanded={expandedPost === post.id}
-            onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-            onLocationClick={() => {}}
-            onTap={() => {}}
-          />
-        )}
-      </div>
+    return post.type === "debate" || post.type === "question" ? (
+      <DebateCard 
+        key={post.id}
+        post={post} 
+        debate={debate} 
+        user={user}
+        onUpvote={() => user && upvoteMut.mutate({ post })}
+        isExpanded={expandedPost === post.id}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+      />
+    ) : (
+      <CommunityPostCard 
+        key={post.id}
+        post={post} 
+        user={user}
+        onUpvote={() => user && upvoteMut.mutate({ post })}
+        isExpanded={expandedPost === post.id}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+        onLocationClick={() => {}}
+        onTap={() => {}}
+      />
     );
   };
 
@@ -410,7 +411,7 @@ export default function CommunityFeed({ user }) {
              </Link>
           </div>
         ) : (
-          filteredPosts.map((post, index) => renderPostCard(post, index))
+          filteredPosts.map(renderPostCard)
         )}
       </div>
 
