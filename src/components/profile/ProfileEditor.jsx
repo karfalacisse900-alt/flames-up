@@ -127,7 +127,7 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-end lg:items-center lg:justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
       <motion.div
@@ -135,7 +135,7 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-2xl mx-auto rounded-t-3xl lg:rounded-3xl overflow-hidden"
+        className="w-full max-w-2xl mx-auto rounded-t-3xl lg:rounded-3xl overflow-hidden shadow-2xl"
         style={{ 
           backgroundColor: "var(--bg-card)", 
           maxHeight: "90vh", 

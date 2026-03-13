@@ -301,7 +301,8 @@ export default function CreateGroup() {
 
   // ── STEP 2: Full Config Form ─────────────────────────────
   return (
-    <div className="min-h-screen pb-32" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }} onClick={() => setStep(1)}>
+      <div className="w-full max-w-lg mx-auto h-full overflow-y-auto pb-32 shadow-2xl" style={{ backgroundColor: "var(--bg-app)" }} onClick={e => e.stopPropagation()}>
       <div className="max-w-lg mx-auto">
 
         {/* Sticky Header */}
@@ -609,6 +610,7 @@ export default function CreateGroup() {
             ) : "✦ Create Group"}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
