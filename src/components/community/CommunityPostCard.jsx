@@ -302,11 +302,11 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
   }
 
   return (
-    <div className="relative mb-4">
+    <div className="relative mb-4 w-full overflow-hidden">
       {/* Modern card container - NO horizontal padding for edge-to-edge media */}
-      <div className="mx-auto" style={{ maxWidth: "640px" }}>
+      <div className="mx-auto w-full" style={{ maxWidth: "640px" }}>
         {/* ── HEADER SECTION ── */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3 gap-2">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Profile Picture */}
             <div className="shrink-0">
@@ -419,21 +419,23 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
         {(post.title || post.body) && (
           <div className="px-4 pb-3">
             {post.title && (
-              <h3 className="font-bold text-base mb-1.5 leading-snug" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              <h3 className="font-bold text-base mb-1.5 leading-snug break-words" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                 {post.title}
               </h3>
             )}
             {post.body && (
-              <div className="text-[15px] leading-relaxed"
+              <div className="text-[15px] leading-relaxed break-words"
                 style={{
                   color: "var(--text-secondary)",
                   fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
                   fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
                 }}>
                 {bodyIsRich ? (
                   <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
                 ) : (
-                  <p className="whitespace-pre-line">
+                  <p className="whitespace-pre-line break-words">
                     <SmartText text={post.type === "quote_of_day" ? `"${post.body}"` : post.body} />
                   </p>
                 )}
@@ -486,16 +488,16 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
         )}
 
         {/* ── ENGAGEMENT ACTIONS ── */}
-        <div className="flex items-center px-3 py-2 gap-2">
+        <div className="flex items-center justify-start flex-wrap px-3 py-2 gap-1">
           {/* Like */}
           <div className="relative">
             <button
               onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
               onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
               onClick={handleLike}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
+              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
               style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)", minHeight: "44px" }}>
-              <Heart className="w-6 h-6" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
+              <Heart className="w-5 h-5" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
               <span className="text-sm font-semibold">Like</span>
               {(post.upvotes || 0) > 0 && <span className="text-sm font-semibold">{post.upvotes}</span>}
             </button>
@@ -518,33 +520,26 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
           {/* Comment */}
           <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
-            <MessageCircle className="w-6 h-6" strokeWidth={2} />
+            <MessageCircle className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-semibold">Comment</span>
             {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
           </Link>
 
           {/* Share */}
           <button onClick={handleShare}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
-            <Share2 className="w-6 h-6" strokeWidth={2} />
+            <Share2 className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-semibold">Share</span>
-          </button>
-
-          {/* More */}
-          <button onClick={() => setShowMenu(v => !v)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
-            <MoreHorizontal className="w-6 h-6" strokeWidth={2} />
           </button>
 
           {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
-            className="ml-auto flex items-center justify-center p-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            className="ml-auto flex items-center justify-center p-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)", minHeight: "44px", minWidth: "44px" }}>
-            <Bookmark className="w-6 h-6" strokeWidth={2} style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+            <Bookmark className="w-5 h-5" strokeWidth={2} style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
           </button>
         </div>
 

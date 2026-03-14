@@ -25,16 +25,21 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
   const startCamera = async () => {
     try {
       const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: frontCamera ? "user" : "environment" },
-        audio: false,
+        video: { 
+          facingMode: frontCamera ? "user" : "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: true,
       });
       setStream(s);
       if (videoRef.current) {
         videoRef.current.srcObject = s;
-        videoRef.current.play();
+        await videoRef.current.play();
       }
       setCameraActive(true);
-    } catch {
+    } catch (err) {
+      console.error("Camera error:", err);
       setCameraActive(false);
     }
   };
@@ -173,17 +178,19 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
       </div>
 
       {/* Camera viewport */}
-      <div className="absolute inset-0">
-        {cameraActive ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-            style={{ transform: frontCamera ? "scaleX(-1)" : "none" }}
-          />
-        ) : (
+      <div className="absolute inset-0 bg-black">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full object-cover"
+          style={{ 
+            transform: frontCamera ? "scaleX(-1)" : "none",
+            display: cameraActive ? "block" : "none"
+          }}
+        />
+        {!cameraActive && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4"
             style={{ backgroundColor: "#0d0d0d" }}>
             <div className="w-24 h-24 rounded-full flex items-center justify-center"
@@ -191,16 +198,18 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
               <Camera className="w-10 h-10 text-white opacity-30" />
             </div>
             <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Tap record or upload from gallery
+              Starting camera...
             </p>
           </div>
         )}
         {/* Vignette */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)" }} />
+          style={{ background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.35) 100%)" }} />
         {/* Rule of thirds grid */}
-        <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{ backgroundImage: "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)", backgroundSize: "33.33% 33.33%" }} />
+        {cameraActive && (
+          <div className="absolute inset-0 opacity-[0.06] pointer-events-none"
+            style={{ backgroundImage: "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)", backgroundSize: "33.33% 33.33%" }} />
+        )}
       </div>
 
       {/* Right side tools */}
