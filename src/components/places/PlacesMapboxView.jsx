@@ -13,7 +13,7 @@ const POI_CATEGORIES = [
   { key: "gym",       label: "🏋️ Gym",       query: "gym fitness" },
 ];
 
-export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
+export default function PlacesMapboxView({ places = [], onOpenPlace }) {
   const mapRef    = useRef(null);
   const mapInst   = useRef(null);
   const markersRef= useRef([]);  // { marker, isPOI }
@@ -127,13 +127,12 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
         map.touchPitch.disable();
         
         setMapReady(true);
-        addCommunityMarkers(map, posts, onOpenPlace);
+        addPlaceMarkers(map, places, onOpenPlace);
       });
 
       // Real-time marker updates on map move
       map.on("moveend", () => {
         if (!mapReady) return;
-        // Filter nearby posts based on current viewport
         filterNearbyMarkers(map);
       });
 
@@ -151,78 +150,87 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  const addCommunityMarkers = (map, postList, openFn) => {
+  const addPlaceMarkers = (map, placeList, openFn) => {
     if (!map || !window.mapboxgl) return;
     
-    postList.filter(p => p.location_lat && p.location_lng).forEach(p => {
+    placeList.filter(place => place.lat && place.lng).forEach(place => {
       const el = document.createElement("div");
-      el.className = "community-marker";
+      el.className = "place-marker";
       el.style.cssText = [
-        "width:36px;height:36px;",
+        "width:40px;height:40px;",
         "background:linear-gradient(135deg,#2E6B4F,#4CAF7D);",
         "border-radius:50% 50% 50% 0;transform:rotate(-45deg);",
-        "border:3px solid white;box-shadow:0 4px 12px rgba(46,107,79,0.35);cursor:pointer;",
-        "transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);position:relative;"
+        "border:3px solid white;box-shadow:0 4px 16px rgba(46,107,79,0.4);cursor:pointer;",
+        "transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);position:relative;",
+        "display:flex;align-items:center;justify-content:center;"
       ].join("");
 
-      // Inner dot
-      const dot = document.createElement("div");
-      dot.style.cssText = "position:absolute;top:50%;left:50%;width:8px;height:8px;background:white;border-radius:50%;transform:translate(-50%,-50%) rotate(45deg);";
-      el.appendChild(dot);
+      // Category emoji
+      const emoji = document.createElement("div");
+      const emojiMap = {
+        park: "🌳", library: "📚", cafe: "☕", campus: "🎓", 
+        landmark: "🏛️", museum: "🏛️", restaurant: "🍽️", gym: "🏋️", mall: "🛍️"
+      };
+      emoji.textContent = emojiMap[place.category] || "📍";
+      emoji.style.cssText = "font-size:18px;transform:rotate(45deg);";
+      el.appendChild(emoji);
 
-      el.addEventListener("mouseenter", () => { el.style.transform = "rotate(-45deg) scale(1.15)"; });
-      el.addEventListener("mouseleave", () => { el.style.transform = "rotate(-45deg) scale(1)"; });
+      el.addEventListener("mouseenter", () => { el.style.transform = "rotate(-45deg) scale(1.2)"; el.style.boxShadow = "0 6px 24px rgba(46,107,79,0.5)"; });
+      el.addEventListener("mouseleave", () => { el.style.transform = "rotate(-45deg) scale(1)"; el.style.boxShadow = "0 4px 16px rgba(46,107,79,0.4)"; });
 
-      const mediaHtml = p.image_url 
-        ? `<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>`
-        : p.video_url 
-        ? `<video src="${p.video_url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px" muted loop autoplay playsinline></video>`
+      const coverImg = place.cover_image_url 
+        ? `<img src="${place.cover_image_url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>`
         : "";
 
       const popup = new window.mapboxgl.Popup({ 
-        offset: 32, 
+        offset: 36, 
         closeButton: false,
-        maxWidth: "240px",
-        className: "post-preview-popup"
+        maxWidth: "260px",
+        className: "place-preview-popup"
       }).setHTML(`
-        <div style="font-family:Inter,sans-serif;padding:6px 4px;min-width:200px">
-          ${mediaHtml}
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-            ${p.author_avatar_url 
-              ? `<img src="${p.author_avatar_url}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"/>`
-              : `<div style="width:24px;height:24px;border-radius:50%;background:#ddd"></div>`
-            }
-            <strong style="color:#1E1E1E;font-size:12px;flex:1">${p.is_anonymous ? "Anonymous" : (p.author_name || "User")}</strong>
+        <div style="font-family:Inter,sans-serif;padding:8px 6px;min-width:220px">
+          ${coverImg}
+          <div style="display:flex;align-items:start;gap:8px;margin-bottom:6px">
+            <div style="font-size:28px;line-height:1">${emojiMap[place.category] || "📍"}</div>
+            <div style="flex:1">
+              <strong style="color:#1E1E1E;font-size:15px;font-weight:700;display:block;margin-bottom:2px">${place.name}</strong>
+              <p style="font-size:11px;color:#888;margin:0">${[place.city, place.region].filter(Boolean).join(", ")}</p>
+            </div>
           </div>
-          <strong style="color:#2E6B4F;font-size:13px;display:block;margin-bottom:4px">${p.location_name || p.location_city || "Place"}</strong>
-          ${p.location_city ? `<p style="font-size:10px;color:#888;margin:0 0 6px">${p.location_city}</p>` : ""}
-          <p style="font-size:12px;color:#444;margin:0 0 8px;line-height:1.4">${(p.body || "").replace(/<[^>]*>/g, "").slice(0, 80)}${(p.body || "").length > 80 ? "…" : ""}</p>
-          <button id="__fuplace_${p.id}" style="background:#2E6B4F;color:white;border:none;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s">Open Post →</button>
+          ${place.description ? `<p style="font-size:12px;color:#555;margin:0 0 8px;line-height:1.4">${place.description.slice(0, 100)}${place.description.length > 100 ? "…" : ""}</p>` : ""}
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <span style="background:#EEF2FF;color:#4F46E5;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700">${place.post_count || 0} posts</span>
+            ${place.is_verified ? `<span style="background:#DBEAFE;color:#2563EB;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700">✓ Verified</span>` : ""}
+          </div>
+          <button id="__openplace_${place.id}" style="background:#2E6B4F;color:white;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s">Open Place Hub →</button>
         </div>
       `);
 
       popup.on("open", () => {
-        const btn = document.getElementById(`__fuplace_${p.id}`);
+        const btn = document.getElementById(`__openplace_${place.id}`);
         if (btn) {
-          btn.onmouseenter = () => { btn.style.background = "#1E4A36"; };
-          btn.onmouseleave = () => { btn.style.background = "#2E6B4F"; };
+          btn.onmouseenter = () => { btn.style.background = "#1E4A36"; btn.style.transform = "scale(1.02)"; };
+          btn.onmouseleave = () => { btn.style.background = "#2E6B4F"; btn.style.transform = "scale(1)"; };
           btn.onclick = () => {
-            map.flyTo({ center: [p.location_lng, p.location_lat], zoom: 16, duration: 800 });
+            map.flyTo({ center: [place.lng, place.lat], zoom: 16, duration: 800 });
             openFn && openFn({
-              name: p.location_name || p.location_city,
-              city: p.location_city, region: p.location_region,
-              lat: p.location_lat, lng: p.location_lng,
+              name: place.name,
+              city: place.city,
+              region: place.region,
+              country: place.country,
+              lat: place.lat,
+              lng: place.lng,
             });
           };
         }
       });
 
       const marker = new window.mapboxgl.Marker({ element: el })
-        .setLngLat([p.location_lng, p.location_lat])
+        .setLngLat([place.lng, place.lat])
         .setPopup(popup)
         .addTo(map);
 
-      markersRef.current.push({ marker, isPOI: false, post: p });
+      markersRef.current.push({ marker, isPOI: false, place });
     });
   };
 
@@ -239,18 +247,19 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
     const zoom = map.getZoom();
     
     // Show/hide markers based on viewport and zoom level
-    markersRef.current.forEach(({ marker, isPOI, post }) => {
+    markersRef.current.forEach(({ marker, isPOI, place }) => {
       if (isPOI) return; // Don't filter POI markers
       
       const lngLat = marker.getLngLat();
       const inBounds = bounds.contains(lngLat);
       const el = marker.getElement();
       
-      if (inBounds && zoom >= 12) {
+      if (inBounds && zoom >= 11) {
         el.style.opacity = "1";
         el.style.pointerEvents = "auto";
+        el.style.transform = zoom >= 14 ? "rotate(-45deg) scale(1)" : "rotate(-45deg) scale(0.85)";
       } else {
-        el.style.opacity = "0.3";
+        el.style.opacity = "0.2";
         el.style.pointerEvents = "none";
       }
     });
@@ -367,7 +376,7 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
       {mapReady && (
         <div className="absolute bottom-4 left-3 z-10 px-3 py-2 rounded-xl text-xs font-semibold"
           style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)", backdropFilter: "blur(8px)", color: "var(--text-secondary)" }}>
-          🟢 Community posts · 🟠 Nearby places
+          🟢 Places · 🟠 Services
         </div>
       )}
     </div>
