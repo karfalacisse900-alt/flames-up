@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
     );
 
     const supabaseData = {
+      id: newPost.id,
       user_id: newPost.author_email,
       content: newPost.body,
       media_url: newPost.video_url || newPost.image_url || null,
