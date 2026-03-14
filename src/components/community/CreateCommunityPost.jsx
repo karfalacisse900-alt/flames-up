@@ -298,9 +298,12 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
         media_url: finalVideoUrl || finalImageUrl || null,
         user_id: user?.email || '',
         full_name: user?.display_name || user?.full_name || 'Anonymous',
-        avatar_url: user?.avatar_url || null,
         created_at: new Date().toISOString(),
       };
+      
+      if (user?.avatar_url) {
+        supabaseData.avatar_url = user.avatar_url;
+      }
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
         method: "POST",

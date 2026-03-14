@@ -45,8 +45,12 @@ Deno.serve(async (req) => {
       media_url: newPost.video_url || newPost.image_url || null,
       user_id: newPost.author_email,
       full_name: newPost.author_name,
-      avatar_url: newPost.author_avatar_url,
+      created_at: newPost.created_date,
     };
+    
+    if (newPost.author_avatar_url) {
+      supabaseData.avatar_url = newPost.author_avatar_url;
+    }
 
     const { error: supabaseError } = await supabase
       .from("posts")
