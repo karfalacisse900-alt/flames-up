@@ -40,11 +40,9 @@ Deno.serve(async (req) => {
     );
 
     const supabaseData = {
+      user_id: newPost.author_email,
       content: newPost.body,
       media_url: newPost.video_url || newPost.image_url || null,
-      user_id: newPost.author_email,
-      full_name: newPost.author_name,
-      avatar_url: newPost.author_avatar_url || null,
     };
 
     const { error: supabaseError } = await supabase
