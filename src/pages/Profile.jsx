@@ -169,9 +169,9 @@ export default function Profile() {
               </button>
               {showMore && (
                 <>
-                  <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowMore(false)} />
+                  <div className="fixed inset-0 z-40" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} onClick={() => setShowMore(false)} />
                   <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
-                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    style={{ backgroundColor: "#FFFFFF", border: "1px solid var(--border-light)" }}>
                     {[
                        { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
                        { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
