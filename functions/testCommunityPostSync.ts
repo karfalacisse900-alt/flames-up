@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     };
 
     const { error: supabaseError } = await supabase
-      .from("community_posts")
+      .from("posts")
       .upsert(supabaseData, { onConflict: "id" });
 
     if (supabaseError) {
