@@ -26,19 +26,34 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRef.current = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRef.current = recorder;
       chunksRef.current = [];
-      mediaRef.current.ondataavailable = (e) => chunksRef.current.push(e.data);
-      mediaRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const file = new File([blob], "voice.webm", { type: "audio/webm" });
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        onSendVoice(file_url);
-        stream.getTracks().forEach(t => t.stop());
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
       };
-      mediaRef.current.start();
+      
+      recorder.onstop = async () => {
+        try {
+          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const file = new File([blob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
+          const { file_url } = await base44.integrations.Core.UploadFile({ file });
+          onSendVoice(file_url);
+        } catch (err) {
+          console.error("Voice upload failed:", err);
+          alert("Failed to send voice message");
+        } finally {
+          stream.getTracks().forEach(t => t.stop());
+        }
+      };
+      
+      recorder.start();
       setRecording(true);
-    } catch { alert("Microphone permission denied"); }
+    } catch (err) {
+      console.error("Microphone error:", err);
+      alert("Microphone permission denied");
+    }
   };
 
   const stopRecording = () => { mediaRef.current?.stop(); setRecording(false); };

@@ -39,20 +39,12 @@ export default function CommunityFeed({ user }) {
 
   const fetchPosts = useCallback(async (pageNum) => {
     try {
+      // Fetch from Base44 instead of Supabase
+      const allPosts = await base44.entities.CommunityPost.list("-created_date", 200);
       const offset = pageNum * BATCH_SIZE;
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=${BATCH_SIZE}&offset=${offset}`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await res.json();
-      return data || [];
+      return allPosts.slice(offset, offset + BATCH_SIZE);
     } catch (err) {
-      console.error("Failed to fetch posts from Supabase:", err);
+      console.error("Failed to fetch posts:", err);
       return [];
     }
   }, []);

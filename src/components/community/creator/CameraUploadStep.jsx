@@ -77,8 +77,15 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
   const startRecording = async () => {
     if (!stream) return;
     try {
+      // Request audio permission again for recording
+      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const combinedStream = new MediaStream([
+        ...stream.getVideoTracks(),
+        ...audioStream.getAudioTracks()
+      ]);
+      
       recordedChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+      const mediaRecorder = new MediaRecorder(combinedStream, { mimeType: "video/webm;codecs=vp9" });
       mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
       setRecordingTime(0);
@@ -91,6 +98,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
         const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
         const file = new File([blob], `video-${Date.now()}.webm`, { type: "video/webm" });
         handleFiles([file]);
+        audioStream.getTracks().forEach(t => t.stop());
       };
 
       mediaRecorder.start();
@@ -110,6 +118,7 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
       }, 1000);
     } catch (err) {
       console.error("Recording error:", err);
+      alert("Microphone permission needed for video recording");
     }
   };
 

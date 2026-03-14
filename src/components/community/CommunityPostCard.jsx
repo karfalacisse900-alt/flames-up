@@ -306,10 +306,10 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
       {/* Modern card container - NO horizontal padding for edge-to-edge media */}
       <div className="mx-auto w-full" style={{ maxWidth: "640px" }}>
         {/* ── HEADER SECTION ── */}
-        <div className="flex items-center justify-between px-4 py-3 gap-2">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
             {/* Profile Picture */}
-            <div className="shrink-0">
+            <div className="shrink-0 flex-shrink-0">
               {showAuthor ? (
                 <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
                   {post.author_avatar_url ? (
@@ -333,20 +333,20 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             </div>
 
             {/* Username + Meta Info */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               {showAuthor ? (
                 <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
-                  className="text-sm font-bold block truncate leading-tight" style={{ color: "var(--text-primary)" }}>
+                  className="text-sm font-bold block truncate leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--text-primary)" }}>
                   {post.author_name || "User"}
                 </Link>
               ) : (
                 <span className="text-sm font-bold block leading-tight" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
               )}
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xs font-medium" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+              <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
+                <span className="text-xs font-medium shrink-0" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
                 {(post.location_name || post.location_city) && (
                   <>
-                    <span style={{ color: "var(--text-hint)" }}>•</span>
+                    <span className="shrink-0" style={{ color: "var(--text-hint)" }}>•</span>
                     <button
                       onClick={() => {
                         const query = post.location_lat && post.location_lng
@@ -354,10 +354,10 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                           : encodeURIComponent([post.location_name, post.location_city, post.location_region, post.location_country].filter(Boolean).join(", "));
                         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
                       }}
-                      className="flex items-center gap-1 text-xs font-semibold"
+                      className="flex items-center gap-0.5 text-xs font-semibold truncate overflow-hidden"
                       style={{ color: "var(--accent-primary)" }}>
-                      <MapPin className="w-3 h-3" />
-                      {post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}</span>
                     </button>
                   </>
                 )}
