@@ -58,12 +58,22 @@ export default function CreatePostFlow() {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
 
-      for (const item of mediaItems) {
+      // Collect all tags from all media items
+      const allTags = [];
+      for (let i = 0; i < mediaItems.length; i++) {
+        const item = mediaItems[i];
         if (item.file) {
           const { file_url } = await base44.integrations.Core.UploadFile({ file: item.file });
           uploadedUrls.push(file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
+        }
+        
+        // Add tags with image index
+        if (item.edits?.tags) {
+          item.edits.tags.forEach(tag => {
+            allTags.push({ ...tag, imageIndex: i });
+          });
         }
       }
 
@@ -96,6 +106,7 @@ export default function CreatePostFlow() {
         comment_count: 0,
         engagement_score: 0,
         is_creator_post: user.is_creator || false,
+        media_tags: allTags.length > 0 ? allTags : undefined,
       };
 
       const createdPost = await base44.entities.CommunityPost.create(postData);
