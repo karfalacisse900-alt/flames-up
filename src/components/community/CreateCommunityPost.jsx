@@ -291,14 +291,13 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
       const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
       
-      // Map Base44 fields to Supabase columns
+      // Map Base44 fields to Supabase columns - ONLY these 5 columns exist
       const supabaseData = {
-        id: String(newPost.id),
         content: cleanedBody,
         media_url: finalVideoUrl || finalImageUrl || null,
         user_id: user?.email || '',
         full_name: user?.display_name || user?.full_name || 'Anonymous',
-        created_at: new Date().toISOString(),
+        avatar_url: user?.avatar_url || null,
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
