@@ -295,8 +295,9 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       const supabaseData = {
         id: String(newPost.id),
         content: cleanedBody || newPost.body || newPost.text || '',
-        user_id: String(newPost.created_by_id || user?.id || ''),
-        media_url: finalVideoUrl || finalImageUrl || null,
+        user_id: String(user?.id || newPost.created_by_id || ''),
+        media_url: finalVideoUrl || finalImageUrl || newPost.video_url || newPost.image_url || null,
+        created_at: new Date().toISOString(),
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {

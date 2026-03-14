@@ -77,8 +77,9 @@ Deno.serve(async (req) => {
       const profileRecord = {
         id: String(freshUser.id),
         email: freshUser.email || 'unknown@flames-up.com',
-        full_name: freshUser.full_name || freshUser.display_name || freshUser.username || 'Anonymous User',
-        avatar_url: freshUser.avatar_url || '',
+        full_name: freshUser.full_name || freshUser.display_name || freshUser.username || freshUser.email?.split('@')[0] || 'User',
+        avatar_url: freshUser.avatar_url || null,
+        created_at: new Date().toISOString(),
       };
       
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
