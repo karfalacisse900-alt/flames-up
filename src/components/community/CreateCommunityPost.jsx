@@ -301,10 +301,6 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
         created_at: new Date().toISOString(),
       };
       
-      if (user?.avatar_url) {
-        supabaseData.avatar_url = user.avatar_url;
-      }
-      
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
         method: "POST",
         headers: {

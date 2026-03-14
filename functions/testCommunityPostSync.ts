@@ -47,10 +47,6 @@ Deno.serve(async (req) => {
       full_name: newPost.author_name,
       created_at: newPost.created_date,
     };
-    
-    if (newPost.author_avatar_url) {
-      supabaseData.avatar_url = newPost.author_avatar_url;
-    }
 
     const { error: supabaseError } = await supabase
       .from("posts")
