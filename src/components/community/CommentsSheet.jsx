@@ -247,6 +247,31 @@ export default function CommentsSheet({ postId, user, onClose }) {
           is_read: false,
         }).catch(() => {});
       }
+
+      // Sync to Supabase comments table
+      try {
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://ljyxfbymvbtflvdwipxg.supabase.co";
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+        
+        await fetch(`${SUPABASE_URL}/rest/v1/comments`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates",
+          },
+          body: JSON.stringify({
+            id: String(comment.id),
+            post_id: postId,
+            user_id: user?.email || '',
+            content: body || '',
+          }),
+        });
+      } catch (err) {
+        console.error("Supabase comment sync failed:", err);
+      }
+
       return comment;
     },
     onSuccess: () => { setCommentText(""); setActivePanel(null); invalidate(); },
