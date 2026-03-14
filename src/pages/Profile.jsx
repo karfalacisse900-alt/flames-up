@@ -169,7 +169,7 @@ export default function Profile() {
               </button>
               {showMore && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowMore(false)} />
+                  <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowMore(false)} />
                   <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
                     style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                     {[
