@@ -27,7 +27,7 @@ export default function CreatePostFlow() {
     link: "",
     linkType: "website",
     showInNearby: false,
-    location: null,
+    location: presetLocation,
     location_hide_exact: false,
     privacy: "public",
     allowComments: true,
