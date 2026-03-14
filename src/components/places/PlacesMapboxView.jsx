@@ -19,39 +19,23 @@ export default function PlacesMapboxView({ onOpenPlace }) {
       .catch(() => setError("Could not load map token"));
   }, []);
 
-  // 2. Get user geolocation (fallback: NYC) + track location updates
+  // 2. Get user geolocation (fallback: NYC) - ONE TIME ONLY
   useEffect(() => {
-    if (!navigator.geolocation) { setUserLoc([-74.006, 40.7128]); return; }
+    if (!navigator.geolocation) { 
+      setUserLoc([-74.006, 40.7128]); 
+      return; 
+    }
     
-    let watchId;
-    
-    // Initial position
     navigator.geolocation.getCurrentPosition(
       pos => setUserLoc([pos.coords.longitude, pos.coords.latitude]),
       () => setUserLoc([-74.006, 40.7128]),
       { enableHighAccuracy: true, maximumAge: 30000 }
     );
-
-    // Watch for location changes
-    watchId = navigator.geolocation.watchPosition(
-      pos => {
-        const newLoc = [pos.coords.longitude, pos.coords.latitude];
-        setUserLoc(newLoc);
-        // Update map center smoothly if map is ready
-        if (mapInst.current && mapReady) {
-          mapInst.current.easeTo({ center: newLoc, duration: 1000 });
-        }
-      },
-      () => {},
-      { enableHighAccuracy: false, maximumAge: 60000 }
-    );
-
-    return () => { if (watchId) navigator.geolocation.clearWatch(watchId); };
-  }, [mapReady]);
+  }, []);
 
   // 3. Initialize Mapbox GL map once token + userLoc + DOM are ready
   useEffect(() => {
-    if (!token || !userLoc || !mapRef.current) return;
+    if (!token || !userLoc || !mapRef.current || mapInst.current) return;
     let destroyed = false;
 
     const init = async () => {
@@ -84,37 +68,38 @@ export default function PlacesMapboxView({ onOpenPlace }) {
         container: mapRef.current,
         style:     "mapbox://styles/mapbox/streets-v12",
         center:    userLoc,
-        zoom:      15, // Neighborhood-level zoom
+        zoom:      15,
         pitch:     0,
         bearing:   0,
         attributionControl: false,
       });
 
-      // Smooth easing
-      map.easeTo = function(options) {
-        return mbgl.Map.prototype.easeTo.call(this, { ...options, duration: 600, easing: t => t * (2 - t) });
-      };
-
       map.addControl(new mbgl.NavigationControl({ showCompass: false }), "bottom-right");
-      map.addControl(
-        new mbgl.GeolocateControl({ 
-          positionOptions: { enableHighAccuracy: true }, 
-          trackUserLocation: true,
-          showUserHeading: true 
-        }),
-        "bottom-right"
-      );
+      
+      // Geolocate control with live tracking
+      const geolocate = new mbgl.GeolocateControl({ 
+        positionOptions: { enableHighAccuracy: true }, 
+        trackUserLocation: true,
+        showUserHeading: true,
+        showUserLocation: true,
+      });
+      
+      map.addControl(geolocate, "bottom-right");
 
       map.on("load", () => {
         if (destroyed) return;
         
-        // Enable smooth interactions
         map.touchZoomRotate.enableRotation();
         map.dragRotate.disable();
         map.touchPitch.disable();
         
         setMapReady(true);
         setupMapClickHandler(map);
+        
+        // Auto-trigger geolocation on load
+        setTimeout(() => {
+          geolocate.trigger();
+        }, 500);
       });
 
       mapInst.current = map;
@@ -124,9 +109,11 @@ export default function PlacesMapboxView({ onOpenPlace }) {
 
     return () => {
       destroyed = true;
-      if (mapInst.current) { mapInst.current.remove(); mapInst.current = null; }
+      if (mapInst.current) { 
+        mapInst.current.remove(); 
+        mapInst.current = null; 
+      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, userLoc]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
