@@ -26,11 +26,19 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
   }, [previewPosts.length]);
 
   useEffect(() => {
-    if (videoRef.current && currentPost?.video_url) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [currentIndex, currentPost]);
+    const playVideo = async () => {
+      if (videoRef.current && currentPost?.video_url) {
+        try {
+          videoRef.current.currentTime = 0;
+          videoRef.current.muted = isMuted;
+          await videoRef.current.play();
+        } catch (err) {
+          console.log("Autoplay failed:", err);
+        }
+      }
+    };
+    playVideo();
+  }, [currentIndex, currentPost, isMuted]);
 
   const isVideo = !!currentPost?.video_url;
   const mediaUrl = isVideo ? currentPost?.video_url : (currentPost?.media_urls?.[0] || currentPost?.image_url);
@@ -51,13 +59,14 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         {mediaUrl ? (
           isVideo ? (
             <video
+              key={mediaUrl}
               ref={videoRef}
               src={mediaUrl}
               className="w-full h-full object-cover"
               muted={isMuted}
               playsInline
               loop
-              autoPlay
+              preload="auto"
             />
           ) : (
             <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />

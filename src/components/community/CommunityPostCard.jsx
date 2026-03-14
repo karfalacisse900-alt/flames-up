@@ -302,9 +302,15 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
   }
 
   return (
-    <div className="relative mb-4 w-full overflow-hidden">
-      {/* Modern card container - NO horizontal padding for edge-to-edge media */}
-      <div className="mx-auto w-full" style={{ maxWidth: "640px" }}>
+    <div className="relative mb-3 w-full">
+      {/* Modern card container */}
+      <div className="mx-auto w-full rounded-3xl overflow-hidden" 
+        style={{ 
+          maxWidth: "640px",
+          backgroundColor: "var(--bg-card)",
+          border: "1px solid var(--border-light)",
+          boxShadow: "0 2px 12px rgba(15,23,42,0.06)"
+        }}>
         {/* ── HEADER SECTION ── */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
@@ -423,33 +429,49 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                 {post.title}
               </h3>
             )}
-            {post.body && (
-              <div className="text-[15px] leading-relaxed break-words"
-                style={{
-                  color: "var(--text-secondary)",
-                  fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
-                  fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                }}>
-                {bodyIsRich ? (
-                  <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
-                ) : (
-                  <p className="whitespace-pre-line break-words">
-                    <SmartText text={post.type === "quote_of_day" ? `"${post.body}"` : post.body} />
-                  </p>
-                )}
-              </div>
-            )}
+            {post.body && (() => {
+              const [expanded, setExpanded] = useState(false);
+              const cleanText = bodyIsRich ? stripHtml(post.body) : (post.type === "quote_of_day" ? `"${post.body}"` : post.body);
+              const isLong = cleanText.length > 200;
+              const displayText = !expanded && isLong ? cleanText.slice(0, 200) : cleanText;
+              
+              return (
+                <div className="text-[15px] leading-relaxed break-words"
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
+                    fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
+                    wordWrap: "break-word",
+                    overflowWrap: "break-word",
+                  }}>
+                  {bodyIsRich && expanded ? (
+                    <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
+                  ) : (
+                    <p className="whitespace-pre-line break-words">
+                      <SmartText text={displayText} />
+                      {!expanded && isLong && "..."}
+                    </p>
+                  )}
+                  {isLong && (
+                    <button 
+                      onClick={() => setExpanded(v => !v)}
+                      className="text-sm font-semibold mt-1"
+                      style={{ color: "var(--accent-primary)" }}>
+                      {expanded ? "See less" : "See more"}
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
 
-        {/* ── MEDIA SECTION (EDGE-TO-EDGE, FULL-WIDTH) ── */}
+        {/* ── MEDIA SECTION ── */}
         {(() => {
           const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
           if (imgs.length === 0 && !post.video_url) return null;
           return (
-            <div className="w-screen relative" style={{ marginLeft: "calc(-50vw + 50%)", marginBottom: "12px", maxWidth: "100vw" }}>
+            <div className="w-full relative mb-3">
               {imgs.length > 0 && (
                 <div className="w-full">
                   <PhotoCarousel images={imgs} aspectRatio="4/5" />
@@ -552,9 +574,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
       </div>
-
-      {/* Divider */}
-      <div className="h-px mx-4 mt-3" style={{ backgroundColor: "var(--border-subtle)" }} />
 
       {/* Backdrop to close menu */}
       {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
