@@ -1,17 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Heart } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+
+const profileUuidCache = new Map();
 
 export default function LikeButton({ post, user, onLikeChange }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const profileUuidRef = useRef(null);
 
   useEffect(() => {
     if (post && user?.email) {
       setLiked(post.upvoted_by?.includes(user.email) || false);
     }
     setLikeCount(post?.upvotes || 0);
+
+    // Fetch and cache profile UUID
+    const fetchProfileUuid = async () => {
+      if (!user?.email) return;
+      if (profileUuidCache.has(user.email)) {
+        profileUuidRef.current = profileUuidCache.get(user.email);
+        return;
+      }
+
+      try {
+        const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+        const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+        
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(user.email)}&select=id`, {
+          headers: {
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+        });
+        const data = await res.json();
+        if (data[0]?.id) {
+          profileUuidRef.current = data[0].id;
+          profileUuidCache.set(user.email, data[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile UUID:", err);
+      }
+    };
+
+    fetchProfileUuid();
   }, [post, user]);
 
   const handleToggleLike = async (e) => {
@@ -37,34 +70,36 @@ export default function LikeButton({ post, user, onLikeChange }) {
       });
 
       // Sync to Supabase likes table
-      const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
-      const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+      if (profileUuidRef.current) {
+        const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+        const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
 
-      if (newLiked) {
-        // Create like record
-        await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_SERVICE_ROLE_KEY,
-            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates",
-          },
-          body: JSON.stringify({
-            id: `${post.id}_${user.email}`,
-            post_id: post.id,
-            user_id: user.email,
-          }),
-        });
-      } else {
-        // Delete like record
-        await fetch(`${SUPABASE_URL}/rest/v1/likes?id=eq.${post.id}_${user.email}`, {
-          method: "DELETE",
-          headers: {
-            "apikey": SUPABASE_SERVICE_ROLE_KEY,
-            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          },
-        });
+        if (newLiked) {
+          // Create like record
+          await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
+            method: "POST",
+            headers: {
+              "apikey": SUPABASE_SERVICE_ROLE_KEY,
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+              "Content-Type": "application/json",
+              "Prefer": "resolution=merge-duplicates",
+            },
+            body: JSON.stringify({
+              id: `${post.id}_${profileUuidRef.current}`,
+              post_id: post.id,
+              user_id: profileUuidRef.current,
+            }),
+          });
+        } else {
+          // Delete like record
+          await fetch(`${SUPABASE_URL}/rest/v1/likes?id=eq.${post.id}_${profileUuidRef.current}`, {
+            method: "DELETE",
+            headers: {
+              "apikey": SUPABASE_SERVICE_ROLE_KEY,
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+          });
+        }
       }
 
       onLikeChange?.();

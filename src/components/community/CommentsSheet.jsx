@@ -179,6 +179,8 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
   );
 }
 
+const profileUuidCache = new Map();
+
 export default function CommentsSheet({ postId, user, onClose }) {
   const [commentText, setCommentText] = useState("");
   const [activePanel, setActivePanel] = useState(null);
@@ -186,6 +188,7 @@ export default function CommentsSheet({ postId, user, onClose }) {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
   const qc = useQueryClient();
+  const profileUuidRef = useRef(null);
 
   const { data: post } = useQuery({
     queryKey: ["communityPost", postId],
@@ -212,6 +215,37 @@ export default function CommentsSheet({ postId, user, onClose }) {
     });
     return unsub;
   }, [postId, qc]);
+
+  useEffect(() => {
+    const fetchProfileUuid = async () => {
+      if (!user?.email) return;
+      if (profileUuidCache.has(user.email)) {
+        profileUuidRef.current = profileUuidCache.get(user.email);
+        return;
+      }
+
+      try {
+        const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+        const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+        
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(user.email)}&select=id`, {
+          headers: {
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+        });
+        const data = await res.json();
+        if (data[0]?.id) {
+          profileUuidRef.current = data[0].id;
+          profileUuidCache.set(user.email, data[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile UUID:", err);
+      }
+    };
+
+    fetchProfileUuid();
+  }, [user?.email]);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["communityComments", postId] });
@@ -249,27 +283,29 @@ export default function CommentsSheet({ postId, user, onClose }) {
       }
 
       // Sync to Supabase comments table
-      try {
-        const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://ljyxfbymvbtflvdwipxg.supabase.co";
-        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
-        
-        await fetch(`${SUPABASE_URL}/rest/v1/comments`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_SERVICE_ROLE_KEY,
-            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates",
-          },
-          body: JSON.stringify({
-            id: String(comment.id),
-            post_id: postId,
-            user_id: user?.email || '',
-            content: body || '',
-          }),
-        });
-      } catch (err) {
-        console.error("Supabase comment sync failed:", err);
+      if (profileUuidRef.current) {
+        try {
+          const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+          const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
+          
+          await fetch(`${SUPABASE_URL}/rest/v1/comments`, {
+            method: "POST",
+            headers: {
+              "apikey": SUPABASE_SERVICE_ROLE_KEY,
+              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+              "Content-Type": "application/json",
+              "Prefer": "resolution=merge-duplicates",
+            },
+            body: JSON.stringify({
+              id: String(comment.id),
+              post_id: postId,
+              user_id: profileUuidRef.current,
+              content: body || '',
+            }),
+          });
+        } catch (err) {
+          console.error("Supabase comment sync failed:", err);
+        }
       }
 
       return comment;
