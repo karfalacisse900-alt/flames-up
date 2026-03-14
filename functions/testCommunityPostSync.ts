@@ -46,7 +46,6 @@ Deno.serve(async (req) => {
       user_id: newPost.author_email,
       full_name: newPost.author_name,
       avatar_url: newPost.author_avatar_url,
-      created_at: newPost.created_date,
     };
 
     const { error: supabaseError } = await supabase
