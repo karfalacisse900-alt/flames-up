@@ -193,7 +193,7 @@ export default function PlacesPage() {
       {/* MAP VIEW */}
       {viewMode === "map" && (
         <div style={{ height: "calc(100vh - 140px)", position: "relative" }}>
-          <PlacesMapboxView places={places} onOpenPlace={openPlace} />
+          <PlacesMapboxView onOpenPlace={openPlace} />
         </div>
       )}
 

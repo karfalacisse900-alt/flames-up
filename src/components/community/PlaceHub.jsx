@@ -224,20 +224,67 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
             </div>
           )}
         </div>
-        {/* Make Post From Here Button */}
-        <button
-          onClick={() => {
-            const url = `/CreatePostFlow?location=${encodeURIComponent(JSON.stringify({ name: locationName, city: locationData.city, region: locationData.region, country: locationData.country, lat: locationData.lat, lng: locationData.lng }))}`;
-            window.location.href = url;
-          }}
-          className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]"
-          style={{
-            background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
-            color: "#fff",
-            boxShadow: "0 4px 16px rgba(46,107,79,0.35)"
-          }}>
-          ✦ Make Post From Here
-        </button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const url = `/CreatePostFlow?location=${encodeURIComponent(JSON.stringify({ name: locationName, city: locationData.city, region: locationData.region, country: locationData.country, lat: locationData.lat, lng: locationData.lng }))}`;
+              window.location.href = url;
+            }}
+            className="flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+              color: "#fff",
+              boxShadow: "0 4px 16px rgba(46,107,79,0.35)"
+            }}>
+            ✦ Post From Here
+          </button>
+          <button
+            onClick={async () => {
+              if (!user) return;
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/*";
+              input.multiple = true;
+              input.onchange = async (e) => {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) return;
+                
+                const uploadedUrls = [];
+                for (const file of files) {
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  uploadedUrls.push(file_url);
+                }
+                
+                await base44.entities.CommunityPost.create({
+                  type: "photo",
+                  author_email: user.email,
+                  author_name: user.full_name,
+                  author_avatar_url: user.avatar_url,
+                  image_urls: uploadedUrls,
+                  location_name: locationName,
+                  location_city: locationData.city,
+                  location_region: locationData.region,
+                  location_country: locationData.country,
+                  location_lat: locationData.lat,
+                  location_lng: locationData.lng,
+                  moderation_status: "approved",
+                });
+                
+                qc.invalidateQueries({ queryKey: ["placePosts", locationName] });
+              };
+              input.click();
+            }}
+            className="px-4 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] flex items-center gap-2"
+            style={{
+              backgroundColor: "var(--bg-subtle)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-light)"
+            }}>
+            <Image className="w-4 h-4" />
+            Add Photo
+          </button>
+        </div>
       </div>
 
       {/* Tabs – horizontal scroll */}

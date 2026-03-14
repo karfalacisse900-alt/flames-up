@@ -127,13 +127,7 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
         map.touchPitch.disable();
         
         setMapReady(true);
-        addPlaceMarkers(map, places, onOpenPlace);
-      });
-
-      // Real-time marker updates on map move
-      map.on("moveend", () => {
-        if (!mapReady) return;
-        filterNearbyMarkers(map);
+        setupMapClickHandler(map);
       });
 
       mapInst.current = map;
@@ -150,87 +144,63 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  const addPlaceMarkers = (map, placeList, openFn) => {
-    if (!map || !window.mapboxgl) return;
-    
-    placeList.filter(place => place.lat && place.lng).forEach(place => {
-      const el = document.createElement("div");
-      el.className = "place-marker";
-      el.style.cssText = [
-        "width:40px;height:40px;",
-        "background:linear-gradient(135deg,#2E6B4F,#4CAF7D);",
-        "border-radius:50% 50% 50% 0;transform:rotate(-45deg);",
-        "border:3px solid white;box-shadow:0 4px 16px rgba(46,107,79,0.4);cursor:pointer;",
-        "transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);position:relative;",
-        "display:flex;align-items:center;justify-content:center;"
-      ].join("");
+  // Handle clicks on map POI features
+  const setupMapClickHandler = (map) => {
+    if (!map) return;
 
-      // Category emoji
-      const emoji = document.createElement("div");
-      const emojiMap = {
-        park: "🌳", library: "📚", cafe: "☕", campus: "🎓", 
-        landmark: "🏛️", museum: "🏛️", restaurant: "🍽️", gym: "🏋️", mall: "🛍️"
-      };
-      emoji.textContent = emojiMap[place.category] || "📍";
-      emoji.style.cssText = "font-size:18px;transform:rotate(45deg);";
-      el.appendChild(emoji);
-
-      el.addEventListener("mouseenter", () => { el.style.transform = "rotate(-45deg) scale(1.2)"; el.style.boxShadow = "0 6px 24px rgba(46,107,79,0.5)"; });
-      el.addEventListener("mouseleave", () => { el.style.transform = "rotate(-45deg) scale(1)"; el.style.boxShadow = "0 4px 16px rgba(46,107,79,0.4)"; });
-
-      const coverImg = place.cover_image_url 
-        ? `<img src="${place.cover_image_url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>`
-        : "";
-
-      const popup = new window.mapboxgl.Popup({ 
-        offset: 36, 
-        closeButton: false,
-        maxWidth: "260px",
-        className: "place-preview-popup"
-      }).setHTML(`
-        <div style="font-family:Inter,sans-serif;padding:8px 6px;min-width:220px">
-          ${coverImg}
-          <div style="display:flex;align-items:start;gap:8px;margin-bottom:6px">
-            <div style="font-size:28px;line-height:1">${emojiMap[place.category] || "📍"}</div>
-            <div style="flex:1">
-              <strong style="color:#1E1E1E;font-size:15px;font-weight:700;display:block;margin-bottom:2px">${place.name}</strong>
-              <p style="font-size:11px;color:#888;margin:0">${[place.city, place.region].filter(Boolean).join(", ")}</p>
-            </div>
-          </div>
-          ${place.description ? `<p style="font-size:12px;color:#555;margin:0 0 8px;line-height:1.4">${place.description.slice(0, 100)}${place.description.length > 100 ? "…" : ""}</p>` : ""}
-          <div style="display:flex;gap:6px;margin-bottom:8px">
-            <span style="background:#EEF2FF;color:#4F46E5;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700">${place.post_count || 0} posts</span>
-            ${place.is_verified ? `<span style="background:#DBEAFE;color:#2563EB;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700">✓ Verified</span>` : ""}
-          </div>
-          <button id="__openplace_${place.id}" style="background:#2E6B4F;color:white;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s">Open Place Hub →</button>
-        </div>
-      `);
-
-      popup.on("open", () => {
-        const btn = document.getElementById(`__openplace_${place.id}`);
-        if (btn) {
-          btn.onmouseenter = () => { btn.style.background = "#1E4A36"; btn.style.transform = "scale(1.02)"; };
-          btn.onmouseleave = () => { btn.style.background = "#2E6B4F"; btn.style.transform = "scale(1)"; };
-          btn.onclick = () => {
-            map.flyTo({ center: [place.lng, place.lat], zoom: 16, duration: 800 });
-            openFn && openFn({
-              name: place.name,
-              city: place.city,
-              region: place.region,
-              country: place.country,
-              lat: place.lat,
-              lng: place.lng,
-            });
-          };
-        }
+    map.on("click", async (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["poi-label"]
       });
 
-      const marker = new window.mapboxgl.Marker({ element: el })
-        .setLngLat([place.lng, place.lat])
-        .setPopup(popup)
-        .addTo(map);
+      if (features.length > 0) {
+        const poi = features[0];
+        const name = poi.properties.name;
+        const category = poi.properties.class;
+        
+        if (!name) return;
 
-      markersRef.current.push({ marker, isPOI: false, place });
+        // Get coordinates
+        const coords = poi.geometry.coordinates;
+        const [lng, lat] = coords;
+
+        // Reverse geocode to get city/region
+        try {
+          const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mbToken}`);
+          const data = await res.json();
+          const context = data.features[0]?.context || [];
+          
+          const city = context.find(c => c.id.startsWith("place"))?.text;
+          const region = context.find(c => c.id.startsWith("region"))?.text;
+          const country = context.find(c => c.id.startsWith("country"))?.text;
+
+          onOpenPlace({
+            name,
+            category,
+            city,
+            region,
+            country,
+            lat,
+            lng,
+          });
+        } catch (err) {
+          console.error("Reverse geocode failed:", err);
+          onOpenPlace({
+            name,
+            category,
+            lat,
+            lng,
+          });
+        }
+      }
+    });
+
+    // Change cursor on hover
+    map.on("mouseenter", "poi-label", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "poi-label", () => {
+      map.getCanvas().style.cursor = "";
     });
   };
 
@@ -241,29 +211,7 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
     });
   };
 
-  const filterNearbyMarkers = (map) => {
-    if (!map) return;
-    const bounds = map.getBounds();
-    const zoom = map.getZoom();
-    
-    // Show/hide markers based on viewport and zoom level
-    markersRef.current.forEach(({ marker, isPOI, place }) => {
-      if (isPOI) return; // Don't filter POI markers
-      
-      const lngLat = marker.getLngLat();
-      const inBounds = bounds.contains(lngLat);
-      const el = marker.getElement();
-      
-      if (inBounds && zoom >= 11) {
-        el.style.opacity = "1";
-        el.style.pointerEvents = "auto";
-        el.style.transform = zoom >= 14 ? "rotate(-45deg) scale(1)" : "rotate(-45deg) scale(0.85)";
-      } else {
-        el.style.opacity = "0.2";
-        el.style.pointerEvents = "none";
-      }
-    });
-  };
+
 
   const handleCategory = async (cat) => {
     if (!mapInst.current || !token) return;
