@@ -7,7 +7,7 @@ export default function VideoCallModal({ roomName, displayName, onClose }) {
   const iframeRef = useRef(null);
 
   const jitsiRoom = `flamesup-${roomName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`;
-  const jitsiUrl = `https://meet.jit.si/${jitsiRoom}#userInfo.displayName="${encodeURIComponent(displayName)}"&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.prejoinPageEnabled=false&config.requireDisplayName=false&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.TOOLBAR_BUTTONS=[]`;
+  const jitsiUrl = `https://meet.jit.si/${jitsiRoom}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.enableWelcomePage=false&interfaceConfig.SHOW_JITSI_WATERMARK=false&userInfo.displayName="${encodeURIComponent(displayName)}"`;  
 
   useEffect(() => {
     const handleMessage = (e) => {
