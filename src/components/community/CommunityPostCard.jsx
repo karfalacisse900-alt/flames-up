@@ -468,26 +468,26 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
         {/* ── MEDIA SECTION ── */}
         {(() => {
-          const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
-          if (imgs.length === 0 && !post.video_url) return null;
-          return (
-            <div className="w-full relative mb-3">
-              {imgs.length > 0 && (
-                <div className="w-full">
-                  <PhotoCarousel images={imgs} aspectRatio="4/5" />
-                </div>
-              )}
-              {post.video_url && post.video_url.trim() && (
-                <div className="w-full">
-                  <AutoplayVideo
-                    src={post.video_url}
-                    postId={post.id}
-                    onDoubleTap={() => handleLike()}
-                  />
-                </div>
-              )}
-            </div>
-          );
+        const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
+        if (imgs.length === 0 && !post.video_url) return null;
+        return (
+          <div className="w-full relative mb-3">
+            {imgs.length > 0 && (
+              <div className="w-full">
+                <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
+              </div>
+            )}
+            {post.video_url && post.video_url.trim() && (
+              <div className="w-full">
+                <AutoplayVideo
+                  src={post.video_url}
+                  postId={post.id}
+                  onDoubleTap={() => handleLike()}
+                />
+              </div>
+            )}
+          </div>
+        );
         })()}
 
         {/* ── Poll ── */}

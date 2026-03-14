@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import TaggedImage from "./TaggedImage";
 
-export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
+export default function PhotoCarousel({ images, tags = [], aspectRatio = "1/1" }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -70,17 +71,22 @@ export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
     resetTimer();
   };
 
+  // Group tags by image index
+  const getTagsForImage = (index) => {
+    if (!tags || !Array.isArray(tags)) return [];
+    return tags.filter(t => t.imageIndex === index);
+  };
+
   if (!images || count === 0) return null;
   if (count === 1) {
     return (
-      <img
-        src={images[0]}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="w-full"
-        style={{ borderRadius: 16, aspectRatio, objectFit: "cover", display: "block", border: "1px solid var(--border-subtle)" }}
-      />
+      <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid var(--border-subtle)" }}>
+        <TaggedImage
+          imageUrl={images[0]}
+          tags={getTagsForImage(0)}
+          aspectRatio={aspectRatio}
+        />
+      </div>
     );
   }
 
@@ -116,13 +122,10 @@ export default function PhotoCarousel({ images, aspectRatio = "1/1" }) {
             transition={{ type: "tween", duration: 0.28, ease: "easeInOut" }}
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
           >
-            <img
-              src={images[current]}
-              alt={`Photo ${current + 1} of ${count}`}
-              loading="lazy"
-              decoding="async"
-              draggable="false"
-              style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", display: "block" }}
+            <TaggedImage
+              imageUrl={images[current]}
+              tags={getTagsForImage(current)}
+              aspectRatio={aspectRatio}
             />
           </motion.div>
         </AnimatePresence>
