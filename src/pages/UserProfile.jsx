@@ -34,7 +34,10 @@ export default function UserProfile() {
       return users[0] || null;
     },
     enabled: !!email,
-    staleTime: 120000,
+    staleTime: Infinity,
+    cacheTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const { data: userPosts = [] } = useQuery({
