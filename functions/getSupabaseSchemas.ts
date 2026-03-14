@@ -11,14 +11,22 @@ Deno.serve(async (req) => {
     const schemas = {};
 
     for (const table of tables) {
-      const { data, error } = await supabase
-        .from('information_schema.columns')
-        .select('column_name')
-        .eq('table_name', table);
+      const { data, error } = await supabase.rpc('exec_sql', {
+        query: `SELECT column_name FROM information_schema.columns WHERE table_name = '${table}' AND table_schema = 'public'`
+      });
 
       if (error) {
-        console.error(`Error fetching ${table}:`, error);
-        schemas[table] = { error: error.message };
+        // Fallback: try to fetch one row to see column structure
+        const { data: sampleData, error: sampleError } = await supabase
+          .from(table)
+          .select('*')
+          .limit(1);
+
+        if (sampleError) {
+          schemas[table] = { error: sampleError.message };
+        } else {
+          schemas[table] = sampleData && sampleData[0] ? Object.keys(sampleData[0]) : [];
+        }
       } else {
         schemas[table] = data?.map(row => row.column_name) || [];
       }
