@@ -583,6 +583,37 @@ body {
   transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
+/* ── Mapbox Popup Enhancements ── */
+.mapboxgl-popup-content {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.2) !important;
+  overflow: hidden;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}
+
+.post-preview-popup .mapboxgl-popup-content {
+  min-width: 220px;
+  max-width: 260px;
+}
+
+/* ── Community Marker Animations ── */
+.community-marker {
+  animation: markerPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes markerPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(46, 107, 79, 0.35);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(46, 107, 79, 0.5);
+  }
+}
+
 /* ── Dark Mode ── */
 /* ── Typography Scale (Readability) ── */
 h1, .h1 { font-family: var(--font-serif); font-size: 2.1rem; font-weight: 800; line-height: 1.08; letter-spacing: -0.035em; }

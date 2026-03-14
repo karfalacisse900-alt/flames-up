@@ -32,14 +32,35 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
       .catch(() => setError("Could not load map token"));
   }, []);
 
-  // 2. Get user geolocation (fallback: NYC)
+  // 2. Get user geolocation (fallback: NYC) + track location updates
   useEffect(() => {
     if (!navigator.geolocation) { setUserLoc([-74.006, 40.7128]); return; }
+    
+    let watchId;
+    
+    // Initial position
     navigator.geolocation.getCurrentPosition(
       pos => setUserLoc([pos.coords.longitude, pos.coords.latitude]),
-      ()  => setUserLoc([-74.006, 40.7128])
+      () => setUserLoc([-74.006, 40.7128]),
+      { enableHighAccuracy: true, maximumAge: 30000 }
     );
-  }, []);
+
+    // Watch for location changes
+    watchId = navigator.geolocation.watchPosition(
+      pos => {
+        const newLoc = [pos.coords.longitude, pos.coords.latitude];
+        setUserLoc(newLoc);
+        // Update map center smoothly if map is ready
+        if (mapInst.current && mapReady) {
+          mapInst.current.easeTo({ center: newLoc, duration: 1000 });
+        }
+      },
+      () => {},
+      { enableHighAccuracy: false, maximumAge: 60000 }
+    );
+
+    return () => { if (watchId) navigator.geolocation.clearWatch(watchId); };
+  }, [mapReady]);
 
   // 3. Initialize Mapbox GL map once token + userLoc + DOM are ready
   useEffect(() => {
@@ -76,19 +97,44 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
         container: mapRef.current,
         style:     "mapbox://styles/mapbox/streets-v12",
         center:    userLoc,
-        zoom:      14,
+        zoom:      15, // Neighborhood-level zoom
+        pitch:     0,
+        bearing:   0,
+        attributionControl: false,
       });
+
+      // Smooth easing
+      map.easeTo = function(options) {
+        return mbgl.Map.prototype.easeTo.call(this, { ...options, duration: 600, easing: t => t * (2 - t) });
+      };
 
       map.addControl(new mbgl.NavigationControl({ showCompass: false }), "bottom-right");
       map.addControl(
-        new mbgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }),
+        new mbgl.GeolocateControl({ 
+          positionOptions: { enableHighAccuracy: true }, 
+          trackUserLocation: true,
+          showUserHeading: true 
+        }),
         "bottom-right"
       );
 
       map.on("load", () => {
         if (destroyed) return;
+        
+        // Enable smooth interactions
+        map.touchZoomRotate.enableRotation();
+        map.dragRotate.disable();
+        map.touchPitch.disable();
+        
         setMapReady(true);
         addCommunityMarkers(map, posts, onOpenPlace);
+      });
+
+      // Real-time marker updates on map move
+      map.on("moveend", () => {
+        if (!mapReady) return;
+        // Filter nearby posts based on current viewport
+        filterNearbyMarkers(map);
       });
 
       mapInst.current = map;
@@ -106,31 +152,69 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   const addCommunityMarkers = (map, postList, openFn) => {
+    if (!map || !window.mapboxgl) return;
+    
     postList.filter(p => p.location_lat && p.location_lng).forEach(p => {
       const el = document.createElement("div");
+      el.className = "community-marker";
       el.style.cssText = [
-        "width:30px;height:30px;",
+        "width:36px;height:36px;",
         "background:linear-gradient(135deg,#2E6B4F,#4CAF7D);",
         "border-radius:50% 50% 50% 0;transform:rotate(-45deg);",
-        "border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;"
+        "border:3px solid white;box-shadow:0 4px 12px rgba(46,107,79,0.35);cursor:pointer;",
+        "transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);position:relative;"
       ].join("");
 
-      const popup = new window.mapboxgl.Popup({ offset: 28, closeButton: false }).setHTML(`
-        <div style="font-family:Inter,sans-serif;padding:4px 2px;min-width:160px">
-          <strong style="color:#2E6B4F;font-size:13px">${p.location_name || p.location_city || "Place"}</strong>
-          ${p.location_city ? `<p style="font-size:11px;color:#888;margin:2px 0">${p.location_city}</p>` : ""}
-          <p style="font-size:12px;color:#444;margin:4px 0 6px">${(p.body || "").replace(/<[^>]*>/g, "").slice(0, 70)}${(p.body || "").length > 70 ? "…" : ""}</p>
-          <button id="__fuplace_${p.id}" style="background:#2E6B4F;color:white;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;width:100%">View Location Hub →</button>
+      // Inner dot
+      const dot = document.createElement("div");
+      dot.style.cssText = "position:absolute;top:50%;left:50%;width:8px;height:8px;background:white;border-radius:50%;transform:translate(-50%,-50%) rotate(45deg);";
+      el.appendChild(dot);
+
+      el.addEventListener("mouseenter", () => { el.style.transform = "rotate(-45deg) scale(1.15)"; });
+      el.addEventListener("mouseleave", () => { el.style.transform = "rotate(-45deg) scale(1)"; });
+
+      const mediaHtml = p.image_url 
+        ? `<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>`
+        : p.video_url 
+        ? `<video src="${p.video_url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px" muted loop autoplay playsinline></video>`
+        : "";
+
+      const popup = new window.mapboxgl.Popup({ 
+        offset: 32, 
+        closeButton: false,
+        maxWidth: "240px",
+        className: "post-preview-popup"
+      }).setHTML(`
+        <div style="font-family:Inter,sans-serif;padding:6px 4px;min-width:200px">
+          ${mediaHtml}
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            ${p.author_avatar_url 
+              ? `<img src="${p.author_avatar_url}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"/>`
+              : `<div style="width:24px;height:24px;border-radius:50%;background:#ddd"></div>`
+            }
+            <strong style="color:#1E1E1E;font-size:12px;flex:1">${p.is_anonymous ? "Anonymous" : (p.author_name || "User")}</strong>
+          </div>
+          <strong style="color:#2E6B4F;font-size:13px;display:block;margin-bottom:4px">${p.location_name || p.location_city || "Place"}</strong>
+          ${p.location_city ? `<p style="font-size:10px;color:#888;margin:0 0 6px">${p.location_city}</p>` : ""}
+          <p style="font-size:12px;color:#444;margin:0 0 8px;line-height:1.4">${(p.body || "").replace(/<[^>]*>/g, "").slice(0, 80)}${(p.body || "").length > 80 ? "…" : ""}</p>
+          <button id="__fuplace_${p.id}" style="background:#2E6B4F;color:white;border:none;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s">Open Post →</button>
         </div>
       `);
 
       popup.on("open", () => {
         const btn = document.getElementById(`__fuplace_${p.id}`);
-        if (btn) btn.onclick = () => openFn && openFn({
-          name: p.location_name || p.location_city,
-          city: p.location_city, region: p.location_region,
-          lat: p.location_lat,   lng:  p.location_lng,
-        });
+        if (btn) {
+          btn.onmouseenter = () => { btn.style.background = "#1E4A36"; };
+          btn.onmouseleave = () => { btn.style.background = "#2E6B4F"; };
+          btn.onclick = () => {
+            map.flyTo({ center: [p.location_lng, p.location_lat], zoom: 16, duration: 800 });
+            openFn && openFn({
+              name: p.location_name || p.location_city,
+              city: p.location_city, region: p.location_region,
+              lat: p.location_lat, lng: p.location_lng,
+            });
+          };
+        }
       });
 
       const marker = new window.mapboxgl.Marker({ element: el })
@@ -138,7 +222,7 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
         .setPopup(popup)
         .addTo(map);
 
-      markersRef.current.push({ marker, isPOI: false });
+      markersRef.current.push({ marker, isPOI: false, post: p });
     });
   };
 
@@ -146,6 +230,29 @@ export default function PlacesMapboxView({ posts = [], onOpenPlace }) {
     markersRef.current = markersRef.current.filter(({ marker, isPOI }) => {
       if (isPOI) { marker.remove(); return false; }
       return true;
+    });
+  };
+
+  const filterNearbyMarkers = (map) => {
+    if (!map) return;
+    const bounds = map.getBounds();
+    const zoom = map.getZoom();
+    
+    // Show/hide markers based on viewport and zoom level
+    markersRef.current.forEach(({ marker, isPOI, post }) => {
+      if (isPOI) return; // Don't filter POI markers
+      
+      const lngLat = marker.getLngLat();
+      const inBounds = bounds.contains(lngLat);
+      const el = marker.getElement();
+      
+      if (inBounds && zoom >= 12) {
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+      } else {
+        el.style.opacity = "0.3";
+        el.style.pointerEvents = "none";
+      }
     });
   };
 
