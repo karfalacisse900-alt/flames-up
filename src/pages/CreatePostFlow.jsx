@@ -12,6 +12,8 @@ import PostSettingsPanel from "../components/community/creator/PostSettingsPanel
 export default function CreatePostFlow() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const urlParams = new URLSearchParams(window.location.search);
+  const presetLocation = urlParams.get("location") ? JSON.parse(decodeURIComponent(urlParams.get("location"))) : null;
   // step: 1 = camera/upload, 2 = editor, 3 = settings
   const [step, setStep] = useState(1);
 

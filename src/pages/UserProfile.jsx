@@ -124,13 +124,30 @@ export default function UserProfile() {
     navigate(-1);
   };
 
-  if (isLoadingUser || !profileUser) {
+  if (isLoadingUser) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-2" 
             style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="text-center px-8">
+          <div className="text-5xl mb-4">👤</div>
+          <p className="text-base font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+            User not found
+          </p>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>This profile doesn't exist</p>
+          <button onClick={() => navigate(-1)} className="mt-6 px-6 py-2 rounded-full text-sm font-bold" style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+            Go Back
+          </button>
         </div>
       </div>
     );
