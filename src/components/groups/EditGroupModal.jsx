@@ -160,7 +160,7 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 32 }}
         className="absolute bottom-0 left-0 right-0 max-w-lg mx-auto rounded-t-3xl overflow-hidden flex flex-col"
-        style={{ backgroundColor: "#F6F7FB", maxHeight: "92dvh" }}>
+        style={{ backgroundColor: "#FFFFFF", maxHeight: "92dvh" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0"
@@ -413,7 +413,7 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
         </div>
 
         {/* Save button */}
-        <div className="px-4 pb-6 pt-3 shrink-0" style={{ borderTop: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-app)" }}>
+        <div className="px-4 pb-6 pt-3 shrink-0" style={{ borderTop: "1px solid var(--border-subtle)", backgroundColor: "#FFFFFF" }}>
           <button onClick={handleSave} disabled={!name.trim() || saving}
             className="w-full py-4 rounded-2xl text-base font-bold text-white disabled:opacity-50"
             style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 20px rgba(46,107,79,0.35)" }}>
