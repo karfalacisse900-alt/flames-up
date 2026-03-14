@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Wand2, Type, Music, Volume2, Scissors } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wand2, Type, Music, Volume2, Scissors, Tag } from "lucide-react";
 import VideoTrimmer from "./VideoTrimmer";
+import TagEditor from "../TagEditor";
 
 export default function MediaEditingStep({
   mediaItems,
@@ -16,6 +17,7 @@ export default function MediaEditingStep({
   const [exposure, setExposure] = useState(0);
   const [volume, setVolume] = useState(100);
   const [showTrimmer, setShowTrimmer] = useState(false);
+  const [showTagEditor, setShowTagEditor] = useState(false);
 
   const currentItem = mediaItems[currentEditingIndex];
   const isVideo = currentItem?.type.startsWith("video");
@@ -34,6 +36,11 @@ export default function MediaEditingStep({
       };
       return newItems;
     });
+  };
+
+  const handleSaveTags = (tags) => {
+    applyEdits({ tags });
+    setShowTagEditor(false);
   };
 
   const handleTrimVideo = (trimmedFile) => {
@@ -216,6 +223,17 @@ export default function MediaEditingStep({
             Trim
           </button>
         )}
+        <button
+          onClick={() => setShowTagEditor(true)}
+          className={`flex-1 min-w-20 py-2.5 rounded-lg font-semibold text-sm transition-all text-gray-600`}
+          style={{
+            backgroundColor: "var(--bg-card)",
+            border: "1px solid var(--border-light)"
+          }}
+        >
+          <Tag className="w-4 h-4 inline mr-1" />
+          Tag
+        </button>
       </div>
 
       {/* Adjust Mode */}
@@ -343,6 +361,16 @@ export default function MediaEditingStep({
           maxDurationMs={getDurationMs()}
           onTrimmed={handleTrimVideo}
           onCancel={() => setShowTrimmer(false)}
+        />
+      )}
+
+      {/* Tag Editor */}
+      {showTagEditor && currentItem && (
+        <TagEditor
+          imageUrl={currentItem.preview}
+          existingTags={currentItem.edits?.tags || []}
+          onSave={handleSaveTags}
+          onClose={() => setShowTagEditor(false)}
         />
       )}
     </div>
