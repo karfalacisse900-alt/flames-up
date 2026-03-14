@@ -17,6 +17,8 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
   const [isPaid, setIsPaid] = useState(false);
   const [monthlyFee, setMonthlyFee] = useState(0);
   const [creating, setCreating] = useState(false);
+  const [previewMedia, setPreviewMedia] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleCreate = async () => {
     if (!name.trim()) return;
@@ -35,6 +37,7 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
         creator_name: user?.full_name || user?.email,
         is_paid: isPaid,
         monthly_fee: isPaid ? monthlyFee : 0,
+        preview_video_url: previewMedia,
         created_at: new Date().toISOString(),
       });
 
@@ -64,6 +67,20 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
     setGroupType("online");
     setIsPaid(false);
     setMonthlyFee(0);
+    setPreviewMedia(null);
+  };
+
+  const handleMediaUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setPreviewMedia(file_url);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    }
+    setUploading(false);
   };
 
   if (!open) return null;
@@ -117,7 +134,7 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
               </div>
 
               {/* Category & Emoji */}
-              <div className="mb-6 grid grid-cols-2 gap-3">
+              <div className="mb-4 grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Category</label>
                   <select value={category} onChange={e => setCategory(e.target.value)} className="w-full mt-2 px-3 py-2 rounded-xl border text-sm" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-subtle)" }}>
@@ -128,6 +145,32 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
                   <label className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Emoji</label>
                   <input value={emoji} onChange={e => setEmoji(e.target.value)} maxLength="2" className="w-full mt-2 px-3 py-2 rounded-xl border text-2xl text-center" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-subtle)" }} />
                 </div>
+              </div>
+
+              {/* Preview Media */}
+              <div className="mb-6">
+                <label className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Preview Video/Photo (Optional)</label>
+                <p className="text-xs mb-2" style={{ color: "var(--text-hint)" }}>Upload a preview to show in group discovery</p>
+                {previewMedia ? (
+                  <div className="relative rounded-xl overflow-hidden" style={{ aspectRatio: "4/5" }}>
+                    {previewMedia.includes(".mp4") || previewMedia.includes("video") ? (
+                      <video src={previewMedia} className="w-full h-full object-cover" controls />
+                    ) : (
+                      <img src={previewMedia} className="w-full h-full object-cover" alt="Preview" />
+                    )}
+                    <button onClick={() => setPreviewMedia(null)} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="block w-full p-6 rounded-xl border-2 border-dashed text-center cursor-pointer hover:bg-gray-50" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-subtle)" }}>
+                    <input type="file" accept="image/*,video/*" onChange={handleMediaUpload} className="hidden" />
+                    <Plus className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-hint)" }} />
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                      {uploading ? "Uploading..." : "Upload Video or Photo"}
+                    </p>
+                  </label>
+                )}
               </div>
 
               <button onClick={() => setStep(2)} className="w-full py-2.5 rounded-xl font-bold text-white" style={{ backgroundColor: "var(--accent-primary)" }}>
