@@ -155,12 +155,12 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
       <motion.div
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 32 }}
         className="absolute bottom-0 left-0 right-0 max-w-lg mx-auto rounded-t-3xl overflow-hidden flex flex-col"
-        style={{ backgroundColor: "var(--bg-app)", maxHeight: "92dvh" }}>
+        style={{ backgroundColor: "#F6F7FB", maxHeight: "92dvh" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0"
