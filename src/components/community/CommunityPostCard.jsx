@@ -486,18 +486,18 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
         )}
 
         {/* ── ENGAGEMENT ACTIONS ── */}
-        <div className="flex items-center px-2 py-2 gap-1">
+        <div className="flex items-center px-3 py-2 gap-2">
           {/* Like */}
           <div className="relative">
             <button
               onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
               onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
               onClick={handleLike}
-              className={`flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
-              style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)" }}>
-              <Heart className="w-5 h-5" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
-              <span className="text-xs font-semibold">Like</span>
-              {(post.upvotes || 0) > 0 && <span className="text-xs font-semibold">{post.upvotes}</span>}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
+              style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)", minHeight: "44px" }}>
+              <Heart className="w-6 h-6" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
+              <span className="text-sm font-semibold">Like</span>
+              {(post.upvotes || 0) > 0 && <span className="text-sm font-semibold">{post.upvotes}</span>}
             </button>
             {showReactions && (
               <div
@@ -518,38 +518,32 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
           {/* Comment */}
           <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)" }}>
-            <MessageCircle className="w-5 h-5" strokeWidth={2} />
-            <span className="text-xs font-semibold">Comment</span>
-            {(post.comment_count || 0) > 0 && <span className="text-xs font-semibold">{post.comment_count}</span>}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
+            <MessageCircle className="w-6 h-6" strokeWidth={2} />
+            <span className="text-sm font-semibold">Comment</span>
+            {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
           </Link>
 
           {/* Share */}
           <button onClick={handleShare}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)" }}>
-            <Share2 className="w-5 h-5" strokeWidth={2} />
-            <span className="text-xs font-semibold">Share</span>
+            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
+            <Share2 className="w-6 h-6" strokeWidth={2} />
+            <span className="text-sm font-semibold">Share</span>
           </button>
 
           {/* More */}
           <button onClick={() => setShowMenu(v => !v)}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)" }}>
-            <MoreHorizontal className="w-5 h-5" strokeWidth={2} />
-            <span className="text-xs font-semibold">More</span>
+            className="flex items-center gap-2 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
+            <MoreHorizontal className="w-6 h-6" strokeWidth={2} />
           </button>
-
-          {/* Want to go — only for location posts */}
-          {(post.location_name || post.location_city) && (
-            <WantToGoButton post={post} user={user} compact />
-          )}
 
           {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
-            className="ml-auto flex items-center justify-center p-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)" }}>
+            className="ml-auto flex items-center justify-center p-2.5 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
+            style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)", minHeight: "44px", minWidth: "44px" }}>
             <Bookmark className="w-6 h-6" strokeWidth={2} style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
           </button>
         </div>
