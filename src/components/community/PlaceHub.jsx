@@ -190,38 +190,54 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
       </div>
 
       {/* Action bar */}
-      <div className="shrink-0 px-4 py-3 flex items-center justify-between"
+      <div className="shrink-0 px-4 py-3 flex flex-col gap-3"
         style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        {/* Stats */}
-        <div className="flex gap-4 text-xs" style={{ color: "var(--text-hint)" }}>
-          <span><strong style={{ color: "var(--text-primary)" }}>{posts.length}</strong> posts</span>
-          <span><strong style={{ color: "var(--text-primary)" }}>{photoPosts.length}</strong> photos</span>
-          <span><strong style={{ color: "var(--text-primary)" }}>{videoPosts.length}</strong> videos</span>
-        </div>
-        {user && (
-          <div className="flex gap-2">
-            <button onClick={toggleFollow} disabled={followLoading}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{
-                backgroundColor: isFollowing ? "var(--accent-primary)" : "var(--bg-subtle)",
-                color: isFollowing ? "#fff" : "var(--text-secondary)",
-                border: `1.5px solid ${isFollowing ? "var(--accent-primary)" : "var(--border-light)"}`,
-              }}>
-              {isFollowing ? <BellOff className="w-3 h-3" /> : <BellPlus className="w-3 h-3" />}
-              {isFollowing ? "Following" : "Follow"}
-            </button>
-            <button onClick={toggleSave} disabled={savedLoading}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-              style={{
-                backgroundColor: isSaved ? "#2E6B4F" : "var(--bg-subtle)",
-                color: isSaved ? "#fff" : "var(--text-secondary)",
-                border: `1.5px solid ${isSaved ? "#2E6B4F" : "var(--border-light)"}`,
-              }}>
-              {isSaved ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
-              {isSaved ? "Saved" : "Save"}
-            </button>
+        <div className="flex items-center justify-between">
+          {/* Stats */}
+          <div className="flex gap-4 text-xs" style={{ color: "var(--text-hint)" }}>
+            <span><strong style={{ color: "var(--text-primary)" }}>{posts.length}</strong> posts</span>
+            <span><strong style={{ color: "var(--text-primary)" }}>{photoPosts.length}</strong> photos</span>
+            <span><strong style={{ color: "var(--text-primary)" }}>{videoPosts.length}</strong> videos</span>
           </div>
-        )}
+          {user && (
+            <div className="flex gap-2">
+              <button onClick={toggleFollow} disabled={followLoading}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  backgroundColor: isFollowing ? "var(--accent-primary)" : "var(--bg-subtle)",
+                  color: isFollowing ? "#fff" : "var(--text-secondary)",
+                  border: `1.5px solid ${isFollowing ? "var(--accent-primary)" : "var(--border-light)"}`,
+                }}>
+                {isFollowing ? <BellOff className="w-3 h-3" /> : <BellPlus className="w-3 h-3" />}
+                {isFollowing ? "Following" : "Follow"}
+              </button>
+              <button onClick={toggleSave} disabled={savedLoading}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  backgroundColor: isSaved ? "#2E6B4F" : "var(--bg-subtle)",
+                  color: isSaved ? "#fff" : "var(--text-secondary)",
+                  border: `1.5px solid ${isSaved ? "#2E6B4F" : "var(--border-light)"}`,
+                }}>
+                {isSaved ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
+                {isSaved ? "Saved" : "Save"}
+              </button>
+            </div>
+          )}
+        </div>
+        {/* Make Post From Here Button */}
+        <button
+          onClick={() => {
+            const url = `/CreatePostFlow?location=${encodeURIComponent(JSON.stringify({ name: locationName, city: locationData.city, region: locationData.region, country: locationData.country, lat: locationData.lat, lng: locationData.lng }))}`;
+            window.location.href = url;
+          }}
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+            color: "#fff",
+            boxShadow: "0 4px 16px rgba(46,107,79,0.35)"
+          }}>
+          ✦ Make Post From Here
+        </button>
       </div>
 
       {/* Tabs – horizontal scroll */}
