@@ -2,28 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin } from "lucide-react";
 
-const POI_CATEGORIES = [
-  { key: "fast_food", label: "🍔 Fast Food", query: "fast food" },
-  { key: "park",      label: "🌳 Parks",     query: "park" },
-  { key: "grocery",   label: "🛒 Grocery",   query: "supermarket grocery" },
-  { key: "cafe",      label: "☕ Café",       query: "cafe coffee" },
-  { key: "restaurant",label: "🍽️ Restaurant", query: "restaurant" },
-  { key: "pharmacy",  label: "💊 Pharmacy",  query: "pharmacy" },
-  { key: "gas",       label: "⛽ Gas",       query: "gas station" },
-  { key: "gym",       label: "🏋️ Gym",       query: "gym fitness" },
-];
-
-export default function PlacesMapboxView({ places = [], onOpenPlace }) {
+export default function PlacesMapboxView({ onOpenPlace }) {
   const mapRef    = useRef(null);
   const mapInst   = useRef(null);
   const markersRef= useRef([]);  // { marker, isPOI }
 
-  const [token,         setToken]         = useState(null);
-  const [userLoc,       setUserLoc]       = useState(null);
-  const [mapReady,      setMapReady]      = useState(false);
-  const [activeCategory,setActiveCategory]= useState(null);
-  const [poiLoading,    setPoiLoading]    = useState(false);
-  const [error,         setError]         = useState(null);
+  const [token,    setToken]    = useState(null);
+  const [userLoc,  setUserLoc]  = useState(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [error,    setError]    = useState(null);
 
   // 1. Fetch mapbox token
   useEffect(() => {
@@ -166,7 +153,7 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
 
         // Reverse geocode to get city/region
         try {
-          const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mbToken}`);
+          const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`);
           const data = await res.json();
           const context = data.features[0]?.context || [];
           
@@ -204,69 +191,7 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
     });
   };
 
-  const clearPOIMarkers = () => {
-    markersRef.current = markersRef.current.filter(({ marker, isPOI }) => {
-      if (isPOI) { marker.remove(); return false; }
-      return true;
-    });
-  };
 
-
-
-  const handleCategory = async (cat) => {
-    if (!mapInst.current || !token) return;
-
-    // Toggle off
-    if (activeCategory === cat.key) {
-      clearPOIMarkers();
-      setActiveCategory(null);
-      return;
-    }
-
-    clearPOIMarkers();
-    setActiveCategory(cat.key);
-    setPoiLoading(true);
-
-    const { lng, lat } = mapInst.current.getCenter();
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cat.query)}.json`
-      + `?proximity=${lng},${lat}&types=poi&limit=15&access_token=${token}`;
-
-    try {
-      const res  = await fetch(url);
-      const data = await res.json();
-
-      (data.features || []).forEach(feature => {
-        const [fLng, fLat] = feature.center;
-
-        const el = document.createElement("div");
-        el.style.cssText = [
-          "width:30px;height:30px;",
-          "background:#D98B62;",
-          "border-radius:50%;border:2px solid white;",
-          "box-shadow:0 2px 8px rgba(0,0,0,0.3);",
-          "display:flex;align-items:center;justify-content:center;",
-          "cursor:pointer;font-size:14px;"
-        ].join("");
-        el.textContent = cat.label.split(" ")[0];
-
-        const popup = new window.mapboxgl.Popup({ offset: 18, closeButton: false }).setHTML(`
-          <div style="font-family:Inter,sans-serif;padding:4px 2px">
-            <strong style="font-size:13px;color:#1E1E1E">${feature.text}</strong>
-            <p style="font-size:11px;color:#888;margin:2px 0">${(feature.place_name || "").split(",").slice(1, 3).join(",").trim()}</p>
-          </div>
-        `);
-
-        const marker = new window.mapboxgl.Marker({ element: el })
-          .setLngLat([fLng, fLat])
-          .setPopup(popup)
-          .addTo(mapInst.current);
-
-        markersRef.current.push({ marker, isPOI: true });
-      });
-    } catch {}
-
-    setPoiLoading(false);
-  };
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -280,24 +205,19 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
   return (
     <div style={{ height: "100%", position: "relative" }}>
 
-      {/* Category pills */}
-      <div className="absolute top-3 left-0 right-0 z-10 px-3 flex gap-2 overflow-x-auto scrollbar-hide pb-1"
-        style={{ pointerEvents: mapReady ? "auto" : "none" }}>
-        {POI_CATEGORIES.map(cat => (
-          <button key={cat.key}
-            onClick={() => handleCategory(cat)}
-            className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all"
-            style={{
-              backgroundColor: activeCategory === cat.key ? "#1E1E1E" : "rgba(250,250,248,0.95)",
-              color:           activeCategory === cat.key ? "#fff"    : "var(--text-primary)",
-              border:          `1.5px solid ${activeCategory === cat.key ? "#1E1E1E" : "var(--border-light)"}`,
-              boxShadow:       "0 2px 8px rgba(0,0,0,0.12)",
-              backdropFilter:  "blur(8px)",
-            }}>
-            {cat.label}
-          </button>
-        ))}
-      </div>
+      {/* Info banner */}
+      {mapReady && (
+        <div className="absolute top-4 left-3 right-3 z-10 px-4 py-3 rounded-2xl text-sm"
+          style={{ 
+            backgroundColor: "rgba(46,107,79,0.95)", 
+            color: "white",
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)"
+          }}>
+          <p className="font-semibold mb-1">📍 Tap any place on the map</p>
+          <p className="text-xs opacity-90">Restaurants, cafés, parks & more</p>
+        </div>
+      )}
 
       {/* Map canvas */}
       <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
@@ -311,22 +231,9 @@ export default function PlacesMapboxView({ places = [], onOpenPlace }) {
         </div>
       )}
 
-      {/* POI search spinner */}
-      {poiLoading && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold"
-          style={{ backgroundColor: "rgba(250,250,248,0.97)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", backdropFilter: "blur(8px)" }}>
-          <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "var(--accent-primary)" }} />
-          Finding nearby places…
-        </div>
-      )}
 
-      {/* Legend */}
-      {mapReady && (
-        <div className="absolute bottom-4 left-3 z-10 px-3 py-2 rounded-xl text-xs font-semibold"
-          style={{ backgroundColor: "rgba(250,250,248,0.95)", border: "1px solid var(--border-light)", backdropFilter: "blur(8px)", color: "var(--text-secondary)" }}>
-          🟢 Places · 🟠 Services
-        </div>
-      )}
+
+
     </div>
   );
 }
