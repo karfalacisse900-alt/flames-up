@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -19,22 +19,72 @@ const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "
 export default function CommunityFeed({ user }) {
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
-  // filter: "global" | "nearby" | city string
   const [activeFilter, setActiveFilter] = useState("global");
   const [showPicker, setShowPicker] = useState(false);
   const [cityInput, setCityInput] = useState("");
   const [userCoords, setUserCoords] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const observerRef = useRef(null);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
 
-  const { data: posts = [], isLoading, refetch } = useQuery({
-    queryKey: ["communityPosts"],
-    queryFn: async () => {
-      const all = await base44.entities.CommunityPost.list("-created_date", 100);
-      return all;
-    },
-  });
+  const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
+  const BATCH_SIZE = 20;
+
+  const fetchPosts = useCallback(async (pageNum) => {
+    try {
+      const offset = pageNum * BATCH_SIZE;
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=${BATCH_SIZE}&offset=${offset}`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+      const data = await res.json();
+      return data || [];
+    } catch (err) {
+      console.error("Failed to fetch posts from Supabase:", err);
+      return [];
+    }
+  }, []);
+
+  const loadInitialPosts = useCallback(async () => {
+    setIsLoading(true);
+    const data = await fetchPosts(0);
+    setPosts(data);
+    setHasMore(data.length === BATCH_SIZE);
+    setPage(0);
+    setIsLoading(false);
+  }, [fetchPosts]);
+
+  const loadMorePosts = useCallback(async () => {
+    if (!hasMore || isFetchingMore) return;
+    setIsFetchingMore(true);
+    const nextPage = page + 1;
+    const data = await fetchPosts(nextPage);
+    setPosts(prev => [...prev, ...data]);
+    setHasMore(data.length === BATCH_SIZE);
+    setPage(nextPage);
+    setIsFetchingMore(false);
+  }, [hasMore, isFetchingMore, page, fetchPosts]);
+
+  useEffect(() => {
+    loadInitialPosts();
+  }, [loadInitialPosts]);
+
+  const refetch = useCallback(async () => {
+    await loadInitialPosts();
+    setNewPostsAvailable(0);
+  }, [loadInitialPosts]);
 
   // Reverse geocode coords to get neighborhood/area name
   const [detectedArea, setDetectedArea] = useState(null);
@@ -130,7 +180,21 @@ export default function CommunityFeed({ user }) {
     enabled: !!user?.email,
   });
 
-  const loadNewPosts = () => { refetch(); setNewPostsAvailable(0); };
+  const loadNewPosts = () => { refetch(); };
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isFetchingMore, loadMorePosts]);
 
   const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(async () => {
     await refetch();
@@ -420,7 +484,7 @@ export default function CommunityFeed({ user }) {
               Enable Location
             </button>
           </div>
-        ) : filteredPosts.length === 0 ? (
+        ) : filteredPosts.length === 0 && !isLoading ? (
           <div className="py-16 text-center px-8" style={{ animation: "fadeIn 0.3s ease" }}>
             <div className="text-5xl mb-4">{activeFilter === "nearby" ? "📍" : activeFilter === "global" ? "💬" : "🏙"}</div>
             <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
@@ -436,7 +500,20 @@ export default function CommunityFeed({ user }) {
              </Link>
           </div>
         ) : (
-          filteredPosts.map(renderPostCard)
+          <>
+            {filteredPosts.map(renderPostCard)}
+            {/* Infinite scroll trigger */}
+            {hasMore && (
+              <div ref={observerRef} className="py-8 flex justify-center">
+                <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--accent-primary)" }} />
+              </div>
+            )}
+            {!hasMore && filteredPosts.length > 0 && (
+              <p className="text-center text-sm py-6" style={{ color: "var(--text-hint)" }}>
+                You've reached the end 🎉
+              </p>
+            )}
+          </>
         )}
       </div>
 

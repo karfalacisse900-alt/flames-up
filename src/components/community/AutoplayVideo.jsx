@@ -51,17 +51,26 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     if (postId && videoProgress[postId] > 2) {
       v.currentTime = videoProgress[postId];
     }
-    v.play().then(() => {
-      setPlaying(true);
-      setBuffering(false);
-      setSavedProgress(0);
-      clearInterval(progressTimer.current);
-      progressTimer.current = setInterval(() => {
-        if (!v.paused && postId) videoProgress[postId] = Math.floor(v.currentTime);
-      }, 1000);
-    }).catch(() => {
-      setBuffering(false);
-    });
+    // Force load before play
+    if (v.readyState < 2) {
+      v.load();
+    }
+    const playPromise = v.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        setPlaying(true);
+        setBuffering(false);
+        setSavedProgress(0);
+        clearInterval(progressTimer.current);
+        progressTimer.current = setInterval(() => {
+          if (!v.paused && postId) videoProgress[postId] = Math.floor(v.currentTime);
+        }, 1000);
+      }).catch((err) => {
+        console.log("Video play failed:", err);
+        setBuffering(false);
+        setPlaying(false);
+      });
+    }
   }, [postId]);
 
   const doPause = useCallback(() => {
