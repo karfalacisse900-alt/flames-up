@@ -27,13 +27,14 @@ export default function UserProfile() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: profileUser } = useQuery({
+  const { data: profileUser, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", email],
     queryFn: async () => {
       const users = await base44.entities.User.filter({ email });
       return users[0] || null;
     },
     enabled: !!email,
+    staleTime: 120000,
   });
 
   const { data: userPosts = [] } = useQuery({
@@ -120,10 +121,14 @@ export default function UserProfile() {
     navigate(-1);
   };
 
-  if (!profileUser) {
+  if (isLoadingUser || !profileUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-2" 
+            style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>Loading profile...</p>
+        </div>
       </div>
     );
   }
