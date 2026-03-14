@@ -39,8 +39,7 @@ export default function CommunityFeed({ user }) {
 
   const fetchPosts = useCallback(async (pageNum) => {
     try {
-      // Fetch from Base44 instead of Supabase
-      const allPosts = await base44.entities.CommunityPost.list("-created_date", 200);
+      const allPosts = await base44.entities.CommunityPost.list("-created_date", 500);
       const offset = pageNum * BATCH_SIZE;
       return allPosts.slice(offset, offset + BATCH_SIZE);
     } catch (err) {

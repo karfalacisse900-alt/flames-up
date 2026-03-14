@@ -68,6 +68,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
   const [reported, setReported] = useState(false);
   const [likeBounce, setLikeBounce] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
   const longPressTimer = useRef(null);
   const qc = useQueryClient();
 
@@ -430,10 +431,9 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               </h3>
             )}
             {post.body && (() => {
-              const [expanded, setExpanded] = useState(false);
               const cleanText = bodyIsRich ? stripHtml(post.body) : (post.type === "quote_of_day" ? `"${post.body}"` : post.body);
               const isLong = cleanText.length > 200;
-              const displayText = !expanded && isLong ? cleanText.slice(0, 200) : cleanText;
+              const displayText = !captionExpanded && isLong ? cleanText.slice(0, 200) : cleanText;
               
               return (
                 <div className="text-[15px] leading-relaxed break-words"
@@ -444,20 +444,20 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                     wordWrap: "break-word",
                     overflowWrap: "break-word",
                   }}>
-                  {bodyIsRich && expanded ? (
+                  {bodyIsRich && captionExpanded ? (
                     <div className="rich-body" dangerouslySetInnerHTML={{ __html: post.body }} />
                   ) : (
                     <p className="whitespace-pre-line break-words">
                       <SmartText text={displayText} />
-                      {!expanded && isLong && "..."}
+                      {!captionExpanded && isLong && "..."}
                     </p>
                   )}
                   {isLong && (
                     <button 
-                      onClick={() => setExpanded(v => !v)}
-                      className="text-sm font-semibold mt-1"
+                      onClick={() => setCaptionExpanded(v => !v)}
+                      className="text-sm font-semibold mt-1 block"
                       style={{ color: "var(--accent-primary)" }}>
-                      {expanded ? "See less" : "See more"}
+                      {captionExpanded ? "See less" : "See more"}
                     </button>
                   )}
                 </div>
