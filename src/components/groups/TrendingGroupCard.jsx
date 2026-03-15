@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, Users, Play, Volume2, VolumeX } from "lucide-react";
+import { X, Users, Volume2, VolumeX } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,6 +17,7 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
   const previewPosts = posts.filter(p => p.video_url || p.media_urls?.length > 0 || p.image_url).slice(0, 8);
   const currentPost = previewPosts[currentIndex];
 
+  // Auto-advance slides
   useEffect(() => {
     if (previewPosts.length <= 1) return;
     const interval = setInterval(() => {
@@ -25,37 +26,47 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     return () => clearInterval(interval);
   }, [previewPosts.length]);
 
+  // Play video when slide changes
   useEffect(() => {
-    const playVideo = async () => {
-      const video = videoRef.current;
-      if (!video || !currentPost?.video_url) return;
-      
+    const video = videoRef.current;
+    if (!video || !currentPost?.video_url) return;
+    let cancelled = false;
+
+    const tryPlay = async () => {
       try {
         video.muted = true;
         video.currentTime = 0;
-        
-        // Force reload and wait for canplay
+        video.src = currentPost.video_url;
         video.load();
-        await new Promise((resolve) => {
+        await new Promise(resolve => {
           video.oncanplay = resolve;
-          setTimeout(resolve, 500); // fallback
+          video.onerror = resolve;
+          setTimeout(resolve, 1000);
         });
-        
-        const playPromise = video.play();
-        if (playPromise) {
-          await playPromise;
-          video.muted = isMuted;
-        }
-      } catch (err) {
-        console.log("Video play error:", err);
+        if (cancelled) return;
+        await video.play();
+        video.muted = isMuted;
+      } catch (e) {
+        // silently fail
       }
     };
-    
-    playVideo();
-  }, [currentIndex, currentPost?.video_url, isMuted]);
+    tryPlay();
+    return () => { cancelled = true; };
+  }, [currentIndex, currentPost?.video_url]);
+
+  // Sync mute state separately
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = isMuted;
+  }, [isMuted]);
 
   const isVideo = !!currentPost?.video_url;
-  const mediaUrl = isVideo ? currentPost?.video_url : (currentPost?.media_urls?.[0] || currentPost?.image_url);
+  const mediaUrl = isVideo
+    ? currentPost?.video_url
+    : (currentPost?.media_urls?.[0] || currentPost?.image_url);
+
+  // Fallback background: group cover, logo, or gradient
+  const hasCover = !!group.cover_url;
+  const hasLogo = !!group.logo_url;
 
   return (
     <div
@@ -66,8 +77,8 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         backgroundColor: "var(--bg-card)",
         border: "1px solid var(--border-light)",
         boxShadow: "0 20px 48px rgba(15,23,42,0.12)",
-      }}>
-
+      }}
+    >
       {/* Background media */}
       <div className="absolute inset-0">
         {mediaUrl ? (
@@ -75,107 +86,117 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
             <video
               key={`video-${group.id}-${currentIndex}`}
               ref={videoRef}
-              src={mediaUrl}
               className="w-full h-full object-cover"
-              muted={isMuted}
+              muted
               playsInline
               loop
-              autoPlay
               preload="auto"
-              onLoadedData={(e) => {
-                if (e.target) {
-                  e.target.muted = isMuted;
-                  e.target.play().catch(() => {});
-                }
-              }}
             />
           ) : (
             <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
           )
+        ) : hasCover ? (
+          <img src={group.cover_url} alt="" className="w-full h-full object-cover" />
+        ) : hasLogo ? (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)" }}
+          >
+            <img src={group.logo_url} alt="" className="w-32 h-32 rounded-3xl object-cover opacity-60" />
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" }}>
+          <div
+            className="w-full h-full flex items-center justify-center text-8xl"
+            style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #1e3a5f 100%)" }}
+          >
             {group.emoji || "💬"}
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
       </div>
 
+      {/* Story progress bars */}
+      {previewPosts.length > 1 && (
+        <div className="absolute top-4 left-4 right-16 z-20 flex gap-1">
+          {previewPosts.map((_, idx) => (
+            <div key={idx} className="flex-1 h-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.3)" }}>
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: idx < currentIndex ? "100%" : idx === currentIndex ? "100%" : "0%",
+                  backgroundColor: "white",
+                  transition: idx === currentIndex ? "none" : undefined,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Top controls */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
         {isVideo && (
           <button
             onClick={(e) => { e.stopPropagation(); setIsMuted(v => !v); }}
-            className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-xl"
-            style={{ backgroundColor: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.3)" }}>
+            className="w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
+          >
             {isMuted ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-white" />}
           </button>
         )}
         <button
           onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-          className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-xl"
-          style={{ backgroundColor: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          className="w-9 h-9 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
+        >
           <X className="w-4 h-4 text-white" />
         </button>
       </div>
 
-      {/* Pagination dots */}
-      {previewPosts.length > 1 && (
-        <div className="absolute top-5 left-4 right-20 z-20 flex gap-1">
-          {previewPosts.map((_, idx) => (
-            <div
-              key={idx}
-              className="flex-1 h-0.5 rounded-full transition-all"
-              style={{
-                backgroundColor: idx === currentIndex ? "white" : "rgba(255,255,255,0.3)",
-                boxShadow: idx === currentIndex ? "0 0 8px rgba(255,255,255,0.5)" : "none",
-              }}
-            />
-          ))}
-        </div>
-      )}
-
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 z-10 p-5" onClick={() => onOpen(group)}>
-        {/* Group info */}
         <div className="mb-4">
-          <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg shrink-0 backdrop-blur-xl"
-              style={{ backgroundColor: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.3)" }}>
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg shrink-0 overflow-hidden"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.25)" }}
+            >
               {group.logo_url ? (
-                <img src={group.logo_url} alt="" className="w-full h-full rounded-full object-cover" />
+                <img src={group.logo_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span>{group.emoji || "💬"}</span>
+                <span className="text-2xl">{group.emoji || "💬"}</span>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-[17px] leading-tight mb-0.5 text-white drop-shadow-lg" style={{ fontFamily: "var(--font-serif)" }}>
+              <h3 className="font-bold text-[18px] leading-tight text-white drop-shadow-lg" style={{ fontFamily: "var(--font-serif)" }}>
                 {group.name}
               </h3>
-              <p className="text-xs text-white/80 flex items-center gap-1">
+              <p className="text-xs text-white/75 flex items-center gap-1 mt-0.5">
                 <Users className="w-3 h-3" />
                 {(group.member_count || 0).toLocaleString()} members
               </p>
             </div>
           </div>
           {group.description && (
-            <p className="text-xs text-white/90 leading-relaxed line-clamp-2 drop-shadow-md">
+            <p className="text-xs text-white/85 leading-relaxed line-clamp-2">
               {group.description}
             </p>
           )}
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-2.5">
           <button
             onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-            className="flex-1 py-3 rounded-full text-sm font-semibold backdrop-blur-xl"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
+            className="flex-1 py-3 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)" }}
+          >
             Pass
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onJoin(group); }}
-            className="flex-1 py-3 rounded-full text-sm font-bold backdrop-blur-xl"
-            style={{ backgroundColor: "white", color: "var(--accent-primary)" }}>
+            className="flex-1 py-3 rounded-full text-sm font-bold"
+            style={{ backgroundColor: "white", color: "var(--accent-primary)" }}
+          >
             Join Group
           </button>
         </div>

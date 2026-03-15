@@ -314,10 +314,10 @@ function ShareModal({ post, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }} onClick={onClose}>
       <div
         className="w-full max-w-lg rounded-t-3xl p-6"
-        style={{ backgroundColor: "var(--bg-modal)" }}
+        style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 -8px 32px rgba(0,0,0,0.2)" }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

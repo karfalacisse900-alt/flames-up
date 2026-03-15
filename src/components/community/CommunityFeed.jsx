@@ -40,8 +40,9 @@ export default function CommunityFeed({ user }) {
   const fetchPosts = useCallback(async (pageNum) => {
     try {
       const allPosts = await base44.entities.CommunityPost.list("-created_date", 500);
+      const filtered = allPosts.filter(p => !p.tags?.includes("listen_dont_judge"));
       const offset = pageNum * BATCH_SIZE;
-      return allPosts.slice(offset, offset + BATCH_SIZE);
+      return filtered.slice(offset, offset + BATCH_SIZE);
     } catch (err) {
       console.error("Failed to fetch posts:", err);
       return [];
