@@ -4,6 +4,10 @@ import { ExternalLink, Shuffle, Sparkles, Star, SlidersHorizontal, X, TrendingUp
 import DiscoverLogo from "./DiscoverLogo";
 import BookmarkButton from "./BookmarkButton";
 import AppPreviewDrawer from "./AppPreviewDrawer";
+import DiscoverSection from "./DiscoverSection";
+import WideCard from "./WideCard";
+import VerticalCard from "./VerticalCard";
+import SquareCard from "./SquareCard";
 
 const CATEGORY_GRADIENTS = {
   productivity:    ["#6366f1", "#8b5cf6"],
@@ -435,19 +439,126 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             </div>
           )}
 
-          {/* ── Seamless category rows — no dividers ── */}
-          {ROWS.map(row => {
-            const rowItems = items.filter(row.filter);
-            return (
-              <SeamlessRow
-                key={row.label}
-                label={row.label}
-                emoji={row.emoji}
-                items={rowItems}
-                onPreview={setPreviewItem}
-              />
+          {/* ── Mixed card format sections ── */}
+          {/* Trending Tools - Wide Cards */}
+          {(() => {
+            const trendingItems = items.filter(i => i.is_featured);
+            return trendingItems.length > 0 && (
+              <DiscoverSection title="🔥 Trending Tools" subtitle="Hot right now">
+                {trendingItems.slice(0, 10).map(item => (
+                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
             );
-          })}
+          })()}
+
+          {/* AI-Powered - Vertical Cards */}
+          {(() => {
+            const aiItems = items.filter(i => i.tags?.some(t => /ai|gpt|llm|artificial|ml/i.test(t)) || i.description?.toLowerCase().includes("ai"));
+            return aiItems.length > 0 && (
+              <DiscoverSection title="🤖 AI-Powered" subtitle="Supercharge with AI">
+                {aiItems.slice(0, 10).map(item => (
+                  <VerticalCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Productivity - Wide Cards */}
+          {(() => {
+            const prodItems = items.filter(i => i.category === "productivity");
+            return prodItems.length > 0 && (
+              <DiscoverSection title="⚡ Productivity" subtitle="Work smarter">
+                {prodItems.slice(0, 8).map(item => (
+                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Study & Learning - Vertical Cards */}
+          {(() => {
+            const learnItems = items.filter(i => i.category === "learning");
+            return learnItems.length > 0 && (
+              <DiscoverSection title="📚 Study & Learning" subtitle="Expand your knowledge">
+                {learnItems.slice(0, 8).map(item => (
+                  <VerticalCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Developer Tools - Wide Cards */}
+          {(() => {
+            const devItems = items.filter(i => i.category === "developer_tools");
+            return devItems.length > 0 && (
+              <DiscoverSection title="🛠️ Developer Tools" subtitle="Build better">
+                {devItems.slice(0, 8).map(item => (
+                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Entertainment - Square Cards */}
+          {(() => {
+            const entertainItems = items.filter(i => i.category === "entertainment");
+            return entertainItems.length > 0 && (
+              <DiscoverSection title="🎬 Entertainment" subtitle="Relax & enjoy">
+                {entertainItems.slice(0, 10).map(item => (
+                  <SquareCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Health & Wellness - Vertical Cards */}
+          {(() => {
+            const healthItems = items.filter(i => i.category === "health");
+            return healthItems.length > 0 && (
+              <DiscoverSection title="💪 Health & Wellness" subtitle="Stay healthy">
+                {healthItems.slice(0, 8).map(item => (
+                  <VerticalCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Lifestyle - Square Cards */}
+          {(() => {
+            const lifestyleItems = items.filter(i => i.category === "lifestyle");
+            return lifestyleItems.length > 0 && (
+              <DiscoverSection title="🌿 Lifestyle" subtitle="Live better">
+                {lifestyleItems.slice(0, 10).map(item => (
+                  <SquareCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Finance - Wide Cards */}
+          {(() => {
+            const financeItems = items.filter(i => i.category === "finance");
+            return financeItems.length > 0 && (
+              <DiscoverSection title="💰 Finance" subtitle="Manage your money">
+                {financeItems.slice(0, 8).map(item => (
+                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
+
+          {/* Social - Square Cards */}
+          {(() => {
+            const socialItems = items.filter(i => i.category === "social");
+            return socialItems.length > 0 && (
+              <DiscoverSection title="👥 Social" subtitle="Connect with others">
+                {socialItems.slice(0, 10).map(item => (
+                  <SquareCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                ))}
+              </DiscoverSection>
+            );
+          })()}
 
           {/* ── Surprise Me ── */}
           <SurpriseBtn onClick={handleSurprise} />
