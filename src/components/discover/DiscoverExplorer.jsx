@@ -431,15 +431,33 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             </div>
           )}
 
-          {/* ── Trending Tools — Compact 4:5 cards (more items) ── */}
+          {/* ── Trending Tools — Full-width swipeable cards ── */}
           {(() => {
-            const trendingItems = items.filter(i => i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.2);
+            const trendingItems = items.filter(i => 
+              i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.0 ||
+              ["Notion", "Slack", "Figma", "ChatGPT", "Canva", "Trello", "Asana", "Zoom", "Discord", "Spotify"].some(name => 
+                i.title?.toLowerCase().includes(name.toLowerCase())
+              )
+            );
             return trendingItems.length > 0 && (
-              <DiscoverSection title="🔥 Trending Tools" subtitle="Hot right now">
-                {trendingItems.slice(0, 20).map(item => (
-                  <CompactToolCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
-                ))}
-              </DiscoverSection>
+              <div className="mb-8">
+                <div className="flex items-center gap-2 px-4 mb-4">
+                  <span className="text-lg">🔥</span>
+                  <h2 className="text-[15px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                    Trending Tools
+                  </h2>
+                  <span className="text-xs ml-auto" style={{ color: "var(--text-hint)" }}>
+                    {trendingItems.length} apps
+                  </span>
+                </div>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory">
+                  {trendingItems.slice(0, 25).map(item => (
+                    <div key={item.id} className="snap-center" style={{ width: "85vw", maxWidth: 360 }}>
+                      <CompactToolCard item={item} onClick={() => setPreviewItem(item)} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             );
           })()}
 

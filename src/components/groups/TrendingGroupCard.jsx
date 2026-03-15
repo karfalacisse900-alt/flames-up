@@ -29,21 +29,18 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     const playVideo = async () => {
       if (videoRef.current && currentPost?.video_url) {
         try {
-          videoRef.current.muted = true;
+          videoRef.current.muted = isMuted;
           videoRef.current.currentTime = 0;
           videoRef.current.load();
-          const playPromise = videoRef.current.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
+          await videoRef.current.play();
         } catch (err) {
           console.log("Video autoplay blocked:", err);
         }
       }
     };
-    const timer = setTimeout(playVideo, 100);
+    const timer = setTimeout(playVideo, 150);
     return () => clearTimeout(timer);
-  }, [currentIndex, currentPost?.video_url]);
+  }, [currentIndex, currentPost?.video_url, isMuted]);
 
   const isVideo = !!currentPost?.video_url;
   const mediaUrl = isVideo ? currentPost?.video_url : (currentPost?.media_urls?.[0] || currentPost?.image_url);
@@ -64,15 +61,20 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         {mediaUrl ? (
           isVideo ? (
             <video
-              key={currentIndex}
+              key={`video-${currentIndex}-${mediaUrl}`}
               ref={videoRef}
               src={mediaUrl}
               className="w-full h-full object-cover"
-              muted
+              muted={isMuted}
               playsInline
               loop
               autoPlay
               preload="auto"
+              onLoadedData={() => {
+                if (videoRef.current) {
+                  videoRef.current.play().catch(() => {});
+                }
+              }}
             />
           ) : (
             <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
