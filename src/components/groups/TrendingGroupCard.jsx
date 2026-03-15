@@ -64,14 +64,21 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         {mediaUrl ? (
           isVideo ? (
             <video
-              key={`${currentIndex}-${mediaUrl}`}
+              key={`video-${group.id}-${currentIndex}`}
               ref={videoRef}
               src={mediaUrl}
               className="w-full h-full object-cover"
               muted={isMuted}
               playsInline
               loop
-              preload="metadata"
+              autoPlay
+              preload="auto"
+              onLoadedData={(e) => {
+                if (e.target) {
+                  e.target.muted = isMuted;
+                  e.target.play().catch(() => {});
+                }
+              }}
             />
           ) : (
             <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
