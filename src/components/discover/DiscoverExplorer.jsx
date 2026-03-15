@@ -5,9 +5,7 @@ import DiscoverLogo from "./DiscoverLogo";
 import BookmarkButton from "./BookmarkButton";
 import AppPreviewDrawer from "./AppPreviewDrawer";
 import DiscoverSection from "./DiscoverSection";
-import WideCard from "./WideCard";
-import VerticalCard from "./VerticalCard";
-import SquareCard from "./SquareCard";
+import CompactToolCard from "./CompactToolCard";
 
 const CATEGORY_GRADIENTS = {
   productivity:    ["#6366f1", "#8b5cf6"],
@@ -48,12 +46,12 @@ function PulseDot() {
   );
 }
 
-// ── Large Hero Card ──────────────────────────────────────────────────────────
-function HeroCard({ item, user, onPreview }) {
+// ── Large Hero Card (for all non-trending sections) ────────────────────────
+function HeroCard({ item, onPreview }) {
   return (
     <div
       onClick={() => onPreview(item)}
-      className="shrink-0 cursor-pointer"
+      className="shrink-0 cursor-pointer active:scale-[0.98] transition-transform duration-150"
       style={{ width: 270 }}
     >
       <div
@@ -68,14 +66,14 @@ function HeroCard({ item, user, onPreview }) {
         <div style={{ position: "absolute", top: -30, right: -30, width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.1)", filter: "blur(25px)" }} />
         <div style={{ position: "absolute", bottom: -20, left: 20, width: 80, height: 80, borderRadius: "50%", background: "rgba(0,0,0,0.12)", filter: "blur(18px)" }} />
 
-        {/* App logo */}
+        {/* App logo - top left, smaller */}
         <div className="absolute top-5 left-5">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.3)" }}>
-            <DiscoverLogo item={item} size="lg" />
+          <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(12px)", border: "1.5px solid rgba(255,255,255,0.35)" }}>
+            <DiscoverLogo item={item} size="md" />
           </div>
         </div>
 
-        {/* Badges */}
+        {/* Badges top-right */}
         <div className="absolute top-5 right-4 flex flex-col gap-1 items-end">
           {item.is_featured && (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)" }}>
@@ -87,9 +85,9 @@ function HeroCard({ item, user, onPreview }) {
         </div>
 
         {/* Bottom gradient content */}
-        <div className="absolute bottom-0 left-0 right-0 px-5 pt-8 pb-5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)" }}>
-          <h3 className="font-bold text-white text-[15px] leading-tight mb-1 truncate">{item.title}</h3>
-          <p className="text-white/75 text-[11px] leading-snug line-clamp-2 mb-3">{item.description}</p>
+        <div className="absolute bottom-0 left-0 right-0 px-5 pt-8 pb-5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.25) 60%, transparent 100%)" }}>
+          <h3 className="font-bold text-white text-[15px] leading-tight mb-1 line-clamp-1">{item.title}</h3>
+          <p className="text-white/80 text-[11px] leading-snug line-clamp-2 mb-3">{item.description}</p>
 
           {/* Rating + pricing inline */}
           <div className="flex items-center gap-2 mb-3">
@@ -101,29 +99,25 @@ function HeroCard({ item, user, onPreview }) {
               </div>
             )}
             {item.pricing && (
-              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.22)", color: "#fff" }}>
                 {item.pricing}
               </span>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-            {item.link && (
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[11px] font-bold px-3.5 py-1.5 rounded-full text-white"
-                style={{ backgroundColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.3)" }}
-              >
-                {item.pricing === "Free" ? "Try Free" : "Open"} <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-            {user && (
-              <BookmarkButton user={user} itemType="app" itemId={item.id} itemTitle={item.title} itemSubtitle={item.brand_name} itemImageUrl={item.logo_url} compact />
-            )}
-          </div>
+          {/* Link button */}
+          {item.link && (
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3.5 py-1.5 rounded-full text-white active:scale-95 transition-transform"
+              style={{ backgroundColor: "rgba(255,255,255,0.28)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)" }}
+            >
+              {item.pricing === "Free" ? "Try Free" : "Open"} <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
         </div>
       </div>
 
@@ -430,31 +424,32 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory">
                 {featured.map(item => (
                   <div key={item.id} className="snap-start">
-                    <HeroCard item={item} user={user} onPreview={setPreviewItem} />
+                    <HeroCard item={item} onPreview={setPreviewItem} />
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── Stable sections with 4:5 cards ── */}
+          {/* ── Trending Tools — Compact 4:5 cards (more items) ── */}
           {(() => {
-            const trendingItems = items.filter(i => i.is_featured);
+            const trendingItems = items.filter(i => i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.2);
             return trendingItems.length > 0 && (
               <DiscoverSection title="🔥 Trending Tools" subtitle="Hot right now">
-                {trendingItems.slice(0, 10).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {trendingItems.slice(0, 20).map(item => (
+                  <CompactToolCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
                 ))}
               </DiscoverSection>
             );
           })()}
 
+          {/* ── All other sections use Hero Cards ── */}
           {(() => {
             const aiItems = items.filter(i => i.tags?.some(t => /ai|gpt|llm|artificial|ml/i.test(t)) || i.description?.toLowerCase().includes("ai"));
             return aiItems.length > 0 && (
               <DiscoverSection title="🤖 AI-Powered" subtitle="Supercharge with AI">
-                {aiItems.slice(0, 10).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {aiItems.slice(0, 12).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -464,8 +459,8 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             const prodItems = items.filter(i => i.category === "productivity");
             return prodItems.length > 0 && (
               <DiscoverSection title="⚡ Productivity" subtitle="Work smarter">
-                {prodItems.slice(0, 8).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {prodItems.slice(0, 10).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -475,8 +470,8 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             const learnItems = items.filter(i => i.category === "learning");
             return learnItems.length > 0 && (
               <DiscoverSection title="📚 Study & Learning" subtitle="Expand your knowledge">
-                {learnItems.slice(0, 8).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {learnItems.slice(0, 10).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -486,8 +481,8 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             const devItems = items.filter(i => i.category === "developer_tools");
             return devItems.length > 0 && (
               <DiscoverSection title="🛠️ Developer Tools" subtitle="Build better">
-                {devItems.slice(0, 8).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {devItems.slice(0, 10).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -498,7 +493,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return entertainItems.length > 0 && (
               <DiscoverSection title="🎬 Entertainment" subtitle="Relax & enjoy">
                 {entertainItems.slice(0, 10).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -508,8 +503,8 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             const healthItems = items.filter(i => i.category === "health");
             return healthItems.length > 0 && (
               <DiscoverSection title="💪 Health & Wellness" subtitle="Stay healthy">
-                {healthItems.slice(0, 8).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {healthItems.slice(0, 10).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -520,7 +515,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return lifestyleItems.length > 0 && (
               <DiscoverSection title="🌿 Lifestyle" subtitle="Live better">
                 {lifestyleItems.slice(0, 10).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -530,8 +525,8 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             const financeItems = items.filter(i => i.category === "finance");
             return financeItems.length > 0 && (
               <DiscoverSection title="💰 Finance" subtitle="Manage your money">
-                {financeItems.slice(0, 8).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                {financeItems.slice(0, 10).map(item => (
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
@@ -542,7 +537,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return socialItems.length > 0 && (
               <DiscoverSection title="👥 Social" subtitle="Connect with others">
                 {socialItems.slice(0, 10).map(item => (
-                  <WideCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
+                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
                 ))}
               </DiscoverSection>
             );
