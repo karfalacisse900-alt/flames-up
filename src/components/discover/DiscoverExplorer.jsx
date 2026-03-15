@@ -433,12 +433,30 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
 
           {/* ── Trending Tools — Compact 4:5 cards (more items) ── */}
           {(() => {
-            const trendingItems = items.filter(i => i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.2);
+            const slowlyApp = {
+              id: "slowly-app",
+              title: "Slowly",
+              description: "Pen pal redefined. Connect with people around the world through thoughtful letters.",
+              category: "social",
+              logo_url: "https://play-lh.googleusercontent.com/9NvLpj8LHYC2C_9_bQhvC0QH3YcLFPaJNQlLQvdnlH9yZfQ_qJW6lHlQKJY8Xnl0MA=w240-h480",
+              link: "https://slowly.app",
+              is_featured: true,
+              is_new: false,
+              avg_rating: 4.6,
+              review_count: 128000,
+              pricing: "Free",
+              tags: ["social", "pen-pal", "letters"]
+            };
+            const trendingItems = [slowlyApp, ...items.filter(i => i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.2)];
             return trendingItems.length > 0 && (
               <DiscoverSection title="🔥 Trending Tools" subtitle="Hot right now">
-                {trendingItems.slice(0, 20).map(item => (
-                  <CompactToolCard key={item.id} item={item} onClick={() => setPreviewItem(item)} />
-                ))}
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory">
+                  {trendingItems.slice(0, 20).map(item => (
+                    <div key={item.id} className="snap-start">
+                      <CompactToolCard item={item} onClick={() => setPreviewItem(item)} />
+                    </div>
+                  ))}
+                </div>
               </DiscoverSection>
             );
           })()}

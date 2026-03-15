@@ -29,9 +29,10 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     const playVideo = async () => {
       if (videoRef.current && currentPost?.video_url) {
         try {
-          videoRef.current.muted = true;
+          videoRef.current.muted = isMuted;
           videoRef.current.currentTime = 0;
           videoRef.current.load();
+          await new Promise(resolve => setTimeout(resolve, 150));
           const playPromise = videoRef.current.play();
           if (playPromise !== undefined) {
             await playPromise;
@@ -41,9 +42,8 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         }
       }
     };
-    const timer = setTimeout(playVideo, 100);
-    return () => clearTimeout(timer);
-  }, [currentIndex, currentPost?.video_url]);
+    playVideo();
+  }, [currentIndex, currentPost?.video_url, isMuted]);
 
   const isVideo = !!currentPost?.video_url;
   const mediaUrl = isVideo ? currentPost?.video_url : (currentPost?.media_urls?.[0] || currentPost?.image_url);
@@ -64,15 +64,14 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         {mediaUrl ? (
           isVideo ? (
             <video
-              key={currentIndex}
+              key={`${currentIndex}-${mediaUrl}`}
               ref={videoRef}
               src={mediaUrl}
               className="w-full h-full object-cover"
-              muted
+              muted={isMuted}
               playsInline
               loop
-              autoPlay
-              preload="auto"
+              preload="metadata"
             />
           ) : (
             <img src={mediaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
