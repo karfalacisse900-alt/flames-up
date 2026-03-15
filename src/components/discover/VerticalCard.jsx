@@ -6,7 +6,7 @@ export default function VerticalCard({ item, onClick }) {
     <div
       onClick={onClick}
       className="flex-shrink-0 snap-start cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
-      style={{ width: 200 }}>
+      style={{ width: 180 }}>
       <div
         className="rounded-2xl overflow-hidden"
         style={{
@@ -14,8 +14,8 @@ export default function VerticalCard({ item, onClick }) {
           border: "1px solid var(--border-light)",
           boxShadow: "var(--elevation-2)",
         }}>
-        {/* 9:16 Image */}
-        <div className="relative w-full" style={{ aspectRatio: "9/16", backgroundColor: "var(--bg-subtle)" }}>
+        {/* 4:5 Image */}
+        <div className="relative w-full" style={{ aspectRatio: "4/5", backgroundColor: "var(--bg-subtle)" }}>
           {item.logo_url ? (
             <img
               src={item.logo_url}
