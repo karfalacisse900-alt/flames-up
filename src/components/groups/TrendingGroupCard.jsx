@@ -27,21 +27,30 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
 
   useEffect(() => {
     const playVideo = async () => {
-      if (videoRef.current && currentPost?.video_url) {
-        try {
-          videoRef.current.muted = isMuted;
-          videoRef.current.currentTime = 0;
-          videoRef.current.load();
-          await new Promise(resolve => setTimeout(resolve, 150));
-          const playPromise = videoRef.current.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
-        } catch (err) {
-          console.log("Video autoplay blocked:", err);
+      const video = videoRef.current;
+      if (!video || !currentPost?.video_url) return;
+      
+      try {
+        video.muted = true;
+        video.currentTime = 0;
+        
+        // Force reload and wait for canplay
+        video.load();
+        await new Promise((resolve) => {
+          video.oncanplay = resolve;
+          setTimeout(resolve, 500); // fallback
+        });
+        
+        const playPromise = video.play();
+        if (playPromise) {
+          await playPromise;
+          video.muted = isMuted;
         }
+      } catch (err) {
+        console.log("Video play error:", err);
       }
     };
+    
     playVideo();
   }, [currentIndex, currentPost?.video_url, isMuted]);
 

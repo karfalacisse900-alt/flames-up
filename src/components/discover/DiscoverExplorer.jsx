@@ -449,15 +449,23 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             };
             const trendingItems = [slowlyApp, ...items.filter(i => i.is_featured || i.is_new || (i.avg_rating || 0) >= 4.2)];
             return trendingItems.length > 0 && (
-              <DiscoverSection title="🔥 Trending Tools" subtitle="Hot right now">
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory">
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-3 px-4">
+                  <div>
+                    <h2 className="text-base font-bold flex items-center gap-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                      🔥 Trending Tools
+                    </h2>
+                    <p className="text-xs" style={{ color: "var(--text-hint)" }}>Hot right now</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
                   {trendingItems.slice(0, 20).map(item => (
-                    <div key={item.id} className="snap-start">
+                    <div key={item.id} className="snap-center shrink-0">
                       <CompactToolCard item={item} onClick={() => setPreviewItem(item)} />
                     </div>
                   ))}
                 </div>
-              </DiscoverSection>
+              </div>
             );
           })()}
 

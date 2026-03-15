@@ -7,8 +7,8 @@ export default function CompactToolCard({ item, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="shrink-0 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-      style={{ width: "calc(100vw - 80px)", maxWidth: 340 }}
+      className="cursor-pointer active:scale-[0.98] transition-transform duration-150"
+      style={{ width: "calc(100vw - 80px)", maxWidth: 340, minWidth: 280 }}
     >
       <div
         className="rounded-[32px] overflow-hidden"
