@@ -4,28 +4,11 @@ import DiscoverLogo from "./DiscoverLogo";
 
 // Compact 4:5 card inspired by group swiper design
 export default function CompactToolCard({ item, onClick }) {
-  const videoRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const playVideo = async () => {
-      if (videoRef.current && item.preview_video_url) {
-        try {
-          videoRef.current.muted = true;
-          videoRef.current.currentTime = 0;
-          await videoRef.current.play();
-        } catch (err) {
-          console.log("Video autoplay blocked:", err);
-        }
-      }
-    };
-    playVideo();
-  }, [item.preview_video_url]);
-
   return (
     <div
       onClick={onClick}
       className="shrink-0 cursor-pointer active:scale-95 transition-transform duration-150"
-      style={{ width: "100%", maxWidth: 320 }}
+      style={{ width: 160 }}
     >
       <div
         className="rounded-2xl overflow-hidden"
@@ -35,30 +18,14 @@ export default function CompactToolCard({ item, onClick }) {
           boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
         }}
       >
-        {/* 4:5 Media container */}
+        {/* 4:5 Image container */}
         <div
-          className="relative w-full overflow-hidden"
+          className="relative w-full flex items-center justify-center"
           style={{
             aspectRatio: "4/5",
             background: `linear-gradient(135deg, ${getGradient(item.category)[0]}, ${getGradient(item.category)[1]})`,
           }}
         >
-          {/* Video or gradient background */}
-          {item.preview_video_url ? (
-            <>
-              <video
-                ref={videoRef}
-                src={item.preview_video_url}
-                className="absolute inset-0 w-full h-full object-cover"
-                muted
-                playsInline
-                loop
-                autoPlay
-                preload="auto"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
-            </>
-          ) : null}
           {/* Logo positioned top-left */}
           <div className="absolute top-3 left-3">
             <div
