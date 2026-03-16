@@ -67,10 +67,10 @@ export default function CreatePostFlow() {
     // Guard: must not already be posting or succeeded
     if (isPosting || postResult === "success") return;
 
-    // Guard: user must be loaded
+    // Guard: user must be loaded — redirect to login if missing
     if (!user) {
-      setPostResult("error");
-      setPostError("Not logged in. Please refresh.");
+      alert("No user session found. Redirecting to login...");
+      base44.auth.redirectToLogin(window.location.href);
       return;
     }
 
