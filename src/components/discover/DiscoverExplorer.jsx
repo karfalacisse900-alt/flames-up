@@ -291,7 +291,6 @@ const ROWS = [
 ];
 
 export default function DiscoverExplorer({ items, isLoading, user, onItemClick, onChipSearch }) {
-  const [previewItem, setPreviewItem] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
 
