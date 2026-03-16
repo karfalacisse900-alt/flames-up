@@ -390,7 +390,7 @@ export default function CommunityFeed({ user }) {
 
               {showPicker && (
                 <div className="absolute right-0 top-9 w-64 rounded-2xl shadow-lg z-50 overflow-hidden"
-                  style={{ backgroundColor: "var(--bg-modal)", border: "1px solid var(--border-light)", backdropFilter: "blur(12px)" }}>
+                  style={{ backgroundColor: "#FFFFFF", border: "1px solid #E2E8F0" }}>
                   {/* Global & Nearby */}
                   <div className="p-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                     <button onClick={() => { setActiveFilter("global"); setShowPicker(false); }}
