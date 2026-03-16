@@ -136,8 +136,11 @@ export default function CreatePostFlow() {
       setPostResult("success");
       setTimeout(() => navigate(createPageUrl("Home")), 1200);
     } catch (err) {
+      const errMsg = err?.message || err?.toString() || "Unknown error";
+      // Show raw error on screen so we can diagnose it
+      alert("POST FAILED:\n\n" + errMsg + "\n\nCheck that you are logged in and try again.");
       setPostResult("error");
-      setPostError(err?.message || "Something went wrong. Tap to retry.");
+      setPostError(errMsg);
     } finally {
       setIsPosting(false);
     }
