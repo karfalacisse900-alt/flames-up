@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Type, Music, Mic, Sliders, Volume2, Wand2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Type, Music, Mic, Sliders, Volume2, Wand2, Tag } from "lucide-react";
 import MusicLibrarySheet from "../../music/MusicLibrarySheet";
+import TagEditor from "../TagEditor";
 
 const TOOLS = [
   { id: "text",    icon: Type,    label: "Text" },
@@ -9,6 +10,7 @@ const TOOLS = [
   { id: "adjust",  icon: Sliders, label: "Adjust" },
   { id: "volume",  icon: Volume2, label: "Volume" },
   { id: "effects", icon: Wand2,   label: "FX" },
+  { id: "tag",     icon: Tag,     label: "Tag" },
 ];
 
 const EFFECTS = [
@@ -232,7 +234,6 @@ export default function CreatorEditorStep({
                 className="w-full py-3 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2"
                 style={{ backgroundColor: "#2E6B4F" }}
                 onClick={() => {
-                  // Voice recording functionality would go here
                   alert("Voice recording feature will be implemented soon!");
                 }}
               >
@@ -241,6 +242,16 @@ export default function CreatorEditorStep({
             </div>
           )}
         </div>
+      )}
+
+      {/* Tag Editor overlay */}
+      {activeTool === "tag" && currentItem && (
+        <TagEditor
+          imageUrl={currentItem.preview}
+          existingTags={currentItem.edits?.tags || []}
+          onSave={(tags) => { applyEdits({ tags }); setActiveTool(null); }}
+          onClose={() => setActiveTool(null)}
+        />
       )}
 
       <MusicLibrarySheet
