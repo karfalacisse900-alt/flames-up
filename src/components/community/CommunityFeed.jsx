@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
+import { Plus, ArrowUp, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
 import FeedMenuDrawer from "./FeedMenuDrawer";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
@@ -363,8 +363,6 @@ export default function CommunityFeed({ user }) {
             >
               <Menu className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
             </button>
-            <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-            <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>For You</p>
           </div>
 
           <div className="flex items-center gap-2">

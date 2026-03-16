@@ -421,9 +421,9 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               </div>
               
               {/* Horizontal scroll for featured */}
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory pb-2">
                 {featured.map(item => (
-                  <div key={item.id} className="snap-start">
+                  <div key={item.id} className="snap-start shrink-0">
                     <HeroCard item={item} onPreview={setPreviewItem} />
                   </div>
                 ))}

@@ -83,7 +83,7 @@ export default function Discover() {
       {/* ── Sticky Header ── */}
       <div
         className="sticky top-0 z-30 px-4 pt-4 pb-3"
-        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)", backdropFilter: "blur(16px)" }}
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)" }}
       >
         {/* Greeting row */}
         <div className="flex items-center justify-between mb-3">
