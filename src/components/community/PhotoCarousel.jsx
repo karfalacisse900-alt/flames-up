@@ -71,10 +71,10 @@ export default function PhotoCarousel({ images, tags = [], aspectRatio = "1/1" }
     resetTimer();
   };
 
-  // Group tags by image index
+  // Group tags by image index (for single images, imageIndex may be undefined — treat as 0)
   const getTagsForImage = (index) => {
     if (!tags || !Array.isArray(tags)) return [];
-    return tags.filter(t => t.imageIndex === index);
+    return tags.filter(t => (t.imageIndex === index) || (index === 0 && t.imageIndex == null));
   };
 
   if (!images || count === 0) return null;
