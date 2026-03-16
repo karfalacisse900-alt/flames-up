@@ -168,7 +168,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           <div className="flex items-center gap-2.5 px-4 pt-4 pb-3">
             <div className="shrink-0">
               {showAuthor ? (
-                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
+                <Link to={`/user/${encodeURIComponent(post.author_email)}`}>
                   {post.author_avatar_url ? (
                     <img src={post.author_avatar_url} alt={post.author_name}
                       loading="lazy" decoding="async"
