@@ -11,6 +11,7 @@ import Live from './pages/Live';
 import UserProfile from './pages/UserProfile';
 import PlaceDetail from './pages/PlaceDetail';
 import ListenDontJudge from './pages/ListenDontJudge';
+import LiveNearby from './pages/LiveNearby';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];

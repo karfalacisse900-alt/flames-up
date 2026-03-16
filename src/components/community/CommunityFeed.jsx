@@ -2,7 +2,8 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X } from "lucide-react";
+import { Plus, ArrowUp, Zap, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
+import FeedMenuDrawer from "./FeedMenuDrawer";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
