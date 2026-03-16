@@ -121,7 +121,7 @@ export default function PlacesPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(242,237,228,0.97)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--border-subtle)" }}>
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="relative overflow-hidden px-4 pt-4 pb-3">
           {/* Organic blobs */}
           <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
