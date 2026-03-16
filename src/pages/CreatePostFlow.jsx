@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, BookMarked, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, BookMarked, Send, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { useLocationDetection } from "../components/hooks/useLocationDetection";
@@ -30,12 +30,13 @@ export default function CreatePostFlow() {
   const urlParams = new URLSearchParams(window.location.search);
   const presetLocation = urlParams.get("location") ? JSON.parse(decodeURIComponent(urlParams.get("location"))) : null;
 
-  // step: 1 = camera/upload, 2 = edit + settings combined
+  // step: 1 = camera/upload, 2 = editor/effects, 3 = caption/settings/post
   const [step, setStep] = useState(1);
 
   const [mediaItems, setMediaItems] = useState([]);
   const [currentEditingIndex, setCurrentEditingIndex] = useState(0);
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [isPosting, setIsPosting] = useState(false);
 
   const [postSettings, setPostSettings] = useState({
     caption: "",
@@ -54,15 +55,12 @@ export default function CreatePostFlow() {
     isAIGenerated: false,
   });
 
-  const [isPosting, setIsPosting] = useState(false);
-
   const { coords: gpsCoords, locationInfo: gpsLocation } = useLocationDetection({ autoDetect: true });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => navigate(createPageUrl("Home")));
   }, []);
 
-  // ── post logic ────────────────────────────────────────────────────────────
   const doPost = async (asDraft = false) => {
     if (!user || mediaItems.length === 0) {
       alert("Please add at least one media item");
@@ -73,7 +71,6 @@ export default function CreatePostFlow() {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
 
-      // Collect all tags from all media items
       const allTags = [];
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
@@ -92,7 +89,6 @@ export default function CreatePostFlow() {
 
       const manualLoc = postSettings.location;
       const hashtagStr = (postSettings.hashtags || []).map((t) => `#${t}`).join(" ");
-      // Strip HTML from ReactQuill output so caption renders correctly in feed
       const rawCaption = stripHtml(postSettings.caption || "");
 
       const postData = {
@@ -133,58 +129,105 @@ export default function CreatePostFlow() {
     }
   };
 
-  // ── loading ───────────────────────────────────────────────────────────────
+  // Loading
   if (!user) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: "#000" }}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: "#000" }}>
         <Loader2 className="w-8 h-8 text-white animate-spin" />
       </div>
     );
   }
 
-  // ── Step 1: Full-screen camera / upload ───────────────────────────────────
+  // ── STEP 1: Camera / Upload ───────────────────────────────────────────────
   if (step === 1) {
     return (
-      <CameraUploadStep
-        onMediaSelected={(items) => {
-          setMediaItems(items);
-          setStep(2);
-        }}
-        onClose={() => navigate(createPageUrl("Home"))}
-      />
+      <div className="fixed inset-0 z-50">
+        <CameraUploadStep
+          onMediaSelected={(items) => {
+            setMediaItems(items);
+            setStep(2);
+          }}
+          onClose={() => navigate(createPageUrl("Home"))}
+        />
+      </div>
     );
   }
 
-  // ── Step 2: Editor + Settings in one screen ───────────────────────────────
-  return (
-    <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: "#000" }}>
+  // ── STEP 2: Editor / Effects ──────────────────────────────────────────────
+  if (step === 2) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#000" }}>
+        {/* Header */}
+        <div
+          className="flex-shrink-0 flex items-center gap-3 px-4"
+          style={{
+            paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
+            paddingBottom: 12,
+            backgroundColor: "#0d0d0d",
+            borderBottom: "1px solid #1e1e1e",
+          }}
+        >
+          <button
+            onClick={() => setStep(1)}
+            className="w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid #333" }}
+          >
+            <ArrowLeft className="w-4 h-4 text-white" />
+          </button>
 
-      {/* ── Header ── */}
+          <h1 className="flex-1 text-center text-base font-bold text-white" style={{ fontFamily: "var(--font-serif)" }}>
+            Edit
+          </h1>
+
+          <button
+            onClick={() => setStep(3)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold text-white"
+            style={{ backgroundColor: "var(--accent-primary)" }}
+          >
+            Next <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Editor fills remaining space */}
+        <div className="flex-1 overflow-hidden">
+          <CreatorEditorStep
+            mediaItems={mediaItems}
+            setMediaItems={setMediaItems}
+            currentEditingIndex={currentEditingIndex}
+            setCurrentEditingIndex={setCurrentEditingIndex}
+            selectedTrack={selectedTrack}
+            onSelectTrack={setSelectedTrack}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── STEP 3: Caption / Settings / Post ─────────────────────────────────────
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Header */}
       <div
         className="flex-shrink-0 flex items-center gap-3 px-4"
         style={{
           paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
           paddingBottom: 12,
-          backgroundColor: "#0d0d0d",
-          borderBottom: "1px solid #1e1e1e",
+          backgroundColor: "var(--bg-card)",
+          borderBottom: "1px solid var(--border-light)",
         }}
       >
         <button
-          onClick={() => setStep(1)}
+          onClick={() => setStep(2)}
           className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid #333" }}
+          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}
         >
-          <ArrowLeft className="w-4 h-4 text-white" />
+          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
         </button>
 
-        <h1
-          className="flex-1 text-center text-base font-bold text-white"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
+        <h1 className="flex-1 text-center text-base font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
           New Post
         </h1>
 
-        {/* Post button right in the header */}
         <button
           onClick={() => doPost(false)}
           disabled={isPosting}
@@ -195,45 +238,29 @@ export default function CreatePostFlow() {
         </button>
       </div>
 
-      {/* ── Content: Editor top half, Settings bottom half ── */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        {/* Editor section (dark) */}
-        <div style={{ backgroundColor: "#000" }}>
-          <CreatorEditorStep
-            mediaItems={mediaItems}
-            setMediaItems={setMediaItems}
-            currentEditingIndex={currentEditingIndex}
-            setCurrentEditingIndex={setCurrentEditingIndex}
-            selectedTrack={selectedTrack}
-            onSelectTrack={setSelectedTrack}
-          />
-        </div>
+      {/* Scrollable settings */}
+      <div className="flex-1 overflow-y-auto">
+        <PostSettingsPanel
+          user={user}
+          postSettings={postSettings}
+          setPostSettings={setPostSettings}
+          mediaItems={mediaItems}
+          gpsLocation={gpsLocation}
+        />
 
-        {/* Settings section (light) */}
-        <div style={{ backgroundColor: "var(--bg-app)" }}>
-          <PostSettingsPanel
-            user={user}
-            postSettings={postSettings}
-            setPostSettings={setPostSettings}
-            mediaItems={mediaItems}
-            gpsLocation={gpsLocation}
-          />
-        </div>
-
-        {/* Draft button at bottom */}
+        {/* Save Draft button */}
         <div
-          className="flex gap-3 px-4"
+          className="px-4"
           style={{
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
             paddingTop: 12,
-            backgroundColor: "var(--bg-app)",
             borderTop: "1px solid var(--border-light)",
           }}
         >
           <button
             onClick={() => doPost(true)}
             disabled={isPosting}
-            className="flex-1 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}
           >
             <BookMarked className="w-4 h-4" />
