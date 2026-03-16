@@ -205,6 +205,11 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                 <div
                   className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
                   style={{ backgroundColor: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E2E8F0", animation: "fadeIn 0.12s ease" }}>
+                  {post.link && (
+                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left font-semibold" style={{ color: "var(--accent-primary)" }}>
+                      <ExternalLink className="w-3.5 h-3.5" /> Open link
+                    </button>
+                  )}
                   <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
                     <LinkIcon className="w-3.5 h-3.5" /> Copy link
                   </button>
@@ -395,6 +400,11 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                 <div
                   className="absolute right-0 top-full mt-2 rounded-2xl overflow-hidden z-40 min-w-[160px]"
                   style={{ backgroundColor: "#FFFFFF", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid #E2E8F0" }}>
+                  {post.link && (
+                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left font-semibold hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--accent-primary)" }}>
+                      <ExternalLink className="w-4 h-4" /> Open link
+                    </button>
+                  )}
                   <button onClick={handleCopyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
                     <LinkIcon className="w-4 h-4" /> Copy link
                   </button>
