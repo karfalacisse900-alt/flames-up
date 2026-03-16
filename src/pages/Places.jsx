@@ -202,7 +202,7 @@ export default function PlacesPage() {
           transition={{ duration: 0.2 }}
           style={{ height: "calc(100vh - 140px)", position: "relative" }}
         >
-          <PlacesMapboxView onOpenPlace={openPlace} />
+          <PlacesMapboxView onOpenPlace={openPlace} user={user} />
         </motion.div>
       )}
       </AnimatePresence>
