@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
 
@@ -201,10 +202,15 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
                 <MoreHorizontal className="w-4 h-4" />
               </button>
+              <AnimatePresence>
               {showMenu && (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.88, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.88, y: -8 }}
+                  transition={{ duration: 0.16, ease: [0.34, 1.56, 0.64, 1] }}
                   className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E2E8F0", animation: "fadeIn 0.12s ease" }}>
+                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E2E8F0", transformOrigin: "top right" }}>
                   {post.link && (
                     <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left font-semibold" style={{ color: "var(--accent-primary)" }}>
                       <ExternalLink className="w-3.5 h-3.5" /> Open link
