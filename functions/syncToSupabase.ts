@@ -3,41 +3,79 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-async function supabaseUpsert(table, record) {
-  const url = `${SUPABASE_URL}/rest/v1/${table}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_SERVICE_ROLE_KEY,
-      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      "Prefer": "resolution=merge-duplicates",
-    },
-    body: JSON.stringify(record),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
+// Retry a fetch-based operation up to `maxRetries` times with exponential backoff
+async function withRetry(fn, maxRetries = 3, label = "operation") {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      console.warn(`[syncToSupabase] ${label} failed (attempt ${attempt}/${maxRetries}): ${err.message}`);
+      if (attempt < maxRetries) {
+        const delay = 500 * Math.pow(2, attempt - 1); // 500ms, 1s, 2s
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
   }
+  throw lastError;
+}
+
+async function supabaseUpsert(table, record) {
+  await withRetry(async () => {
+    const url = `${SUPABASE_URL}/rest/v1/${table}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Prefer": "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(record),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
+    }
+  }, 3, `upsert:${table}`);
 }
 
 async function supabaseDelete(table, id) {
-  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
-  const res = await fetch(url, {
-    method: "DELETE",
+  await withRetry(async () => {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
+    }
+  }, 3, `delete:${table}`);
+}
+
+// Verify Supabase connectivity before proceeding
+async function checkSupabaseConnection() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
     headers: {
       "apikey": SUPABASE_SERVICE_ROLE_KEY,
       "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
     },
   });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
-  }
+  if (!res.ok) throw new Error(`Supabase unreachable: ${res.status}`);
 }
 
 Deno.serve(async (req) => {
   try {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("[syncToSupabase] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      return Response.json({ error: "Supabase credentials not configured" }, { status: 500 });
+    }
+
     const payload = await req.json();
     const { event, data } = payload;
     const entityName = event?.entity_name;
@@ -45,6 +83,9 @@ Deno.serve(async (req) => {
     const id = String(data?.id || event?.entity_id);
 
     console.log(`[syncToSupabase] entity=${entityName} event=${eventType} id=${id}`);
+
+    // Check connection before doing anything
+    await checkSupabaseConnection();
 
     if (eventType === "delete") {
       if (entityName === "Post" || entityName === "CommunityPost") await supabaseDelete("posts", id);
