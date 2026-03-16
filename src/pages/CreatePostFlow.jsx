@@ -257,9 +257,8 @@ export default function CreatePostFlow() {
         >
           <button
             onClick={() => doPost(false)}
-            disabled={isPosting}
-            className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white disabled:opacity-50"
-            style={{ backgroundColor: "var(--accent-primary)" }}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white"
+            style={{ backgroundColor: "var(--accent-primary)", opacity: 1, display: "flex" }}
           >
             {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Share Post</>}
           </button>
