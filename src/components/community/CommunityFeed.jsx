@@ -389,9 +389,10 @@ export default function CommunityFeed({ user }) {
 
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ 
-        background: "linear-gradient(180deg, rgba(242,237,228,0.98), rgba(242,237,228,0.8))", 
-        backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(207,198,188,0.4)"
+        backgroundColor: "var(--bg-nav)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        borderBottom: "1px solid var(--border-subtle)",
       }}>
         <div className="px-4 pt-2.5 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
