@@ -22,7 +22,14 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
   const captureInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
+  const [isMobile] = useState(() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+
   const startCamera = async () => {
+    // On mobile, skip getUserMedia — use native capture input instead
+    if (isMobile) {
+      setCameraActive(false);
+      return;
+    }
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         video: { 
