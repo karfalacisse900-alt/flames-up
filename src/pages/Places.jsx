@@ -192,11 +192,20 @@ export default function PlacesPage() {
       </div>
 
       {/* MAP VIEW */}
+      <AnimatePresence mode="wait">
       {viewMode === "map" && (
-        <div style={{ height: "calc(100vh - 140px)", position: "relative" }}>
+        <motion.div
+          key="map"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          style={{ height: "calc(100vh - 140px)", position: "relative" }}
+        >
           <PlacesMapboxView onOpenPlace={openPlace} />
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* SAVED PLACES VIEW */}
       {viewMode === "saved" && (
