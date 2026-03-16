@@ -1,19 +1,10 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Zap, MapPin, Clock, LayoutList } from "lucide-react";
+import { X, MapPin, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 const MENU_ITEMS = [
-  {
-    id: "main",
-    label: "Main Feed",
-    description: "Posts from everyone",
-    icon: LayoutList,
-    gradient: ["#6366f1", "#8b5cf6"],
-    emoji: "🌍",
-    page: null, // stays on home
-  },
   {
     id: "live_nearby",
     label: "Live Nearby",
