@@ -18,6 +18,7 @@ const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "
 
 
 export default function CommunityFeed({ user }) {
+  const [showFeedMenu, setShowFeedMenu] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
   const [activeFilter, setActiveFilter] = useState("global");
