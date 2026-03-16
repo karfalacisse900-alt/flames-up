@@ -54,7 +54,7 @@ export default function DiscoverMenuDrawer({ activeTab, onChange }) {
             {/* Drawer */}
             <motion.div
               className="fixed left-0 top-0 bottom-0 z-50 w-[75vw] max-w-[280px] flex flex-col"
-              style={{ backgroundColor: "var(--bg-card)", boxShadow: "4px 0 40px rgba(0,0,0,0.2)" }}
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "4px 0 40px rgba(0,0,0,0.2)" }}
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
