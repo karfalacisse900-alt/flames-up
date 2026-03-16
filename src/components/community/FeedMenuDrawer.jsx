@@ -54,7 +54,7 @@ export default function FeedMenuDrawer({ isOpen, onClose }) {
           {/* Drawer */}
           <motion.div
             className="fixed left-0 top-0 bottom-0 z-50 w-[78vw] max-w-[300px] flex flex-col"
-            style={{ backgroundColor: "var(--bg-card)", boxShadow: "4px 0 40px rgba(0,0,0,0.2)" }}
+            style={{ backgroundColor: "#FFFFFF", boxShadow: "4px 0 40px rgba(0,0,0,0.25)" }}
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
