@@ -207,15 +207,27 @@ export default function CameraUploadStep({ onMediaSelected, onClose, setSelected
           }}
         />
         {!cameraActive && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-4"
+          <div className="w-full h-full flex flex-col items-center justify-center gap-6"
             style={{ backgroundColor: "#0d0d0d" }}>
             <div className="w-24 h-24 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "2px dashed rgba(255,255,255,0.2)" }}>
-              <Camera className="w-10 h-10 text-white opacity-30" />
+              <Camera className="w-10 h-10 text-white opacity-50" />
             </div>
-            <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Starting camera...
-            </p>
+            {isMobile ? (
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={() => captureInputRef.current?.click()}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-white text-sm"
+                  style={{ backgroundColor: "var(--accent-primary)" }}>
+                  <Camera className="w-4 h-4" /> Open Camera
+                </button>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Uses your device's native camera</p>
+              </div>
+            ) : (
+              <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>
+                Starting camera...
+              </p>
+            )}
           </div>
         )}
         {/* Vignette */}
