@@ -272,14 +272,26 @@ export default function CreatePostFlow() {
           }}
         >
           <button
+            type="button"
             onClick={() => doPost(false)}
             disabled={isPosting || postResult === "success"}
             className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white"
-            style={{ backgroundColor: postResult === "success" ? "#16a34a" : postResult === "error" ? "#dc2626" : "var(--accent-primary)" }}
+            style={{
+              backgroundColor: postResult === "success" ? "#16a34a" : postResult === "error" ? "#dc2626" : "var(--accent-primary)",
+              opacity: isPosting ? 0.8 : 1,
+              pointerEvents: postResult === "success" ? "none" : "auto",
+            }}
           >
-            {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : postResult === "success" ? "✓ Post Shared!" : postResult === "error" ? `✗ ${postError || "Failed — tap to retry"}` : <><Send className="w-4 h-4" /> Share Post</>}
+            {isPosting
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Posting…</>
+              : postResult === "success"
+              ? "✓ Post Shared!"
+              : postResult === "error"
+              ? `✗ ${postError || "Failed — tap to retry"}`
+              : <><Send className="w-4 h-4" /> Share Post</>}
           </button>
           <button
+            type="button"
             onClick={() => doPost(true)}
             disabled={isPosting}
             className="w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
