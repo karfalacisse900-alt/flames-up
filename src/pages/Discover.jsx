@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
-import { Search, X, Compass, Lightbulb, ArrowLeft } from "lucide-react";
+import { Search, X, ArrowLeft } from "lucide-react";
+import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
 import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
