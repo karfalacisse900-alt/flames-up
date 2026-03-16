@@ -233,14 +233,15 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                     </button>
                   )}
                   {!isOwnPost && (
-                    <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
-                      <Flag className="w-3.5 h-3.5" /> Report post
-                    </button>
+                   <button onClick={handleReport} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#E05C7A" }}>
+                     <Flag className="w-3.5 h-3.5" /> Report post
+                   </button>
                   )}
-                </div>
-              )}
-            </div>
-          </div>
+                  </motion.div>
+                  )}
+                  </AnimatePresence>
+                  </div>
+                  </div>
 
           {/* Big centered text */}
           <div className="px-5 pb-5 text-center">
@@ -402,10 +403,15 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               <button onClick={() => setShowMenu(v => !v)} className="p-2 rounded-full hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-hint)" }}>
                 <MoreHorizontal className="w-5 h-5" />
               </button>
+              <AnimatePresence>
               {showMenu && (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.88, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.88, y: -8 }}
+                  transition={{ duration: 0.16, ease: [0.34, 1.56, 0.64, 1] }}
                   className="absolute right-0 top-full mt-2 rounded-2xl overflow-hidden z-40 min-w-[160px]"
-                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid #E2E8F0" }}>
+                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid #E2E8F0", transformOrigin: "top right" }}>
                   {post.link && (
                     <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left font-semibold hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--accent-primary)" }}>
                       <ExternalLink className="w-4 h-4" /> Open link
@@ -432,8 +438,9 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
                       <Flag className="w-4 h-4" /> Report post
                     </button>
                   )}
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
