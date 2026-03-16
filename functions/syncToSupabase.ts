@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
       else if (entityName === "Group") await supabaseDelete("communities", rawId);
       else if (entityName === "CommunityComment") await supabaseDelete("comments", rawId);
       else if (entityName === "Follow") await supabaseDelete("followers", rawId);
+      else if (entityName === "CommunityComment") await supabaseDelete("comments", rawId);
       return Response.json({ ok: true, action: "delete", entity: entityName });
     }
 
