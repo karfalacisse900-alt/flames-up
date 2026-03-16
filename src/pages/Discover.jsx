@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Search, X, ArrowLeft } from "lucide-react";
 import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
