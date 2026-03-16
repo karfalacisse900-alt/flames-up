@@ -36,8 +36,8 @@ export default function PlacesPage() {
     queryKey: ["placeFeedPosts"],
     queryFn: async () => {
       const all = await base44.entities.CommunityPost.list("-created_date", 100);
-      // Only show posts with a location
-      return all.filter(p => !p.group_id && (p.location_name || p.location_city));
+      // Only show posts with a specific named place (not just a city)
+      return all.filter(p => !p.group_id && p.location_name && p.location_name.trim().length > 2);
     },
     staleTime: 60000,
   });

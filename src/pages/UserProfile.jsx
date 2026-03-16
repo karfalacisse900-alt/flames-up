@@ -18,7 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function UserProfile() {
-  const { email } = useParams();
+  const { email: emailParam } = useParams();
+  // Also support ?email= query param (for backwards compatibility with old links)
+  const urlParams = new URLSearchParams(window.location.search);
+  const email = emailParam || urlParams.get("email");
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
