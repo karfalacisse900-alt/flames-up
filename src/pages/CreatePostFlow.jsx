@@ -71,6 +71,8 @@ export default function CreatePostFlow() {
     }
 
     console.log("[doPost] Starting post. User:", user.email, "| ID:", user.id, "| Online:", navigator.onLine);
+    setPostResult(null);
+    setPostError(null);
     setIsPosting(true);
 
     try {
