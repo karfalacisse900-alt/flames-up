@@ -103,31 +103,9 @@ export default function Discover() {
           )}
         </div>
 
-        {/* Tab bar */}
-         <div className="flex gap-2 mb-3">
-           {[
-             { id: "apps", label: "🧰 Apps & Tools" },
-             { id: "creators", label: "⭐ Creators" },
-             { id: "dyk",  label: "💡 Did You Know" },
-           ].map(tab => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-bold transition-all"
-                style={{
-                  backgroundColor: isActive ? "#1E1E1E" : "var(--bg-card)",
-                  color: isActive ? "#fff" : "var(--text-secondary)",
-                  border: `1.5px solid ${isActive ? "#1E1E1E" : "var(--border-light)"}`,
-                  boxShadow: isActive ? "0 4px 14px rgba(0,0,0,0.2)" : "none",
-                  letterSpacing: "-0.2px",
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* Tab bar — hamburger menu */}
+        <div className="mb-3">
+          <DiscoverMenuDrawer activeTab={activeTab} onChange={handleTabChange} />
         </div>
 
         {/* Search bar — apps tab only */}
