@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Shuffle, Sparkles, Star, SlidersHorizontal, X, TrendingUp } from "lucide-react";
 import DiscoverLogo from "./DiscoverLogo";
 import BookmarkButton from "./BookmarkButton";
-import AppPreviewDrawer from "./AppPreviewDrawer";
 import DiscoverSection from "./DiscoverSection";
 import CompactToolCard from "./CompactToolCard";
 
@@ -316,7 +315,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
   const handleSurprise = () => {
     if (!items.length) return;
     const pick = items[Math.floor(Math.random() * items.length)];
-    setPreviewItem(pick);
+    onItemClick(pick);
   };
 
   const activeCatLabel = CATEGORY_FILTERS.find(c => c.id === activeCategory);
@@ -574,13 +573,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
         </>
       )}
 
-      {/* ── App Preview Drawer ── */}
-      <AppPreviewDrawer
-        item={previewItem}
-        user={user}
-        onClose={() => setPreviewItem(null)}
-        onFullOpen={() => { onItemClick(previewItem); setPreviewItem(null); }}
-      />
+
 
       {/* ── Category Filter Sheet ── */}
       <AnimatePresence>
