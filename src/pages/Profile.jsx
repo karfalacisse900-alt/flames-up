@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap } from "lucide-react";
@@ -145,14 +146,49 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+      <div className="overflow-y-auto px-4 pt-4 pb-8 space-y-4" style={{ backgroundColor: "#f3f6fb", minHeight: "calc(100dvh - 64px)" }}>
+        <div className="flex items-center justify-between px-1">
+          <div className="h-8 w-28 rounded-xl skeleton" />
+          <div className="flex gap-2">
+            <div className="w-11 h-11 rounded-full skeleton" />
+            <div className="w-11 h-11 rounded-full skeleton" />
+            <div className="w-11 h-11 rounded-full skeleton" />
+          </div>
+        </div>
+        <div className="rounded-[34px] overflow-hidden p-5 space-y-4" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5" }}>
+          <div className="flex gap-4 pt-2">
+            <div className="w-24 h-24 rounded-full skeleton shrink-0" />
+            <div className="flex-1 space-y-3 pt-2">
+              <div className="h-7 w-36 rounded-xl skeleton" />
+              <div className="h-4 w-24 rounded-xl skeleton" />
+              <div className="flex gap-2">
+                <div className="h-6 w-16 rounded-full skeleton" />
+                <div className="h-6 w-20 rounded-full skeleton" />
+              </div>
+            </div>
+          </div>
+          <div className="h-16 rounded-2xl skeleton" />
+          <div className="h-12 rounded-2xl skeleton" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          {[0,1,2,3].map(i => <div key={i} className="aspect-square rounded-[20px] skeleton" />)}
+        </div>
       </div>
     );
   }
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: 18 },
+    show: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.3, ease: [0.22, 1, 0.36, 1] } }),
+  };
+
   return (
-    <div className="overflow-y-auto overscroll-contain px-4 pt-4 pb-8" style={{ backgroundColor: "#f3f6fb", minHeight: "calc(100dvh - 64px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+      className="overflow-y-auto overscroll-contain px-4 pt-4 pb-8"
+      style={{ backgroundColor: "#f3f6fb", minHeight: "calc(100dvh - 64px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-4 px-1">
           <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Profile</h1>
@@ -406,8 +442,6 @@ export default function Profile() {
         onClose={() => setShowAIDeleteModal(false)} 
       />
 
-
-
       {/* Edit profile - New comprehensive editor */}
       {showEdit && (
         <ProfileEditor
@@ -419,6 +453,6 @@ export default function Profile() {
           }}
         />
       )}
-    </div>
+    </motion.div>
   );
 }
