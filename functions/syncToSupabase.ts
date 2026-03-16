@@ -109,6 +109,14 @@ Deno.serve(async (req) => {
         console.log(`[sync] 👍 syncing ${upvotedBy.length} likes for post ${rawId}`);
         for (const userEmail of upvotedBy) {
           const likeUserId = await toUUID(userEmail);
+          // Ensure user exists in profiles (likes table has FK to profiles)
+          await supabaseUpsert("profiles", {
+            id: likeUserId,
+            email: userEmail,
+            full_name: userEmail.split("@")[0],
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+          });
           // Deterministic UUID: same input always → same like row (safe to upsert repeatedly)
           const likeId = await toUUID(`like:${rawId}:${userEmail}`);
           await supabaseUpsert("likes", {
