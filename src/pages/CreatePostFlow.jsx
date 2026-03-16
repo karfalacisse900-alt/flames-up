@@ -274,10 +274,11 @@ export default function CreatePostFlow() {
         >
           <button
             onClick={() => doPost(false)}
+            disabled={isPosting || postResult === "success"}
             className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white"
-            style={{ backgroundColor: "var(--accent-primary)", opacity: 1, display: "flex" }}
+            style={{ backgroundColor: postResult === "success" ? "#16a34a" : postResult === "error" ? "#dc2626" : "var(--accent-primary)" }}
           >
-            {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Share Post</>}
+            {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : postResult === "success" ? "✓ Post Shared!" : postResult === "error" ? `✗ ${postError || "Failed — tap to retry"}` : <><Send className="w-4 h-4" /> Share Post</>}
           </button>
           <button
             onClick={() => doPost(true)}
