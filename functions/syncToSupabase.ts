@@ -3,76 +3,44 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-// Retry a fetch-based operation up to `maxRetries` times with exponential backoff
-async function withRetry(fn, maxRetries = 3, label = "operation") {
-  let lastError;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastError = err;
-      console.warn(`[syncToSupabase] ${label} failed (attempt ${attempt}/${maxRetries}): ${err.message}`);
-      if (attempt < maxRetries) {
-        const delay = 500 * Math.pow(2, attempt - 1); // 500ms, 1s, 2s
-        await new Promise(r => setTimeout(r, delay));
-      }
-    }
-  }
-  throw lastError;
-}
-
 async function supabaseUpsert(table, record) {
-  await withRetry(async () => {
-    const url = `${SUPABASE_URL}/rest/v1/${table}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        "Prefer": "resolution=merge-duplicates",
-      },
-      body: JSON.stringify(record),
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
-    }
-  }, 3, `upsert:${table}`);
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_SERVICE_ROLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "Prefer": "resolution=merge-duplicates",
+    },
+    body: JSON.stringify(record),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
+  }
+  console.log(`[sync] upserted to ${table}:`, JSON.stringify(record));
 }
 
 async function supabaseDelete(table, id) {
-  await withRetry(async () => {
-    const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "apikey": SUPABASE_SERVICE_ROLE_KEY,
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
-    }
-  }, 3, `delete:${table}`);
-}
-
-// Verify Supabase connectivity before proceeding
-async function checkSupabaseConnection() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+  const res = await fetch(url, {
+    method: "DELETE",
     headers: {
       "apikey": SUPABASE_SERVICE_ROLE_KEY,
       "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
     },
   });
-  if (!res.ok) throw new Error(`Supabase unreachable: ${res.status}`);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
+  }
+  console.log(`[sync] deleted from ${table} id=${id}`);
 }
 
 Deno.serve(async (req) => {
   try {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error("[syncToSupabase] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
       return Response.json({ error: "Supabase credentials not configured" }, { status: 500 });
     }
 
@@ -82,60 +50,81 @@ Deno.serve(async (req) => {
     const eventType = event?.type;
     const id = String(data?.id || event?.entity_id);
 
-    console.log(`[syncToSupabase] RECEIVED entity=${entityName} event=${eventType} id=${id}`);
-    console.log(`[syncToSupabase] Full data keys:`, Object.keys(data || {}).join(", "));
-    console.log(`[syncToSupabase] author_email=${data?.author_email} created_by=${data?.created_by} user_id=${data?.user_id}`);
+    console.log(`[sync] entity=${entityName} event=${eventType} id=${id}`);
 
-    // Check connection before doing anything
-    await checkSupabaseConnection();
-
+    // ── DELETE ────────────────────────────────────────────────────────────
     if (eventType === "delete") {
-      if (entityName === "Post" || entityName === "CommunityPost") await supabaseDelete("posts", id);
+      if (entityName === "CommunityPost") await supabaseDelete("posts", id);
       else if (entityName === "User") await supabaseDelete("profiles", id);
       else if (entityName === "Group") await supabaseDelete("communities", id);
+      else if (entityName === "CommunityComment") await supabaseDelete("comments", id);
+      else if (entityName === "Follow") await supabaseDelete("followers", id);
+      // Likes are soft-deleted by the app; ignore hard delete
       return Response.json({ ok: true, action: "delete", entity: entityName });
     }
 
+    // ── UPSERT ────────────────────────────────────────────────────────────
     if (entityName === "User") {
-      const record = {
+      await supabaseUpsert("profiles", {
         id,
-        email: data.email || 'unknown@flames-up.com',
-        full_name: data.full_name || data.display_name || data.username || 'Anonymous User',
-        avatar_url: data.avatar_url || '',
-      };
-      console.log(`[syncToSupabase] Syncing User → profiles:`, JSON.stringify(record));
-      await supabaseUpsert("profiles", record);
-
-    } else if (entityName === "Post" || entityName === "CommunityPost") {
-      const record = {
-        id: String(id),
-        content: data.body || data.text || null,
+        email: data.email || "unknown@flames-up.com",
+        full_name: data.full_name || data.display_name || data.username || "Anonymous",
+        avatar_url: data.avatar_url || null,
         created_at: data.created_date || new Date().toISOString(),
-        user_id: data.author_email || data.created_by || data.created_by_id
-          ? String(data.author_email || data.created_by || data.created_by_id)
-          : null,
-        media_url: data.video_url || data.image_url || (data.image_urls?.length > 0 ? data.image_urls[0] : null),
-        community_id: data.community_id ? String(data.community_id) : null,
-      };
-      console.log(`[syncToSupabase] Syncing ${entityName} → posts:`, JSON.stringify(record));
-      await supabaseUpsert("posts", record);
+      });
+
+    } else if (entityName === "CommunityPost") {
+      await supabaseUpsert("posts", {
+        id,
+        content: data.body || data.text || null,
+        user_id: String(data.author_email || data.created_by || ""),
+        media_url: data.video_url || data.image_url || (data.image_urls?.length > 0 ? data.image_urls[0] : null) || null,
+        community_id: data.group_id ? String(data.group_id) : null,
+        created_at: data.created_date || new Date().toISOString(),
+      });
 
     } else if (entityName === "Group") {
-      const record = {
+      await supabaseUpsert("communities", {
         id,
         name: data.name || null,
         description: data.description || null,
-      };
-      console.log(`[syncToSupabase] Syncing Group → communities:`, JSON.stringify(record));
-      await supabaseUpsert("communities", record);
+        created_at: data.created_date || new Date().toISOString(),
+      });
+
+    } else if (entityName === "CommunityComment") {
+      await supabaseUpsert("comments", {
+        id,
+        post_id: String(data.post_id || ""),
+        user_id: String(data.author_email || data.created_by || ""),
+        content: data.body || data.text || null,
+        created_at: data.created_date || new Date().toISOString(),
+      });
+
+    } else if (entityName === "Follow") {
+      await supabaseUpsert("followers", {
+        id,
+        follower_id: String(data.follower_email || data.created_by || ""),
+        following_id: String(data.following_email || ""),
+        created_at: data.created_date || new Date().toISOString(),
+      });
+
+    } else if (entityName === "CoinTransaction" || entityName === "LikeEvent") {
+      // generic like tracking — store in likes table if columns match
+      await supabaseUpsert("likes", {
+        id,
+        post_id: String(data.ref_id || data.post_id || ""),
+        user_id: String(data.user_email || data.created_by || ""),
+        created_at: data.created_date || new Date().toISOString(),
+      });
 
     } else {
+      console.log(`[sync] skipped entity=${entityName}`);
       return Response.json({ ok: true, skipped: true, entity: entityName });
     }
 
     return Response.json({ ok: true, entity: entityName, id });
   } catch (error) {
-    console.error(`[syncToSupabase] Fatal error:`, error.message);
+    console.error(`[sync] Fatal:`, error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
