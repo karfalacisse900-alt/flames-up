@@ -179,7 +179,7 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
 
         {/* Share panel */}
         {showShare && (
-          <div className="shrink-0 px-5 py-3 flex gap-2 flex-wrap" style={{ backgroundColor: "#F0F4F8", borderBottom: "1px solid #E2E8F0" }}>
+        <div className="shrink-0 px-5 py-3 flex gap-2 flex-wrap" style={{ backgroundColor: "var(--bg-subtle)", borderBottom: "1px solid var(--border-light)" }}>
             <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "#1DA1F2" }}>
@@ -210,10 +210,10 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
                 { icon: <Users className="w-4 h-4" />, label: "Reviews", value: item.review_count || 0, color: cat.from },
                 { icon: <Zap className="w-4 h-4" />, label: "Type", value: item.pricing || "Free", color: cat.to },
               ].map(stat => (
-                <div key={stat.label} className="rounded-2xl p-3 text-center" style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+                <div key={stat.label} className="rounded-2xl p-3 text-center" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
                   <div className="w-7 h-7 rounded-xl flex items-center justify-center mx-auto mb-1.5" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>{stat.icon}</div>
-                  <p className="text-xs font-bold" style={{ color: "#1E293B" }}>{stat.value}</p>
-                  <p className="text-[10px]" style={{ color: "#94A3B8" }}>{stat.label}</p>
+                  <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>{stat.value}</p>
+                  <p className="text-[10px]" style={{ color: "var(--text-hint)" }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -233,9 +233,9 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
             </div>
 
             {/* Description */}
-            <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${cat.from}08, ${cat.to}08)`, border: `1px solid ${cat.from}20` }}>
-              <h3 className="text-sm font-bold mb-2" style={{ color: "#1E293B" }}>About</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#475569", lineHeight: "1.75" }}>
+            <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${cat.from}10, ${cat.to}10)`, border: `1px solid ${cat.from}25` }}>
+              <h3 className="text-sm font-bold mb-2" style={{ color: "var(--text-primary)" }}>About</h3>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)", lineHeight: "1.75" }}>
                 {item.long_description || item.description || "No description available."}
               </p>
             </div>
@@ -271,16 +271,16 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
             {relatedItems.length > 0 && (
               <div>
                 <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #E2E8F0, transparent)" }} className="mb-4" />
-                <h3 className="text-sm font-bold mb-3" style={{ color: "#1E293B" }}>Related Tools</h3>
+                <h3 className="text-sm font-bold mb-3" style={{ color: "var(--text-primary)" }}>Related Tools</h3>
                 <div className="space-y-2">
                   {relatedItems.map(rel => (
                     <button key={rel.id} onClick={() => onOpenRelated?.(rel)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all active:scale-99"
-                      style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+                      style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
                       <DiscoverLogo item={rel} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold truncate" style={{ color: "#1E293B" }}>{rel.title}</p>
-                        <p className="text-[11px] truncate" style={{ color: "#94A3B8" }}>{rel.description}</p>
+                        <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{rel.title}</p>
+                        <p className="text-[11px] truncate" style={{ color: "var(--text-hint)" }}>{rel.description}</p>
                       </div>
                       <StarRating value={rel.avg_rating || 0} size="sm" />
                     </button>
