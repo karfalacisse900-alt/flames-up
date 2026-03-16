@@ -149,36 +149,6 @@ Deno.serve(async (req) => {
         created_at: data.created_date || new Date().toISOString(),
       });
 
-    } else if (entityName === "CommunityPost" && eventType === "update") {
-      // Sync likes: upvoted_by is an array of user emails on the post
-      // Each email becomes a row in the likes table keyed by post_id + user_id (deterministic UUID)
-      const postId = id; // already computed as toUUID(rawId) — same as what posts table uses
-      const upvotedBy = data.upvoted_by || [];
-      console.log(`[sync] 👍 syncing ${upvotedBy.length} likes for post ${rawId}`);
-
-      for (const userEmail of upvotedBy) {
-        const userId = await toUUID(userEmail);
-        // Deterministic UUID for the like row: hash of "like:{postRawId}:{userEmail}"
-        const likeId = await toUUID(`like:${rawId}:${userEmail}`);
-        await supabaseUpsert("likes", {
-          id: likeId,
-          post_id: postId,
-          user_id: userId,
-          created_at: data.updated_date || data.created_date || new Date().toISOString(),
-        });
-      }
-
-      // Also upsert the post itself (content may have changed)
-      const userId = await toUUID(data.author_email || data.created_by || "");
-      await supabaseUpsert("posts", {
-        id,
-        content: data.body || data.text || null,
-        user_id: userId,
-        media_url: data.video_url || data.image_url || (data.image_urls?.length > 0 ? data.image_urls[0] : null) || null,
-        community_id: data.group_id ? await toUUID(data.group_id) : null,
-        created_at: data.created_date || new Date().toISOString(),
-      });
-
     } else {
       console.log(`[sync] skipped entity=${entityName}`);
       return Response.json({ ok: true, skipped: true, entity: entityName });
