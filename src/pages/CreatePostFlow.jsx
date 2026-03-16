@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, X, BookMarked, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, BookMarked, Send, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { useLocationDetection } from "../components/hooks/useLocationDetection";
@@ -9,12 +9,28 @@ import CameraUploadStep from "../components/community/creator/CameraUploadStep";
 import CreatorEditorStep from "../components/community/creator/CreatorEditorStep";
 import PostSettingsPanel from "../components/community/creator/PostSettingsPanel";
 
+// Strip HTML tags from ReactQuill output to get plain text
+function stripHtml(html) {
+  if (!html) return "";
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .trim();
+}
+
 export default function CreatePostFlow() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const urlParams = new URLSearchParams(window.location.search);
   const presetLocation = urlParams.get("location") ? JSON.parse(decodeURIComponent(urlParams.get("location"))) : null;
-  // step: 1 = camera/upload, 2 = editor, 3 = settings
+
+  // step: 1 = camera/upload, 2 = edit + settings combined
   const [step, setStep] = useState(1);
 
   const [mediaItems, setMediaItems] = useState([]);
@@ -36,7 +52,6 @@ export default function CreatePostFlow() {
     isEvent: false,
     isProduct: false,
     isAIGenerated: false,
-    poll: null,
   });
 
   const [isPosting, setIsPosting] = useState(false);
@@ -68,8 +83,6 @@ export default function CreatePostFlow() {
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
         }
-        
-        // Add tags with image index
         if (item.edits?.tags) {
           item.edits.tags.forEach(tag => {
             allTags.push({ ...tag, imageIndex: i });
@@ -79,7 +92,8 @@ export default function CreatePostFlow() {
 
       const manualLoc = postSettings.location;
       const hashtagStr = (postSettings.hashtags || []).map((t) => `#${t}`).join(" ");
-      const rawCaption = postSettings.caption || "";
+      // Strip HTML from ReactQuill output so caption renders correctly in feed
+      const rawCaption = stripHtml(postSettings.caption || "");
 
       const postData = {
         type: "opinion",
@@ -109,22 +123,7 @@ export default function CreatePostFlow() {
         media_tags: allTags.length > 0 ? allTags : undefined,
       };
 
-      const createdPost = await base44.entities.CommunityPost.create(postData);
-
-      // Create poll if one was added
-      if (postSettings.poll) {
-        const pollData = {
-          post_id: createdPost.id,
-          ...postSettings.poll,
-        };
-        await base44.entities.Poll.create(pollData);
-
-        // Update post with poll_id
-        await base44.entities.CommunityPost.update(createdPost.id, {
-          poll_id: (await base44.entities.Poll.filter({ post_id: createdPost.id }))[0].id,
-        });
-      }
-
+      await base44.entities.CommunityPost.create(postData);
       navigate(createPageUrl("Home"));
     } catch (err) {
       console.error("Post error:", err);
@@ -156,9 +155,9 @@ export default function CreatePostFlow() {
     );
   }
 
-  // ── Step 2 & 3 share a chrome ─────────────────────────────────────────────
+  // ── Step 2: Editor + Settings in one screen ───────────────────────────────
   return (
-    <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: step === 2 ? "#000" : "var(--bg-app)" }}>
+    <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: "#000" }}>
 
       {/* ── Header ── */}
       <div
@@ -166,40 +165,40 @@ export default function CreatePostFlow() {
         style={{
           paddingTop: "max(env(safe-area-inset-top, 0px), 44px)",
           paddingBottom: 12,
-          backgroundColor: step === 2 ? "#0d0d0d" : "var(--bg-card)",
-          borderBottom: step === 2 ? "1px solid #1e1e1e" : "1px solid var(--border-light)",
+          backgroundColor: "#0d0d0d",
+          borderBottom: "1px solid #1e1e1e",
         }}
       >
         <button
-          onClick={() => setStep(step - 1)}
+          onClick={() => setStep(1)}
           className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{
-            backgroundColor: step === 2 ? "rgba(255,255,255,0.08)" : "var(--bg-subtle)",
-            border: step === 2 ? "1px solid #333" : "1px solid var(--border-light)",
-          }}
+          style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid #333" }}
         >
-          <ArrowLeft className="w-4 h-4" style={{ color: step === 2 ? "#fff" : "var(--text-primary)" }} />
+          <ArrowLeft className="w-4 h-4 text-white" />
         </button>
 
         <h1
-          className="flex-1 text-center text-base font-bold"
-          style={{ color: step === 2 ? "#fff" : "var(--text-primary)", fontFamily: "var(--font-serif)" }}
+          className="flex-1 text-center text-base font-bold text-white"
+          style={{ fontFamily: "var(--font-serif)" }}
         >
-          {step === 2 ? "Edit" : "New Post"}
+          New Post
         </h1>
 
+        {/* Post button right in the header */}
         <button
-          onClick={() => setStep(step + 1)}
-          className="px-5 py-2 rounded-full text-sm font-bold text-white"
+          onClick={() => doPost(false)}
+          disabled={isPosting}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold text-white disabled:opacity-50"
           style={{ backgroundColor: "var(--accent-primary)" }}
         >
-          Next
+          {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-3.5 h-3.5" /> Post</>}
         </button>
       </div>
 
-      {/* ── Content ── */}
+      {/* ── Content: Editor top half, Settings bottom half ── */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        {step === 2 && (
+        {/* Editor section (dark) */}
+        <div style={{ backgroundColor: "#000" }}>
           <CreatorEditorStep
             mediaItems={mediaItems}
             setMediaItems={setMediaItems}
@@ -208,9 +207,10 @@ export default function CreatePostFlow() {
             selectedTrack={selectedTrack}
             onSelectTrack={setSelectedTrack}
           />
-        )}
+        </div>
 
-        {step === 3 && (
+        {/* Settings section (light) */}
+        <div style={{ backgroundColor: "var(--bg-app)" }}>
           <PostSettingsPanel
             user={user}
             postSettings={postSettings}
@@ -218,17 +218,15 @@ export default function CreatePostFlow() {
             mediaItems={mediaItems}
             gpsLocation={gpsLocation}
           />
-        )}
-      </div>
+        </div>
 
-      {/* ── Step 3 footer: Drafts + Post ── */}
-      {step === 3 && (
+        {/* Draft button at bottom */}
         <div
-          className="flex-shrink-0 flex gap-3 px-4"
+          className="flex gap-3 px-4"
           style={{
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)",
+            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
             paddingTop: 12,
-            backgroundColor: "var(--bg-card)",
+            backgroundColor: "var(--bg-app)",
             borderTop: "1px solid var(--border-light)",
           }}
         >
@@ -241,22 +239,8 @@ export default function CreatePostFlow() {
             <BookMarked className="w-4 h-4" />
             Save Draft
           </button>
-          <button
-            onClick={() => doPost(false)}
-            disabled={isPosting}
-            className="flex-1 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white disabled:opacity-50"
-            style={{ backgroundColor: "var(--accent-primary)" }}
-          >
-            {isPosting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Send className="w-4 h-4" /> Post
-              </>
-            )}
-          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
