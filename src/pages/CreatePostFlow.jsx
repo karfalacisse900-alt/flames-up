@@ -67,8 +67,10 @@ export default function CreatePostFlow() {
       alert("No internet connection. Please check your network and try again.");
       return;
     }
-    alert("Syncing to Supabase...");
+
+    console.log("[doPost] Starting post. User:", user.email, "| ID:", user.id, "| Online:", navigator.onLine);
     setIsPosting(true);
+
     try {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
@@ -77,7 +79,9 @@ export default function CreatePostFlow() {
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
+          console.log("[doPost] Uploading file", i, item.file.name, item.file.size, "bytes");
           const { file_url } = await base44.integrations.Core.UploadFile({ file: item.file });
+          console.log("[doPost] Uploaded →", file_url);
           uploadedUrls.push(file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
@@ -121,11 +125,16 @@ export default function CreatePostFlow() {
         media_tags: allTags.length > 0 ? allTags : undefined,
       };
 
-      await base44.entities.CommunityPost.create(postData);
+      console.log("[doPost] Saving to Base44 CommunityPost:", JSON.stringify(postData));
+      const created = await base44.entities.CommunityPost.create(postData);
+      console.log("[doPost] Base44 create SUCCESS. New post ID:", created?.id);
+      console.log("[doPost] Supabase sync will fire via automation for entity ID:", created?.id);
+
       navigate(createPageUrl("Home"));
     } catch (err) {
-      console.error("Post error:", err);
-      alert("Failed to post. Please try again.");
+      console.error("[doPost] FAILED:", err?.message || err);
+      console.error("[doPost] Full error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      alert(`Failed to post.\n\nError: ${err?.message || "Unknown error"}`);
     } finally {
       setIsPosting(false);
     }
