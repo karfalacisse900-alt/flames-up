@@ -346,6 +346,8 @@ export default function CommunityFeed({ user }) {
       onTouchEnd={handleTouchEnd}
       style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
     >
+      <FeedMenuDrawer isOpen={showFeedMenu} onClose={() => setShowFeedMenu(false)} />
+
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ 
         background: "linear-gradient(180deg, rgba(242,237,228,0.98), rgba(242,237,228,0.8))", 
@@ -353,7 +355,14 @@ export default function CommunityFeed({ user }) {
         borderBottom: "1px solid rgba(207,198,188,0.4)"
       }}>
         <div className="px-4 pt-2.5 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFeedMenu(true)}
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}
+            >
+              <Menu className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+            </button>
             <Zap className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
             <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>For You</p>
           </div>
