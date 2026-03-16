@@ -115,7 +115,6 @@ Deno.serve(async (req) => {
             email: userEmail,
             full_name: userEmail.split("@")[0],
             avatar_url: null,
-            created_at: new Date().toISOString(),
           });
           // Deterministic UUID: same input always → same like row (safe to upsert repeatedly)
           const likeId = await toUUID(`like:${rawId}:${userEmail}`);
