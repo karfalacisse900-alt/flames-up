@@ -123,12 +123,12 @@ export default function DiscoverItemModal({ item, user, onClose, onOpenRelated, 
   return createPortal(
     <div
       className="fixed inset-0 flex items-end justify-center sm:items-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 9999, touchAction: "none" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px) saturate(160%)", zIndex: 9999, touchAction: "none" }}
       onMouseDown={onClose}
     >
       <div
         className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
-        style={{ boxShadow: "0 -8px 60px rgba(0,0,0,0.25)", maxHeight: "92dvh", backgroundColor: "var(--bg-card)" }}
+        style={{ boxShadow: "0 -8px 60px rgba(0,0,0,0.4)", maxHeight: "92dvh", backgroundColor: "var(--bg-modal)" }}
         onMouseDown={e => e.stopPropagation()}
       >
 
