@@ -82,7 +82,9 @@ Deno.serve(async (req) => {
     const eventType = event?.type;
     const id = String(data?.id || event?.entity_id);
 
-    console.log(`[syncToSupabase] entity=${entityName} event=${eventType} id=${id}`);
+    console.log(`[syncToSupabase] RECEIVED entity=${entityName} event=${eventType} id=${id}`);
+    console.log(`[syncToSupabase] Full data keys:`, Object.keys(data || {}).join(", "));
+    console.log(`[syncToSupabase] author_email=${data?.author_email} created_by=${data?.created_by} user_id=${data?.user_id}`);
 
     // Check connection before doing anything
     await checkSupabaseConnection();
