@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Search, X, ArrowLeft } from "lucide-react";
 import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
@@ -58,13 +58,6 @@ export default function Discover() {
   };
 
   const firstName = user?.full_name?.split(" ")[0] || "";
-
-  const doRefresh = useCallback(async () => {
-    setIsLoading(true);
-    await base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
-      .then(setItems)
-      .finally(() => setIsLoading(false));
-  }, []);
 
   return (
     <div
