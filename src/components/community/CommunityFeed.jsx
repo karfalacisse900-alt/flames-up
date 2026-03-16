@@ -322,21 +322,43 @@ export default function CommunityFeed({ user }) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-6">
-        {[0, 1, 2].map(i => (
-          <div key={i} className="rounded-2xl p-4 space-y-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full skeleton" />
-              <div className="flex-1 space-y-1.5">
-                <div className="h-3 w-24 rounded skeleton" />
-                <div className="h-2.5 w-16 rounded skeleton" />
+      <div className="flex flex-col gap-3 px-4 py-6">
+        {[0, 1, 2, 3].map(i => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.07, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-3xl overflow-hidden"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", boxShadow: "0 2px 12px rgba(15,23,42,0.04)" }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+              <div className="w-11 h-11 rounded-full skeleton shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-28 rounded-full skeleton" />
+                <div className="h-2.5 w-20 rounded-full skeleton" />
               </div>
+              <div className="w-16 h-7 rounded-full skeleton" />
             </div>
-            <div className="space-y-1.5">
-              <div className="h-3 rounded skeleton" />
-              <div className="h-3 w-4/5 rounded skeleton" />
+            {/* Body */}
+            <div className="px-4 pb-3 space-y-2">
+              <div className="h-3.5 rounded-full skeleton" />
+              <div className="h-3.5 w-5/6 rounded-full skeleton" />
+              <div className="h-3.5 w-3/4 rounded-full skeleton" />
             </div>
-          </div>
+            {/* Optional image placeholder (every other card) */}
+            {i % 2 === 0 && (
+              <div className="mx-4 mb-3 h-44 rounded-2xl skeleton" />
+            )}
+            {/* Actions bar */}
+            <div className="flex items-center gap-3 px-4 py-3 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+              <div className="h-8 w-16 rounded-full skeleton" />
+              <div className="h-8 w-20 rounded-full skeleton" />
+              <div className="h-8 w-16 rounded-full skeleton" />
+              <div className="ml-auto h-8 w-8 rounded-full skeleton" />
+            </div>
+          </motion.div>
         ))}
       </div>
     );
