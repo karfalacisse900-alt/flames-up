@@ -37,6 +37,8 @@ export default function CreatePostFlow() {
   const [currentEditingIndex, setCurrentEditingIndex] = useState(0);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [isPosting, setIsPosting] = useState(false);
+  const [postResult, setPostResult] = useState(null); // null | 'success' | 'error'
+  const [postError, setPostError] = useState(null);
 
   const [postSettings, setPostSettings] = useState({
     caption: "",
