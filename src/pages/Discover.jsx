@@ -70,7 +70,7 @@ export default function Discover() {
         className="sticky top-0 z-30 px-4 pt-4 pb-3"
         style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)" }}
       >
-        {/* Greeting row */}
+        {/* Title row */}
         <div className="flex items-center justify-between mb-3">
           {view === "browse" && activeTab === "apps" ? (
             <button
@@ -81,9 +81,7 @@ export default function Discover() {
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
           ) : (
-            <div>
-              <h1 className="text-2xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Discover</h1>
-            </div>
+            <h1 className="text-2xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Discover</h1>
           )}
         </div>
 
