@@ -248,15 +248,23 @@ export default function CreatePostFlow() {
           gpsLocation={gpsLocation}
         />
 
-        {/* Save Draft button */}
+        {/* Post + Save Draft buttons */}
         <div
-          className="px-4"
+          className="px-4 flex flex-col gap-3"
           style={{
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 24px)",
             paddingTop: 12,
             borderTop: "1px solid var(--border-light)",
           }}
         >
+          <button
+            onClick={() => doPost(false)}
+            disabled={isPosting}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-white disabled:opacity-50"
+            style={{ backgroundColor: "var(--accent-primary)" }}
+          >
+            {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Share Post</>}
+          </button>
           <button
             onClick={() => doPost(true)}
             disabled={isPosting}
