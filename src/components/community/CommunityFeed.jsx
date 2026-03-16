@@ -145,13 +145,12 @@ export default function CommunityFeed({ user }) {
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      qc.invalidateQueries({ queryKey: ["communityPosts"] });
       if (event.type === "create") {
         setNewPostsAvailable(n => n + 1);
       }
     });
     return unsub;
-  }, [qc]);
+  }, []);
 
   useEffect(() => {
     const unsub = base44.entities.CommunityComment.subscribe((event) => {
