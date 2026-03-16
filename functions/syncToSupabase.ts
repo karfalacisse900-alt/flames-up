@@ -3,6 +3,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
+// Convert any string into a deterministic v4-format UUID so Supabase UUID columns accept it
+async function toUUID(str) {
+  if (!str) return null;
+  // If already a valid UUID, return as-is
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) return str;
+  // Hash the string using SHA-256, then format first 32 hex chars as UUID
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  // Format as UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-${hex.slice(16,17)}${hex.slice(17,20)}-${hex.slice(20,32)}`;
+}
+
 async function supabaseUpsert(table, record) {
   const url = `${SUPABASE_URL}/rest/v1/${table}`;
   const res = await fetch(url, {
@@ -19,11 +34,12 @@ async function supabaseUpsert(table, record) {
     const errText = await res.text();
     throw new Error(`Supabase upsert to '${table}' failed: ${res.status} - ${errText}`);
   }
-  console.log(`[sync] upserted to ${table}:`, JSON.stringify(record));
+  console.log(`[sync] ✅ upserted to ${table}:`, JSON.stringify(record));
 }
 
 async function supabaseDelete(table, id) {
-  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+  const uuid = await toUUID(id);
+  const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${uuid}`;
   const res = await fetch(url, {
     method: "DELETE",
     headers: {
@@ -35,7 +51,7 @@ async function supabaseDelete(table, id) {
     const errText = await res.text();
     throw new Error(`Supabase delete from '${table}' failed: ${res.status} - ${errText}`);
   }
-  console.log(`[sync] deleted from ${table} id=${id}`);
+  console.log(`[sync] 🗑 deleted from ${table} id=${uuid}`);
 }
 
 Deno.serve(async (req) => {
@@ -48,22 +64,23 @@ Deno.serve(async (req) => {
     const { event, data } = payload;
     const entityName = event?.entity_name;
     const eventType = event?.type;
-    const id = String(data?.id || event?.entity_id);
+    const rawId = String(data?.id || event?.entity_id || "");
 
-    console.log(`[sync] entity=${entityName} event=${eventType} id=${id}`);
+    console.log(`[sync] entity=${entityName} event=${eventType} rawId=${rawId}`);
 
     // ── DELETE ────────────────────────────────────────────────────────────
     if (eventType === "delete") {
-      if (entityName === "CommunityPost") await supabaseDelete("posts", id);
-      else if (entityName === "User") await supabaseDelete("profiles", id);
-      else if (entityName === "Group") await supabaseDelete("communities", id);
-      else if (entityName === "CommunityComment") await supabaseDelete("comments", id);
-      else if (entityName === "Follow") await supabaseDelete("followers", id);
-      // Likes are soft-deleted by the app; ignore hard delete
+      if (entityName === "CommunityPost") await supabaseDelete("posts", rawId);
+      else if (entityName === "User") await supabaseDelete("profiles", rawId);
+      else if (entityName === "Group") await supabaseDelete("communities", rawId);
+      else if (entityName === "CommunityComment") await supabaseDelete("comments", rawId);
+      else if (entityName === "Follow") await supabaseDelete("followers", rawId);
       return Response.json({ ok: true, action: "delete", entity: entityName });
     }
 
-    // ── UPSERT ────────────────────────────────────────────────────────────
+    // ── UPSERT — convert all IDs/emails to UUIDs ──────────────────────────
+    const id = await toUUID(rawId);
+
     if (entityName === "User") {
       await supabaseUpsert("profiles", {
         id,
@@ -74,12 +91,13 @@ Deno.serve(async (req) => {
       });
 
     } else if (entityName === "CommunityPost") {
+      const userId = await toUUID(data.author_email || data.created_by || "");
       await supabaseUpsert("posts", {
         id,
         content: data.body || data.text || null,
-        user_id: String(data.author_email || data.created_by || ""),
+        user_id: userId,
         media_url: data.video_url || data.image_url || (data.image_urls?.length > 0 ? data.image_urls[0] : null) || null,
-        community_id: data.group_id ? String(data.group_id) : null,
+        community_id: data.group_id ? await toUUID(data.group_id) : null,
         created_at: data.created_date || new Date().toISOString(),
       });
 
@@ -92,28 +110,23 @@ Deno.serve(async (req) => {
       });
 
     } else if (entityName === "CommunityComment") {
+      const userId = await toUUID(data.author_email || data.created_by || "");
+      const postId = await toUUID(data.post_id || "");
       await supabaseUpsert("comments", {
         id,
-        post_id: String(data.post_id || ""),
-        user_id: String(data.author_email || data.created_by || ""),
+        post_id: postId,
+        user_id: userId,
         content: data.body || data.text || null,
         created_at: data.created_date || new Date().toISOString(),
       });
 
     } else if (entityName === "Follow") {
+      const followerId = await toUUID(data.follower_email || data.created_by || "");
+      const followingId = await toUUID(data.following_email || "");
       await supabaseUpsert("followers", {
         id,
-        follower_id: String(data.follower_email || data.created_by || ""),
-        following_id: String(data.following_email || ""),
-        created_at: data.created_date || new Date().toISOString(),
-      });
-
-    } else if (entityName === "CoinTransaction" || entityName === "LikeEvent") {
-      // generic like tracking — store in likes table if columns match
-      await supabaseUpsert("likes", {
-        id,
-        post_id: String(data.ref_id || data.post_id || ""),
-        user_id: String(data.user_email || data.created_by || ""),
+        follower_id: followerId,
+        following_id: followingId,
         created_at: data.created_date || new Date().toISOString(),
       });
 
@@ -124,7 +137,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ ok: true, entity: entityName, id });
   } catch (error) {
-    console.error(`[sync] Fatal:`, error.message);
+    console.error(`[sync] ❌ Fatal:`, error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
