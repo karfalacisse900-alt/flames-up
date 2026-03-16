@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { MapPin, Bookmark, Map, List, Search, X, Plus } from "lucide-react";
 import PlacesMapboxView from "@/components/places/PlacesMapboxView";
@@ -326,20 +327,34 @@ export default function PlacesPage() {
           <div className="mx-4 mb-2" style={{ height: 1, backgroundColor: "var(--border-subtle)" }} />
 
           {isLoading ? (
-            <div className="flex flex-col gap-4 px-4 py-4">
+            <div className="flex flex-col gap-3 px-4 py-4">
               {[0, 1, 2].map(i => (
-                <div key={i} className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
-                  <div className="skeleton h-48" />
-                  <div className="p-4 space-y-2">
-                    <div className="skeleton h-3 w-32 rounded" />
-                    <div className="skeleton h-3 w-full rounded" />
-                    <div className="skeleton h-3 w-3/4 rounded" />
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  className="rounded-3xl overflow-hidden"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="skeleton h-44" />
+                  <div className="p-4 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="skeleton w-8 h-8 rounded-full" />
+                      <div className="skeleton h-3 w-28 rounded-full" />
+                    </div>
+                    <div className="skeleton h-3 w-full rounded-full" />
+                    <div className="skeleton h-3 w-4/5 rounded-full" />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           ) : filteredPosts.length === 0 ? (
-            <div className="py-16 text-center px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28 }}
+              className="py-16 text-center px-8"
+            >
               <div className="text-4xl mb-3">🗺️</div>
               <p className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                 {selectedCategory !== "all" ? `No ${selectedCategory} posts yet` : "No location posts yet"}
@@ -347,14 +362,21 @@ export default function PlacesPage() {
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>
                 Posts tagged with a location will appear here
               </p>
-            </div>
+            </motion.div>
           ) : (
             <div className="pb-28">
-              {filteredPosts.map(post => (
-                <CommunityPostCard key={post.id} post={post} user={user}
-                  onUpvote={() => user && upvoteMut.mutate({ post })}
-                  onLocationClick={(locationData) => openPlace(locationData)}
-                />
+              {filteredPosts.map((post, i) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.04, 0.28), duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <CommunityPostCard post={post} user={user}
+                    onUpvote={() => user && upvoteMut.mutate({ post })}
+                    onLocationClick={(locationData) => openPlace(locationData)}
+                  />
+                </motion.div>
               ))}
             </div>
           )}
