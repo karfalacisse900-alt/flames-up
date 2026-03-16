@@ -296,9 +296,8 @@ export default function CommunityFeed({ user }) {
   const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
-    return post.type === "debate" || post.type === "question" ? (
+    const card = post.type === "debate" || post.type === "question" ? (
       <DebateCard 
-        key={post.id}
         post={post} 
         debate={debate} 
         user={user}
@@ -308,7 +307,6 @@ export default function CommunityFeed({ user }) {
       />
     ) : (
       <CommunityPostCard 
-        key={post.id}
         post={post} 
         user={user}
         onUpvote={() => user && upvoteMut.mutate({ post })}
@@ -317,6 +315,21 @@ export default function CommunityFeed({ user }) {
         onLocationClick={() => {}}
         onTap={() => {}}
       />
+    );
+
+    return (
+      <motion.div
+        key={post.id}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: Math.min(index * 0.04, 0.3),
+          duration: 0.3,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        {card}
+      </motion.div>
     );
   };
 
