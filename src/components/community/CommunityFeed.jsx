@@ -59,8 +59,12 @@ export default function CommunityFeed({ user }) {
     setIsLoading(false);
   }, [fetchPosts]);
 
+  const lastFetchTime = useRef(0);
+
   const loadMorePosts = useCallback(async () => {
-    if (!hasMore || isFetchingMore) return;
+    const now = Date.now();
+    if (!hasMore || isFetchingMore || now - lastFetchTime.current < 1500) return;
+    lastFetchTime.current = now;
     setIsFetchingMore(true);
     const nextPage = page + 1;
     const data = await fetchPosts(nextPage);
