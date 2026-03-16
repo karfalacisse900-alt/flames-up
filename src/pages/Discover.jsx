@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import { Search, X, ArrowLeft } from "lucide-react";
 import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,18 +66,11 @@ export default function Discover() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(doRefresh);
-
   return (
     <div
-      ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-app)" }}
     >
-      <PullIndicator />
 
       {/* ── Sticky Header ── */}
       <div
