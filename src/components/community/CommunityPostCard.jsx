@@ -187,7 +187,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             </div>
             <div className="flex-1 min-w-0">
               {showAuthor ? (
-                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
+                <Link to={`/user/${encodeURIComponent(post.author_email)}`}
                   className="text-xs font-bold block truncate" style={{ color: "var(--text-primary)" }}>
                   {post.author_name || "User"}
                 </Link>
@@ -323,7 +323,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             {/* Profile Picture */}
             <div className="shrink-0 flex-shrink-0">
               {showAuthor ? (
-                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}>
+                <Link to={`/user/${encodeURIComponent(post.author_email)}`}>
                   {post.author_avatar_url ? (
                     <img src={post.author_avatar_url} alt={post.author_name}
                       loading="lazy" decoding="async"
@@ -347,7 +347,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
             {/* Username + Meta Info */}
             <div className="flex-1 min-w-0 overflow-hidden">
               {showAuthor ? (
-                <Link to={createPageUrl(`UserProfile?email=${post.author_email}`)}
+                <Link to={`/user/${encodeURIComponent(post.author_email)}`}
                   className="text-sm font-bold block truncate leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--text-primary)" }}>
                   {post.author_name || "User"}
                 </Link>
