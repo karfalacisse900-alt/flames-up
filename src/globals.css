@@ -129,7 +129,7 @@ body {
 
 /* ── Micro-interactions & depth ── */
 button {
-  transition: transform 160ms ease, box-shadow 220ms ease, background-color 220ms ease, border-color 220ms ease, opacity 160ms ease !important;
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease, background-color 200ms ease, border-color 200ms ease, opacity 160ms ease !important;
   will-change: transform, box-shadow;
   transform-origin: center;
   min-height: var(--touch-target-min);
@@ -137,17 +137,18 @@ button {
   border-radius: 0.95rem;
 }
 button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(1.01);
   box-shadow: var(--elevation-2);
 }
 button:active:not(:disabled) {
-  transform: translateY(0) scale(0.985) !important;
-  box-shadow: var(--elevation-1);
-  opacity: 0.98;
+  transform: translateY(1px) scale(0.97) !important;
+  box-shadow: none;
+  opacity: 0.92;
 }
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 /* ── Elevation Classes (Layering System) ── */
@@ -160,17 +161,74 @@ button:disabled {
 /* Card with depth */
 .card-elevated {
   box-shadow: var(--elevation-2);
-  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), 
+              transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: box-shadow, transform;
 }
 .card-elevated:hover {
   box-shadow: var(--elevation-3);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.005);
 }
 .card-elevated:active {
   box-shadow: var(--elevation-1);
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.99);
+}
+
+/* ── Premium Input Focus Lift ── */
+input:focus, textarea:focus {
+  transform: translateY(-1px) !important;
+}
+
+/* ── Link press state ── */
+a {
+  transition: opacity 150ms ease, transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+a:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* ── Smooth page transitions ── */
+.app-page-shell {
+  animation: pageEnter 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Bottom sheet slide up ── */
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.sheet-enter {
+  animation: slideUpSheet 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Dropdown pop ── */
+@keyframes dropdownPop {
+  from { opacity: 0; transform: scale(0.92) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.dropdown-pop {
+  animation: dropdownPop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top right;
+}
+
+/* ── Pill filter chip press ── */
+.chip {
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease !important;
+}
+.chip:active {
+  transform: scale(0.9) !important;
+}
+
+/* ── Image lazy-load fade-in ── */
+img {
+  transition: opacity 0.3s ease;
+}
+img[loading="lazy"] {
+  opacity: 0;
+}
+img[loading="lazy"].loaded {
+  opacity: 1;
 }
 
 /* Chip / Filter pill */
