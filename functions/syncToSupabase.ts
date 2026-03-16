@@ -106,11 +106,14 @@ Deno.serve(async (req) => {
 
     } else if (entityName === "Post" || entityName === "CommunityPost") {
       const record = {
-        id,
+        id: String(id),
         content: data.body || data.text || null,
         created_at: data.created_date || new Date().toISOString(),
-        user_id: String(data.created_by_id || data.author_email || data.created_by || null),
+        user_id: data.author_email || data.created_by || data.created_by_id
+          ? String(data.author_email || data.created_by || data.created_by_id)
+          : null,
         media_url: data.video_url || data.image_url || (data.image_urls?.length > 0 ? data.image_urls[0] : null),
+        community_id: data.community_id ? String(data.community_id) : null,
       };
       console.log(`[syncToSupabase] Syncing ${entityName} → posts:`, JSON.stringify(record));
       await supabaseUpsert("posts", record);
