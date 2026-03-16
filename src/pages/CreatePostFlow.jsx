@@ -63,6 +63,10 @@ export default function CreatePostFlow() {
 
   const doPost = async (asDraft = false) => {
     if (!user) return;
+    if (!navigator.onLine) {
+      alert("No internet connection. Please check your network and try again.");
+      return;
+    }
     alert("Syncing to Supabase...");
     setIsPosting(true);
     try {
