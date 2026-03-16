@@ -243,10 +243,14 @@ export default function CreatePostFlow() {
         </h1>
 
         <button
+          type="button"
           onClick={() => doPost(false)}
           disabled={isPosting || postResult === "success"}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold text-white disabled:opacity-70"
-          style={{ backgroundColor: postResult === "success" ? "#16a34a" : postResult === "error" ? "#dc2626" : "var(--accent-primary)" }}
+          style={{
+            backgroundColor: postResult === "success" ? "#16a34a" : postResult === "error" ? "#dc2626" : "var(--accent-primary)",
+            pointerEvents: postResult === "success" ? "none" : "auto",
+          }}
         >
           {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : postResult === "success" ? "✓ Posted!" : postResult === "error" ? "✗ Failed" : <><Send className="w-3.5 h-3.5" /> Post</>}
         </button>
