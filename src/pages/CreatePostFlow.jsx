@@ -241,9 +241,14 @@ export default function CreatePostFlow() {
           <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
         </button>
 
-        <h1 className="flex-1 text-center text-base font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-          New Post
-        </h1>
+        <div className="flex-1 flex flex-col items-center">
+          <h1 className="text-base font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+            New Post
+          </h1>
+          <span className="text-xs" style={{ color: user ? "#16a34a" : "#dc2626" }}>
+            {user ? `✓ ${user.email}` : "✗ Not logged in"}
+          </span>
+        </div>
 
         <button
           type="button"
