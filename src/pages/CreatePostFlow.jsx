@@ -64,13 +64,16 @@ export default function CreatePostFlow() {
   }, []);
 
   const doPost = async (asDraft = false) => {
-    if (!user) return;
-    if (!navigator.onLine) {
-      alert("No internet connection. Please check your network and try again.");
+    // Guard: must not already be posting or succeeded
+    if (isPosting || postResult === "success") return;
+
+    // Guard: user must be loaded
+    if (!user) {
+      setPostResult("error");
+      setPostError("Not logged in. Please refresh.");
       return;
     }
 
-    console.log("[doPost] Starting post. User:", user.email, "| ID:", user.id, "| Online:", navigator.onLine);
     setPostResult(null);
     setPostError(null);
     setIsPosting(true);
@@ -78,22 +81,18 @@ export default function CreatePostFlow() {
     try {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
-
       const allTags = [];
+
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
-          console.log("[doPost] Uploading file", i, item.file.name, item.file.size, "bytes");
           const { file_url } = await base44.integrations.Core.UploadFile({ file: item.file });
-          console.log("[doPost] Uploaded →", file_url);
           uploadedUrls.push(file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
         }
         if (item.edits?.tags) {
-          item.edits.tags.forEach(tag => {
-            allTags.push({ ...tag, imageIndex: i });
-          });
+          item.edits.tags.forEach(tag => allTags.push({ ...tag, imageIndex: i }));
         }
       }
 
@@ -129,18 +128,16 @@ export default function CreatePostFlow() {
         media_tags: allTags.length > 0 ? allTags : undefined,
       };
 
-      console.log("[doPost] Saving to Base44 CommunityPost:", JSON.stringify(postData));
+      // This awaits confirmation from the server before proceeding
       const created = await base44.entities.CommunityPost.create(postData);
-      console.log("[doPost] Base44 create SUCCESS. New post ID:", created?.id);
+
+      if (!created?.id) throw new Error("Server returned no post ID");
 
       setPostResult("success");
-      // Wait 1.2s so user sees the success state, then navigate
       setTimeout(() => navigate(createPageUrl("Home")), 1200);
     } catch (err) {
-      console.error("[doPost] FAILED:", err?.message || err);
-      console.error("[doPost] Full error:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
       setPostResult("error");
-      setPostError(err?.message || "Unknown error");
+      setPostError(err?.message || "Something went wrong. Tap to retry.");
     } finally {
       setIsPosting(false);
     }
