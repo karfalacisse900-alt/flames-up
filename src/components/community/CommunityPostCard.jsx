@@ -394,7 +394,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
               {showMenu && (
                 <div
                   className="absolute right-0 top-full mt-2 rounded-2xl overflow-hidden z-40 min-w-[160px]"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 12px 40px rgba(0,0,0,0.15)", border: "1px solid var(--border-light)" }}>
+                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid #E2E8F0" }}>
                   <button onClick={handleCopyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
                     <LinkIcon className="w-4 h-4" /> Copy link
                   </button>
