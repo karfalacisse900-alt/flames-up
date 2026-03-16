@@ -130,13 +130,15 @@ export default function CreatePostFlow() {
       console.log("[doPost] Saving to Base44 CommunityPost:", JSON.stringify(postData));
       const created = await base44.entities.CommunityPost.create(postData);
       console.log("[doPost] Base44 create SUCCESS. New post ID:", created?.id);
-      console.log("[doPost] Supabase sync will fire via automation for entity ID:", created?.id);
 
-      navigate(createPageUrl("Home"));
+      setPostResult("success");
+      // Wait 1.2s so user sees the success state, then navigate
+      setTimeout(() => navigate(createPageUrl("Home")), 1200);
     } catch (err) {
       console.error("[doPost] FAILED:", err?.message || err);
-      console.error("[doPost] Full error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
-      alert(`Failed to post.\n\nError: ${err?.message || "Unknown error"}`);
+      console.error("[doPost] Full error:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      setPostResult("error");
+      setPostError(err?.message || "Unknown error");
     } finally {
       setIsPosting(false);
     }
