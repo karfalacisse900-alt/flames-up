@@ -82,7 +82,6 @@ export default function Discover() {
             </button>
           ) : (
             <div>
-              <p className="text-[11px] font-medium tracking-wide uppercase" style={{ color: "var(--text-hint)" }}>{getGreeting()}{firstName ? `, ${firstName}` : ""} ✦</p>
               <h1 className="text-2xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Discover</h1>
             </div>
           )}
