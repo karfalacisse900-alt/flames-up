@@ -62,10 +62,8 @@ export default function CreatePostFlow() {
   }, []);
 
   const doPost = async (asDraft = false) => {
-    if (!user || mediaItems.length === 0) {
-      alert("Please add at least one media item");
-      return;
-    }
+    if (!user) return;
+    alert("Syncing to Supabase...");
     setIsPosting(true);
     try {
       const uploadedUrls = [];
