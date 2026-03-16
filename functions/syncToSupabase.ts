@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
       });
 
     } else if (entityName === "CommunityPost") {
+      // Always upsert the post itself
       const userId = await toUUID(data.author_email || data.created_by || "");
       await supabaseUpsert("posts", {
         id,
@@ -101,6 +102,23 @@ Deno.serve(async (req) => {
         community_id: data.group_id ? await toUUID(data.group_id) : null,
         created_at: data.created_date || new Date().toISOString(),
       });
+
+      // On updates, sync likes: upvoted_by[] → one row per user in likes table
+      if (eventType === "update") {
+        const upvotedBy = data.upvoted_by || [];
+        console.log(`[sync] 👍 syncing ${upvotedBy.length} likes for post ${rawId}`);
+        for (const userEmail of upvotedBy) {
+          const likeUserId = await toUUID(userEmail);
+          // Deterministic UUID: same input always → same like row (safe to upsert repeatedly)
+          const likeId = await toUUID(`like:${rawId}:${userEmail}`);
+          await supabaseUpsert("likes", {
+            id: likeId,
+            post_id: id,  // same deterministic UUID used for the posts table
+            user_id: likeUserId,
+            created_at: data.updated_date || data.created_date || new Date().toISOString(),
+          });
+        }
+      }
 
     } else if (entityName === "Group") {
       await supabaseUpsert("communities", {
