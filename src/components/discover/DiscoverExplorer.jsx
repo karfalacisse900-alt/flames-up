@@ -297,7 +297,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
   // Clear all overlays when component unmounts (page navigation)
   useEffect(() => {
     return () => {
-      setPreviewItem(null);
+      onItemClick(null);
       setShowFilter(false);
       document.body.style.overflow = "";
     };
@@ -370,7 +370,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              onClick={() => setPreviewItem(item)}
+              onClick={() => onItemClick(item)}
               className="flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
             >
@@ -422,7 +422,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
               <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 snap-x snap-mandatory pb-2">
                 {featured.map(item => (
                   <div key={item.id} className="snap-start shrink-0">
-                    <HeroCard item={item} onPreview={setPreviewItem} />
+                    <HeroCard item={item} onPreview={onItemClick} />
                   </div>
                 ))}
               </div>
@@ -459,7 +459,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
                 <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
                   {trendingItems.slice(0, 20).map(item => (
                     <div key={item.id} className="snap-center shrink-0">
-                      <CompactToolCard item={item} onClick={() => setPreviewItem(item)} />
+                      <CompactToolCard item={item} onClick={() => onItemClick(item)} />
                     </div>
                   ))}
                 </div>
@@ -473,7 +473,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return aiItems.length > 0 && (
               <DiscoverSection title="🤖 AI-Powered" subtitle="Supercharge with AI">
                 {aiItems.slice(0, 12).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -484,7 +484,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return prodItems.length > 0 && (
               <DiscoverSection title="⚡ Productivity" subtitle="Work smarter">
                 {prodItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -495,7 +495,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return learnItems.length > 0 && (
               <DiscoverSection title="📚 Study & Learning" subtitle="Expand your knowledge">
                 {learnItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -506,7 +506,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return devItems.length > 0 && (
               <DiscoverSection title="🛠️ Developer Tools" subtitle="Build better">
                 {devItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -517,7 +517,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return entertainItems.length > 0 && (
               <DiscoverSection title="🎬 Entertainment" subtitle="Relax & enjoy">
                 {entertainItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -528,7 +528,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return healthItems.length > 0 && (
               <DiscoverSection title="💪 Health & Wellness" subtitle="Stay healthy">
                 {healthItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -539,7 +539,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return lifestyleItems.length > 0 && (
               <DiscoverSection title="🌿 Lifestyle" subtitle="Live better">
                 {lifestyleItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -550,7 +550,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return financeItems.length > 0 && (
               <DiscoverSection title="💰 Finance" subtitle="Manage your money">
                 {financeItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
@@ -561,7 +561,7 @@ export default function DiscoverExplorer({ items, isLoading, user, onItemClick, 
             return socialItems.length > 0 && (
               <DiscoverSection title="👥 Social" subtitle="Connect with others">
                 {socialItems.slice(0, 10).map(item => (
-                  <HeroCard key={item.id} item={item} onPreview={setPreviewItem} />
+                  <HeroCard key={item.id} item={item} onPreview={onItemClick} />
                 ))}
               </DiscoverSection>
             );
