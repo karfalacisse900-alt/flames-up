@@ -528,6 +528,34 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
         </div>
       )}
 
+      {/* Nearby People Modal */}
+      {showNearbyModal && (
+        <NearbyPeopleModal
+          allUsers={nearbyUsers}
+          userLoc={userLoc}
+          currentUser={currentUser}
+          followedEmails={follows}
+          onClose={() => setShowNearbyModal(false)}
+          onHighlight={presence => {
+            setShowNearbyModal(false);
+            if (mapInst.current && presence.location_lat && presence.location_lng) {
+              mapInst.current.flyTo({
+                center: [presence.location_lng, presence.location_lat],
+                zoom: 16,
+                duration: 800,
+              });
+              // Show popup after fly
+              setTimeout(() => {
+                if (!mapInst.current) return;
+                const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
+                setPopupCoords({ x: pt.x, y: pt.y });
+                setSelectedUserPresence(presence);
+              }, 850);
+            }
+          }}
+        />
+      )}
+
       {/* Full PlaceHub modal — Posts, Photos, Events, Tips */}
       {showPlaceHub && selectedPlace && (
         <PlaceHub
