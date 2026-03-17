@@ -182,9 +182,9 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
               {locationName}
             </h2>
           </div>
-          {(locationData.city || locationData.country) && (
-            <p className="text-xs text-white/80 pl-6.5 drop-shadow-sm">
-              {[locationData.city, locationData.region, locationData.country].filter(Boolean).join(", ")}
+          {(locationData.address || locationData.city || locationData.country) && (
+            <p className="text-xs text-white/80 drop-shadow-sm" style={{ paddingLeft: "1.6rem" }}>
+              {locationData.address || [locationData.city, locationData.region, locationData.country].filter(Boolean).join(", ")}
             </p>
           )}
         </div>
