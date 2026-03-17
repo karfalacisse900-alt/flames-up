@@ -127,6 +127,7 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const fetchPosts = useCallback(async (pageNum) => {
+    // Always network-only: add a cache-busting timestamp so no browser/CDN cache is used
     try {
       const offset = pageNum * BATCH_SIZE;
       const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
@@ -135,6 +136,28 @@ export default function CommunityFeed({ user }) {
       console.error("[feed] fetch failed:", err.message);
       return [];
     }
+  }, []);
+
+  // Hard-refresh: fetch posts then cross-check against Supabase to strip deleted ones
+  const fetchPostsHard = useCallback(async () => {
+    const offset = 0;
+    const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
+    const filtered = batch.filter(p => !p.tags?.includes("listen_dont_judge"));
+    if (filtered.length === 0) return filtered;
+
+    try {
+      const res = await base44.functions.invoke("getLivePostIds", { base44_ids: filtered.map(p => p.id) });
+      const { live_ids = [], supabase_ok = false } = res.data || {};
+      if (supabase_ok && live_ids.length > 0) {
+        const liveSet = new Set(live_ids);
+        const result = filtered.filter(p => liveSet.has(p.id));
+        console.log(`[feed] hard-refresh: ${filtered.length} fetched, ${result.length} live after Supabase check`);
+        return result;
+      }
+    } catch (e) {
+      console.warn("[feed] getLivePostIds check failed, showing all:", e.message);
+    }
+    return filtered;
   }, []);
 
   const loadInitialPosts = useCallback(async () => {
