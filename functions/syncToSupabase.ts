@@ -83,29 +83,13 @@ Deno.serve(async (req) => {
     const id = await toUUID(rawId);
 
     if (entityName === "User") {
-      // Upsert on email to prevent duplicate profile rows
-      const url = `${SUPABASE_URL}/rest/v1/profiles?on_conflict=email`;
-      const profileBody = {
+      await supabaseUpsert("profiles", {
+        id,
         email: data.email || "unknown@flames-up.com",
         full_name: data.full_name || data.display_name || data.username || "Anonymous",
         avatar_url: data.avatar_url || null,
         updated_at: new Date().toISOString(),
-      };
-      const profileRes = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_SERVICE_ROLE_KEY,
-          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          "Prefer": "resolution=merge-duplicates,return=minimal",
-        },
-        body: JSON.stringify(profileBody),
       });
-      if (!profileRes.ok) {
-        const errText = await profileRes.text();
-        throw new Error(`Supabase profile upsert failed: ${profileRes.status} - ${errText}`);
-      }
-      console.log(`[sync] ✅ upserted profile for ${data.email}`);
 
     } else if (entityName === "CommunityPost") {
       // Always upsert the post itself
