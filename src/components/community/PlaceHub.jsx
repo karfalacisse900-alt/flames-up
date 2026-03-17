@@ -273,6 +273,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
                 await base44.entities.CommunityPost.create({
                   type: "opinion",
                   body: `📸 Photo from ${locationName}`,
+                  title: `📸 Photo from ${locationName}`,
                   author_email: user.email,
                   author_name: user.full_name,
                   author_avatar_url: user.avatar_url || "",
