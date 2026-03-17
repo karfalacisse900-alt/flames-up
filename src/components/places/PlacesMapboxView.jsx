@@ -592,12 +592,9 @@ function LocationQuickCard({ place, onClose, onExpand }) {
           <h3 className="font-bold text-base leading-tight truncate" style={{ color:"#0F172A", fontFamily:"var(--font-serif)" }}>
             {place.name}
           </h3>
-          {place.address && (
-            <p className="text-xs mt-0.5 truncate" style={{ color:"#64748B" }}>{place.address}</p>
-          )}
-          {!place.address && (place.city || place.country) && (
-            <p className="text-xs mt-0.5" style={{ color:"#64748B" }}>
-              {[place.city, place.region, place.country].filter(Boolean).join(", ")}
+          {(place.address || place.city) && (
+            <p className="text-xs mt-0.5 truncate" style={{ color:"#64748B" }}>
+              {place.address || [place.city, place.region, place.country].filter(Boolean).join(", ")}
             </p>
           )}
           {place.category && (
