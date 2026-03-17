@@ -60,6 +60,16 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
   const [showRadiusPanel,     setShowRadiusPanel]     = useState(false);
   const [selectedUserPresence, setSelectedUserPresence] = useState(null);
   const [popupCoords,          setPopupCoords]          = useState(null);
+  const [showNearbyModal,      setShowNearbyModal]      = useState(false);
+  const [follows,              setFollows]              = useState([]);
+
+  // Load follows for friend prioritization
+  useEffect(() => {
+    if (!currentUser?.email) return;
+    base44.entities.Follow.filter({ follower_email: currentUser.email })
+      .then(rows => setFollows(rows.map(r => r.following_email)))
+      .catch(() => {});
+  }, [currentUser?.email]);
   // Location detail — shown as bottom sheet inside map
   const [selectedPlace,    setSelectedPlace]    = useState(null);
   const [showPlaceHub,     setShowPlaceHub]     = useState(false);
