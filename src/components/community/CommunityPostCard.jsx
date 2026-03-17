@@ -315,14 +315,13 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
   }
 
   return (
-    <div className="relative mb-3 w-full">
+    <div className="relative w-full">
       {/* Modern card container */}
-      <div className="mx-auto w-full rounded-3xl overflow-hidden" 
+      <div className="w-full overflow-hidden" 
         style={{ 
-          maxWidth: "640px",
           backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border-light)",
-          boxShadow: "0 2px 12px rgba(15,23,42,0.06)"
+          borderTop: "1px solid var(--border-subtle)",
+          borderBottom: "1px solid var(--border-subtle)",
         }}>
         {/* ── HEADER SECTION ── */}
         <div className="flex items-center justify-between px-4 py-3">
