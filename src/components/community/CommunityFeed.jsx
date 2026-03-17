@@ -133,13 +133,63 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const fetchPosts = useCallback(async (pageNum) => {
+    // Read directly from Supabase — bypasses Base44 cache, reflects live deletes
     try {
       const offset = pageNum * BATCH_SIZE;
-      const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
-      return batch.filter(p => !p.tags?.includes("listen_dont_judge"));
+      // Get post IDs from Supabase (source of truth)
+      const sbRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/posts?select=id&order=created_at.desc&limit=${BATCH_SIZE}&offset=${offset}`,
+        { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      if (!sbRes.ok) throw new Error("Supabase fetch failed");
+      const sbPosts = await sbRes.json();
+      if (!Array.isArray(sbPosts) || sbPosts.length === 0) return [];
+
+      // Build a set of live Supabase UUIDs
+      const liveIds = new Set(sbPosts.map(p => p.id));
+
+      // Fetch full post data from Base44 (has all fields), then filter to only live IDs
+      const offset44 = pageNum * BATCH_SIZE;
+      const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE * 3, offset44);
+      const filtered = batch.filter(p => {
+        if (p.tags?.includes("listen_dont_judge")) return false;
+        // Keep post only if it exists in Supabase live posts table
+        return liveIds.has(p.supabase_id) || liveIds.size === 0;
+      });
+      // If we have live IDs, filter strictly; otherwise fall back to full batch
+      if (liveIds.size > 0) {
+        // Build a UUID→Base44 post map using the deterministic UUID logic
+        // Since we can't do client-side UUID hashing easily, we fall back: 
+        // any post NOT in Supabase (deleted) is excluded by checking against a fresh batch
+        // We use a simpler heuristic: fetch Supabase post content field to match Base44 post ids
+        const sbFull = await fetch(
+          `${SUPABASE_URL}/rest/v1/posts?select=id,content,created_at&order=created_at.desc&limit=${BATCH_SIZE}&offset=${offset}`,
+          { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        const sbFullPosts = await sbFull.json();
+        if (Array.isArray(sbFullPosts) && sbFullPosts.length > 0) {
+          // Build set of known-live content snippets to cross-reference
+          const liveSnippets = new Set(sbFullPosts.map(p => (p.content || "").slice(0, 80)));
+          return batch
+            .filter(p => !p.tags?.includes("listen_dont_judge"))
+            .filter(p => {
+              const snippet = (p.body || p.text || "").slice(0, 80);
+              return liveSnippets.has(snippet);
+            })
+            .slice(0, BATCH_SIZE);
+        }
+      }
+      return batch.filter(p => !p.tags?.includes("listen_dont_judge")).slice(0, BATCH_SIZE);
     } catch (err) {
-      console.error("Failed to fetch posts:", err);
-      return [];
+      console.error("[feed] Supabase fetch failed, falling back to Base44:", err.message);
+      // Fallback to Base44 if Supabase is unreachable
+      try {
+        const offset = pageNum * BATCH_SIZE;
+        const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
+        return batch.filter(p => !p.tags?.includes("listen_dont_judge"));
+      } catch {
+        return [];
+      }
     }
   }, []);
 
