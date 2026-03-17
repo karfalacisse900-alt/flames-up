@@ -103,7 +103,6 @@ export default function CommunityFeed({ user }) {
         };
 
         ws.onclose = () => {
-          console.log("[supabase-rt] disconnected, reconnecting in 5s...");
           clearInterval(heartbeatInterval);
           reconnectTimeout = setTimeout(connect, 5000);
         };
