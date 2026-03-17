@@ -39,6 +39,99 @@ export default function CommunityFeed({ user }) {
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
   const BATCH_SIZE = 20;
 
+  // ── Supabase Realtime: reflect DELETE and UPDATE from Supabase dashboard ──
+  useEffect(() => {
+    let ws = null;
+    let heartbeatInterval = null;
+    let reconnectTimeout = null;
+
+    const connect = () => {
+      try {
+        const wsUrl = `${SUPABASE_URL.replace("https://", "wss://")}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}&vsn=1.0.0`;
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log("[supabase-rt] connected");
+          // Subscribe to posts table
+          ws.send(JSON.stringify({
+            topic: "realtime:public:posts",
+            event: "phx_join",
+            payload: { config: { broadcast: { self: false }, presence: { key: "" } } },
+            ref: "1",
+          }));
+          // Subscribe to comments table
+          ws.send(JSON.stringify({
+            topic: "realtime:public:comments",
+            event: "phx_join",
+            payload: { config: { broadcast: { self: false }, presence: { key: "" } } },
+            ref: "2",
+          }));
+          // Heartbeat every 30s
+          heartbeatInterval = setInterval(() => {
+            if (ws?.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ topic: "phoenix", event: "heartbeat", payload: {}, ref: "hb" }));
+            }
+          }, 30000);
+        };
+
+        ws.onmessage = (msg) => {
+          try {
+            const data = JSON.parse(msg.data);
+            const payload = data.payload;
+            if (!payload?.type) return;
+            const eventType = payload.type; // "INSERT" | "UPDATE" | "DELETE"
+            const table = payload.table;   // "posts" | "comments"
+            const record = payload.old_record || payload.record;
+
+            if (table === "posts") {
+              if (eventType === "DELETE" && record?.id) {
+                // Remove deleted post from local state
+                setPosts(prev => prev.filter(p => {
+                  // Match by supabase UUID — we need to check both direct id match and content match
+                  return p.supabase_id !== record.id;
+                }));
+                console.log("[supabase-rt] post deleted:", record.id);
+                // Also reload from Base44 to ensure sync
+                loadInitialPosts();
+              } else if (eventType === "UPDATE" && record?.id) {
+                console.log("[supabase-rt] post updated:", record.id);
+                loadInitialPosts();
+              }
+            }
+
+            if (table === "comments") {
+              if (eventType === "DELETE" || eventType === "UPDATE") {
+                console.log("[supabase-rt] comment change:", eventType, record?.id);
+                qc.invalidateQueries({ queryKey: ["communityComments"] });
+              }
+            }
+          } catch {}
+        };
+
+        ws.onclose = () => {
+          console.log("[supabase-rt] disconnected, reconnecting in 5s...");
+          clearInterval(heartbeatInterval);
+          reconnectTimeout = setTimeout(connect, 5000);
+        };
+
+        ws.onerror = (err) => {
+          console.warn("[supabase-rt] error:", err);
+          ws?.close();
+        };
+      } catch (e) {
+        console.warn("[supabase-rt] failed to connect:", e);
+      }
+    };
+
+    connect();
+
+    return () => {
+      clearInterval(heartbeatInterval);
+      clearTimeout(reconnectTimeout);
+      ws?.close();
+    };
+  }, []);
+
   const fetchPosts = useCallback(async (pageNum) => {
     try {
       const offset = pageNum * BATCH_SIZE;
