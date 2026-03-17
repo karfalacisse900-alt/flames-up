@@ -21,6 +21,7 @@ const TABS = [
   { key: "events",  label: "Events",  icon: Calendar },
   { key: "groups",  label: "Groups",  icon: Users },
   { key: "tips",    label: "Tips",    icon: Lightbulb },
+  { key: "details", label: "Details", icon: MapPin },
 ];
 
 export default function PlaceHub({ locationName, locationData = {}, user, onClose, onUpvote }) {
