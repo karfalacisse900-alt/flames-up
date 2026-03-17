@@ -58,10 +58,10 @@ Deno.serve(async (req) => {
     const live_ids = base44_ids.filter(rawId => liveUuids.has(idMap[rawId]));
 
     console.log(`[getLivePostIds] checked ${base44_ids.length} posts, ${live_ids.length} still live in Supabase`);
-    return Response.json({ live_ids });
+    return Response.json({ live_ids, supabase_ok: true });
   } catch (error) {
     console.error("[getLivePostIds] error:", error.message);
-    // Fail open — don't block the feed
-    return Response.json({ live_ids: [] });
+    // Signal Supabase was unreachable — caller should fail open
+    return Response.json({ live_ids: [], supabase_ok: false });
   }
 });
