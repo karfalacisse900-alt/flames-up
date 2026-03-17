@@ -161,6 +161,10 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const loadInitialPosts = useCallback(async () => {
+    // Reset state first so no stale posts flash before fresh data arrives
+    setPosts([]);
+    setPage(0);
+    setHasMore(true);
     setIsLoading(true);
     const data = await fetchPosts(0);
     setPosts(data);
