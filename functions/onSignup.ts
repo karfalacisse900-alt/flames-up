@@ -73,22 +73,27 @@ Deno.serve(async (req) => {
     try {
       const freshUser = await base44.auth.me();
       
-      // Map Base44 fields to Supabase columns - upsert on email to prevent duplicates
+      // Deterministic UUID from user id — same user always maps to same Supabase row
+      const encoder = new TextEncoder();
+      const hashBuf = await crypto.subtle.digest("SHA-256", encoder.encode(String(freshUser.id)));
+      const hex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,"0")).join("");
+      const profileId = `${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-${hex.slice(16,17)}${hex.slice(17,20)}-${hex.slice(20,32)}`;
+
       const profileRecord = {
+        id: profileId,
         email: freshUser.email || 'unknown@flames-up.com',
         full_name: freshUser.full_name || freshUser.display_name || freshUser.username || freshUser.email?.split('@')[0] || 'User',
         avatar_url: freshUser.avatar_url || null,
         updated_at: new Date().toISOString(),
       };
       
-      // Use email as the upsert key — prevents duplicate rows for the same user
-      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?on_conflict=email`, {
+      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
         method: "POST",
         headers: {
           "apikey": SUPABASE_SERVICE_ROLE_KEY,
           "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
           "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates,return=minimal",
+          "Prefer": "resolution=merge-duplicates",
         },
         body: JSON.stringify(profileRecord),
       });
