@@ -12,6 +12,7 @@ import UserProfile from './pages/UserProfile';
 import PlaceDetail from './pages/PlaceDetail';
 import ListenDontJudge from './pages/ListenDontJudge';
 import LiveNearby from './pages/LiveNearby';
+import Onboarding from './pages/Onboarding';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
