@@ -100,7 +100,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
     setFollowLoading(false);
   };
 
-  const photoPosts = posts.filter(p => p.image_url || p.image_urls?.length > 0);
+  const photoPosts = posts.filter(p => (p.image_url && p.image_url.trim()) || p.image_urls?.length > 0);
   const videoPosts = posts.filter(p => p.video_url?.trim());
 
   const lat = locationData.lat || posts.find(p => p.location_lat)?.location_lat;
