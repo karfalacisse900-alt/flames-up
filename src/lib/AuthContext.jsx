@@ -17,6 +17,23 @@ export const AuthProvider = ({ children }) => {
     checkAppState();
   }, []);
 
+  // Heartbeat: re-check Supabase profile every time app comes to foreground
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+      const currentUser = user;
+      if (!currentUser?.email) return;
+      console.log('[auth-heartbeat] app foregrounded, checking profile...');
+      const exists = await checkSupabaseProfile(currentUser.email);
+      if (exists === false) {
+        console.warn(`[auth-heartbeat] ${currentUser.email} no longer in Supabase — forcing logout`);
+        forceLogout();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user]);
+
   const checkAppState = async () => {
     try {
       setIsLoadingPublicSettings(true);
