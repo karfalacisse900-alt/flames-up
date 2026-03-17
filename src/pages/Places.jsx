@@ -192,10 +192,10 @@ export default function PlacesPage() {
         )}
       </div>
 
-      {/* MAP VIEW — full screen, nav hidden via postviewermode event */}
+      {/* MAP VIEW — full screen with its own place detail handling */}
       <AnimatePresence mode="wait">
       {viewMode === "map" && (
-        <MapViewWrapper onOpenPlace={openPlace} user={user} />
+        <MapViewWrapper onOpenPlace={() => {}} user={user} />
       )}
       </AnimatePresence>
 
