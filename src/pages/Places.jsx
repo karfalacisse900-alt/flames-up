@@ -191,19 +191,10 @@ export default function PlacesPage() {
         )}
       </div>
 
-      {/* MAP VIEW */}
+      {/* MAP VIEW — full screen, nav hidden via postviewermode event */}
       <AnimatePresence mode="wait">
       {viewMode === "map" && (
-        <motion.div
-          key="map"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ height: "calc(100vh - 140px)", position: "relative" }}
-        >
-          <PlacesMapboxView onOpenPlace={openPlace} user={user} />
-        </motion.div>
+        <MapViewWrapper onOpenPlace={openPlace} user={user} />
       )}
       </AnimatePresence>
 
