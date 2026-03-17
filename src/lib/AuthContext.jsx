@@ -203,6 +203,7 @@ export const AuthProvider = ({ children }) => {
       authError,
       appPublicSettings,
       logout,
+      forceLogout,
       navigateToLogin,
       checkAppState
     }}>
