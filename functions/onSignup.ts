@@ -73,22 +73,22 @@ Deno.serve(async (req) => {
     try {
       const freshUser = await base44.auth.me();
       
-      // Map Base44 fields to Supabase columns - ensure NOT NULL
+      // Map Base44 fields to Supabase columns - upsert on email to prevent duplicates
       const profileRecord = {
-        id: String(freshUser.id),
         email: freshUser.email || 'unknown@flames-up.com',
         full_name: freshUser.full_name || freshUser.display_name || freshUser.username || freshUser.email?.split('@')[0] || 'User',
         avatar_url: freshUser.avatar_url || null,
-        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       
-      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+      // Use email as the upsert key — prevents duplicate rows for the same user
+      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?on_conflict=email`, {
         method: "POST",
         headers: {
           "apikey": SUPABASE_SERVICE_ROLE_KEY,
           "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
           "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates",
+          "Prefer": "resolution=merge-duplicates,return=minimal",
         },
         body: JSON.stringify(profileRecord),
       });
