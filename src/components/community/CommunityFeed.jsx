@@ -289,14 +289,16 @@ export default function CommunityFeed({ user }) {
   const { data: debates = [] } = useQuery({
     queryKey: ["communityDebates"],
     queryFn: () => base44.entities.CommunityDebate.list("-created_date", 50),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const { data: follows = [] } = useQuery({
     queryKey: ["myFollows", user?.email],
     queryFn: () => base44.entities.Follow.filter({ follower_email: user?.email }),
     enabled: !!user?.email,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const loadNewPosts = () => { refetch(); };
