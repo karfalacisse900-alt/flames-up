@@ -85,19 +85,7 @@ export default function CommunityFeed({ user }) {
 
             if (table === "posts") {
               if (eventType === "DELETE" && record?.id) {
-                console.log("[supabase-rt] post deleted:", record.id, "— clearing cache and reloading");
-                // Immediately remove from local state (optimistic)
-                setPosts(prev => prev.filter(p => p.supabase_id !== record.id));
-                // Clear any query cache so stale data can't leak back
-                try {
-                  for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key?.includes("community") || key?.includes("post") || key?.includes("feed")) {
-                      localStorage.removeItem(key);
-                    }
-                  }
-                } catch {}
-                // Reload fresh from Supabase-verified source
+                console.log("[supabase-rt] post deleted:", record.id, "— reloading feed");
                 loadInitialPosts();
               } else if (eventType === "UPDATE" && record?.id) {
                 console.log("[supabase-rt] post updated:", record.id);
