@@ -3,7 +3,6 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { MapPin, Bookmark, Map, List, Search, X, Plus } from "lucide-react";
-import PlacesMapboxView from "@/components/places/PlacesMapboxView";
 import MapViewWrapper from "@/components/places/MapViewWrapper";
 import PlaceHub from "@/components/community/PlaceHub";
 import TrendingPlaces from "@/components/community/TrendingPlaces";
