@@ -316,8 +316,7 @@ export default function CommunityFeed({ user }) {
   }, [hasMore, isFetchingMore, loadMorePosts]);
 
   const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(async () => {
-    await refetch();
-    setNewPostsAvailable(0);
+    await hardRefetch();
   });
 
   const upvoteMut = useMutation({
