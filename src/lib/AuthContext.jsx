@@ -153,31 +153,40 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingAuth(true);
 
-      // Verify the Base44 token is still valid by calling me()
+      // Clear stale cache before loading fresh data
+      clearLocalCache();
+
+      // Verify the Base44 token is still valid
       let currentUser;
       try {
         currentUser = await base44.auth.me();
       } catch (tokenErr) {
-        // Token invalid / expired — clear everything
         console.warn('[auth] Token validation failed — forcing logout:', tokenErr.message);
         forceLogout();
         return;
       }
 
-      // HARD CHECK against Supabase — if the profile row was deleted, kick the user out
-      // even if their Base44 token is still technically valid
-      const exists = await checkSupabaseProfile(currentUser.email);
-      if (exists === false) {
+      // Force-fetch the real profile from Supabase so we always show the correct name/avatar,
+      // not a stale placeholder. If the row is missing, the account was deleted — kick them out.
+      const supabaseProfile = await fetchSupabaseProfile(currentUser.email);
+      if (supabaseProfile === false) {
         console.warn(`[auth] BLOCKED LOGIN: ${currentUser.email} deleted from Supabase profiles`);
         forceLogout();
         return;
       }
-      if (exists === null) {
-        console.warn('[auth] Supabase unreachable during login check — allowing (network issue)');
+      if (supabaseProfile === null) {
+        console.warn('[auth] Supabase unreachable during login — allowing, using Base44 profile data');
       }
 
-      setUser(currentUser);
-      userRef.current = currentUser;
+      // Merge Supabase profile data so the app always shows the real name/avatar
+      const mergedUser = {
+        ...currentUser,
+        full_name: supabaseProfile?.full_name || currentUser.full_name,
+        avatar_url: supabaseProfile?.avatar_url || currentUser.avatar_url,
+      };
+
+      setUser(mergedUser);
+      userRef.current = mergedUser;
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {
