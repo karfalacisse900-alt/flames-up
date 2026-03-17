@@ -348,7 +348,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
                 <div className="pb-28">
                   {posts.map(p => (
                     <CommunityPostCard key={p.id} post={p} user={user}
-                      onUpvote={() => onUpvote?.(p)} onLocationClick={null} />
+                      onUpvote={() => handleLikePost(p)} onLocationClick={null} />
                   ))}
                 </div>
               )
