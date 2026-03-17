@@ -89,9 +89,33 @@ export const AuthProvider = ({ children }) => {
 
   const checkUserAuth = async () => {
     try {
-      // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+
+      // Verify this user exists in Supabase profiles table
+      // If they were deleted from Supabase, force logout
+      try {
+        const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(currentUser.email)}&select=id`,
+          { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        const rows = await res.json();
+        if (res.ok && Array.isArray(rows) && rows.length === 0) {
+          // User deleted from Supabase — force logout
+          console.warn(`[auth] User ${currentUser.email} not found in Supabase profiles — forcing logout`);
+          setIsLoadingAuth(false);
+          setIsAuthenticated(false);
+          setAuthError({ type: 'auth_required', message: 'Authentication required' });
+          base44.auth.logout(window.location.href);
+          return;
+        }
+      } catch (sbErr) {
+        // If Supabase check fails, don't block login — fail open
+        console.warn('[auth] Supabase profile check failed (non-fatal):', sbErr.message);
+      }
+
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
@@ -99,13 +123,8 @@ export const AuthProvider = ({ children }) => {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
-      // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+        setAuthError({ type: 'auth_required', message: 'Authentication required' });
       }
     }
   };
