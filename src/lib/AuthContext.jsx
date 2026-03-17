@@ -87,33 +87,63 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
+
+  // Returns true if user exists in Supabase, false if deleted, null if check failed (network error)
+  const checkSupabaseProfile = async (email) => {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id`,
+        {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
+          cache: "no-store",
+        }
+      );
+      if (!res.ok) return null; // Network/server error — don't block
+      const rows = await res.json();
+      return Array.isArray(rows) && rows.length > 0;
+    } catch {
+      return null; // Network error — don't block
+    }
+  };
+
+  const forceLogout = () => {
+    // Clear all local storage keys related to posts/cache
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes("post") || key.includes("feed") || key.includes("community") || key.includes("tanstack") || key.includes("query"))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear();
+    } catch {}
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsLoadingAuth(false);
+    setAuthError({ type: 'auth_required', message: 'Authentication required' });
+    base44.auth.logout(window.location.href);
+  };
+
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
 
-      // Verify this user exists in Supabase profiles table
-      // If they were deleted from Supabase, force logout
-      try {
-        const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(currentUser.email)}&select=id`,
-          { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } }
-        );
-        const rows = await res.json();
-        if (res.ok && Array.isArray(rows) && rows.length === 0) {
-          // User deleted from Supabase — force logout
-          console.warn(`[auth] User ${currentUser.email} not found in Supabase profiles — forcing logout`);
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-          setAuthError({ type: 'auth_required', message: 'Authentication required' });
-          base44.auth.logout(window.location.href);
-          return;
-        }
-      } catch (sbErr) {
-        // If Supabase check fails, don't block login — fail open
-        console.warn('[auth] Supabase profile check failed (non-fatal):', sbErr.message);
+      // HARD CHECK: Verify user exists in Supabase profiles table
+      const exists = await checkSupabaseProfile(currentUser.email);
+      if (exists === false) {
+        // User was deleted from Supabase — force logout immediately, no fail-open
+        console.warn(`[auth] BLOCKED: ${currentUser.email} not in Supabase profiles — forcing logout`);
+        forceLogout();
+        return;
+      }
+      // exists === null means Supabase was unreachable — allow login (network issue, not deletion)
+      if (exists === null) {
+        console.warn('[auth] Supabase unreachable during profile check — allowing login');
       }
 
       setUser(currentUser);
