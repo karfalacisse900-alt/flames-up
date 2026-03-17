@@ -633,7 +633,7 @@ export default function CommunityFeed({ user }) {
       </AnimatePresence>
 
       {/* Feed */}
-      <div className="pb-28 flex flex-col gap-4 px-4 py-4">
+      <div className="pb-28 flex flex-col gap-3 py-3">
         {activeFilter === "nearby" && locationLoading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />
