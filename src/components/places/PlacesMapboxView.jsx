@@ -289,17 +289,43 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
       .addTo(map);
   }, [mapReady, !!userLoc, currentUser?.email]);
 
-  // ── 7. Other user markers ──────────────────────────────────────────────
+  // ── 7. Other user markers — smart-limited (max 12, friends first) ────────
+  const MAP_PIN_LIMIT = 12;
+  const friendSet = new Set(follows);
+
+  const mapPins = useMemo(() => {
+    const [uLng, uLat] = userLoc || [0, 0];
+    const candidates = nearbyUsers
+      .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
+      .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
+      .map(p => ({
+        ...p,
+        _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
+        _isFriend: friendSet.has(p.user_email),
+      }))
+      .sort((a, b) => {
+        if (a._isFriend !== b._isFriend) return a._isFriend ? -1 : 1;
+        return a._dist - b._dist;
+      });
+    return candidates.slice(0, MAP_PIN_LIMIT);
+  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
+
+  const extraNearby = useMemo(() => {
+    const [uLng, uLat] = userLoc || [0, 0];
+    const total = nearbyUsers.filter(p =>
+      p.location_lat && p.location_lng &&
+      p.user_email !== currentUser?.email &&
+      (!userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
+    ).length;
+    return Math.max(0, total - MAP_PIN_LIMIT);
+  }, [nearbyUsers, userLoc, radius, currentUser?.email]);
+
   useEffect(() => {
     const map = mapInst.current;
     if (!map || !mapReady || !window.mapboxgl) return;
-    const [uLng, uLat] = userLoc || [0, 0];
     const activeEmails = new Set();
 
-    nearbyUsers.forEach(p => {
-      if (!p.location_lat || !p.location_lng) return;
-      if (p.user_email === currentUser?.email) return;
-      if (userLoc && haversineKm(uLat, uLng, p.location_lat, p.location_lng) > radius) return;
+    mapPins.forEach(p => {
       activeEmails.add(p.user_email);
 
       if (userMarkersRef.current[p.user_email]) {
