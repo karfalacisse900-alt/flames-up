@@ -31,6 +31,19 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
   const [showMeetup, setShowMeetup] = useState(false);
   const qc = useQueryClient();
 
+  const handleLikePost = async (post) => {
+    if (!user) return;
+    const hasLiked = post.upvoted_by?.includes(user.email);
+    const newUpvotes = hasLiked ? Math.max(0, (post.upvotes || 0) - 1) : (post.upvotes || 0) + 1;
+    await base44.entities.CommunityPost.update(post.id, {
+      upvotes: newUpvotes,
+      upvoted_by: hasLiked
+        ? (post.upvoted_by || []).filter(e => e !== user.email)
+        : [...(post.upvoted_by || []), user.email],
+    });
+    qc.invalidateQueries({ queryKey: ["placePosts", locationName] });
+  };
+
   const { data: posts = [] } = useQuery({
     queryKey: ["placePosts", locationName],
     queryFn: async () => {
