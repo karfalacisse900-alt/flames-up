@@ -422,7 +422,6 @@ export default function CommunityFeed({ user }) {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     const card = post.type === "debate" || post.type === "question" ? (
-
       <DebateCard 
         post={post} 
         debate={debate} 
