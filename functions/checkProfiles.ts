@@ -13,6 +13,10 @@ Deno.serve(async (req) => {
       }
     });
     const profiles = await res.json();
+    if (!res.ok) {
+      console.error("Supabase error:", JSON.stringify(profiles));
+      return Response.json({ error: "Supabase query failed", detail: profiles }, { status: 500 });
+    }
 
     // Find duplicates by email
     const byEmail = {};
