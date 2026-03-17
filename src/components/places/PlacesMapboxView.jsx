@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, MapPin, SlidersHorizontal, X, ArrowLeft } from "lucide-react";
+import { Loader2, MapPin, SlidersHorizontal, X, Users } from "lucide-react";
 import MapCategoryCarousel from "./MapCategoryCarousel";
 import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
 import PlaceHub from "@/components/community/PlaceHub";
+import NearbyPeopleModal from "./NearbyPeopleModal";
 
 const CATEGORY_LAYERS = {
   food:        ["restaurant", "food", "fast-food", "bakery", "bar"],
