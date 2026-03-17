@@ -108,8 +108,8 @@ export default function CommunityFeed({ user }) {
           reconnectTimeout = setTimeout(connect, 5000);
         };
 
-        ws.onerror = (err) => {
-          console.warn("[supabase-rt] error:", err);
+        ws.onerror = () => {
+          // silently close — reconnect logic in onclose handles retry
           ws?.close();
         };
       } catch (e) {
