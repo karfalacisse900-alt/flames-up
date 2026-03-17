@@ -141,24 +141,8 @@ export default function CommunityFeed({ user }) {
   const fetchPosts = useCallback(async (pageNum) => {
     try {
       const offset = pageNum * BATCH_SIZE;
-      // 1. Fetch full post data from Base44
       const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
-      const filtered = batch.filter(p => !p.tags?.includes("listen_dont_judge"));
-      if (filtered.length === 0) return [];
-
-      // 2. Verify against Supabase — filter out posts deleted from Supabase (source of truth)
-      const ids = filtered.map(p => p.id);
-      const res = await base44.functions.invoke("getLivePostIds", { base44_ids: ids });
-      const { live_ids = [], supabase_ok = false } = res.data || {};
-
-      // Only filter if Supabase was actually reachable
-      if (!supabase_ok) {
-        console.warn("[feed] Supabase unreachable — showing Base44 data as-is");
-        return filtered;
-      }
-
-      const liveSet = new Set(live_ids);
-      return filtered.filter(p => liveSet.has(p.id));
+      return batch.filter(p => !p.tags?.includes("listen_dont_judge"));
     } catch (err) {
       console.error("[feed] fetch failed:", err.message);
       return [];
