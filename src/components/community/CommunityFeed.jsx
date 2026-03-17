@@ -193,6 +193,17 @@ export default function CommunityFeed({ user }) {
     setNewPostsAvailable(0);
   }, [loadInitialPosts]);
 
+  // Hard refresh: used by pull-to-refresh — strips Supabase-deleted posts
+  const hardRefetch = useCallback(async () => {
+    setIsLoading(true);
+    const data = await fetchPostsHard();
+    setPosts(data);
+    setHasMore(data.length === BATCH_SIZE);
+    setPage(0);
+    setNewPostsAvailable(0);
+    setIsLoading(false);
+  }, [fetchPostsHard]);
+
   // Reverse geocode coords to get neighborhood/area name
   const [detectedArea, setDetectedArea] = useState(null);
   
