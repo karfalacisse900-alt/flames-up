@@ -113,42 +113,45 @@ export default function ConversationListTab({ user, tab, onSelect }) {
   );
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-1 pt-1">
       {filtered.map((conv) => (
         <button key={conv.email} onClick={() => onSelect({ type: "dm", data: conv })}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-[24px]"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)" }}>
+          className="w-full flex items-center gap-3 px-4 py-3 text-left"
+          style={{ borderBottom: "1px solid var(--border-subtle)" }}>
 
           {/* Avatar */}
-          <div className="w-[54px] h-[54px] rounded-2xl flex items-center justify-center text-xl font-bold shrink-0"
-            style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, var(--accent-primary))`, color: "#fff" }}>
-            {conv.name?.[0]?.toUpperCase() || "?"}
+          <div className="relative shrink-0">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+              style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, ${avatarColor(conv.email)}bb)`, color: "#fff" }}>
+              {conv.name?.[0]?.toUpperCase() || "?"}
+            </div>
+            {/* Online dot placeholder */}
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-0.5">
-              <p className="font-semibold text-[15px] truncate" style={{ color: "#111" }}>{conv.name}</p>
-              <span className="text-[12px] shrink-0 ml-2" style={{ color: conv.unread > 0 ? "#25D366" : "#999", fontWeight: conv.unread > 0 ? 600 : 400 }}>
+              <p className="font-bold text-[15px] truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{conv.name}</p>
+              <span className="text-[12px] shrink-0 ml-2" style={{ color: conv.unread > 0 ? "var(--accent-primary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 600 : 400 }}>
                 {formatTime(conv.lastMessage.created_date)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-[13px] truncate flex-1" style={{ color: conv.unread > 0 ? "#333" : "#999", fontWeight: conv.unread > 0 ? 500 : 400 }}>
+              <p className="text-[13px] truncate flex-1" style={{ color: conv.unread > 0 ? "var(--text-primary)" : "var(--text-hint)", fontWeight: conv.unread > 0 ? 500 : 400 }}>
                 {conv.lastMessage.sender_email === user.email
-                  ? <span style={{ color: "#999" }}>You: </span>
+                  ? <span style={{ color: "var(--text-hint)" }}>You: </span>
                   : null}
                 {getPreview(conv.lastMessage)}
               </p>
               {conv.unread > 0 && (
-                <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[11px] font-bold text-white ml-2 shrink-0"
-                  style={{ backgroundColor: "#25D366" }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold text-white ml-2 shrink-0"
+                  style={{ backgroundColor: "var(--accent-primary)" }}>
                   {conv.unread > 9 ? "9+" : conv.unread}
                 </div>
               )}
               {tab === "requests" && conv.unread === 0 && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full ml-2 font-semibold shrink-0"
-                  style={{ backgroundColor: "#FFF3E0", color: "#E65100" }}>Req</span>
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>Req</span>
               )}
             </div>
           </div>
