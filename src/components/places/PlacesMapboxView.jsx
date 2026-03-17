@@ -452,14 +452,19 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
       {/* Radius + online badge row */}
       {mapReady && (
         <div className="absolute top-16 left-0 right-0 z-20 flex items-center justify-between px-3 pointer-events-none">
-          {/* Online count */}
-          {nearbyUsers.filter(u => u.user_email !== currentUser?.email).length > 0 ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
-              style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#16A34A" }}>
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              {nearbyUsers.filter(u => u.user_email !== currentUser?.email).length} nearby
-            </div>
-          ) : <div />}
+          {/* Nearby People toggle */}
+          <button
+            onClick={() => setShowNearbyModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
+            style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#0F172A" }}
+          >
+            <Users className="w-3.5 h-3.5" style={{ color:"#16A34A" }} />
+            <span style={{ color:"#16A34A" }}>
+              {mapPins.length > 0
+                ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
+                : "Nearby People"}
+            </span>
+          </button>
 
           {/* Radius picker */}
           <div className="relative pointer-events-auto">
