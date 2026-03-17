@@ -6,7 +6,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 Deno.serve(async (req) => {
   try {
     // Fetch all profiles
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id,email,full_name,created_at&order=email.asc,created_at.asc`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=id,email,full_name,updated_at&order=email.asc,updated_at.asc`, {
       headers: {
         "apikey": SUPABASE_SERVICE_ROLE_KEY,
         "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
