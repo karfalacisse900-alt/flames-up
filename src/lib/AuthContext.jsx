@@ -134,12 +134,23 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
 
-      // HARD CHECK against Supabase — no fail-open for explicit "deleted" result
+      // Verify the Base44 token is still valid by calling me()
+      let currentUser;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (tokenErr) {
+        // Token invalid / expired — clear everything
+        console.warn('[auth] Token validation failed — forcing logout:', tokenErr.message);
+        forceLogout();
+        return;
+      }
+
+      // HARD CHECK against Supabase — if the profile row was deleted, kick the user out
+      // even if their Base44 token is still technically valid
       const exists = await checkSupabaseProfile(currentUser.email);
       if (exists === false) {
-        console.warn(`[auth] BLOCKED LOGIN: ${currentUser.email} not in Supabase profiles`);
+        console.warn(`[auth] BLOCKED LOGIN: ${currentUser.email} deleted from Supabase profiles`);
         forceLogout();
         return;
       }
