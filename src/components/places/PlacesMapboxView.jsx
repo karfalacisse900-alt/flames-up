@@ -373,7 +373,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
         delete userMarkersRef.current[email];
       }
     });
-  }, [nearbyUsers, mapReady, radius, currentUser?.email]);
+  }, [mapPins, mapReady]);
 
   // ── 8. Category filter ─────────────────────────────────────────────────
   useEffect(() => {
