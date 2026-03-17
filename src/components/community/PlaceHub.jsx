@@ -412,6 +412,71 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
               <LocationTipsTab locationName={locationName} locationData={locationData} user={user} />
             )}
 
+            {/* DETAILS */}
+            {activeTab === "details" && (
+              <div className="p-4 pb-28 space-y-3">
+                {/* Address */}
+                {locationData.address && (
+                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>📍</div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>ADDRESS</p>
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{locationData.address}</p>
+                    </div>
+                  </div>
+                )}
+                {/* Hours */}
+                {locationData.hours && (
+                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🕐</div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>HOURS</p>
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{typeof locationData.hours === "string" ? locationData.hours : "See website"}</p>
+                    </div>
+                  </div>
+                )}
+                {/* Phone */}
+                {locationData.phone && (
+                  <a href={`tel:${locationData.phone}`} className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>📞</div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>PHONE</p>
+                      <p className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>{locationData.phone}</p>
+                    </div>
+                  </a>
+                )}
+                {/* Website */}
+                {locationData.website && (
+                  <a href={locationData.website.startsWith("http") ? locationData.website : `https://${locationData.website}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🌐</div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>WEBSITE</p>
+                      <p className="text-sm font-medium truncate" style={{ color: "var(--accent-primary)" }}>{locationData.website}</p>
+                    </div>
+                  </a>
+                )}
+                {/* Category */}
+                {locationData.category && (
+                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🏷️</div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>CATEGORY</p>
+                      <p className="text-sm font-medium capitalize" style={{ color: "var(--text-primary)" }}>{locationData.category.replace(/-/g, " ")}</p>
+                    </div>
+                  </div>
+                )}
+                {!locationData.address && !locationData.hours && !locationData.phone && !locationData.website && (
+                  <div className="py-12 text-center">
+                    <p className="text-4xl mb-3">ℹ️</p>
+                    <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>No details available yet</p>
+                    <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Details come from the map data</p>
+                  </div>
+                )}
+              </div>
+            )}
+
           </motion.div>
         </AnimatePresence>
       </div>
