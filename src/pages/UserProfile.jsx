@@ -37,10 +37,18 @@ export default function UserProfile() {
       return users[0] || null;
     },
     enabled: !!email,
-    staleTime: Infinity,
-    cacheTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 30000,
+    retry: 3,
+  });
+
+  const { data: userProfileData } = useQuery({
+    queryKey: ["userProfile", email],
+    queryFn: async () => {
+      const profiles = await base44.entities.UserProfile.filter({ user_email: email });
+      return profiles[0] || null;
+    },
+    enabled: !!email,
+    staleTime: 30000,
   });
 
   const { data: userPosts = [] } = useQuery({
