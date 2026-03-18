@@ -219,7 +219,7 @@ export default function UserProfile() {
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-[22px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                  {profileUser.full_name}
+                  {effectiveUser.full_name}
                 </h2>
                 {profile.bio && (
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
