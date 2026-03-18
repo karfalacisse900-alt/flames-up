@@ -175,19 +175,19 @@ export default function UserProfile() {
   // Merge data from User entity + UserProfile entity
   const profile = {
     bio: userProfileData?.bio || effectiveUser?.bio,
-    age: userProfileData?.age || profileUser?.age,
-    major: userProfileData?.major || profileUser?.major,
-    graduation_year: userProfileData?.graduation_year || profileUser?.graduation_year,
-    location: userProfileData?.location || profileUser?.location,
-    interests: userProfileData?.interests || profileUser?.interests,
-    looking_for: userProfileData?.looking_for || profileUser?.looking_for,
-    website: userProfileData?.website || profileUser?.website,
-    social_links: userProfileData?.social_links || profileUser?.social_links,
-    avatar_url: userProfileData?.avatar_url || profileUser?.avatar_url,
-    hide_age: userProfileData?.hide_age ?? profileUser?.hide_age,
-    hide_graduation: userProfileData?.hide_graduation ?? profileUser?.hide_graduation,
-    hide_location: userProfileData?.hide_location ?? profileUser?.hide_location,
-    hide_interests: userProfileData?.hide_interests ?? profileUser?.hide_interests,
+    age: userProfileData?.age || effectiveUser?.age,
+    major: userProfileData?.major || effectiveUser?.major,
+    graduation_year: userProfileData?.graduation_year || effectiveUser?.graduation_year,
+    location: userProfileData?.location || effectiveUser?.location,
+    interests: userProfileData?.interests || effectiveUser?.interests,
+    looking_for: userProfileData?.looking_for || effectiveUser?.looking_for,
+    website: userProfileData?.website || effectiveUser?.website,
+    social_links: userProfileData?.social_links || effectiveUser?.social_links,
+    avatar_url: userProfileData?.avatar_url || effectiveUser?.avatar_url,
+    hide_age: userProfileData?.hide_age ?? effectiveUser?.hide_age,
+    hide_graduation: userProfileData?.hide_graduation ?? effectiveUser?.hide_graduation,
+    hide_location: userProfileData?.hide_location ?? effectiveUser?.hide_location,
+    hide_interests: userProfileData?.hide_interests ?? effectiveUser?.hide_interests,
   };
 
   return (
