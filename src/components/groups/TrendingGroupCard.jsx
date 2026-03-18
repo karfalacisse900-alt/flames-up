@@ -17,19 +17,46 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
   const previewPosts = posts.filter(p => p.video_url || p.media_urls?.length > 0 || p.image_url).slice(0, 8);
   const currentPost = previewPosts[currentIndex];
 
-  // Auto-advance slides
+  // If group has a preview video, use it directly — skip post carousel
+  const hasGroupPreview = !!group.preview_video_url;
+
+  // Auto-advance slides (only when no group preview video)
   useEffect(() => {
-    if (previewPosts.length <= 1) return;
+    if (hasGroupPreview || previewPosts.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % previewPosts.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [previewPosts.length]);
+  }, [previewPosts.length, hasGroupPreview]);
 
-  // Play video when slide changes
+  // Play group preview video on mount
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !currentPost?.video_url) return;
+    if (!video || !hasGroupPreview) return;
+    let cancelled = false;
+    const tryPlay = async () => {
+      try {
+        video.muted = true;
+        video.currentTime = 0;
+        video.load();
+        await new Promise(resolve => {
+          video.oncanplay = resolve;
+          video.onerror = resolve;
+          setTimeout(resolve, 1500);
+        });
+        if (cancelled) return;
+        await video.play();
+        video.muted = isMuted;
+      } catch {}
+    };
+    tryPlay();
+    return () => { cancelled = true; };
+  }, [hasGroupPreview, group.preview_video_url]);
+
+  // Play post video when slide changes (only when no group preview)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || hasGroupPreview || !currentPost?.video_url) return;
     let cancelled = false;
 
     const tryPlay = async () => {
@@ -52,17 +79,20 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     };
     tryPlay();
     return () => { cancelled = true; };
-  }, [currentIndex, currentPost?.video_url]);
+  }, [currentIndex, currentPost?.video_url, hasGroupPreview]);
 
   // Sync mute state separately
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = isMuted;
   }, [isMuted]);
 
-  const isVideo = !!currentPost?.video_url;
-  const mediaUrl = isVideo
-    ? currentPost?.video_url
-    : (currentPost?.media_urls?.[0] || currentPost?.image_url);
+  // If group has a preview video, always show that
+  const isVideo = hasGroupPreview ? true : !!currentPost?.video_url;
+  const mediaUrl = hasGroupPreview
+    ? group.preview_video_url
+    : isVideo
+      ? currentPost?.video_url
+      : (currentPost?.media_urls?.[0] || currentPost?.image_url);
 
   // Fallback background: group cover, logo, or gradient
   const hasCover = !!group.cover_url;
@@ -84,8 +114,9 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
         {mediaUrl ? (
           isVideo ? (
             <video
-              key={`video-${group.id}-${currentIndex}`}
+              key={`video-${group.id}-${hasGroupPreview ? "preview" : currentIndex}`}
               ref={videoRef}
+              src={hasGroupPreview ? group.preview_video_url : undefined}
               className="w-full h-full object-cover"
               muted
               playsInline
