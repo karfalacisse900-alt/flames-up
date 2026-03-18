@@ -104,6 +104,7 @@ function PersonCard({ presence, distance, currentUser, onHighlight }) {
 export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, followedEmails = [], onClose, onHighlight }) {
   const [radiusMi, setRadiusMi] = useState(10);
   const [filter, setFilter] = useState("everyone"); // everyone | friends | recent
+  // Note: only users with visibility_mode="everyone" appear here (privacy enforced in enriched filter)
   const [sortBy, setSortBy] = useState("distance");  // distance | activity
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
@@ -116,6 +117,8 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
     return allUsers
       .filter(p => p.user_email !== currentUser?.email)
       .filter(p => p.location_lat && p.location_lng)
+      // Only show users who have set visibility to "everyone"
+      .filter(p => p.visibility_mode === "everyone" || p.visibility_mode == null)
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),

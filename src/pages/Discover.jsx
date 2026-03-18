@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
 import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
 import DYKTab from "@/components/discover/DYKTab";
-import CreatorsTab from "@/components/discover/CreatorsTab";
 import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
 
 
