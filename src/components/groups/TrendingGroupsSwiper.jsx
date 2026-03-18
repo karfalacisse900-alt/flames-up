@@ -55,59 +55,80 @@ function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends, i
     if (videoRef.current) videoRef.current.muted = isMuted;
   }, [isMuted]);
 
+  // Full-screen layout: video/image fills entire card, info overlaid at bottom
   return (
-    <div className="h-full flex flex-col items-center justify-center px-6 pb-24">
-      {/* Profile Picture */}
-      <div className="w-40 h-40 rounded-full mb-6 overflow-hidden" style={{ border: "4px solid var(--bg-card)" }}>
-        {group.cover_image_url ? (
-          <img src={group.cover_image_url} alt="" className="w-full h-full object-cover" />
+    <div className="h-full w-full relative overflow-hidden" style={{ backgroundColor: "#000" }}>
+      {/* Full-screen media background */}
+      {mediaUrl ? (
+        isVideo ? (
+          <video
+            ref={videoRef}
+            className="absolute inset-0 w-full h-full object-cover"
+            loop playsInline preload="auto"
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
+          <img src={mediaUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )
+      ) : (
+        /* Fallback: cover image or emoji */
+        group.cover_image_url ? (
+          <img src={group.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-8xl"
+            style={{ background: "linear-gradient(135deg,#1e1b4b,#312e81)" }}>
             {group.emoji || "💬"}
           </div>
-        )}
-      </div>
+        )
+      )}
 
-      <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-        {group.name}
-      </h2>
-      <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>
-        {(group.member_count || 0).toLocaleString()} members
-      </p>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)" }} />
 
-      {/* Media preview — single video/image at a time */}
-      {mediaPosts.length > 0 && mediaUrl && (
-        <div className="w-full max-w-sm rounded-2xl overflow-hidden relative" style={{ aspectRatio: "4/5", backgroundColor: "#000" }}>
-          {isVideo ? (
-            <>
-              <video
-                ref={videoRef}
-                className="w-full h-full object-cover"
-                loop playsInline preload="auto"
-              />
-              {/* Mute toggle */}
-              <button
-                onClick={() => setIsMuted(v => !v)}
-                className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
-                <span className="text-white text-sm">{isMuted ? "🔇" : "🔊"}</span>
-              </button>
-            </>
-          ) : (
-            <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
-          )}
-          {/* Slide dots */}
-          {mediaPosts.length > 1 && (
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-              {mediaPosts.map((_, i) => (
-                <button key={i} onClick={() => setCurrentIdx(i)}
-                  className="rounded-full transition-all"
-                  style={{ width: i === currentIdx ? 16 : 6, height: 6, backgroundColor: i === currentIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
-              ))}
-            </div>
-          )}
+      {/* Mute toggle (top right, only for video) */}
+      {isVideo && mediaUrl && (
+        <button
+          onClick={() => setIsMuted(v => !v)}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-10"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+          <span className="text-white text-base">{isMuted ? "🔇" : "🔊"}</span>
+        </button>
+      )}
+
+      {/* Slide dots */}
+      {mediaPosts.length > 1 && (
+        <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+          {mediaPosts.map((_, i) => (
+            <button key={i} onClick={() => setCurrentIdx(i)}
+              className="rounded-full transition-all"
+              style={{ width: i === currentIdx ? 16 : 6, height: 6, backgroundColor: i === currentIdx ? "#fff" : "rgba(255,255,255,0.4)" }} />
+          ))}
         </div>
       )}
+
+      {/* Group info overlay — bottom */}
+      <div className="absolute bottom-0 left-0 right-0 px-6 pb-36 z-10">
+        {/* Avatar */}
+        <div className="w-16 h-16 rounded-2xl mb-3 overflow-hidden flex items-center justify-center"
+          style={{ border: "2.5px solid rgba(255,255,255,0.6)", backgroundColor: "rgba(0,0,0,0.4)" }}>
+          {group.cover_image_url ? (
+            <img src={group.cover_image_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-3xl">{group.emoji || "💬"}</span>
+          )}
+        </div>
+
+        <h2 className="text-2xl font-bold mb-1 text-white leading-tight" style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+          {group.name}
+        </h2>
+        <p className="text-sm text-white/70 mb-2">
+          {(group.member_count || 0).toLocaleString()} members
+        </p>
+        {group.description && (
+          <p className="text-sm text-white/80 line-clamp-2" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+            {group.description}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
