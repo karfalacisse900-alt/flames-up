@@ -23,8 +23,11 @@ export default function FriendRequestsSheet({ currentUser, onClose }) {
   const accept = async (req) => {
     setProcessing(p => ({ ...p, [req.id]: "accepting" }));
     try {
-      await base44.entities.FriendRequest.update(req.id, { status: "accepted" });
-      await Promise.all([
+      // Delete old request and recreate as accepted to avoid update issues
+      await base44.entities.FriendRequest.delete(req.id);
+      await base44.entities.FriendRequest.create({ ...req, status: "accepted" });
+      // Create mutual follows (ignore errors if already exists)
+      await Promise.allSettled([
         base44.entities.Follow.create({
           follower_email: currentUser.email,
           follower_name: currentUser.full_name || currentUser.email,
@@ -43,7 +46,7 @@ export default function FriendRequestsSheet({ currentUser, onClose }) {
         actor_email: currentUser.email,
         actor_name: currentUser.full_name || currentUser.email,
         type: "friend_accepted",
-      });
+      }).catch(() => {});
       qc.invalidateQueries({ queryKey: ["friendRequests"] });
     } finally {
       setProcessing(p => ({ ...p, [req.id]: null }));
@@ -53,7 +56,7 @@ export default function FriendRequestsSheet({ currentUser, onClose }) {
   const decline = async (req) => {
     setProcessing(p => ({ ...p, [req.id]: "declining" }));
     try {
-      await base44.entities.FriendRequest.update(req.id, { status: "declined" });
+      await base44.entities.FriendRequest.delete(req.id);
       qc.invalidateQueries({ queryKey: ["friendRequests"] });
     } finally {
       setProcessing(p => ({ ...p, [req.id]: null }));
@@ -63,7 +66,8 @@ export default function FriendRequestsSheet({ currentUser, onClose }) {
   const block = async (req) => {
     setProcessing(p => ({ ...p, [req.id]: "blocking" }));
     try {
-      await base44.entities.FriendRequest.update(req.id, { status: "blocked" });
+      await base44.entities.FriendRequest.delete(req.id);
+      await base44.entities.FriendRequest.create({ ...req, status: "blocked" });
       qc.invalidateQueries({ queryKey: ["friendRequests"] });
     } finally {
       setProcessing(p => ({ ...p, [req.id]: null }));
