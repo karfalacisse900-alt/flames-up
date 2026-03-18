@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
