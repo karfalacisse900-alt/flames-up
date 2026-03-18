@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, MapPin, SlidersHorizontal, X, Users } from "lucide-react";
+import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft } from "lucide-react";
+import ProximityNotifier from "@/components/friends/ProximityNotifier";
 import MapCategoryCarousel from "./MapCategoryCarousel";
 import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
@@ -36,7 +37,7 @@ function getInitials(name) {
   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
+export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }) {
   const mapRef         = useRef(null);
   const mapInst        = useRef(null);
   const selfMarkerRef  = useRef(null);
@@ -444,6 +445,20 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
           50%{transform:scale(1.4);opacity:0.15;}
         }
       `}</style>
+
+      {/* Back to Places button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold"
+          style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)", color: "#0F172A" }}
+        >
+          <ArrowLeft className="w-4 h-4" /> Places
+        </button>
+      )}
+
+      {/* Proximity notifier (invisible) */}
+      <ProximityNotifier currentUser={currentUser} userLoc={userLoc} followedEmails={follows} />
 
       {/* Category carousel */}
       {mapReady && <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />}
