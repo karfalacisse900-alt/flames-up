@@ -290,23 +290,22 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp }) {
   }, [mapReady, !!userLoc, currentUser?.email]);
 
   // ── 7. Other user markers — smart-limited (max 12, friends first) ────────
-  const MAP_PIN_LIMIT = 12;
+  const MAP_PIN_LIMIT = 15;
   const friendSet = new Set(follows);
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
+    // Only show friends on the map (non-friends are hidden from map, only in Nearby modal)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
+      .filter(p => friendSet.has(p.user_email)) // friends only on map
       .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
-        _isFriend: friendSet.has(p.user_email),
+        _isFriend: true,
       }))
-      .sort((a, b) => {
-        if (a._isFriend !== b._isFriend) return a._isFriend ? -1 : 1;
-        return a._dist - b._dist;
-      });
+      .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
   }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
 
