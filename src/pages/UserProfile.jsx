@@ -390,7 +390,22 @@ export default function UserProfile() {
         ) : (
           <div className="space-y-4">
             {userPosts.map(post => (
-              <CommunityPostCard key={post.id} post={post} />
+              <CommunityPostCard
+                key={post.id}
+                post={post}
+                user={currentUser}
+                onUpvote={async () => {
+                  if (!currentUser?.email) return;
+                  const alreadyLiked = post.upvoted_by?.includes(currentUser.email);
+                  const newUpvotedBy = alreadyLiked
+                    ? (post.upvoted_by || []).filter(e => e !== currentUser.email)
+                    : [...(post.upvoted_by || []), currentUser.email];
+                  await base44.entities.CommunityPost.update(post.id, {
+                    upvotes: newUpvotedBy.length,
+                    upvoted_by: newUpvotedBy,
+                  });
+                }}
+              />
             ))}
           </div>
         )}
