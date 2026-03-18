@@ -443,18 +443,9 @@ export default function CommunityFeed({ user }) {
     );
 
     return (
-      <motion.div
-        key={post.id}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: Math.min(index * 0.04, 0.3),
-          duration: 0.3,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
+      <div key={post.id}>
         {card}
-      </motion.div>
+      </div>
     );
   };
 
