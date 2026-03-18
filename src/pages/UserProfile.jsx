@@ -139,7 +139,7 @@ export default function UserProfile() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-2" 
+          <div className="w-8 h-8 border-2 rounded-full animate-spin mx-auto mb-2" 
             style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>Loading profile...</p>
         </div>
@@ -147,7 +147,14 @@ export default function UserProfile() {
     );
   }
 
-  if (!profileUser) {
+  // If still no user but we have a userProfileData, construct a minimal user object
+  const effectiveUser = profileUser || (userProfileData ? {
+    email,
+    full_name: userProfileData.display_name || userProfileData.full_name || email.split("@")[0],
+    avatar_url: userProfileData.avatar_url,
+  } : null);
+
+  if (!effectiveUser) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
         <div className="text-center px-8">
@@ -155,7 +162,7 @@ export default function UserProfile() {
           <p className="text-base font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
             User not found
           </p>
-          <p className="text-sm" style={{ color: "var(--text-hint)" }}>This profile doesn't exist</p>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>This profile doesn't exist or hasn't been set up yet</p>
           <button onClick={() => navigate(-1)} className="mt-6 px-6 py-2 rounded-full text-sm font-bold" style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
             Go Back
           </button>
