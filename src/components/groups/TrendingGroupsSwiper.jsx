@@ -4,34 +4,56 @@ import { X, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
-function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends }) {
-  const videoRefs = useRef([]);
+function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends, isVisible }) {
+  const videoRef = useRef(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
 
   const { data: posts = [] } = useQuery({
     queryKey: ["groupPosts", group.id],
     queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 20),
   });
 
-  const mediaPosts = useMemo(() => 
-    posts.filter(p => p.media_urls?.length > 0 || p.video_url).slice(0, 3),
-    [posts]
-  );
+  const mediaPosts = useMemo(() => {
+    if (group.preview_video_url) return [{ id: "preview", video_url: group.preview_video_url }];
+    return posts.filter(p => p.media_urls?.length > 0 || p.video_url).slice(0, 3);
+  }, [posts, group.preview_video_url]);
+
+  const currentPost = mediaPosts[currentIdx];
+  const isVideo = !!currentPost?.video_url;
+  const mediaUrl = isVideo ? currentPost.video_url : currentPost?.media_urls?.[0];
+
+  // Auto-advance image slides
+  useEffect(() => {
+    if (mediaPosts.length <= 1 || isVideo) return;
+    const t = setInterval(() => setCurrentIdx(i => (i + 1) % mediaPosts.length), 4000);
+    return () => clearInterval(t);
+  }, [mediaPosts.length, isVideo]);
+
+  // Play/pause based on visibility and current index
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isVideo || !mediaUrl) return;
+    let cancelled = false;
+    const tryPlay = async () => {
+      try {
+        video.muted = isMuted;
+        video.currentTime = 0;
+        video.src = mediaUrl;
+        video.load();
+        await new Promise(r => { video.oncanplay = r; video.onerror = r; setTimeout(r, 1500); });
+        if (cancelled || !isVisible) return;
+        await video.play();
+      } catch {}
+    };
+    if (isVisible) tryPlay();
+    else video.pause();
+    return () => { cancelled = true; };
+  }, [isVisible, mediaUrl, currentIdx]);
 
   useEffect(() => {
-    // Auto-play all videos
-    videoRefs.current.forEach(vid => {
-      if (vid) {
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.play().catch(() => {});
-      }
-    });
-    return () => {
-      videoRefs.current.forEach(vid => {
-        if (vid) vid.pause();
-      });
-    };
-  }, [mediaPosts]);
+    if (videoRef.current) videoRef.current.muted = isMuted;
+  }, [isMuted]);
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 pb-24">
@@ -46,69 +68,44 @@ function GroupPreviewCard({ group, onDismiss, onJoin, isMember, mutualFriends })
         )}
       </div>
 
-      {/* Group Name */}
       <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
         {group.name}
       </h2>
+      <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>
+        {(group.member_count || 0).toLocaleString()} members
+      </p>
 
-      {/* Mutual Friends / Members */}
-      {mutualFriends?.length > 0 ? (
-        <div className="flex items-center gap-2 mb-6">
-          <div className="flex -space-x-2">
-            {mutualFriends.slice(0, 3).map((friend, i) => (
-              <div key={i} className="w-6 h-6 rounded-full" style={{ border: "2px solid var(--bg-card)", backgroundColor: "var(--bg-subtle)" }} />
-            ))}
-          </div>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Friends with {mutualFriends[0]?.name || "JULIA D'ELIA"}, {mutualFriends[1]?.name || "Bianca"}, and {mutualFriends.length - 2} others
-          </p>
-        </div>
-      ) : (
-        <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>
-          {(group.member_count || 0).toLocaleString()} members
-        </p>
-      )}
-
-      {/* Preview Posts */}
-      {mediaPosts.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
-          {mediaPosts.map((post, i) => {
-            const isVideo = !!post.video_url;
-            const mediaUrl = isVideo ? post.video_url : post.media_urls?.[0];
-            const viewCount = post.view_count || Math.floor(Math.random() * 600 + 100);
-
-            return (
-              <div key={post.id} className="aspect-[3/4] rounded-xl overflow-hidden relative" style={{ backgroundColor: "var(--bg-subtle)" }}>
-                {isVideo ? (
-                  <>
-                    <video
-                      ref={el => videoRefs.current[i] = el}
-                      src={mediaUrl}
-                      className="w-full h-full object-cover"
-                      loop
-                      playsInline
-                      muted
-                      autoPlay
-                      preload="auto"
-                      onLoadedData={(e) => {
-                        e.currentTarget.muted = true;
-                        e.currentTarget.play().catch(() => {});
-                      }}
-                    />
-                    <div className="absolute top-2 left-2">
-                      <Play className="w-4 h-4 text-white drop-shadow-lg" fill="white" />
-                    </div>
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1">
-                      <Play className="w-3 h-3 text-white drop-shadow-lg" fill="white" />
-                      <span className="text-xs font-bold text-white drop-shadow-lg">{viewCount}</span>
-                    </div>
-                  </>
-                ) : (
-                  <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
-                )}
-              </div>
-            );
-          })}
+      {/* Media preview — single video/image at a time */}
+      {mediaPosts.length > 0 && mediaUrl && (
+        <div className="w-full max-w-sm rounded-2xl overflow-hidden relative" style={{ aspectRatio: "4/5", backgroundColor: "#000" }}>
+          {isVideo ? (
+            <>
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                loop playsInline preload="auto"
+              />
+              {/* Mute toggle */}
+              <button
+                onClick={() => setIsMuted(v => !v)}
+                className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+                <span className="text-white text-sm">{isMuted ? "🔇" : "🔊"}</span>
+              </button>
+            </>
+          ) : (
+            <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
+          )}
+          {/* Slide dots */}
+          {mediaPosts.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+              {mediaPosts.map((_, i) => (
+                <button key={i} onClick={() => setCurrentIdx(i)}
+                  className="rounded-full transition-all"
+                  style={{ width: i === currentIdx ? 16 : 6, height: 6, backgroundColor: i === currentIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -211,6 +208,7 @@ export default function TrendingGroupsSwiper({ groups, onDismiss, onJoin, onClos
             onJoin={handleAction}
             isMember={isMember}
             mutualFriends={[]}
+            isVisible={true}
           />
         </motion.div>
       </AnimatePresence>
