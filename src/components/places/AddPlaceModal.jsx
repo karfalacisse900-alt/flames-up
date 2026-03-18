@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 
 export default function AddPlaceModal({ user, onClose, onSuccess }) {
   // Hide bottom nav while modal is open
-  React.useEffect(() => {
+  useEffect(() => {
     window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } }));
     return () => window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } }));
   }, []);
