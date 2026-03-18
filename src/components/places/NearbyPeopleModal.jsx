@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
-import { X, MessageCircle, User, MapPin, Users, Clock } from "lucide-react";
+import { X, MessageCircle, User, MapPin, Users, Clock, UserPlus, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 
 const RADIUS_MI_OPTIONS = [5, 10, 15];
 
@@ -32,10 +33,34 @@ function timeAgo(dateStr) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function PersonCard({ presence, distance, currentUser, onHighlight }) {
+function PersonCard({ presence, distance, currentUser, onHighlight, followedEmails = [] }) {
   const navigate = useNavigate();
   const distMi = kmToMiles(distance);
   const approxDist = distMi < 1 ? "< 1 mile" : `~${Math.round(distMi)} mile${Math.round(distMi) !== 1 ? "s" : ""}`;
+  const isFriend = followedEmails.includes(presence.user_email);
+  const [friendSent, setFriendSent] = useState(false);
+
+  const sendFriendRequest = async () => {
+    if (!currentUser?.email || isFriend || friendSent) return;
+    try {
+      const req = await base44.entities.FriendRequest.create({
+        sender_email: currentUser.email,
+        sender_name: currentUser.full_name || currentUser.email,
+        sender_avatar_url: currentUser.avatar_url || "",
+        receiver_email: presence.user_email,
+        receiver_name: presence.user_name || "",
+        status: "pending",
+      });
+      await base44.entities.Notification.create({
+        recipient_email: presence.user_email,
+        actor_email: currentUser.email,
+        actor_name: currentUser.full_name || currentUser.email,
+        type: "friend_request",
+        ref_id: req.id,
+      });
+      setFriendSent(true);
+    } catch {}
+  };
 
   return (
     <div
@@ -87,14 +112,29 @@ function PersonCard({ presence, distance, currentUser, onHighlight }) {
           <MapPin className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
         </button>
         {currentUser && presence.user_email !== currentUser.email && (
-          <button
-            onClick={() => navigate(`/Messages?with=${presence.user_email}`)}
-            className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: "#F0FDF4", minWidth: 36, minHeight: 36 }}
-            title="Message"
-          >
-            <MessageCircle className="w-4 h-4" style={{ color: "#16A34A" }} />
-          </button>
+          <>
+            <button
+              onClick={() => navigate(`/Messages?with=${presence.user_email}`)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: "#F0FDF4", minWidth: 36, minHeight: 36 }}
+              title="Message"
+            >
+              <MessageCircle className="w-4 h-4" style={{ color: "#16A34A" }} />
+            </button>
+            {!isFriend && (
+              <button
+                onClick={sendFriendRequest}
+                disabled={friendSent}
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: friendSent ? "#ECFDF5" : "#EEF2FF", minWidth: 36, minHeight: 36 }}
+                title={friendSent ? "Request sent" : "Add Friend"}
+              >
+                {friendSent
+                  ? <UserCheck className="w-4 h-4" style={{ color: "#16A34A" }} />
+                  : <UserPlus className="w-4 h-4" style={{ color: "#4F46E5" }} />}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -233,6 +273,7 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
                   distance={p._dist}
                   currentUser={currentUser}
                   onHighlight={onHighlight}
+                  followedEmails={followedEmails}
                 />
               ))}
               {hasMore && (
