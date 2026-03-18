@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell, AtSign, Settings, CheckCheck } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell, AtSign, Settings, CheckCheck, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 
@@ -12,6 +12,9 @@ const typeConfig = {
   post_boosted:   { icon: Zap,           color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  label: "boosted your post",      emoji: "⚡" },
   mention:        { icon: AtSign,        color: "#14b8a6", bg: "rgba(20,184,166,0.12)",  label: "mentioned you",          emoji: "📣" },
   direct_message: { icon: MessageSquare, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "sent you a message",     emoji: "✉️" },
+  friend_request: { icon: UserPlus,      color: "#4F46E5", bg: "rgba(79,70,229,0.12)",  label: "sent you a friend request", emoji: "🤝" },
+  friend_accepted:{ icon: UserPlus,      color: "#16A34A", bg: "rgba(22,163,74,0.12)",  label: "accepted your friend request", emoji: "✅" },
+  friend_nearby:  { icon: MapPin,        color: "#F59E0B", bg: "rgba(245,158,11,0.12)", label: "is nearby!",             emoji: "📍" },
 };
 
 function timeAgo(date) {
@@ -88,6 +91,8 @@ export default function Notifications() {
       window.location.href = `/user/${n.actor_email}`;
     } else if (n.type === "direct_message") {
       window.location.href = createPageUrl("Messages");
+    } else if ((n.type === "friend_request" || n.type === "friend_accepted" || n.type === "friend_nearby") && n.actor_email) {
+      window.location.href = `/user/${n.actor_email}`;
     }
   };
 
