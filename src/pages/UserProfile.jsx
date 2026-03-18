@@ -165,21 +165,22 @@ export default function UserProfile() {
   }
 
   const isOwnProfile = currentUser?.email === email;
-  // Get profile data from user object itself
+  // Merge data from User entity + UserProfile entity
   const profile = {
-    bio: profileUser?.bio,
-    age: profileUser?.age,
-    major: profileUser?.major,
-    graduation_year: profileUser?.graduation_year,
-    location: profileUser?.location,
-    interests: profileUser?.interests,
-    looking_for: profileUser?.looking_for,
-    website: profileUser?.website,
-    social_links: profileUser?.social_links,
-    hide_age: profileUser?.hide_age,
-    hide_graduation: profileUser?.hide_graduation,
-    hide_location: profileUser?.hide_location,
-    hide_interests: profileUser?.hide_interests,
+    bio: userProfileData?.bio || profileUser?.bio,
+    age: userProfileData?.age || profileUser?.age,
+    major: userProfileData?.major || profileUser?.major,
+    graduation_year: userProfileData?.graduation_year || profileUser?.graduation_year,
+    location: userProfileData?.location || profileUser?.location,
+    interests: userProfileData?.interests || profileUser?.interests,
+    looking_for: userProfileData?.looking_for || profileUser?.looking_for,
+    website: userProfileData?.website || profileUser?.website,
+    social_links: userProfileData?.social_links || profileUser?.social_links,
+    avatar_url: userProfileData?.avatar_url || profileUser?.avatar_url,
+    hide_age: userProfileData?.hide_age ?? profileUser?.hide_age,
+    hide_graduation: userProfileData?.hide_graduation ?? profileUser?.hide_graduation,
+    hide_location: userProfileData?.hide_location ?? profileUser?.hide_location,
+    hide_interests: userProfileData?.hide_interests ?? profileUser?.hide_interests,
   };
 
   return (
