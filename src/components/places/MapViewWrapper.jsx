@@ -5,7 +5,7 @@ import PlacesMapboxView from "./PlacesMapboxView";
 /**
  * Wraps the map and hides the bottom nav while it's mounted.
  */
-export default function MapViewWrapper({ onOpenPlace, user }) {
+export default function MapViewWrapper({ onOpenPlace, user, onBack }) {
   useEffect(() => {
     // Hide nav bar
     window.dispatchEvent(new CustomEvent("postviewermode", { detail: { active: true } }));
@@ -24,7 +24,7 @@ export default function MapViewWrapper({ onOpenPlace, user }) {
       transition={{ duration: 0.2 }}
       style={{ position: "fixed", inset: 0, zIndex: 40, top: 0, left: 0, right: 0, bottom: 0 }}
     >
-      <PlacesMapboxView onOpenPlace={onOpenPlace} user={user} />
+      <PlacesMapboxView onOpenPlace={onOpenPlace} user={user} onBack={onBack} />
     </motion.div>
   );
 }
