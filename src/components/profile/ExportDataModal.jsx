@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
-import { Download, Loader2, FileText, FileSpreadsheet, File } from "lucide-react";
+import { Download, Loader2, FileText, FileSpreadsheet, File, Mail, CheckCircle2 } from "lucide-react";
 
 const DATA_TYPES = [
   { key: "posts", label: "My Posts", emoji: "✍️" },
@@ -86,6 +86,8 @@ export default function ExportDataModal({ open, onClose, user }) {
   const [selectedTypes, setSelectedTypes] = useState(["posts"]);
   const [format, setFormat] = useState("csv");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState("download"); // "download" | "email"
 
   const toggleType = (key) => {
     setSelectedTypes((prev) =>
@@ -102,6 +104,31 @@ export default function ExportDataModal({ open, onClose, user }) {
         allData[type] = await fetchData(type, user.email);
       }
 
+      if (deliveryMode === "email") {
+        // Build email body with the data
+        let emailBody = `Hi ${user.full_name || "there"},\n\nHere is your exported account data from flames-up:\n\n`;
+        for (const [type, rows] of Object.entries(allData)) {
+          const label = DATA_TYPES.find(d => d.key === type)?.label || type;
+          emailBody += `--- ${label} (${rows.length} records) ---\n`;
+          if (format === "json") {
+            emailBody += JSON.stringify(rows, null, 2);
+          } else {
+            emailBody += toCSV(rows);
+          }
+          emailBody += "\n\n";
+        }
+        emailBody += `\nExported on ${new Date().toLocaleString()}\n`;
+        await base44.integrations.Core.SendEmail({
+          to: user.email,
+          subject: "Your Account Data Export - flames-up",
+          body: emailBody,
+        });
+        setEmailSent(true);
+        setTimeout(() => { setEmailSent(false); onClose(); }, 3000);
+        return;
+      }
+
+      // Direct download
       if (format === "json") {
         const content = JSON.stringify(allData, null, 2);
         downloadBlob(content, `my-data-${Date.now()}.json`, "application/json");
@@ -137,6 +164,42 @@ export default function ExportDataModal({ open, onClose, user }) {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Email sent confirmation */}
+          {emailSent && (
+            <div className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: "#F0FDF4", border: "1px solid #86EFAC" }}>
+              <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: "#16A34A" }} />
+              <p className="text-sm font-semibold" style={{ color: "#15803D" }}>
+                Export sent to {user?.email}
+              </p>
+            </div>
+          )}
+
+          {/* Delivery mode */}
+          <div>
+            <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Delivery method</p>
+            <div className="flex gap-2">
+              {[
+                { key: "download", label: "Download", icon: Download },
+                { key: "email", label: "Email me", icon: Mail },
+              ].map(({ key, label, icon: Icon }) => (
+                <button key={key} onClick={() => setDeliveryMode(key)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold"
+                  style={{
+                    backgroundColor: deliveryMode === key ? "var(--accent-primary)" : "var(--bg-subtle)",
+                    borderColor: deliveryMode === key ? "var(--accent-primary)" : "var(--border-light)",
+                    color: deliveryMode === key ? "#fff" : "var(--text-secondary)",
+                  }}>
+                  <Icon className="w-3.5 h-3.5" /> {label}
+                </button>
+              ))}
+            </div>
+            {deliveryMode === "email" && (
+              <p className="text-[11px] mt-1.5" style={{ color: "var(--text-hint)" }}>
+                Will be sent to: <strong>{user?.email}</strong>
+              </p>
+            )}
+          </div>
+
           {/* Data type selection */}
           <div>
             <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Select data to export</p>
@@ -193,8 +256,8 @@ export default function ExportDataModal({ open, onClose, user }) {
             className="w-full rounded-xl gap-2"
             style={{ backgroundColor: "var(--accent-primary)" }}
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {loading ? "Exporting…" : "Export"}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : deliveryMode === "email" ? <Mail className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+            {loading ? (deliveryMode === "email" ? "Sending…" : "Exporting…") : deliveryMode === "email" ? "Send to Email" : "Download"}
           </Button>
         </div>
       </DialogContent>
