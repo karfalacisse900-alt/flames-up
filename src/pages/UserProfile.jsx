@@ -100,7 +100,7 @@ export default function UserProfile() {
         follower_email: currentUser.email,
         follower_name: currentUser.full_name,
         following_email: email,
-        following_name: profileUser?.full_name,
+        following_name: effectiveUser?.full_name,
       });
       setIsFollowing(true);
     }
