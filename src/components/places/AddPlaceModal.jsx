@@ -3,6 +3,12 @@ import { X, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AddPlaceModal({ user, onClose, onSuccess }) {
+  // Hide bottom nav while modal is open
+  React.useEffect(() => {
+    window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: true } }));
+    return () => window.dispatchEvent(new CustomEvent("swipemode", { detail: { active: false } }));
+  }, []);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("other");
