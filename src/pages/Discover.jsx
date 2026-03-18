@@ -112,9 +112,7 @@ export default function Discover() {
 
       {/* ── Content ── */}
       <div className="pt-2">
-        {activeTab === "creators" ? (
-          <CreatorsTab />
-        ) : activeTab === "dyk" ? (
+        {activeTab === "dyk" ? (
           <DYKTab user={user} />
         ) : view === "explore" ? (
           <DiscoverExplorer

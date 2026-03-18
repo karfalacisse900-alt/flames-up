@@ -79,18 +79,30 @@ export const AuthProvider = ({ children }) => {
       const currentUser = userRef.current;
       if (!currentUser?.email) return;
       const exists = await checkSupabaseProfile(currentUser.email);
+      // Only force logout if explicitly deleted (false), NOT on network errors (null)
       if (exists === false) {
         console.warn(`[auth-heartbeat] ${currentUser.email} not in Supabase — forcing logout`);
         forceLogout();
       }
     };
 
+    // Only check on visibility change (tab becomes active), not on a timer
+    // This prevents aggressive logouts when users leave the app idle
     const onVisible = () => {
-      if (document.visibilityState === 'visible') runCheck();
+      if (document.visibilityState === 'visible') {
+        // Only run if tab has been hidden for more than 30 minutes
+        const lastHidden = parseInt(sessionStorage.getItem('_tab_hidden_at') || '0');
+        if (Date.now() - lastHidden > 30 * 60 * 1000) {
+          runCheck();
+        }
+      } else {
+        sessionStorage.setItem('_tab_hidden_at', String(Date.now()));
+      }
     };
 
     document.addEventListener('visibilitychange', onVisible);
-    const interval = setInterval(runCheck, 30000); // check every 30s
+    // Check every 60 minutes instead of 30 seconds
+    const interval = setInterval(runCheck, 60 * 60 * 1000);
 
     return () => {
       document.removeEventListener('visibilitychange', onVisible);
@@ -153,8 +165,8 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingAuth(true);
 
-      // Clear stale cache before loading fresh data
-      clearLocalCache();
+      // Do NOT clear cache on every auth check — this causes stale-data logouts
+      // clearLocalCache() removed to prevent session instability
 
       // Verify the Base44 token is still valid
       let currentUser;

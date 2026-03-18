@@ -4,7 +4,6 @@ import { X, Menu } from "lucide-react";
 
 const TABS = [
   { id: "apps",     label: "Apps & Tools",   emoji: "🧰", description: "Discover useful apps and tools" },
-  { id: "creators", label: "Creators",        emoji: "⭐", description: "Follow top creators" },
   { id: "dyk",      label: "Did You Know",    emoji: "💡", description: "Learn something new daily" },
 ];
 

@@ -290,13 +290,7 @@ export default function Profile() {
               <WalletWidget balance={coinBalance} />
             </Link>
 
-            {!user.is_creator && (
-              <Link to={createPageUrl("CreatorApplication")}
-                className="w-full py-3 rounded-[24px] text-white font-bold text-sm mt-4 flex items-center justify-center gap-2 inline-block text-center"
-                style={{ backgroundColor: "#111" }}>
-                Apply to Become a Creator
-              </Link>
-            )}
+
           </div>
         </div>
 
