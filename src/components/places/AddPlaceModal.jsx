@@ -87,12 +87,12 @@ export default function AddPlaceModal({ user, onClose, onSuccess }) {
       style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}>
       
       <div className="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl"
-        style={{ backgroundColor: "var(--bg-card)" }}
+        style={{ backgroundColor: "#FFFFFF" }}
         onClick={e => e.stopPropagation()}>
         
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b"
-          style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+          style={{ backgroundColor: "#FFFFFF", borderColor: "#E2E8F0" }}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>

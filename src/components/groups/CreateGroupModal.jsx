@@ -87,9 +87,9 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
-      <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "var(--bg-modal)" }}>
+      <div className="rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "#FFFFFF" }}>
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border-light)", backgroundColor: "var(--bg-modal)" }}>
+        <div className="sticky top-0 flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" }}>
           <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Create Group</h2>
           <button onClick={() => { onClose(); resetForm(); }} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100" style={{ backgroundColor: "var(--bg-subtle)" }}>
             <X className="w-4 h-4" />
