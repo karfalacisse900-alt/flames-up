@@ -222,8 +222,7 @@ export default function UserProfile() {
                 <h2 className="text-[22px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                   {effectiveUser.full_name}
                 </h2>
-                {/* bio only shown on own profile */}
-                {isOwnProfile && profile.bio && (
+                {profile.bio && (
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {profile.bio}
                   </p>
@@ -294,8 +293,8 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Website & Social Links — only shown on own profile */}
-            {isOwnProfile && (profile.website || profile.social_links?.length > 0) && (
+            {/* Website & Social Links */}
+            {(profile.website || profile.social_links?.length > 0) && (
               <div className="mb-5">
                 <p style={{ color: "var(--text-hint)", fontSize: "11px", fontWeight: 700, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   Links
