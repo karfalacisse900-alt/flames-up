@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell, AtSign, Settings, CheckCheck, MapPin } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, UserPlus, Zap, Bell, AtSign, Settings, CheckCheck, MapPin, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
+import FriendRequestsSheet from "@/components/friends/FriendRequestsSheet";
 
 const typeConfig = {
   new_follower:   { icon: UserPlus,      color: "#6366f1", bg: "rgba(99,102,241,0.12)",  label: "followed you",           emoji: "👤" },
@@ -46,6 +47,7 @@ function groupByDate(notifications) {
 
 export default function Notifications() {
   const [user, setUser] = useState(null);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -98,6 +100,9 @@ export default function Notifications() {
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      {showFriendRequests && user && (
+        <FriendRequestsSheet currentUser={user} onClose={() => setShowFriendRequests(false)} />
+      )}
       {/* Header */}
       <div
         className="sticky top-0 z-30 px-4 pt-5 pb-4"
@@ -122,6 +127,14 @@ export default function Notifications() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFriendRequests(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: "rgba(79,70,229,0.1)", color: "#4F46E5" }}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Requests
+            </button>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
