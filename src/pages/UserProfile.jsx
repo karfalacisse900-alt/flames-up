@@ -223,6 +223,11 @@ export default function UserProfile() {
                 <h2 className="text-[22px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                   {effectiveUser.full_name}
                 </h2>
+                {(userProfileData?.headline || userProfileData?.username) && (
+                  <p className="text-sm font-medium mt-0.5" style={{ color: "var(--text-hint)" }}>
+                    {userProfileData.username || userProfileData.headline}
+                  </p>
+                )}
                 {profile.bio && (
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {profile.bio}
