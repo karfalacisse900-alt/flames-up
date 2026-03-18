@@ -95,6 +95,7 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
 
   const handleFollow = async () => {
     if (!user || isOwnPost) return;
+    // Optimistic update — don't invalidate broad queries to prevent post list jumping
     if (isFollowing && followRecord) {
       await base44.entities.Follow.delete(followRecord.id);
     } else {
@@ -106,7 +107,6 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
       });
     }
     qc.invalidateQueries({ queryKey: ["followStatus", user?.email, post.author_email] });
-    qc.invalidateQueries({ queryKey: ["myFollows", user?.email] });
   };
 
   const handleReport = async () => {
