@@ -201,8 +201,8 @@ export default function UserProfile() {
             <div className="flex items-start gap-4 mb-5">
               <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0" 
                 style={{ border: "3px solid var(--accent-primary)" }}>
-                {profileUser.avatar_url ? (
-                  <img src={profileUser.avatar_url} alt={profileUser.full_name} className="w-full h-full object-cover" />
+                {(profile.avatar_url || profileUser.avatar_url) ? (
+                  <img src={profile.avatar_url || profileUser.avatar_url} alt={profileUser.full_name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl font-bold"
                     style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
