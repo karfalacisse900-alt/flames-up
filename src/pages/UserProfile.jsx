@@ -174,7 +174,7 @@ export default function UserProfile() {
   const isOwnProfile = currentUser?.email === email;
   // Merge data from User entity + UserProfile entity
   const profile = {
-    bio: userProfileData?.bio || profileUser?.bio,
+    bio: userProfileData?.bio || effectiveUser?.bio,
     age: userProfileData?.age || profileUser?.age,
     major: userProfileData?.major || profileUser?.major,
     graduation_year: userProfileData?.graduation_year || profileUser?.graduation_year,
