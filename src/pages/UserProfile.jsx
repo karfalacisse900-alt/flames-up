@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import FriendRequestButton from "@/components/friends/FriendRequestButton";
 import { 
   MessageCircle, UserPlus, UserCheck, MoreVertical, MapPin, 
   Calendar, GraduationCap, Briefcase, Users, FileText, 
@@ -318,15 +319,17 @@ export default function UserProfile() {
 
             {/* Action Buttons */}
             {!isOwnProfile && currentUser && (
-              <div className="flex gap-2 mt-6 pt-5" style={{ borderTop: "1px solid #edf2f7" }}>
+              <div className="flex gap-2 mt-6 pt-5 flex-wrap" style={{ borderTop: "1px solid #edf2f7" }}>
                 <Button onClick={handleMessage} className="flex-1 rounded-full h-10" style={{ backgroundColor: "var(--accent-primary)", color: "white" }}>
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Message
                 </Button>
-                <Button onClick={handleFollow} variant="outline" className="flex-1 rounded-full h-10">
-                  {isFollowing ? <UserCheck className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
+                <FriendRequestButton
+                  targetEmail={email}
+                  targetName={effectiveUser?.full_name}
+                  targetAvatar={profile.avatar_url}
+                  currentUser={currentUser}
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" className="rounded-full">
