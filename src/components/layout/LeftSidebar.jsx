@@ -81,6 +81,23 @@ export default function LeftSidebar({ currentPageName, unreadCount }) {
         })}
       </nav>
 
+      {/* Creator Dashboard link */}
+      <div className="px-3 mb-1">
+        <Link
+          to="/CreatorDashboard"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-medium transition-all"
+          style={{
+            backgroundColor: currentPageName === "CreatorDashboard" ? "#FFF7ED" : "transparent",
+            color: currentPageName === "CreatorDashboard" ? "#E05C2A" : "var(--text-secondary)",
+          }}
+          onMouseEnter={e => { if (currentPageName !== "CreatorDashboard") e.currentTarget.style.backgroundColor = "var(--bg-subtle)"; }}
+          onMouseLeave={e => { if (currentPageName !== "CreatorDashboard") e.currentTarget.style.backgroundColor = "transparent"; }}
+        >
+          <Sparkles className="w-5 h-5 flex-shrink-0" strokeWidth={currentPageName === "CreatorDashboard" ? 2.5 : 1.8} />
+          <span>Creator Hub</span>
+        </Link>
+      </div>
+
       {/* Create Post CTA */}
       <div className="px-3 mb-2">
         <Link
