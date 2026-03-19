@@ -212,7 +212,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
     } else if (imageFile) {
       setUploading(true);
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+        const { file_url } = await uploadToR2(imageFile);
         finalImageUrl = file_url;
         finalImageUrls = [file_url];
       } catch (err) {
@@ -222,7 +222,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
     } else if (videoFile) {
       setUploading(true);
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: videoFile });
+        const { file_url } = await uploadToR2(videoFile);
         finalVideoUrl = file_url;
       } catch (err) {
         console.error("Video upload failed:", err);
