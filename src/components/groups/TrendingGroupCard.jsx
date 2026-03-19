@@ -43,15 +43,24 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     return () => clearInterval(interval);
   }, [previewPosts.length, hasGroupPreview]);
 
-  // Play group preview video on mount
+  // Play/pause video based on visibility
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !hasGroupPreview) return;
+    if (!video) return;
+    const videoUrl = hasGroupPreview ? group.preview_video_url : currentPost?.video_url;
+    if (!videoUrl) return;
+
+    if (!isInView) {
+      video.pause();
+      return;
+    }
+
     let cancelled = false;
     const tryPlay = async () => {
       try {
         video.muted = true;
         video.currentTime = 0;
+        if (!hasGroupPreview) video.src = videoUrl;
         video.load();
         await new Promise(resolve => {
           video.oncanplay = resolve;
@@ -65,35 +74,7 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
     };
     tryPlay();
     return () => { cancelled = true; };
-  }, [hasGroupPreview, group.preview_video_url]);
-
-  // Play post video when slide changes (only when no group preview)
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || hasGroupPreview || !currentPost?.video_url) return;
-    let cancelled = false;
-
-    const tryPlay = async () => {
-      try {
-        video.muted = true;
-        video.currentTime = 0;
-        video.src = currentPost.video_url;
-        video.load();
-        await new Promise(resolve => {
-          video.oncanplay = resolve;
-          video.onerror = resolve;
-          setTimeout(resolve, 1000);
-        });
-        if (cancelled) return;
-        await video.play();
-        video.muted = isMuted;
-      } catch (e) {
-        // silently fail
-      }
-    };
-    tryPlay();
-    return () => { cancelled = true; };
-  }, [currentIndex, currentPost?.video_url, hasGroupPreview]);
+  }, [isInView, hasGroupPreview, group.preview_video_url, currentIndex, currentPost?.video_url]);
 
   // Sync mute state separately
   useEffect(() => {
