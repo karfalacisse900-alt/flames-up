@@ -37,7 +37,7 @@ export default function CommunityFeed({ user }) {
 
   const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U"; // used by Realtime WS
-  const BATCH_SIZE = 20;
+  const BATCH_SIZE = 12;
 
   // ── Supabase Realtime: reflect DELETE and UPDATE from Supabase dashboard ──
   useEffect(() => {
@@ -85,12 +85,10 @@ export default function CommunityFeed({ user }) {
 
             if (table === "posts") {
               if (eventType === "DELETE" && record?.id) {
-                console.log("[supabase-rt] post deleted:", record.id, "— reloading feed");
-                loadInitialPosts();
-              } else if (eventType === "UPDATE" && record?.id) {
-                console.log("[supabase-rt] post updated:", record.id);
-                loadInitialPosts();
+                // Surgically remove deleted post — no full reload
+                setPosts(prev => prev.filter(p => String(p.id) !== String(record.id)));
               }
+              // Ignore UPDATE events from Supabase RT — upvote state managed locally
             }
 
             if (table === "comments") {
