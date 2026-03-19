@@ -93,45 +93,40 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
   };
 
   return (
-     <div style={{ 
-       backgroundColor: "var(--bg-card)", 
-       paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)", 
-       borderTop: "1px solid var(--border-light)", 
-       boxShadow: "0 -8px 24px rgba(15,23,42,0.06)" 
-     }}>
+    <div style={{ backgroundColor: "var(--bg-card)", paddingBottom: "env(safe-area-inset-bottom, 0px)", borderTop: "1px solid var(--border-light)", boxShadow: "0 -8px 24px rgba(15,23,42,0.06)" }}>
 
-       {/* Reply strip */}
-       {replyTo && (
-         <div className="flex items-center gap-2 px-4 py-3" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
-           <div className="flex-1 border-l-4 pl-3 py-1.5 rounded-xl" style={{ borderLeftColor: "#8B5CF6", backgroundColor: "#f3ecff" }}>
-             <p className="text-[12px] font-semibold" style={{ color: "#7C3AED" }}>Replying</p>
-             <p className="text-[13px] truncate" style={{ color: "var(--text-secondary)" }}>{replyTo.text || "Voice message"}</p>
-           </div>
-           <button onClick={onCancelReply} className="p-1 flex-shrink-0">
-             <X className="w-4 h-4" style={{ color: "#999" }} />
-           </button>
-         </div>
-       )}
+      {/* Reply strip */}
+      {replyTo && (
+        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
+          <div className="flex-1 border-l-4 pl-3 py-1 rounded-xl" style={{ borderLeftColor: "#8B5CF6", backgroundColor: "#f3ecff" }}>
+            <p className="text-[12px] font-semibold" style={{ color: "#7C3AED" }}>Replying</p>
+            <p className="text-[13px] truncate" style={{ color: "var(--text-secondary)" }}>{replyTo.text || "Voice message"}</p>
+          </div>
+          <button onClick={onCancelReply} className="p-1">
+            <X className="w-4 h-4" style={{ color: "#999" }} />
+          </button>
+        </div>
+      )}
 
       {/* GIF panel */}
       {showGif && (
-        <div className="py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)", paddingRight: "max(12px, env(safe-area-inset-right, 0px))", paddingLeft: "max(12px, env(safe-area-inset-left, 0px))" }}>
+        <div className="px-3 py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
           <div className="flex gap-2 mb-2">
             <input value={gifQuery} onChange={e => setGifQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && searchGifs()}
               placeholder="Search GIFs…"
               className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
               style={{ backgroundColor: "#F5F5F5", border: "none", color: "#111" }} />
-            <button onClick={searchGifs} className="px-4 py-2 rounded-full text-sm font-semibold text-white flex-shrink-0"
+            <button onClick={searchGifs} className="px-4 py-2 rounded-full text-sm font-semibold text-white"
               style={{ backgroundColor: "#25D366" }}>Search</button>
-            <button onClick={() => { setShowGif(false); setGifs([]); }} className="flex-shrink-0">
+            <button onClick={() => { setShowGif(false); setGifs([]); }}>
               <X className="w-5 h-5" style={{ color: "#999" }} />
             </button>
           </div>
           {loadingGifs ? (
             <p className="text-xs text-center py-2" style={{ color: "#999" }}>Searching…</p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-0">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {gifs.map((gif, i) => {
                 const url = gif.images?.fixed_height?.url || gif.url || gif;
                 return (
@@ -148,7 +143,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* Attach panel */}
       {showAttach && (
-        <div className="grid grid-cols-3 gap-3 px-4 py-4 safe-x" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0", paddingRight: "max(16px, env(safe-area-inset-right, 0px))", paddingLeft: "max(16px, env(safe-area-inset-left, 0px))" }}>
+        <div className="grid grid-cols-3 gap-3 px-6 py-4" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
           {[
             { icon: Image, label: "Photo & Video", color: "#E040FB", action: () => fileRef.current?.click() },
             { icon: Smile, label: "GIF", color: "#FF9800", action: () => { setShowAttach(false); setShowGif(true); } },
@@ -167,26 +162,27 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* Recording indicator */}
       {recording && (
-        <div className="flex items-center gap-3 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0", paddingRight: "max(20px, env(safe-area-inset-right, 0px))", paddingLeft: "max(20px, env(safe-area-inset-left, 0px))" }}>
+        <div className="flex items-center gap-3 px-5 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#F44336" }} />
           <span className="text-sm font-medium" style={{ color: "#F44336" }}>Recording… tap stop when done</span>
         </div>
       )}
 
       {/* Main input row */}
-      <div className="flex items-end gap-2 px-3 py-2.5" style={{ paddingRight: "max(12px, env(safe-area-inset-right, 0px))", paddingLeft: "max(12px, env(safe-area-inset-left, 0px))" }}>
+      <div className="flex items-end gap-2 px-2 py-2">
         {/* Left: paperclip + emoji */}
-        <button 
-          onClick={() => { setShowAttach(v => !v); setShowGif(false); }}
-          className="w-11 h-11 flex items-center justify-center rounded-full flex-shrink-0"
-          style={{ background: showAttach ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "var(--bg-subtle)", color: showAttach ? "#fff" : "var(--text-secondary)" }}>
-          {showAttach
-            ? <X className="w-5 h-5" style={{ color: "#fff" }} />
-            : <Paperclip className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />}
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => { setShowAttach(v => !v); setShowGif(false); }}
+            className="w-10 h-10 flex items-center justify-center rounded-full"
+            style={{ background: showAttach ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "var(--bg-subtle)", color: showAttach ? "#fff" : "var(--text-secondary)" }}>
+            {showAttach
+              ? <X className="w-5 h-5" style={{ color: "#fff" }} />
+              : <Paperclip className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />}
+          </button>
+        </div>
 
         {/* Text input */}
-        <div className="flex-1 flex items-end rounded-full px-4"
+        <div className="flex-1 flex items-end rounded-3xl px-4 py-2"
           style={{ background: "linear-gradient(135deg, #ffffff, #f8f5ff)", minHeight: 44, border: "1px solid #ede9fe", boxShadow: "0 4px 14px rgba(15,23,42,0.06)" }}>
           <textarea
             ref={textRef}
@@ -197,15 +193,14 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
             disabled={disabled || uploading}
             rows={1}
             className="flex-1 bg-transparent text-sm resize-none outline-none"
-            style={{ color: "#111", maxHeight: 120, lineHeight: "1.5", paddingTop: "11px", paddingBottom: "11px" }}
+            style={{ color: "#111", maxHeight: 120, lineHeight: "1.5", paddingTop: 2 }}
           />
         </div>
 
         {/* Right: send or mic */}
         {text.trim() ? (
-          <button 
-            onClick={handleSend}
-            className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+          <button onClick={handleSend}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
             style={{ background: "linear-gradient(135deg, #7C3AED, #DB2777)", boxShadow: "0 8px 18px rgba(124,58,237,0.32)" }}>
             <Send className="w-5 h-5 text-white" />
           </button>
@@ -213,9 +208,8 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
           <button
             onPointerDown={startRecording}
             onPointerUp={stopRecording}
-            onPointerLeave={stopRecording}
             disabled={disabled}
-            className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
             style={{
               background: recording ? "linear-gradient(135deg, #ef4444, #f97316)" : "linear-gradient(135deg, #7C3AED, #DB2777)",
               boxShadow: recording ? "0 8px 18px rgba(239,68,68,0.28)" : "0 8px 18px rgba(124,58,237,0.32)",

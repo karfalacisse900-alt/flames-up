@@ -3,8 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft } from "lucide-react";
 import ProximityNotifier from "@/components/friends/ProximityNotifier";
 import CreatorMapMarkers from "@/components/creators/CreatorMapMarkers";
-import CreatorProfilePopup from "@/components/creators/CreatorProfilePopup";
 import MapCategoryCarousel from "./MapCategoryCarousel";
+import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
 import PlaceHub from "@/components/community/PlaceHub";
 import NearbyPeopleModal from "./NearbyPeopleModal";
@@ -35,67 +35,7 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 function getInitials(name) {
-   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-}
-
-function updateSelfMarkerStyle(wrapper, isLive, currentUser) {
-   // Clear old content
-   wrapper.innerHTML = "";
-   wrapper.style.cssText = "position:relative; width:52px; height:52px;";
-
-   // Pulse ring
-   const ring = document.createElement("div");
-   const ringColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.5)";
-   ring.style.cssText = `
-     position:absolute; top:-8px; left:-8px; width:68px; height:68px; border-radius:50%;
-     border:2.5px solid ${ringColor}; pointer-events:none;
-     animation:selfPulse 2.2s ease-in-out infinite;
-   `;
-   wrapper.appendChild(ring);
-
-   // Avatar circle
-   const circle = document.createElement("div");
-   const borderColor = isLive ? "#E05C2A" : "#4F46E5";
-   const shadowColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.5)";
-   const bgGradient = isLive ? "linear-gradient(135deg,#E05C2A,#F97316)" : "linear-gradient(135deg,#4F46E5,#7C3AED)";
-
-   circle.style.cssText = `
-     position:absolute; top:2px; left:2px;
-     width:48px; height:48px; border-radius:50%;
-     border:3px solid ${borderColor};
-     box-shadow:0 4px 20px ${shadowColor};
-     overflow:hidden;
-     background:${bgGradient};
-     display:flex; align-items:center; justify-content:center;
-     font-size:15px; font-weight:700; color:white;
-   `;
-
-   if (currentUser?.avatar_url) {
-     const img = document.createElement("img");
-     img.src = currentUser.avatar_url;
-     img.style.cssText = "width:100%;height:100%;object-fit:cover;";
-     img.onerror = () => { img.remove(); circle.textContent = getInitials(currentUser?.full_name); };
-     circle.appendChild(img);
-   } else {
-     circle.textContent = getInitials(currentUser?.full_name);
-   }
-   wrapper.appendChild(circle);
-
-   // Live badge
-   if (isLive) {
-     const badge = document.createElement("div");
-     badge.style.cssText = `
-       position:absolute; top:-8px; right:-8px;
-       width:24px; height:24px; border-radius:50%;
-       background:#E05C2A; border:3px solid white;
-       font-size:11px; font-weight:800; color:white;
-       display:flex; align-items:center; justify-content:center;
-       box-shadow:0 2px 10px rgba(224,92,42,0.6);
-       z-index:10;
-     `;
-     badge.textContent = "●";
-     wrapper.appendChild(badge);
-   }
+  return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }) {
@@ -120,11 +60,10 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
   const [radius,              setRadius]              = useState(10);
   const [showRadiusPanel,     setShowRadiusPanel]     = useState(false);
-  const [selectedCreatorProfile, setSelectedCreatorProfile] = useState(null);
-  const [creatorProfileCoords,   setCreatorProfileCoords]   = useState(null);
-  const [showNearbyModal,        setShowNearbyModal]        = useState(false);
-  const [follows,                setFollows]                = useState([]);
-  const [liveCreators,           setLiveCreators]           = useState(new Set()); // emails of creators currently hosting
+  const [selectedUserPresence, setSelectedUserPresence] = useState(null);
+  const [popupCoords,          setPopupCoords]          = useState(null);
+  const [showNearbyModal,      setShowNearbyModal]      = useState(false);
+  const [follows,              setFollows]              = useState([]);
 
   // Load follows for friend prioritization
   useEffect(() => {
@@ -156,19 +95,6 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     base44.functions.invoke("mapboxToken", {})
       .then(res => setToken(res.data?.token || res.data))
       .catch(() => setError("Could not load map token"));
-  }, []);
-
-  // Track live creators in real-time
-  useEffect(() => {
-    const fetchLive = async () => {
-      try {
-        const rooms = await base44.entities.LiveRoom.filter({ is_active: true }, "-created_date", 100);
-        setLiveCreators(new Set(rooms.map(r => r.host_email).filter(Boolean)));
-      } catch {}
-    };
-    fetchLive();
-    const unsub = base44.entities.LiveRoom.subscribe(fetchLive);
-    return () => unsub();
   }, []);
 
   // ── 2. GPS — one-time for initial center ───────────────────────────────
@@ -310,8 +236,21 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     }).catch(e => console.error("publish error", e));
   }
 
-  // ── 5. Creator emails — no longer used (LocationPresence is single source) ──
+  // ── 5. Subscribe to presences ──────────────────────────────────────────
   const [creatorEmails, setCreatorEmails] = useState(new Set());
+
+  useEffect(() => {
+    // Load approved creator emails so we can hide their regular presence pin
+    base44.entities.Creator.filter({ approval_status: "approved" })
+      .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
+      .catch(() => {});
+    const unsub = base44.entities.Creator.subscribe(() => {
+      base44.entities.Creator.filter({ approval_status: "approved" })
+        .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
+        .catch(() => {});
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const fetch = async () => {
@@ -327,50 +266,76 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     return () => { if (presenceSubRef.current) presenceSubRef.current(); };
   }, []);
 
-  // ── 6. Self avatar marker (updates styling based on live status) ────────
+  // ── 6. Self avatar marker ──────────────────────────────────────────────
   useEffect(() => {
     const map = mapInst.current;
     if (!map || !mapReady || !userLoc || !window.mapboxgl) return;
     const [lng, lat] = userLoc;
-    const isCurrentUserLive = liveCreators.has(currentUser?.email);
 
     if (selfMarkerRef.current) {
       selfMarkerRef.current.setLngLat([lng, lat]);
-      // Update marker styling if live status changed
-      const el = selfMarkerRef.current.getElement();
-      updateSelfMarkerStyle(el, isCurrentUserLive, currentUser);
       return;
     }
 
     const wrapper = document.createElement("div");
     wrapper.style.cssText = "position:relative; width:52px; height:52px;";
-    updateSelfMarkerStyle(wrapper, isCurrentUserLive, currentUser);
+
+    const ring = document.createElement("div");
+    ring.style.cssText = `
+      position:absolute; top:-8px; left:-8px; width:68px; height:68px; border-radius:50%;
+      border:2.5px solid rgba(79,70,229,0.5); pointer-events:none;
+      animation:selfPulse 2.2s ease-in-out infinite;
+    `;
+    wrapper.appendChild(ring);
+
+    const circle = document.createElement("div");
+    circle.style.cssText = `
+      position:absolute; top:2px; left:2px;
+      width:48px; height:48px; border-radius:50%;
+      border:3px solid #4F46E5;
+      box-shadow:0 4px 20px rgba(79,70,229,0.5);
+      overflow:hidden;
+      background:linear-gradient(135deg,#4F46E5,#7C3AED);
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; font-weight:700; color:white;
+    `;
+
+    if (currentUser?.avatar_url) {
+      const img = document.createElement("img");
+      img.src = currentUser.avatar_url;
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+      img.onerror = () => { img.remove(); circle.textContent = getInitials(currentUser?.full_name); };
+      circle.appendChild(img);
+    } else {
+      circle.textContent = getInitials(currentUser?.full_name);
+    }
+    wrapper.appendChild(circle);
 
     selfMarkerRef.current = new window.mapboxgl.Marker({ element: wrapper, anchor: "center" })
       .setLngLat([lng, lat])
       .addTo(map);
-  }, [mapReady, !!userLoc, currentUser?.email, liveCreators]);
+  }, [mapReady, !!userLoc, currentUser?.email]);
 
-  // ── 7. Creator-only markers — show LIVE creators only (no offline creators) ────
+  // ── 7. Other user markers — smart-limited (max 12, friends first) ────────
   const MAP_PIN_LIMIT = 15;
   const friendSet = new Set(follows);
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
-    // Show only LIVE creators (offline creators hidden completely from map)
+    // Only show friends on the map (non-friends are hidden from map, only in Nearby modal)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
+      .filter(p => !creatorEmails.has(p.user_email)) // creators have their own orange pin
       .filter(p => friendSet.has(p.user_email)) // friends only on map
-      .filter(p => liveCreators.has(p.user_email)) // ONLY show if currently LIVE
       .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
-        _isLive: true, // All shown creators are live
+        _isFriend: true,
       }))
       .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
-  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows, liveCreators]);
+  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
 
   const extraNearby = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
@@ -396,36 +361,15 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       }
 
       const el = document.createElement("div");
-      // All shown creators are LIVE - orange styling
-      const bgColor = "linear-gradient(135deg,#E05C2A,#F97316)";
-      const borderColor = "#E05C2A";
-      const shadowColor = "rgba(224,92,42,0.5)";
-
       el.style.cssText = `
         width:42px; height:42px; border-radius:50%;
-        border:2.5px solid ${borderColor};
-        box-shadow:0 3px 14px ${shadowColor};
+        border:2.5px solid #fff;
+        box-shadow:0 3px 14px rgba(0,0,0,0.22);
         cursor:pointer; overflow:hidden;
-        background:${bgColor};
+        background:linear-gradient(135deg,#7C3AED,#4F46E5);
         display:flex; align-items:center; justify-content:center;
         font-size:13px; font-weight:700; color:white;
       `;
-
-      // All shown creators have LIVE badge
-      const badge = document.createElement("div");
-      badge.style.cssText = `
-        position:absolute; top:-4px; right:-4px;
-        width:18px; height:18px; border-radius:50%;
-        background:#E05C2A; border:2px solid white;
-        font-size:10px; font-weight:800; color:white;
-        display:flex; align-items:center; justify-content:center;
-        box-shadow:0 2px 8px rgba(224,92,42,0.6);
-        z-index:10;
-      `;
-      badge.textContent = "●";
-      el.style.position = "relative";
-      el.appendChild(badge);
-
       if (p.avatar_url) {
         const img = document.createElement("img");
         img.src = p.avatar_url;
@@ -436,26 +380,11 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         el.textContent = getInitials(p.user_name);
       }
 
-      el.addEventListener("click", async e => {
+      el.addEventListener("click", e => {
         e.stopPropagation();
         const pt = map.project([p.location_lng, p.location_lat]);
-
-        // Creator-only: fetch creator profile (no normal profile fallback)
-        try {
-          const creators = await base44.entities.creator_profiles.filter(
-            { user_email: p.user_email },
-            "-created_date",
-            1
-          );
-          if (creators.length > 0) {
-            setSelectedCreatorProfile({ ...creators[0], ...p });
-            setCreatorProfileCoords({ x: pt.x, y: pt.y });
-            setSelectedUserPresence(null);
-            setPopupCoords(null);
-          }
-        } catch (err) {
-          console.error("Creator profile fetch failed:", err);
-        }
+        setPopupCoords({ x: pt.x, y: pt.y });
+        setSelectedUserPresence(p);
       });
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "center" })
@@ -499,8 +428,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       const coords = poi.geometry.coordinates;
       const [lng, lat] = Array.isArray(coords[0]) ? coords[0] : coords;
 
-      setSelectedCreatorProfile(null);
-      setCreatorProfileCoords(null);
+      setSelectedUserPresence(null);
 
       try {
         const res = await fetch(
@@ -559,7 +487,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Proximity notifier (invisible) */}
       <ProximityNotifier currentUser={currentUser} userLoc={userLoc} followedEmails={follows} />
 
-
+      {/* Street Creator markers */}
+      {mapReady && <CreatorMapMarkers map={mapInst.current} mapReady={mapReady} currentUserEmail={currentUser?.email} />}
 
       {/* Category carousel */}
       {mapReady && <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />}
@@ -567,17 +496,17 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Radius + online badge row */}
       {mapReady && (
         <div className="absolute top-16 left-0 right-0 z-20 flex items-center justify-between px-3 pointer-events-none">
-          {/* Live Creators toggle — creator-only */}
+          {/* Nearby People toggle */}
           <button
             onClick={() => setShowNearbyModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
             style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#0F172A" }}
           >
-            <Users className="w-3.5 h-3.5" style={{ color:"#E05C2A" }} />
-            <span style={{ color:"#E05C2A" }}>
+            <Users className="w-3.5 h-3.5" style={{ color:"#16A34A" }} />
+            <span style={{ color:"#16A34A" }}>
               {mapPins.length > 0
-                ? `${mapPins.length} live${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
-                : "Live Creators"}
+                ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
+                : "Nearby People"}
             </span>
           </button>
 
@@ -610,21 +539,15 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
           onUpdate={updates => setMyPresence(prev => ({ ...(prev||{}), ...updates }))} />
       )}
 
-
-
-      {/* Creator profile popup — creator-only system */}
-      {selectedCreatorProfile && creatorProfileCoords && (
+      {/* User pin popup */}
+      {selectedUserPresence && popupCoords && (
         <div className="absolute z-30" style={{
-          left: Math.min(Math.max(creatorProfileCoords.x - 145, 8), (mapRef.current?.clientWidth||400)-310),
-          top: Math.max(creatorProfileCoords.y - 250, 70),
+          left: Math.min(Math.max(popupCoords.x - 110, 8), (mapRef.current?.clientWidth||400)-228),
+          top: Math.max(popupCoords.y - 200, 70),
           pointerEvents:"auto",
         }}>
-          <CreatorProfilePopup 
-            creator={selectedCreatorProfile} 
-            coords={creatorProfileCoords}
-            mapContainer={mapRef.current}
-            currentUserEmail={currentUser?.email}
-            onClose={() => { setSelectedCreatorProfile(null); setCreatorProfileCoords(null); }} />
+          <UserPinPopup presence={selectedUserPresence} currentUser={currentUser}
+            onClose={() => { setSelectedUserPresence(null); setPopupCoords(null); }} />
         </div>
       )}
 
@@ -665,23 +588,12 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
                 zoom: 16,
                 duration: 800,
               });
-              // Show creator profile popup after fly
-              setTimeout(async () => {
+              // Show popup after fly
+              setTimeout(() => {
                 if (!mapInst.current) return;
-                try {
-                  const creators = await base44.entities.creator_profiles.filter(
-                    { user_email: presence.user_email },
-                    "-created_date",
-                    1
-                  );
-                  if (creators.length > 0) {
-                    const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
-                    setSelectedCreatorProfile({ ...creators[0], ...presence });
-                    setCreatorProfileCoords({ x: pt.x, y: pt.y });
-                  }
-                } catch (err) {
-                  console.error("Creator profile fetch failed:", err);
-                }
+                const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
+                setPopupCoords({ x: pt.x, y: pt.y });
+                setSelectedUserPresence(presence);
               }, 850);
             }
           }}
