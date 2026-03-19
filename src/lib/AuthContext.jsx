@@ -5,47 +5,6 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
-const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U";
-
-// Returns the full profile row, false if deleted, null if network error
-async function fetchSupabaseProfile(email) {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=id,full_name,avatar_url,email`,
-      {
-        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-        cache: "no-store",
-      }
-    );
-    if (!res.ok) return null;
-    const rows = await res.json();
-    if (!Array.isArray(rows) || rows.length === 0) return false; // explicitly deleted
-    console.log(`[auth] Supabase profile fetched for ${email}:`, rows[0]);
-    return rows[0]; // { id, full_name, avatar_url, email }
-  } catch (e) {
-    console.warn('[auth] Supabase profile fetch network error:', e.message);
-    return null;
-  }
-}
-
-// Backwards-compat alias used by heartbeat
-async function checkSupabaseProfile(email) {
-  const result = await fetchSupabaseProfile(email);
-  if (result === false) return false;
-  if (result === null) return null;
-  return true;
-}
-
-// Nuke all persisted local/session cache so stale data never survives a fresh launch
-function clearLocalCache() {
-  try {
-    localStorage.clear();
-    sessionStorage.clear();
-    console.log('[auth] Local cache cleared');
-  } catch {}
-}
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
