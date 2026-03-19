@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft } from "lucide-react";
 import ProximityNotifier from "@/components/friends/ProximityNotifier";
 import CreatorMapMarkers from "@/components/creators/CreatorMapMarkers";
+import CreatorProfilePopup from "@/components/creators/CreatorProfilePopup";
 import MapCategoryCarousel from "./MapCategoryCarousel";
 import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
@@ -120,11 +121,13 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
   const [radius,              setRadius]              = useState(10);
   const [showRadiusPanel,     setShowRadiusPanel]     = useState(false);
-  const [selectedUserPresence, setSelectedUserPresence] = useState(null);
-  const [popupCoords,          setPopupCoords]          = useState(null);
-  const [showNearbyModal,      setShowNearbyModal]      = useState(false);
-  const [follows,              setFollows]              = useState([]);
-  const [liveCreators,         setLiveCreators]         = useState(new Set()); // emails of creators currently hosting
+  const [selectedUserPresence,   setSelectedUserPresence]   = useState(null);
+  const [popupCoords,            setPopupCoords]            = useState(null);
+  const [selectedCreatorProfile, setSelectedCreatorProfile] = useState(null);
+  const [creatorProfileCoords,   setCreatorProfileCoords]   = useState(null);
+  const [showNearbyModal,        setShowNearbyModal]        = useState(false);
+  const [follows,                setFollows]                = useState([]);
+  const [liveCreators,           setLiveCreators]           = useState(new Set()); // emails of creators currently hosting
 
   // Load follows for friend prioritization
   useEffect(() => {
@@ -439,11 +442,37 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         el.textContent = getInitials(p.user_name);
       }
 
-      el.addEventListener("click", e => {
+      el.addEventListener("click", async e => {
         e.stopPropagation();
         const pt = map.project([p.location_lng, p.location_lat]);
-        setPopupCoords({ x: pt.x, y: pt.y });
+
+        // Check if user is currently live
+        const isLive = liveCreators.has(p.user_email);
+
+        if (isLive) {
+          // Fetch creator profile from creator_profiles entity
+          try {
+            const creators = await base44.entities.creator_profiles.filter(
+              { user_email: p.user_email },
+              "-created_date",
+              1
+            );
+            if (creators.length > 0) {
+              setSelectedCreatorProfile({ ...creators[0], ...p });
+              setCreatorProfileCoords({ x: pt.x, y: pt.y });
+              setSelectedUserPresence(null);
+              return;
+            }
+          } catch (err) {
+            console.error("Creator profile fetch failed:", err);
+          }
+        }
+
+        // Default: show normal user presence popup
         setSelectedUserPresence(p);
+        setPopupCoords({ x: pt.x, y: pt.y });
+        setSelectedCreatorProfile(null);
+        setCreatorProfileCoords(null);
       });
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "center" })
