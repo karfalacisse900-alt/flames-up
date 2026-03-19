@@ -160,6 +160,7 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
           creator={selectedCreator}
           coords={popupCoords}
           mapContainer={map.getContainer()}
+          currentUserEmail={currentUserEmail}
           onClose={() => { setSelectedCreator(null); setPopupCoords(null); }}
         />
       )}
