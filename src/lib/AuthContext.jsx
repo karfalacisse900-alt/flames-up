@@ -84,18 +84,16 @@ export const AuthProvider = ({ children }) => {
       // Do NOT clear cache on every auth check — this causes stale-data logouts
       // clearLocalCache() removed to prevent session instability
 
-      // Verify the Base44 token is still valid
-      let currentUser;
-      try {
-        currentUser = await base44.auth.me();
-      } catch (tokenErr) {
-        console.warn('[auth] Token validation failed — forcing logout:', tokenErr.message);
-        forceLogout();
+      const isAuthed = await base44.auth.isAuthenticated();
+      if (!isAuthed) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoadingAuth(false);
+        setAuthError({ type: 'auth_required', message: 'Authentication required' });
         return;
       }
 
-      // Use Base44 profile data directly — Supabase profile check removed from login
-      // to prevent 403/network errors from blocking authentication.
+      const currentUser = await base44.auth.me();
       setUser(currentUser);
       userRef.current = currentUser;
       setIsAuthenticated(true);
@@ -104,9 +102,7 @@ export const AuthProvider = ({ children }) => {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({ type: 'auth_required', message: 'Authentication required' });
-      }
+      setAuthError({ type: 'auth_required', message: 'Authentication required' });
     }
   };
 
