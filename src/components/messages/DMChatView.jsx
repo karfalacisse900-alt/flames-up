@@ -149,9 +149,14 @@ export default function DMChatView({ user, conversation, onBack }) {
 
         {/* Name + status */}
         <div className="flex-1 min-w-0 ml-1">
-          <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{displayName}</p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{displayName}</p>
+            {partnerCreator && <CreatorBadge category={partnerCreator.category} size="xs" />}
+          </div>
           <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
-            {muted ? "🔇 Muted" : "tap here for contact info"}
+            {partnerCreator?.status_message
+              ? `💬 ${partnerCreator.status_message}`
+              : muted ? "🔇 Muted" : "tap here for contact info"}
           </p>
         </div>
 
