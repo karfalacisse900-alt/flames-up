@@ -6,7 +6,21 @@ import { useQuery } from "@tanstack/react-query";
 export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [isInView, setIsInView] = useState(false);
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Only play when card is at least 60% visible
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.intersectionRatio >= 0.6),
+      { threshold: 0.6 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const { data: posts = [] } = useQuery({
     queryKey: ["groupPosts", group.id],
