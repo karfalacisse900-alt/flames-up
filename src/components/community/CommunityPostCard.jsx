@@ -488,19 +488,19 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
           </div>
         )}
 
-        {/* ── MEDIA SECTION ── */}
+        {/* ── MEDIA SECTION — fixed aspect-ratio prevents layout shift ── */}
         {(() => {
         const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
         if (imgs.length === 0 && !post.video_url) return null;
         return (
-          <div className="w-full relative mb-3">
+          <div className="w-full relative mb-3" style={{ aspectRatio: "4/5", maxHeight: "56vh", overflow: "hidden" }}>
             {imgs.length > 0 && (
-              <div className="w-full">
+              <div className="absolute inset-0">
                 <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
               </div>
             )}
             {post.video_url && post.video_url.trim() && (
-              <div className="w-full">
+              <div className="absolute inset-0">
                 <AutoplayVideo
                   src={post.video_url}
                   postId={post.id}
