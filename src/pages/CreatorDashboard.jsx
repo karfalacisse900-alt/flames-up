@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2, MessageCircle } from "lucide-react";
+import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2 } from "lucide-react";
 import CreatorProfileEditor from "@/components/creators/CreatorProfileEditor.jsx";
 import CreatorApplyForm from "@/components/creators/CreatorApplyForm.jsx";
 
@@ -19,8 +19,6 @@ export default function CreatorDashboard() {
   const [toggling, setToggling] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showApply, setShowApply] = useState(false);
-  const [statusInput, setStatusInput] = useState("");
-  const [savingStatus, setSavingStatus] = useState(false);
   const locationWatchRef = useRef(null);
 
   useEffect(() => {
@@ -58,7 +56,7 @@ export default function CreatorDashboard() {
         });
       },
       null,
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 30000 }
     );
   };
 
