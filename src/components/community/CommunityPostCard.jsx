@@ -607,7 +607,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   );
 }
 
-export default memo(CommunityPostCard, (prev, next) =>
+const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) =>
   prev.post.id === next.post.id &&
   prev.post.upvotes === next.post.upvotes &&
   prev.post.comment_count === next.post.comment_count &&
