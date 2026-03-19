@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
@@ -89,6 +89,8 @@ export default function CommunityPostCard({ post, user, onUpvote, onLocationClic
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email }),
     enabled: !!user?.email && !isOwnPost && !post.is_anonymous,
     select: (data) => data[0] || null,
+    staleTime: 60000, // cache for 1 min — prevents refetch on every scroll
+    gcTime: 120000,
   });
 
   const isFollowing = !!followRecord;
