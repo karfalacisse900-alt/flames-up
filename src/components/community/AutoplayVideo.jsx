@@ -181,22 +181,25 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         4. Multiple load events (onLoadedMetadata, onCanPlay, onLoadedData, onError)
            all call markLoaded() so we catch whichever fires first.
       */}
-      <video
-        ref={videoRef}
-        src={src}
-        playsInline
-        loop
-        muted={muted}
-        preload="auto"
-        onLoadedMetadata={markLoaded}
-        onCanPlay={markLoaded}
-        onLoadedData={markLoaded}
-        onError={markLoaded}
-        onWaiting={() => setBuffering(true)}
-        onPlaying={() => { setBuffering(false); setLoaded(true); }}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: 1, zIndex: 1 }}
-      />
+      {/* Only inject src once visible — prevents eager loading for off-screen videos */}
+      {visible && (
+        <video
+          ref={videoRef}
+          src={src}
+          playsInline
+          loop
+          muted={muted}
+          preload="metadata"
+          onLoadedMetadata={markLoaded}
+          onCanPlay={markLoaded}
+          onLoadedData={markLoaded}
+          onError={markLoaded}
+          onWaiting={() => setBuffering(true)}
+          onPlaying={() => { setBuffering(false); setLoaded(true); }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ zIndex: 1 }}
+        />
+      )}
 
       {/* Tap icon feedback */}
       {showIcon && (
