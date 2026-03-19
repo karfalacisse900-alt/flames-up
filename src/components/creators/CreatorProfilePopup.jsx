@@ -215,23 +215,30 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-2">
-            <button onClick={openDirections}
-              className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-1.5"
-              style={{ background: "linear-gradient(135deg,#E05C2A,#F97316)", boxShadow: "0 4px 12px rgba(224,92,42,0.35)" }}>
-              <Navigation className="w-3.5 h-3.5" />
-              Directions
-            </button>
-            {creator.user_email && (
-              <button
-                onClick={() => { onClose(); navigate(createPageUrl(`Messages?with=${creator.user_email}`)); }}
-                className="flex-1 py-2.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-1.5"
-                style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
-                <MessageCircle className="w-3.5 h-3.5" />
-                Message
+          {isSelf ? (
+            <div className="py-2 text-center text-xs font-semibold rounded-2xl"
+              style={{ backgroundColor: "#F1F5F9", color: "#64748B" }}>
+              👤 This is your creator profile
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button onClick={openDirections}
+                className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-1.5"
+                style={{ background: "linear-gradient(135deg,#E05C2A,#F97316)", boxShadow: "0 4px 12px rgba(224,92,42,0.35)" }}>
+                <Navigation className="w-3.5 h-3.5" />
+                Directions
               </button>
-            )}
-          </div>
+              {creator.user_email && (
+                <button
+                  onClick={() => { onClose(); navigate(createPageUrl(`Messages?with=${creator.user_email}`)); }}
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-1.5"
+                  style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Message
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
