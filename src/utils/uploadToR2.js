@@ -1,4 +1,4 @@
-import { appParams } from "@/lib/app-params";
+import { base44 } from "@/api/base44Client";
 
 /**
  * Upload a File object to Cloudflare R2 via the uploadToR2 backend function.
@@ -8,26 +8,12 @@ export async function uploadToR2(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const baseUrl = appParams.appBaseUrl || "";
-  const appId = appParams.appId;
-  const token = appParams.token;
+  const response = await base44.functions.invoke("uploadToR2", formData);
+  const data = response?.data;
 
-  const url = `${baseUrl}/api/apps/${appId}/functions/uploadToR2`;
-
-  const headers = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: formData,
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || "R2 upload failed");
+  if (!data?.file_url) {
+    throw new Error(data?.error || "R2 upload failed");
   }
 
-  return response.json(); // { file_url }
+  return data; // { file_url }
 }
