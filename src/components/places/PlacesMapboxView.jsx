@@ -354,22 +354,22 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .addTo(map);
   }, [mapReady, !!userLoc, currentUser?.email, liveCreators]);
 
-  // ── 7. Other user markers — smart-limited (max 15, friends first) ────────
+  // ── 7. Creator-only markers — show LIVE creators only (no offline creators) ────
   const MAP_PIN_LIMIT = 15;
   const friendSet = new Set(follows);
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
-    // Show all nearby friends with real-time location (single source of truth: LocationPresence)
-    // Each user appears ONCE with one marker, styled based on live status
+    // Show only LIVE creators (offline creators hidden completely from map)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
       .filter(p => friendSet.has(p.user_email)) // friends only on map
+      .filter(p => liveCreators.has(p.user_email)) // ONLY show if currently LIVE
       .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
-        _isLive: liveCreators.has(p.user_email), // true = creator mode ON, marker style = orange + LIVE badge
+        _isLive: true, // All shown creators are live
       }))
       .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
@@ -399,11 +399,10 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       }
 
       const el = document.createElement("div");
-      // Live creators get orange styling, others get purple
-      const isLive = p._isLive;
-      const bgColor = isLive ? "linear-gradient(135deg,#E05C2A,#F97316)" : "linear-gradient(135deg,#7C3AED,#4F46E5)";
-      const borderColor = isLive ? "#E05C2A" : "#fff";
-      const shadowColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.4)";
+      // All shown creators are LIVE - orange styling
+      const bgColor = "linear-gradient(135deg,#E05C2A,#F97316)";
+      const borderColor = "#E05C2A";
+      const shadowColor = "rgba(224,92,42,0.5)";
 
       el.style.cssText = `
         width:42px; height:42px; border-radius:50%;
@@ -415,22 +414,20 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         font-size:13px; font-weight:700; color:white;
       `;
 
-      // Add "LIVE" badge if creator is streaming
-      if (isLive) {
-        const badge = document.createElement("div");
-        badge.style.cssText = `
-          position:absolute; top:-4px; right:-4px;
-          width:18px; height:18px; border-radius:50%;
-          background:#E05C2A; border:2px solid white;
-          font-size:10px; font-weight:800; color:white;
-          display:flex; align-items:center; justify-content:center;
-          box-shadow:0 2px 8px rgba(224,92,42,0.6);
-          z-index:10;
-        `;
-        badge.textContent = "●";
-        el.style.position = "relative";
-        el.appendChild(badge);
-      }
+      // All shown creators have LIVE badge
+      const badge = document.createElement("div");
+      badge.style.cssText = `
+        position:absolute; top:-4px; right:-4px;
+        width:18px; height:18px; border-radius:50%;
+        background:#E05C2A; border:2px solid white;
+        font-size:10px; font-weight:800; color:white;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow:0 2px 8px rgba(224,92,42,0.6);
+        z-index:10;
+      `;
+      badge.textContent = "●";
+      el.style.position = "relative";
+      el.appendChild(badge);
 
       if (p.avatar_url) {
         const img = document.createElement("img");
@@ -446,33 +443,22 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         e.stopPropagation();
         const pt = map.project([p.location_lng, p.location_lat]);
 
-        // Check if user is currently live
-        const isLive = liveCreators.has(p.user_email);
-
-        if (isLive) {
-          // Fetch creator profile from creator_profiles entity
-          try {
-            const creators = await base44.entities.creator_profiles.filter(
-              { user_email: p.user_email },
-              "-created_date",
-              1
-            );
-            if (creators.length > 0) {
-              setSelectedCreatorProfile({ ...creators[0], ...p });
-              setCreatorProfileCoords({ x: pt.x, y: pt.y });
-              setSelectedUserPresence(null);
-              return;
-            }
-          } catch (err) {
-            console.error("Creator profile fetch failed:", err);
+        // Creator-only: fetch creator profile (no normal profile fallback)
+        try {
+          const creators = await base44.entities.creator_profiles.filter(
+            { user_email: p.user_email },
+            "-created_date",
+            1
+          );
+          if (creators.length > 0) {
+            setSelectedCreatorProfile({ ...creators[0], ...p });
+            setCreatorProfileCoords({ x: pt.x, y: pt.y });
+            setSelectedUserPresence(null);
+            setPopupCoords(null);
           }
+        } catch (err) {
+          console.error("Creator profile fetch failed:", err);
         }
-
-        // Default: show normal user presence popup
-        setSelectedUserPresence(p);
-        setPopupCoords({ x: pt.x, y: pt.y });
-        setSelectedCreatorProfile(null);
-        setCreatorProfileCoords(null);
       });
 
       const marker = new window.mapboxgl.Marker({ element: el, anchor: "center" })
@@ -626,17 +612,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
           onUpdate={updates => setMyPresence(prev => ({ ...(prev||{}), ...updates }))} />
       )}
 
-      {/* User pin popup — normal profile (not live) */}
-      {selectedUserPresence && popupCoords && !selectedCreatorProfile && (
-        <div className="absolute z-30" style={{
-          left: Math.min(Math.max(popupCoords.x - 110, 8), (mapRef.current?.clientWidth||400)-228),
-          top: Math.max(popupCoords.y - 200, 70),
-          pointerEvents:"auto",
-        }}>
-          <UserPinPopup presence={selectedUserPresence} currentUser={currentUser}
-            onClose={() => { setSelectedUserPresence(null); setPopupCoords(null); }} />
-        </div>
-      )}
+
 
       {/* Creator profile popup — live mode */}
       {selectedCreatorProfile && creatorProfileCoords && (
