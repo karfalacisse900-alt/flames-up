@@ -608,3 +608,14 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
     </div>
   );
 }
+
+export default memo(CommunityPostCard, (prev, next) => {
+  // Only re-render if post data, user, or upvote count changes
+  return (
+    prev.post.id === next.post.id &&
+    prev.post.upvotes === next.post.upvotes &&
+    prev.post.comment_count === next.post.comment_count &&
+    prev.post.upvoted_by === next.post.upvoted_by &&
+    prev.user?.email === next.user?.email
+  );
+});
