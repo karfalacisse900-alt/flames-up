@@ -15,6 +15,7 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
   const [photoIdx, setPhotoIdx] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const navigate = useNavigate();
+  const isSelf = currentUserEmail && creator.user_email === currentUserEmail;
 
   const containerWidth = mapContainer?.clientWidth || 400;
   const containerHeight = mapContainer?.clientHeight || 600;
