@@ -609,7 +609,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   );
 }
 
-export default memo(CommunityPostCard, (prev, next) => {
+const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) => {
   // Only re-render if post data, user, or upvote count changes
   return (
     prev.post.id === next.post.id &&
