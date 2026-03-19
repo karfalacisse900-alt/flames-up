@@ -62,7 +62,7 @@ function stripHtml(html) {
   return text.replace(/\n{3,}/g, "\n\n");
 }
 
-export default function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
+function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
   const [saved, setSaved] = useState(false);
