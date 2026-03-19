@@ -213,13 +213,24 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
             </div>
           )}
 
-          {/* Directions */}
-          <button onClick={openDirections}
-            className="w-full py-2.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg,#E05C2A,#F97316)", boxShadow: "0 4px 12px rgba(224,92,42,0.35)" }}>
-            <Navigation className="w-4 h-4" />
-            Get Directions
-          </button>
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            <button onClick={openDirections}
+              className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-1.5"
+              style={{ background: "linear-gradient(135deg,#E05C2A,#F97316)", boxShadow: "0 4px 12px rgba(224,92,42,0.35)" }}>
+              <Navigation className="w-3.5 h-3.5" />
+              Directions
+            </button>
+            {creator.user_email && (
+              <button
+                onClick={() => { onClose(); navigate(createPageUrl(`Messages?with=${creator.user_email}`)); }}
+                className="flex-1 py-2.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-1.5"
+                style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
+                <MessageCircle className="w-3.5 h-3.5" />
+                Message
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </>
