@@ -415,7 +415,7 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const renderPostCard = (post, index) => {
+  const renderPostCard = useCallback((post) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     const card = post.type === "debate" || post.type === "question" ? (
@@ -440,11 +440,11 @@ export default function CommunityFeed({ user }) {
     );
 
     return (
-      <div key={post.id}>
+      <div key={post.id} style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}>
         {card}
       </div>
     );
-  };
+  }, [expandedPost, user, debates, upvoteMut]);
 
   if (isLoading) {
     return (
