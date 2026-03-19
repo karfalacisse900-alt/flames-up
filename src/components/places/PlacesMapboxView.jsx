@@ -227,6 +227,21 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   }
 
   // ── 5. Subscribe to presences ──────────────────────────────────────────
+  const [creatorEmails, setCreatorEmails] = useState(new Set());
+
+  useEffect(() => {
+    // Load approved creator emails so we can hide their regular presence pin
+    base44.entities.Creator.filter({ approval_status: "approved" })
+      .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
+      .catch(() => {});
+    const unsub = base44.entities.Creator.subscribe(() => {
+      base44.entities.Creator.filter({ approval_status: "approved" })
+        .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
+        .catch(() => {});
+    });
+    return () => unsub();
+  }, []);
+
   useEffect(() => {
     const fetch = async () => {
       const all = await base44.entities.LocationPresence.list("-updated_date", 100);
