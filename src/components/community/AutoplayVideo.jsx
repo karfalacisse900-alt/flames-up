@@ -158,15 +158,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         background: "#1a1a1a",
       }}
     >
-      {/* Spinner — shown while buffering, hidden once loaded */}
-      {buffering && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backgroundColor: "#1a1a1a", zIndex: 2 }}
-        >
-          <div className="flex flex-col items-center gap-2 opacity-40">
-            <div className="w-10 h-10 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
-          </div>
+      {/* Dark placeholder before video loads, spinner only while buffering after load started */}
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "#111", zIndex: 2 }}>
+          {buffering && (
+            <div className="w-9 h-9 rounded-full border-2 border-white/20 border-t-white/70 animate-spin opacity-60" />
+          )}
         </div>
       )}
 
