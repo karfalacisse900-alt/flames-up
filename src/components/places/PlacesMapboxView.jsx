@@ -461,6 +461,9 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Proximity notifier (invisible) */}
       <ProximityNotifier currentUser={currentUser} userLoc={userLoc} followedEmails={follows} />
 
+      {/* Street Creator markers */}
+      <CreatorMapMarkers map={mapInst.current} mapReady={mapReady} />
+
       {/* Category carousel */}
       {mapReady && <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />}
 
