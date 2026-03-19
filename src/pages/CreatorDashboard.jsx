@@ -62,7 +62,7 @@ export default function CreatorDashboard() {
         });
       },
       null,
-      { enableHighAccuracy: true, maximumAge: 30000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
   };
 
