@@ -11,7 +11,7 @@ const CATEGORY_LABELS = {
   caricaturist: "✏️ Caricaturist", other: "🌟 Other"
 };
 
-export default function CreatorProfilePopup({ creator, coords, mapContainer, onClose }) {
+export default function CreatorProfilePopup({ creator, coords, mapContainer, onClose, currentUserEmail }) {
   const [photoIdx, setPhotoIdx] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const navigate = useNavigate();
