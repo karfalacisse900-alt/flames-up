@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 import { Plus, X, Loader2, ImageIcon } from "lucide-react";
 
 export default function PortfolioUploader({ creator, onUpdated }) {

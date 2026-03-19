@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 import { X, Upload, Loader2 } from "lucide-react";
 
 export default function CreatorProfileEditor({ creator, onClose, onSaved }) {
