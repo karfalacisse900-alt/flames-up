@@ -277,6 +277,57 @@ export default function CreatorDashboard() {
           </button>
         </div>
 
+        {/* Status Message */}
+        <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Live Status Message</p>
+            </div>
+            {!editingStatus && (
+              <button onClick={() => setEditingStatus(true)}
+                className="text-xs font-bold px-2 py-1 rounded-lg"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                Edit
+              </button>
+            )}
+          </div>
+          {editingStatus ? (
+            <div className="flex gap-2">
+              <input
+                value={statusMsg}
+                onChange={e => setStatusMsg(e.target.value)}
+                maxLength={80}
+                placeholder="e.g. Giving 20% discount today! 🎉"
+                className="flex-1 px-3 py-2 rounded-xl text-sm"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+              />
+              <button onClick={saveStatus} disabled={savingStatus}
+                className="px-3 py-2 rounded-xl text-white text-sm font-bold"
+                style={{ background: "linear-gradient(135deg,#16A34A,#22C55E)" }}>
+                {savingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              </button>
+              <button onClick={() => { setEditingStatus(false); setStatusMsg(creator.status_message || ""); }}
+                className="px-3 py-2 rounded-xl text-sm"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : creator.status_message ? (
+            <div className="flex items-start gap-2 mt-1">
+              <div className="text-lg">💬</div>
+              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{creator.status_message}</p>
+            </div>
+          ) : (
+            <p className="text-xs italic mt-1" style={{ color: "var(--text-hint)" }}>No status message set. Add one to attract customers!</p>
+          )}
+        </div>
+
+        {/* Portfolio */}
+        <div className="mb-6">
+          <PortfolioUploader creator={creator} onUpdated={setCreator} />
+        </div>
+
         {/* Location info */}
         {isOpen && creator.latitude && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-6"
