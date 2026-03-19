@@ -5,6 +5,7 @@ import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, Use
 import MessageBubble from "./MessageBubble";
 import ChatInputBar from "./ChatInputBar";
 import VideoCallModal from "./VideoCallModal";
+import CreatorBadge from "@/components/creators/CreatorBadge.jsx";
 
 const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B", "#FFA500"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
