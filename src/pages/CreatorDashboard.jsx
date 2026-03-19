@@ -32,7 +32,9 @@ export default function CreatorDashboard() {
         setUser(u);
         if (u?.email) {
           const rows = await base44.entities.Creator.filter({ user_email: u.email });
-          setCreator(rows[0] || null);
+          const c = rows[0] || null;
+          setCreator(c);
+          if (c?.status_message) setStatusMsg(c.status_message);
         }
       } catch {}
       setLoading(false);
