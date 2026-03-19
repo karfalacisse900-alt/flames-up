@@ -5,7 +5,6 @@ import ProximityNotifier from "@/components/friends/ProximityNotifier";
 import CreatorMapMarkers from "@/components/creators/CreatorMapMarkers";
 import CreatorProfilePopup from "@/components/creators/CreatorProfilePopup";
 import MapCategoryCarousel from "./MapCategoryCarousel";
-import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
 import PlaceHub from "@/components/community/PlaceHub";
 import NearbyPeopleModal from "./NearbyPeopleModal";
@@ -121,8 +120,6 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
   const [radius,              setRadius]              = useState(10);
   const [showRadiusPanel,     setShowRadiusPanel]     = useState(false);
-  const [selectedUserPresence,   setSelectedUserPresence]   = useState(null);
-  const [popupCoords,            setPopupCoords]            = useState(null);
   const [selectedCreatorProfile, setSelectedCreatorProfile] = useState(null);
   const [creatorProfileCoords,   setCreatorProfileCoords]   = useState(null);
   const [showNearbyModal,        setShowNearbyModal]        = useState(false);
@@ -502,7 +499,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       const coords = poi.geometry.coordinates;
       const [lng, lat] = Array.isArray(coords[0]) ? coords[0] : coords;
 
-      setSelectedUserPresence(null);
+      setSelectedCreatorProfile(null);
+      setCreatorProfileCoords(null);
 
       try {
         const res = await fetch(
@@ -569,17 +567,17 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Radius + online badge row */}
       {mapReady && (
         <div className="absolute top-16 left-0 right-0 z-20 flex items-center justify-between px-3 pointer-events-none">
-          {/* Nearby People toggle */}
+          {/* Live Creators toggle — creator-only */}
           <button
             onClick={() => setShowNearbyModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
             style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#0F172A" }}
           >
-            <Users className="w-3.5 h-3.5" style={{ color:"#16A34A" }} />
-            <span style={{ color:"#16A34A" }}>
+            <Users className="w-3.5 h-3.5" style={{ color:"#E05C2A" }} />
+            <span style={{ color:"#E05C2A" }}>
               {mapPins.length > 0
-                ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
-                : "Nearby People"}
+                ? `${mapPins.length} live${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
+                : "Live Creators"}
             </span>
           </button>
 
@@ -614,7 +612,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
 
 
 
-      {/* Creator profile popup — live mode */}
+      {/* Creator profile popup — creator-only system */}
       {selectedCreatorProfile && creatorProfileCoords && (
         <div className="absolute z-30" style={{
           left: Math.min(Math.max(creatorProfileCoords.x - 145, 8), (mapRef.current?.clientWidth||400)-310),
@@ -667,12 +665,23 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
                 zoom: 16,
                 duration: 800,
               });
-              // Show popup after fly
-              setTimeout(() => {
+              // Show creator profile popup after fly
+              setTimeout(async () => {
                 if (!mapInst.current) return;
-                const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
-                setPopupCoords({ x: pt.x, y: pt.y });
-                setSelectedUserPresence(presence);
+                try {
+                  const creators = await base44.entities.creator_profiles.filter(
+                    { user_email: presence.user_email },
+                    "-created_date",
+                    1
+                  );
+                  if (creators.length > 0) {
+                    const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
+                    setSelectedCreatorProfile({ ...creators[0], ...presence });
+                    setCreatorProfileCoords({ x: pt.x, y: pt.y });
+                  }
+                } catch (err) {
+                  console.error("Creator profile fetch failed:", err);
+                }
               }, 850);
             }
           }}
