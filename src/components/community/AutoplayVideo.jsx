@@ -16,7 +16,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [buffering, setBuffering] = useState(true);
+  const [buffering, setBuffering] = useState(false);
+  const [srcLoaded, setSrcLoaded] = useState(false); // lazy: only set src when visible
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   const iconTimer = useRef(null);
