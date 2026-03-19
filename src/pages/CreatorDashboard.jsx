@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2 } from "lucide-react";
+import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2, MessageCircle, Check } from "lucide-react";
 import CreatorProfileEditor from "@/components/creators/CreatorProfileEditor.jsx";
 import CreatorApplyForm from "@/components/creators/CreatorApplyForm.jsx";
+import PortfolioUploader from "@/components/creators/PortfolioUploader.jsx";
 
 const CATEGORY_LABELS = {
   painter: "🎨 Painter", dancer: "💃 Dancer", musician: "🎵 Musician",
