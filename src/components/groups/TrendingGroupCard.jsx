@@ -95,6 +95,7 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
 
   return (
     <div
+      ref={containerRef}
       className="relative rounded-[32px] overflow-hidden cursor-pointer"
       style={{
         width: "100%",
