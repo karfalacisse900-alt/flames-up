@@ -35,7 +35,67 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 function getInitials(name) {
-  return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function updateSelfMarkerStyle(wrapper, isLive, currentUser) {
+   // Clear old content
+   wrapper.innerHTML = "";
+   wrapper.style.cssText = "position:relative; width:52px; height:52px;";
+
+   // Pulse ring
+   const ring = document.createElement("div");
+   const ringColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.5)";
+   ring.style.cssText = `
+     position:absolute; top:-8px; left:-8px; width:68px; height:68px; border-radius:50%;
+     border:2.5px solid ${ringColor}; pointer-events:none;
+     animation:selfPulse 2.2s ease-in-out infinite;
+   `;
+   wrapper.appendChild(ring);
+
+   // Avatar circle
+   const circle = document.createElement("div");
+   const borderColor = isLive ? "#E05C2A" : "#4F46E5";
+   const shadowColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.5)";
+   const bgGradient = isLive ? "linear-gradient(135deg,#E05C2A,#F97316)" : "linear-gradient(135deg,#4F46E5,#7C3AED)";
+
+   circle.style.cssText = `
+     position:absolute; top:2px; left:2px;
+     width:48px; height:48px; border-radius:50%;
+     border:3px solid ${borderColor};
+     box-shadow:0 4px 20px ${shadowColor};
+     overflow:hidden;
+     background:${bgGradient};
+     display:flex; align-items:center; justify-content:center;
+     font-size:15px; font-weight:700; color:white;
+   `;
+
+   if (currentUser?.avatar_url) {
+     const img = document.createElement("img");
+     img.src = currentUser.avatar_url;
+     img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+     img.onerror = () => { img.remove(); circle.textContent = getInitials(currentUser?.full_name); };
+     circle.appendChild(img);
+   } else {
+     circle.textContent = getInitials(currentUser?.full_name);
+   }
+   wrapper.appendChild(circle);
+
+   // Live badge
+   if (isLive) {
+     const badge = document.createElement("div");
+     badge.style.cssText = `
+       position:absolute; top:-8px; right:-8px;
+       width:24px; height:24px; border-radius:50%;
+       background:#E05C2A; border:3px solid white;
+       font-size:11px; font-weight:800; color:white;
+       display:flex; align-items:center; justify-content:center;
+       box-shadow:0 2px 10px rgba(224,92,42,0.6);
+       z-index:10;
+     `;
+     badge.textContent = "●";
+     wrapper.appendChild(badge);
+   }
 }
 
 export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }) {
@@ -267,55 +327,29 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     return () => { if (presenceSubRef.current) presenceSubRef.current(); };
   }, []);
 
-  // ── 6. Self avatar marker ──────────────────────────────────────────────
+  // ── 6. Self avatar marker (updates styling based on live status) ────────
   useEffect(() => {
     const map = mapInst.current;
     if (!map || !mapReady || !userLoc || !window.mapboxgl) return;
     const [lng, lat] = userLoc;
+    const isCurrentUserLive = liveCreators.has(currentUser?.email);
 
     if (selfMarkerRef.current) {
       selfMarkerRef.current.setLngLat([lng, lat]);
+      // Update marker styling if live status changed
+      const el = selfMarkerRef.current.getElement();
+      updateSelfMarkerStyle(el, isCurrentUserLive, currentUser);
       return;
     }
 
     const wrapper = document.createElement("div");
     wrapper.style.cssText = "position:relative; width:52px; height:52px;";
-
-    const ring = document.createElement("div");
-    ring.style.cssText = `
-      position:absolute; top:-8px; left:-8px; width:68px; height:68px; border-radius:50%;
-      border:2.5px solid rgba(79,70,229,0.5); pointer-events:none;
-      animation:selfPulse 2.2s ease-in-out infinite;
-    `;
-    wrapper.appendChild(ring);
-
-    const circle = document.createElement("div");
-    circle.style.cssText = `
-      position:absolute; top:2px; left:2px;
-      width:48px; height:48px; border-radius:50%;
-      border:3px solid #4F46E5;
-      box-shadow:0 4px 20px rgba(79,70,229,0.5);
-      overflow:hidden;
-      background:linear-gradient(135deg,#4F46E5,#7C3AED);
-      display:flex; align-items:center; justify-content:center;
-      font-size:15px; font-weight:700; color:white;
-    `;
-
-    if (currentUser?.avatar_url) {
-      const img = document.createElement("img");
-      img.src = currentUser.avatar_url;
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;";
-      img.onerror = () => { img.remove(); circle.textContent = getInitials(currentUser?.full_name); };
-      circle.appendChild(img);
-    } else {
-      circle.textContent = getInitials(currentUser?.full_name);
-    }
-    wrapper.appendChild(circle);
+    updateSelfMarkerStyle(wrapper, isCurrentUserLive, currentUser);
 
     selfMarkerRef.current = new window.mapboxgl.Marker({ element: wrapper, anchor: "center" })
       .setLngLat([lng, lat])
       .addTo(map);
-  }, [mapReady, !!userLoc, currentUser?.email]);
+  }, [mapReady, !!userLoc, currentUser?.email, liveCreators]);
 
   // ── 7. Other user markers — smart-limited (max 15, friends first) ────────
   const MAP_PIN_LIMIT = 15;
