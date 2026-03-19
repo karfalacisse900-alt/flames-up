@@ -9,12 +9,26 @@ export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
   const videoRef = useRef(null);
   const fileRef = useRef(null);
 
+  // Stop this video when another video starts playing
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail !== group.id && videoRef.current && !videoRef.current.paused) {
+        videoRef.current.pause();
+        setPlaying(false);
+      }
+    };
+    window.addEventListener("group_video_play", handler);
+    return () => window.removeEventListener("group_video_play", handler);
+  }, [group.id]);
+
   const handleTogglePlay = () => {
     if (!videoRef.current) return;
     if (playing) {
       videoRef.current.pause();
       setPlaying(false);
     } else {
+      // Tell all other videos to stop
+      window.dispatchEvent(new CustomEvent("group_video_play", { detail: group.id }));
       videoRef.current.play();
       setPlaying(true);
     }
