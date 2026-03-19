@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 import { X, ImageIcon, Save, Plus, Zap } from "lucide-react";
 import { getSmartLinksEnabled, setSmartLinksEnabled, SMART_LINKS_PREF_KEY } from "./SmartText";
 import { checkContent, createModerationReport } from "../moderation/moderationHelper";
