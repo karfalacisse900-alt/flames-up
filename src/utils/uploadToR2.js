@@ -4,9 +4,10 @@ import { base44 } from "@/api/base44Client";
  * Upload a File object to Cloudflare R2 via the uploadToR2 backend function.
  * Returns { file_url: string }
  */
-export async function uploadToR2(file) {
+export async function uploadToR2(file, folder = "uploads") {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("folder", folder);
 
   const response = await base44.functions.invoke("uploadToR2", formData);
   const data = response?.data;

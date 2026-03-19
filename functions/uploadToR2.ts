@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
     }
 
     const ext = file.name.split(".").pop() || "bin";
-    const key = `uploads/${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const folder = (new URL(req.url).searchParams.get("folder")) || formData.get("folder") || "uploads";
+    const key = `${folder}/${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
     const endpoint = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET_NAME}/${key}`;
 
     const arrayBuffer = await file.arrayBuffer();
