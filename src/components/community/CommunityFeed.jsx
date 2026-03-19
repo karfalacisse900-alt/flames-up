@@ -419,7 +419,7 @@ export default function CommunityFeed({ user }) {
     return base;
   }, [stablePostIds, posts, activeFilter, userCoords]);
 
-  const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
+  const getDebateForPost = useCallback((postId) => debates.find(d => d.post_id === postId), [debates]);
 
   // Stable per-post upvote callbacks — avoid creating new functions every render
   const handleUpvote = useCallback((post) => {
