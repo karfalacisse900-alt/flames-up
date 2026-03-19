@@ -315,6 +315,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     // Only show friends on the map (non-friends are hidden from map, only in Nearby modal)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
+      .filter(p => !creatorEmails.has(p.user_email)) // creators have their own orange pin
       .filter(p => friendSet.has(p.user_email)) // friends only on map
       .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
       .map(p => ({
