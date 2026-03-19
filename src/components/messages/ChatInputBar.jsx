@@ -115,23 +115,23 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* GIF panel */}
       {showGif && (
-        <div className="px-3 py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)" }}>
+        <div className="py-2" style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)", paddingRight: "max(12px, env(safe-area-inset-right, 0px))", paddingLeft: "max(12px, env(safe-area-inset-left, 0px))" }}>
           <div className="flex gap-2 mb-2">
             <input value={gifQuery} onChange={e => setGifQuery(e.target.value)}
               onKeyDown={e => e.key === "Enter" && searchGifs()}
               placeholder="Search GIFs…"
               className="flex-1 px-3 py-2 rounded-full text-sm outline-none"
               style={{ backgroundColor: "#F5F5F5", border: "none", color: "#111" }} />
-            <button onClick={searchGifs} className="px-4 py-2 rounded-full text-sm font-semibold text-white"
+            <button onClick={searchGifs} className="px-4 py-2 rounded-full text-sm font-semibold text-white flex-shrink-0"
               style={{ backgroundColor: "#25D366" }}>Search</button>
-            <button onClick={() => { setShowGif(false); setGifs([]); }}>
+            <button onClick={() => { setShowGif(false); setGifs([]); }} className="flex-shrink-0">
               <X className="w-5 h-5" style={{ color: "#999" }} />
             </button>
           </div>
           {loadingGifs ? (
             <p className="text-xs text-center py-2" style={{ color: "#999" }}>Searching…</p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-0">
               {gifs.map((gif, i) => {
                 const url = gif.images?.fixed_height?.url || gif.url || gif;
                 return (
@@ -148,7 +148,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* Attach panel */}
       {showAttach && (
-        <div className="grid grid-cols-3 gap-3 px-6 py-4" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
+        <div className="grid grid-cols-3 gap-3 px-4 py-4 safe-x" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0", paddingRight: "max(16px, env(safe-area-inset-right, 0px))", paddingLeft: "max(16px, env(safe-area-inset-left, 0px))" }}>
           {[
             { icon: Image, label: "Photo & Video", color: "#E040FB", action: () => fileRef.current?.click() },
             { icon: Smile, label: "GIF", color: "#FF9800", action: () => { setShowAttach(false); setShowGif(true); } },
@@ -167,7 +167,7 @@ export default function ChatInputBar({ onSendText, onSendVoice, onSendMedia, onS
 
       {/* Recording indicator */}
       {recording && (
-        <div className="flex items-center gap-3 px-5 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0" }}>
+        <div className="flex items-center gap-3 py-2" style={{ backgroundColor: "#fff", borderTop: "1px solid #E0E0E0", paddingRight: "max(20px, env(safe-area-inset-right, 0px))", paddingLeft: "max(20px, env(safe-area-inset-left, 0px))" }}>
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#F44336" }} />
           <span className="text-sm font-medium" style={{ color: "#F44336" }}>Recording… tap stop when done</span>
         </div>
