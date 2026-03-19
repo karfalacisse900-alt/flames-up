@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, MapPin, Upload, Image as ImageIcon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 
 export default function AddPlaceModal({ user, onClose, onSuccess }) {
   // Hide bottom nav while modal is open

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Plus, MapPin, Globe } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 
 const CATEGORIES = [
   "fitness", "food", "travel", "tech", "art", "music", "gaming", "movies",

@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useLocationSearch } from "@/components/hooks/useLocationSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 import {
   X, ImageIcon, Video, MapPin, Phone, Mail,
   Loader2, Check, Search, ChevronDown, ChevronUp

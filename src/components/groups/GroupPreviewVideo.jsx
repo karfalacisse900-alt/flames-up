@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, Video, X, Upload, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { uploadToR2 } from "@/utils/uploadToR2";
 
 export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
   const [playing, setPlaying] = useState(false);
