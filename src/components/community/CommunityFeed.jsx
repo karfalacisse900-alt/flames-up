@@ -85,12 +85,10 @@ export default function CommunityFeed({ user }) {
 
             if (table === "posts") {
               if (eventType === "DELETE" && record?.id) {
-                console.log("[supabase-rt] post deleted:", record.id, "— reloading feed");
-                loadInitialPosts();
-              } else if (eventType === "UPDATE" && record?.id) {
-                console.log("[supabase-rt] post updated:", record.id);
-                loadInitialPosts();
+                // Remove just that post in-place — no full feed reset / no blink
+                setPosts(prev => prev.filter(p => p.id !== record.id));
               }
+              // Ignore UPDATE from Supabase — Base44 subscriptions handle live field updates
             }
 
             if (table === "comments") {
