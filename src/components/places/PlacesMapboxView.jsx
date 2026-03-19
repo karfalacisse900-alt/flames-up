@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft } from "lucide-react";
 import ProximityNotifier from "@/components/friends/ProximityNotifier";
+import CreatorMapMarkers from "@/components/creators/CreatorMapMarkers";
 import MapCategoryCarousel from "./MapCategoryCarousel";
 import UserPinPopup from "./UserPinPopup";
 import LocationPrivacyPanel from "./LocationPrivacyPanel";
