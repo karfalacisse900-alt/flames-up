@@ -202,7 +202,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
     if (imageFiles.length > 0) {
       setUploading(true);
       try {
-        const uploads = await Promise.all(imageFiles.map(({ file }) => base44.integrations.Core.UploadFile({ file })));
+        const uploads = await Promise.all(imageFiles.map(({ file }) => uploadToR2(file)));
         finalImageUrls = uploads.map(r => r.file_url);
         finalImageUrl = finalImageUrls[0];
       } catch (err) {

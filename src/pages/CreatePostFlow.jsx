@@ -87,7 +87,7 @@ export default function CreatePostFlow() {
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
-          const { file_url } = await base44.integrations.Core.UploadFile({ file: item.file });
+          const { file_url } = await uploadToR2(item.file);
           uploadedUrls.push(file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
