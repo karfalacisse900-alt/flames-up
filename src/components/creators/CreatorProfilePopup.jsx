@@ -12,15 +12,16 @@ const CATEGORY_LABELS = {
 };
 
 export default function CreatorProfilePopup({ creator, coords, mapContainer, onClose, currentUserEmail }) {
-  const [photoIdx, setPhotoIdx] = useState(0);
-  const [fullscreen, setFullscreen] = useState(false);
-  const navigate = useNavigate();
-  const isSelf = currentUserEmail && creator.user_email === currentUserEmail;
+   const [photoIdx, setPhotoIdx] = useState(0);
+   const [fullscreen, setFullscreen] = useState(false);
+   const navigate = useNavigate();
+   const isSelf = currentUserEmail && creator.user_email === currentUserEmail;
 
-  const containerWidth = mapContainer?.clientWidth || 400;
-  const containerHeight = mapContainer?.clientHeight || 600;
-  const POPUP_W = 290;
-  const images = creator.portfolio_images || [];
+   const containerWidth = mapContainer?.clientWidth || 400;
+   const containerHeight = mapContainer?.clientHeight || 600;
+   const POPUP_W = 290;
+   // Creator-only: use portfolio_images from creator_profiles entity
+   const images = creator.portfolio_images?.filter(img => img?.trim()) || [];
 
   const left = Math.min(Math.max(coords.x - POPUP_W / 2, 8), containerWidth - POPUP_W - 8);
   const top = Math.max(coords.y - 420, 70);
@@ -86,7 +87,7 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
           pointerEvents: "auto",
         }}>
 
-        {/* Status message bubble — above the popup */}
+        {/* Custom message bubble — creator-only from status_message field */}
         {creator.status_message && (
           <div className="mx-3 mt-3 px-3 py-2 rounded-2xl text-xs font-medium flex items-start gap-1.5"
             style={{ backgroundColor: "#FFF7ED", border: "1px solid #FED7AA", color: "#C2410C" }}>
@@ -142,7 +143,7 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
             <X className="w-3.5 h-3.5 text-white" />
           </button>
 
-          {/* Live badge */}
+          {/* Live badge — creator-only always live */}
           <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
             style={{ backgroundColor: "#16A34A", color: "white" }}>
             <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -150,33 +151,37 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content — creator-only profile data */}
         <div className="px-3 pb-3 pt-2">
           <div className="flex items-start gap-2 mb-1">
-            {creator.profile_image && images.length > 0 && (
+            {creator.profile_image && (
               <img src={creator.profile_image} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 border-2"
                 style={{ borderColor: "#E05C2A" }} />
             )}
             <div className="min-w-0">
               <h3 className="font-bold text-sm leading-tight truncate" style={{ color: "#0F172A", fontFamily: "var(--font-serif)" }}>
-                {creator.full_name}
+                {creator.full_name || creator.user_name}
               </h3>
-              <p className="text-[11px] font-semibold" style={{ color: "#E05C2A" }}>
-                {CATEGORY_LABELS[creator.category]}
-              </p>
+              {creator.category && (
+                <p className="text-[11px] font-semibold" style={{ color: "#E05C2A" }}>
+                  {CATEGORY_LABELS[creator.category]}
+                </p>
+              )}
             </div>
           </div>
 
-          {creator.description && (
+          {/* Bio — creator profile description field */}
+          {creator.bio && (
             <p className="text-xs leading-relaxed mb-2 line-clamp-2" style={{ color: "#64748B" }}>
-              {creator.description}
+              {creator.bio}
             </p>
           )}
 
-          {creator.price && (
+          {/* Price info from creator profile */}
+          {creator.hourly_rate && (
             <span className="inline-block text-xs font-bold px-2 py-1 rounded-full mb-2"
               style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
-              💰 {creator.price}
+              💰 ${creator.hourly_rate}/hr
             </span>
           )}
 
