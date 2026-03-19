@@ -76,7 +76,7 @@ export default function CreateGroupModal({ open, onClose, onCreated, user }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploadToR2(file, file.type?.startsWith("video") ? "groups/videos" : "groups/images");
+      const { file_url } = await uploadToR2(file, "groups");
       setPreviewMedia(file_url);
     } catch (err) {
       console.error("Upload failed:", err);

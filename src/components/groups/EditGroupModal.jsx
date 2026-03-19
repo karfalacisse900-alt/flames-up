@@ -103,7 +103,7 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
     e.target.value = "";
   };
 
-  const upload = async (file, folder = "groups/images") => {
+  const upload = async (file, folder = "groups") => {
     const { file_url } = await uploadToR2(file, folder);
     return file_url;
   };
@@ -117,7 +117,7 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
     let videoUrl = group.preview_video_url;
 
     if (logoFile) { setUploadMsg("Uploading logo…"); logoUrl = await upload(logoFile, "groups/logos"); }
-    if (coverFile) { setUploadMsg("Uploading cover…"); coverUrl = await upload(coverFile, "groups/images"); }
+    if (coverFile) { setUploadMsg("Uploading cover…"); coverUrl = await upload(coverFile, "groups/covers"); }
     if (videoFile) { setUploadMsg("Uploading video…"); videoUrl = await upload(videoFile, "groups/videos"); }
     setUploadMsg("Saving…");
 

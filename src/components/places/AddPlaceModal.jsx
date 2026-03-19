@@ -28,7 +28,7 @@ export default function AddPlaceModal({ user, onClose, onSuccess }) {
     
     setUploading(true);
     try {
-      const { file_url } = await uploadToR2(file, "places/images");
+      const { file_url } = await uploadToR2(file, "places");
       setCoverImageUrl(file_url);
       setCoverImage(file);
     } catch (err) {
