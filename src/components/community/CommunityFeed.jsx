@@ -160,11 +160,10 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const loadInitialPosts = useCallback(async () => {
-    // Reset state first so no stale posts flash before fresh data arrives
-    setPosts([]);
+    // Keep existing posts visible during refresh — no empty flash
     setPage(0);
     setHasMore(true);
-    setIsLoading(true);
+    setIsLoading(prev => posts.length === 0 ? true : prev); // only show spinner on first load
     const data = await fetchPosts(0);
     setPosts(data);
     setHasMore(data.length === BATCH_SIZE);
