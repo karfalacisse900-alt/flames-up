@@ -16,7 +16,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [buffering, setBuffering] = useState(true);
+  const [visible, setVisible] = useState(false); // lazy: only load src when visible
+  const [buffering, setBuffering] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   const iconTimer = useRef(null);
@@ -87,8 +88,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     if (!container) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          doPlay();
+        if (entry.isIntersecting) {
+          setVisible(true); // load src lazily only when entering viewport
+          if (entry.intersectionRatio >= 0.6) {
+            doPlay();
+          }
         } else {
           doPause();
         }
