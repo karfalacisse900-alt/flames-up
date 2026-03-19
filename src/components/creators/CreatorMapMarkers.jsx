@@ -82,7 +82,7 @@ function buildMarkerEl(c) {
   return wrapper;
 }
 
-export default function CreatorMapMarkers({ map, mapReady }) {
+export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
   const [creators, setCreators] = useState([]);
   const [selectedCreator, setSelectedCreator] = useState(null);
   const [popupCoords, setPopupCoords] = useState(null);
