@@ -64,6 +64,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const [popupCoords,          setPopupCoords]          = useState(null);
   const [showNearbyModal,      setShowNearbyModal]      = useState(false);
   const [follows,              setFollows]              = useState([]);
+  const [liveCreators,         setLiveCreators]         = useState(new Set()); // emails of creators currently hosting
 
   // Load follows for friend prioritization
   useEffect(() => {
@@ -97,9 +98,17 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .catch(() => setError("Could not load map token"));
   }, []);
 
-  // Clear creator emails list — use LocationPresence for all users
+  // Track live creators in real-time
   useEffect(() => {
-    setCreatorEmails(new Set());
+    const fetchLive = async () => {
+      try {
+        const rooms = await base44.entities.LiveRoom.filter({ is_active: true }, "-created_date", 100);
+        setLiveCreators(new Set(rooms.map(r => r.host_email).filter(Boolean)));
+      } catch {}
+    };
+    fetchLive();
+    const unsub = base44.entities.LiveRoom.subscribe(fetchLive);
+    return () => unsub();
   }, []);
 
   // ── 2. GPS — one-time for initial center ───────────────────────────────
@@ -308,13 +317,13 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .addTo(map);
   }, [mapReady, !!userLoc, currentUser?.email]);
 
-  // ── 7. Other user markers — smart-limited (max 12, friends first) ────────
+  // ── 7. Other user markers — smart-limited (max 15, friends first) ────────
   const MAP_PIN_LIMIT = 15;
   const friendSet = new Set(follows);
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
-    // Show all nearby users including creators (single source of truth: LocationPresence)
+    // Show all nearby friends with real-time location (single source of truth: LocationPresence)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
       .filter(p => friendSet.has(p.user_email)) // friends only on map
@@ -322,11 +331,11 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
-        _isFriend: true,
+        _isLive: liveCreators.has(p.user_email), // check if user is currently hosting
       }))
       .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
-  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
+  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows, liveCreators]);
 
   const extraNearby = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
@@ -352,15 +361,39 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       }
 
       const el = document.createElement("div");
+      // Live creators get orange styling, others get purple
+      const isLive = p._isLive;
+      const bgColor = isLive ? "linear-gradient(135deg,#E05C2A,#F97316)" : "linear-gradient(135deg,#7C3AED,#4F46E5)";
+      const borderColor = isLive ? "#E05C2A" : "#fff";
+      const shadowColor = isLive ? "rgba(224,92,42,0.5)" : "rgba(79,70,229,0.4)";
+
       el.style.cssText = `
         width:42px; height:42px; border-radius:50%;
-        border:2.5px solid #fff;
-        box-shadow:0 3px 14px rgba(0,0,0,0.22);
+        border:2.5px solid ${borderColor};
+        box-shadow:0 3px 14px ${shadowColor};
         cursor:pointer; overflow:hidden;
-        background:linear-gradient(135deg,#7C3AED,#4F46E5);
+        background:${bgColor};
         display:flex; align-items:center; justify-content:center;
         font-size:13px; font-weight:700; color:white;
       `;
+
+      // Add "LIVE" badge if creator is streaming
+      if (isLive) {
+        const badge = document.createElement("div");
+        badge.style.cssText = `
+          position:absolute; top:-4px; right:-4px;
+          width:18px; height:18px; border-radius:50%;
+          background:#E05C2A; border:2px solid white;
+          font-size:10px; font-weight:800; color:white;
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 2px 8px rgba(224,92,42,0.6);
+          z-index:10;
+        `;
+        badge.textContent = "●";
+        el.style.position = "relative";
+        el.appendChild(badge);
+      }
+
       if (p.avatar_url) {
         const img = document.createElement("img");
         img.src = p.avatar_url;
