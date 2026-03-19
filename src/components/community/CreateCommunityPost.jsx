@@ -286,41 +286,7 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
       tags: challengeContext ? ["daily_challenge"] : undefined,
     };
 
-    const newPost = await base44.entities.CommunityPost.create(postData);
-    
-    // Sync to Supabase - map fields correctly
-    try {
-      const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
-      const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDUzNDQ0NCwiZXhwIjoyMDUwMTEwNDQ0fQ.fIYLuEuPMGUvj_U5N0bj8fMHFWTqHK-wbMQXDxdwZ20";
-      
-      // Map Base44 fields to Supabase columns
-      const supabaseData = {
-        id: String(newPost.id),
-        user_id: user?.email || '',
-        content: cleanedBody,
-        media_url: finalVideoUrl || finalImageUrl || null,
-      };
-      
-      const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_SERVICE_ROLE_KEY,
-          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates",
-        },
-        body: JSON.stringify(supabaseData),
-      });
-      
-      if (!sbRes.ok) {
-        const errText = await sbRes.text();
-        console.error("Supabase sync failed:", sbRes.status, errText);
-      } else {
-        console.log("Post synced to Supabase:", newPost.id);
-      }
-    } catch (err) {
-      console.error("Supabase sync error:", err);
-    }
+    await base44.entities.CommunityPost.create(postData);
 
     setSaving(false);
     await clearDraft();
