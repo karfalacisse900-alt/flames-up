@@ -17,6 +17,7 @@ export default function DMChatView({ user, conversation, onBack }) {
   const [blocked, setBlocked] = useState(false);
   const [muted, setMuted] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
+  const [partnerCreator, setPartnerCreator] = useState(null);
   const endRef = useRef(null);
   const queryClient = useQueryClient();
   const convId = [user.email, conversation.email].sort().join("_");
