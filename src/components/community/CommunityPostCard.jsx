@@ -614,3 +614,5 @@ const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) =>
   prev.isExpanded === next.isExpanded &&
   prev.user?.email === next.user?.email
 );
+
+export default MemoizedCommunityPostCard;
