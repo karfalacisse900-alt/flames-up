@@ -440,7 +440,7 @@ export default function CommunityFeed({ user }) {
     );
 
     return (
-      <div key={post.id} style={{ contentVisibility: "auto", containIntrinsicSize: "0 500px" }}>
+      <div key={post.id}>
         {card}
       </div>
     );
