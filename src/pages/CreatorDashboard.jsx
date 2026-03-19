@@ -23,6 +23,8 @@ export default function CreatorDashboard() {
   const [statusMsg, setStatusMsg] = useState("");
   const [editingStatus, setEditingStatus] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState(false);
+  const [promotionData, setPromotionData] = useState({ type: "", description: "" });
   const locationWatchRef = useRef(null);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function CreatorDashboard() {
           const c = rows[0] || null;
           setCreator(c);
           if (c?.status_message) setStatusMsg(c.status_message);
+          if (c?.promotion_type) setPromotionData({ type: c.promotion_type, description: c.promotion_description || "" });
         }
       } catch {}
       setLoading(false);
@@ -94,6 +97,19 @@ export default function CreatorDashboard() {
     await base44.entities.Creator.update(creator.id, { status_message: statusMsg });
     setCreator(prev => ({ ...prev, status_message: statusMsg }));
     setEditingStatus(false);
+    setSavingStatus(false);
+  };
+
+  const savePromotion = async () => {
+    if (!creator) return;
+    setSavingStatus(true);
+    await base44.entities.Creator.update(creator.id, {
+      promotion_type: promotionData.type,
+      promotion_description: promotionData.description,
+      is_discoverable: true,
+    });
+    setCreator(prev => ({ ...prev, ...promotionData, is_discoverable: true }));
+    setEditingPromotion(false);
     setSavingStatus(false);
   };
 
