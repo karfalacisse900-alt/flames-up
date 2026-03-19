@@ -16,8 +16,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [visible, setVisible] = useState(false); // lazy: only load src when visible
-  const [buffering, setBuffering] = useState(false);
+  const [buffering, setBuffering] = useState(true);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   const iconTimer = useRef(null);
@@ -88,11 +87,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     if (!container) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true); // load src lazily only when entering viewport
-          if (entry.intersectionRatio >= 0.6) {
-            doPlay();
-          }
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          doPlay();
         } else {
           doPause();
         }
@@ -158,12 +154,15 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         background: "#1a1a1a",
       }}
     >
-      {/* Dark placeholder before video loads, spinner only while buffering after load started */}
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "#111", zIndex: 2 }}>
-          {buffering && (
-            <div className="w-9 h-9 rounded-full border-2 border-white/20 border-t-white/70 animate-spin opacity-60" />
-          )}
+      {/* Spinner — shown while buffering, hidden once loaded */}
+      {buffering && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundColor: "#1a1a1a", zIndex: 2 }}
+        >
+          <div className="flex flex-col items-center gap-2 opacity-40">
+            <div className="w-10 h-10 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
+          </div>
         </div>
       )}
 
@@ -178,25 +177,22 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         4. Multiple load events (onLoadedMetadata, onCanPlay, onLoadedData, onError)
            all call markLoaded() so we catch whichever fires first.
       */}
-      {/* Only inject src once visible — prevents eager loading for off-screen videos */}
-      {visible && (
-        <video
-          ref={videoRef}
-          src={src}
-          playsInline
-          loop
-          muted={muted}
-          preload="metadata"
-          onLoadedMetadata={markLoaded}
-          onCanPlay={markLoaded}
-          onLoadedData={markLoaded}
-          onError={markLoaded}
-          onWaiting={() => setBuffering(true)}
-          onPlaying={() => { setBuffering(false); setLoaded(true); }}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 1 }}
-        />
-      )}
+      <video
+        ref={videoRef}
+        src={src}
+        playsInline
+        loop
+        muted={muted}
+        preload="auto"
+        onLoadedMetadata={markLoaded}
+        onCanPlay={markLoaded}
+        onLoadedData={markLoaded}
+        onError={markLoaded}
+        onWaiting={() => setBuffering(true)}
+        onPlaying={() => { setBuffering(false); setLoaded(true); }}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: 1, zIndex: 1 }}
+      />
 
       {/* Tap icon feedback */}
       {showIcon && (

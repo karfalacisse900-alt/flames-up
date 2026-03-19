@@ -37,7 +37,7 @@ export default function CommunityFeed({ user }) {
 
   const SUPABASE_URL = "https://ljyxfbymvbtflvdwipxg.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqeXhmYnltdmJ0Zmx2ZHdpcHhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzQ0NDQsImV4cCI6MjA1MDExMDQ0NH0.M8qyqYoVwgZxnr-rWdZdSgTRj88SX8uKQf1NuM0eC7U"; // used by Realtime WS
-  const BATCH_SIZE = 12; // smaller initial batch → faster first paint
+  const BATCH_SIZE = 20;
 
   // ── Supabase Realtime: reflect DELETE and UPDATE from Supabase dashboard ──
   useEffect(() => {
@@ -85,10 +85,12 @@ export default function CommunityFeed({ user }) {
 
             if (table === "posts") {
               if (eventType === "DELETE" && record?.id) {
-                // Remove just that post in-place — no full feed reset / no blink
-                setPosts(prev => prev.filter(p => p.id !== record.id));
+                console.log("[supabase-rt] post deleted:", record.id, "— reloading feed");
+                loadInitialPosts();
+              } else if (eventType === "UPDATE" && record?.id) {
+                console.log("[supabase-rt] post updated:", record.id);
+                loadInitialPosts();
               }
-              // Ignore UPDATE from Supabase — Base44 subscriptions handle live field updates
             }
 
             if (table === "comments") {
@@ -158,18 +160,12 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const loadInitialPosts = useCallback(async () => {
+    // Keep existing posts visible during refresh — no empty flash
+    setPage(0);
     setHasMore(true);
-    // Only show skeleton on very first load (when posts list is empty)
-    setIsLoading(prev => posts.length === 0 ? true : prev);
+    setIsLoading(prev => posts.length === 0 ? true : prev); // only show spinner on first load
     const data = await fetchPosts(0);
-    // Merge: keep existing posts visible, prepend/replace only at top without clearing
-    setPosts(prev => {
-      if (prev.length === 0) return data;
-      // Keep existing posts + prepend truly new ones that aren't already in the list
-      const existingIds = new Set(prev.map(p => p.id));
-      const newOnes = data.filter(p => !existingIds.has(p.id));
-      return newOnes.length > 0 ? [...newOnes, ...prev] : prev;
-    });
+    setPosts(data);
     setHasMore(data.length === BATCH_SIZE);
     setPage(0);
     setIsLoading(false);
@@ -201,13 +197,13 @@ export default function CommunityFeed({ user }) {
 
   // Hard refresh: used by pull-to-refresh — strips Supabase-deleted posts
   const hardRefetch = useCallback(async () => {
+    setIsLoading(true);
     const data = await fetchPostsHard();
-    if (data.length > 0) {
-      setPosts(data);
-      setHasMore(data.length === BATCH_SIZE);
-      setPage(0);
-    }
+    setPosts(data);
+    setHasMore(data.length === BATCH_SIZE);
+    setPage(0);
     setNewPostsAvailable(0);
+    setIsLoading(false);
   }, [fetchPostsHard]);
 
   // Reverse geocode coords to get neighborhood/area name
@@ -419,18 +415,9 @@ export default function CommunityFeed({ user }) {
     return base;
   }, [stablePostIds, posts, activeFilter, userCoords]);
 
-  const getDebateForPost = useCallback((postId) => debates.find(d => d.post_id === postId), [debates]);
+  const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  // Stable per-post upvote callbacks — avoid creating new functions every render
-  const handleUpvote = useCallback((post) => {
-    if (user) upvoteMut.mutate({ post });
-  }, [user, upvoteMut]);
-
-  const handleToggle = useCallback((postId) => {
-    setExpandedPost(prev => prev === postId ? null : postId);
-  }, []);
-
-  const renderPostCard = useCallback((post) => {
+  const renderPostCard = (post, index) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     const card = post.type === "debate" || post.type === "question" ? (
@@ -438,17 +425,17 @@ export default function CommunityFeed({ user }) {
         post={post} 
         debate={debate} 
         user={user}
-        onUpvote={() => handleUpvote(post)}
+        onUpvote={() => user && upvoteMut.mutate({ post })}
         isExpanded={expandedPost === post.id}
-        onToggle={() => handleToggle(post.id)}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
       />
     ) : (
       <CommunityPostCard 
         post={post} 
         user={user}
-        onUpvote={() => handleUpvote(post)}
+        onUpvote={() => user && upvoteMut.mutate({ post })}
         isExpanded={expandedPost === post.id}
-        onToggle={() => handleToggle(post.id)}
+        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
         onLocationClick={() => {}}
         onTap={() => {}}
       />
@@ -459,7 +446,7 @@ export default function CommunityFeed({ user }) {
         {card}
       </div>
     );
-  }, [user, expandedPost, handleUpvote, handleToggle, debates]);
+  };
 
   if (isLoading) {
     return (

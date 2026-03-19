@@ -1,4 +1,4 @@
-import React, { useState, useRef, memo } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
@@ -62,7 +62,7 @@ function stripHtml(html) {
   return text.replace(/\n{3,}/g, "\n\n");
 }
 
-function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
+export default function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -89,8 +89,6 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email, following_email: post.author_email }),
     enabled: !!user?.email && !isOwnPost && !post.is_anonymous,
     select: (data) => data[0] || null,
-    staleTime: 60000, // cache for 1 min — prevents refetch on every scroll
-    gcTime: 120000,
   });
 
   const isFollowing = !!followRecord;
@@ -608,16 +606,3 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
     </div>
   );
 }
-
-const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) => {
-  // Only re-render if post data, user, or upvote count changes
-  return (
-    prev.post.id === next.post.id &&
-    prev.post.upvotes === next.post.upvotes &&
-    prev.post.comment_count === next.post.comment_count &&
-    prev.post.upvoted_by === next.post.upvoted_by &&
-    prev.user?.email === next.user?.email
-  );
-});
-
-export default MemoizedCommunityPostCard;
