@@ -88,8 +88,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     if (!container) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          doPlay();
+        if (entry.isIntersecting) {
+          // Load src lazily — only when first entering viewport
+          setSrcLoaded(true);
+          if (entry.intersectionRatio >= 0.6) {
+            doPlay();
+          }
         } else {
           doPause();
         }
