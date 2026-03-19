@@ -97,6 +97,11 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .catch(() => setError("Could not load map token"));
   }, []);
 
+  // Clear creator emails list — use LocationPresence for all users
+  useEffect(() => {
+    setCreatorEmails(new Set());
+  }, []);
+
   // ── 2. GPS — one-time for initial center ───────────────────────────────
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -236,21 +241,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     }).catch(e => console.error("publish error", e));
   }
 
-  // ── 5. Subscribe to presences ──────────────────────────────────────────
+  // ── 5. Creator emails — no longer used (LocationPresence is single source) ──
   const [creatorEmails, setCreatorEmails] = useState(new Set());
-
-  useEffect(() => {
-    // Load approved creator emails so we can hide their regular presence pin
-    base44.entities.Creator.filter({ approval_status: "approved" })
-      .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
-      .catch(() => {});
-    const unsub = base44.entities.Creator.subscribe(() => {
-      base44.entities.Creator.filter({ approval_status: "approved" })
-        .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
-        .catch(() => {});
-    });
-    return () => unsub();
-  }, []);
 
   useEffect(() => {
     const fetch = async () => {
@@ -322,10 +314,9 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
-    // Only show friends on the map (non-friends are hidden from map, only in Nearby modal)
+    // Show all nearby users including creators (single source of truth: LocationPresence)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
-      .filter(p => !creatorEmails.has(p.user_email)) // creators have their own orange pin
       .filter(p => friendSet.has(p.user_email)) // friends only on map
       .filter(p => !userLoc || haversineKm(uLat, uLng, p.location_lat, p.location_lng) <= radius)
       .map(p => ({
@@ -487,8 +478,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Proximity notifier (invisible) */}
       <ProximityNotifier currentUser={currentUser} userLoc={userLoc} followedEmails={follows} />
 
-      {/* Street Creator markers */}
-      {mapReady && <CreatorMapMarkers map={mapInst.current} mapReady={mapReady} currentUserEmail={currentUser?.email} />}
+
 
       {/* Category carousel */}
       {mapReady && <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />}
