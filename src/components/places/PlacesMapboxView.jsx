@@ -184,16 +184,26 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     publishLocation(userLoc[1], userLoc[0]);
 
     if (!navigator.geolocation) return;
+    const MIN_MOVE_METERS = 10; // ignore jitter smaller than 10m
+    let lastLat = userLoc[1], lastLng = userLoc[0];
+
     gpsWatchRef.current = navigator.geolocation.watchPosition(
       pos => {
-        const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
+        const { longitude: lng, latitude: lat, accuracy } = pos.coords;
+        // Filter out low-accuracy or tiny-jitter updates
+        if (accuracy > 80) return;
+        const dLat = (lat - lastLat) * 111320;
+        const dLng = (lng - lastLng) * 111320 * Math.cos(lat * Math.PI / 180);
+        const movedM = Math.sqrt(dLat * dLat + dLng * dLng);
+        if (movedM < MIN_MOVE_METERS) return;
+        lastLat = lat; lastLng = lng;
         setUserLoc([lng, lat]);
         if (selfMarkerRef.current) selfMarkerRef.current.setLngLat([lng, lat]);
         clearTimeout(dbThrottleRef.current);
         dbThrottleRef.current = setTimeout(() => publishLocation(lat, lng), 30000);
       },
       null,
-      { enableHighAccuracy: true, maximumAge: 15000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
     return () => {
       if (gpsWatchRef.current) navigator.geolocation.clearWatch(gpsWatchRef.current);
