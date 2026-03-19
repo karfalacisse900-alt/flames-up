@@ -15,6 +15,7 @@ import LiveNearby from './pages/LiveNearby';
 import Onboarding from './pages/Onboarding';
 import CreatorDashboard from './pages/CreatorDashboard';
 import AdminCreators from './pages/AdminCreators';
+import CreatorLanding from './pages/CreatorLanding';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
