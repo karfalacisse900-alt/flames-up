@@ -8,6 +8,7 @@ import {
   Calendar, Lightbulb, Users, BellPlus, BellOff, Navigation
 } from "lucide-react";
 import CommunityPostCard from "./CommunityPostCard";
+import { uploadToR2 } from "@/utils/uploadToR2";
 import PeopleHereNow from "@/components/places/PeopleHereNow";
 import LocationTipsTab from "@/components/places/LocationTipsTab";
 import LocationEventsTab from "@/components/places/LocationEventsTab";
@@ -266,7 +267,7 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
                 
                 const uploadedUrls = [];
                 for (const file of files) {
-                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  const { file_url } = await uploadToR2(file, "places/images");
                   uploadedUrls.push(file_url);
                 }
                 
