@@ -597,8 +597,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
           onUpdate={updates => setMyPresence(prev => ({ ...(prev||{}), ...updates }))} />
       )}
 
-      {/* User pin popup */}
-      {selectedUserPresence && popupCoords && (
+      {/* User pin popup — normal profile (not live) */}
+      {selectedUserPresence && popupCoords && !selectedCreatorProfile && (
         <div className="absolute z-30" style={{
           left: Math.min(Math.max(popupCoords.x - 110, 8), (mapRef.current?.clientWidth||400)-228),
           top: Math.max(popupCoords.y - 200, 70),
@@ -606,6 +606,22 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         }}>
           <UserPinPopup presence={selectedUserPresence} currentUser={currentUser}
             onClose={() => { setSelectedUserPresence(null); setPopupCoords(null); }} />
+        </div>
+      )}
+
+      {/* Creator profile popup — live mode */}
+      {selectedCreatorProfile && creatorProfileCoords && (
+        <div className="absolute z-30" style={{
+          left: Math.min(Math.max(creatorProfileCoords.x - 145, 8), (mapRef.current?.clientWidth||400)-310),
+          top: Math.max(creatorProfileCoords.y - 250, 70),
+          pointerEvents:"auto",
+        }}>
+          <CreatorProfilePopup 
+            creator={selectedCreatorProfile} 
+            coords={creatorProfileCoords}
+            mapContainer={mapRef.current}
+            currentUserEmail={currentUser?.email}
+            onClose={() => { setSelectedCreatorProfile(null); setCreatorProfileCoords(null); }} />
         </div>
       )}
 
