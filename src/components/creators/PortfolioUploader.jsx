@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { uploadToR2 } from "@/utils/uploadToR2";
 import { Plus, X, Loader2, ImageIcon } from "lucide-react";
 
 export default function PortfolioUploader({ creator, onUpdated }) {
@@ -14,7 +13,7 @@ export default function PortfolioUploader({ creator, onUpdated }) {
     setUploading(true);
     const urls = [];
     for (const file of files) {
-      const { file_url } = await uploadToR2(file, "creators/portfolio");
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       urls.push(file_url);
     }
     const updated = await base44.entities.Creator.update(creator.id, {

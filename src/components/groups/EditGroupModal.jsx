@@ -103,8 +103,8 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
     e.target.value = "";
   };
 
-  const upload = async (file, folder = "groups") => {
-    const { file_url } = await uploadToR2(file, folder);
+  const upload = async (file) => {
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
     return file_url;
   };
 
@@ -116,9 +116,9 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
     let coverUrl = group.cover_image_url;
     let videoUrl = group.preview_video_url;
 
-    if (logoFile) { setUploadMsg("Uploading logo…"); logoUrl = await upload(logoFile, "groups/logos"); }
-    if (coverFile) { setUploadMsg("Uploading cover…"); coverUrl = await upload(coverFile, "groups/covers"); }
-    if (videoFile) { setUploadMsg("Uploading video…"); videoUrl = await upload(videoFile, "groups/videos"); }
+    if (logoFile) { setUploadMsg("Uploading logo…"); logoUrl = await upload(logoFile); }
+    if (coverFile) { setUploadMsg("Uploading cover…"); coverUrl = await upload(coverFile); }
+    if (videoFile) { setUploadMsg("Uploading video…"); videoUrl = await upload(videoFile); }
     setUploadMsg("Saving…");
 
     const updates = {

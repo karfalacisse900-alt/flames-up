@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
-import { uploadToR2 } from "@/utils/uploadToR2";
 import { X, Upload, Loader2 } from "lucide-react";
 
 export default function CreatorProfileEditor({ creator, onClose, onSaved }) {
@@ -25,7 +24,7 @@ export default function CreatorProfileEditor({ creator, onClose, onSaved }) {
     setSaving(true);
     let profile_image = creator.profile_image;
     if (imageFile) {
-      const { file_url } = await uploadToR2(imageFile, "creators/profiles");
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
       profile_image = file_url;
     }
     const updated = await base44.entities.Creator.update(creator.id, { ...form, profile_image });

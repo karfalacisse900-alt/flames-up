@@ -87,8 +87,7 @@ export default function CreatePostFlow() {
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
-          const folder = item.type?.startsWith("video") ? "posts/videos" : "posts/images";
-          const { file_url } = await uploadToR2(item.file, folder);
+          const { file_url } = await uploadToR2(item.file);
           uploadedUrls.push(file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);

@@ -49,7 +49,7 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploadToR2(file, "avatars");
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setAvatarUrl(file_url);
     } catch (err) {
       console.error("Avatar upload failed:", err);
@@ -63,7 +63,7 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploadToR2(file, "profiles/banners");
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setBannerUrl(file_url);
     } catch (err) {
       console.error("Banner upload failed:", err);
