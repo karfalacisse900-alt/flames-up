@@ -241,31 +241,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     }).catch(e => console.error("publish error", e));
   }
 
-  // ── 5. Load approved creators to enhance presence markers with creator styling ──
+  // ── 5. Creator emails — no longer used (LocationPresence is single source) ──
   const [creatorEmails, setCreatorEmails] = useState(new Set());
-  const [creatorMetadata, setCreatorMetadata] = useState({});
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const rows = await base44.entities.Creator.filter({ approval_status: "approved" });
-        setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean)));
-        // Store creator metadata for enhancing presence markers
-        const meta = {};
-        rows.forEach(c => {
-          meta[c.user_email] = {
-            category: c.category || "other",
-            profile_image: c.profile_image,
-            availability_status: c.availability_status,
-          };
-        });
-        setCreatorMetadata(meta);
-      } catch {}
-    };
-    load();
-    const unsub = base44.entities.Creator.subscribe(load);
-    return () => unsub();
-  }, []);
 
   useEffect(() => {
     const fetch = async () => {
@@ -337,7 +314,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
 
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
-    // Show all nearby users including creators (single source of truth: LocationPresence with Creator metadata)
+    // Show all nearby users including creators (single source of truth: LocationPresence)
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
       .filter(p => friendSet.has(p.user_email)) // friends only on map
@@ -346,11 +323,10 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
         _isFriend: true,
-        _isLiveCreator: creatorEmails.has(p.user_email), // Check if user is an approved creator
       }))
       .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
-  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows, creatorEmails]);
+  }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
 
   const extraNearby = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
@@ -376,38 +352,15 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       }
 
       const el = document.createElement("div");
-      const isLiveCreator = p._isLiveCreator;
-      const borderColor = isLiveCreator ? "#E05C2A" : "#fff";
-      const gradientBg = isLiveCreator 
-        ? "linear-gradient(135deg,#E05C2A,#F97316)" 
-        : "linear-gradient(135deg,#7C3AED,#4F46E5)";
-      const boxShadowColor = isLiveCreator 
-        ? "rgba(224,92,42,0.5)" 
-        : "rgba(79,70,229,0.3)";
-
       el.style.cssText = `
         width:42px; height:42px; border-radius:50%;
-        border:2.5px solid ${borderColor};
-        box-shadow:0 3px 14px ${boxShadowColor};
+        border:2.5px solid #fff;
+        box-shadow:0 3px 14px rgba(0,0,0,0.22);
         cursor:pointer; overflow:hidden;
-        background:${gradientBg};
+        background:linear-gradient(135deg,#7C3AED,#4F46E5);
         display:flex; align-items:center; justify-content:center;
         font-size:13px; font-weight:700; color:white;
-        position:relative;
       `;
-
-      // Live indicator dot for creators
-      if (isLiveCreator) {
-        const dot = document.createElement("div");
-        dot.style.cssText = `
-          position:absolute; top:2px; right:2px;
-          width:8px; height:8px; border-radius:50%;
-          background:#FF4444; border:2px solid white;
-          z-index:10; animation:livePulse 1.5s ease-in-out infinite;
-        `;
-        el.appendChild(dot);
-      }
-
       if (p.avatar_url) {
         const img = document.createElement("img");
         img.src = p.avatar_url;
@@ -508,10 +461,6 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         @keyframes selfPulse {
           0%,100%{transform:scale(1);opacity:0.55;}
           50%{transform:scale(1.4);opacity:0.15;}
-        }
-        @keyframes livePulse {
-          0%,100%{opacity:1;transform:scale(1);}
-          50%{opacity:0.4;transform:scale(1.3);}
         }
       `}</style>
 
