@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setIsLoadingAuth(false);
     setAuthError({ type: 'auth_required', message: 'Authentication required' });
-    base44.auth.logout(window.location.href);
+    base44.auth.logout();
   }, []);
 
 
