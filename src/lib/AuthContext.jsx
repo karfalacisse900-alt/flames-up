@@ -178,27 +178,10 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Force-fetch the real profile from Supabase so we always show the correct name/avatar,
-      // not a stale placeholder. If the row is missing, the account was deleted — kick them out.
-      const supabaseProfile = await fetchSupabaseProfile(currentUser.email);
-      if (supabaseProfile === false) {
-        console.warn(`[auth] BLOCKED LOGIN: ${currentUser.email} deleted from Supabase profiles`);
-        forceLogout();
-        return;
-      }
-      if (supabaseProfile === null) {
-        console.warn('[auth] Supabase unreachable during login — allowing, using Base44 profile data');
-      }
-
-      // Merge Supabase profile data so the app always shows the real name/avatar
-      const mergedUser = {
-        ...currentUser,
-        full_name: supabaseProfile?.full_name || currentUser.full_name,
-        avatar_url: supabaseProfile?.avatar_url || currentUser.avatar_url,
-      };
-
-      setUser(mergedUser);
-      userRef.current = mergedUser;
+      // Use Base44 profile data directly — Supabase profile check removed from login
+      // to prevent 403/network errors from blocking authentication.
+      setUser(currentUser);
+      userRef.current = currentUser;
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {
