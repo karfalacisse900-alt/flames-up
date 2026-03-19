@@ -104,7 +104,8 @@ export default function EditGroupModal({ group, onClose, onUpdated }) {
   };
 
   const upload = async (file) => {
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const fileType = file.type.startsWith("video") ? "groups/videos" : "groups/images";
+    const { file_url } = await uploadToR2(file, fileType);
     return file_url;
   };
 

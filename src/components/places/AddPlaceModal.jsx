@@ -28,7 +28,7 @@ export default function AddPlaceModal({ user, onClose, onSuccess }) {
     
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadToR2(file, "places/images");
       setCoverImageUrl(file_url);
       setCoverImage(file);
     } catch (err) {

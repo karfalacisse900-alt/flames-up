@@ -39,12 +39,17 @@ export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.entities.Group.update(group.id, { preview_video_url: file_url });
-    setUploading(false);
-    setShowUploadUI(false);
-    onUpdated?.({ ...group, preview_video_url: file_url });
-    e.target.value = "";
+    try {
+      const { file_url } = await uploadToR2(file, "groups/videos");
+      await base44.entities.Group.update(group.id, { preview_video_url: file_url });
+      setUploading(false);
+      setShowUploadUI(false);
+      onUpdated?.({ ...group, preview_video_url: file_url });
+      e.target.value = "";
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setUploading(false);
+    }
   };
 
   const handleRemove = async () => {
