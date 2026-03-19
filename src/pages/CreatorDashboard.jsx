@@ -88,6 +88,15 @@ export default function CreatorDashboard() {
     setToggling(false);
   };
 
+  const saveStatus = async () => {
+    if (!creator) return;
+    setSavingStatus(true);
+    await base44.entities.Creator.update(creator.id, { status_message: statusMsg });
+    setCreator(prev => ({ ...prev, status_message: statusMsg }));
+    setEditingStatus(false);
+    setSavingStatus(false);
+  };
+
   const handleClose = async () => {
     if (!creator || toggling) return;
     setToggling(true);
