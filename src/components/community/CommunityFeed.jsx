@@ -158,12 +158,18 @@ export default function CommunityFeed({ user }) {
   }, []);
 
   const loadInitialPosts = useCallback(async () => {
-    // Keep existing posts visible during refresh — no empty flash
-    setPage(0);
     setHasMore(true);
-    setIsLoading(prev => posts.length === 0 ? true : prev); // only show spinner on first load
+    // Only show skeleton on very first load (when posts list is empty)
+    setIsLoading(prev => posts.length === 0 ? true : prev);
     const data = await fetchPosts(0);
-    setPosts(data);
+    // Merge: keep existing posts visible, prepend/replace only at top without clearing
+    setPosts(prev => {
+      if (prev.length === 0) return data;
+      // Keep existing posts + prepend truly new ones that aren't already in the list
+      const existingIds = new Set(prev.map(p => p.id));
+      const newOnes = data.filter(p => !existingIds.has(p.id));
+      return newOnes.length > 0 ? [...newOnes, ...prev] : prev;
+    });
     setHasMore(data.length === BATCH_SIZE);
     setPage(0);
     setIsLoading(false);
