@@ -59,12 +59,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => { userRef.current = user; }, [user]);
 
   const forceLogout = useCallback(() => {
-    console.warn('[auth] forceLogout called — clearing storage and redirecting');
-    // Nuke all local/session storage so no stale cache survives
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {}
+    console.warn('[auth] forceLogout called — redirecting to logout');
     setUser(null);
     userRef.current = null;
     setIsAuthenticated(false);
