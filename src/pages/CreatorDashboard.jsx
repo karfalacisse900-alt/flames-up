@@ -1,120 +1,323 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
-import { BarChart2, Heart, Users, Eye, TrendingUp, MessageCircle, ArrowLeft, Film } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2 } from "lucide-react";
+import CreatorProfileEditor from "@/components/creators/CreatorProfileEditor";
+import CreatorApplyForm from "@/components/creators/CreatorApplyForm";
+
+const CATEGORY_LABELS = {
+  painter: "🎨 Painter", dancer: "💃 Dancer", musician: "🎵 Musician",
+  videographer: "🎬 Videographer", photographer: "📸 Photographer",
+  street_performer: "🎭 Street Performer", comedian: "😂 Comedian",
+  magician: "🪄 Magician", tattoo_artist: "✒️ Tattoo Artist",
+  caricaturist: "✏️ Caricaturist", other: "🌟 Other"
+};
 
 export default function CreatorDashboard() {
   const [user, setUser] = useState(null);
+  const [creator, setCreator] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [showApply, setShowApply] = useState(false);
+  const locationWatchRef = useRef(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    const load = async () => {
+      try {
+        const u = await base44.auth.me();
+        setUser(u);
+        if (u?.email) {
+          const rows = await base44.entities.Creator.filter({ user_email: u.email });
+          setCreator(rows[0] || null);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    load();
+    return () => stopTracking();
   }, []);
 
-  const { data: posts = [] } = useQuery({
-    queryKey: ["creatorPosts", user?.email],
-    queryFn: () => base44.entities.CommunityPost.filter({ author_email: user.email }, "-created_date", 200),
-    enabled: !!user?.email,
-  });
+  const stopTracking = () => {
+    if (locationWatchRef.current !== null) {
+      navigator.geolocation.clearWatch(locationWatchRef.current);
+      locationWatchRef.current = null;
+    }
+  };
 
-  const { data: followers = [] } = useQuery({
-    queryKey: ["creatorFollowers", user?.email],
-    queryFn: () => base44.entities.Follow.filter({ following_email: user.email }),
-    enabled: !!user?.email,
-  });
+  const startTracking = (creatorId) => {
+    if (!navigator.geolocation) return;
+    locationWatchRef.current = navigator.geolocation.watchPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        await base44.entities.Creator.update(creatorId, {
+          latitude,
+          longitude,
+          last_updated: new Date().toISOString(),
+        });
+      },
+      null,
+      { enableHighAccuracy: true, maximumAge: 30000 }
+    );
+  };
 
-  const totalLikes = posts.reduce((sum, p) => sum + (p.upvotes || 0), 0);
-  const totalComments = posts.reduce((sum, p) => sum + (p.comment_count || 0), 0);
-  const totalViews = posts.reduce((sum, p) => sum + (p.engagement_score || 0), 0);
-  const videoPosts = posts.filter(p => p.video_url);
-  const topPosts = [...posts].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0)).slice(0, 5);
+  const handleOpen = async () => {
+    if (!creator || toggling) return;
+    setToggling(true);
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+      );
+      const { latitude, longitude } = pos.coords;
+      const updated = await base44.entities.Creator.update(creator.id, {
+        availability_status: "open",
+        latitude,
+        longitude,
+        last_updated: new Date().toISOString(),
+      });
+      setCreator(prev => ({ ...prev, availability_status: "open", latitude, longitude }));
+      startTracking(creator.id);
+    } catch (e) {
+      alert("Could not get your location. Please enable GPS and try again.");
+    }
+    setToggling(false);
+  };
 
-  const stats = [
-    { label: "Total Likes", value: totalLikes, icon: Heart, color: "#E05C7A", bg: "#E05C7A18" },
-    { label: "Followers", value: followers.length, icon: Users, color: "var(--accent-primary)", bg: "var(--accent-primary-light)" },
-    { label: "Total Posts", value: posts.length, icon: BarChart2, color: "#4A7FC1", bg: "#4A7FC118" },
-    { label: "Engagement", value: totalViews, icon: Eye, color: "#D98B62", bg: "#D98B6218" },
-    { label: "Comments", value: totalComments, icon: MessageCircle, color: "#7C69C4", bg: "#7C69C418" },
-    { label: "Videos", value: videoPosts.length, icon: Film, color: "#3C6E5A", bg: "#3C6E5A18" },
-  ];
+  const handleClose = async () => {
+    if (!creator || toggling) return;
+    setToggling(true);
+    stopTracking();
+    await base44.entities.Creator.update(creator.id, {
+      availability_status: "closed",
+      last_updated: new Date().toISOString(),
+    });
+    setCreator(prev => ({ ...prev, availability_status: "closed" }));
+    setToggling(false);
+  };
 
-  if (!user) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }} />
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg-app)" }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--accent-primary)" }} />
     </div>
   );
 
-  return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
-        style={{ backgroundColor: "rgba(242,237,228,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <Link to={createPageUrl("Profile")} className="p-1.5 rounded-full" style={{ color: "var(--text-secondary)" }}>
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Creator Dashboard</h1>
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>Your content performance</p>
-        </div>
-        <TrendingUp className="w-5 h-5 ml-auto" style={{ color: "var(--accent-primary)" }} />
-      </div>
+  if (!user) return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center" style={{ background: "var(--bg-app)" }}>
+      <p className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Sign in to access the Creator Dashboard</p>
+    </div>
+  );
 
-      <div className="px-4 py-4 space-y-5">
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {stats.map(({ label, value, icon: Icon, color, bg }) => (
-            <div key={label} className="p-4 rounded-2xl flex items-center gap-3"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: bg }}>
-                <Icon className="w-5 h-5" style={{ color }} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{value.toLocaleString()}</p>
-                <p className="text-xs truncate" style={{ color: "var(--text-hint)" }}>{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Top performing posts */}
-        <div>
-          <h2 className="text-sm font-bold mb-3 px-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-            🏆 Top Posts
-          </h2>
-          {topPosts.length === 0 ? (
-            <div className="text-center py-8 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
-              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No posts yet. Start sharing!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {topPosts.map((post, i) => (
-                <Link key={post.id} to={createPageUrl(`PostComments?postId=${post.id}`)}>
-                  <div className="flex items-center gap-3 p-3 rounded-2xl"
-                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
-                    <span className="text-sm font-bold w-5 shrink-0 text-center" style={{ color: "var(--accent-primary)" }}>#{i + 1}</span>
-                    <p className="text-sm flex-1 line-clamp-2" style={{ color: "var(--text-primary)" }}>
-                      {post.title || post.body?.replace(/<[^>]*>/g, "") || "Post"}
-                    </p>
-                    <div className="flex gap-2 shrink-0 text-xs" style={{ color: "var(--text-hint)" }}>
-                      <span>❤️ {post.upvotes || 0}</span>
-                      <span>💬 {post.comment_count || 0}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Engagement tip */}
-        <div className="p-4 rounded-2xl" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), #EDE8DF)", border: "1px solid var(--border-light)" }}>
-          <p className="text-xs font-bold mb-1" style={{ color: "var(--accent-primary)" }}>💡 Tip</p>
-          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Posts with videos get 3× more engagement. Try adding a short clip to your next post!
+  // No creator profile yet
+  if (!creator) return (
+    <div className="min-h-screen" style={{ background: "var(--bg-app)" }}>
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl"
+            style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}>
+            🎨
+          </div>
+          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+            Become a Street Creator
+          </h1>
+          <p className="text-sm" style={{ color: "var(--text-hint)" }}>
+            Apply to showcase your talent on the map. Painters, musicians, dancers, photographers and more are welcome.
           </p>
         </div>
+        <button
+          onClick={() => setShowApply(true)}
+          className="w-full py-4 rounded-2xl font-bold text-white text-lg"
+          style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)", boxShadow: "0 8px 24px rgba(224,92,42,0.4)" }}>
+          Apply Now
+        </button>
       </div>
+      {showApply && (
+        <CreatorApplyForm
+          user={user}
+          onClose={() => setShowApply(false)}
+          onCreated={(c) => { setCreator(c); setShowApply(false); }}
+        />
+      )}
+    </div>
+  );
+
+  const isPending = creator.approval_status === "pending";
+  const isRejected = creator.approval_status === "rejected";
+  const isApproved = creator.approval_status === "approved";
+  const isOpen = creator.availability_status === "open";
+
+  // Pending/Rejected states
+  if (!isApproved) return (
+    <div className="min-h-screen" style={{ background: "var(--bg-app)" }}>
+      <div className="max-w-lg mx-auto px-4 py-8 text-center">
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl"
+          style={{ background: isPending ? "#FFF7ED" : "#FEF2F2" }}>
+          {isPending ? <Clock className="w-10 h-10" style={{ color: "#F97316" }} /> : <X className="w-10 h-10" style={{ color: "#EF4444" }} />}
+        </div>
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+          {isPending ? "Application Under Review" : "Application Rejected"}
+        </h2>
+        <p className="text-sm" style={{ color: "var(--text-hint)" }}>
+          {isPending
+            ? "Your creator application is being reviewed. You'll gain access once approved by an admin."
+            : "Your application was not approved. Please contact support for more information."}
+        </p>
+        <div className="mt-6 p-4 rounded-2xl text-left" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <p className="text-xs font-bold mb-1" style={{ color: "var(--text-hint)" }}>SUBMITTED PROFILE</p>
+          <p className="font-bold" style={{ color: "var(--text-primary)" }}>{creator.full_name}</p>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{CATEGORY_LABELS[creator.category]}</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Approved Dashboard
+  return (
+    <div className="min-h-screen pb-10" style={{ background: "var(--bg-app)" }}>
+      <div className="max-w-lg mx-auto px-4 pt-6">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--accent-primary)" }}>Creator Dashboard</p>
+            <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+              {creator.full_name}
+            </h1>
+            <p className="text-sm" style={{ color: "var(--text-hint)" }}>{CATEGORY_LABELS[creator.category]}</p>
+          </div>
+          <button
+            onClick={() => setShowEditor(true)}
+            className="p-2.5 rounded-2xl"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            <Edit3 className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+          </button>
+        </div>
+
+        {/* Profile Preview */}
+        <div className="rounded-3xl overflow-hidden mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          {creator.profile_image ? (
+            <img src={creator.profile_image} alt={creator.full_name} className="w-full h-44 object-cover" />
+          ) : (
+            <div className="w-full h-44 flex items-center justify-center text-6xl"
+              style={{ background: "linear-gradient(135deg, #E05C2A22, #F9731622)" }}>
+              🎨
+            </div>
+          )}
+          <div className="p-4">
+            {creator.description && (
+              <p className="text-sm leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
+                {creator.description}
+              </p>
+            )}
+            {creator.price && (
+              <span className="inline-block text-sm font-bold px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
+                💰 {creator.price}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div className="flex items-center justify-center gap-2 mb-6 py-2 rounded-2xl"
+          style={{ backgroundColor: isOpen ? "#F0FDF4" : "var(--bg-subtle)", border: `1px solid ${isOpen ? "#86EFAC" : "var(--border-light)"}` }}>
+          <div className={`w-2.5 h-2.5 rounded-full ${isOpen ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
+          <span className="text-sm font-bold" style={{ color: isOpen ? "#16A34A" : "var(--text-secondary)" }}>
+            {isOpen ? "You're LIVE on the map" : "You're hidden from the map"}
+          </span>
+        </div>
+
+        {/* OPEN / CLOSE Buttons */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <button
+            onClick={handleOpen}
+            disabled={isOpen || toggling}
+            className="py-5 rounded-3xl font-black text-xl text-white relative overflow-hidden"
+            style={{
+              background: isOpen ? "#86EFAC" : "linear-gradient(135deg, #16A34A, #22C55E)",
+              boxShadow: isOpen ? "none" : "0 8px 32px rgba(22,163,74,0.4)",
+              opacity: isOpen ? 0.6 : 1,
+            }}>
+            {toggling && !isOpen ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (
+              <>
+                <div className="text-3xl mb-1">🟢</div>
+                OPEN
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleClose}
+            disabled={!isOpen || toggling}
+            className="py-5 rounded-3xl font-black text-xl text-white"
+            style={{
+              background: !isOpen ? "#FCA5A5" : "linear-gradient(135deg, #DC2626, #EF4444)",
+              boxShadow: !isOpen ? "none" : "0 8px 32px rgba(220,38,38,0.4)",
+              opacity: !isOpen ? 0.6 : 1,
+            }}>
+            {toggling && isOpen ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (
+              <>
+                <div className="text-3xl mb-1">🔴</div>
+                CLOSE
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Location info */}
+        {isOpen && creator.latitude && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-6"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            <MapPin className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+              Location active · {creator.latitude.toFixed(4)}, {creator.longitude.toFixed(4)}
+            </p>
+          </div>
+        )}
+
+        {/* Social Links */}
+        {(creator.instagram_url || creator.tiktok_url || creator.youtube_url || creator.website_url) && (
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Social Links</p>
+            <div className="flex flex-wrap gap-2">
+              {creator.instagram_url && (
+                <a href={creator.instagram_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                  style={{ backgroundColor: "#FDF2F8", color: "#DB2777" }}>
+                  <Instagram className="w-3.5 h-3.5" /> Instagram
+                </a>
+              )}
+              {creator.tiktok_url && (
+                <a href={creator.tiktok_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                  style={{ backgroundColor: "#F0FFFE", color: "#0D9488" }}>
+                  🎵 TikTok
+                </a>
+              )}
+              {creator.youtube_url && (
+                <a href={creator.youtube_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                  style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
+                  <Youtube className="w-3.5 h-3.5" /> YouTube
+                </a>
+              )}
+              {creator.website_url && (
+                <a href={creator.website_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                  style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
+                  <Globe className="w-3.5 h-3.5" /> Website
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showEditor && (
+        <CreatorProfileEditor
+          creator={creator}
+          onClose={() => setShowEditor(false)}
+          onSaved={(updated) => { setCreator(updated); setShowEditor(false); }}
+        />
+      )}
     </div>
   );
 }
