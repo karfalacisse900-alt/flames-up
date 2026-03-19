@@ -293,6 +293,77 @@ export default function CreatorDashboard() {
           </button>
         </div>
 
+        {/* What You're Promoting */}
+        <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="text-lg">🎯</div>
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>What You're Promoting</p>
+            </div>
+            {!editingPromotion && (
+              <button onClick={() => setEditingPromotion(true)}
+                className="text-xs font-bold px-2 py-1 rounded-lg"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                Edit
+              </button>
+            )}
+          </div>
+          {editingPromotion ? (
+            <div className="space-y-2">
+              <select
+                value={promotionData.type}
+                onChange={e => setPromotionData({ ...promotionData, type: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl text-sm"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
+                <option value="">Select promotion type</option>
+                <option value="shop">🛍️ Shop/Business</option>
+                <option value="hosting">🎪 Hosting Event/Show</option>
+                <option value="content">📱 Content Creator</option>
+                <option value="service">💼 Service Provider</option>
+                <option value="activity">🎯 Activity/Experience</option>
+              </select>
+              <input
+                value={promotionData.description}
+                onChange={e => setPromotionData({ ...promotionData, description: e.target.value })}
+                maxLength={120}
+                placeholder="e.g. Custom portrait paintings, live bookings available"
+                className="w-full px-3 py-2 rounded-xl text-sm"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
+              />
+              <div className="flex gap-2">
+                <button onClick={savePromotion} disabled={savingStatus || !promotionData.type}
+                  className="flex-1 px-3 py-2 rounded-xl text-white text-sm font-bold"
+                  style={{ background: "linear-gradient(135deg,#16A34A,#22C55E)" }}>
+                  {savingStatus ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : <Check className="w-4 h-4 mx-auto" />}
+                </button>
+                <button onClick={() => setEditingPromotion(false)}
+                  className="flex-1 px-3 py-2 rounded-xl text-sm"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                  <X className="w-4 h-4 mx-auto" />
+                </button>
+              </div>
+            </div>
+          ) : promotionData.type ? (
+            <div className="mt-2">
+              <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                {promotionData.type === "shop" ? "🛍️ Shop/Business" : 
+                 promotionData.type === "hosting" ? "🎪 Hosting Event/Show" :
+                 promotionData.type === "content" ? "📱 Content Creator" :
+                 promotionData.type === "service" ? "💼 Service Provider" : "🎯 Activity/Experience"}
+              </p>
+              {promotionData.description && (
+                <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{promotionData.description}</p>
+              )}
+              <div className="mt-3 inline-block px-3 py-1.5 rounded-full text-xs font-bold"
+                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
+                ✓ Discoverable on Map
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs italic mt-2" style={{ color: "var(--text-hint)" }}>Set what you're promoting to appear on the discovery map!</p>
+          )}
+        </div>
+
         {/* Status Message */}
         <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-2">
