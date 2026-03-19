@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { X, Instagram, Youtube, Globe, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Instagram, Youtube, Globe, Navigation, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const CATEGORY_LABELS = {
   painter: "🎨 Painter", dancer: "💃 Dancer", musician: "🎵 Musician",
