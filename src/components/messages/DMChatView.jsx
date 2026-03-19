@@ -24,6 +24,13 @@ export default function DMChatView({ user, conversation, onBack }) {
   const displayName = getName(conversation.name, conversation.email);
 
   useEffect(() => {
+    // Check if conversation partner is an approved creator
+    base44.entities.Creator.filter({ user_email: conversation.email, approval_status: "approved" })
+      .then(rows => setPartnerCreator(rows[0] || null))
+      .catch(() => {});
+  }, [conversation.email]);
+
+  useEffect(() => {
     const blockedList = JSON.parse(localStorage.getItem("blocked_users") || "[]");
     setBlocked(blockedList.includes(conversation.email));
     const mutedList = JSON.parse(localStorage.getItem("muted_users") || "[]");
