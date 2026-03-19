@@ -421,7 +421,16 @@ export default function CommunityFeed({ user }) {
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
-  const renderPostCard = (post, index) => {
+  // Stable per-post upvote callbacks — avoid creating new functions every render
+  const handleUpvote = useCallback((post) => {
+    if (user) upvoteMut.mutate({ post });
+  }, [user, upvoteMut]);
+
+  const handleToggle = useCallback((postId) => {
+    setExpandedPost(prev => prev === postId ? null : postId);
+  }, []);
+
+  const renderPostCard = useCallback((post) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     const card = post.type === "debate" || post.type === "question" ? (
@@ -429,17 +438,17 @@ export default function CommunityFeed({ user }) {
         post={post} 
         debate={debate} 
         user={user}
-        onUpvote={() => user && upvoteMut.mutate({ post })}
+        onUpvote={() => handleUpvote(post)}
         isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+        onToggle={() => handleToggle(post.id)}
       />
     ) : (
       <CommunityPostCard 
         post={post} 
         user={user}
-        onUpvote={() => user && upvoteMut.mutate({ post })}
+        onUpvote={() => handleUpvote(post)}
         isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
+        onToggle={() => handleToggle(post.id)}
         onLocationClick={() => {}}
         onTap={() => {}}
       />
@@ -450,7 +459,7 @@ export default function CommunityFeed({ user }) {
         {card}
       </div>
     );
-  };
+  }, [user, expandedPost, handleUpvote, handleToggle, debates]);
 
   if (isLoading) {
     return (
