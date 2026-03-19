@@ -25,7 +25,7 @@ export default function CreatorProfileEditor({ creator, onClose, onSaved }) {
     setSaving(true);
     let profile_image = creator.profile_image;
     if (imageFile) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+      const { file_url } = await uploadToR2(imageFile, "creators/profiles");
       profile_image = file_url;
     }
     const updated = await base44.entities.Creator.update(creator.id, { ...form, profile_image });

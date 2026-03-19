@@ -14,7 +14,7 @@ export default function PortfolioUploader({ creator, onUpdated }) {
     setUploading(true);
     const urls = [];
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadToR2(file, "creators/portfolio");
       urls.push(file_url);
     }
     const updated = await base44.entities.Creator.update(creator.id, {
