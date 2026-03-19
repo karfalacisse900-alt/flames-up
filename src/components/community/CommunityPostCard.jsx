@@ -491,7 +491,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
         {/* ── MEDIA SECTION ── */}
         {(() => {
         const imgs = post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
-        if (imgs.length === 0 && !post.video_url) return null;
+        if (imgs.length === 0 && !post.video_url?.trim()) return null;
         return (
           <div className="w-full mb-3">
             {imgs.length > 0 && (
