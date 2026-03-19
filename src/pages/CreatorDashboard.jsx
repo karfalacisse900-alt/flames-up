@@ -20,6 +20,9 @@ export default function CreatorDashboard() {
   const [toggling, setToggling] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showApply, setShowApply] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
   const locationWatchRef = useRef(null);
 
   useEffect(() => {
