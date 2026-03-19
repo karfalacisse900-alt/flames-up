@@ -324,6 +324,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const mapPins = useMemo(() => {
     const [uLng, uLat] = userLoc || [0, 0];
     // Show all nearby friends with real-time location (single source of truth: LocationPresence)
+    // Each user appears ONCE with one marker, styled based on live status
     const candidates = nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email)
       .filter(p => friendSet.has(p.user_email)) // friends only on map
@@ -331,7 +332,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       .map(p => ({
         ...p,
         _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
-        _isLive: liveCreators.has(p.user_email), // check if user is currently hosting
+        _isLive: liveCreators.has(p.user_email), // true = creator mode ON, marker style = orange + LIVE badge
       }))
       .sort((a, b) => a._dist - b._dist);
     return candidates.slice(0, MAP_PIN_LIMIT);
