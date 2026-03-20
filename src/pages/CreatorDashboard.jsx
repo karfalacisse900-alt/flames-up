@@ -26,6 +26,7 @@ export default function CreatorDashboard() {
   const [editingPromotion, setEditingPromotion] = useState(false);
   const [promotionData, setPromotionData] = useState({ type: "", description: "" });
   const locationWatchRef = useRef(null);
+  const locationIntervalRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
@@ -51,10 +52,31 @@ export default function CreatorDashboard() {
       navigator.geolocation.clearWatch(locationWatchRef.current);
       locationWatchRef.current = null;
     }
+    if (locationIntervalRef.current !== null) {
+      clearInterval(locationIntervalRef.current);
+      locationIntervalRef.current = null;
+    }
+  };
+
+  const pushLocation = (creatorId) => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        await base44.entities.Creator.update(creatorId, {
+          latitude,
+          longitude,
+          last_updated: new Date().toISOString(),
+        });
+      },
+      null,
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+    );
   };
 
   const startTracking = (creatorId) => {
     if (!navigator.geolocation) return;
+    // watchPosition for continuous updates
     locationWatchRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -67,6 +89,8 @@ export default function CreatorDashboard() {
       null,
       { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
+    // Also push every 2 minutes as a heartbeat so location never gets stale
+    locationIntervalRef.current = setInterval(() => pushLocation(creatorId), 2 * 60 * 1000);
   };
 
   const handleOpen = async () => {
