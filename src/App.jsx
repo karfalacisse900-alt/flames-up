@@ -16,6 +16,8 @@ import Onboarding from './pages/Onboarding';
 import CreatorDashboard from './pages/CreatorDashboard';
 import AdminCreators from './pages/AdminCreators';
 import CreatorLanding from './pages/CreatorLanding';
+import Settings from './pages/Settings';
+import EditProfile from './pages/EditProfile';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -76,6 +78,8 @@ const AuthenticatedApp = () => {
       <Route path="/CreatorDashboard" element={<LayoutWrapper currentPageName="CreatorDashboard"><CreatorDashboard /></LayoutWrapper>} />
       <Route path="/AdminCreators" element={<LayoutWrapper currentPageName="AdminCreators"><AdminCreators /></LayoutWrapper>} />
       <Route path="/CreatorLanding" element={<LayoutWrapper currentPageName="CreatorLanding"><CreatorLanding /></LayoutWrapper>} />
+      <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
+      <Route path="/EditProfile" element={<LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
