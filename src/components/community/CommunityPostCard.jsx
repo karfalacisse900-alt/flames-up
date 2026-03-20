@@ -81,7 +81,12 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
 
   const handleDelete = async () => {
     if (!window.confirm("Delete this post?")) return;
-    await base44.entities.CommunityPost.delete(post.id);
+    try {
+      await base44.entities.CommunityPost.delete(post.id);
+    } catch (e) {
+      // Post already deleted — ignore "not found" errors
+      if (!e?.message?.includes("not found")) throw e;
+    }
     qc.invalidateQueries({ queryKey: ["communityPosts"] });
   };
 
