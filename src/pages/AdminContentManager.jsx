@@ -60,30 +60,7 @@ export default function AdminContentManager() {
   const filteredDYK = dykPosts.filter(p => dykFilter === "all" || p.status === dykFilter);
   const pendingDYK = dykPosts.filter(p => p.status === "pending").length;
 
-  // ── Challenges management ─────────────────────────────────────────────────
-  const { data: challenges = [], isLoading: challengesLoading } = useQuery({
-    queryKey: ["adminChallenges"],
-    queryFn: () => base44.entities.PhotoChallenge.list("-created_date", 50),
-    enabled: user?.role === "admin",
-  });
 
-  const [showCreateChallenge, setShowCreateChallenge] = useState(false);
-  const [newChallenge, setNewChallenge] = useState({ theme: "", description: "", status: "submissions_open", submissions_end: "", voting_end: "", prize_badge: "" });
-
-  const createChallengeMut = useMutation({
-    mutationFn: () => base44.entities.PhotoChallenge.create({ ...newChallenge, submission_count: 0 }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["adminChallenges"] }); setShowCreateChallenge(false); setNewChallenge({ theme: "", description: "", status: "submissions_open", submissions_end: "", voting_end: "", prize_badge: "" }); },
-  });
-
-  const updateChallengeMut = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.PhotoChallenge.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminChallenges"] }),
-  });
-
-  const deleteChallengeMut = useMutation({
-    mutationFn: (id) => base44.entities.PhotoChallenge.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminChallenges"] }),
-  });
 
   if (!user) return <div className="flex items-center justify-center h-screen"><Loader2 className="w-6 h-6 animate-spin" /></div>;
   if (user?.role !== "admin") return (
