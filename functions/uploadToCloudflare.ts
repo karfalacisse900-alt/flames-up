@@ -23,26 +23,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Cloudflare not configured' }, { status: 500 });
     }
 
-    const { file_url: sourceUrl } = await req.json();
+    const body = await req.json();
+    const sourceUrl = body.file_url;
 
     if (!sourceUrl) {
       return Response.json({ error: 'No file_url provided' }, { status: 400 });
     }
 
-    // Fetch the file from the temporary base44 URL
-    const fileRes = await fetch(sourceUrl);
-    if (!fileRes.ok) {
-      console.error("[uploadToCloudflare] Failed to fetch source file:", fileRes.status);
-      return Response.json({ error: 'Failed to fetch source file' }, { status: 400 });
-    }
-
-    const fileBlob = await fileRes.blob();
-    const contentType = fileBlob.type || "image/jpeg";
-    const ext = contentType.split("/")[1]?.split("+")[0] || "jpg";
-
-    // Upload to Cloudflare Images
+    // Use Cloudflare Images URL upload (CF fetches from URL itself — no proxy needed)
     const cfForm = new FormData();
-    cfForm.append("file", new File([fileBlob], `upload.${ext}`, { type: contentType }));
+    cfForm.append("url", sourceUrl);
     cfForm.append("metadata", JSON.stringify({ uploaded_by: user.email }));
 
     const cfRes = await fetch(
@@ -64,8 +54,6 @@ Deno.serve(async (req) => {
     }
 
     const imageId = result.result.id;
-    // Always construct URL from scratch: https://imagedelivery.net/<ACCOUNT_HASH>/<IMAGE_ID>/public
-    // Strip any trailing slashes or extra path segments from DELIVERY_URL
     const baseUrl = DELIVERY_URL.replace(/\/$/, "").replace(/\/<[^>]+>/g, "");
     const file_url = `${baseUrl}/${imageId}/public`;
 
