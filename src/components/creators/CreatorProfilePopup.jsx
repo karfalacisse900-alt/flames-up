@@ -80,7 +80,7 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
       )}
 
       <div
-        className="absolute z-40 rounded-3xl overflow-hidden"
+        className="fixed z-[9990] rounded-3xl overflow-hidden"
         style={{
           left, top,
           width: POPUP_W,
