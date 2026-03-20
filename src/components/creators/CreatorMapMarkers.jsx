@@ -8,31 +8,30 @@ const CATEGORY_EMOJI = {
   magician: "🪄", tattoo_artist: "✒️", caricaturist: "✏️", other: "🌟"
 };
 
-function getInitials(name) {
-  return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-}
-
 function buildMarkerEl(c) {
+  // Fixed 50x50 wrapper — critical for correct anchor positioning
   const wrapper = document.createElement("div");
-  wrapper.style.cssText = "position:relative; cursor:pointer;";
+  wrapper.style.cssText = "position:relative; width:50px; height:50px; cursor:pointer;";
 
-  // Pulse ring
+  // Pulse ring — absolutely centered, doesn't affect layout
   const ring = document.createElement("div");
   ring.style.cssText = `
-    position:absolute; top:-6px; left:-6px;
-    width:62px; height:62px; border-radius:50%;
+    position:absolute; top:50%; left:50%;
+    width:66px; height:66px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
     border:2px solid rgba(224,92,42,0.6);
     animation:creatorPulse 2s ease-in-out infinite;
     pointer-events:none;
   `;
   wrapper.appendChild(ring);
 
-  // Status bubble (shown above avatar when status_message is set)
+  // Status bubble — above center, doesn't affect anchor
   if (c.status_message) {
     const bubble = document.createElement("div");
     bubble.style.cssText = `
-      position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
-      margin-bottom:6px; white-space:nowrap; max-width:160px;
+      position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
+      white-space:nowrap; max-width:160px;
       background:#FFF7ED; color:#C2410C;
       font-size:9px; font-weight:700;
       padding:3px 7px; border-radius:10px;
@@ -44,16 +43,17 @@ function buildMarkerEl(c) {
     wrapper.appendChild(bubble);
   }
 
-  // Avatar circle
+  // Avatar circle — fills the wrapper exactly
   const circle = document.createElement("div");
   circle.style.cssText = `
+    position:absolute; top:0; left:0;
     width:50px; height:50px; border-radius:50%;
     border:3px solid #E05C2A;
     box-shadow:0 4px 16px rgba(224,92,42,0.5);
     overflow:hidden; background:linear-gradient(135deg,#E05C2A,#F97316);
     display:flex; align-items:center; justify-content:center;
     font-size:14px; font-weight:700; color:white;
-    position:relative; z-index:1;
+    z-index:1;
   `;
   if (c.profile_image) {
     const img = document.createElement("img");
@@ -66,11 +66,11 @@ function buildMarkerEl(c) {
   }
   wrapper.appendChild(circle);
 
-  // Name label
+  // Name label — below center
   const label = document.createElement("div");
   label.style.cssText = `
-    position:absolute; top:100%; left:50%; transform:translateX(-50%);
-    margin-top:3px; white-space:nowrap;
+    position:absolute; top:calc(100% + 3px); left:50%; transform:translateX(-50%);
+    white-space:nowrap;
     background:rgba(0,0,0,0.75); color:#fff;
     font-size:10px; font-weight:700;
     padding:2px 6px; border-radius:8px;
@@ -85,11 +85,11 @@ function buildMarkerEl(c) {
 export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
   const [creators, setCreators] = useState([]);
   const [selectedCreator, setSelectedCreator] = useState(null);
-  const [popupCoords, setPopupCoords] = useState(null);
-  const markersRef = useRef({});      // id -> mapboxgl.Marker
-  const creatorsRef = useRef({});     // id -> creator data (for click handlers)
+  // Store lngLat instead of pixel coords — reproject when needed
+  const [selectedLngLat, setSelectedLngLat] = useState(null);
+  const markersRef = useRef({});
+  const creatorsRef = useRef({});
 
-  // Fetch active creators + subscribe to real-time updates
   useEffect(() => {
     const load = async () => {
       const all = await base44.entities.Creator.filter({
@@ -103,7 +103,6 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
     return () => unsub();
   }, []);
 
-  // Manage markers: only move existing ones, create/destroy as needed
   useEffect(() => {
     if (!map || !mapReady || !window.mapboxgl) return;
 
@@ -113,19 +112,16 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
       creatorsRef.current[c.id] = c;
 
       if (markersRef.current[c.id]) {
-        // Just update position — no DOM recreation, no jump
         markersRef.current[c.id].setLngLat([c.longitude, c.latitude]);
         return;
       }
 
-      // Build fresh marker
       const el = buildMarkerEl(c);
 
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         const creator = creatorsRef.current[c.id];
-        const pt = map.project([creator.longitude, creator.latitude]);
-        setPopupCoords({ x: pt.x, y: pt.y });
+        setSelectedLngLat([creator.longitude, creator.latitude]);
         setSelectedCreator({ ...creator });
       });
 
@@ -136,7 +132,6 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
       markersRef.current[c.id] = marker;
     });
 
-    // Remove stale markers
     Object.keys(markersRef.current).forEach(id => {
       if (!activeIds.has(id)) {
         markersRef.current[id].remove();
@@ -146,12 +141,17 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
     });
   }, [creators, map, mapReady]);
 
+  // Compute pixel coords from lngLat each render (stays accurate across zoom/pan)
+  const popupCoords = selectedCreator && selectedLngLat && map
+    ? map.project(selectedLngLat)
+    : null;
+
   return (
     <>
       <style>{`
         @keyframes creatorPulse {
-          0%,100%{transform:scale(1);opacity:0.6;}
-          50%{transform:scale(1.5);opacity:0.1;}
+          0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}
+          50%{transform:translate(-50%,-50%) scale(1.5);opacity:0.1;}
         }
       `}</style>
 
@@ -161,7 +161,7 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
           coords={popupCoords}
           mapContainer={map.getContainer()}
           currentUserEmail={currentUserEmail}
-          onClose={() => { setSelectedCreator(null); setPopupCoords(null); }}
+          onClose={() => { setSelectedCreator(null); setSelectedLngLat(null); }}
         />
       )}
     </>
