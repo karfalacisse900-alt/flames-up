@@ -1,28 +1,16 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 
-// Session-level mute preference
-const sessionPrefs = { muted: true };
-
 // Global singleton — only one video plays at a time
 const activeIframe = { id: null };
 
-/**
- * Detects if a URL is a Cloudflare Stream video ID or HLS URL.
- * Returns the Cloudflare Stream iframe embed URL.
- */
-function getStreamEmbedUrl(src, muted) {
+function extractVideoId(src) {
   if (!src) return null;
-  // Already a stream video ID (32-char hex)
-  if (/^[a-f0-9]{32}$/.test(src)) {
-    return `https://iframe.cloudflarestream.com/${src}?autoplay=true&muted=${muted ? 1 : 0}&loop=true&controls=false&preload=metadata`;
-  }
-  // HLS manifest URL from cloudflarestream.com
-  const hlsMatch = src.match(/cloudflarestream\.com\/([a-f0-9]{32})\//);
-  if (hlsMatch) {
-    return `https://iframe.cloudflarestream.com/${hlsMatch[1]}?autoplay=true&muted=${muted ? 1 : 0}&loop=true&controls=false&preload=metadata`;
-  }
-  return null;
+  // Already a bare 32-char hex video ID
+  if (/^[a-f0-9]{32}$/.test(src)) return src;
+  // HLS or iframe URL containing the ID
+  const m = src.match(/([a-f0-9]{32})/);
+  return m ? m[1] : null;
 }
 
 export function isStreamVideo(src) {
@@ -30,8 +18,21 @@ export function isStreamVideo(src) {
   return /^[a-f0-9]{32}$/.test(src) || src.includes("cloudflarestream.com");
 }
 
+function buildEmbedUrl(videoId, { autoplay = false, muted = true } = {}) {
+  const params = new URLSearchParams({
+    loop: "true",
+    controls: "false",
+    preload: "metadata",
+    // fit=cover removes the black letterboxing
+    "defaultTextTrack": "off",
+  });
+  if (autoplay) params.set("autoplay", "true");
+  if (muted) params.set("muted", "true");
+  return `https://iframe.cloudflarestream.com/${videoId}?${params.toString()}`;
+}
+
 export default function StreamVideo({ src, postId, onDoubleTap }) {
-  const [muted, setMuted] = useState(sessionPrefs.muted);
+  const [muted, setMuted] = useState(true); // start muted for autoplay policy
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null);
   const containerRef = useRef(null);
@@ -40,8 +41,9 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
+  const hasUnmuted = useRef(false);
 
-  const embedUrl = getStreamEmbedUrl(src, muted);
+  const videoId = extractVideoId(src);
 
   const flashIcon = (icon) => {
     setShowIcon(icon);
@@ -49,22 +51,36 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     iconTimer.current = setTimeout(() => setShowIcon(null), 700);
   };
 
-  const pauseVideo = useCallback(() => {
-    iframeRef.current?.contentWindow?.postMessage('{"method":"pause"}', "*");
-    setPlaying(false);
+  const sendMessage = useCallback((method) => {
+    try {
+      iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ method }), "*");
+    } catch (_) {}
   }, []);
 
+  const pauseVideo = useCallback(() => {
+    sendMessage("pause");
+    setPlaying(false);
+  }, [sendMessage]);
+
   const playVideo = useCallback(() => {
-    // Pause any other playing stream video
     if (activeIframe.id && activeIframe.id !== instanceId.current) {
       window.dispatchEvent(new CustomEvent("stream_pause_all", { detail: instanceId.current }));
     }
     activeIframe.id = instanceId.current;
-    iframeRef.current?.contentWindow?.postMessage('{"method":"play"}', "*");
+    sendMessage("play");
     setPlaying(true);
-  }, []);
 
-  // Pause when another stream video starts
+    // Unmute on first play (after autoplay starts)
+    if (!hasUnmuted.current) {
+      hasUnmuted.current = true;
+      setTimeout(() => {
+        sendMessage("unmute");
+        setMuted(false);
+      }, 800);
+    }
+  }, [sendMessage]);
+
+  // Listen for pause-all events from other videos
   useEffect(() => {
     const handler = (e) => {
       if (e.detail !== instanceId.current) pauseVideo();
@@ -73,7 +89,7 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     return () => window.removeEventListener("stream_pause_all", handler);
   }, [pauseVideo]);
 
-  // IntersectionObserver for autoplay/pause
+  // IntersectionObserver: autoplay when 60% visible, pause when not
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -91,13 +107,9 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
   const toggleMute = (e) => {
     e.stopPropagation();
     const next = !muted;
-    sessionPrefs.muted = next;
     setMuted(next);
-    // Reload iframe with new mute state — simplest way to toggle mute on CF stream iframe
-    if (iframeRef.current) {
-      iframeRef.current.src = getStreamEmbedUrl(src, next);
-      setTimeout(() => playVideo(), 300);
-    }
+    sendMessage(next ? "mute" : "unmute");
+    if (next === false) hasUnmuted.current = true;
   };
 
   const handleTap = () => {
@@ -115,7 +127,10 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     }, 250);
   };
 
-  if (!embedUrl) return null;
+  if (!videoId) return null;
+
+  // Build embed URL — always start muted so browser allows autoplay
+  const embedUrl = buildEmbedUrl(videoId, { autoplay: true, muted: true });
 
   return (
     <div
@@ -124,23 +139,23 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
+        aspectRatio: "9/16",
         maxHeight: "56vh",
         cursor: "pointer",
         userSelect: "none",
-        background: "#1a1a1a",
+        background: "#000",
       }}
     >
       <iframe
         ref={iframeRef}
         src={embedUrl}
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         allowFullScreen
         className="absolute inset-0 w-full h-full"
         style={{ border: "none", zIndex: 1 }}
       />
 
-      {/* Transparent tap capture layer */}
+      {/* Transparent tap capture overlay */}
       <div className="absolute inset-0" style={{ zIndex: 2 }} />
 
       {/* Mute toggle */}
