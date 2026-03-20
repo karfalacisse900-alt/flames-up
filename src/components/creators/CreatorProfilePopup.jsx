@@ -17,13 +17,18 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
   const navigate = useNavigate();
   const isSelf = currentUserEmail && creator.user_email === currentUserEmail;
 
-  const containerWidth = mapContainer?.clientWidth || 400;
-  const containerHeight = mapContainer?.clientHeight || 600;
   const POPUP_W = 290;
   const images = creator.portfolio_images || [];
 
-  const left = Math.min(Math.max(coords.x - POPUP_W / 2, 8), containerWidth - POPUP_W - 8);
-  const top = Math.max(coords.y - 420, 70);
+  // Use fixed positioning relative to viewport so zoom/pan never shifts the popup
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  // coords are pixel coords from map.project() — add map container offset
+  const containerRect = mapContainer?.getBoundingClientRect() || { left: 0, top: 0 };
+  const absX = containerRect.left + coords.x;
+  const absY = containerRect.top + coords.y;
+  const left = Math.min(Math.max(absX - POPUP_W / 2, 8), viewportW - POPUP_W - 8);
+  const top = Math.max(absY - 430, 70);
 
   const prevPhoto = (e) => { e.stopPropagation(); setPhotoIdx(i => (i - 1 + images.length) % images.length); };
   const nextPhoto = (e) => { e.stopPropagation(); setPhotoIdx(i => (i + 1) % images.length); };
