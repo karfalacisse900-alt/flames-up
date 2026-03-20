@@ -70,7 +70,10 @@ export default function UserProfile() {
 
   const { data: userPosts = [] } = useQuery({
     queryKey: ["userPosts", email],
-    queryFn: () => base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 30),
+    queryFn: async () => {
+      const posts = await base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 30);
+      return posts.map(normalizePost);
+    },
     enabled: !!email,
     staleTime: 60000,
   });
