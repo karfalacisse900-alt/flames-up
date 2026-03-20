@@ -129,7 +129,7 @@ export default function CommunityFeed({ user }) {
     try {
       const offset = pageNum * BATCH_SIZE;
       const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
-      return batch.filter(p => !p.tags?.includes("listen_dont_judge"));
+      return batch.filter(p => !p.tags?.includes("listen_dont_judge")).map(normalizePost);
     } catch (err) {
       console.error("[feed] fetch failed:", err.message);
       return [];
