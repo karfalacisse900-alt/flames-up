@@ -54,10 +54,11 @@ Deno.serve(async (req) => {
 
     const video = result.result;
     const video_id = video.uid;
-    const stream_url = `https://customer-${video.playback?.hls?.split("customer-")[1] || `${ACCOUNT_ID}.cloudflarestream.com/${video_id}/manifest/video.m3u8`}`;
-    const thumbnail_url = `https://customer-${video.thumbnail?.split("customer-")[1] || `${ACCOUNT_ID}.cloudflarestream.com/${video_id}/thumbnails/thumbnail.jpg`}`;
+    // Use the video ID as stream_url — StreamVideo component knows how to build the embed URL from just the ID
+    const stream_url = video_id;
+    const thumbnail_url = video.thumbnail || `https://${ACCOUNT_ID}.cloudflarestream.com/${video_id}/thumbnails/thumbnail.jpg`;
 
-    console.log(`[uploadToStream] ✓ video ${video_id} queued for ${user.email}`);
+    console.log(`[uploadToStream] ✓ video ${video_id} queued for ${user.email}`, JSON.stringify({ playback: video.playback }));
     return Response.json({ video_id, stream_url, thumbnail_url });
 
   } catch (err) {
