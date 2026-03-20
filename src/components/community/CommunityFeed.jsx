@@ -129,7 +129,7 @@ export default function CommunityFeed({ user }) {
     try {
       const offset = pageNum * BATCH_SIZE;
       const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
-      return batch.filter(p => !p.tags?.includes("listen_dont_judge")).map(normalizePost);
+      return batch.filter(p => !p.tags?.includes("listen_dont_judge") && !p.group_id).map(normalizePost);
     } catch (err) {
       console.error("[feed] fetch failed:", err.message);
       return [];
@@ -140,7 +140,7 @@ export default function CommunityFeed({ user }) {
   const fetchPostsHard = useCallback(async () => {
     const offset = 0;
     const batch = await base44.entities.CommunityPost.list("-created_date", BATCH_SIZE, offset);
-    const filtered = batch.filter(p => !p.tags?.includes("listen_dont_judge")).map(normalizePost);
+    const filtered = batch.filter(p => !p.tags?.includes("listen_dont_judge") && !p.group_id).map(normalizePost);
     if (filtered.length === 0) return filtered;
 
     try {

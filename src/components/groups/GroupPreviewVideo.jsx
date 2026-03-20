@@ -124,7 +124,6 @@ export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
           style={{ maxHeight: 240, objectFit: "cover", display: "block" }}
           playsInline
           loop
-          muted
           onEnded={() => setPlaying(false)}
           onPause={() => setPlaying(false)}
           onPlay={() => setPlaying(true)}
