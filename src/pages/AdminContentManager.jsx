@@ -26,117 +26,17 @@ export default function AdminContentManager() {
     }).catch(() => {});
   }, []);
 
-  const { data: submissions = [], isLoading: subLoading } = useQuery({
-    queryKey: ["userSubmissions"],
-    queryFn: () => base44.entities.UserSubmittedMedia.list("-created_date", 200),
-    refetchInterval: 30000,
-    enabled: user?.role === "admin",
-  });
-
-  const { data: reviews = [], isLoading: revLoading } = useQuery({
-    queryKey: ["userReviews"],
-    queryFn: () => base44.entities.UserMediaReview.list("-created_date", 200),
-    refetchInterval: 30000,
-    enabled: user?.role === "admin",
-  });
-
-  // Real-time notification on new pending items
+  // Real-time notification on new DYK submissions
   useEffect(() => {
-    const unsub = base44.entities.UserSubmittedMedia.subscribe((event) => {
+    const unsub = base44.entities.DidYouKnow.subscribe((event) => {
       if (event.type === "create") {
-        setNotification("New media submission received!");
-        qc.invalidateQueries({ queryKey: ["userSubmissions"] });
+        setNotification("New Did You Know submission!");
+        qc.invalidateQueries({ queryKey: ["adminDYK"] });
         setTimeout(() => setNotification(null), 5000);
       }
     });
-    const unsub2 = base44.entities.UserMediaReview.subscribe((event) => {
-      if (event.type === "create") {
-        setNotification("New review received!");
-        qc.invalidateQueries({ queryKey: ["userReviews"] });
-        setTimeout(() => setNotification(null), 5000);
-      }
-    });
-    return () => { unsub(); unsub2(); };
+    return () => unsub();
   }, []);
-
-  // Mutations
-  const approveMut = useMutation({
-    mutationFn: (id) => base44.entities.UserSubmittedMedia.update(id, { status: "approved" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["userSubmissions"] }); setSelectedIds(new Set()); },
-  });
-  const rejectMut = useMutation({
-    mutationFn: ({ id, reason }) => base44.entities.UserSubmittedMedia.update(id, { status: "rejected", rejection_reason: reason }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["userSubmissions"] }); setSelectedItem(null); setRejectionReason(""); },
-  });
-  const approveRevMut = useMutation({
-    mutationFn: (id) => base44.entities.UserMediaReview.update(id, { status: "approved" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["userReviews"] }); setSelectedIds(new Set()); },
-  });
-  const rejectRevMut = useMutation({
-    mutationFn: (id) => base44.entities.UserMediaReview.update(id, { status: "rejected" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["userReviews"] }),
-  });
-  const updateMut = useMutation({
-    mutationFn: (item) => base44.entities.UserSubmittedMedia.update(item.id, { title: item.title, creator: item.creator, description: item.description, genre: item.genre }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["userSubmissions"] }); setEditingItem(null); },
-  });
-  const deleteMut = useMutation({
-    mutationFn: (id) => base44.entities.UserSubmittedMedia.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["userSubmissions"] }); setSelectedIds(new Set()); },
-  });
-
-  // Filtered data
-  const filteredSubs = useMemo(() =>
-    submissions.filter(s => statusFilter === "all" || s.status === statusFilter),
-    [submissions, statusFilter]);
-  const filteredRevs = useMemo(() =>
-    reviews.filter(r => statusFilter === "all" || r.status === statusFilter),
-    [reviews, statusFilter]);
-
-  const currentList = activeTab === "submissions" ? filteredSubs : filteredRevs;
-  const allSelected = selectedIds.size === currentList.length && currentList.length > 0;
-
-  const toggleSelect = (id) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const toggleAll = () => {
-    if (allSelected) setSelectedIds(new Set());
-    else setSelectedIds(new Set(currentList.map(i => i.id)));
-  };
-
-  const handleBulkApprove = async () => {
-    const ids = Array.from(selectedIds);
-    if (activeTab === "submissions") {
-      await Promise.all(ids.map(id => base44.entities.UserSubmittedMedia.update(id, { status: "approved" })));
-      qc.invalidateQueries({ queryKey: ["userSubmissions"] });
-    } else {
-      await Promise.all(ids.map(id => base44.entities.UserMediaReview.update(id, { status: "approved" })));
-      qc.invalidateQueries({ queryKey: ["userReviews"] });
-    }
-    setSelectedIds(new Set());
-  };
-
-  const handleBulkReject = async () => {
-    const ids = Array.from(selectedIds);
-    if (activeTab === "submissions") {
-      await Promise.all(ids.map(id => base44.entities.UserSubmittedMedia.update(id, { status: "rejected", rejection_reason: bulkRejectionReason })));
-      qc.invalidateQueries({ queryKey: ["userSubmissions"] });
-    } else {
-      await Promise.all(ids.map(id => base44.entities.UserMediaReview.update(id, { status: "rejected" })));
-      qc.invalidateQueries({ queryKey: ["userReviews"] });
-    }
-    setSelectedIds(new Set());
-    setShowBulkModal(false);
-    setBulkRejectionReason("");
-  };
-
-  const pendingSubs = submissions.filter(s => s.status === "pending").length;
-  const pendingRevs = reviews.filter(r => r.status === "pending").length;
 
   // Did You Know queries & mutations
   const { data: dykPosts = [], isLoading: dykLoading } = useQuery({
