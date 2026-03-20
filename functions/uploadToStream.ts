@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No file_url provided' }, { status: 400 });
     }
 
-    // Use Cloudflare Stream's URL upload (no need to re-download the file)
+    // Use Cloudflare Stream's URL upload with allowedOrigins wildcard so embedding works everywhere
     const cfRes = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/stream/copy`,
       {
@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
           url: sourceUrl,
           meta: { name: `upload-${user.email}-${Date.now()}` },
           creator: user.email,
+          allowedOrigins: ["*"],
         }),
       }
     );
