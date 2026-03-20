@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Edit2, Trash2, Loader2, AlertCircle, Bell, Filter, CheckSquare, Square, BarChart2, ArrowLeft, Camera, Plus } from "lucide-react";
+import { Check, X, Trash2, Loader2, AlertCircle, Bell, BarChart2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import CreatorApplicationReview from "@/components/admin/CreatorApplicationReview";
-import AdminMusicModeration from "@/components/music/AdminMusicModeration";
-
-const STATUS_FILTERS = ["all", "pending", "approved", "rejected"];
 
 function StatusBadge({ status }) {
   const cls = status === "pending" ? "bg-yellow-100 text-yellow-800"
@@ -19,16 +15,8 @@ function StatusBadge({ status }) {
 
 export default function AdminContentManager() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("submissions");
+  const [activeTab, setActiveTab] = useState("dyk");
   const [dykFilter, setDykFilter] = useState("pending");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedItem, setSelectedItem] = useState(null); // for reject modal
-  const [editingItem, setEditingItem] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [bulkAction, setBulkAction] = useState(null); // "approve" | "reject"
-  const [bulkRejectionReason, setBulkRejectionReason] = useState("");
-  const [showBulkModal, setShowBulkModal] = useState(false);
   const [notification, setNotification] = useState(null);
   const qc = useQueryClient();
 
