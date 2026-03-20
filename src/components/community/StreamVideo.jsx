@@ -23,8 +23,7 @@ function buildEmbedUrl(videoId, { autoplay = false, muted = true } = {}) {
     loop: "true",
     controls: "false",
     preload: "metadata",
-    // fit=cover removes the black letterboxing
-    "defaultTextTrack": "off",
+    poster: "false",
   });
   if (autoplay) params.set("autoplay", "true");
   if (muted) params.set("muted", "true");
@@ -143,16 +142,26 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
         maxHeight: "56vh",
         cursor: "pointer",
         userSelect: "none",
-        background: "#000",
+        background: "transparent",
       }}
     >
+      {/* Scale iframe slightly larger than container so CF Stream's internal padding/letterbox is cropped out */}
       <iframe
         ref={iframeRef}
         src={embedUrl}
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         allowFullScreen
-        className="absolute inset-0 w-full h-full"
-        style={{ border: "none", zIndex: 1 }}
+        style={{
+          border: "none",
+          zIndex: 1,
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "100%",
+          height: "100%",
+          transform: "translate(-50%, -50%) scale(1.01)",
+          objectFit: "cover",
+        }}
       />
 
       {/* Transparent tap capture overlay */}
