@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
+import StreamVideo, { isStreamVideo } from "./StreamVideo";
 
 // Session-level mute preference — unmuted by default
 const sessionPrefs = { muted: false };
@@ -11,6 +12,10 @@ const activeVideo = { ref: null, setPlaying: null };
 const videoProgress = {};
 
 export default function AutoplayVideo({ src, postId, onDoubleTap }) {
+  // Delegate to StreamVideo for Cloudflare Stream URLs
+  if (isStreamVideo(src)) {
+    return <StreamVideo src={src} postId={postId} onDoubleTap={onDoubleTap} />;
+  }
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(sessionPrefs.muted);

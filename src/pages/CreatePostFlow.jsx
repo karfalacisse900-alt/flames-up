@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
+import { uploadToStream } from "@/utils/uploadToStream";
 import { ArrowLeft, ChevronRight, BookMarked, Send, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "../utils";
@@ -87,8 +88,11 @@ export default function CreatePostFlow() {
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
-          const { file_url } = await uploadToCloudflare(item.file);
-          uploadedUrls.push(file_url);
+          const isVid = item.file.type?.startsWith("video");
+          const result = isVid
+            ? await uploadToStream(item.file)
+            : await uploadToCloudflare(item.file);
+          uploadedUrls.push(isVid ? (result.video_id || result.stream_url) : result.file_url);
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
         }

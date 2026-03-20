@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, Video, X, Upload, Loader2 } from "lucide-react";
+import { isStreamVideo } from "@/components/community/StreamVideo";
 import { base44 } from "@/api/base44Client";
-import { uploadToR2 } from "@/utils/uploadToR2";
+import { uploadToStream } from "@/utils/uploadToStream";
 
 export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
   const [playing, setPlaying] = useState(false);
@@ -40,7 +41,7 @@ export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await uploadToR2(file, "groups/videos");
+      const { stream_url: file_url } = await uploadToStream(file);
       await base44.entities.Group.update(group.id, { preview_video_url: file_url });
       setUploading(false);
       setShowUploadUI(false);
@@ -107,18 +108,28 @@ export default function GroupPreviewVideo({ group, isAdmin, onUpdated }) {
       )}
 
       {/* Video */}
-      <video
-        ref={videoRef}
-        src={group.preview_video_url}
-        className="w-full"
-        style={{ maxHeight: 240, objectFit: "cover", display: "block" }}
-        playsInline
-        loop
-        muted
-        onEnded={() => setPlaying(false)}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
-      />
+      {isStreamVideo(group.preview_video_url) ? (
+        <iframe
+          src={`https://iframe.cloudflarestream.com/${group.preview_video_url.match(/([a-f0-9]{32})/)?.[1]}?muted=1&loop=true&controls=false&preload=metadata${playing ? "&autoplay=true" : ""}`}
+          allow="autoplay; fullscreen"
+          allowFullScreen
+          className="w-full"
+          style={{ maxHeight: 240, height: 240, border: "none", display: "block" }}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={group.preview_video_url}
+          className="w-full"
+          style={{ maxHeight: 240, objectFit: "cover", display: "block" }}
+          playsInline
+          loop
+          muted
+          onEnded={() => setPlaying(false)}
+          onPause={() => setPlaying(false)}
+          onPlay={() => setPlaying(true)}
+        />
+      )}
 
       {/* Play / Pause overlay */}
       <button
