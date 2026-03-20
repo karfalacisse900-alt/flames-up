@@ -136,9 +136,11 @@ button {
   min-width: var(--touch-target-min);
   border-radius: 0.95rem;
 }
-button:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.01);
-  box-shadow: var(--elevation-2);
+@media (hover: hover) {
+  button:hover:not(:disabled) {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: var(--elevation-2);
+  }
 }
 button:active:not(:disabled) {
   transform: translateY(1px) scale(0.97) !important;
@@ -165,9 +167,11 @@ button:disabled {
               transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: box-shadow, transform;
 }
-.card-elevated:hover {
-  box-shadow: var(--elevation-3);
-  transform: translateY(-3px) scale(1.005);
+@media (hover: hover) {
+  .card-elevated:hover {
+    box-shadow: var(--elevation-3);
+    transform: translateY(-3px) scale(1.005);
+  }
 }
 .card-elevated:active {
   box-shadow: var(--elevation-1);
@@ -462,9 +466,11 @@ nav, button, a[role="button"], .no-select {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.interactive-layer:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: var(--elevation-3);
+@media (hover: hover) {
+  .interactive-layer:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: var(--elevation-3);
+  }
 }
 .interactive-layer:active {
   transform: translateY(0) scale(0.99);
