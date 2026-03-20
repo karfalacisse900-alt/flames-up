@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { uploadToR2 } from "@/utils/uploadToR2";
+import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
 import { X, Camera, Link2, Eye, EyeOff, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,12 +48,8 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    try {
-      const { file_url } = await uploadToR2(file, "profiles/avatars");
-      setAvatarUrl(file_url);
-    } catch (err) {
-      console.error("Avatar upload failed:", err);
-    }
+    const { file_url } = await uploadToCloudflare(file);
+    setAvatarUrl(file_url);
     setUploading(false);
     e.target.value = "";
   };
@@ -62,12 +58,8 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    try {
-      const { file_url } = await uploadToR2(file, "profiles/banners");
-      setBannerUrl(file_url);
-    } catch (err) {
-      console.error("Banner upload failed:", err);
-    }
+    const { file_url } = await uploadToCloudflare(file);
+    setBannerUrl(file_url);
     setUploading(false);
     e.target.value = "";
   };

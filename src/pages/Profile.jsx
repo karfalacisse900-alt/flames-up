@@ -130,8 +130,9 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
     setAvatarUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setAvatarUrl(file_url);
+    const { file_url: tempUrl } = await base44.integrations.Core.UploadFile({ file });
+    const res = await base44.functions.invoke("uploadToCloudflare", { file_url: tempUrl });
+    setAvatarUrl(res.data?.file_url || tempUrl);
     setAvatarUploading(false);
   };
 
@@ -213,7 +214,10 @@ export default function Profile() {
                        { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
                        { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
                        { to: "/CreatorLanding", icon: <Sparkles className="w-4 h-4" />, label: "Creator Hub", color: "#E05C2A" },
-                       ...(user?.role === "admin" ? [{ to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" }] : []),
+                       ...(user?.role === "admin" ? [
+                         { to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" },
+                         { to: createPageUrl("AdminContentManager"), icon: <BarChart2 className="w-4 h-4" />, label: "Content Manager", color: "#0EA5E9" },
+                       ] : []),
                      ].map(({ to, icon, label, color }) => (
                       <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
                         style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
