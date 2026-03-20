@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap, Shield } from "lucide-react";
+import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap, Shield, Cog } from "lucide-react";
 import SavedItems from "../components/profile/SavedItems";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
@@ -212,7 +212,6 @@ export default function Profile() {
                     {[
                        { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
                        { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                       { to: createPageUrl("HelpCenter"), icon: <HelpCircle className="w-4 h-4" />, label: "Help & Guide", color: "#3C6E5A" },
                        { to: "/CreatorLanding", icon: <Sparkles className="w-4 h-4" />, label: "Creator Hub", color: "#E05C2A" },
                        ...(user?.role === "admin" ? [
                          { to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" },
@@ -225,18 +224,10 @@ export default function Profile() {
                         {label}
                       </Link>
                     ))}
-                    <button onClick={() => { setShowMore(false); setShowExport(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
-                      <Download className="w-4 h-4" /> Export Data
-                    </button>
-                    <button onClick={() => { setShowMore(false); setShowAIDeleteModal(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#D97706", borderBottom: "1px solid var(--border-light)" }}>
-                      <Zap className="w-4 h-4" /> Delete AI Data
-                    </button>
-                    <button onClick={() => base44.auth.logout()} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-light)" }}>
-                      <LogOut className="w-4 h-4" /> Sign Out
-                    </button>
-                    <button onClick={() => { setShowMore(false); setShowDeleteConfirm(true); }} className="flex w-full items-center gap-3 px-4 py-3 text-sm" style={{ color: "#E53E3E" }}>
-                      <Trash2 className="w-4 h-4" /> Delete Account
-                    </button>
+                    <Link to="/Settings" onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
+                      style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                      <Cog className="w-4 h-4" style={{ color: "var(--text-secondary)" }} /> Settings
+                    </Link>
                   </div>
                 </>
               )}
