@@ -324,7 +324,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     selfMarkerRef.current = new window.mapboxgl.Marker({ element: wrapper, anchor: "center" })
       .setLngLat([lng, lat])
       .addTo(map);
-  }, [mapReady, !!userLoc, currentUser?.email]);
+  }, [mapReady, !!userLoc, currentUser?.email, creatorEmails]);
 
   // ── 7. Other user markers — smart-limited (max 12, friends first) ────────
   const MAP_PIN_LIMIT = 15;
