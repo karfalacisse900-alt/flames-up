@@ -1,35 +1,33 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { MessageCircle, Share2, ExternalLink, CheckCircle, Users, AlertTriangle, Lightbulb } from "lucide-react";
+import { MessageCircle, Share2, ExternalLink, CheckCircle, Users, AlertTriangle, Lightbulb, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DYKComments from "./DYKComments";
 
 const CATEGORY_META = {
-  save_money:     { emoji: "💰", label: "Finance",       gradient: ["#10b981", "#059669"] },
-  apps_tech:      { emoji: "📱", label: "Tech",          gradient: ["#6366f1", "#4f46e5"] },
-  travel:         { emoji: "🌎", label: "World",         gradient: ["#0ea5e9", "#0284c7"] },
-  city_services:  { emoji: "🏙", label: "City",          gradient: ["#8b5cf6", "#7c3aed"] },
-  entertainment:  { emoji: "🎬", label: "Entertainment", gradient: ["#f43f5e", "#e11d48"] },
-  jobs:           { emoji: "🔬", label: "Science",       gradient: ["#f97316", "#ea580c"] },
+  save_money:     { emoji: "💰", label: "Finance",       color: "#10b981", bg: "#d1fae5" },
+  apps_tech:      { emoji: "📱", label: "Tech",          color: "#6366f1", bg: "#ede9fe" },
+  travel:         { emoji: "🌎", label: "World",         color: "#0ea5e9", bg: "#e0f2fe" },
+  city_services:  { emoji: "🏙", label: "City",          color: "#8b5cf6", bg: "#f3e8ff" },
+  entertainment:  { emoji: "🎬", label: "Entertainment", color: "#f43f5e", bg: "#ffe4e6" },
+  jobs:           { emoji: "🔬", label: "Science",       color: "#f97316", bg: "#ffedd5" },
 };
 
 const QUALITY_META = {
-  verified:      { icon: CheckCircle,   label: "Verified",      bg: "bg-emerald-100 text-emerald-700" },
-  community_tip: { icon: Users,         label: "Community Tip", bg: "bg-blue-100 text-blue-700" },
-  needs_source:  { icon: AlertTriangle, label: "Needs Source",  bg: "bg-amber-100 text-amber-600" },
+  verified:      { icon: CheckCircle,   label: "Verified",      style: { backgroundColor: "#d1fae5", color: "#059669" } },
+  community_tip: { icon: Users,         label: "Community Tip", style: { backgroundColor: "#dbeafe", color: "#2563eb" } },
+  needs_source:  { icon: AlertTriangle, label: "Needs Source",  style: { backgroundColor: "#fef3c7", color: "#d97706" } },
 };
 
 export default function DYKCard({ fact, user, onVoted }) {
   const [showComments, setShowComments] = useState(false);
   const [voting, setVoting] = useState(false);
   const [localFact, setLocalFact] = useState(fact);
+  const [saved, setSaved] = useState(false);
 
   const myVote = localFact.voted_by?.[user?.email];
   const cat = CATEGORY_META[localFact.category] || CATEGORY_META.apps_tech;
   const quality = localFact.quality_label ? QUALITY_META[localFact.quality_label] : null;
-  const gradient = `linear-gradient(135deg, ${cat.gradient[0]}, ${cat.gradient[1]})`;
-
-  const totalEngagement = (localFact.useful_count || 0) + (localFact.didnt_know_count || 0) + (localFact.comment_count || 0);
 
   async function handleVote(voteType) {
     if (!user || voting) return;
@@ -56,111 +54,135 @@ export default function DYKCard({ fact, user, onVoted }) {
 
     const updated = { ...localFact, useful_count: useful, didnt_know_count: didnt, knew_count: knew, voted_by };
     setLocalFact(updated);
-
-    await base44.entities.DidYouKnow.update(localFact.id, {
-      useful_count: useful, didnt_know_count: didnt, knew_count: knew, voted_by,
-    });
+    await base44.entities.DidYouKnow.update(localFact.id, { useful_count: useful, didnt_know_count: didnt, knew_count: knew, voted_by });
     setVoting(false);
     onVoted?.();
   }
 
   function handleShare() {
     const text = localFact.content;
-    if (navigator.share) navigator.share({ text });
+    if (navigator.share) navigator.share({ text, title: "Did You Know?" });
     else navigator.clipboard.writeText(text);
   }
 
+  const reactions = [
+    { key: "useful",    emoji: "👍", label: "Useful",      count: localFact.useful_count || 0 },
+    { key: "didnt_know",emoji: "🤯", label: "Mind blown",  count: localFact.didnt_know_count || 0 },
+    { key: "knew",      emoji: "✅", label: "Knew it",     count: localFact.knew_count || 0 },
+  ];
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 280, damping: 24 }}
-      className="rounded-3xl overflow-hidden"
-      style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
+      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+      className="overflow-hidden"
+      style={{
+        backgroundColor: "var(--bg-card)",
+        borderRadius: 24,
+        border: "1.5px solid var(--border-light)",
+        boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
+      }}
     >
-      {/* Organic header band */}
-      <div className="relative overflow-hidden px-4 pt-4 pb-5" style={{ background: `linear-gradient(135deg, ${cat.gradient[0]}18, ${cat.gradient[1]}30)` }}>
-        {/* Decorative blobs */}
-        <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${cat.gradient[0]}, ${cat.gradient[1]})` }} />
-        <div className="absolute top-3 right-14 w-8 h-8 rounded-full opacity-15" style={{ background: cat.gradient[1] }} />
+      {/* Color accent bar */}
+      <div style={{ height: 4, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}88)` }} />
 
-        <div className="flex items-center justify-between relative z-10 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-lg shadow-md" style={{ background: gradient }}>
-              <span>{cat.emoji}</span>
-            </div>
-            <div>
-              <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: cat.gradient[0] }}>Did You Know</p>
-              <p className="text-xs font-bold" style={{ color: "var(--text-secondary)" }}>{cat.label}</p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-lg"
+            style={{ backgroundColor: cat.bg }}>
+            {cat.emoji}
           </div>
-          <div className="flex items-center gap-1.5">
-            {quality && (
-              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${quality.bg}`}>
-                <quality.icon className="w-3 h-3" /> {quality.label}
-              </span>
-            )}
-            {totalEngagement > 0 && (
-              <span className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ backgroundColor: "rgba(0,0,0,0.07)", color: "var(--text-secondary)" }}>
-                🔥 {totalEngagement}
-              </span>
-            )}
+          <div>
+            <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: cat.color }}>Did You Know</p>
+            <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>{cat.label}</p>
           </div>
         </div>
 
-        {/* Fact content */}
-        <p className="text-base leading-relaxed font-bold relative z-10"
-          style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-          {localFact.content?.replace(/^(.+?)\n\1$/, "$1")}
-        </p>
+        <div className="flex items-center gap-2">
+          {quality && (
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1" style={quality.style}>
+              <quality.icon className="w-3 h-3" /> {quality.label}
+            </span>
+          )}
+          <button onClick={() => setSaved(v => !v)} className="p-1.5 rounded-full"
+            style={{ backgroundColor: saved ? `${cat.color}18` : "transparent" }}>
+            <Bookmark className="w-4 h-4" style={{ color: saved ? cat.color : "var(--text-hint)", fill: saved ? cat.color : "none" }} />
+          </button>
+        </div>
       </div>
 
-      <div className="px-4 pt-3 pb-3">
-        {/* Image */}
-        {localFact.image_url && (
-          <div className="rounded-2xl overflow-hidden mb-3">
-            <img src={localFact.image_url} alt="" className="w-full max-h-52 object-cover" />
-          </div>
-        )}
+      {/* Optional image */}
+      {localFact.image_url && (
+        <div className="mx-4 rounded-2xl overflow-hidden mb-3" style={{ maxHeight: 200 }}>
+          <img src={localFact.image_url} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
 
-        {/* Source link */}
+      {/* Fact content */}
+      <div className="px-4 pb-3">
+        <p className="text-[17px] leading-relaxed font-bold"
+          style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", lineHeight: 1.55 }}>
+          <span style={{ color: cat.color, fontSize: 20, fontFamily: "serif", marginRight: 4 }}>"</span>
+          {localFact.content?.replace(/^(.+?)\n\1$/, "$1")}
+          <span style={{ color: cat.color, fontSize: 20, fontFamily: "serif", marginLeft: 4 }}>"</span>
+        </p>
+
         {localFact.source_link && (
           <a href={localFact.source_link} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs mb-3 font-bold px-3 py-1.5 rounded-full"
-            style={{ backgroundColor: `${cat.gradient[0]}18`, color: cat.gradient[0] }}>
+            className="inline-flex items-center gap-1.5 text-xs mt-3 font-semibold px-3 py-1.5 rounded-full"
+            style={{ backgroundColor: cat.bg, color: cat.color }}>
             <ExternalLink className="w-3 h-3" /> View Source
           </a>
         )}
-
-        {/* Vote counts */}
-        {(localFact.useful_count > 0 || localFact.didnt_know_count > 0 || localFact.knew_count > 0) && (
-          <div className="flex gap-3 text-xs mb-2 font-medium" style={{ color: "var(--text-hint)" }}>
-            {localFact.useful_count > 0 && <span>👍 {localFact.useful_count.toLocaleString()}</span>}
-            {localFact.didnt_know_count > 0 && <span>🤯 {localFact.didnt_know_count.toLocaleString()}</span>}
-            {localFact.knew_count > 0 && <span>✅ {localFact.knew_count.toLocaleString()}</span>}
-            {localFact.comment_count > 0 && <span>· {localFact.comment_count} comments</span>}
-          </div>
-        )}
       </div>
 
-      {/* Action row */}
-      <div className="flex items-center border-t px-2 py-2 gap-1" style={{ borderColor: "var(--border-subtle)" }}>
-        <VoteBtn emoji="👍" label="Useful" active={myVote === "useful"} gradient={gradient} onClick={() => handleVote("useful")} />
-        <VoteBtn emoji="🤯" label="Mind blown" active={myVote === "didnt_know"} gradient={gradient} onClick={() => handleVote("didnt_know")} />
-        <VoteBtn emoji="✅" label="Knew it" active={myVote === "knew"} gradient={gradient} onClick={() => handleVote("knew")} />
+      {/* Reaction counts */}
+      {(localFact.useful_count > 0 || localFact.didnt_know_count > 0 || localFact.knew_count > 0) && (
+        <div className="flex gap-3 px-4 pb-3 text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
+          {localFact.useful_count > 0 && <span>👍 {localFact.useful_count.toLocaleString()}</span>}
+          {localFact.didnt_know_count > 0 && <span>🤯 {localFact.didnt_know_count.toLocaleString()}</span>}
+          {localFact.knew_count > 0 && <span>✅ {localFact.knew_count.toLocaleString()}</span>}
+          {(localFact.comment_count || 0) > 0 && <span>💬 {localFact.comment_count}</span>}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center border-t px-2 py-2 gap-0.5" style={{ borderColor: "var(--border-subtle)" }}>
+        {reactions.map(r => (
+          <motion.button
+            key={r.key}
+            whileTap={{ scale: 0.88 }}
+            onClick={() => handleVote(r.key)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-bold transition-all"
+            style={{
+              backgroundColor: myVote === r.key ? `${cat.color}18` : "transparent",
+              color: myVote === r.key ? cat.color : "var(--text-hint)",
+              border: myVote === r.key ? `1.5px solid ${cat.color}44` : "1.5px solid transparent",
+            }}>
+            <span>{r.emoji}</span>
+            <span className="hidden sm:inline">{r.label}</span>
+          </motion.button>
+        ))}
+
         <button
           onClick={() => setShowComments(v => !v)}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-xs font-bold"
-          style={{ color: showComments ? cat.gradient[0] : "var(--text-hint)", backgroundColor: showComments ? `${cat.gradient[0]}12` : "transparent" }}>
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-bold transition-all"
+          style={{
+            backgroundColor: showComments ? `${cat.color}18` : "transparent",
+            color: showComments ? cat.color : "var(--text-hint)",
+            border: showComments ? `1.5px solid ${cat.color}44` : "1.5px solid transparent",
+          }}>
           <MessageCircle className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Comment</span>
+          {(localFact.comment_count || 0) > 0 && <span>{localFact.comment_count}</span>}
         </button>
+
         <button
           onClick={handleShare}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-xs font-bold"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-bold transition-all"
           style={{ color: "var(--text-hint)" }}>
           <Share2 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Share</span>
         </button>
       </div>
 
@@ -179,21 +201,5 @@ export default function DYKCard({ fact, user, onVoted }) {
         )}
       </AnimatePresence>
     </motion.div>
-  );
-}
-
-function VoteBtn({ emoji, label, active, gradient, onClick }) {
-  return (
-    <motion.button
-      whileTap={{ scale: 0.88 }}
-      onClick={onClick}
-      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-2xl text-sm font-bold transition-all"
-      style={{
-        color: active ? "white" : "var(--text-hint)",
-        background: active ? gradient : "transparent",
-        boxShadow: active ? "0 3px 10px rgba(0,0,0,0.15)" : "none",
-      }}>
-      <span>{emoji}</span>
-    </motion.button>
   );
 }
