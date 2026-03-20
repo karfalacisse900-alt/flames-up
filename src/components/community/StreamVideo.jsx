@@ -1,28 +1,19 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 
-// Session-level mute preference
-const sessionPrefs = { muted: true };
+// Session-level mute preference — unmuted by default
+const sessionPrefs = { muted: false };
 
 // Global singleton — only one video plays at a time
 const activeIframe = { id: null };
 
-/**
- * Detects if a URL is a Cloudflare Stream video ID or HLS URL.
- * Returns the Cloudflare Stream iframe embed URL.
- */
-function getStreamEmbedUrl(src, muted) {
+function extractVideoId(src) {
   if (!src) return null;
-  // Already a stream video ID (32-char hex)
-  if (/^[a-f0-9]{32}$/.test(src)) {
-    return `https://iframe.cloudflarestream.com/${src}?autoplay=true&muted=${muted ? 1 : 0}&loop=true&controls=false&preload=metadata`;
-  }
-  // HLS manifest URL from cloudflarestream.com
-  const hlsMatch = src.match(/cloudflarestream\.com\/([a-f0-9]{32})\//);
-  if (hlsMatch) {
-    return `https://iframe.cloudflarestream.com/${hlsMatch[1]}?autoplay=true&muted=${muted ? 1 : 0}&loop=true&controls=false&preload=metadata`;
-  }
-  return null;
+  // Bare 32-char hex ID
+  if (/^[a-f0-9]{32}$/.test(src)) return src;
+  // Any cloudflarestream.com URL containing the ID
+  const match = src.match(/([a-f0-9]{32})/);
+  return match ? match[1] : null;
 }
 
 export function isStreamVideo(src) {
@@ -30,7 +21,14 @@ export function isStreamVideo(src) {
   return /^[a-f0-9]{32}$/.test(src) || src.includes("cloudflarestream.com");
 }
 
+function getEmbedUrl(videoId) {
+  if (!videoId) return null;
+  // Always start muted so browsers allow autoplay; we send unmute via postMessage after load
+  return `https://iframe.cloudflarestream.com/${videoId}?autoplay=true&muted=true&loop=true&controls=false&preload=metadata`;
+}
+
 export default function StreamVideo({ src, postId, onDoubleTap }) {
+  const videoId = extractVideoId(src);
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null);
@@ -40,8 +38,7 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
-
-  const embedUrl = getStreamEmbedUrl(src, muted);
+  const iframeReady = useRef(false);
 
   const flashIcon = (icon) => {
     setShowIcon(icon);
@@ -49,20 +46,50 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     iconTimer.current = setTimeout(() => setShowIcon(null), 700);
   };
 
-  const pauseVideo = useCallback(() => {
-    iframeRef.current?.contentWindow?.postMessage('{"method":"pause"}', "*");
-    setPlaying(false);
+  const sendMessage = useCallback((method, value) => {
+    const msg = value !== undefined
+      ? JSON.stringify({ method, value })
+      : JSON.stringify({ method });
+    iframeRef.current?.contentWindow?.postMessage(msg, "*");
   }, []);
 
+  const pauseVideo = useCallback(() => {
+    sendMessage("pause");
+    setPlaying(false);
+  }, [sendMessage]);
+
   const playVideo = useCallback(() => {
-    // Pause any other playing stream video
     if (activeIframe.id && activeIframe.id !== instanceId.current) {
       window.dispatchEvent(new CustomEvent("stream_pause_all", { detail: instanceId.current }));
     }
     activeIframe.id = instanceId.current;
-    iframeRef.current?.contentWindow?.postMessage('{"method":"play"}', "*");
+    sendMessage("play");
     setPlaying(true);
-  }, []);
+    // Apply current mute preference after play
+    setTimeout(() => {
+      sendMessage("muted", sessionPrefs.muted);
+    }, 200);
+  }, [sendMessage]);
+
+  // Listen for messages from the iframe (Stream SDK events)
+  useEffect(() => {
+    const handler = (e) => {
+      if (!e.data) return;
+      try {
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (data.event === "ready") {
+          iframeReady.current = true;
+          // If this video is supposed to be playing, play it now
+          if (activeIframe.id === instanceId.current) {
+            sendMessage("play");
+            setTimeout(() => sendMessage("muted", sessionPrefs.muted), 100);
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [sendMessage]);
 
   // Pause when another stream video starts
   useEffect(() => {
@@ -93,11 +120,7 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     const next = !muted;
     sessionPrefs.muted = next;
     setMuted(next);
-    // Reload iframe with new mute state — simplest way to toggle mute on CF stream iframe
-    if (iframeRef.current) {
-      iframeRef.current.src = getStreamEmbedUrl(src, next);
-      setTimeout(() => playVideo(), 300);
-    }
+    sendMessage("muted", next);
   };
 
   const handleTap = () => {
@@ -115,7 +138,7 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     }, 250);
   };
 
-  if (!embedUrl) return null;
+  if (!videoId) return null;
 
   return (
     <div
@@ -124,23 +147,23 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
-        maxHeight: "56vh",
+        aspectRatio: "9/16",
+        maxHeight: "72vh",
         cursor: "pointer",
         userSelect: "none",
-        background: "#1a1a1a",
+        background: "#000",
       }}
     >
       <iframe
         ref={iframeRef}
-        src={embedUrl}
+        src={getEmbedUrl(videoId)}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
         className="absolute inset-0 w-full h-full"
-        style={{ border: "none", zIndex: 1 }}
+        style={{ border: "none", zIndex: 1, background: "transparent" }}
       />
 
-      {/* Transparent tap capture layer */}
+      {/* Transparent tap capture layer — lets taps through to our handler */}
       <div className="absolute inset-0" style={{ zIndex: 2 }} />
 
       {/* Mute toggle */}
