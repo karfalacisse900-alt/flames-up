@@ -500,9 +500,9 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             {imgs.length > 0 && (
               <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
             )}
-            {post.video_url && post.video_url.trim() && (
+            {videoUrl && videoUrl.trim() && (
               <AutoplayVideo
-                src={post.video_url}
+                src={videoUrl}
                 postId={post.id}
                 onDoubleTap={() => handleLike()}
               />
