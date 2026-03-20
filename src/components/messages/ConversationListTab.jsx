@@ -31,7 +31,7 @@ const getPreview = (msg) => {
   return msg.text || "";
 };
 
-export default function ConversationListTab({ user, tab, onSelect }) {
+export default function ConversationListTab({ user, tab, onSelect, searchQuery = "" }) {
   const queryClient = useQueryClient();
 
   const { data: sentMessages = [] } = useQuery({
@@ -93,9 +93,15 @@ export default function ConversationListTab({ user, tab, onSelect }) {
       .sort((a, b) => new Date(b.lastMessage.created_date) - new Date(a.lastMessage.created_date));
   }, [sentMessages, receivedMessages, followingEmails, user.email]);
 
-  const filtered = conversations.filter(c =>
-    tab === "requests" ? c.isRequest : !c.isRequest
-  );
+  const filtered = conversations.filter(c => {
+    const tabMatch = tab === "requests" ? c.isRequest : !c.isRequest;
+    if (!tabMatch) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   if (filtered.length === 0) return (
     <div className="flex flex-col items-center justify-center py-20">
