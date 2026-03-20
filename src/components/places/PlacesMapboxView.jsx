@@ -270,6 +270,16 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   useEffect(() => {
     const map = mapInst.current;
     if (!map || !mapReady || !userLoc || !window.mapboxgl) return;
+
+    // If current user is an approved creator, remove the blue self marker — they get the orange one
+    if (currentUser?.email && creatorEmails.has(currentUser.email)) {
+      if (selfMarkerRef.current) {
+        selfMarkerRef.current.remove();
+        selfMarkerRef.current = null;
+      }
+      return;
+    }
+
     const [lng, lat] = userLoc;
 
     if (selfMarkerRef.current) {
