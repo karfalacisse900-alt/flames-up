@@ -10,6 +10,7 @@ import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
+import { normalizePost } from "@/utils/normalizeMediaUrl";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { motion, AnimatePresence } from "framer-motion";
 
