@@ -64,7 +64,10 @@ Deno.serve(async (req) => {
     }
 
     const imageId = result.result.id;
-    const file_url = `${DELIVERY_URL.replace(/\/$/, "")}/${imageId}/public`;
+    // Always construct URL from scratch: https://imagedelivery.net/<ACCOUNT_HASH>/<IMAGE_ID>/public
+    // Strip any trailing slashes or extra path segments from DELIVERY_URL
+    const baseUrl = DELIVERY_URL.replace(/\/$/, "").replace(/\/<[^>]+>/g, "");
+    const file_url = `${baseUrl}/${imageId}/public`;
 
     console.log(`[uploadToCloudflare] ✓ image ${imageId} uploaded for ${user.email}`);
     return Response.json({ file_url, image_id: imageId });
