@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, X, Loader2, ImageIcon } from "lucide-react";
+import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
 
 export default function PortfolioUploader({ creator, onUpdated }) {
   const [uploading, setUploading] = useState(false);
@@ -13,7 +14,7 @@ export default function PortfolioUploader({ creator, onUpdated }) {
     setUploading(true);
     const urls = [];
     for (const file of files) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadToCloudflare(file);
       urls.push(file_url);
     }
     const updated = await base44.entities.Creator.update(creator.id, {

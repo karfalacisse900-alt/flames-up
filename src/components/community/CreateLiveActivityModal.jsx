@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { X, MapPin, Clock, Loader2, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
+import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
+import { uploadToStream } from "@/utils/uploadToStream";
 
 const CATEGORIES = [
   { value: "food",   label: "Food",   emoji: "🍕" },
@@ -98,8 +100,14 @@ export default function CreateLiveActivityModal({ user, onClose }) {
     if (!file) return;
     setMediaUploading(true);
     setErrors(prev => ({ ...prev, media: null }));
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setMediaUrl(file_url);
+    const isVid = file.type?.startsWith("video");
+    if (isVid) {
+      const { stream_url } = await uploadToStream(file);
+      setMediaUrl(stream_url);
+    } else {
+      const { file_url } = await uploadToCloudflare(file);
+      setMediaUrl(file_url);
+    }
     setMediaUploading(false);
   };
 

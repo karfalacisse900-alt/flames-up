@@ -23,7 +23,6 @@ function buildEmbedUrl(videoId, { autoplay = false, muted = true } = {}) {
     loop: "true",
     controls: "false",
     preload: "metadata",
-    poster: "false",
   });
   if (autoplay) params.set("autoplay", "true");
   if (muted) params.set("muted", "true");
