@@ -101,9 +101,18 @@ export default function CreatePostFlow() {
       const hashtagStr = (postSettings.hashtags || []).map((t) => `#${t}`).join(" ");
       const rawCaption = stripHtml(postSettings.caption || "");
 
+      // Require either caption or media
+      const hasMedia = uploadedUrls.length > 0;
+      const hasCaption = rawCaption.length > 0;
+      if (!hasMedia && !hasCaption) {
+        throw new Error("Please add a caption or upload a photo/video before posting.");
+      }
+
+      const bodyText = rawCaption + (hashtagStr ? `\n${hashtagStr}` : "");
+
       const postData = {
         type: "opinion",
-        body: rawCaption + (hashtagStr ? `\n${hashtagStr}` : ""),
+        body: bodyText || " ", // fallback space so entity required field passes when media-only post
         author_email: user.email,
         author_name: postSettings.isAnonymous ? "Anonymous" : (user.display_name || user.full_name || "Anonymous"),
         author_avatar_url: postSettings.isAnonymous ? "" : (user.avatar_url || ""),
