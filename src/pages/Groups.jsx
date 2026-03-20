@@ -354,30 +354,35 @@ export default function Groups() {
               </section>
             )}
 
-            {/* All Groups */}
-            <section>
-              <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
-                <Flame className="w-3.5 h-3.5 text-orange-500" /> Popular Groups
-              </p>
-              {groups.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="text-5xl mb-3">👥</div>
-                  <p className="font-bold text-base mb-1" style={{ color: "var(--text-primary)" }}>No groups yet</p>
-                  {user && (
-                    <button onClick={() => setShowCreateModal(true)}
-                      className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-                      style={{ backgroundColor: "var(--accent-primary)" }}>Create First Group</button>
+            {/* Popular Groups — only show groups the user hasn't joined */}
+            {(() => {
+              const popularGroups = groups.filter(g => !membershipMap[g.id]);
+              return (
+                <section>
+                  <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
+                    <Flame className="w-3.5 h-3.5 text-orange-500" /> Popular Groups
+                  </p>
+                  {popularGroups.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <div className="text-4xl mb-3">🎉</div>
+                      <p className="font-semibold text-sm" style={{ color: "var(--text-hint)" }}>You've joined all available groups!</p>
+                      {user && (
+                        <button onClick={() => setShowCreateModal(true)}
+                          className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+                          style={{ backgroundColor: "var(--accent-primary)" }}>Create a New Group</button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {popularGroups.map(g => (
+                        <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
+                          onOpen={handleOpenGroup} onJoin={handleJoin} />
+                      ))}
+                    </div>
                   )}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {groups.map(g => (
-                    <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
-                      onOpen={handleOpenGroup} onJoin={handleJoin} />
-                  ))}
-                </div>
-              )}
-            </section>
+                </section>
+              );
+            })()}
           </>
         )}
       </div>
