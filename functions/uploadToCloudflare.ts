@@ -1,6 +1,7 @@
 /**
  * Upload images to Cloudflare Images API.
- * Returns a delivery URL with variant support (auto-resize, WebP, CDN).
+ * Accepts a file URL (from base44 UploadFile) and pushes it to Cloudflare Images.
+ * Returns { file_url, image_id }
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
@@ -22,17 +23,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Cloudflare not configured' }, { status: 500 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get("file");
+    const { file_url: sourceUrl } = await req.json();
 
-    if (!file) {
-      return Response.json({ error: 'No file provided' }, { status: 400 });
+    if (!sourceUrl) {
+      return Response.json({ error: 'No file_url provided' }, { status: 400 });
     }
 
-    // Forward the file to Cloudflare Images
+    // Fetch the file from the temporary base44 URL
+    const fileRes = await fetch(sourceUrl);
+    if (!fileRes.ok) {
+      console.error("[uploadToCloudflare] Failed to fetch source file:", fileRes.status);
+      return Response.json({ error: 'Failed to fetch source file' }, { status: 400 });
+    }
+
+    const fileBlob = await fileRes.blob();
+    const contentType = fileBlob.type || "image/jpeg";
+    const ext = contentType.split("/")[1]?.split("+")[0] || "jpg";
+
+    // Upload to Cloudflare Images
     const cfForm = new FormData();
-    cfForm.append("file", file);
-    // Optional metadata
+    cfForm.append("file", new File([fileBlob], `upload.${ext}`, { type: contentType }));
     cfForm.append("metadata", JSON.stringify({ uploaded_by: user.email }));
 
     const cfRes = await fetch(
@@ -54,10 +64,9 @@ Deno.serve(async (req) => {
     }
 
     const imageId = result.result.id;
-    // Use 'public' variant — configure variants in your Cloudflare Images dashboard
     const file_url = `${DELIVERY_URL.replace(/\/$/, "")}/${imageId}/public`;
 
-    console.log(`[uploadToCloudflare] Uploaded image ${imageId} for ${user.email}`);
+    console.log(`[uploadToCloudflare] ✓ image ${imageId} uploaded for ${user.email}`);
     return Response.json({ file_url, image_id: imageId });
 
   } catch (err) {
