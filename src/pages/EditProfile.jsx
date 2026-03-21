@@ -153,7 +153,7 @@ export default function EditProfile() {
 
         {/* Bio (headline) */}
         <Field label="Headline">
-          <input value={bio} onChange={e => setBio(e.target.value)} placeholder='e.g. "i\'m the owner of this"'
+          <input value={bio} onChange={e => setBio(e.target.value)} placeholder="e.g. i'm the owner of this"
             maxLength={80} style={inputStyle} />
         </Field>
 
