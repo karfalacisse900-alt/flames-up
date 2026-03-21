@@ -650,6 +650,16 @@ body {
   max-width: 100vw !important;
 }
 
+/* ── Safe-area inset: all fixed-position bottom UI ── */
+/* Covers nav bars, toolbars, bottom sheets, FABs, input bars */
+.fixed-bottom-safe,
+nav.fixed,
+[class*="fixed"][class*="bottom"],
+[style*="position: fixed"][style*="bottom: 0"],
+[style*="position:fixed"][style*="bottom:0"] {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+}
+
 /* ── Layout Stabilization System ── */
 .use-real-vh {
   height: calc(var(--vh, 1vh) * 100);
