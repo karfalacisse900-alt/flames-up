@@ -170,12 +170,11 @@ button:disabled {
 @media (hover: hover) {
   .card-elevated:hover {
     box-shadow: var(--elevation-3);
-    transform: translateY(-3px) scale(1.005);
   }
 }
 .card-elevated:active {
   box-shadow: var(--elevation-1);
-  transform: translateY(1px) scale(0.99);
+  transform: scale(0.99);
 }
 
 /* ── Premium Input Focus Lift ── */
