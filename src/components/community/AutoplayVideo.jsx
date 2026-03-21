@@ -168,12 +168,13 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
           backgroundSize: "200% 100%",
           animation: "videoShimmer 1.4s ease-in-out infinite",
+          minHeight: 200,
         }} />
       )}
 
       {/* Buffering spinner */}
       {buffering && loaded && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
         </div>
       )}
