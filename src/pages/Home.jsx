@@ -3,20 +3,33 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import WelcomePopup from "../components/home/WelcomePopup";
 import WelcomePage from "../components/home/WelcomePage";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 import CommunityFeed from "../components/community/CommunityFeed";
 import StatusBar from "@/components/home/StatusBar";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const containerRef = useRef(null);
+  const { containerProps, RefreshIndicator } = usePullToRefresh(() => {
+    // Refresh feed data here if needed
+    window.location.reload();
+  });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {}).finally(() => setAuthChecked(true));
   }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      Object.assign(containerRef.current, containerProps);
+    }
+  }, [containerProps]);
 
   // Show nothing while checking auth to avoid flash
   if (!authChecked) {
@@ -52,11 +65,13 @@ export default function Home() {
 
   return (
     <motion.div
+      ref={containerRef}
       initial="hidden"
       animate="show"
       variants={stagger}
       style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}
     >
+      <RefreshIndicator />
       <motion.div variants={fadeUp}>
         <HomeHeader user={user} />
       </motion.div>
