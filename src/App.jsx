@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { NavigationStackProvider } from '@/lib/NavigationStack';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { lazy, Suspense } from 'react';
 
