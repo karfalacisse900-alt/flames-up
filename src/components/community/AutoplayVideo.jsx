@@ -157,10 +157,14 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       style={{
         borderRadius: 16,
         width: "100%",
+        aspectRatio: "9/16",
+        maxHeight: "80vh",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
         overflow: "hidden",
+        WebkitUserSelectAll: "none",
+        touchAction: "manipulation",
       }}
     >
       {/* Skeleton shimmer before loaded */}
@@ -185,7 +189,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           playsInline
           loop
           muted={muted}
-          preload="none"
+          preload="metadata"
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
@@ -193,8 +197,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="w-full block"
-        style={{ maxHeight: "75vh", objectFit: "contain", display: "block", zIndex: 1 }}
+        onEnded={() => { setLoaded(true); setPlaying(false); }}
+        className="w-full h-full block"
+        style={{ objectFit: "cover", display: "block", zIndex: 1, backgroundColor: "#000" }}
       />
 
       {/* Tap feedback icon */}
@@ -220,9 +225,9 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
 
       {/* Mute button */}
       {loaded && (
-        <div className="absolute bottom-3 right-3 z-10 pointer-events-auto">
-          <button onClick={toggleMute} className="p-2 rounded-full"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}>
+        <div className="absolute bottom-3 right-3 z-10 pointer-events-auto" style={{ touchAction: "manipulation" }}>
+          <button onClick={toggleMute} className="p-2 rounded-full active:scale-95 transition-transform"
+            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
         </div>
