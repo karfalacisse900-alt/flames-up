@@ -37,7 +37,9 @@ export default function CreatorEditorStep({
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
   const [volume, setVolume] = useState(100);
-  const [textOverlay, setTextOverlay] = useState("");
+  const [textOverlay, setTextOverlay] = useState(
+    () => mediaItems[0]?.edits?.textOverlay || ""
+  );
 
   const currentItem = mediaItems[currentEditingIndex];
   if (!currentItem) return null;
