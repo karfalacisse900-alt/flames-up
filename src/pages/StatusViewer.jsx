@@ -257,33 +257,29 @@ export default function StatusViewer() {
         <div className="w-1/3 h-full cursor-pointer" onClick={handleNext} />
       </div>
 
-      {/* Status text */}
-      <div className="relative z-10 px-6 pb-2">
-        <p className="text-white text-2xl font-bold leading-snug" style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-          {currentStatus.text}
-        </p>
-      </div>
-
-      {/* Reactions */}
-      <div className="relative z-10 flex items-center gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-1.5 flex-1">
-          {REACTION_EMOJIS.map(emoji => {
-            const count = reactionCounts[emoji] || 0;
-            const isReacted = userReactions[emoji];
-            return (
-              <button key={emoji} onClick={() => handleReact(emoji)}
-                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold shrink-0"
-                style={{ backgroundColor: isReacted ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.14)", color: "#fff", border: `1px solid ${isReacted ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)"}` }}>
-                <span>{emoji}</span>
-                {count > 0 && <span className="text-[10px]">{count}</span>}
-              </button>
-            );
-          })}
+      {/* Overlay text at saved position */}
+      {currentStatus.text && (
+        <div className="absolute z-10 max-w-[82%]" style={{ ...textPosStyle }}>
+          <p style={{
+            color: "#fff",
+            fontFamily: "var(--font-serif)",
+            fontSize: textFontSize,
+            fontWeight: 700,
+            lineHeight: 1.25,
+            textAlign: textPosStyle.textAlign,
+            textShadow: "0 2px 16px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.9)",
+          }}>
+            {currentStatus.text}
+          </p>
         </div>
+      )}
+
+      {/* Bottom actions — comment only, no reaction clutter */}
+      <div className="relative z-10 flex items-center justify-end px-4 py-2">
         <button
           onClick={() => { setShowComments(v => !v); clearInterval(timerRef.current); setTimeout(() => inputRef.current?.focus(), 100); }}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0"
-          style={{ backgroundColor: showComments ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.14)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)" }}>
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{ backgroundColor: showComments ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.14)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)" }}>
           <MessageCircle className="w-3.5 h-3.5" />
           {comments.length > 0 && <span>{comments.length}</span>}
         </button>
