@@ -137,7 +137,7 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
-  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "Messages"].includes(currentPageName);
+  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "Messages", "EditProfile", "Settings"].includes(currentPageName);
 
   const showSidebars = !isAdminPage && !hideNav;
 
