@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Search, X, ArrowLeft } from "lucide-react";
 import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
 import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
 import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
 import DYKTab from "@/components/discover/DYKTab";
