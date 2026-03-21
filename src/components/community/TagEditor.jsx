@@ -32,8 +32,9 @@ export default function TagEditor({ imageUrl, existingTags = [], onSave, onClose
     if (!isAddingTag) return;
 
     const rect = imageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    // Store as fractional 0-1 so preview pins work with percentage positioning
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
 
     setNewTagPosition({ x, y });
   };
@@ -43,8 +44,10 @@ export default function TagEditor({ imageUrl, existingTags = [], onSave, onClose
 
     const newTag = {
       id: Date.now().toString(),
+      label: tagForm.name,
       ...tagForm,
-      position: newTagPosition,
+      x: newTagPosition.x,
+      y: newTagPosition.y,
     };
 
     setTags([...tags, newTag]);
