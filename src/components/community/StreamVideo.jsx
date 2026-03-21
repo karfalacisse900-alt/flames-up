@@ -22,7 +22,7 @@ function buildEmbedUrl(videoId, { autoplay = false, muted = true } = {}) {
   const params = new URLSearchParams({
     loop: "true",
     controls: "false",
-    preload: "metadata",
+    preload: "auto",
   });
   if (autoplay) params.set("autoplay", "true");
   if (muted) params.set("muted", "true");
@@ -68,15 +68,15 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     sendMessage("play");
     setPlaying(true);
 
-    // Unmute on first play (after autoplay starts)
-    if (!hasUnmuted.current) {
+    // Unmute on first play only if not already unmuted
+    if (!hasUnmuted.current && muted) {
       hasUnmuted.current = true;
       setTimeout(() => {
         sendMessage("unmute");
         setMuted(false);
-      }, 800);
+      }, 500);
     }
-  }, [sendMessage]);
+  }, [sendMessage, muted]);
 
   // Listen for pause-all events from other videos
   useEffect(() => {
@@ -87,16 +87,19 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     return () => window.removeEventListener("stream_pause_all", handler);
   }, [pauseVideo]);
 
-  // IntersectionObserver: autoplay when 60% visible, pause when not
+  // IntersectionObserver: autoplay when 60% visible, pause when less than 60%
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.intersectionRatio >= 0.6) playVideo();
-        else pauseVideo();
+        if (entry.intersectionRatio >= 0.6) {
+          playVideo();
+        } else if (entry.intersectionRatio < 0.6) {
+          pauseVideo();
+        }
       },
-      { threshold: [0, 0.6] }
+      { threshold: [0, 0.6, 1.0] }
     );
     obs.observe(container);
     return () => { obs.disconnect(); pauseVideo(); };
