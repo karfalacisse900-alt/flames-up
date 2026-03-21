@@ -90,6 +90,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           inViewport.current = true;
+          // Assign src lazily on first viewport entry
+          if (videoRef.current && !srcSet.current) {
+            videoRef.current.src = src;
+            srcSet.current = true;
+          }
           if (!userPaused.current) {
             doPlay();
           }
