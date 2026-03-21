@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { X, MessageCircle, Send } from "lucide-react";
+import { X, MessageCircle, Send, Heart } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -21,7 +21,9 @@ export default function StatusViewer() {
   const [reactions, setReactions] = useState({});
   const [reactionCounts, setReactionCounts] = useState({});
   const [userReactions, setUserReactions] = useState({});
-  const [showComments, setShowComments] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [showComments, setShowComments] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [progress, setProgress] = useState(0);
