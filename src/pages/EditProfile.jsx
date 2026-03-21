@@ -159,10 +159,10 @@ export default function EditProfile() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)", display: "flex", flexDirection: "column", maxHeight: "100vh" }}>
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3"
-        style={{ backgroundColor: "var(--bg-app)", paddingTop: "max(env(safe-area-inset-top,0px), 16px)", borderBottom: "1px solid var(--border-light)" }}>
+        style={{ backgroundColor: "var(--bg-app)", paddingTop: "max(env(safe-area-inset-top,0px), 16px)", borderBottom: "1px solid var(--border-light)", flexShrink: 0 }}>
         <button onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full flex items-center justify-center"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
@@ -176,7 +176,7 @@ export default function EditProfile() {
         </button>
       </div>
 
-      <div className="px-4 pb-12" style={{ paddingTop: 16 }}>
+      <div className="px-4 pb-20 overflow-y-auto" style={{ paddingTop: 16, flex: 1 }}>
         <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
         <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
