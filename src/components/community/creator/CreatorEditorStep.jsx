@@ -142,11 +142,14 @@ export default function CreatorEditorStep({
         <div className="flex-shrink-0 px-4 py-4" style={{ backgroundColor: "#111", borderTop: "1px solid #2a2a2a" }}>
           {activeTool === "text" && (
             <div className="flex gap-2">
-              <input value={textOverlay} onChange={(e) => setTextOverlay(e.target.value)}
+              <input value={textOverlay} onChange={(e) => {
+                  setTextOverlay(e.target.value);
+                  applyEdits({ textOverlay: e.target.value });
+                }}
                 placeholder="Type overlay text…"
                 className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ backgroundColor: "#1e1e1e", border: "1px solid #333", color: "#fff" }} />
-              <button onClick={() => setActiveTool(null)}
+              <button onClick={() => { applyEdits({ textOverlay }); setActiveTool(null); }}
                 className="px-4 py-2 rounded-xl text-white text-sm font-semibold"
                 style={{ backgroundColor: "#2E6B4F" }}>
                 Done
