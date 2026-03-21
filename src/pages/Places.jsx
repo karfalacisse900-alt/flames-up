@@ -119,8 +119,14 @@ export default function PlacesPage() {
     setSeedingPlaces(false);
   };
 
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+    await qc.invalidateQueries({ queryKey: ["realPlaces"] });
+    await qc.invalidateQueries({ queryKey: ["placeFeedPosts"] });
+  });
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div {...containerProps} className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <PullIndicator />
       {/* Header */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderBottom: "1px solid var(--border-subtle)" }}>
         <div className="relative overflow-hidden px-4 pt-4 pb-3">
