@@ -394,13 +394,11 @@ export default function Profile() {
             <Button
               onClick={async () => {
                 if (deleteInput !== "DELETE") return;
-                // Remove profile from Supabase first
                 try {
-                  await base44.functions.invoke("deleteSupabaseProfile", {});
+                  await base44.functions.invoke("deleteUserAccount", {});
                 } catch (e) {
-                  console.error("Supabase profile delete failed (non-fatal):", e);
+                  console.error("Delete account error:", e);
                 }
-                await base44.auth.updateMe({ account_deleted: true, email: `deleted_${Date.now()}@deleted.com` });
                 base44.auth.logout();
               }}
               disabled={deleteInput !== "DELETE"}
