@@ -118,6 +118,25 @@ export default function CreatorEditorStep({
           </div>
         )}
 
+        {/* Tag pins preview (when tag tool is not active) */}
+        {activeTool !== "tag" && currentItem?.edits?.tags?.length > 0 && (
+          <div className="absolute inset-0 pointer-events-none">
+            {currentItem.edits.tags.map((tag, idx) => (
+              <div key={idx} className="absolute flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-white"
+                style={{
+                  left: `${tag.x * 100}%`,
+                  top: `${tag.y * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "rgba(0,0,0,0.72)",
+                  backdropFilter: "blur(4px)",
+                  whiteSpace: "nowrap",
+                }}>
+                🏷 {tag.label}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Media navigation arrows for multi-item */}
         {mediaItems.length > 1 && (
           <>
