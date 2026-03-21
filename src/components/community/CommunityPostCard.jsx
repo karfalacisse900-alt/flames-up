@@ -11,6 +11,7 @@ import PhotoCarousel from "./PhotoCarousel";
 import SavePostModal from "./SavePostModal";
 import TipButton from "./TipButton";
 import PollComponent from "./PollComponent";
+import ShareSheet from "./ShareSheet";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
