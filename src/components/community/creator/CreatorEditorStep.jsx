@@ -41,9 +41,14 @@ export default function CreatorEditorStep({
     () => mediaItems[0]?.edits?.textOverlay || ""
   );
 
-  // Sync text overlay when switching items
+  // Sync all per-item state when switching items
   useEffect(() => {
-    setTextOverlay(mediaItems[currentEditingIndex]?.edits?.textOverlay || "");
+    const edits = mediaItems[currentEditingIndex]?.edits || {};
+    setTextOverlay(edits.textOverlay || "");
+    setBrightness(edits.brightness || 0);
+    setContrast(edits.contrast || 0);
+    setSaturation(edits.saturation || 0);
+    setVolume(edits.volume ?? 100);
   }, [currentEditingIndex]);
 
   const currentItem = mediaItems[currentEditingIndex];
