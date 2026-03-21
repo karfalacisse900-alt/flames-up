@@ -147,8 +147,9 @@ export default function PlacesPage() {
             <div className="flex items-center gap-2">
               {/* Add Place Button */}
               <button onClick={() => user ? setShowAddPlaceModal(true) : base44.auth.redirectToLogin()}
-                className="p-2 rounded-xl transition-all active:scale-90"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                aria-label="Add place"
+                className="rounded-xl flex items-center justify-center transition-all active:scale-90"
+                style={{ minWidth: 44, minHeight: 44, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
                 <Plus className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
               </button>
 
