@@ -664,9 +664,9 @@ export default function CommunityFeed({ user }) {
               </div>
             )}
             {!hasMore && filteredPosts.length > 0 && (
-              <p className="text-center text-sm py-6" style={{ color: "var(--text-hint)" }}>
-                You've reached the end 🎉
-              </p>
+              <div className="text-center py-6" style={{ minHeight: 60 }}>
+                <p className="text-sm" style={{ color: "var(--text-hint)" }}>You've reached the end 🎉</p>
+              </div>
             )}
           </>
         )}
