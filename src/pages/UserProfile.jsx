@@ -141,17 +141,24 @@ export default function UserProfile() {
     navigate(-1);
   };
 
-  // Build display info — show immediately from what we have, fill in as data loads
-  const avatarUrl = userProfileData?.avatar_url || profileUser?.avatar_url;
-  const rawName = profileUser?.full_name || userProfileData?.display_name || userProfileData?.full_name;
+  // Build display info — merge UserProfile entity + User entity
+  const avatarUrl = profileUser?.avatar_url || userProfileData?.avatar_url;
+  const rawName = profileUser?.display_name || profileUser?.full_name || userProfileData?.display_name;
   const effectiveName = rawName || email?.split("@")[0] || "User";
-  const username = userProfileData?.username;
-  const bio = userProfileData?.bio || profileUser?.bio;
-  const interests = userProfileData?.interests || profileUser?.interests || [];
-  const lookingFor = userProfileData?.looking_for || profileUser?.looking_for || [];
-  const location = userProfileData?.location || profileUser?.location;
-  const website = userProfileData?.website || profileUser?.website;
-  const socialLinks = userProfileData?.social_links || profileUser?.social_links || [];
+  const username = profileUser?.username || userProfileData?.username;
+  const bio = profileUser?.bio || userProfileData?.bio;
+  const aboutMe = profileUser?.about_me || userProfileData?.about_me;
+  const interests = profileUser?.interests || userProfileData?.interests || [];
+  const lookingFor = profileUser?.looking_for || userProfileData?.looking_for || [];
+  const website = profileUser?.website || userProfileData?.website;
+  const portfolio = profileUser?.portfolio || userProfileData?.portfolio;
+  const socialLinks = profileUser?.social_links || userProfileData?.social_links || [];
+  // Personal info
+  const age = profileUser?.age || userProfileData?.age;
+  const city = profileUser?.city || userProfileData?.city;
+  const major = profileUser?.major || userProfileData?.major;
+  const graduationYear = profileUser?.graduation_year || userProfileData?.graduation_year;
+  const hobbies = profileUser?.hobbies || userProfileData?.hobbies;
 
   const isOwnProfile = currentUser?.email === email;
 
