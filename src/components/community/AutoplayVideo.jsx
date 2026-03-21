@@ -157,6 +157,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       style={{
         borderRadius: 16,
         width: "100%",
+        height: "auto",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
@@ -192,8 +193,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="w-full block"
-        style={{ maxHeight: "75vh", objectFit: "contain", display: "block", zIndex: 1 }}
+        className="absolute inset-0 w-full h-full"
+        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
       />
 
       {/* Tap feedback icon */}
