@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { MapPin, Bookmark, Map, List, Search, X, Plus } from "lucide-react";
