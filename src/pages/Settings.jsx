@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ChevronRight, Bell, Settings2, Moon, Languages,
-  Users, HelpCircle, FileText, Shield, LogOut, Trash2, AlertTriangle
+  Users, HelpCircle, FileText, Shield, LogOut, Trash2, AlertTriangle, Loader2
 } from "lucide-react";
 import BottomSheet from "@/components/ui/BottomSheet";
 
@@ -15,6 +15,7 @@ export default function Settings() {
   const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [deleteStep, setDeleteStep] = useState(1); // 1 = warning, 2 = confirm
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -25,9 +26,15 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteInput !== "DELETE") return;
-    await base44.auth.updateMe({ account_deleted: true });
-    base44.auth.logout();
+    if (deleteInput !== "DELETE" || deleting) return;
+    setDeleting(true);
+    try {
+      await base44.functions.invoke('deleteUserAccount', {});
+    } catch (err) {
+      console.error("Delete account error:", err);
+    } finally {
+      base44.auth.logout();
+    }
   };
 
   const openDeleteSheet = () => {
@@ -39,6 +46,7 @@ export default function Settings() {
   const SettingRow = ({ icon: Icon, label, onClick, rightEl, danger }) => (
     <button
       onClick={onClick}
+      aria-label={label}
       className="w-full flex items-center justify-between px-4 py-4"
       style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
@@ -221,11 +229,13 @@ export default function Settings() {
               </button>
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteInput !== "DELETE"}
+                disabled={deleteInput !== "DELETE" || deleting}
+                aria-label="Permanently delete account"
                 className="flex-1 font-bold text-sm rounded-2xl text-white disabled:opacity-35"
                 style={{ backgroundColor: "#ef4444", minHeight: 52 }}>
                 <span className="flex items-center justify-center gap-2">
-                  <Trash2 className="w-4 h-4" /> Delete Forever
+                  {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  {deleting ? "Deleting..." : "Delete Forever"}
                 </span>
               </button>
             </div>
