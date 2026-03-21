@@ -138,13 +138,16 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
       style={{
         borderRadius: 16,
         aspectRatio: "9/16",
-        maxHeight: "56vh",
+        maxHeight: "80vh",
         cursor: "pointer",
         userSelect: "none",
-        background: "transparent",
+        background: "#000",
+        overflow: "hidden",
+        WebkitUserSelectAll: "none",
+        touchAction: "manipulation",
       }}
     >
-      {/* Scale iframe slightly larger than container so CF Stream's internal padding/letterbox is cropped out */}
+      {/* Scale iframe to cover container without letterboxing */}
       <iframe
         ref={iframeRef}
         src={embedUrl}
@@ -154,11 +157,11 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
           border: "none",
           zIndex: 1,
           position: "absolute",
-          top: "50%",
-          left: "50%",
+          top: 0,
+          left: 0,
           width: "100%",
           height: "100%",
-          transform: "translate(-50%, -50%) scale(1.01)",
+          transform: "scale(1.02)",
           objectFit: "cover",
         }}
       />
@@ -170,8 +173,8 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
       <div className="absolute bottom-3 right-3" style={{ zIndex: 3 }}>
         <button
           onClick={toggleMute}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
+          className="p-2 rounded-full active:scale-95 transition-transform"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", touchAction: "manipulation" }}
         >
           {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
