@@ -33,7 +33,9 @@ const FONT_SIZES = [
   { label: "XL", size: 40 },
 ];
 
-export default function PostStatusModal({ user, groupId, groupName, onClose, onPosted }) {
+export default function PostStatusModal({ user, onClose, onPosted }) {
+  const groupId = null;
+  const groupName = null;
   const [text, setText] = useState("");
   const [bg, setBg] = useState(BG_PRESETS[0]);
   const [mediaUrl, setMediaUrl] = useState("");
