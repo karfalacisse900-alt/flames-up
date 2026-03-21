@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
 import { Search, X, ArrowLeft } from "lucide-react";
 import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
