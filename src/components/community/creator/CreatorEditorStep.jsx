@@ -105,7 +105,7 @@ export default function CreatorEditorStep({
         )}
 
         {/* Text overlay preview */}
-        {textOverlay && (
+        {(textOverlay || currentItem?.edits?.textOverlay) && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8">
             <div className="px-5 py-2.5 rounded-xl max-w-full" style={{ backgroundColor: "rgba(0,0,0,0.65)" }}>
               <p className="text-white text-xl font-bold text-center break-words" style={{ 
@@ -113,7 +113,7 @@ export default function CreatorEditorStep({
                 wordBreak: "break-word",
                 maxWidth: "100%",
                 hyphens: "auto"
-              }}>{textOverlay}</p>
+              }}>{textOverlay || currentItem?.edits?.textOverlay}</p>
             </div>
           </div>
         )}
