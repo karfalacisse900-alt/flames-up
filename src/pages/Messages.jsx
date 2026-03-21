@@ -177,7 +177,7 @@ export default function Messages() {
 
   return (
      <div ref={containerRef} className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
-       <RefreshIndicator />
+       <PullIndicator />
        {/* Header */}
        <div
          className="shrink-0 px-5 pt-5 pb-3"
