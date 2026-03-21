@@ -316,6 +316,8 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
 
         {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
         {showSaveModal && <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />}
+        <ShareSheet open={showShareSheet} onClose={() => setShowShareSheet(false)}
+          url={`${window.location.origin}?post=${post.id}`} text={post.title || post.body?.slice(0, 100)} />
       </div>
     );
   }
