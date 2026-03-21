@@ -508,6 +508,32 @@ input, textarea, [contenteditable],
   justify-content: center;
 }
 
+/* iOS WebView: Ensure all interactive elements meet 44px minimum */
+@media (max-width: 1023px) {
+  button, a, [role="button"], [role="tab"], [role="menuitem"], input, select, textarea {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Buttons with icon only */
+  button[class*="icon"], button[class*="rounded-full"] {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Navigation items */
+  nav button, nav a, nav [role="button"] {
+    min-height: 48px !important;
+    padding: 12px !important;
+  }
+  
+  /* Form controls padding for easier tapping */
+  input[type="checkbox"], input[type="radio"] {
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+  }
+}
+
 /* ── Desktop layout: wider container for non-mobile pages ── */
 @media (min-width: 768px) {
   .desktop-wide {
