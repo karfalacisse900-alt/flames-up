@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, MapPin, Loader2, SlidersHorizontal, X, ArrowLeft } from "lucide-react";
+import { Plus, MapPin, Loader2, ArrowLeft, Navigation, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import LiveActivityCard from "@/components/community/LiveActivityCard";
 import CreateLiveActivityModal from "@/components/community/CreateLiveActivityModal";
@@ -18,10 +18,10 @@ const CATEGORIES = [
 ];
 
 const RADIUS_OPTIONS = [
-  { label: "5 km",  value: 5 },
-  { label: "15 km", value: 15 },
-  { label: "50 km", value: 50 },
-  { label: "Any",   value: 9999 },
+  { label: "1 km",   value: 1 },
+  { label: "5 km",   value: 5 },
+  { label: "15 km",  value: 15 },
+  { label: "50 km",  value: 50 },
 ];
 
 function distanceKm(lat1, lng1, lat2, lng2) {
@@ -30,6 +30,16 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function timeUntil(expiresAt) {
+  const now = new Date();
+  const exp = new Date(expiresAt);
+  const minLeft = Math.floor((exp - now) / 1000 / 60);
+  if (minLeft < 1) return "Ending soon";
+  if (minLeft < 60) return `${minLeft}m left`;
+  const hrsLeft = Math.floor(minLeft / 60);
+  return `${hrsLeft}h left`;
 }
 
 export default function LiveNearby() {
@@ -41,14 +51,14 @@ export default function LiveNearby() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [radius, setRadius] = useState(15);
   const [showComposer, setShowComposer] = useState(false);
-  const [showRadiusPicker, setShowRadiusPicker] = useState(false);
+  const [sortBy, setSortBy] = useState("distance"); // "distance" or "newest"
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-    detectLocation();
+    requestLocation();
   }, []);
 
-  const detectLocation = () => {
+  const requestLocation = () => {
     if (!navigator.geolocation) return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
@@ -67,18 +77,16 @@ export default function LiveNearby() {
       const now = new Date();
       return all.filter(a => new Date(a.expires_at) > now);
     },
-    refetchInterval: 30000,
+    refetchInterval: 20000,
   });
 
   const filtered = useMemo(() => {
     let list = activities;
 
-    // Category filter
     if (activeCategory !== "all") {
       list = list.filter(a => a.category === activeCategory);
     }
 
-    // Geo filter
     if (coords) {
       list = list
         .map(a => {
@@ -86,97 +94,60 @@ export default function LiveNearby() {
           return { ...a, distance: distanceKm(coords.lat, coords.lng, a.location_lat, a.location_lng) };
         })
         .filter(a => a.distance <= radius)
-        .sort((a, b) => a.distance - b.distance);
+        .sort((a, b) => sortBy === "distance" ? a.distance - b.distance : new Date(b.created_date) - new Date(a.created_date));
     }
 
     return list;
-  }, [activities, activeCategory, coords, radius]);
+  }, [activities, activeCategory, coords, radius, sortBy]);
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div
-        className="sticky top-0 z-30 border-b"
-        style={{ backgroundColor: "var(--bg-app)", borderColor: "var(--border-light)" }}
-      >
-        <div className="max-w-2xl mx-auto px-4 pt-4 pb-3">
-          <div className="flex items-center gap-3 mb-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "var(--bg-subtle)" }}
-            >
-              <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+      {/* Advanced Header */}
+      <div className="sticky top-0 z-30 border-b" style={{ backgroundColor: "var(--bg-app)", borderColor: "var(--border-light)" }}>
+        <div className="max-w-4xl mx-auto px-4 pt-4 pb-3">
+          {/* Top Bar */}
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+              <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
             </button>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#f43f5e" }} />
-                <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                  Live Nearby
-                </h1>
+                <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: "#f43f5e" }} />
+                <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Live Nearby</h1>
               </div>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Real-time activities around you</p>
+              {coords && <p className="text-xs" style={{ color: "var(--text-hint)" }}>Real-time activities around you</p>}
             </div>
-
-            {/* Radius picker */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRadiusPicker(p => !p)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-                style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-secondary)" }}
-              >
-                <MapPin className="w-3.5 h-3.5" style={{ color: "#f43f5e" }} />
-                {radius === 9999 ? "Any" : `${radius} km`}
-              </button>
-              {showRadiusPicker && (
-                <div
-                  className="absolute right-0 top-10 rounded-2xl overflow-hidden z-20 w-32"
-                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}
-                >
-                  {RADIUS_OPTIONS.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setRadius(opt.value); setShowRadiusPicker(false); }}
-                      className="w-full px-4 py-2.5 text-sm text-left font-semibold"
-                      style={{
-                        backgroundColor: radius === opt.value ? "rgba(244,63,94,0.1)" : "transparent",
-                        color: radius === opt.value ? "#f43f5e" : "var(--text-primary)",
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {user && (
-              <button
-                onClick={() => setShowComposer(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold text-white shrink-0"
-                style={{ background: "linear-gradient(135deg, #f43f5e, #e11d48)", boxShadow: "0 4px 12px rgba(244,63,94,0.3)" }}
-              >
+              <button onClick={() => setShowComposer(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold text-white shrink-0" style={{ background: "linear-gradient(135deg, #f43f5e, #e11d48)" }}>
                 <Plus className="w-4 h-4" /> Post
               </button>
             )}
           </div>
 
-          {/* Category filters */}
+          {/* Location & Filter Row */}
+          <div className="flex gap-2 mb-3">
+            <button onClick={requestLocation} disabled={locationLoading} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: coords ? "rgba(20, 184, 166, 0.1)" : "rgba(244, 63, 94, 0.1)", color: coords ? "var(--accent-secondary)" : "#f43f5e", border: "1px solid" + (coords ? "rgba(20, 184, 166, 0.3)" : "rgba(244, 63, 94, 0.3)") }}>
+              <Navigation className="w-3.5 h-3.5" /> {coords ? "Located" : "Enable Location"}
+            </button>
+
+            {coords && (
+              <select value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
+                {RADIUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            )}
+
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
+              <option value="distance">Closest</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+
+          {/* Category Filter Scrollable */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             {CATEGORIES.map(cat => {
               const isActive = activeCategory === cat.value;
               return (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveCategory(cat.value)}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{
-                    backgroundColor: isActive ? "#f43f5e" : "var(--bg-card)",
-                    color: isActive ? "#fff" : "var(--text-secondary)",
-                    border: `1.5px solid ${isActive ? "#f43f5e" : "var(--border-light)"}`,
-                    boxShadow: isActive ? "0 2px 8px rgba(244,63,94,0.3)" : "none",
-                  }}
-                >
+                <button key={cat.value} onClick={() => setActiveCategory(cat.value)} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: isActive ? "#f43f5e" : "var(--bg-card)", color: isActive ? "#fff" : "var(--text-secondary)", border: `1.5px solid ${isActive ? "#f43f5e" : "var(--border-light)"}` }}>
                   {cat.emoji} {cat.label}
                 </button>
               );
@@ -185,31 +156,24 @@ export default function LiveNearby() {
         </div>
       </div>
 
-      {/* Location banner */}
+      {/* Location Request Banner */}
       {!coords && !locationLoading && (
-        <div className="max-w-2xl mx-auto px-4 pt-4">
-          <div
-            className="flex items-center gap-3 p-4 rounded-2xl"
-            style={{ backgroundColor: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}
-          >
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ backgroundColor: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.2)" }}>
             <MapPin className="w-5 h-5 shrink-0" style={{ color: "#f43f5e" }} />
             <div className="flex-1">
-              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Enable location for better results</p>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>See activities closest to you first</p>
+              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Enable location to discover nearby activities</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Find events, food spots, meetups & more around you</p>
             </div>
-            <button
-              onClick={detectLocation}
-              className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-              style={{ backgroundColor: "#f43f5e" }}
-            >
+            <button onClick={requestLocation} className="text-xs font-bold px-3 py-1.5 rounded-full text-white" style={{ backgroundColor: "#f43f5e" }}>
               Enable
             </button>
           </div>
         </div>
       )}
 
-      {/* Feed */}
-      <div className="max-w-2xl mx-auto px-4 py-5">
+      {/* Activities Feed */}
+      <div className="max-w-4xl mx-auto px-4 py-5">
         {isLoading || locationLoading ? (
           <div className="flex flex-col gap-4">
             {[0, 1, 2].map(i => (
@@ -218,35 +182,47 @@ export default function LiveNearby() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="text-5xl mb-4">📍</div>
+            <div className="text-5xl mb-4">🌍</div>
             <h3 className="text-lg font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              Nothing happening yet
+              No activities nearby
             </h3>
             <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>
-              Be the first to share a local activity!
+              {!coords ? "Enable location to discover nearby activities" : "Be the first to post something!"}
             </p>
             {user && (
-              <button
-                onClick={() => setShowComposer(true)}
-                className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
-                style={{ background: "linear-gradient(135deg, #f43f5e, #e11d48)" }}
-              >
+              <button onClick={() => setShowComposer(true)} className="px-6 py-3 rounded-2xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #f43f5e, #e11d48)" }}>
                 Post an Activity
               </button>
             )}
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
-              {filtered.length} active {filtered.length === 1 ? "activity" : "activities"} nearby
-            </p>
+            <div className="flex items-center justify-between px-1">
+              <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>
+                {filtered.length} active {filtered.length === 1 ? "activity" : "activities"}
+              </p>
+              {coords && (
+                <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                  within {radius} km
+                </p>
+              )}
+            </div>
             {filtered.map(activity => (
-              <LiveActivityCard
-                key={activity.id}
-                activity={activity}
-                user={user}
-                onUpdate={() => qc.invalidateQueries({ queryKey: ["liveActivities"] })}
-              />
+              <div key={activity.id} className="relative rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                <LiveActivityCard activity={activity} user={user} onUpdate={() => qc.invalidateQueries({ queryKey: ["liveActivities"] })} />
+                
+                {/* Distance + Time Overlay */}
+                <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+                  {activity.distance !== undefined && activity.distance < 9999 && (
+                    <div className="px-2.5 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                      {activity.distance < 1 ? `${Math.round(activity.distance * 1000)}m` : `${activity.distance.toFixed(1)} km`}
+                    </div>
+                  )}
+                  <div className="px-2.5 py-1 rounded-full text-xs font-semibold text-white flex items-center gap-1" style={{ backgroundColor: "rgba(244, 63, 94, 0.8)" }}>
+                    <Clock className="w-3 h-3" /> {timeUntil(activity.expires_at)}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
