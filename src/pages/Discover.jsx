@@ -66,7 +66,7 @@ export default function Discover() {
       .finally(() => setIsLoading(false));
   };
 
-  const { containerProps, RefreshIndicator } = usePullToRefresh(refreshItems);
+  const { containerProps, PullIndicator } = usePullToRefresh(refreshItems);
 
   return (
     <div
@@ -74,7 +74,7 @@ export default function Discover() {
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-app)" }}
     >
-      <RefreshIndicator />
+      <PullIndicator />
 
       {/* ── Sticky Header ── */}
       <div
