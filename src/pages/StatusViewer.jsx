@@ -293,7 +293,7 @@ export default function StatusViewer() {
         </div>
       )}
 
-      {/* Bottom actions — like + comment */}
+      {/* Bottom actions — like + share + comment */}
       <div className="relative z-10 flex items-center justify-end gap-2 px-4 py-2">
         <button onClick={handleLike}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
