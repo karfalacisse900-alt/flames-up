@@ -1,148 +1,133 @@
 /**
- * pages.config.js - Page routing configuration
- * 
- * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
- * Pages are auto-registered when you create files in the ./pages/ folder.
- * 
- * THE ONLY EDITABLE VALUE: mainPage
- * This controls which page is the landing page (shown when users visit the app).
- * 
- * Example file structure:
- * 
- *   import HomePage from './pages/HomePage';
- *   import Dashboard from './pages/Dashboard';
- *   import Settings from './pages/Settings';
- *   
- *   export const PAGES = {
- *       "HomePage": HomePage,
- *       "Dashboard": Dashboard,
- *       "Settings": Settings,
- *   }
- *   
- *   export const pagesConfig = {
- *       mainPage: "HomePage",
- *       Pages: PAGES,
- *   };
- * 
- * Example with Layout (wraps all pages):
- *
- *   import Home from './pages/Home';
- *   import Settings from './pages/Settings';
- *   import __Layout from './Layout.jsx';
- *
- *   export const PAGES = {
- *       "Home": Home,
- *       "Settings": Settings,
- *   }
- *
- *   export const pagesConfig = {
- *       mainPage: "Home",
- *       Pages: PAGES,
- *       Layout: __Layout,
- *   };
- *
- * To change the main page from HomePage to Dashboard, use find_replace:
- *   Old: mainPage: "HomePage",
- *   New: mainPage: "Dashboard",
- *
- * The mainPage value must match a key in the PAGES object exactly.
+ * pages.config.js - Page routing configuration with lazy loading
+ * All pages use React.lazy for code splitting / faster initial load.
  */
-import AdminAnalytics from './pages/AdminAnalytics';
-import AdminContentManager from './pages/AdminContentManager';
-import AdminModeration from './pages/AdminModeration';
-import Art from './pages/Art';
-import ArtStudio from './pages/ArtStudio';
-import CampusMap from './pages/CampusMap';
-import Collections from './pages/Collections';
-import CreateGroup from './pages/CreateGroup';
-import CreatePost from './pages/CreatePost';
-import CreatePostFlow from './pages/CreatePostFlow';
-import CreatorApplication from './pages/CreatorApplication';
-import CreatorDashboard from './pages/CreatorDashboard';
-import DailyChallenge from './pages/DailyChallenge';
-import DidYouKnow from './pages/DidYouKnow';
-import Discover from './pages/Discover';
-import DiscoverForum from './pages/DiscoverForum';
-import EditServiceProfile from './pages/EditServiceProfile';
-import Explore from './pages/Explore';
-import Gallery from './pages/Gallery';
-import GamePlay from './pages/GamePlay';
-import Games from './pages/Games';
-import GoLive from './pages/GoLive';
-import Groups from './pages/Groups';
-import HallOfFame from './pages/HallOfFame';
-import HelpCenter from './pages/HelpCenter';
-import Home from './pages/Home';
-import Live from './pages/Live';
-import LiveRoomView from './pages/LiveRoomView';
-import Messages from './pages/Messages';
-import MyLibrary from './pages/MyLibrary';
-import NotificationSettings from './pages/NotificationSettings';
-import Notifications from './pages/Notifications';
-import NowBoard from './pages/NowBoard';
-import PlaceDetail from './pages/PlaceDetail';
-import Places from './pages/Places';
-import PostComments from './pages/PostComments';
-import PostDetail from './pages/PostDetail';
-import Profile from './pages/Profile';
-import Referral from './pages/Referral';
-import Shop from './pages/Shop';
-import StatusViewer from './pages/StatusViewer';
-import UserProfile from './pages/UserProfile';
-import Wallet from './pages/Wallet';
-import WeeklyChallenges from './pages/WeeklyChallenges';
+import React, { Suspense } from 'react';
 import __Layout from './Layout.jsx';
 
+// ── Lazy page imports (code-split per page) ──────────────────────────────────
+const AdminAnalytics       = React.lazy(() => import('./pages/AdminAnalytics'));
+const AdminContentManager  = React.lazy(() => import('./pages/AdminContentManager'));
+const AdminModeration      = React.lazy(() => import('./pages/AdminModeration'));
+const Art                  = React.lazy(() => import('./pages/Art'));
+const ArtStudio            = React.lazy(() => import('./pages/ArtStudio'));
+const CampusMap            = React.lazy(() => import('./pages/CampusMap'));
+const Collections          = React.lazy(() => import('./pages/Collections'));
+const CreateGroup          = React.lazy(() => import('./pages/CreateGroup'));
+const CreatePost           = React.lazy(() => import('./pages/CreatePost'));
+const CreatePostFlow       = React.lazy(() => import('./pages/CreatePostFlow'));
+const CreatorApplication   = React.lazy(() => import('./pages/CreatorApplication'));
+const CreatorDashboard     = React.lazy(() => import('./pages/CreatorDashboard'));
+const DailyChallenge       = React.lazy(() => import('./pages/DailyChallenge'));
+const DidYouKnow           = React.lazy(() => import('./pages/DidYouKnow'));
+const Discover             = React.lazy(() => import('./pages/Discover'));
+const DiscoverForum        = React.lazy(() => import('./pages/DiscoverForum'));
+const EditServiceProfile   = React.lazy(() => import('./pages/EditServiceProfile'));
+const Explore              = React.lazy(() => import('./pages/Explore'));
+const Gallery              = React.lazy(() => import('./pages/Gallery'));
+const GamePlay             = React.lazy(() => import('./pages/GamePlay'));
+const Games                = React.lazy(() => import('./pages/Games'));
+const GoLive               = React.lazy(() => import('./pages/GoLive'));
+const Groups               = React.lazy(() => import('./pages/Groups'));
+const HallOfFame           = React.lazy(() => import('./pages/HallOfFame'));
+const HelpCenter           = React.lazy(() => import('./pages/HelpCenter'));
+const Home                 = React.lazy(() => import('./pages/Home'));
+const Live                 = React.lazy(() => import('./pages/Live'));
+const LiveRoomView         = React.lazy(() => import('./pages/LiveRoomView'));
+const Messages             = React.lazy(() => import('./pages/Messages'));
+const MyLibrary            = React.lazy(() => import('./pages/MyLibrary'));
+const NotificationSettings = React.lazy(() => import('./pages/NotificationSettings'));
+const Notifications        = React.lazy(() => import('./pages/Notifications'));
+const NowBoard             = React.lazy(() => import('./pages/NowBoard'));
+const PlaceDetail          = React.lazy(() => import('./pages/PlaceDetail'));
+const Places               = React.lazy(() => import('./pages/Places'));
+const PostComments         = React.lazy(() => import('./pages/PostComments'));
+const PostDetail           = React.lazy(() => import('./pages/PostDetail'));
+const Profile              = React.lazy(() => import('./pages/Profile'));
+const Referral             = React.lazy(() => import('./pages/Referral'));
+const Shop                 = React.lazy(() => import('./pages/Shop'));
+const StatusViewer         = React.lazy(() => import('./pages/StatusViewer'));
+const UserProfile          = React.lazy(() => import('./pages/UserProfile'));
+const Wallet               = React.lazy(() => import('./pages/Wallet'));
+const WeeklyChallenges     = React.lazy(() => import('./pages/WeeklyChallenges'));
 
-export const PAGES = {
-    "AdminAnalytics": AdminAnalytics,
-    "AdminContentManager": AdminContentManager,
-    "AdminModeration": AdminModeration,
-    "Art": Art,
-    "ArtStudio": ArtStudio,
-    "CampusMap": CampusMap,
-    "Collections": Collections,
-    "CreateGroup": CreateGroup,
-    "CreatePost": CreatePost,
-    "CreatePostFlow": CreatePostFlow,
-    "CreatorApplication": CreatorApplication,
-    "CreatorDashboard": CreatorDashboard,
-    "DailyChallenge": DailyChallenge,
-    "DidYouKnow": DidYouKnow,
-    "Discover": Discover,
-    "DiscoverForum": DiscoverForum,
-    "EditServiceProfile": EditServiceProfile,
-    "Explore": Explore,
-    "Gallery": Gallery,
-    "GamePlay": GamePlay,
-    "Games": Games,
-    "GoLive": GoLive,
-    "Groups": Groups,
-    "HallOfFame": HallOfFame,
-    "HelpCenter": HelpCenter,
-    "Home": Home,
-    "Live": Live,
-    "LiveRoomView": LiveRoomView,
-    "Messages": Messages,
-    "MyLibrary": MyLibrary,
-    "NotificationSettings": NotificationSettings,
-    "Notifications": Notifications,
-    "NowBoard": NowBoard,
-    "PlaceDetail": PlaceDetail,
-    "Places": Places,
-    "PostComments": PostComments,
-    "PostDetail": PostDetail,
-    "Profile": Profile,
-    "Referral": Referral,
-    "Shop": Shop,
-    "StatusViewer": StatusViewer,
-    "UserProfile": UserProfile,
-    "Wallet": Wallet,
-    "WeeklyChallenges": WeeklyChallenges,
+// Page-level suspense fallback — matches app bg to avoid flash
+function PageFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "100dvh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "var(--bg-app)",
+      }}
+    >
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
+    </div>
+  );
 }
 
+// HOC: wraps a lazy component in Suspense so the pagesConfig loop works unchanged
+function lazy(LazyComponent) {
+  return function LazyPage(props) {
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <LazyComponent {...props} />
+      </Suspense>
+    );
+  };
+}
+
+export const PAGES = {
+  "AdminAnalytics":       lazy(AdminAnalytics),
+  "AdminContentManager":  lazy(AdminContentManager),
+  "AdminModeration":      lazy(AdminModeration),
+  "Art":                  lazy(Art),
+  "ArtStudio":            lazy(ArtStudio),
+  "CampusMap":            lazy(CampusMap),
+  "Collections":          lazy(Collections),
+  "CreateGroup":          lazy(CreateGroup),
+  "CreatePost":           lazy(CreatePost),
+  "CreatePostFlow":       lazy(CreatePostFlow),
+  "CreatorApplication":   lazy(CreatorApplication),
+  "CreatorDashboard":     lazy(CreatorDashboard),
+  "DailyChallenge":       lazy(DailyChallenge),
+  "DidYouKnow":           lazy(DidYouKnow),
+  "Discover":             lazy(Discover),
+  "DiscoverForum":        lazy(DiscoverForum),
+  "EditServiceProfile":   lazy(EditServiceProfile),
+  "Explore":              lazy(Explore),
+  "Gallery":              lazy(Gallery),
+  "GamePlay":             lazy(GamePlay),
+  "Games":                lazy(Games),
+  "GoLive":               lazy(GoLive),
+  "Groups":               lazy(Groups),
+  "HallOfFame":           lazy(HallOfFame),
+  "HelpCenter":           lazy(HelpCenter),
+  "Home":                 lazy(Home),
+  "Live":                 lazy(Live),
+  "LiveRoomView":         lazy(LiveRoomView),
+  "Messages":             lazy(Messages),
+  "MyLibrary":            lazy(MyLibrary),
+  "NotificationSettings": lazy(NotificationSettings),
+  "Notifications":        lazy(Notifications),
+  "NowBoard":             lazy(NowBoard),
+  "PlaceDetail":          lazy(PlaceDetail),
+  "Places":               lazy(Places),
+  "PostComments":         lazy(PostComments),
+  "PostDetail":           lazy(PostDetail),
+  "Profile":              lazy(Profile),
+  "Referral":             lazy(Referral),
+  "Shop":                 lazy(Shop),
+  "StatusViewer":         lazy(StatusViewer),
+  "UserProfile":          lazy(UserProfile),
+  "Wallet":               lazy(Wallet),
+  "WeeklyChallenges":     lazy(WeeklyChallenges),
+};
+
 export const pagesConfig = {
-    mainPage: "Home",
-    Pages: PAGES,
-    Layout: __Layout,
+  mainPage: "Home",
+  Pages: PAGES,
+  Layout: __Layout,
 };
