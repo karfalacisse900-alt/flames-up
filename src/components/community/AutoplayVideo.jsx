@@ -188,15 +188,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
            all call markLoaded() so we catch whichever fires first.
       */}
       {/* Placeholder shown before video src is loaded */}
-      {!srcLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center"
-          style={{ backgroundColor: "#1a1a1a", zIndex: 2 }}>
-          <div className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
-            <Play className="w-6 h-6 text-white opacity-60" fill="white" />
-          </div>
-        </div>
-      )}
       <video
         ref={videoRef}
         src={srcLoaded ? src : undefined}
@@ -210,8 +201,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onError={markLoaded}
         onWaiting={() => setBuffering(true)}
         onPlaying={() => { setBuffering(false); setLoaded(true); }}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: srcLoaded ? 1 : 0, zIndex: 1 }}
+        className="absolute inset-0 w-full h-full"
+        style={{ objectFit: "cover", zIndex: 1 }}
       />
 
       {/* Tap icon feedback */}
