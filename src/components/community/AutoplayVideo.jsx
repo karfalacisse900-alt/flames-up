@@ -157,7 +157,6 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       style={{
         borderRadius: 16,
         width: "100%",
-        height: "auto",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
@@ -170,6 +169,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
           backgroundSize: "200% 100%",
           animation: "videoShimmer 1.4s ease-in-out infinite",
+          minHeight: 200,
         }} />
       )}
 
@@ -193,8 +193,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="absolute inset-0 w-full h-full"
-        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
+        className="w-full block"
+        style={{ maxHeight: "75vh", objectFit: "contain", display: "block", zIndex: 1 }}
       />
 
       {/* Tap feedback icon */}
