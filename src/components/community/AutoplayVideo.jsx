@@ -156,11 +156,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
-        aspectRatio: "4/5",
-        maxHeight: "56vh",
+        width: "100%",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
+        overflow: "hidden",
       }}
     >
       {/* Skeleton shimmer before loaded */}
