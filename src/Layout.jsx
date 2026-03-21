@@ -123,6 +123,7 @@ export default function Layout({ children, currentPageName }) {
 
   const [statusViewerActive, setStatusViewerActive] = useState(false);
   const [postViewerActive, setPostViewerActive] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   
   useEffect(() => {
     const handler = (e) => setStatusViewerActive(e.detail?.active ?? false);
@@ -136,8 +137,14 @@ export default function Layout({ children, currentPageName }) {
     return () => window.removeEventListener("postviewermode", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = (e) => setModalOpen(e.detail ?? false);
+    window.addEventListener("modal_open", handler);
+    return () => window.removeEventListener("modal_open", handler);
+  }, []);
+
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
-  const hideNav = statusViewerActive || postViewerActive || swipeMode || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "Messages", "EditProfile", "Settings"].includes(currentPageName);
+  const hideNav = statusViewerActive || postViewerActive || swipeMode || modalOpen || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "Messages", "EditProfile", "Settings"].includes(currentPageName);
 
   const showSidebars = !isAdminPage && !hideNav;
 
