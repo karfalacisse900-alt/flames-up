@@ -130,6 +130,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <NavigationStackProvider>
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>
