@@ -8,6 +8,8 @@ import GroupsTab from "../components/messages/GroupsTab";
 import DMChatView from "../components/messages/DMChatView";
 import GroupChatView from "../components/messages/GroupChatView";
 import { useQuery } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
@@ -144,6 +146,10 @@ export default function Messages() {
   const [activeChat, setActiveChat] = useState(null);
   const [showNewMsg, setShowNewMsg] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const containerRef = useRef(null);
+  const { containerProps, RefreshIndicator } = usePullToRefresh(() => {
+    window.location.reload();
+  });
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
@@ -153,6 +159,12 @@ export default function Messages() {
     const withName = params.get("name");
     if (withEmail) setActiveChat({ type: "dm", data: { email: withEmail, name: getName(withName, withEmail) } });
   }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      Object.assign(containerRef.current, containerProps);
+    }
+  }, [containerProps]);
 
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
@@ -164,7 +176,8 @@ export default function Messages() {
   if (activeChat?.type === "group") return <GroupChatView user={user} group={activeChat.data} onBack={() => setActiveChat(null)} />;
 
   return (
-     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+     <div ref={containerRef} className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+       <RefreshIndicator />
        {/* Header */}
        <div
          className="shrink-0 px-5 pt-5 pb-3"
