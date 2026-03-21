@@ -133,6 +133,7 @@ function App() {
           <NavigationStackProvider>
           <NavigationTracker />
           <AuthenticatedApp />
+          </NavigationStackProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>
