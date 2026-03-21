@@ -199,7 +199,7 @@ export default function Groups() {
 
   const isFiltering = search || categoryFilter !== "all" || typeFilter !== "all";
 
-  const { containerProps, RefreshIndicator } = usePullToRefresh(async () => {
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
     await qc.invalidateQueries({ queryKey: ["groups"] });
     await qc.invalidateQueries({ queryKey: ["myMemberships", user?.email] });
   });
