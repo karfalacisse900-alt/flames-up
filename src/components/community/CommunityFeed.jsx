@@ -519,8 +519,9 @@ export default function CommunityFeed({ user }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFeedMenu(true)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}
+              aria-label="Feed menu"
+              className="rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", minWidth: 44, minHeight: 44 }}
             >
               <Menu className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
             </button>
