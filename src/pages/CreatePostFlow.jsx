@@ -105,6 +105,8 @@ export default function CreatePostFlow() {
         }
       }
 
+      // eslint-disable-next-line no-undef
+      const textOverlayValue = typeof postData_textOverlay !== "undefined" ? postData_textOverlay : undefined;
       const manualLoc = postSettings.location;
       const hashtagStr = (postSettings.hashtags || []).map((t) => `#${t}`).join(" ");
       const rawCaption = stripHtml(postSettings.caption || "");
