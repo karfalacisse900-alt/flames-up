@@ -70,7 +70,7 @@ export default function Home() {
       variants={stagger}
       style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}
     >
-      <RefreshIndicator />
+      <PullIndicator />
       <motion.div variants={fadeUp}>
         <HomeHeader user={user} />
       </motion.div>
