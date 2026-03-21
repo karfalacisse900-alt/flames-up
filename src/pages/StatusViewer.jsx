@@ -178,8 +178,23 @@ export default function StatusViewer() {
     );
   }
 
+  const TEXT_POSITION_STYLES = {
+    "top-left":      { top: 80, left: 16, textAlign: "left" },
+    "top-center":    { top: 80, left: "50%", transform: "translateX(-50%)", textAlign: "center" },
+    "top-right":     { top: 80, right: 16, textAlign: "right" },
+    "center-left":   { top: "50%", left: 16, transform: "translateY(-50%)", textAlign: "left" },
+    "center":        { top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center" },
+    "center-right":  { top: "50%", right: 16, transform: "translateY(-50%)", textAlign: "right" },
+    "bottom-left":   { bottom: 120, left: 16, textAlign: "left" },
+    "bottom-center": { bottom: 120, left: "50%", transform: "translateX(-50%)", textAlign: "center" },
+    "bottom-right":  { bottom: 120, right: 16, textAlign: "right" },
+  };
+
+  const textPosStyle = TEXT_POSITION_STYLES[currentStatus.text_position] || TEXT_POSITION_STYLES["center"];
+  const textFontSize = currentStatus.text_size || 28;
+
   const bgStyle = currentStatus.image_url
-    ? { backgroundImage: `url(${currentStatus.image_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+    ? {}
     : { background: currentStatus.background || "linear-gradient(135deg, #7C3AED, #4F46E5)" };
 
   return (
