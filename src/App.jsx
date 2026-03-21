@@ -28,8 +28,36 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0, x: 18 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -18 },
+};
+const pageTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] };
+
+function AnimatedRoutes({ children }) {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={pageTransition}
+        style={{ width: "100%", minHeight: "100dvh" }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const location = useLocation();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
