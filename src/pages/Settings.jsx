@@ -5,6 +5,7 @@ import {
   ArrowLeft, ChevronRight, Bell, Settings2, Moon, Languages,
   Users, HelpCircle, FileText, Shield, LogOut, Trash2, AlertTriangle, Loader2
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import BottomSheet from "@/components/ui/BottomSheet";
 
 export default function Settings() {

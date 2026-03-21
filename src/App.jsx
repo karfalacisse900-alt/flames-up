@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationStackProvider } from '@/lib/NavigationStack';
+import { TabHistoryProvider } from '@/lib/TabHistoryContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { lazy, Suspense } from 'react';
 import { useHardwareBack } from '@/hooks/useHardwareBack';
@@ -125,10 +126,12 @@ function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
-            <NavigationStackProvider>
-              <NavigationTracker />
-              <AuthenticatedApp />
-            </NavigationStackProvider>
+            <TabHistoryProvider>
+              <NavigationStackProvider>
+                <NavigationTracker />
+                <AuthenticatedApp />
+              </NavigationStackProvider>
+            </TabHistoryProvider>
           </Router>
           <Toaster />
         </QueryClientProvider>
