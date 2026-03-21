@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Type, Music, Mic, Sliders, Volume2, Wand2, Tag } from "lucide-react";
 import MusicLibrarySheet from "../../music/MusicLibrarySheet";
 import TagEditor from "../TagEditor";
