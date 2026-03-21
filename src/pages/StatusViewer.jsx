@@ -25,6 +25,7 @@ export default function StatusViewer() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(true);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [progress, setProgress] = useState(0);
