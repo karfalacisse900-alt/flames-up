@@ -503,10 +503,7 @@ export default function CommunityFeed({ user }) {
 
   return (
     <div
-      ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      {...containerProps}
       style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
     >
       <FeedMenuDrawer isOpen={showFeedMenu} onClose={() => setShowFeedMenu(false)} />
