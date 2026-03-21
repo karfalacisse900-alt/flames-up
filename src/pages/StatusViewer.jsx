@@ -206,11 +206,14 @@ export default function StatusViewer() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {(currentStatus.image_url || currentStatus.video_url) && (
-        <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)" }} />
+      {currentStatus.image_url && (
+        <img src={currentStatus.image_url} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
       )}
       {currentStatus.video_url && (
         <video src={currentStatus.video_url} autoPlay loop playsInline className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
+      )}
+      {(currentStatus.image_url || currentStatus.video_url) && (
+        <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.3)" }} />
       )}
 
       {/* Progress bars */}
