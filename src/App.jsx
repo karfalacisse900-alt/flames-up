@@ -26,16 +26,8 @@ const CreatorLanding = lazy(() => import('./pages/CreatorLanding'));
 const Settings       = lazy(() => import('./pages/Settings'));
 const EditProfile    = lazy(() => import('./pages/EditProfile'));
 
-function PageFallback() {
-  return (
-    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--bg-app)" }}>
-      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
-    </div>
-  );
-}
-
 function SuspensePage({ children }) {
-  return <Suspense fallback={<PageFallback />}>{children}</Suspense>;
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
 const { Pages, Layout, mainPage } = pagesConfig;
