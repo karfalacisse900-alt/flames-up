@@ -113,7 +113,12 @@ export default function Discover() {
               style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", color: "var(--text-primary)" }}
             />
             {search && (
-              <button onClick={() => { setSearch(""); setView("explore"); }} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              <button
+                onClick={() => { setSearch(""); setView("explore"); }}
+                aria-label="Clear search"
+                className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full"
+                style={{ minWidth: 44, minHeight: 44 }}
+              >
                 <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
               </button>
             )}
