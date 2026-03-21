@@ -291,8 +291,14 @@ export default function StatusViewer() {
         </div>
       )}
 
-      {/* Bottom actions — comment only, no reaction clutter */}
-      <div className="relative z-10 flex items-center justify-end px-4 py-2">
+      {/* Bottom actions — like + comment */}
+      <div className="relative z-10 flex items-center justify-end gap-2 px-4 py-2">
+        <button onClick={handleLike}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{ backgroundColor: liked ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.14)", color: "#fff", border: `1px solid ${liked ? "rgba(239,68,68,0.6)" : "rgba(255,255,255,0.25)"}` }}>
+          <Heart className="w-3.5 h-3.5" style={{ fill: liked ? "#ef4444" : "none", color: liked ? "#ef4444" : "#fff" }} />
+          {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
         <button
           onClick={() => { setShowComments(v => !v); clearInterval(timerRef.current); setTimeout(() => inputRef.current?.focus(), 100); }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
