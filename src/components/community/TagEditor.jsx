@@ -108,8 +108,8 @@ export default function TagEditor({ imageUrl, existingTags = [], onSave, onClose
                 onClick={() => setSelectedTag(selectedTag?.id === tag.id ? null : tag)}
                 className="absolute w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                 style={{
-                  left: `${tag.position.x}%`,
-                  top: `${tag.position.y}%`,
+                  left: `${(tag.x ?? tag.position?.x ?? 0.5) * 100}%`,
+                  top: `${(tag.y ?? tag.position?.y ?? 0.5) * 100}%`,
                   transform: "translate(-50%, -50%)",
                   backgroundColor: getCategoryColor(tag.category),
                   border: "2px solid white",
