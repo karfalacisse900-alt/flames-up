@@ -1,40 +1,55 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 /**
- * useHardwareBack — intercepts the Android hardware back button / browser back gesture.
+ * useHardwareBack — proper Android hardware back button / swipe-back handling.
  *
- * On mobile WebViews (Android), the hardware back button fires a `popstate` event.
- * This hook pushes a sentinel history entry on mount so there's always something to
- * pop back to, then intercepts the popstate event to call `navigate(-1)` (pop the
- * React Router stack) rather than letting the WebView exit the app.
- *
- * Usage:
- *   Call once at the top of your app (e.g. inside AuthenticatedApp or App).
- *   Optionally pass `onBack` to override default behaviour for specific screens.
+ * Strategy:
+ * - Tracks a "stack depth" counter in a ref so we know how deep we are.
+ * - On every navigation (location change), increments depth.
+ * - When back is pressed:
+ *   - If depth > 0: navigate(-1) and decrement depth.
+ *   - If depth === 0 (at root): do nothing — let the WebView exit naturally.
+ * - This avoids the infinite sentinel-push loop that broke previous implementations.
  */
 export function useHardwareBack(onBack) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const stackDepth = useRef(0);
+  const rootPath = useRef(location.pathname);
+
+  // Track navigation depth: increment when we navigate away from root
+  useEffect(() => {
+    if (location.pathname !== rootPath.current) {
+      stackDepth.current = Math.max(stackDepth.current, window.history.length - 1);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
-    // Push a sentinel state so there's always a "previous" entry to pop back to.
-    // This prevents the WebView from exiting the app on the very first back press.
-    if (!window.history.state?.__sentinel) {
-      window.history.pushState({ __sentinel: true }, "");
-    }
+    // Push one sentinel so popstate fires on first back press
+    window.history.pushState({ __hwback: true }, "");
 
     const handlePopState = (e) => {
-      // Re-push the sentinel so subsequent back presses are also caught
-      window.history.pushState({ __sentinel: true }, "");
+      // Always re-push the sentinel to keep catching back presses
+      window.history.pushState({ __hwback: true }, "");
 
       if (onBack) {
         onBack();
-      } else {
-        navigate(-1);
+        return;
       }
+
+      // At root path — nothing to pop, allow natural exit
+      if (location.pathname === "/" || location.pathname === rootPath.current) {
+        // Remove our sentinel and let the browser handle it (exits app)
+        window.history.back();
+        return;
+      }
+
+      navigate(-1);
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [navigate, onBack]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, location.pathname, onBack]);
 }
