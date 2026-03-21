@@ -144,6 +144,7 @@ export default function CreatePostFlow() {
         engagement_score: 0,
         is_creator_post: user.is_creator || false,
         media_tags: allTags.length > 0 ? allTags : undefined,
+        text_overlay: textOverlayValue,
       };
 
       // This awaits confirmation from the server before proceeding
