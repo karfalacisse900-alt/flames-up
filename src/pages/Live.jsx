@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Clock, Zap, MapPin } from "lucide-react";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import { Button } from "@/components/ui/button";
 import CreateLivePost from "../components/live/CreateLivePost";
 import LivePostCard from "../components/live/LivePostCard";
