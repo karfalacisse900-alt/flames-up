@@ -81,7 +81,7 @@ export default function Settings() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="flex items-center gap-4 px-4 py-4" style={{ paddingTop: "max(env(safe-area-inset-top,0px), 16px)" }}>
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+        <button onClick={() => navigate(-1)} aria-label="Go back" className="rounded-full flex items-center justify-center" style={{ minWidth: 44, minHeight: 44, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
         </button>
         <h1 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Settings</h1>
