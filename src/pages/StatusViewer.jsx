@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { X, MessageCircle, Send, Heart } from "lucide-react";
+import { X, MessageCircle, Send, Heart, Share2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import ShareSheet from "@/components/community/ShareSheet";
 
 const COLORS = ["#7C3AED", "#DB2777", "#EA580C", "#059669", "#0284C7", "#D97706"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
