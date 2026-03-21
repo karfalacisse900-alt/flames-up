@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, ChevronRight, Bell, Settings2, Moon, Languages,
-  Users, HelpCircle, FileText, Shield, LogOut
+  Users, HelpCircle, FileText, Shield, LogOut, Trash2, AlertTriangle
 } from "lucide-react";
+import BottomSheet from "@/components/ui/BottomSheet";
 
 export default function Settings() {
   const navigate = useNavigate();
