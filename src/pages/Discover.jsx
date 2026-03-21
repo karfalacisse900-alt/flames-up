@@ -9,6 +9,8 @@ import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
 import DYKTab from "@/components/discover/DYKTab";
 import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
 
+// Cache refresh
+
 
 function getGreeting() {
   const h = new Date().getHours();
