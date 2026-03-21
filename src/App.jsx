@@ -36,24 +36,6 @@ const pageVariants = {
 };
 const pageTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] };
 
-function AnimatedRoutes({ children }) {
-  const location = useLocation();
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        transition={pageTransition}
-        style={{ width: "100%", minHeight: "100dvh" }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
