@@ -47,6 +47,9 @@ export default function ActionSheet({
           {/* Sheet */}
           <motion.div
             key="as-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label={title || "Action Sheet"}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -75,6 +78,8 @@ export default function ActionSheet({
                 <button
                   key={opt.value}
                   onClick={() => handleSelect(opt.value)}
+                  aria-label={opt.label}
+                  aria-pressed={opt.value === value}
                   className="w-full flex items-center justify-between px-5"
                   style={{
                     minHeight: 56,

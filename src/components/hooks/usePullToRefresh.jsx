@@ -27,10 +27,15 @@ export function usePullToRefresh(onRefresh) {
   const handleTouchEnd = useCallback(async () => {
     if (pullY > 60) {
       setRefreshing(true);
-      await onRefresh();
-      setRefreshing(false);
+      setPullY(0);
+      try {
+        await onRefresh();
+      } finally {
+        setRefreshing(false);
+      }
+    } else {
+      setPullY(0);
     }
-    setPullY(0);
   }, [pullY, onRefresh]);
 
   const PullIndicator = () => (
