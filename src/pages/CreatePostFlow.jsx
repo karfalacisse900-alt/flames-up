@@ -99,6 +99,10 @@ export default function CreatePostFlow() {
         if (item.edits?.tags) {
           item.edits.tags.forEach(tag => allTags.push({ ...tag, imageIndex: i }));
         }
+        // Capture text overlay from first media item
+        if (i === 0 && item.edits?.textOverlay) {
+          postData_textOverlay = item.edits.textOverlay;
+        }
       }
 
       const manualLoc = postSettings.location;
