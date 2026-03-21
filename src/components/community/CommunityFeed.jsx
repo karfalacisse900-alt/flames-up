@@ -267,8 +267,18 @@ export default function CommunityFeed({ user }) {
 
   useEffect(() => {
     const unsub = base44.entities.CommunityPost.subscribe((event) => {
-      if (event.type === "create") {
-        setNewPostsAvailable(n => n + 1);
+      if (event.type === "create" && event.data) {
+        const newPost = normalizePost(event.data);
+        // Skip group posts and listen_dont_judge posts
+        if (newPost.group_id || newPost.tags?.includes("listen_dont_judge")) return;
+        // Prepend instantly to the feed
+        setPosts(prev => {
+          if (prev.find(p => p.id === newPost.id)) return prev; // dedupe
+          return [newPost, ...prev];
+        });
+      } else if (event.type === "update" && event.data) {
+        // Update post in place (for likes etc)
+        setPosts(prev => prev.map(p => p.id === event.data.id ? { ...p, ...normalizePost(event.data) } : p));
       }
     });
     return unsub;
