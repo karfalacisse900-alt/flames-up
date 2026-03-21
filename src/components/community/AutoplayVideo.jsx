@@ -202,7 +202,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onWaiting={() => setBuffering(true)}
         onPlaying={() => { setBuffering(false); setLoaded(true); }}
         className="absolute inset-0 w-full h-full"
-        style={{ objectFit: "cover", zIndex: 1 }}
+        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
       />
 
       {/* Tap icon feedback */}
