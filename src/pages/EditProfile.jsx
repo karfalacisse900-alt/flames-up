@@ -1,41 +1,42 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Link2, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Plus, X } from "lucide-react";
 import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
-import { useQuery } from "@tanstack/react-query";
+
+const INTERESTS_OPTIONS = ["fitness", "music", "tech", "gaming", "art", "travel", "food", "movies", "books", "sports", "fashion", "coding", "photography", "nature", "crypto"];
+const LOOKING_FOR_OPTIONS = ["friends", "study partners", "gym partners", "dating", "networking", "roommates", "collaborators"];
 
 export default function EditProfile() {
   const navigate = useNavigate();
   const avatarInputRef = useRef(null);
-  const bannerInputRef = useRef(null);
+  const [user, setUser] = useState(null);
 
-  const { data: user } = useQuery({
-    queryKey: ["me"],
-    queryFn: () => base44.auth.me(),
-  });
-
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const [bannerUrl, setBannerUrl] = useState(null);
-  const [displayName, setDisplayName] = useState(null);
-  const [username, setUsername] = useState(null);
-  const [bio, setBio] = useState(null);
-  const [websiteUrl, setWebsiteUrl] = useState(null);
+  // Form state
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");         // short headline
+  const [aboutMe, setAboutMe] = useState(""); // long bio
+  const [city, setCity] = useState("");
+  const [interests, setInterests] = useState([]);
+  const [lookingFor, setLookingFor] = useState([]);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Use user data as defaults until user edits
-  const currentAvatar = avatarUrl ?? user?.avatar_url ?? "";
-  const currentBanner = bannerUrl ?? user?.banner_url ?? "";
-  const currentName = displayName ?? user?.display_name ?? user?.full_name ?? "";
-  const currentUsername = username ?? (user?.username ?? "").replace(/^@/, "");
-  const currentBio = bio ?? user?.bio ?? "";
-  const currentWebsite = websiteUrl ?? user?.website_url ?? "";
-
-  const getInitials = () => {
-    const name = currentName || "U";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-  };
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      setUser(u);
+      setDisplayName(u?.display_name || u?.full_name || "");
+      setUsername((u?.username || "").replace(/^@/, ""));
+      setBio(u?.bio || "");
+      setAboutMe(u?.about_me || "");
+      setCity(u?.city || "");
+      setInterests(u?.interests || []);
+      setLookingFor(u?.looking_for || []);
+      setAvatarUrl(u?.avatar_url || "");
+    }).catch(() => {});
+  }, []);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -47,33 +48,54 @@ export default function EditProfile() {
     e.target.value = "";
   };
 
-  const handleBannerUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const { file_url } = await uploadToCloudflare(file);
-    setBannerUrl(file_url);
-    setUploading(false);
-    e.target.value = "";
+  const toggleInterest = (item) => {
+    setInterests(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
+  };
+
+  const toggleLookingFor = (item) => {
+    setLookingFor(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    const usernameToSave = currentUsername ? `@${currentUsername.replace(/^@/, "")}` : "";
+    const usernameToSave = username ? `@${username.replace(/^@/, "")}` : "";
     await base44.auth.updateMe({
-      avatar_url: currentAvatar,
-      banner_url: currentBanner,
-      display_name: currentName,
+      display_name: displayName,
       username: usernameToSave,
-      bio: currentBio,
-      website_url: currentWebsite,
+      bio,
+      about_me: aboutMe,
+      city,
+      interests,
+      looking_for: lookingFor,
+      avatar_url: avatarUrl,
     });
     setSaving(false);
     navigate(-1);
   };
 
+  const initials = (displayName || user?.email || "U")[0]?.toUpperCase();
+
+  const Field = ({ label, children }) => (
+    <div>
+      <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>{label}</label>
+      {children}
+    </div>
+  );
+
+  const inputStyle = {
+    backgroundColor: "var(--bg-card)",
+    border: "1px solid var(--border-light)",
+    color: "var(--text-primary)",
+    minHeight: 48,
+    borderRadius: 14,
+    padding: "0 16px",
+    fontSize: 14,
+    width: "100%",
+    outline: "none",
+  };
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)", paddingBottom: 32 }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)", paddingBottom: 48 }}>
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3"
         style={{ backgroundColor: "var(--bg-app)", paddingTop: "max(env(safe-area-inset-top,0px), 16px)", borderBottom: "1px solid var(--border-light)" }}>
@@ -83,113 +105,103 @@ export default function EditProfile() {
           <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
         </button>
         <h1 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Edit Profile</h1>
-        <button
-          onClick={handleSave}
-          disabled={saving || uploading}
+        <button onClick={handleSave} disabled={saving || uploading}
           className="px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-50"
           style={{ backgroundColor: "var(--accent-primary)", minHeight: 36 }}>
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
 
-      <div className="px-4 py-5 space-y-6">
-        {/* Banner */}
-        <div>
-          <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
-          <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-
-          <div className="relative rounded-2xl overflow-hidden" style={{ height: 120, backgroundColor: "var(--bg-subtle)" }}>
-            {currentBanner ? (
-              <img src={currentBanner} alt="Banner" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full" style={{ background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))" }} />
-            )}
-            <button onClick={() => bannerInputRef.current?.click()} disabled={uploading}
-              className="absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-semibold text-white flex items-center gap-1.5"
-              style={{ backgroundColor: "rgba(0,0,0,0.55)", minHeight: 32 }}>
-              <Camera className="w-3.5 h-3.5" />
-              {currentBanner ? "Change" : "Add"} Banner
-            </button>
-          </div>
-
-          {/* Avatar */}
-          <div className="flex items-end gap-4 -mt-10 px-2">
-            <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-full border-4 overflow-hidden"
-                style={{ borderColor: "var(--bg-app)", backgroundColor: "var(--bg-subtle)" }}>
-                {currentAvatar ? (
-                  <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xl font-bold"
-                    style={{ color: "var(--text-primary)", backgroundColor: "var(--accent-primary-light)" }}>
-                    {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : getInitials()}
-                  </div>
-                )}
-              </div>
-              <button onClick={() => avatarInputRef.current?.click()} disabled={uploading}
-                className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center text-white"
-                style={{ backgroundColor: "var(--accent-primary)" }}>
-                <Camera className="w-3.5 h-3.5" />
-              </button>
+      <div className="px-4 py-6 space-y-6 max-w-lg mx-auto w-full">
+        {/* Avatar */}
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold"
+              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "3px solid var(--border-light)" }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                : uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : initials}
             </div>
+            <button onClick={() => avatarInputRef.current?.click()} disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center text-white"
+              style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Camera className="w-4 h-4" />
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
         </div>
 
         {/* Display Name */}
-        <div>
-          <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Display Name</label>
-          <input
-            value={currentName}
-            onChange={e => setDisplayName(e.target.value)}
-            placeholder="Your name"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)", minHeight: 48 }}
-          />
-        </div>
+        <Field label="Display Name">
+          <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name" style={inputStyle} />
+        </Field>
 
         {/* Username */}
-        <div>
-          <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Username</label>
-          <div className="flex items-center px-4 rounded-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 48 }}>
+        <Field label="Username">
+          <div className="flex items-center" style={{ ...inputStyle, padding: "0 16px" }}>
             <span className="text-sm mr-0.5" style={{ color: "var(--text-hint)" }}>@</span>
-            <input
-              value={currentUsername}
-              onChange={e => setUsername(e.target.value.replace(/^@/, ""))}
-              placeholder="username"
-              className="flex-1 bg-transparent text-sm outline-none py-3"
-              style={{ color: "var(--text-primary)" }}
-            />
+            <input value={username} onChange={e => setUsername(e.target.value.replace(/^@/, ""))}
+              placeholder="username" className="flex-1 bg-transparent text-sm outline-none"
+              style={{ color: "var(--text-primary)", minHeight: 48 }} />
           </div>
-        </div>
+        </Field>
 
-        {/* Bio */}
-        <div>
-          <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Bio</label>
-          <textarea
-            value={currentBio}
-            onChange={e => setBio(e.target.value)}
+        {/* City */}
+        <Field label="City">
+          <input value={city} onChange={e => setCity(e.target.value)} placeholder="Where are you based?" style={inputStyle} />
+        </Field>
+
+        {/* Bio (headline) */}
+        <Field label="Headline">
+          <input value={bio} onChange={e => setBio(e.target.value)} placeholder='e.g. "i\'m the owner of this"'
+            maxLength={80} style={inputStyle} />
+        </Field>
+
+        {/* About Me (long bio) */}
+        <Field label="About Me">
+          <textarea value={aboutMe} onChange={e => setAboutMe(e.target.value)}
             placeholder="Tell people a bit about yourself…"
-            rows={4}
-            maxLength={200}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-          />
-          <p className="text-xs mt-1 text-right" style={{ color: "var(--text-hint)" }}>{currentBio.length}/200</p>
-        </div>
+            rows={5} maxLength={500}
+            className="resize-none outline-none"
+            style={{ ...inputStyle, minHeight: "unset", padding: "12px 16px" }} />
+          <p className="text-xs mt-1 text-right" style={{ color: "var(--text-hint)" }}>{aboutMe.length}/500</p>
+        </Field>
 
-        {/* Website */}
-        <div>
-          <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
-            <Link2 className="w-3.5 h-3.5" /> Website / Link
-          </label>
-          <input
-            value={currentWebsite}
-            onChange={e => setWebsiteUrl(e.target.value)}
-            placeholder="https://yoursite.com"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)", minHeight: 48 }}
-          />
-        </div>
+        {/* Interests */}
+        <Field label="Interests">
+          <div className="flex flex-wrap gap-2 mt-1">
+            {INTERESTS_OPTIONS.map(item => (
+              <button key={item} onClick={() => toggleInterest(item)}
+                className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: interests.includes(item) ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: interests.includes(item) ? "#fff" : "var(--text-secondary)",
+                  border: `1px solid ${interests.includes(item) ? "var(--accent-primary)" : "var(--border-light)"}`,
+                  minHeight: 36,
+                }}>
+                {item}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        {/* Looking For */}
+        <Field label="Looking For">
+          <div className="flex flex-wrap gap-2 mt-1">
+            {LOOKING_FOR_OPTIONS.map(item => (
+              <button key={item} onClick={() => toggleLookingFor(item)}
+                className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: lookingFor.includes(item) ? "var(--accent-secondary)" : "var(--bg-card)",
+                  color: lookingFor.includes(item) ? "#fff" : "var(--text-secondary)",
+                  border: `1px solid ${lookingFor.includes(item) ? "var(--accent-secondary)" : "var(--border-light)"}`,
+                  minHeight: 36,
+                }}>
+                {item}
+              </button>
+            ))}
+          </div>
+        </Field>
       </div>
     </div>
   );
