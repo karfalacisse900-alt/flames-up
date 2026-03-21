@@ -37,6 +37,7 @@ function FlamesUpLogo() {
 export default function Layout({ children, currentPageName }) {
   useLayoutStabilizer();
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
   // Disable pinch-zoom and double-tap zoom globally
   useEffect(() => {
@@ -66,6 +67,15 @@ export default function Layout({ children, currentPageName }) {
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
   const scrollTicking = useRef(false);
+
+  // Detect mobile breakpoint
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     base44.auth.me().then((u) => {
@@ -146,7 +156,7 @@ export default function Layout({ children, currentPageName }) {
   const isAdminPage = ADMIN_PAGES.includes(currentPageName);
   const hideNav = statusViewerActive || postViewerActive || swipeMode || modalOpen || isAdminPage || ["PostDetail", "LiveRoomView", "GamePlay", "DiscoverForum", "Shop", "swipe", "ArtStudio", "PostComments", "Live", "CreatePostFlow", "StatusViewer", "Messages", "EditProfile", "Settings"].includes(currentPageName);
 
-  const showSidebars = !isAdminPage && !hideNav;
+  const showSidebars = !isAdminPage && !hideNav && !isMobile;
 
   return (
     <div className="min-h-screen" style={{ background: "radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 34%), radial-gradient(circle at bottom right, rgba(20, 184, 166, 0.08), transparent 30%), var(--bg-app)", color: "var(--text-primary)", fontFamily: "var(--font-sans)", overflowX: "clip", width: "100%", maxWidth: "100%" }}>

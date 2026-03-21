@@ -155,16 +155,21 @@ export default function Settings() {
           </button>
         </div>
 
-        {/* Delete Account */}
-        <div className="mx-4 mt-3 mb-6">
+        {/* Delete Account — Apple Compliance */}
+        <SectionCard>
           <button
             onClick={openDeleteSheet}
-            className="w-full py-3 rounded-2xl text-sm font-medium"
-            style={{ color: "var(--text-hint)", minHeight: 44 }}
+            className="w-full flex items-center justify-between px-4 py-4"
+            aria-label="Delete account permanently"
+            style={{ minHeight: 52 }}
           >
-            Delete Account
+            <div className="flex items-center gap-3">
+              <Trash2 className="w-5 h-5" style={{ color: "#ef4444" }} />
+              <span className="text-sm font-medium" style={{ color: "#ef4444" }}>Delete Account</span>
+            </div>
+            <ChevronRight className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
           </button>
-        </div>
+        </SectionCard>
       </div>
 
       {/* Delete Account Bottom Sheet */}
