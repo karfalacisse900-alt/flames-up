@@ -156,10 +156,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 16,
+        aspectRatio: "4/5",
+        maxHeight: "56vh",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
-        minHeight: 200,
       }}
     >
       {/* Skeleton shimmer before loaded */}
@@ -168,23 +169,22 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
           backgroundSize: "200% 100%",
           animation: "videoShimmer 1.4s ease-in-out infinite",
-          minHeight: 200,
         }} />
       )}
 
       {/* Buffering spinner */}
       {buffering && loaded && (
-        <div className="absolute inset-0 flex items-center justify-center z-20">
+        <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
         </div>
       )}
 
       <video
-        ref={videoRef}
-        playsInline
-        loop
-        muted={muted}
-        preload="none"
+          ref={videoRef}
+          playsInline
+          loop
+          muted={muted}
+          preload="none"
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
@@ -192,8 +192,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="w-full block"
-        style={{ display: "block", zIndex: 1, maxHeight: "70vh" }}
+        className="absolute inset-0 w-full h-full"
+        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
       />
 
       {/* Tap feedback icon */}
