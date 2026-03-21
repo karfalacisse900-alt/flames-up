@@ -12,8 +12,9 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [notifPaused, setNotifPaused] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [deleteStep, setDeleteStep] = useState(1); // 1 = warning, 2 = confirm
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
