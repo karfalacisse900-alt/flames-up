@@ -179,11 +179,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       )}
 
       <video
-          ref={videoRef}
-          playsInline
-          loop
-          muted={muted}
-          preload="none"
+        ref={videoRef}
+        playsInline
+        loop
+        muted={muted}
+        preload="none"
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
@@ -191,8 +191,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="absolute inset-0 w-full h-full"
-        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
+        className="w-full block"
+        style={{ display: "block", zIndex: 1, maxHeight: "70vh" }}
       />
 
       {/* Tap feedback icon */}
