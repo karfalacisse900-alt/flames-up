@@ -104,17 +104,17 @@ const AuthenticatedApp = () => {
               }
             />
           ))}
-          <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><Live /></LayoutWrapper>} />
-          <Route path="/user/:email" element={<LayoutWrapper currentPageName="UserProfile"><UserProfile /></LayoutWrapper>} />
-          <Route path="/PlaceDetail" element={<LayoutWrapper currentPageName="PlaceDetail"><PlaceDetail /></LayoutWrapper>} />
-          <Route path="/ListenDontJudge" element={<LayoutWrapper currentPageName="ListenDontJudge"><ListenDontJudge /></LayoutWrapper>} />
-          <Route path="/LiveNearby" element={<LayoutWrapper currentPageName="LiveNearby"><LiveNearby /></LayoutWrapper>} />
-          <Route path="/Onboarding" element={<Onboarding />} />
-          <Route path="/CreatorDashboard" element={<LayoutWrapper currentPageName="CreatorDashboard"><CreatorDashboard /></LayoutWrapper>} />
-          <Route path="/AdminCreators" element={<LayoutWrapper currentPageName="AdminCreators"><AdminCreators /></LayoutWrapper>} />
-          <Route path="/CreatorLanding" element={<LayoutWrapper currentPageName="CreatorLanding"><CreatorLanding /></LayoutWrapper>} />
-          <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
-          <Route path="/EditProfile" element={<LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper>} />
+          <Route path="/Live" element={<SuspensePage><LayoutWrapper currentPageName="Live"><Live /></LayoutWrapper></SuspensePage>} />
+          <Route path="/user/:email" element={<SuspensePage><LayoutWrapper currentPageName="UserProfile"><UserProfile /></LayoutWrapper></SuspensePage>} />
+          <Route path="/PlaceDetail" element={<SuspensePage><LayoutWrapper currentPageName="PlaceDetail"><PlaceDetail /></LayoutWrapper></SuspensePage>} />
+          <Route path="/ListenDontJudge" element={<SuspensePage><LayoutWrapper currentPageName="ListenDontJudge"><ListenDontJudge /></LayoutWrapper></SuspensePage>} />
+          <Route path="/LiveNearby" element={<SuspensePage><LayoutWrapper currentPageName="LiveNearby"><LiveNearby /></LayoutWrapper></SuspensePage>} />
+          <Route path="/Onboarding" element={<SuspensePage><Onboarding /></SuspensePage>} />
+          <Route path="/CreatorDashboard" element={<SuspensePage><LayoutWrapper currentPageName="CreatorDashboard"><CreatorDashboard /></LayoutWrapper></SuspensePage>} />
+          <Route path="/AdminCreators" element={<SuspensePage><LayoutWrapper currentPageName="AdminCreators"><AdminCreators /></LayoutWrapper></SuspensePage>} />
+          <Route path="/CreatorLanding" element={<SuspensePage><LayoutWrapper currentPageName="CreatorLanding"><CreatorLanding /></LayoutWrapper></SuspensePage>} />
+          <Route path="/Settings" element={<SuspensePage><LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper></SuspensePage>} />
+          <Route path="/EditProfile" element={<SuspensePage><LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper></SuspensePage>} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </motion.div>
