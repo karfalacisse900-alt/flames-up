@@ -161,7 +161,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         width: "100%",
         cursor: "pointer",
         userSelect: "none",
-        background: "#1a1a1a",
+        background: "#000",
       }}
     >
       {/* Spinner — shown while buffering, hidden once loaded */}

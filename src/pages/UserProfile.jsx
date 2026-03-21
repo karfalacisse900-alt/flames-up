@@ -176,26 +176,30 @@ export default function UserProfile() {
       </div>
 
       {/* Profile Header */}
-      <div className="pb-4" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        {/* Banner area */}
-        <div className="h-24 w-full" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" }} />
-
-        {/* Avatar + name row */}
-        <div className="px-5 -mt-10 flex items-end gap-4 mb-4">
-          <div style={{ border: "4px solid var(--bg-card)", borderRadius: "50%", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
-            <AvatarCircle src={avatarUrl} name={effectiveName} size={80} />
-          </div>
-          <div className="flex-1 min-w-0 pt-10">
-            <h1 style={{ fontSize: 21, fontWeight: 800, color: "var(--text-primary)", fontFamily: "var(--font-serif)", lineHeight: 1.1 }}>
+      <div className="pb-4 px-5 pt-5" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        {/* Top row: avatar left, name/username/tags right */}
+        <div className="flex items-start gap-4 mb-4">
+          <AvatarCircle src={avatarUrl} name={effectiveName} size={80} />
+          <div className="flex-1 min-w-0 pt-1">
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", fontFamily: "var(--font-serif)", lineHeight: 1.15, marginBottom: 2 }}>
               {effectiveName}
             </h1>
             {username && (
-              <p style={{ fontSize: 13, color: "var(--text-hint)" }}>{username}</p>
+              <p style={{ fontSize: 13, color: "var(--text-hint)", marginBottom: 6 }}>{username}</p>
+            )}
+            {interests.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {interests.slice(0, 3).map((tag, i) => (
+                  <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 20, backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>
 
-        <div className="px-5 space-y-4">
+        <div className="space-y-4">
           {/* Headline / bio */}
           {bio && (
             <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-primary)", fontWeight: 500 }}>{bio}</p>
