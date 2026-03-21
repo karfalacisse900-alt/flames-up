@@ -2,113 +2,98 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
 import StreamVideo, { isStreamVideo } from "./StreamVideo";
 
-// Session-level mute preference — unmuted by default
+// Session-level mute preference
 const sessionPrefs = { muted: false };
 
-// Global singleton — only one video plays at a time
-const activeVideo = { ref: null, setPlaying: null };
-
-// Continue-watching progress store (postId → seconds)
-const videoProgress = {};
+// Global: only one video plays at a time
+let activeVideoRef = null;
+let activeSetPlaying = null;
 
 export default function AutoplayVideo({ src, postId, onDoubleTap }) {
-  // Delegate to StreamVideo for Cloudflare Stream URLs
   if (isStreamVideo(src)) {
     return <StreamVideo src={src} postId={postId} onDoubleTap={onDoubleTap} />;
   }
+
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(sessionPrefs.muted);
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [buffering, setBuffering] = useState(false);
-  const [srcLoaded, setSrcLoaded] = useState(false); // lazy: only set src when visible
+  const [srcReady, setSrcReady] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
-  const [savedProgress, setSavedProgress] = useState(postId ? videoProgress[postId] || 0 : 0);
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
-  const progressTimer = useRef(null);
+  const progressInterval = useRef(null);
+  const playingRef = useRef(false);
+
+  // Keep playingRef in sync
+  useEffect(() => { playingRef.current = playing; }, [playing]);
 
   const flashIcon = (icon) => {
     setShowIcon(icon);
     clearTimeout(iconTimer.current);
-    iconTimer.current = setTimeout(() => setShowIcon(null), 700);
+    iconTimer.current = setTimeout(() => setShowIcon(null), 600);
   };
 
-  const pauseGlobally = useCallback(() => {
-    if (activeVideo.ref === videoRef) {
-      activeVideo.ref = null;
-      activeVideo.setPlaying = null;
+  const stopGlobal = () => {
+    if (activeVideoRef && activeVideoRef !== videoRef) {
+      activeVideoRef.current?.pause();
+      activeSetPlaying?.(false);
     }
-  }, []);
+  };
 
   const doPlay = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (activeVideo.ref && activeVideo.ref !== videoRef) {
-      activeVideo.ref.current?.pause();
-      activeVideo.setPlaying?.(false);
-    }
-    activeVideo.ref = videoRef;
-    activeVideo.setPlaying = setPlaying;
+    stopGlobal();
+    activeVideoRef = videoRef;
+    activeSetPlaying = setPlaying;
     v.muted = sessionPrefs.muted;
     setMuted(sessionPrefs.muted);
-    if (postId && videoProgress[postId] > 2) {
-      v.currentTime = videoProgress[postId];
-    }
-    // Force load before play
-    if (v.readyState < 2) {
-      v.load();
-    }
-    const playPromise = v.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        setPlaying(true);
-        setBuffering(false);
-        setSavedProgress(0);
-        clearInterval(progressTimer.current);
-        progressTimer.current = setInterval(() => {
-          if (!v.paused && postId) videoProgress[postId] = Math.floor(v.currentTime);
-        }, 1000);
-      }).catch((err) => {
-        console.log("Video play failed:", err);
-        setBuffering(false);
-        setPlaying(false);
-      });
-    }
-  }, [postId]);
+    if (v.readyState < 2) v.load();
+    v.play().then(() => {
+      setPlaying(true);
+      setBuffering(false);
+      clearInterval(progressInterval.current);
+    }).catch(() => {
+      setPlaying(false);
+      setBuffering(false);
+    });
+  }, []);
 
   const doPause = useCallback(() => {
     const v = videoRef.current;
-    if (v && postId) videoProgress[postId] = Math.floor(v.currentTime);
-    clearInterval(progressTimer.current);
     v?.pause();
     setPlaying(false);
-    pauseGlobally();
-  }, [pauseGlobally, postId]);
+    clearInterval(progressInterval.current);
+    if (activeVideoRef === videoRef) {
+      activeVideoRef = null;
+      activeSetPlaying = null;
+    }
+  }, []);
 
+  // Intersection Observer — 60% visibility required to autoplay
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          // Load src lazily — only when first entering viewport
-          setSrcLoaded(true);
-          if (entry.intersectionRatio >= 0.6) {
-            doPlay();
-          }
-        } else {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          setSrcReady(true);
+          doPlay();
+        } else if (!entry.isIntersecting) {
           doPause();
         }
       },
-      { threshold: [0, 0.6] }
+      { threshold: [0, 0.3, 0.6, 1.0] }
     );
     obs.observe(container);
     return () => {
       obs.disconnect();
-      clearInterval(progressTimer.current);
+      clearInterval(progressInterval.current);
       doPause();
     };
   }, [doPlay, doPause]);
@@ -123,16 +108,18 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     setMuted(next);
   };
 
-
-  const handleTap = () => {
+  // Tap handler — single tap toggles play/pause, double tap likes
+  const handleTap = useCallback(() => {
     tapCount.current += 1;
     clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => {
-      if (tapCount.current >= 2) {
+      const count = tapCount.current;
+      tapCount.current = 0;
+      if (count >= 2) {
         flashIcon("like");
         onDoubleTap?.();
       } else {
-        if (playing) {
+        if (playingRef.current) {
           doPause();
           flashIcon("pause");
         } else {
@@ -140,14 +127,10 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           flashIcon("play");
         }
       }
-      tapCount.current = 0;
-    }, 250);
-  };
+    }, 220);
+  }, [doPlay, doPause, onDoubleTap]);
 
-  const markLoaded = () => {
-    setLoaded(true);
-    setBuffering(false);
-  };
+  const markLoaded = () => { setLoaded(true); setBuffering(false); };
 
   return (
     <div
@@ -158,39 +141,30 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         borderRadius: 16,
         aspectRatio: "4/5",
         maxHeight: "56vh",
-        width: "100%",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
       }}
     >
-      {/* Spinner — shown while buffering, hidden once loaded */}
-      {buffering && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backgroundColor: "#1a1a1a", zIndex: 2 }}
-        >
-          <div className="flex flex-col items-center gap-2 opacity-40">
-            <div className="w-10 h-10 rounded-full border-2 border-white/30 border-t-white/80 animate-spin" />
-          </div>
+      {/* Skeleton shimmer before loaded */}
+      {!loaded && (
+        <div className="absolute inset-0 z-10" style={{
+          background: "linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%)",
+          backgroundSize: "200% 100%",
+          animation: "videoShimmer 1.4s ease-in-out infinite",
+        }} />
+      )}
+
+      {/* Buffering spinner */}
+      {buffering && loaded && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
         </div>
       )}
 
-      {/*
-        FIX — Black video bug:
-        1. opacity is always 1 — the video element is never hidden.
-           Previously `opacity: loaded ? 1 : 0` kept the video invisible if
-           onLoadedMetadata never fired (mobile autoplay policy, CORS, slow network).
-        2. preload="auto" instead of "metadata" so the browser downloads enough
-           data to render a first frame immediately.
-        3. muted={muted} prop keeps React's muted state in sync with the DOM attribute.
-        4. Multiple load events (onLoadedMetadata, onCanPlay, onLoadedData, onError)
-           all call markLoaded() so we catch whichever fires first.
-      */}
-      {/* Placeholder shown before video src is loaded */}
       <video
         ref={videoRef}
-        src={srcLoaded ? src : undefined}
+        src={srcReady ? src : undefined}
         playsInline
         loop
         muted={muted}
@@ -198,58 +172,40 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
+        onWaiting={() => { if (loaded) setBuffering(true); }}
+        onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
+        onPause={() => setPlaying(false)}
         onError={markLoaded}
-        onWaiting={() => setBuffering(true)}
-        onPlaying={() => { setBuffering(false); setLoaded(true); }}
         className="absolute inset-0 w-full h-full"
         style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
       />
 
-      {/* Tap icon feedback */}
+      {/* Tap feedback icon */}
       {showIcon && (
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ zIndex: 5 }}
-        >
-          <div
-            className="flex items-center justify-center rounded-full"
-            style={{
-              width: 64, height: 64,
-              backgroundColor: "rgba(0,0,0,0.45)",
-              backdropFilter: "blur(8px)",
-              animation: "tapFade 0.7s ease forwards",
-            }}
-          >
-            {showIcon === "like" ? (
-              <span style={{ fontSize: 32 }}>❤️</span>
-            ) : showIcon === "play" ? (
-              <Play className="w-7 h-7 text-white" fill="white" />
-            ) : (
-              <Pause className="w-7 h-7 text-white" fill="white" />
-            )}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 5 }}>
+          <div className="flex items-center justify-center rounded-full"
+            style={{ width: 64, height: 64, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", animation: "tapFade 0.6s ease forwards" }}>
+            {showIcon === "like" ? <span style={{ fontSize: 32 }}>❤️</span>
+              : showIcon === "play" ? <Play className="w-7 h-7 text-white" fill="white" />
+              : <Pause className="w-7 h-7 text-white" fill="white" />}
           </div>
         </div>
       )}
 
-      {/* Continue Watching banner */}
-      {savedProgress > 2 && !playing && (
-        <div
-          className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
-          style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", zIndex: 4 }}
-        >
-          <Play className="w-3 h-3" fill="white" />
-          Continue from {Math.floor(savedProgress / 60)}:{String(savedProgress % 60).padStart(2, "0")}
+      {/* Paused overlay — subtle dark overlay with play icon when paused & loaded */}
+      {loaded && !playing && !buffering && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3, backgroundColor: "rgba(0,0,0,0.25)" }}>
+          <div className="flex items-center justify-center rounded-full" style={{ width: 56, height: 56, backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}>
+            <Play className="w-6 h-6 text-white" fill="white" />
+          </div>
         </div>
       )}
 
-      {/* Bottom controls */}
+      {/* Mute button */}
       {loaded && (
-        <div className="absolute bottom-3 right-3 flex gap-2 pointer-events-auto" style={{ zIndex: 4 }}>
-          <button
-            onClick={toggleMute}
-            className="p-2 rounded-full"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}
-          >
+        <div className="absolute bottom-3 right-3 z-10 pointer-events-auto">
+          <button onClick={toggleMute} className="p-2 rounded-full"
+            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff" }}>
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
         </div>
@@ -258,9 +214,13 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       <style>{`
         @keyframes tapFade {
           0%   { opacity: 0; transform: scale(0.6); }
-          20%  { opacity: 1; transform: scale(1.1); }
+          20%  { opacity: 1; transform: scale(1.15); }
           70%  { opacity: 1; transform: scale(1); }
           100% { opacity: 0; transform: scale(1); }
+        }
+        @keyframes videoShimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
       `}</style>
     </div>
