@@ -199,7 +199,7 @@ export default function Groups() {
 
   const isFiltering = search || categoryFilter !== "all" || typeFilter !== "all";
 
-  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+  const { containerProps, RefreshIndicator } = usePullToRefresh(async () => {
     await qc.invalidateQueries({ queryKey: ["groups"] });
     await qc.invalidateQueries({ queryKey: ["myMemberships", user?.email] });
   });
@@ -214,7 +214,7 @@ export default function Groups() {
 
   return (
     <div {...containerProps} style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
-      <PullIndicator />
+      <RefreshIndicator />
 
       {/* ── Header ── */}
       <div className="relative px-5 pt-6 pb-4" style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
@@ -279,8 +279,8 @@ export default function Groups() {
               {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
                 <button key={t.key} onClick={() => setTypeFilter(t.key)}
                   className="shrink-0 px-3 rounded-full text-xs font-semibold"
-                  style={{ minHeight: 44 }}
                   style={{
+                    minHeight: 44,
                     backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
                     color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
                     border: "1px solid var(--border-light)",
@@ -291,8 +291,8 @@ export default function Groups() {
               {CATEGORY_TABS.map(c => (
                 <button key={c.key} onClick={() => setCategoryFilter(c.key)}
                   className="shrink-0 flex items-center gap-1 px-3 rounded-full text-xs font-semibold"
-                  style={{ minHeight: 44 }}
                   style={{
+                    minHeight: 44,
                     backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
                     color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",
                     border: "1px solid var(--border-light)",
