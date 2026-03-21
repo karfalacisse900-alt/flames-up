@@ -84,6 +84,7 @@ export default function CreatePostFlow() {
       const uploadedUrls = [];
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
       const allTags = [];
+      let textOverlayValue = undefined;
 
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
@@ -99,14 +100,11 @@ export default function CreatePostFlow() {
         if (item.edits?.tags) {
           item.edits.tags.forEach(tag => allTags.push({ ...tag, imageIndex: i }));
         }
-        // Capture text overlay from first media item
         if (i === 0 && item.edits?.textOverlay) {
-          postData_textOverlay = item.edits.textOverlay;
+          textOverlayValue = item.edits.textOverlay;
         }
       }
 
-      // eslint-disable-next-line no-undef
-      const textOverlayValue = typeof postData_textOverlay !== "undefined" ? postData_textOverlay : undefined;
       const manualLoc = postSettings.location;
       const hashtagStr = (postSettings.hashtags || []).map((t) => `#${t}`).join(" ");
       const rawCaption = stripHtml(postSettings.caption || "");
