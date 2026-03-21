@@ -147,7 +147,7 @@ export default function Messages() {
   const [showNewMsg, setShowNewMsg] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef(null);
-  const { containerProps, RefreshIndicator } = usePullToRefresh(() => {
+  const { containerProps, PullIndicator } = usePullToRefresh(() => {
     window.location.reload();
   });
 
