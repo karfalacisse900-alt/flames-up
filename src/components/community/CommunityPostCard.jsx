@@ -508,11 +508,20 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
             )}
             {videoUrl && videoUrl.trim() && (
-              <AutoplayVideo
-                src={videoUrl}
-                postId={post.id}
-                onDoubleTap={() => handleLike()}
-              />
+              <div className="relative">
+                <AutoplayVideo
+                  src={videoUrl}
+                  postId={post.id}
+                  onDoubleTap={() => handleLike()}
+                />
+                {post.text_overlay && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8" style={{ zIndex: 3 }}>
+                    <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
+                      <p className="text-white text-lg font-bold text-center break-words">{post.text_overlay}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );
