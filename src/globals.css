@@ -138,12 +138,12 @@ button {
 }
 @media (hover: hover) {
   button:hover:not(:disabled) {
-    transform: translateY(-1px) scale(1.01);
+    /* Subtle lift only — no scale to avoid layout shift */
     box-shadow: var(--elevation-2);
   }
 }
 button:active:not(:disabled) {
-  transform: translateY(1px) scale(0.97) !important;
+  transform: scale(0.97) !important;
   box-shadow: none;
   opacity: 0.92;
 }
