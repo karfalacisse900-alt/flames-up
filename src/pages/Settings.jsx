@@ -148,44 +148,90 @@ export default function Settings() {
         </div>
 
         {/* Delete Account */}
-        <div className="mx-4 mt-3">
-          {!showDeleteConfirm ? (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full py-3 rounded-2xl text-sm font-medium"
-              style={{ color: "var(--text-hint)" }}
-            >
-              Delete Account
-            </button>
-          ) : (
-            <div className="p-4 rounded-2xl space-y-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid #ef444440" }}>
-              <p className="text-sm font-semibold text-center" style={{ color: "#ef4444" }}>⚠️ This is permanent</p>
-              <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>Type <strong>DELETE</strong> to confirm deletion of your account and all data.</p>
-              <input
-                value={deleteInput}
-                onChange={e => setDeleteInput(e.target.value)}
-                placeholder="Type DELETE"
-                className="w-full px-4 py-2.5 rounded-xl text-sm text-center outline-none"
-                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid #ef444440", color: "var(--text-primary)" }}
-              />
-              <div className="flex gap-2">
-                <button onClick={() => { setShowDeleteConfirm(false); setDeleteInput(""); }}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteInput !== "DELETE"}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
-                  style={{ backgroundColor: "#ef4444" }}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
+        <div className="mx-4 mt-3 mb-6">
+          <button
+            onClick={openDeleteSheet}
+            className="w-full py-3 rounded-2xl text-sm font-medium"
+            style={{ color: "var(--text-hint)", minHeight: 44 }}
+          >
+            Delete Account
+          </button>
         </div>
       </div>
+
+      {/* Delete Account Bottom Sheet */}
+      <BottomSheet open={showDeleteSheet} onClose={() => setShowDeleteSheet(false)} title="Delete Account">
+        {deleteStep === 1 ? (
+          <div className="px-5 py-6 space-y-5">
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: "#ef44441a" }}>
+                <AlertTriangle className="w-8 h-8" style={{ color: "#ef4444" }} />
+              </div>
+              <h3 className="text-lg font-bold text-center" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Permanently Delete Account?</h3>
+              <p className="text-sm text-center leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                This will permanently erase your profile, posts, messages, coins, and all associated data. <strong>This action cannot be undone.</strong>
+              </p>
+            </div>
+            <div className="space-y-2 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
+              {["Your profile and posts will be deleted", "Your coin balance will be lost", "Your messages will be removed", "You will be logged out immediately"].map(item => (
+                <div key={item} className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "#ef4444" }} />
+                  <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{item}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setShowDeleteSheet(false)}
+                className="flex-1 font-semibold text-sm rounded-2xl"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minHeight: 52 }}>
+                Keep Account
+              </button>
+              <button onClick={() => setDeleteStep(2)}
+                className="flex-1 font-bold text-sm rounded-2xl text-white"
+                style={{ backgroundColor: "#ef4444", minHeight: 52 }}>
+                Continue
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 py-6 space-y-4">
+            <p className="text-sm text-center font-semibold" style={{ color: "#ef4444" }}>Final confirmation required</p>
+            <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
+              Type <strong style={{ color: "var(--text-primary)" }}>DELETE</strong> in the box below to permanently delete your account.
+            </p>
+            <input
+              value={deleteInput}
+              onChange={e => setDeleteInput(e.target.value)}
+              placeholder="Type DELETE"
+              autoFocus
+              className="w-full px-4 rounded-2xl text-sm text-center outline-none tracking-widest font-bold uppercase"
+              style={{
+                backgroundColor: "var(--bg-subtle)",
+                border: `2px solid ${deleteInput === "DELETE" ? "#ef4444" : "var(--border-light)"}`,
+                color: "var(--text-primary)",
+                minHeight: 52,
+                transition: "border-color 0.2s ease",
+              }}
+            />
+            <div className="flex gap-3">
+              <button onClick={() => { setDeleteStep(1); setDeleteInput(""); }}
+                className="flex-1 font-semibold text-sm rounded-2xl"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minHeight: 52 }}>
+                Back
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteInput !== "DELETE"}
+                className="flex-1 font-bold text-sm rounded-2xl text-white disabled:opacity-35"
+                style={{ backgroundColor: "#ef4444", minHeight: 52 }}>
+                <span className="flex items-center justify-center gap-2">
+                  <Trash2 className="w-4 h-4" /> Delete Forever
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 }
