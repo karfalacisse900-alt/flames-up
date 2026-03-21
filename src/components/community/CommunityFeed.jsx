@@ -328,7 +328,7 @@ export default function CommunityFeed({ user }) {
     return () => observer.disconnect();
   }, [hasMore, isFetchingMore, loadMorePosts]);
 
-  const { containerRef, PullIndicator, handleTouchStart, handleTouchMove, handleTouchEnd } = usePullToRefresh(async () => {
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
     await hardRefetch();
   });
 
