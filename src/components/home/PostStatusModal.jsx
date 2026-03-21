@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ImagePlus, Video as VideoIcon, Loader2 } from "lucide-react";
+import { X, ImagePlus, Video as VideoIcon, Loader2, Type, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const BG_PRESETS = [
@@ -14,13 +14,35 @@ const BG_PRESETS = [
   "linear-gradient(135deg, #BE185D, #7C3AED)",
 ];
 
+const TEXT_POSITIONS = [
+  { id: "top-left",     label: "↖", style: { top: 40, left: 16, textAlign: "left" } },
+  { id: "top-center",   label: "↑",  style: { top: 40, left: "50%", transform: "translateX(-50%)", textAlign: "center" } },
+  { id: "top-right",    label: "↗", style: { top: 40, right: 16, textAlign: "right" } },
+  { id: "center-left",  label: "←",  style: { top: "50%", left: 16, transform: "translateY(-50%)", textAlign: "left" } },
+  { id: "center",       label: "⊙", style: { top: "50%", left: "50%", transform: "translate(-50%,-50%)", textAlign: "center" } },
+  { id: "center-right", label: "→", style: { top: "50%", right: 16, transform: "translateY(-50%)", textAlign: "right" } },
+  { id: "bottom-left",  label: "↙", style: { bottom: 50, left: 16, textAlign: "left" } },
+  { id: "bottom-center",label: "↓", style: { bottom: 50, left: "50%", transform: "translateX(-50%)", textAlign: "center" } },
+  { id: "bottom-right", label: "↘", style: { bottom: 50, right: 16, textAlign: "right" } },
+];
+
+const FONT_SIZES = [
+  { label: "S", size: 18 },
+  { label: "M", size: 24 },
+  { label: "L", size: 32 },
+  { label: "XL", size: 40 },
+];
+
 export default function PostStatusModal({ user, groupId, groupName, onClose, onPosted }) {
   const [text, setText] = useState("");
   const [bg, setBg] = useState(BG_PRESETS[0]);
   const [mediaUrl, setMediaUrl] = useState("");
-  const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
+  const [mediaType, setMediaType] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [textPosition, setTextPosition] = useState("center");
+  const [fontSize, setFontSize] = useState(24);
+  const [showTextOptions, setShowTextOptions] = useState(false);
 
   const handleMediaUpload = async (e, type) => {
     const file = e.target.files?.[0];
@@ -35,13 +57,11 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
   const handlePost = async () => {
     if (!text.trim()) return;
     setPosting(true);
-    
-    // Get or create user profile (upsert — prevent duplicates)
+
     const existingProfiles = await base44.entities.UserProfile.filter({ user_email: user.email });
     let userProfile;
     if (existingProfiles.length > 0) {
       userProfile = existingProfiles[0];
-      // Clean up any duplicates
       if (existingProfiles.length > 1) {
         for (let i = 1; i < existingProfiles.length; i++) {
           base44.entities.UserProfile.delete(existingProfiles[i].id).catch(() => {});
@@ -62,6 +82,8 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
       creator_profile_id: userProfile.id,
       author_type: groupId ? "group_owner" : "creator",
       text: text.trim(),
+      text_position: textPosition,
+      text_size: fontSize,
       background: mediaUrl ? undefined : bg,
       image_url: mediaType === "image" ? mediaUrl : undefined,
       video_url: mediaType === "video" ? mediaUrl : undefined,
@@ -71,21 +93,22 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
       view_count: 0,
       viewed_by: [],
     });
-    
-    // Update profile status count
+
     await base44.entities.UserProfile.update(userProfile.id, {
       status_count: (userProfile.status_count || 0) + 1,
     });
-    
+
     setPosting(false);
     onPosted?.();
     onClose();
   };
 
+  const posConfig = TEXT_POSITIONS.find(p => p.id === textPosition) || TEXT_POSITIONS[4];
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
       onClick={onClose}>
       <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -93,33 +116,102 @@ export default function PostStatusModal({ user, groupId, groupName, onClose, onP
         style={{ backgroundColor: "var(--bg-card)" }}
         onClick={e => e.stopPropagation()}>
 
-        {/* Preview */}
-        <div className="relative h-52 flex flex-col items-center justify-center p-6"
-          style={{ background: mediaUrl ? undefined : bg, backgroundImage: mediaType === "image" ? `url(${mediaUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-          {mediaType === "video" && (
-            <video src={mediaUrl} className="absolute inset-0 w-full h-full object-cover" />
+        {/* Preview — full aspect ratio story style */}
+        <div className="relative w-full overflow-hidden"
+          style={{
+            aspectRatio: "9/16",
+            maxHeight: "55vh",
+            background: !mediaUrl ? bg : undefined,
+          }}>
+
+          {/* Background media fills with no black bars */}
+          {mediaType === "image" && mediaUrl && (
+            <img src={mediaUrl} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
           )}
+          {mediaType === "video" && mediaUrl && (
+            <video src={mediaUrl} autoPlay muted loop playsInline className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
+          )}
+
+          {/* Dark overlay for readability */}
           {mediaUrl && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.35)" }} />}
-          <p className="relative z-10 text-white text-2xl font-bold text-center leading-snug max-w-[90%]"
-            style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
-            {text || "Your status text…"}
-          </p>
+
+          {/* Close */}
           <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10"
             style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
             <X className="w-4 h-4 text-white" />
           </button>
+
+          {/* Overlay text at chosen position */}
+          {text && (
+            <div className="absolute z-10 max-w-[80%]" style={{ ...posConfig.style }}>
+              <p style={{
+                color: "#fff",
+                fontFamily: "var(--font-serif)",
+                fontSize: fontSize,
+                fontWeight: 700,
+                lineHeight: 1.25,
+                textShadow: "0 2px 16px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.9)",
+                textAlign: posConfig.style.textAlign,
+              }}>
+                {text}
+              </p>
+            </div>
+          )}
+
+          {/* Group tag */}
           {groupName && (
             <span className="absolute bottom-3 left-3 text-xs font-bold text-white/80 z-10">📍 {groupName}</span>
           )}
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-3 max-h-[45vh] overflow-y-auto">
           {/* Text input */}
           <textarea value={text} onChange={e => setText(e.target.value)}
-            placeholder="What's happening? (e.g. Going to yoga 🧘, Check out our new class!)"
+            placeholder="Type your caption… it will appear as overlay text"
             rows={2} maxLength={180}
             className="w-full px-3 py-2.5 rounded-2xl text-sm outline-none resize-none"
             style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+
+          {/* Text options toggle */}
+          <button onClick={() => setShowTextOptions(v => !v)}
+            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-xl"
+            style={{ backgroundColor: showTextOptions ? "var(--accent-primary-light)" : "var(--bg-subtle)", color: showTextOptions ? "var(--accent-primary)" : "var(--text-secondary)" }}>
+            <Type className="w-3.5 h-3.5" /> Text Style
+          </button>
+
+          <AnimatePresence>
+            {showTextOptions && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden space-y-3">
+                {/* Font size */}
+                <div>
+                  <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-hint)" }}>Size</p>
+                  <div className="flex gap-2">
+                    {FONT_SIZES.map(f => (
+                      <button key={f.size} onClick={() => setFontSize(f.size)}
+                        className="w-10 h-10 rounded-xl text-sm font-bold transition-all"
+                        style={{ backgroundColor: fontSize === f.size ? "var(--accent-primary)" : "var(--bg-subtle)", color: fontSize === f.size ? "#fff" : "var(--text-secondary)" }}>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Position grid */}
+                <div>
+                  <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-hint)" }}>Position</p>
+                  <div className="grid grid-cols-3 gap-1.5 w-28">
+                    {TEXT_POSITIONS.map(p => (
+                      <button key={p.id} onClick={() => setTextPosition(p.id)}
+                        className="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-all"
+                        style={{ backgroundColor: textPosition === p.id ? "var(--accent-primary)" : "var(--bg-subtle)", color: textPosition === p.id ? "#fff" : "var(--text-secondary)" }}>
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Background picker */}
           {!mediaUrl && (

@@ -195,7 +195,7 @@ export default function StatusViewer() {
         <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.4)" }} />
       )}
       {currentStatus.video_url && (
-        <video src={currentStatus.video_url} autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" />
+        <video src={currentStatus.video_url} autoPlay loop playsInline className="absolute inset-0 w-full h-full" style={{ objectFit: "cover" }} />
       )}
 
       {/* Progress bars */}
