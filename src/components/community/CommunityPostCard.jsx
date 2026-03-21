@@ -125,9 +125,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}?post=${post.id}`;
-    if (navigator.share) navigator.share({ title: "Post", url });
-    else { navigator.clipboard.writeText(url); }
+    setShowShareSheet(true);
     setShowMenu(false);
   };
 
