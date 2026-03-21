@@ -30,6 +30,12 @@ export default function Settings() {
     base44.auth.logout();
   };
 
+  const openDeleteSheet = () => {
+    setDeleteStep(1);
+    setDeleteInput("");
+    setShowDeleteSheet(true);
+  };
+
   const SettingRow = ({ icon: Icon, label, onClick, rightEl, danger }) => (
     <button
       onClick={onClick}
