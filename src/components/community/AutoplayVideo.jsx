@@ -192,8 +192,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
         onPause={() => setPlaying(false)}
         onError={markLoaded}
-        className="absolute inset-0 w-full h-full"
-        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
+        className="w-full block"
+        style={{ maxHeight: "75vh", objectFit: "contain", display: "block", zIndex: 1 }}
       />
 
       {/* Tap feedback icon */}
