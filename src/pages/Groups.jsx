@@ -247,8 +247,10 @@ export default function Groups() {
       {/* Filter toggle */}
       <div className="px-4 pb-3 flex items-center gap-2">
         <button onClick={() => setShowDiscoverFilters(v => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+          aria-label="Toggle filters"
+          className="flex items-center gap-1.5 px-3 rounded-full text-xs font-semibold"
           style={{
+            minHeight: 44,
             backgroundColor: showDiscoverFilters ? "var(--accent-primary)" : "var(--bg-card)",
             color: showDiscoverFilters ? "#fff" : "var(--text-secondary)",
             border: `1px solid ${showDiscoverFilters ? "var(--accent-primary)" : "var(--border-light)"}`,
