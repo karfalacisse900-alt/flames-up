@@ -338,9 +338,23 @@ textarea.flex, textarea[class*="rounded"] {
 .safe-top    { padding-top: env(safe-area-inset-top, 0px); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-nav, button, a[role="button"], .no-select {
+/* ── User-select: none on all non-text interactive elements ── */
+nav, header, footer,
+button, a, label,
+[role="button"], [role="tab"], [role="menuitem"], [role="option"],
+img, svg, video, canvas,
+.no-select {
   -webkit-user-select: none;
+  -moz-user-select: none;
   user-select: none;
+}
+/* Re-allow selection on actual text content */
+p, span, h1, h2, h3, h4, h5, h6,
+input, textarea, [contenteditable],
+.selectable {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
 }
 
 .text-\[10px\] { font-size: 11px !important; }

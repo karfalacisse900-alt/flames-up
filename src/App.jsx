@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { NavigationStackProvider } from '@/lib/NavigationStack';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { lazy, Suspense } from 'react';
+import { useHardwareBack } from '@/hooks/useHardwareBack';
 
 const Live           = lazy(() => import('./pages/Live'));
 const UserProfile    = lazy(() => import('./pages/UserProfile'));
