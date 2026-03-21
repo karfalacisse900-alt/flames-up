@@ -15,7 +15,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const containerRef = useRef(null);
-  const { containerProps, RefreshIndicator } = usePullToRefresh(() => {
+  const { containerProps, PullIndicator } = usePullToRefresh(() => {
     // Refresh feed data here if needed
     window.location.reload();
   });
