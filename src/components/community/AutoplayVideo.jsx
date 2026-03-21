@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
 import StreamVideo, { isStreamVideo } from "./StreamVideo";
 
-// Session-level mute preference
-const sessionPrefs = { muted: false };
+// Session-level mute preference — start muted for autoplay policy compliance
+const sessionPrefs = { muted: true };
 
 // Global: only one video plays at a time
 let activeVideoRef = null;
@@ -20,13 +20,13 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [buffering, setBuffering] = useState(false);
-  const [srcReady, setSrcReady] = useState(false);
   const [showIcon, setShowIcon] = useState(null); // "play" | "pause" | "like"
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
-  const progressInterval = useRef(null);
   const playingRef = useRef(false);
+  const inViewport = useRef(false);
+  const userPaused = useRef(false); // track if user manually paused
 
   // Keep playingRef in sync
   useEffect(() => { playingRef.current = playing; }, [playing]);
@@ -52,14 +52,21 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     activeSetPlaying = setPlaying;
     v.muted = sessionPrefs.muted;
     setMuted(sessionPrefs.muted);
-    if (v.readyState < 2) v.load();
     v.play().then(() => {
       setPlaying(true);
       setBuffering(false);
-      clearInterval(progressInterval.current);
     }).catch(() => {
-      setPlaying(false);
-      setBuffering(false);
+      // Autoplay blocked — try muted
+      v.muted = true;
+      sessionPrefs.muted = true;
+      setMuted(true);
+      v.play().then(() => {
+        setPlaying(true);
+        setBuffering(false);
+      }).catch(() => {
+        setPlaying(false);
+        setBuffering(false);
+      });
     });
   }, []);
 
@@ -67,33 +74,34 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     const v = videoRef.current;
     v?.pause();
     setPlaying(false);
-    clearInterval(progressInterval.current);
     if (activeVideoRef === videoRef) {
       activeVideoRef = null;
       activeSetPlaying = null;
     }
   }, []);
 
-  // Intersection Observer — 60% visibility required to autoplay
+  // Intersection Observer — pause when out of viewport, play when back in (if not user-paused)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          setSrcReady(true);
-          doPlay();
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          inViewport.current = true;
+          if (!userPaused.current) {
+            doPlay();
+          }
         } else if (!entry.isIntersecting) {
+          inViewport.current = false;
           doPause();
         }
       },
-      { threshold: [0, 0.3, 0.6, 1.0] }
+      { threshold: [0, 0.5, 1.0] }
     );
     obs.observe(container);
     return () => {
       obs.disconnect();
-      clearInterval(progressInterval.current);
       doPause();
     };
   }, [doPlay, doPause]);
@@ -109,7 +117,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   };
 
   // Tap handler — single tap toggles play/pause, double tap likes
-  const handleTap = useCallback(() => {
+  const handleTap = useCallback((e) => {
+    e.stopPropagation();
     tapCount.current += 1;
     clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => {
@@ -120,9 +129,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onDoubleTap?.();
       } else {
         if (playingRef.current) {
+          userPaused.current = true;
           doPause();
           flashIcon("pause");
         } else {
+          userPaused.current = false;
           doPlay();
           flashIcon("play");
         }
@@ -162,25 +173,23 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         </div>
       )}
 
-      {srcReady && (
-        <video
-          ref={videoRef}
-          src={src}
-          playsInline
-          loop
-          muted={muted}
-          preload="metadata"
-          onLoadedMetadata={markLoaded}
-          onCanPlay={markLoaded}
-          onLoadedData={markLoaded}
-          onWaiting={() => { if (loaded) setBuffering(true); }}
-          onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
-          onPause={() => setPlaying(false)}
-          onError={markLoaded}
-          className="absolute inset-0 w-full h-full"
-          style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
-        />
-      )}
+      <video
+        ref={videoRef}
+        src={src}
+        playsInline
+        loop
+        muted={muted}
+        preload="metadata"
+        onLoadedMetadata={markLoaded}
+        onCanPlay={markLoaded}
+        onLoadedData={markLoaded}
+        onWaiting={() => { if (loaded) setBuffering(true); }}
+        onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
+        onPause={() => setPlaying(false)}
+        onError={markLoaded}
+        className="absolute inset-0 w-full h-full"
+        style={{ objectFit: "cover", objectPosition: "center", zIndex: 1, display: "block" }}
+      />
 
       {/* Tap feedback icon */}
       {showIcon && (
@@ -194,7 +203,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         </div>
       )}
 
-      {/* Paused overlay — subtle dark overlay with play icon when paused & loaded */}
+      {/* Paused overlay */}
       {loaded && !playing && !buffering && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3, backgroundColor: "rgba(0,0,0,0.25)" }}>
           <div className="flex items-center justify-center rounded-full" style={{ width: 56, height: 56, backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}>
