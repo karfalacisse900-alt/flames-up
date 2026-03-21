@@ -118,7 +118,10 @@ export default function StatusViewer() {
     setReactions(currentStatus.reactions || {});
     setReactionCounts(currentStatus.reaction_counts || {});
     setComments(currentStatus.comments || []);
-    setShowComments(false);
+    setShowComments(true);
+    const likes = currentStatus.liked_by || [];
+    setLiked(!!user?.email && likes.includes(user.email));
+    setLikeCount(likes.length);
     const userReacts = {};
     Object.entries(currentStatus.reactions || {}).forEach(([emoji, users]) => {
       if (users?.includes(user?.email)) userReacts[emoji] = true;
