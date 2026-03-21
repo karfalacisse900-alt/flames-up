@@ -278,7 +278,8 @@ export default function Groups() {
             <div className="flex gap-2 px-4 pb-1 overflow-x-auto scrollbar-hide">
               {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
                 <button key={t.key} onClick={() => setTypeFilter(t.key)}
-                  className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  className="shrink-0 px-3 rounded-full text-xs font-semibold"
+                  style={{ minHeight: 44 }}
                   style={{
                     backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
                     color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
@@ -289,7 +290,8 @@ export default function Groups() {
             <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
               {CATEGORY_TABS.map(c => (
                 <button key={c.key} onClick={() => setCategoryFilter(c.key)}
-                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  className="shrink-0 flex items-center gap-1 px-3 rounded-full text-xs font-semibold"
+                  style={{ minHeight: 44 }}
                   style={{
                     backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
                     color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",

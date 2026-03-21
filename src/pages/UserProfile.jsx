@@ -139,7 +139,7 @@ export default function UserProfile() {
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 safe-top"
         style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2" style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <button onClick={() => navigate(-1)} aria-label="Go back" style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", touchAction: "manipulation" }}>
           <ArrowLeft className="w-5 h-5" />
         </button>
         <span className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
@@ -269,7 +269,7 @@ export default function UserProfile() {
                 />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-xl h-10 w-10">
+                    <Button variant="outline" size="icon" className="rounded-xl" style={{ minWidth: 44, minHeight: 44 }}>
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
