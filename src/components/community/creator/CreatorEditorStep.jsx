@@ -270,14 +270,13 @@ export default function CreatorEditorStep({
         </div>
       )}
 
-      {/* Tag Editor overlay */}
-      {activeTool === "tag" && currentItem && (
-        <TagEditor
-          imageUrl={currentItem.preview}
-          existingTags={currentItem.edits?.tags || []}
-          onSave={(tags) => { applyEdits({ tags }); setActiveTool(null); }}
-          onClose={() => setActiveTool(null)}
-        />
+      {/* Tag Editor — coming soon */}
+      {activeTool === "tag" && (
+        <div className="flex-shrink-0 px-4 py-5 flex flex-col items-center gap-2" style={{ backgroundColor: "#111", borderTop: "1px solid #2a2a2a" }}>
+          <span className="text-2xl">🏷️</span>
+          <p className="text-white text-sm font-bold">Tag People & Products</p>
+          <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.45)" }}>Coming soon — tagging will be available in a future update</p>
+        </div>
       )}
 
       <MusicLibrarySheet
