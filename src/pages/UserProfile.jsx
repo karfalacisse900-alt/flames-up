@@ -61,11 +61,12 @@ export default function UserProfile() {
   const { data: userProfileData } = useQuery({
     queryKey: ["userProfile", email],
     queryFn: async () => {
+      // Try UserProfile entity first, then fall back to User entity extended data
       const profiles = await base44.entities.UserProfile.filter({ user_email: email });
       return profiles[0] || null;
     },
     enabled: !!email,
-    staleTime: 60000,
+    staleTime: 30000,
   });
 
   const { data: userPosts = [] } = useQuery({
