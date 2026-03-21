@@ -8,17 +8,31 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Live from './pages/Live';
-import UserProfile from './pages/UserProfile';
-import PlaceDetail from './pages/PlaceDetail';
-import ListenDontJudge from './pages/ListenDontJudge';
-import LiveNearby from './pages/LiveNearby';
-import Onboarding from './pages/Onboarding';
-import CreatorDashboard from './pages/CreatorDashboard';
-import AdminCreators from './pages/AdminCreators';
-import CreatorLanding from './pages/CreatorLanding';
-import Settings from './pages/Settings';
-import EditProfile from './pages/EditProfile';
+import { lazy, Suspense } from 'react';
+
+const Live           = lazy(() => import('./pages/Live'));
+const UserProfile    = lazy(() => import('./pages/UserProfile'));
+const PlaceDetail    = lazy(() => import('./pages/PlaceDetail'));
+const ListenDontJudge = lazy(() => import('./pages/ListenDontJudge'));
+const LiveNearby     = lazy(() => import('./pages/LiveNearby'));
+const Onboarding     = lazy(() => import('./pages/Onboarding'));
+const CreatorDashboard = lazy(() => import('./pages/CreatorDashboard'));
+const AdminCreators  = lazy(() => import('./pages/AdminCreators'));
+const CreatorLanding = lazy(() => import('./pages/CreatorLanding'));
+const Settings       = lazy(() => import('./pages/Settings'));
+const EditProfile    = lazy(() => import('./pages/EditProfile'));
+
+function PageFallback() {
+  return (
+    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--bg-app)" }}>
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
+    </div>
+  );
+}
+
+function SuspensePage({ children }) {
+  return <Suspense fallback={<PageFallback />}>{children}</Suspense>;
+}
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
