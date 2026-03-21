@@ -180,12 +180,11 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
       )}
 
       <video
-        ref={videoRef}
-        src={src}
-        playsInline
-        loop
-        muted={muted}
-        preload="metadata"
+          ref={videoRef}
+          playsInline
+          loop
+          muted={muted}
+          preload="none"
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
