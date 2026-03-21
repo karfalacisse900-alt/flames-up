@@ -88,7 +88,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           inViewport.current = true;
           // Assign src lazily on first viewport entry
           if (videoRef.current && !srcSet.current) {
@@ -98,12 +98,12 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           if (!userPaused.current) {
             doPlay();
           }
-        } else if (!entry.isIntersecting) {
+        } else if (entry.intersectionRatio < 0.6) {
           inViewport.current = false;
           doPause();
         }
       },
-      { threshold: [0, 0.5, 1.0] }
+      { threshold: [0, 0.6, 1.0] }
     );
     obs.observe(container);
     return () => {
@@ -120,6 +120,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
     sessionPrefs.muted = next;
     v.muted = next;
     setMuted(next);
+    v.volume = next ? 0 : 1;
   };
 
   // Tap handler — single tap toggles play/pause, double tap likes
@@ -189,7 +190,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           playsInline
           loop
           muted={muted}
-          preload="metadata"
+          preload="auto"
         onLoadedMetadata={markLoaded}
         onCanPlay={markLoaded}
         onLoadedData={markLoaded}
@@ -199,7 +200,7 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
         onError={markLoaded}
         onEnded={() => { setLoaded(true); setPlaying(false); }}
         className="w-full h-full block"
-        style={{ objectFit: "cover", display: "block", zIndex: 1, backgroundColor: "#000" }}
+        style={{ objectFit: "cover", display: "block", zIndex: 1, backgroundColor: "#000", audioTracks: "enable" }}
       />
 
       {/* Tap feedback icon */}
