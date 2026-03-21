@@ -9,7 +9,7 @@ import DMChatView from "../components/messages/DMChatView";
 import GroupChatView from "../components/messages/GroupChatView";
 import { useQuery } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 
 const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
