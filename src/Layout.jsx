@@ -198,26 +198,31 @@ export default function Layout({ children, currentPageName }) {
           transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           willChange: "transform",
         }}>
-          <div className="max-w-lg mx-auto flex justify-around items-center h-full px-2" style={{ maxWidth: "min(512px, 100vw)" }}>
-                {navItems.map((item) => {
-                const isActive = currentPageName === item.page;
-                const showBadge = item.page === "Notifications" && unreadCount > 0;
-                return (
-                  <Link
-                    key={item.name}
-                    to={createPageUrl(item.page)}
-                    onClick={isActive ? (e) => { e.preventDefault(); navigate(createPageUrl(item.page), { replace: true }); } : undefined}
-                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 relative"
-                    style={{ color: isActive ? "var(--accent-primary)" : "var(--text-secondary)", fontWeight: isActive ? 600 : 400 }}>
-
+          <div className="max-w-lg mx-auto flex justify-around items-center h-full px-1" style={{ maxWidth: "min(512px, 100vw)" }}>
+            {navItems.map((item) => {
+              const isActive = currentPageName === item.page;
+              const showBadge = item.page === "Notifications" && unreadCount > 0;
+              return (
+                <Link
+                  key={item.name}
+                  to={createPageUrl(item.page)}
+                  onClick={isActive ? (e) => { e.preventDefault(); navigate(createPageUrl(item.page), { replace: true }); } : undefined}
+                  className="flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-200 relative"
+                  style={{
+                    color: isActive ? "var(--accent-primary)" : "var(--text-secondary)",
+                    fontWeight: isActive ? 600 : 400,
+                    minWidth: 52,
+                    minHeight: 52,
+                    flex: 1,
+                  }}>
                   <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                   {showBadge &&
-                <span style={{ position: "absolute", top: 2, right: 4, width: 8, height: 8, borderRadius: "50%", backgroundColor: "#E05C7A", border: "2px solid var(--bg-nav)" }} />
-                }
-                  <span className="text-[11px] font-semibold tracking-wide">{item.name}</span>
-                </Link>);
-
-          })}
+                    <span style={{ position: "absolute", top: 6, right: "50%", transform: "translateX(10px)", width: 8, height: 8, borderRadius: "50%", backgroundColor: "#E05C7A", border: "2px solid var(--bg-nav)" }} />
+                  }
+                  <span className="text-[11px] font-semibold tracking-wide leading-none">{item.name}</span>
+                </Link>
+              );
+            })}
           </div>
         </nav>
       }
