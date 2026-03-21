@@ -198,15 +198,23 @@ export default function ListenDontJudge() {
 
       {/* Composer Modal */}
       {showComposer && (
-        <ComposerModal
-          user={user}
-          defaultTopic={activeTopic !== "all" ? activeTopic : "opinion"}
-          onClose={() => setShowComposer(false)}
-        />
+        <>
+          <ComposerModal
+            user={user}
+            defaultTopic={activeTopic !== "all" ? activeTopic : "opinion"}
+            onClose={() => setShowComposer(false)}
+          />
+          {typeof window !== "undefined" && window.dispatchEvent(new CustomEvent("modal_open", { detail: true }))}
+        </>
       )}
 
       {/* Share Modal */}
-      {sharePost && <ShareModal post={sharePost} onClose={() => setSharePost(null)} />}
+      {sharePost && (
+        <>
+          <ShareModal post={sharePost} onClose={() => setSharePost(null)} />
+          {typeof window !== "undefined" && window.dispatchEvent(new CustomEvent("modal_open", { detail: true }))}
+        </>
+      )}
     </div>
   );
 }
@@ -399,7 +407,7 @@ function ComposerModal({ user, defaultTopic, onClose }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
       <div
         className="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 max-h-[92vh] overflow-y-auto"
-        style={{ backgroundColor: "var(--bg-modal)" }}
+        style={{ backgroundColor: "#FFFFFF" }}
       >
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>

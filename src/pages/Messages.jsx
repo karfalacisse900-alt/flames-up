@@ -164,19 +164,26 @@ export default function Messages() {
   if (activeChat?.type === "group") return <GroupChatView user={user} group={activeChat.data} onBack={() => setActiveChat(null)} />;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div
-        className="shrink-0 px-5 pt-5 pb-3"
-        style={{
-          paddingTop: "max(env(safe-area-inset-top, 0px), 20px)",
-          backgroundColor: "var(--bg-app)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-            Messages
-          </h1>
+     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
+       {/* Header */}
+       <div
+         className="shrink-0 px-5 pt-5 pb-3"
+         style={{
+           paddingTop: "max(env(safe-area-inset-top, 0px), 20px)",
+           backgroundColor: "var(--bg-app)",
+         }}
+       >
+         <div className="flex items-center justify-between mb-4">
+           <div className="flex items-center gap-3">
+             <button onClick={() => window.history.back()} style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--text-primary)" }}>
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+               </svg>
+             </button>
+             <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+               Messages
+             </h1>
+           </div>
           <div className="flex items-center gap-2">
             <Link
               to={createPageUrl("Notifications")}

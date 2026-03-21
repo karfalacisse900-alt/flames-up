@@ -41,7 +41,7 @@ export default function UserProfile() {
     queryKey: ["userPosts", email],
     queryFn: async () => {
       const posts = await base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 30);
-      return posts.map(normalizePost);
+      return posts.filter(p => !p.tags?.includes("listen_dont_judge")).map(normalizePost);
     },
     enabled: !!email,
     staleTime: 60000,
