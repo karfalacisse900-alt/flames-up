@@ -40,6 +40,10 @@ export default function Live() {
     return unsubscribe;
   }, [queryClient]);
 
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["livePosts"] });
+  });
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
@@ -50,7 +54,8 @@ export default function Live() {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div {...containerProps} className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
+      <PullIndicator />
       {/* Header */}
       <div className="px-5 pt-6 pb-4 border-b" style={{ borderColor: "var(--border-light)" }}>
         <div className="flex items-center justify-between mb-3">
