@@ -139,6 +139,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
 
   const [notInterested, setNotInterested] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   if (notInterested) return null;
 
   const handleLike = () => {
