@@ -59,11 +59,22 @@ export default function Discover() {
 
   const firstName = user?.full_name?.split(" ")[0] || "";
 
+  const refreshItems = async () => {
+    setIsLoading(true);
+    base44.entities.DiscoverItem.filter({ is_approved: true }, "-avg_rating", 100)
+      .then(setItems)
+      .finally(() => setIsLoading(false));
+  };
+
+  const { containerProps, PullIndicator } = usePullToRefresh(refreshItems);
+
   return (
     <div
+      {...containerProps}
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-app)" }}
     >
+      <PullIndicator />
 
       {/* ── Sticky Header ── */}
       <div
