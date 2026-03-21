@@ -161,8 +161,10 @@ export default function PlacesPage() {
                   { key: "saved", icon: Bookmark },
                 ].map(({ key, icon: Icon }) => (
                   <button key={key} onClick={() => setViewMode(key)}
-                    className="p-2 rounded-xl transition-all"
+                    aria-label={key}
+                    className="rounded-xl flex items-center justify-center transition-all"
                     style={{
+                      minWidth: 40, minHeight: 40,
                       backgroundColor: viewMode === key ? "#1E1E1E" : "transparent",
                       color: viewMode === key ? "#fff" : "var(--text-hint)",
                       boxShadow: viewMode === key ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
