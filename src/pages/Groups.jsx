@@ -213,7 +213,8 @@ export default function Groups() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
+    <div {...containerProps} style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
+      <PullIndicator />
 
       {/* ── Header ── */}
       <div className="relative px-5 pt-6 pb-4" style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
