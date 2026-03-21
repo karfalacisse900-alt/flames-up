@@ -124,8 +124,8 @@ export default function TagEditor({ imageUrl, existingTags = [], onSave, onClose
               <div
                 className="absolute w-8 h-8 rounded-full flex items-center justify-center animate-pulse"
                 style={{
-                  left: `${newTagPosition.x}%`,
-                  top: `${newTagPosition.y}%`,
+                  left: `${newTagPosition.x * 100}%`,
+                  top: `${newTagPosition.y * 100}%`,
                   transform: "translate(-50%, -50%)",
                   backgroundColor: "#4F46E5",
                   border: "2px solid white",
