@@ -175,126 +175,165 @@ export default function UserProfile() {
         </span>
       </div>
 
-      {/* Profile Header — Instagram-like: large avatar left, name right */}
-      <div className="px-5 pt-6 pb-4" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="flex items-start gap-4 mb-4">
-          {/* Large avatar with optional online dot */}
-          <div style={{ position: "relative" }}>
-            <AvatarCircle src={avatarUrl} name={effectiveName} size={88} />
-          </div>
+      {/* Profile Header */}
+      <div className="pb-4" style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+        {/* Banner area */}
+        <div className="h-24 w-full" style={{ background: "linear-gradient(135deg, var(--accent-primary-light), var(--bg-subtle))" }} />
 
-          {/* Name + username + interests */}
-          <div className="flex-1 min-w-0 pt-1">
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", fontFamily: "var(--font-serif)", lineHeight: 1.1, marginBottom: 4 }}>
+        {/* Avatar + name row */}
+        <div className="px-5 -mt-10 flex items-end gap-4 mb-4">
+          <div style={{ border: "4px solid var(--bg-card)", borderRadius: "50%", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
+            <AvatarCircle src={avatarUrl} name={effectiveName} size={80} />
+          </div>
+          <div className="flex-1 min-w-0 pt-10">
+            <h1 style={{ fontSize: 21, fontWeight: 800, color: "var(--text-primary)", fontFamily: "var(--font-serif)", lineHeight: 1.1 }}>
               {effectiveName}
             </h1>
             {username && (
-              <p style={{ fontSize: 13, color: "var(--text-hint)", marginBottom: 6 }}>@{username}</p>
-            )}
-            {/* Interest tags — shown right under name like screenshot */}
-            {interests.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {interests.slice(0, 4).map((tag, i) => (
-                  <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 20, backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <p style={{ fontSize: 13, color: "var(--text-hint)" }}>{username}</p>
             )}
           </div>
         </div>
 
-        {/* Bio */}
-        {bio && (
-          <div className="mb-4 px-1">
-            <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--text-primary)", backgroundColor: "var(--bg-subtle)", padding: "12px 14px", borderRadius: 14 }}>
-              {bio}
-            </p>
-          </div>
-        )}
+        <div className="px-5 space-y-4">
+          {/* Headline / bio */}
+          {bio && (
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-primary)", fontWeight: 500 }}>{bio}</p>
+          )}
 
-        {/* Location / Website */}
-        {(location || website) && (
-          <div className="flex flex-wrap gap-3 mb-4 px-1">
-            {location && (
-              <span style={{ fontSize: 12, color: "var(--text-hint)", display: "flex", alignItems: "center", gap: 4 }}>
-                📍 {location}
-              </span>
-            )}
-            {website && (
-              <a href={website} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-primary)", display: "flex", alignItems: "center", gap: 4 }}>
-                🌐 {website.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-          </div>
-        )}
-
-        {/* Looking For tags */}
-        {lookingFor.length > 0 && (
-          <div className="mb-4 px-1">
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Looking For</p>
-            <div className="flex flex-wrap gap-1.5">
-              {lookingFor.map((item, i) => (
-                <span key={i} style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border-medium)", color: "var(--text-secondary)", backgroundColor: "var(--bg-subtle)" }}>
-                  {item}
-                </span>
-              ))}
+          {/* About Me */}
+          {aboutMe && (
+            <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>About Me</p>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary)" }}>{aboutMe}</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Social links */}
-        {socialLinks.length > 0 && (
-          <div className="mb-4 px-1 flex flex-wrap gap-2">
-            {socialLinks.map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 12, color: "var(--accent-primary)", padding: "3px 10px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
-                {link.platform}
-              </a>
-            ))}
-          </div>
-        )}
+          {/* Personal Info */}
+          {(age || city || major || graduationYear || hobbies) && (
+            <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>Personal Info</p>
+              <div className="space-y-2">
+                {age && <div className="flex items-center gap-3">
+                  <span style={{ fontSize: 12, color: "var(--text-hint)", width: 100 }}>Age</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{age}</span>
+                </div>}
+                {city && <div className="flex items-center gap-3">
+                  <span style={{ fontSize: 12, color: "var(--text-hint)", width: 100 }}>City / Campus</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{city}</span>
+                </div>}
+                {major && <div className="flex items-center gap-3">
+                  <span style={{ fontSize: 12, color: "var(--text-hint)", width: 100 }}>Major / Field</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{major}</span>
+                </div>}
+                {graduationYear && <div className="flex items-center gap-3">
+                  <span style={{ fontSize: 12, color: "var(--text-hint)", width: 100 }}>Graduation Year</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{graduationYear}</span>
+                </div>}
+                {hobbies && <div className="flex items-start gap-3">
+                  <span style={{ fontSize: 12, color: "var(--text-hint)", width: 100, flexShrink: 0 }}>Hobbies</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{Array.isArray(hobbies) ? hobbies.join(", ") : hobbies}</span>
+                </div>}
+              </div>
+            </div>
+          )}
 
-        {/* Action Buttons */}
-        {!isOwnProfile && currentUser && (
-          <div className="flex gap-2 mt-2">
-            <button onClick={handleMessage}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
-              <MessageCircle className="w-4 h-4" />
-              Message
+          {/* Looking For */}
+          {lookingFor.length > 0 && (
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Looking For</p>
+              <div className="flex flex-wrap gap-2">
+                {lookingFor.map((item, i) => (
+                  <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 20, border: "1.5px solid var(--accent-primary)", color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Interest Tags */}
+          {interests.length > 0 && (
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Interest Tags</p>
+              <div className="flex flex-wrap gap-1.5">
+                {interests.map((tag, i) => (
+                  <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 20, backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Social Links */}
+          {(website || portfolio || socialLinks.length > 0) && (
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Social Links</p>
+              <div className="flex flex-wrap gap-2">
+                {website && (
+                  <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    🌐 Website
+                  </a>
+                )}
+                {portfolio && (
+                  <a href={portfolio.startsWith("http") ? portfolio : `https://${portfolio}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    💼 Portfolio
+                  </a>
+                )}
+                {socialLinks.map((link, i) => (
+                  <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    {link.platform}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {!isOwnProfile && currentUser && (
+            <div className="flex gap-2 pt-1">
+              <button onClick={handleMessage}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white"
+                style={{ backgroundColor: "var(--accent-primary)" }}>
+                <MessageCircle className="w-4 h-4" />
+                Message
+              </button>
+              <FriendRequestButton
+                targetEmail={email}
+                targetName={effectiveName}
+                targetAvatar={avatarUrl}
+                currentUser={currentUser}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="rounded-xl h-10 w-10">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleReport}>
+                    <Flag className="w-4 h-4 mr-2" /> Report
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleBlock} className="text-red-600">
+                    <UserX className="w-4 h-4 mr-2" /> Block
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {isOwnProfile && (
+            <button onClick={() => navigate("/Profile")}
+              className="w-full py-2.5 rounded-2xl font-bold text-sm"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-medium)" }}>
+              Edit Profile
             </button>
-            <FriendRequestButton
-              targetEmail={email}
-              targetName={effectiveName}
-              targetAvatar={avatarUrl}
-              currentUser={currentUser}
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-xl h-10 w-10">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleReport}>
-                  <Flag className="w-4 h-4 mr-2" /> Report
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleBlock} className="text-red-600">
-                  <UserX className="w-4 h-4 mr-2" /> Block
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
-
-        {isOwnProfile && (
-          <button onClick={() => navigate("/Profile")}
-            className="w-full py-2.5 rounded-2xl font-bold text-sm mt-2"
-            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-medium)" }}>
-            Edit Profile
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Live Activities */}
