@@ -301,6 +301,11 @@ export default function StatusViewer() {
           <Heart className="w-3.5 h-3.5" style={{ fill: liked ? "#ef4444" : "none", color: liked ? "#ef4444" : "#fff" }} />
           {likeCount > 0 && <span>{likeCount}</span>}
         </button>
+        <button onClick={() => setShowShareSheet(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{ backgroundColor: "rgba(255,255,255,0.14)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)" }}>
+          <Share2 className="w-3.5 h-3.5" />
+        </button>
         <button
           onClick={() => { setShowComments(v => !v); clearInterval(timerRef.current); setTimeout(() => inputRef.current?.focus(), 100); }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -309,6 +314,10 @@ export default function StatusViewer() {
           {comments.length > 0 && <span>{comments.length}</span>}
         </button>
       </div>
+
+      <ShareSheet open={showShareSheet} onClose={() => setShowShareSheet(false)}
+        url={`${window.location.origin}/StatusViewer?authorEmail=${encodeURIComponent(currentStatus?.author_email || "")}`}
+        text={currentStatus?.text} />
 
       {/* Comments panel */}
       <AnimatePresence>
