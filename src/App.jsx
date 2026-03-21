@@ -81,36 +81,48 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={pageTransition}
+        style={{ width: "100%" }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={
+            <LayoutWrapper currentPageName={mainPageKey}>
+              <MainPage />
             </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><Live /></LayoutWrapper>} />
-      <Route path="/user/:email" element={<LayoutWrapper currentPageName="UserProfile"><UserProfile /></LayoutWrapper>} />
-      <Route path="/PlaceDetail" element={<LayoutWrapper currentPageName="PlaceDetail"><PlaceDetail /></LayoutWrapper>} />
-      <Route path="/ListenDontJudge" element={<LayoutWrapper currentPageName="ListenDontJudge"><ListenDontJudge /></LayoutWrapper>} />
-      <Route path="/LiveNearby" element={<LayoutWrapper currentPageName="LiveNearby"><LiveNearby /></LayoutWrapper>} />
-      <Route path="/Onboarding" element={<Onboarding />} />
-      <Route path="/CreatorDashboard" element={<LayoutWrapper currentPageName="CreatorDashboard"><CreatorDashboard /></LayoutWrapper>} />
-      <Route path="/AdminCreators" element={<LayoutWrapper currentPageName="AdminCreators"><AdminCreators /></LayoutWrapper>} />
-      <Route path="/CreatorLanding" element={<LayoutWrapper currentPageName="CreatorLanding"><CreatorLanding /></LayoutWrapper>} />
-      <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
-      <Route path="/EditProfile" element={<LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper>} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+          } />
+          {Object.entries(Pages).map(([path, Page]) => (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={
+                <LayoutWrapper currentPageName={path}>
+                  <Page />
+                </LayoutWrapper>
+              }
+            />
+          ))}
+          <Route path="/Live" element={<LayoutWrapper currentPageName="Live"><Live /></LayoutWrapper>} />
+          <Route path="/user/:email" element={<LayoutWrapper currentPageName="UserProfile"><UserProfile /></LayoutWrapper>} />
+          <Route path="/PlaceDetail" element={<LayoutWrapper currentPageName="PlaceDetail"><PlaceDetail /></LayoutWrapper>} />
+          <Route path="/ListenDontJudge" element={<LayoutWrapper currentPageName="ListenDontJudge"><ListenDontJudge /></LayoutWrapper>} />
+          <Route path="/LiveNearby" element={<LayoutWrapper currentPageName="LiveNearby"><LiveNearby /></LayoutWrapper>} />
+          <Route path="/Onboarding" element={<Onboarding />} />
+          <Route path="/CreatorDashboard" element={<LayoutWrapper currentPageName="CreatorDashboard"><CreatorDashboard /></LayoutWrapper>} />
+          <Route path="/AdminCreators" element={<LayoutWrapper currentPageName="AdminCreators"><AdminCreators /></LayoutWrapper>} />
+          <Route path="/CreatorLanding" element={<LayoutWrapper currentPageName="CreatorLanding"><CreatorLanding /></LayoutWrapper>} />
+          <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
+          <Route path="/EditProfile" element={<LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper>} />
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
