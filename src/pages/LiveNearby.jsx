@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, MapPin, Loader2, ArrowLeft, Navigation, Clock } from "lucide-react";
@@ -18,10 +18,10 @@ const CATEGORIES = [
 ];
 
 const RADIUS_OPTIONS = [
-  { label: "1 km",   value: 1 },
-  { label: "5 km",   value: 5 },
-  { label: "15 km",  value: 15 },
-  { label: "50 km",  value: 50 },
+  { label: "1 mi",   value: 1.6 },
+  { label: "3 mi",   value: 5 },
+  { label: "10 mi",  value: 16 },
+  { label: "30 mi",  value: 50 },
 ];
 
 function distanceKm(lat1, lng1, lat2, lng2) {
@@ -30,6 +30,10 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function kmToMiles(km) {
+  return km * 0.621371;
 }
 
 function timeUntil(expiresAt) {
@@ -49,16 +53,16 @@ export default function LiveNearby() {
   const [coords, setCoords] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [radius, setRadius] = useState(15);
+  const [radius, setRadius] = useState(16);
   const [showComposer, setShowComposer] = useState(false);
-  const [sortBy, setSortBy] = useState("distance"); // "distance" or "newest"
+  const [sortBy, setSortBy] = useState("distance");
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
     requestLocation();
   }, []);
 
-  const requestLocation = () => {
+  const requestLocation = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
@@ -66,9 +70,10 @@ export default function LiveNearby() {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationLoading(false);
       },
-      () => setLocationLoading(false)
+      () => setLocationLoading(false),
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
     );
-  };
+  }, []);
 
   const { data: activities = [], isLoading } = useQuery({
     queryKey: ["liveActivities"],
@@ -77,7 +82,8 @@ export default function LiveNearby() {
       const now = new Date();
       return all.filter(a => new Date(a.expires_at) > now);
     },
-    refetchInterval: 20000,
+    refetchInterval: 30000,
+    staleTime: 10000,
   });
 
   const filtered = useMemo(() => {
@@ -102,7 +108,7 @@ export default function LiveNearby() {
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Advanced Header */}
+      {/* Header */}
       <div className="sticky top-0 z-30 border-b" style={{ backgroundColor: "var(--bg-app)", borderColor: "var(--border-light)" }}>
         <div className="max-w-4xl mx-auto px-4 pt-4 pb-3">
           {/* Top Bar */}
@@ -125,18 +131,18 @@ export default function LiveNearby() {
           </div>
 
           {/* Location & Filter Row */}
-          <div className="flex gap-2 mb-3">
-            <button onClick={requestLocation} disabled={locationLoading} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: coords ? "rgba(20, 184, 166, 0.1)" : "rgba(244, 63, 94, 0.1)", color: coords ? "var(--accent-secondary)" : "#f43f5e", border: "1px solid" + (coords ? "rgba(20, 184, 166, 0.3)" : "rgba(244, 63, 94, 0.3)") }}>
-              <Navigation className="w-3.5 h-3.5" /> {coords ? "Located" : "Enable Location"}
+          <div className="flex gap-2 mb-3 overflow-x-auto">
+            <button onClick={requestLocation} disabled={locationLoading} className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold shrink-0" style={{ backgroundColor: coords ? "rgba(20, 184, 166, 0.1)" : "rgba(244, 63, 94, 0.1)", color: coords ? "var(--accent-secondary)" : "#f43f5e", border: "1px solid " + (coords ? "rgba(20, 184, 166, 0.3)" : "rgba(244, 63, 94, 0.3)") }}>
+              <Navigation className="w-3.5 h-3.5" /> {coords ? "Located" : "Location"}
             </button>
 
             {coords && (
-              <select value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
+              <select value={radius} onChange={(e) => setRadius(Number(e.target.value))} className="px-3 py-2 rounded-full text-xs font-semibold shrink-0" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
                 {RADIUS_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
             )}
 
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 rounded-full text-xs font-semibold" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="px-3 py-2 rounded-full text-xs font-semibold shrink-0" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
               <option value="distance">Closest</option>
               <option value="newest">Newest</option>
             </select>
@@ -165,7 +171,7 @@ export default function LiveNearby() {
               <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Enable location to discover nearby activities</p>
               <p className="text-xs" style={{ color: "var(--text-hint)" }}>Find events, food spots, meetups & more around you</p>
             </div>
-            <button onClick={requestLocation} className="text-xs font-bold px-3 py-1.5 rounded-full text-white" style={{ backgroundColor: "#f43f5e" }}>
+            <button onClick={requestLocation} className="text-xs font-bold px-3 py-1.5 rounded-full text-white shrink-0" style={{ backgroundColor: "#f43f5e" }}>
               Enable
             </button>
           </div>
@@ -203,7 +209,7 @@ export default function LiveNearby() {
               </p>
               {coords && (
                 <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                  within {radius} km
+                  within {(radius).toFixed(1)} km
                 </p>
               )}
             </div>
@@ -212,10 +218,10 @@ export default function LiveNearby() {
                 <LiveActivityCard activity={activity} user={user} onUpdate={() => qc.invalidateQueries({ queryKey: ["liveActivities"] })} />
                 
                 {/* Distance + Time Overlay */}
-                <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+                <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end pointer-events-none">
                   {activity.distance !== undefined && activity.distance < 9999 && (
                     <div className="px-2.5 py-1 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                      {activity.distance < 1 ? `${Math.round(activity.distance * 1000)}m` : `${activity.distance.toFixed(1)} km`}
+                      {activity.distance < 1 ? `${Math.round(activity.distance * 1000)}m` : `${kmToMiles(activity.distance).toFixed(1)} mi`}
                     </div>
                   )}
                   <div className="px-2.5 py-1 rounded-full text-xs font-semibold text-white flex items-center gap-1" style={{ backgroundColor: "rgba(244, 63, 94, 0.8)" }}>
