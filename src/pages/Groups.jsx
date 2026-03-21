@@ -199,6 +199,11 @@ export default function Groups() {
 
   const isFiltering = search || categoryFilter !== "all" || typeFilter !== "all";
 
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+    await qc.invalidateQueries({ queryKey: ["groups"] });
+    await qc.invalidateQueries({ queryKey: ["myMemberships", user?.email] });
+  });
+
   if (activeGroup) {
     return (
       <GroupHub group={activeGroup} user={user} membership={activeMembership}
