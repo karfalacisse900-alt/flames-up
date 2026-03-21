@@ -49,9 +49,6 @@ export default function CreatorEditorStep({
   const currentItem = mediaItems[currentEditingIndex];
   if (!currentItem) return null;
 
-  // Sync textOverlay with the current item's saved edits when switching items
-  // (only update if the state doesn't match what's saved)
-
   const isVideo = currentItem.type?.startsWith("video");
 
   const applyEdits = (updates) => {
