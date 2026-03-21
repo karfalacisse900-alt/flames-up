@@ -42,8 +42,8 @@ Deno.serve(async (req) => {
           quantity: 1,
         },
       ],
-      success_url: `{ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `{ORIGIN}/home`,
+      success_url: `https://${req.headers.get("host") || "app"}/Home?tip_success=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://${req.headers.get("host") || "app"}/Home`,
       metadata: {
         base44_app_id: Deno.env.get("BASE44_APP_ID"),
         user_email: user.email,
