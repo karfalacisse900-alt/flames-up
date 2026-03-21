@@ -135,6 +135,18 @@ export default function StatusViewer() {
     }
   }, [currentStatus?.id, user?.email]);
 
+  const handleLike = async () => {
+    if (!user?.email || !currentStatus) return;
+    const newLiked = !liked;
+    const newCount = newLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
+    const newLikedBy = newLiked
+      ? [...(currentStatus.liked_by || []), user.email]
+      : (currentStatus.liked_by || []).filter(e => e !== user.email);
+    setLiked(newLiked);
+    setLikeCount(newCount);
+    await base44.entities.CreatorStatus.update(currentStatus.id, { liked_by: newLikedBy }).catch(() => {});
+  };
+
   const handleReact = async (emoji) => {
     if (!user?.email || !currentStatus) return;
     const newReactions = { ...reactions };
