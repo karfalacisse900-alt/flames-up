@@ -11,6 +11,8 @@ import { NavigationStackProvider } from '@/lib/NavigationStack';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { lazy, Suspense } from 'react';
 import { useHardwareBack } from '@/hooks/useHardwareBack';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import PageLoader from '@/components/ui/PageLoader';
 
 const Live           = lazy(() => import('./pages/Live'));
 const UserProfile    = lazy(() => import('./pages/UserProfile'));
