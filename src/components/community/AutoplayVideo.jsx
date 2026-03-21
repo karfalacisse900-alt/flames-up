@@ -26,7 +26,8 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
   const tapCount = useRef(0);
   const playingRef = useRef(false);
   const inViewport = useRef(false);
-  const userPaused = useRef(false); // track if user manually paused
+  const userPaused = useRef(false);
+  const srcSet = useRef(false); // whether we've assigned src yet
 
   // Keep playingRef in sync
   useEffect(() => { playingRef.current = playing; }, [playing]);
