@@ -175,7 +175,8 @@ export default function StreamVideo({ src, postId, thumbnail, onDoubleTap }) {
       style={{
         borderRadius: 0,
         aspectRatio: "9/16",
-        maxHeight: "80vh",
+        width: "100%",
+        maxHeight: "calc(100vw * 16 / 9)",
         background: "#000",
         cursor: "pointer",
         touchAction: "manipulation",
