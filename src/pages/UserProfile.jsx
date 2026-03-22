@@ -159,8 +159,12 @@ export default function UserProfile() {
         <div className="relative overflow-hidden rounded-[34px] p-4"
           style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
 
-          {/* Banner gradient */}
-          <div className="absolute inset-x-0 top-0 h-28" style={{ background: theme.banner, opacity: 0.22 }} />
+          {/* Banner */}
+          {bannerUrl ? (
+            <img src={bannerUrl} alt="" className="absolute inset-x-0 top-0 w-full object-cover" style={{ height: 112, opacity: 0.85 }} />
+          ) : (
+            <div className="absolute inset-x-0 top-0 h-28" style={{ background: theme.banner, opacity: 0.22 }} />
+          )}
 
           <div className="relative">
             {/* Avatar + name row */}
