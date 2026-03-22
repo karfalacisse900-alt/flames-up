@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
 const avatarColor = (email) => COLORS[(email || "a").charCodeAt(0) % COLORS.length];
 
-// High-quality audio constraints
+// High-quality audio constraints — echo cancellation only for local mic
 const AUDIO_CONSTRAINTS = {
   echoCancellation: true,
   noiseSuppression: true,
