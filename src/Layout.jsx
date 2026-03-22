@@ -65,6 +65,7 @@ export default function Layout({ children, currentPageName }) {
     };
   }, []);
   const [user, setUser] = useState(null);
+  useOnlinePresence(user);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showVerifyBanner, setShowVerifyBanner] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
