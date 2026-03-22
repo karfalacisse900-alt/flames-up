@@ -85,15 +85,19 @@ export default function CreatePostFlow() {
       const isVideo = mediaItems.length === 1 && mediaItems[0].type?.startsWith("video");
       const allTags = [];
       let textOverlayValue = undefined;
+      let streamResult = null; // { video_id, thumbnail_url }
 
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i];
         if (item.file) {
           const isVid = item.file.type?.startsWith("video");
-          const result = isVid
-            ? await uploadToStream(item.file)
-            : await uploadToCloudflare(item.file);
-          uploadedUrls.push(isVid ? (result.video_id || result.stream_url) : result.file_url);
+          if (isVid) {
+            streamResult = await uploadToStream(item.file);
+            uploadedUrls.push(streamResult.video_id);
+          } else {
+            const result = await uploadToCloudflare(item.file);
+            uploadedUrls.push(result.file_url);
+          }
         } else if (item.preview) {
           uploadedUrls.push(item.preview);
         }
