@@ -110,9 +110,9 @@ export default function UserProfile() {
     navigate(-1);
   };
 
-  // Build display info
+  // Build display info — UserProfile entity uses display_name, user_name; User entity uses full_name
   const avatarUrl = profileUser?.avatar_url;
-  const rawName = profileUser?.display_name || profileUser?.full_name;
+  const rawName = profileUser?.display_name || profileUser?.user_name || profileUser?.full_name;
   const effectiveName = rawName || email?.split("@")[0] || "User";
   const username = profileUser?.username;
   const bio = profileUser?.bio;
@@ -126,6 +126,9 @@ export default function UserProfile() {
   const hobbies = profileUser?.hobbies;
   const website = profileUser?.website || profileUser?.website_url;
   const portfolio = profileUser?.portfolio || profileUser?.portfolio_url;
+  const tiktok = profileUser?.tiktok;
+  const instagram = profileUser?.instagram;
+  const bannerUrl = profileUser?.banner_url;
 
   const isOwnProfile = currentUser?.email === email;
 
