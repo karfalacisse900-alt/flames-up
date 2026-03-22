@@ -158,8 +158,8 @@ export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
       style={{
         borderRadius: 0,
         width: "100%",
-        aspectRatio: "9/16",
-        maxHeight: "calc(100vw * 16 / 9)",
+        aspectRatio: "4/5",
+        maxHeight: "calc(100vw * 5 / 4)",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
