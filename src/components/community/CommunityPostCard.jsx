@@ -511,8 +511,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
             )}
             {videoUrl && videoUrl.trim() && (
-              <div className="relative" style={{ aspectRatio: "9/16", maxHeight: "80vh", background: "#000", overflow: "hidden" }}>
-                {/* Only render the player when the video is ready */}
+              <div className="relative w-full">
                 {videoStatus === "ready" ? (
                   <AutoplayVideo
                     src={videoUrl}
@@ -521,18 +520,15 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                     onDoubleTap={() => handleLike()}
                   />
                 ) : (
-                  /* Show thumbnail + processing indicator while Cloudflare encodes */
                   <VideoProcessingBanner
                     postId={post.id}
                     videoId={videoUrl}
                     thumbnail={thumbnail}
-                    onReady={() => {
-                      // The post entity subscription will auto-update via real-time
-                    }}
+                    onReady={() => {}}
                   />
                 )}
                 {post.text_overlay && videoStatus === "ready" && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8" style={{ zIndex: 3 }}>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8" style={{ zIndex: 10 }}>
                     <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
                       <p className="text-white text-lg font-bold text-center break-words">{post.text_overlay}</p>
                     </div>
