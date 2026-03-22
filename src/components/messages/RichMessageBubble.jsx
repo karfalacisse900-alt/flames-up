@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { CornerUpLeft, Copy, Trash2, ExternalLink } from "lucide-react";
 
 const REACTION_EMOJIS = ["❤️", "😂", "😮", "😢", "👍", "🔥", "🎉"];
