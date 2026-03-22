@@ -3,35 +3,27 @@ import { PhoneOff, Users, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 
-// Jitsi config — no login, no popup, no moderator requirement
+// Use 8x8.vc free tier — no moderator requirement, no 5-min embed limit
 function buildJitsiUrl(roomId, displayName, callType) {
-  const room = `flamesup-${roomId}`;
-  const params = new URLSearchParams({
-    // Core: disable ALL auth / login
-    "config.prejoinPageEnabled": "false",
-    "config.requireDisplayName": "false",
-    "config.enableWelcomePage": "false",
-    "config.disableDeepLinking": "true",
-    "config.disableThirdPartyRequests": "true",
-    // No moderator / lobby
-    "config.lobby.autoKnock": "false",
-    "config.securityUi.hideLobbyButton": "true",
-    "config.hiddenPremadeBackgroundEnabled": "false",
-    // Audio/video defaults
-    "config.startWithAudioMuted": "false",
-    "config.startWithVideoMuted": callType === "audio" ? "true" : "false",
-    // UI cleanup
-    "interfaceConfig.SHOW_JITSI_WATERMARK": "false",
-    "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS": "false",
-    "interfaceConfig.SHOW_POWERED_BY": "false",
-    "interfaceConfig.SHOW_BRAND_WATERMARK": "false",
-    "interfaceConfig.SHOW_CHROME_EXTENSION_BANNER": "false",
-    "interfaceConfig.MOBILE_APP_PROMO": "false",
-    "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS": "true",
-    // Display name
-    "userInfo.displayName": displayName,
-  });
-  return `https://meet.jit.si/${room}#${params.toString()}`;
+  // 8x8.vc/vpaas-magic-cookie-free does NOT require a moderator or login
+  const room = encodeURIComponent(`flamesup${roomId}`);
+  const config = [
+    "config.prejoinPageEnabled=false",
+    "config.requireDisplayName=false",
+    "config.enableWelcomePage=false",
+    "config.disableDeepLinking=true",
+    "config.startWithAudioMuted=false",
+    `config.startWithVideoMuted=${callType === "audio" ? "true" : "false"}`,
+    "config.disableThirdPartyRequests=true",
+    "config.enableNoisyMicDetection=false",
+    "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+    "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
+    "interfaceConfig.SHOW_POWERED_BY=false",
+    "interfaceConfig.MOBILE_APP_PROMO=false",
+    "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true",
+    `userInfo.displayName=${encodeURIComponent(displayName)}`,
+  ].join("&");
+  return `https://8x8.vc/vpaas-magic-cookie-free/${room}#${config}`;
 }
 
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
