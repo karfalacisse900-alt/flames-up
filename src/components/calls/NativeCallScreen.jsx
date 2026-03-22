@@ -450,6 +450,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
 
       {/* Remote video / avatar — fills screen */}
       <div className="absolute inset-0">
+        {/* Remote video — NO muted, audio plays through speaker naturally without echo */}
         <video ref={remoteVideoRef} autoPlay playsInline
           className="w-full h-full object-cover"
           style={{ display: remoteVideoActive && !isAudioOnly ? "block" : "none" }}
