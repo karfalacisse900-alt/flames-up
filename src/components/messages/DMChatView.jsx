@@ -185,10 +185,14 @@ export default function DMChatView({ user, conversation, onBack }) {
 
         {/* Action icons */}
         <div className="flex items-center gap-1">
-          <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowVideoCall(true)} style={{ backgroundColor: "#f3ecff" }}>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full"
+            onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "video" })}
+            style={{ backgroundColor: "#f3ecff" }}>
             <Video className="w-5 h-5" style={{ color: "#7C3AED" }} />
           </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowVideoCall(true)} style={{ backgroundColor: "#ecfeff" }}>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full"
+            onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "audio" })}
+            style={{ backgroundColor: "#ecfeff" }}>
             <Phone className="w-5 h-5" style={{ color: "#0F766E" }} />
           </button>
           <div className="relative">
