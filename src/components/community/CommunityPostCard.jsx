@@ -502,6 +502,8 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
         const rawImgs = (post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : []);
         const imgs = rawImgs.map(normalizeMediaUrl).filter(url => url && url.trim());
         const videoUrl = normalizeMediaUrl(post.video_url);
+        const videoStatus = post.video_status || "ready";
+        const thumbnail = post.video_thumbnail_url || undefined;
         if (imgs.length === 0 && !videoUrl?.trim()) return null;
         return (
           <div className="w-full mb-3">
@@ -509,13 +511,27 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               <PhotoCarousel images={imgs} tags={post.media_tags} aspectRatio="4/5" />
             )}
             {videoUrl && videoUrl.trim() && (
-              <div className="relative">
-                <AutoplayVideo
-                  src={videoUrl}
-                  postId={post.id}
-                  onDoubleTap={() => handleLike()}
-                />
-                {post.text_overlay && (
+              <div className="relative" style={{ aspectRatio: "9/16", maxHeight: "80vh", background: "#000", overflow: "hidden" }}>
+                {/* Only render the player when the video is ready */}
+                {videoStatus === "ready" ? (
+                  <AutoplayVideo
+                    src={videoUrl}
+                    postId={post.id}
+                    thumbnail={thumbnail}
+                    onDoubleTap={() => handleLike()}
+                  />
+                ) : (
+                  /* Show thumbnail + processing indicator while Cloudflare encodes */
+                  <VideoProcessingBanner
+                    postId={post.id}
+                    videoId={videoUrl}
+                    thumbnail={thumbnail}
+                    onReady={() => {
+                      // The post entity subscription will auto-update via real-time
+                    }}
+                  />
+                )}
+                {post.text_overlay && videoStatus === "ready" && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8" style={{ zIndex: 3 }}>
                     <div className="px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.6)" }}>
                       <p className="text-white text-lg font-bold text-center break-words">{post.text_overlay}</p>
