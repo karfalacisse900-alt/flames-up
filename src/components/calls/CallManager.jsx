@@ -99,7 +99,8 @@ export default function CallManager({ user }) {
   // Expose initiateCall globally so any component can trigger it
   useEffect(() => {
     window.__callManager = {
-      startCall: async ({ calleeEmail, calleeName, callType = "video" }) => {
+      startCall: async ({ calleeEmail, calleeName, callType = "video", call_type }) => {
+        callType = callType || call_type || "video";
         if (!user?.email) return;
         const roomId = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
         const session = await base44.entities.CallSession.create({
