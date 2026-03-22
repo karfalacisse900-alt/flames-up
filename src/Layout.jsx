@@ -9,6 +9,7 @@ import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
 import { useLayoutStabilizer } from "@/components/hooks/useLayoutStabilizer";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
+import GlobalNotificationToast from "@/components/notifications/GlobalNotificationToast";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
