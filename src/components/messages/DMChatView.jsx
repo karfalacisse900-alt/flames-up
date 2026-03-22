@@ -15,7 +15,10 @@ export default function DMChatView({ user, conversation, onBack }) {
   const [showMenu, setShowMenu] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [muted, setMuted] = useState(false);
-  // no local showVideoCall needed — calls go through global CallManager
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchMatchIndex, setSearchMatchIndex] = useState(0);
+  const searchMatchRefs = useRef([]);
 
   const [partnerCreator, setPartnerCreator] = useState(null);
   const endRef = useRef(null);
