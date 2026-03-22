@@ -64,18 +64,7 @@ export default function HomeHeader({ user }) {
           </motion.div>
 
           <motion.div whileTap={{ scale: 0.88 }} transition={{ duration: 0.12 }}>
-            <Link
-              to={createPageUrl("Notifications")}
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                border: "1.5px solid var(--border-light)",
-                color: "var(--text-secondary)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-              }}
-            >
-              <Bell className="w-4 h-4" />
-            </Link>
+            <NotificationBell user={user} />
           </motion.div>
 
           {user && (
