@@ -6,9 +6,7 @@ const activeIframe = { id: null };
 
 function extractVideoId(src) {
   if (!src) return null;
-  // Already a bare 32-char hex video ID
   if (/^[a-f0-9]{32}$/.test(src)) return src;
-  // HLS or iframe URL containing the ID
   const m = src.match(/([a-f0-9]{32})/);
   return m ? m[1] : null;
 }
@@ -18,30 +16,40 @@ export function isStreamVideo(src) {
   return /^[a-f0-9]{32}$/.test(src) || src.includes("cloudflarestream.com");
 }
 
-function buildEmbedUrl(videoId, { autoplay = false, muted = true } = {}) {
+function buildEmbedUrl(videoId, muted) {
   const params = new URLSearchParams({
     loop: "true",
-    controls: "false",
+    autoplay: "true",
     preload: "auto",
+    poster: "false",
+    // fit=cover fills the iframe without letterboxing
+    "letterboxColor": "transparent",
   });
-  if (autoplay) params.set("autoplay", "true");
   if (muted) params.set("muted", "true");
+  // Do NOT set controls=false via URL — omit it instead (avoids Cloudflare error)
   return `https://iframe.cloudflarestream.com/${videoId}?${params.toString()}`;
 }
 
 export default function StreamVideo({ src, postId, onDoubleTap }) {
-  const [muted, setMuted] = useState(true); // start muted for autoplay policy
+  const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [showIcon, setShowIcon] = useState(null);
+  // Rebuild URL when muted changes so the iframe re-loads with correct state
+  const [embedUrl, setEmbedUrl] = useState("");
   const containerRef = useRef(null);
   const iframeRef = useRef(null);
   const instanceId = useRef(postId || Math.random().toString(36).slice(2));
   const iconTimer = useRef(null);
   const tapTimer = useRef(null);
   const tapCount = useRef(0);
-  const hasUnmuted = useRef(false);
+  const isInView = useRef(false);
 
   const videoId = extractVideoId(src);
+
+  // Build URL on mount — always muted for autoplay compliance
+  useEffect(() => {
+    if (videoId) setEmbedUrl(buildEmbedUrl(videoId, true));
+  }, [videoId]);
 
   const flashIcon = (icon) => {
     setShowIcon(icon);
@@ -49,9 +57,10 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     iconTimer.current = setTimeout(() => setShowIcon(null), 700);
   };
 
-  const sendMessage = useCallback((method) => {
+  const sendMessage = useCallback((method, value) => {
     try {
-      iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ method }), "*");
+      const msg = value !== undefined ? { method, value } : { method };
+      iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
     } catch (_) {}
   }, []);
 
@@ -67,16 +76,7 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     activeIframe.id = instanceId.current;
     sendMessage("play");
     setPlaying(true);
-
-    // Unmute on first play only if not already unmuted
-    if (!hasUnmuted.current && muted) {
-      hasUnmuted.current = true;
-      setTimeout(() => {
-        sendMessage("unmute");
-        setMuted(false);
-      }, 500);
-    }
-  }, [sendMessage, muted]);
+  }, [sendMessage]);
 
   // Listen for pause-all events from other videos
   useEffect(() => {
@@ -87,15 +87,17 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     return () => window.removeEventListener("stream_pause_all", handler);
   }, [pauseVideo]);
 
-  // IntersectionObserver: autoplay when 60% visible, pause when less than 60%
+  // IntersectionObserver: autoplay when 60% visible
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.intersectionRatio >= 0.6) {
+          isInView.current = true;
           playVideo();
-        } else if (entry.intersectionRatio < 0.6) {
+        } else {
+          isInView.current = false;
           pauseVideo();
         }
       },
@@ -109,11 +111,12 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
     e.stopPropagation();
     const next = !muted;
     setMuted(next);
+    // Use postMessage to toggle mute without reloading iframe
     sendMessage(next ? "mute" : "unmute");
-    if (next === false) hasUnmuted.current = true;
   };
 
-  const handleTap = () => {
+  const handleTap = (e) => {
+    e.stopPropagation();
     tapCount.current += 1;
     clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => {
@@ -130,9 +133,6 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
 
   if (!videoId) return null;
 
-  // Build embed URL — always start muted so browser allows autoplay
-  const embedUrl = buildEmbedUrl(videoId, { autoplay: true, muted: true });
-
   return (
     <div
       ref={containerRef}
@@ -146,11 +146,10 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
         userSelect: "none",
         background: "#000",
         overflow: "hidden",
-        WebkitUserSelectAll: "none",
         touchAction: "manipulation",
       }}
     >
-      {/* Scale iframe to cover container without letterboxing */}
+      {/* iframe scaled to cover — eliminates black bars */}
       <iframe
         ref={iframeRef}
         src={embedUrl}
@@ -158,14 +157,14 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
         allowFullScreen
         style={{
           border: "none",
-          zIndex: 1,
           position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          transform: "scale(1.02)",
-          objectFit: "cover",
+          // Overscan to hide letterbox bars: scale up so object-fit cover fills the box
+          top: "-5%",
+          left: "-5%",
+          width: "110%",
+          height: "110%",
+          pointerEvents: "none",
+          zIndex: 1,
         }}
       />
 
@@ -177,7 +176,17 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
         <button
           onClick={toggleMute}
           className="p-2 rounded-full active:scale-95 transition-transform"
-          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", color: "#fff", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", touchAction: "manipulation" }}
+          style={{
+            backgroundColor: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+            color: "#fff",
+            minWidth: 44,
+            minHeight: 44,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            touchAction: "manipulation",
+          }}
         >
           {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
@@ -186,8 +195,10 @@ export default function StreamVideo({ src, postId, onDoubleTap }) {
       {/* Tap icon feedback */}
       {showIcon && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 4 }}>
-          <div className="flex items-center justify-center rounded-full"
-            style={{ width: 64, height: 64, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", animation: "tapFade 0.7s ease forwards" }}>
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{ width: 64, height: 64, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", animation: "tapFade 0.7s ease forwards" }}
+          >
             {showIcon === "like" ? <span style={{ fontSize: 32 }}>❤️</span>
               : showIcon === "play" ? <Play className="w-7 h-7 text-white" fill="white" />
               : <Pause className="w-7 h-7 text-white" fill="white" />}
