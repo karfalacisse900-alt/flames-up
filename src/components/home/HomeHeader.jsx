@@ -1,8 +1,9 @@
 import React from "react";
-import { Bell, Search, Flame } from "lucide-react";
+import { Search, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function HomeHeader({ user }) {
   const greeting = () => {
