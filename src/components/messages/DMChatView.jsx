@@ -74,6 +74,29 @@ export default function DMChatView({ user, conversation, onBack }) {
       ...(replyTo ? { reply_to_id: replyTo.id, reply_preview: replyTo.text || "Voice message" } : {}),
       ...fields,
     });
+
+    // Send real-time notification to recipient
+    const mutedList = JSON.parse(localStorage.getItem("muted_users") || "[]");
+    if (!mutedList.includes(conversation.email)) {
+      base44.entities.Notification.create({
+        recipient_email: conversation.email,
+        actor_email: user.email,
+        actor_name: user.full_name || user.email?.split("@")[0] || "Someone",
+        type: "direct_message",
+        post_text: fields.text
+          ? fields.text.slice(0, 80)
+          : fields.message_type === "voice"
+          ? "🎤 Voice message"
+          : fields.message_type === "gif"
+          ? "🎭 GIF"
+          : fields.message_type === "location"
+          ? "📍 Location"
+          : "📷 Media",
+        ref_id: convId,
+        is_read: false,
+      }).catch(() => {});
+    }
+
     setReplyTo(null);
     queryClient.invalidateQueries({ queryKey: ["dm", convId] });
     queryClient.invalidateQueries({ queryKey: ["dmSent", user.email] });
