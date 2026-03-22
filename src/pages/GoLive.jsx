@@ -85,16 +85,22 @@ export default function GoLive() {
         host_country: formData.country,
       });
 
-      // Notify followers
-      await base44.entities.Notification.create({
-        recipient_email: user.email,
-        actor_name: user.display_name || user.full_name || "You",
-        actor_email: user.email,
-        type: "stream_started",
-        post_text: formData.title,
-        ref_id: stream.id,
-        is_read: false,
-      }).catch(() => {});
+      // Notify all followers that the creator went live
+      try {
+        const followers = await base44.entities.Follow.filter({ following_email: user.email });
+        const notifPromises = followers.map(f =>
+          base44.entities.Notification.create({
+            recipient_email: f.follower_email,
+            actor_name: user.display_name || user.full_name || user.email?.split("@")[0],
+            actor_email: user.email,
+            type: "creator_live",
+            post_text: formData.title,
+            ref_id: stream.id,
+            is_read: false,
+          }).catch(() => {})
+        );
+        await Promise.all(notifPromises);
+      } catch (_) {}
 
       navigate(createPageUrl("Live"));
     } catch (error) {
