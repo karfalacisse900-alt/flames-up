@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
 import StreamVideo, { isStreamVideo } from "./StreamVideo";
 
-// Session-level mute preference — start muted for autoplay policy compliance
-const sessionPrefs = { muted: true };
+// Session-level mute preference — start unmuted, fall back to muted if browser blocks
+const sessionPrefs = { muted: false };
 
 // Global: only one video plays at a time
 let activeVideoRef = null;
@@ -158,8 +158,8 @@ export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
       style={{
         borderRadius: 0,
         width: "100%",
-        aspectRatio: "4/5",
-        maxHeight: "calc(100vw * 5 / 4)",
+        aspectRatio: "1/1",
+        maxHeight: "100vw",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
