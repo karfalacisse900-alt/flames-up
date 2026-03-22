@@ -6,17 +6,23 @@ import { base44 } from "@/api/base44Client";
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
 const avatarColor = (email) => COLORS[(email || "a").charCodeAt(0) % COLORS.length];
 
-// High-quality audio constraints — echo cancellation only for local mic
+// Audio constraints — echo cancellation MUST be on for local mic capture
 const AUDIO_CONSTRAINTS = {
-  echoCancellation: true,
-  noiseSuppression: true,
-  autoGainControl: true,
+  echoCancellation: { ideal: true },
+  noiseSuppression: { ideal: true },
+  autoGainControl: { ideal: true },
   sampleRate: 48000,
   sampleSize: 16,
   channelCount: 1,
 };
 
-// High-quality video constraints
+// Fallback audio constraints — simpler but still with EC on
+const AUDIO_CONSTRAINTS_FALLBACK = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+};
+
 const VIDEO_CONSTRAINTS = {
   facingMode: "user",
   width: { ideal: 1280, min: 640 },
@@ -28,8 +34,6 @@ const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
   { urls: "stun:stun2.l.google.com:19302" },
-  { urls: "stun:stun3.l.google.com:19302" },
-  { urls: "stun:stun4.l.google.com:19302" },
 ];
 
 const PC_CONFIG = {
@@ -39,31 +43,74 @@ const PC_CONFIG = {
   rtcpMuxPolicy: "require",
 };
 
-// Set high bitrate on audio sender
-function setAudioBitrate(pc, kbps = 128) {
+function setAudioBitrate(pc, kbps = 64) {
   pc.getSenders().forEach(async (sender) => {
     if (sender.track?.kind !== "audio") return;
     const params = sender.getParameters();
-    if (!params.encodings || params.encodings.length === 0) {
-      params.encodings = [{}];
-    }
+    if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
     params.encodings[0].maxBitrate = kbps * 1000;
     await sender.setParameters(params).catch(() => {});
   });
 }
 
-// Set high bitrate on video sender
-function setVideoBitrate(pc, kbps = 2500) {
+function setVideoBitrate(pc, kbps = 1500) {
   pc.getSenders().forEach(async (sender) => {
     if (sender.track?.kind !== "video") return;
     const params = sender.getParameters();
-    if (!params.encodings || params.encodings.length === 0) {
-      params.encodings = [{}];
-    }
+    if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
     params.encodings[0].maxBitrate = kbps * 1000;
     params.encodings[0].maxFramerate = 30;
     await sender.setParameters(params).catch(() => {});
   });
+}
+
+// Patch SDP to set Opus bitrate and enable in-band FEC for packet loss resilience
+function patchOpusSdp(sdp, bitrateBps = 64000) {
+  if (!sdp) return sdp;
+  const lines = sdp.split("\r\n");
+  const out = [];
+  let inAudio = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("m=audio")) inAudio = true;
+    else if (line.startsWith("m=")) inAudio = false;
+
+    // Inject b=AS bandwidth line right after m=audio line
+    if (inAudio && line.startsWith("m=audio")) {
+      out.push(line);
+      out.push(`b=AS:${Math.floor(bitrateBps / 1000)}`);
+      continue;
+    }
+
+    // Patch Opus fmtp line — add FEC + CBR for stable audio on bad networks
+    if (inAudio && line.startsWith("a=fmtp") && line.toLowerCase().includes("opus")) {
+      let patched = line;
+      const add = (key, val) => {
+        if (!patched.includes(key)) patched += `;${key}=${val}`;
+        else patched = patched.replace(new RegExp(`${key}=\\d+`), `${key}=${val}`);
+      };
+      add("maxaveragebitrate", bitrateBps);
+      add("useinbandfec", 1);
+      add("stereo", 0);
+      add("cbr", 1); // constant bitrate — avoids silent gaps being misdetected as echo
+      out.push(patched);
+      continue;
+    }
+
+    out.push(line);
+  }
+  return out.join("\r\n");
+}
+
+// Attach stream to video element safely — only when srcObject actually changes
+function attachStream(videoEl, stream) {
+  if (!videoEl || !stream) return;
+  if (videoEl.srcObject === stream) return;
+  videoEl.srcObject = stream;
+  videoEl.volume = 1.0;
+  videoEl.muted = false; // never mute remote audio
+  videoEl.play().catch(() => {});
 }
 
 export default function NativeCallScreen({ session, currentUser, onEnd }) {
@@ -81,12 +128,13 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   const remoteVideoRef = useRef(null);
   const pcRef = useRef(null);
   const localStreamRef = useRef(null);
-  const remoteStreamRef = useRef(new MediaStream());
+  const remoteStreamRef = useRef(null); // null until first track arrives
   const durationRef = useRef(null);
   const pollingRef = useRef(null);
   const sessionIdRef = useRef(session.id);
   const isCaller = session.caller_email === currentUser.email;
   const pendingCandidatesRef = useRef([]);
+  const remoteTracksRef = useRef(new Set()); // deduplicate incoming tracks
 
   const partnerName = isCaller
     ? (session.callee_name || session.callee_email?.split("@")[0])
@@ -95,25 +143,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
 
   const formatDuration = (s) =>
     `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
-
-  // Imperatively attach streams whenever refs change
-  useEffect(() => {
-    if (localVideoRef.current && localStreamRef.current) {
-      if (localVideoRef.current.srcObject !== localStreamRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-        localVideoRef.current.play().catch(() => {});
-      }
-    }
-  });
-
-  useEffect(() => {
-    if (remoteVideoRef.current) {
-      if (remoteVideoRef.current.srcObject !== remoteStreamRef.current) {
-        remoteVideoRef.current.srcObject = remoteStreamRef.current;
-        remoteVideoRef.current.play().catch(() => {});
-      }
-    }
-  });
 
   const cleanup = useCallback(() => {
     clearInterval(durationRef.current);
@@ -126,6 +155,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       pcRef.current.close();
       pcRef.current = null;
     }
+    remoteTracksRef.current.clear();
   }, []);
 
   const handleEnd = useCallback(async (selfInitiated = true) => {
@@ -154,7 +184,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     return unsub;
   }, [session.id, handleEnd]);
 
-  // Start duration timer when connected
+  // Duration timer
   useEffect(() => {
     if (status === "active") {
       durationRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
@@ -162,12 +192,12 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     return () => clearInterval(durationRef.current);
   }, [status]);
 
-  // Main WebRTC setup
+  // Main WebRTC setup — runs once on mount
   useEffect(() => {
     let cancelled = false;
 
     const setupCall = async () => {
-      // Get local media with high quality settings
+      // Acquire local media — always keep echoCancellation on in every fallback
       let stream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -176,14 +206,16 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         });
       } catch {
         try {
-          // Fallback: simpler constraints
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: session.call_type !== "audio" ? true : false,
+            audio: AUDIO_CONSTRAINTS_FALLBACK,
+            video: session.call_type !== "audio",
           });
         } catch {
           try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: AUDIO_CONSTRAINTS_FALLBACK,
+              video: false,
+            });
           } catch {
             handleEnd(true);
             return;
@@ -195,52 +227,51 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
 
       localStreamRef.current = stream;
 
+      // Attach local video (muted to prevent local echo via speakers)
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+        localVideoRef.current.muted = true; // CRITICAL: mute local playback
+        localVideoRef.current.volume = 0;
         localVideoRef.current.play().catch(() => {});
       }
 
       const pc = new RTCPeerConnection(PC_CONFIG);
       pcRef.current = pc;
 
-      // Add tracks
       stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-      // Set bitrate after adding tracks
-      setTimeout(() => {
-        if (pcRef.current) {
-          setAudioBitrate(pc, 128);
-          if (session.call_type !== "audio") setVideoBitrate(pc, 2500);
-        }
-      }, 2000);
-
-      // Remote track handler
+      // Remote track handler — deduplicate tracks to prevent double audio
       pc.ontrack = (event) => {
-        const incomingStream = event.streams[0];
-        if (incomingStream) {
-          remoteStreamRef.current = incomingStream;
-        } else {
-          remoteStreamRef.current.addTrack(event.track);
+        const track = event.track;
+
+        // Skip if we've already added this track (prevents duplicate audio)
+        if (remoteTracksRef.current.has(track.id)) return;
+        remoteTracksRef.current.add(track.id);
+
+        // Use the stream from the event if available, else build one
+        if (!remoteStreamRef.current) {
+          remoteStreamRef.current = event.streams[0] || new MediaStream();
         }
+
+        // Only add track if not already in the stream
+        const existing = remoteStreamRef.current.getTracks().find(t => t.id === track.id);
+        if (!existing) {
+          remoteStreamRef.current.addTrack(track);
+        }
+
+        // Attach to remote video element
         if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStreamRef.current;
-          // Critical: disable any browser-side audio processing on playback
-          // This prevents echo/reverb artifacts on the received audio
-          remoteVideoRef.current.volume = 1.0;
-          remoteVideoRef.current.muted = false;
-          remoteVideoRef.current.play().catch(() => {});
+          attachStream(remoteVideoRef.current, remoteStreamRef.current);
         }
+
         setRemoteVideoActive(true);
         setStatus("active");
       };
 
-      // Trickle ICE — send candidates as they arrive
-      pc.onicecandidate = async (event) => {
+      // Trickle ICE
+      pc.onicecandidate = (event) => {
         if (!event.candidate || cancelled) return;
-        const candidate = event.candidate.toJSON();
-        pendingCandidatesRef.current.push(candidate);
-
-        // Debounce: flush every 300ms to avoid too many DB writes
+        pendingCandidatesRef.current.push(event.candidate.toJSON());
         clearTimeout(pc._iceFlushTimer);
         pc._iceFlushTimer = setTimeout(async () => {
           if (cancelled || !pcRef.current) return;
@@ -254,9 +285,8 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "connected") {
           setStatus("active");
-          // Boost bitrate once fully connected
-          setAudioBitrate(pc, 128);
-          if (session.call_type !== "audio") setVideoBitrate(pc, 2500);
+          setAudioBitrate(pc, 64);
+          if (session.call_type !== "audio") setVideoBitrate(pc, 1500);
         }
         if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
           if (!cancelled) handleEnd(false);
@@ -264,36 +294,31 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       };
 
       pc.oniceconnectionstatechange = () => {
-        if (pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed") {
+        if (["connected", "completed"].includes(pc.iceConnectionState)) {
           setStatus("active");
         }
       };
 
+      const waitForIce = (pc) => new Promise(resolve => {
+        if (pc.iceGatheringState === "complete") { resolve(); return; }
+        const check = setInterval(() => {
+          if (cancelled || pc.iceGatheringState === "complete") { clearInterval(check); resolve(); }
+        }, 150);
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+      });
+
       if (isCaller) {
-        // Create offer with high-quality codec preferences
-        const offerOptions = { offerToReceiveAudio: true, offerToReceiveVideo: session.call_type !== "audio" };
-        const offer = await pc.createOffer(offerOptions);
-
-        // Modify SDP for higher bitrate audio (Opus)
-        offer.sdp = setOpusMaxBitrate(offer.sdp, 128000);
-
+        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: session.call_type !== "audio" });
+        offer.sdp = patchOpusSdp(offer.sdp, 64000);
         await pc.setLocalDescription(offer);
-
-        // Wait for ICE gathering to finish (max 5s) OR use trickle
-        await new Promise(resolve => {
-          if (pc.iceGatheringState === "complete") { resolve(); return; }
-          const check = setInterval(() => {
-            if (cancelled || pc.iceGatheringState === "complete") { clearInterval(check); resolve(); }
-          }, 150);
-          setTimeout(() => { clearInterval(check); resolve(); }, 5000);
-        });
+        await waitForIce(pc);
 
         await base44.entities.CallSession.update(session.id, {
           webrtc_offer: JSON.stringify(pc.localDescription),
           webrtc_ice_caller: JSON.stringify(pendingCandidatesRef.current),
         }).catch(() => {});
 
-        // Poll for answer
+        // Poll for callee answer
         pollingRef.current = setInterval(async () => {
           if (cancelled || !pcRef.current) return;
           const sessions = await base44.entities.CallSession.filter({ id: session.id }).catch(() => []);
@@ -302,11 +327,10 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
           if (pc.signalingState !== "have-local-offer") { clearInterval(pollingRef.current); return; }
           try {
             const answer = JSON.parse(sess.webrtc_answer);
-            answer.sdp = setOpusMaxBitrate(answer.sdp, 128000);
+            answer.sdp = patchOpusSdp(answer.sdp, 64000);
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
             if (sess.webrtc_ice_callee) {
-              const candidates = JSON.parse(sess.webrtc_ice_callee);
-              for (const c of candidates) {
+              for (const c of JSON.parse(sess.webrtc_ice_callee)) {
                 await pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
               }
             }
@@ -315,48 +339,35 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         }, 1000);
 
       } else {
-        // Callee: wait for offer
-        const waitForOffer = async () => {
-          for (let i = 0; i < 30; i++) {
-            if (cancelled) return;
-            const sessions = await base44.entities.CallSession.filter({ id: session.id }).catch(() => []);
-            const sess = Array.isArray(sessions) ? sessions[0] : sessions;
-            if (sess?.webrtc_offer) {
-              const offer = JSON.parse(sess.webrtc_offer);
-              offer.sdp = setOpusMaxBitrate(offer.sdp, 128000);
-              await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        // Callee: wait for caller's offer
+        for (let i = 0; i < 30; i++) {
+          if (cancelled) return;
+          const sessions = await base44.entities.CallSession.filter({ id: session.id }).catch(() => []);
+          const sess = Array.isArray(sessions) ? sessions[0] : sessions;
+          if (sess?.webrtc_offer) {
+            const offer = JSON.parse(sess.webrtc_offer);
+            offer.sdp = patchOpusSdp(offer.sdp, 64000);
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
-              if (sess.webrtc_ice_caller) {
-                const candidates = JSON.parse(sess.webrtc_ice_caller);
-                for (const c of candidates) {
-                  await pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
-                }
+            if (sess.webrtc_ice_caller) {
+              for (const c of JSON.parse(sess.webrtc_ice_caller)) {
+                await pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
               }
-
-              const answer = await pc.createAnswer();
-              answer.sdp = setOpusMaxBitrate(answer.sdp, 128000);
-              await pc.setLocalDescription(answer);
-
-              // Wait for ICE gathering
-              await new Promise(resolve => {
-                if (pc.iceGatheringState === "complete") { resolve(); return; }
-                const check = setInterval(() => {
-                  if (cancelled || pc.iceGatheringState === "complete") { clearInterval(check); resolve(); }
-                }, 150);
-                setTimeout(() => { clearInterval(check); resolve(); }, 5000);
-              });
-
-              await base44.entities.CallSession.update(session.id, {
-                webrtc_answer: JSON.stringify(pc.localDescription),
-                webrtc_ice_callee: JSON.stringify(pendingCandidatesRef.current),
-              }).catch(() => {});
-              return;
             }
-            await new Promise(r => setTimeout(r, 1000));
+
+            const answer = await pc.createAnswer();
+            answer.sdp = patchOpusSdp(answer.sdp, 64000);
+            await pc.setLocalDescription(answer);
+            await waitForIce(pc);
+
+            await base44.entities.CallSession.update(session.id, {
+              webrtc_answer: JSON.stringify(pc.localDescription),
+              webrtc_ice_callee: JSON.stringify(pendingCandidatesRef.current),
+            }).catch(() => {});
+            break;
           }
-          handleEnd(true);
-        };
-        waitForOffer();
+          await new Promise(r => setTimeout(r, 1000));
+        }
       }
     };
 
@@ -366,26 +377,25 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   }, []);
 
   const toggleMic = () => {
-    if (localStreamRef.current) {
-      localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = micMuted; });
-      setMicMuted(m => !m);
-    }
+    if (!localStreamRef.current) return;
+    const newMuted = !micMuted;
+    localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = !newMuted; });
+    setMicMuted(newMuted);
   };
 
   const toggleVideo = () => {
-    if (localStreamRef.current) {
-      localStreamRef.current.getVideoTracks().forEach(t => { t.enabled = videoOff; });
-      setVideoOff(v => !v);
-    }
+    if (!localStreamRef.current) return;
+    const newOff = !videoOff;
+    localStreamRef.current.getVideoTracks().forEach(t => { t.enabled = !newOff; });
+    setVideoOff(newOff);
   };
 
   const toggleScreenShare = async () => {
     if (!pcRef.current) return;
     if (screenSharing) {
-      // Switch back to camera
       const newStream = await navigator.mediaDevices.getUserMedia({
         audio: false,
-        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
       }).catch(() => null);
       if (!newStream) return;
       const [videoTrack] = newStream.getVideoTracks();
@@ -397,7 +407,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       if (localVideoRef.current) { localVideoRef.current.srcObject = updated; localVideoRef.current.play().catch(() => {}); }
       setScreenSharing(false);
     } else {
-      // Start screen share
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false }).catch(() => null);
       if (!screenStream) return;
       const [screenTrack] = screenStream.getVideoTracks();
@@ -407,12 +416,12 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       const updated = new MediaStream([...localStreamRef.current.getAudioTracks(), screenTrack]);
       localStreamRef.current = updated;
       if (localVideoRef.current) { localVideoRef.current.srcObject = updated; }
-      screenTrack.onended = () => toggleScreenShare(); // auto-stop when user stops sharing
+      screenTrack.onended = () => setScreenSharing(false);
       setScreenSharing(true);
     }
   };
 
-  const handleAddPerson = async () => {
+  const handleAddPerson = () => {
     if (!addPersonEmail.trim()) return;
     window.__callManager?.startCall({ calleeEmail: addPersonEmail.trim(), callType: session.call_type || "video" });
     setShowAddPerson(false);
@@ -425,17 +434,14 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     setFacingMode(newMode);
     const newStream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { facingMode: newMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+      video: { facingMode: newMode, width: { ideal: 1280 }, height: { ideal: 720 } },
     }).catch(() => null);
     if (!newStream) return;
     const [newVideoTrack] = newStream.getVideoTracks();
     const sender = pcRef.current.getSenders().find(s => s.track?.kind === "video");
     if (sender && newVideoTrack) await sender.replaceTrack(newVideoTrack);
     localStreamRef.current.getVideoTracks().forEach(t => t.stop());
-    const newFull = new MediaStream([
-      ...localStreamRef.current.getAudioTracks(),
-      newVideoTrack,
-    ]);
+    const newFull = new MediaStream([...localStreamRef.current.getAudioTracks(), newVideoTrack]);
     localStreamRef.current = newFull;
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = newFull;
@@ -450,10 +456,13 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     <div className="fixed inset-0 z-[200] flex flex-col"
       style={{ background: "#0a0a0f", paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
-      {/* Remote video / avatar — fills screen */}
+      {/* Remote video — fills screen, NEVER muted (audio plays through device speaker) */}
       <div className="absolute inset-0">
-        {/* Remote video — NO muted, audio plays through speaker naturally without echo */}
-        <video ref={remoteVideoRef} autoPlay playsInline
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          playsInline
+          // DO NOT set muted here — remote audio must play through speaker
           className="w-full h-full object-cover"
           style={{ display: remoteVideoActive && !isAudioOnly ? "block" : "none" }}
         />
@@ -484,7 +493,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         )}
       </div>
 
-      {/* Local video PiP */}
+      {/* Local video PiP — always muted to prevent local echo */}
       {!isAudioOnly && (
         <div className="absolute z-10 rounded-2xl overflow-hidden shadow-xl"
           style={{ top: "calc(env(safe-area-inset-top, 0px) + 72px)", right: 16, width: 100, height: 140, border: "2px solid rgba(255,255,255,0.3)", background: "#111" }}>
@@ -495,6 +504,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         </div>
       )}
 
+      {/* Hidden local audio element for audio-only calls — always muted */}
       {isAudioOnly && <video ref={localVideoRef} autoPlay playsInline muted style={{ display: "none" }} />}
 
       {/* Top bar */}
@@ -571,7 +581,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
           </button>
         </div>
 
-        {/* Add person input */}
         {showAddPerson && (
           <div className="mt-3 flex gap-2">
             <input
@@ -592,25 +601,4 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       </div>
     </div>
   );
-}
-
-// Modify Opus SDP to set max bitrate (b=AS: and maxaveragebitrate)
-function setOpusMaxBitrate(sdp, bitrate) {
-  if (!sdp) return sdp;
-  return sdp
-    .split("\n")
-    .map(line => {
-      // Set audio section bandwidth
-      if (line.startsWith("m=audio")) return line;
-      if (line.startsWith("a=rtpmap") && line.toLowerCase().includes("opus")) return line;
-      if (line.startsWith("a=fmtp") && line.includes("opus")) {
-        // Add maxaveragebitrate
-        if (!line.includes("maxaveragebitrate")) {
-          return line + `;maxaveragebitrate=${bitrate};stereo=0;useinbandfec=1`;
-        }
-        return line.replace(/maxaveragebitrate=\d+/, `maxaveragebitrate=${bitrate}`);
-      }
-      return line;
-    })
-    .join("\n");
 }
