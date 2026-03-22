@@ -52,8 +52,12 @@ export default function CallManager({ user }) {
         if (activeSession && event.id === activeSession.id && event.data?.status === "ended") {
           setActiveSession(null);
         }
+        // Keep active session data in sync (e.g. status change to "active")
+        if (activeSession && event.id === activeSession.id) {
+          setActiveSession(prev => prev ? { ...prev, ...event.data } : prev);
+        }
         // If the incoming session was cancelled by caller
-        if (incomingSession && event.id === incomingSession.id && event.data?.status === "ended") {
+        if (incomingSession && event.id === incomingSession.id && ["ended", "declined", "missed"].includes(event.data?.status)) {
           clearRingTimer();
           setIncomingSession(null);
         }
