@@ -9,9 +9,9 @@ const sessionPrefs = { muted: true };
 let activeVideoRef = null;
 let activeSetPlaying = null;
 
-export default function AutoplayVideo({ src, postId, onDoubleTap }) {
+export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
   if (isStreamVideo(src)) {
-    return <StreamVideo src={src} postId={postId} onDoubleTap={onDoubleTap} />;
+    return <StreamVideo src={src} postId={postId} thumbnail={thumbnail} onDoubleTap={onDoubleTap} />;
   }
 
   const videoRef = useRef(null);
