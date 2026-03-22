@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import IncomingCallOverlay from "./IncomingCallOverlay";
-import ActiveCallScreen from "./ActiveCallScreen";
+import NativeCallScreen from "./NativeCallScreen";
 
 // Timeout: auto-decline if not answered in 30s
 const RING_TIMEOUT_MS = 30000;
