@@ -6,6 +6,7 @@ import SmartText from "./SmartText";
 import { MessageCircle, Share2, Bookmark, Plus, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin, Heart, ExternalLink } from "lucide-react";
 import { normalizeMediaUrl } from "@/utils/normalizeMediaUrl";
 import AutoplayVideo from "./AutoplayVideo";
+import VideoProcessingBanner from "./VideoProcessingBanner";
 import WantToGoButton from "./WantToGoButton";
 import PhotoCarousel from "./PhotoCarousel";
 import SavePostModal from "./SavePostModal";
