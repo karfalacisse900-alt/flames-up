@@ -544,12 +544,46 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
           ) : <div className="w-14 h-14" />}
         </div>
 
-        {!isAudioOnly && (
-          <div className="flex justify-center mt-4">
+        {/* Secondary row */}
+        <div className="flex items-center justify-around mt-4">
+          {!isAudioOnly && (
             <button onClick={flipCamera}
               className="w-12 h-12 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
               <RotateCcw className="w-5 h-5 text-white" />
+            </button>
+          )}
+          {!isAudioOnly && (
+            <button onClick={toggleScreenShare}
+              className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: screenSharing ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.15)" }}>
+              {screenSharing
+                ? <MonitorOff className="w-5 h-5" style={{ color: "#111" }} />
+                : <Monitor className="w-5 h-5 text-white" />}
+            </button>
+          )}
+          <button onClick={() => setShowAddPerson(v => !v)}
+            className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: showAddPerson ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.15)" }}>
+            <UserPlus className="w-5 h-5" style={{ color: showAddPerson ? "#111" : "#fff" }} />
+          </button>
+        </div>
+
+        {/* Add person input */}
+        {showAddPerson && (
+          <div className="mt-3 flex gap-2">
+            <input
+              type="email"
+              value={addPersonEmail}
+              onChange={e => setAddPersonEmail(e.target.value)}
+              placeholder="Enter email to invite…"
+              className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", minHeight: 40 }}
+            />
+            <button onClick={handleAddPerson}
+              className="px-4 rounded-xl text-sm font-bold text-white"
+              style={{ backgroundColor: "var(--accent-primary)", minHeight: 40 }}>
+              Invite
             </button>
           </div>
         )}
