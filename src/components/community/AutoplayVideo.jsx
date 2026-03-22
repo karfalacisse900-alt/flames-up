@@ -191,16 +191,16 @@ export default function AutoplayVideo({ src, postId, onDoubleTap }) {
           loop
           muted={muted}
           preload="auto"
-        onLoadedMetadata={markLoaded}
-        onCanPlay={markLoaded}
-        onLoadedData={markLoaded}
-        onWaiting={() => { if (loaded) setBuffering(true); }}
-        onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
-        onPause={() => setPlaying(false)}
-        onError={markLoaded}
-        onEnded={() => { setLoaded(true); setPlaying(false); }}
-        className="w-full h-full block"
-        style={{ objectFit: "cover", display: "block", zIndex: 1, backgroundColor: "#000", audioTracks: "enable" }}
+          onLoadedMetadata={markLoaded}
+          onCanPlay={markLoaded}
+          onLoadedData={markLoaded}
+          onWaiting={() => { if (loaded) setBuffering(true); }}
+          onPlaying={() => { setBuffering(false); setLoaded(true); setPlaying(true); }}
+          onPause={() => setPlaying(false)}
+          onError={markLoaded}
+          onEnded={() => { setLoaded(true); setPlaying(false); }}
+          className="absolute inset-0 w-full h-full block"
+          style={{ objectFit: "cover", zIndex: 1 }}
       />
 
       {/* Tap feedback icon */}
