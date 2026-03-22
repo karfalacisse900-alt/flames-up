@@ -1,7 +1,13 @@
 /**
- * Upload a video to Cloudflare Stream.
- * Accepts a file URL (from base44 UploadFile) and pushes it to Cloudflare Stream via URL upload.
- * Returns { video_id, stream_url, thumbnail_url }
+ * Upload a video to Cloudflare Stream using Direct Upload (not URL copy).
+ * Direct upload sends the video bytes immediately to Cloudflare — video is
+ * ready to stream in seconds, not minutes.
+ *
+ * Flow:
+ *   1. Client calls this endpoint with { file_url } (base44 temp URL)
+ *   2. We fetch the file bytes here on the server
+ *   3. We upload as multipart/form-data directly to Cloudflare Stream
+ *   4. Video is encoded and ready almost instantly
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
@@ -28,38 +34,57 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No file_url provided' }, { status: 400 });
     }
 
-    // Use Cloudflare Stream's URL upload with allowedOrigins wildcard so embedding works everywhere
+    console.log(`[uploadToStream] Fetching video bytes from: ${sourceUrl}`);
+
+    // Step 1: Download the video file bytes from base44 storage
+    const fileRes = await fetch(sourceUrl);
+    if (!fileRes.ok) {
+      console.error("[uploadToStream] Failed to fetch source file:", fileRes.status);
+      return Response.json({ error: 'Could not fetch source video' }, { status: 500 });
+    }
+
+    const fileBlob = await fileRes.blob();
+    const contentType = fileRes.headers.get("content-type") || "video/mp4";
+    console.log(`[uploadToStream] File size: ${fileBlob.size} bytes, type: ${contentType}`);
+
+    // Step 2: Direct upload to Cloudflare Stream as multipart form
+    const formData = new FormData();
+    formData.append("file", fileBlob, `upload-${Date.now()}.mp4`);
+    formData.append("meta", JSON.stringify({
+      name: `upload-${user.email}-${Date.now()}`,
+    }));
+    formData.append("creator", user.email);
+    formData.append("allowedOrigins", JSON.stringify(["*"]));
+    // requireSignedURLs=false so the video plays publicly
+    formData.append("requireSignedURLs", "false");
+
     const cfRes = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/stream/copy`,
+      `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/stream`,
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${STREAM_TOKEN}`,
-          "Content-Type": "application/json",
+          // Do NOT set Content-Type — fetch sets it with boundary for multipart
         },
-        body: JSON.stringify({
-          url: sourceUrl,
-          meta: { name: `upload-${user.email}-${Date.now()}` },
-          creator: user.email,
-          allowedOrigins: ["*"],
-        }),
+        body: formData,
       }
     );
 
     const result = await cfRes.json();
 
     if (!result.success) {
-      console.error("[uploadToStream] CF error:", JSON.stringify(result.errors));
+      console.error("[uploadToStream] CF direct upload error:", JSON.stringify(result.errors));
       return Response.json({ error: result.errors?.[0]?.message || 'Upload failed' }, { status: 500 });
     }
 
     const video = result.result;
     const video_id = video.uid;
-    // Use the video ID as stream_url — StreamVideo component knows how to build the embed URL from just the ID
     const stream_url = video_id;
-    const thumbnail_url = video.thumbnail || `https://${ACCOUNT_ID}.cloudflarestream.com/${video_id}/thumbnails/thumbnail.jpg`;
+    const thumbnail_url = video.thumbnail || `https://videodelivery.net/${video_id}/thumbnails/thumbnail.jpg`;
 
-    console.log(`[uploadToStream] ✓ video ${video_id} queued for ${user.email}`, JSON.stringify({ playback: video.playback }));
+    console.log(`[uploadToStream] ✓ Direct upload complete: video ${video_id} for ${user.email}`, 
+      `readyToStream: ${video.readyToStream}`);
+
     return Response.json({ video_id, stream_url, thumbnail_url });
 
   } catch (err) {
