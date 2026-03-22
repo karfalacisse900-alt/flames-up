@@ -131,7 +131,7 @@ export default function EditProfile() {
   const handleSave = async () => {
     setSaving(true);
     const usernameToSave = currentUsername ? `@${currentUsername.replace(/^@/, "")}` : "";
-    await base44.auth.updateMe({
+    const profileData = {
       avatar_url: currentAvatar,
       banner_url: currentBanner,
       display_name: currentName,
@@ -149,7 +149,39 @@ export default function EditProfile() {
       instagram: currentInstagram,
       interests: currentInterests,
       looking_for: currentLookingFor,
-    });
+    };
+
+    // Save to User entity (own data)
+    await base44.auth.updateMe(profileData);
+
+    // Also save to public UserProfile entity so others can view it
+    const existing = await base44.entities.UserProfile.filter({ user_email: user.email }).catch(() => []);
+    const publicData = {
+      user_email: user.email,
+      user_name: currentName || user.full_name || user.email,
+      display_name: currentName,
+      username: usernameToSave,
+      bio: currentBio,
+      about_me: currentAboutMe,
+      avatar_url: currentAvatar,
+      banner_url: currentBanner,
+      city: currentCity,
+      age: currentAge,
+      major: currentMajor,
+      graduation_year: currentGraduationYear,
+      hobbies: currentHobbies,
+      website: currentWebsite,
+      tiktok: currentTiktok,
+      instagram: currentInstagram,
+      interests: currentInterests,
+      looking_for: currentLookingFor,
+    };
+    if (existing.length > 0) {
+      await base44.entities.UserProfile.update(existing[0].id, publicData);
+    } else {
+      await base44.entities.UserProfile.create(publicData);
+    }
+
     setSaving(false);
     navigate(-1);
   };
