@@ -140,7 +140,7 @@ export default function CallManager({ user }) {
         />
       )}
       {activeSession && (
-        <ActiveCallScreen
+        <NativeCallScreen
           key="active"
           session={activeSession}
           currentUser={user}

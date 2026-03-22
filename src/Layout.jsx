@@ -11,6 +11,7 @@ import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import GlobalNotificationToast from "@/components/notifications/GlobalNotificationToast";
 import CallManager from "@/components/calls/CallManager";
+import { useOnlinePresence } from "@/components/hooks/useOnlinePresence";
 
 const navItems = [
 { name: "Home",    icon: Home,    page: "Home" },
