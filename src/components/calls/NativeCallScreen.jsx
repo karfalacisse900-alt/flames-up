@@ -73,6 +73,9 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   const [videoOff, setVideoOff] = useState(session.call_type === "audio");
   const [remoteVideoActive, setRemoteVideoActive] = useState(false);
   const [facingMode, setFacingMode] = useState("user");
+  const [screenSharing, setScreenSharing] = useState(false);
+  const [showAddPerson, setShowAddPerson] = useState(false);
+  const [addPersonEmail, setAddPersonEmail] = useState("");
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
