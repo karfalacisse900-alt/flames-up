@@ -645,6 +645,7 @@ const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) =>
   prev.post.id === next.post.id &&
   prev.post.upvotes === next.post.upvotes &&
   prev.post.comment_count === next.post.comment_count &&
+  prev.post.video_status === next.post.video_status &&
   prev.isExpanded === next.isExpanded &&
   prev.user?.email === next.user?.email
 );
