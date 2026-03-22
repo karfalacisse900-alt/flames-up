@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw } from "lucide-react";
+import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Monitor, MonitorOff, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 
