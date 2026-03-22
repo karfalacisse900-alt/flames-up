@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, UserX } from "lucide-react";
+import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, UserX, Search, X, ChevronUp, ChevronDown } from "lucide-react";
 import RichMessageBubble from "./RichMessageBubble";
 import ChatInputBar from "./ChatInputBar";
 import CreatorBadge from "@/components/creators/CreatorBadge.jsx";
@@ -18,7 +18,8 @@ export default function DMChatView({ user, conversation, onBack }) {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMatchIndex, setSearchMatchIndex] = useState(0);
-  const searchMatchRefs = useRef([]);
+  const searchInputRef = useRef(null);
+  const matchRefs = useRef({});
 
   const [partnerCreator, setPartnerCreator] = useState(null);
   const endRef = useRef(null);
@@ -27,7 +28,6 @@ export default function DMChatView({ user, conversation, onBack }) {
   const displayName = getName(conversation.name, conversation.email);
 
   useEffect(() => {
-    // Check if conversation partner is an approved creator
     base44.entities.Creator.filter({ user_email: conversation.email, approval_status: "approved" })
       .then(rows => setPartnerCreator(rows[0] || null))
       .catch(() => {});
@@ -56,7 +56,9 @@ export default function DMChatView({ user, conversation, onBack }) {
       .forEach(m => base44.entities.DirectMessage.update(m.id, { is_read: true }));
   }, [messages, user.email]);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => {
+    if (!showSearch) endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, showSearch]);
 
   useEffect(() => {
     const unsub = base44.entities.DirectMessage.subscribe((event) => {
@@ -66,6 +68,47 @@ export default function DMChatView({ user, conversation, onBack }) {
     });
     return unsub;
   }, [convId, queryClient]);
+
+  // Search logic
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return visibleMessages
+      .map((msg, idx) => ({ msg, idx }))
+      .filter(({ msg }) => {
+        if (msg.is_deleted) return false;
+        if (msg.text?.toLowerCase().includes(q)) return true;
+        // Date search: "jan 5", "2024", "today" etc.
+        const dateStr = new Date(msg.created_date).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" });
+        if (dateStr.toLowerCase().includes(q)) return true;
+        return false;
+      });
+  }, [searchQuery, visibleMessages]);
+
+  useEffect(() => {
+    setSearchMatchIndex(0);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (searchMatches.length > 0) {
+      const match = searchMatches[searchMatchIndex];
+      if (match) {
+        const el = matchRefs.current[match.msg.id];
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [searchMatchIndex, searchMatches]);
+
+  const openSearch = () => {
+    setShowSearch(true);
+    setTimeout(() => searchInputRef.current?.focus(), 100);
+  };
+
+  const closeSearch = () => {
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchMatchIndex(0);
+  };
 
   const createMsg = async (fields) => {
     await base44.entities.DirectMessage.create({
@@ -78,7 +121,6 @@ export default function DMChatView({ user, conversation, onBack }) {
       ...fields,
     });
 
-    // Send real-time notification to recipient
     const mutedList = JSON.parse(localStorage.getItem("muted_users") || "[]");
     if (!mutedList.includes(conversation.email)) {
       base44.entities.Notification.create({
@@ -88,12 +130,9 @@ export default function DMChatView({ user, conversation, onBack }) {
         type: "direct_message",
         post_text: fields.text
           ? fields.text.slice(0, 80)
-          : fields.message_type === "voice"
-          ? "🎤 Voice message"
-          : fields.message_type === "gif"
-          ? "🎭 GIF"
-          : fields.message_type === "location"
-          ? "📍 Location"
+          : fields.message_type === "voice" ? "🎤 Voice message"
+          : fields.message_type === "gif" ? "🎭 GIF"
+          : fields.message_type === "location" ? "📍 Location"
           : "📷 Media",
         ref_id: convId,
         is_read: false,
@@ -149,80 +188,125 @@ export default function DMChatView({ user, conversation, onBack }) {
     setShowMenu(false);
   };
 
+  const matchIds = new Set(searchMatches.map(m => m.msg.id));
+  const currentMatchId = searchMatches[searchMatchIndex]?.msg.id;
+
   return (
     <div className="flex flex-col" style={{ height: "100dvh", background: "linear-gradient(180deg, #f8f5ff 0%, #eef2ff 45%, #ecfeff 100%)" }}>
 
       {/* Header */}
-      <div className="mx-3 mt-3 flex items-center gap-2 px-3 shrink-0 rounded-[24px]"
-        style={{
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border-light)",
-          boxShadow: "var(--elevation-2)",
-          paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
-          paddingBottom: 12,
-        }}>
-        <button onClick={onBack} className="p-1 mr-1">
-          <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
-        </button>
+      <div className="mx-3 mt-3 shrink-0 rounded-[24px] overflow-hidden"
+        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-2)" }}>
 
-        {/* Avatar */}
-        <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
-          style={{ background: `linear-gradient(135deg, ${avatarColor(conversation.email)}, #7C3AED)`, color: "#fff" }}>
-          {conversation.avatar_url
-            ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-            : displayName[0]?.toUpperCase() || "?"}
-        </div>
+        {/* Main header row */}
+        <div className="flex items-center gap-2 px-3"
+          style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 16px)", paddingBottom: 12 }}>
+          <button onClick={onBack} className="p-1 mr-1">
+            <ArrowLeft className="w-6 h-6" style={{ color: "var(--text-primary)" }} />
+          </button>
 
-        {/* Name + status */}
-        <div className="flex-1 min-w-0 ml-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{displayName}</p>
-            {partnerCreator && <CreatorBadge category={partnerCreator.category} size="xs" />}
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
+            style={{ background: `linear-gradient(135deg, ${avatarColor(conversation.email)}, #7C3AED)`, color: "#fff" }}>
+            {conversation.avatar_url
+              ? <img src={conversation.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+              : displayName[0]?.toUpperCase() || "?"}
           </div>
-          <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
-            {partnerCreator?.status_message
-              ? `💬 ${partnerCreator.status_message}`
-              : muted ? "🔇 Muted" : "tap here for contact info"}
-          </p>
-        </div>
 
-        {/* Action icons */}
-        <div className="flex items-center gap-1">
-          <button className="w-9 h-9 flex items-center justify-center rounded-full"
-            onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "video" })}
-            style={{ backgroundColor: "#f3ecff" }}>
-            <Video className="w-5 h-5" style={{ color: "#7C3AED" }} />
-          </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full"
-            onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "audio" })}
-            style={{ backgroundColor: "#ecfeff" }}>
-            <Phone className="w-5 h-5" style={{ color: "#0F766E" }} />
-          </button>
-          <div className="relative">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowMenu(v => !v)} style={{ backgroundColor: "#f8fafc" }}>
-              <MoreVertical className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+          <div className="flex-1 min-w-0 ml-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="font-semibold text-[16px] truncate" style={{ color: "var(--text-primary)" }}>{displayName}</p>
+              {partnerCreator && <CreatorBadge category={partnerCreator.category} size="xs" />}
+            </div>
+            <p className="text-[12px]" style={{ color: "var(--text-hint)" }}>
+              {muted ? "🔇 Muted" : "tap here for contact info"}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button className="w-9 h-9 flex items-center justify-center rounded-full"
+              onClick={openSearch}
+              style={{ backgroundColor: showSearch ? "var(--accent-primary-light)" : "#f8fafc" }}>
+              <Search className="w-4 h-4" style={{ color: showSearch ? "var(--accent-primary)" : "var(--text-secondary)" }} />
             </button>
-            {showMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-10 z-50 rounded-xl shadow-xl overflow-hidden"
-                  style={{ backgroundColor: "#fff", minWidth: 200 }}>
-                  {[
-                    { icon: VolumeX, label: muted ? "Unmute" : "Mute notifications", action: handleMute },
-                    { icon: Ban, label: blocked ? "Unblock" : "Block", action: handleBlock, danger: !blocked },
-                    { icon: AlertTriangle, label: "Report", action: () => setShowMenu(false), danger: true },
-                  ].map(({ icon: Icon, label, action, danger }) => (
-                    <button key={label} onClick={action}
-                      className="w-full flex items-center gap-3 px-4 py-3.5 text-[14px]"
-                      style={{ color: danger ? "#E53935" : "#333", borderBottom: "1px solid #F5F5F5" }}>
-                      <Icon className="w-4 h-4" /> {label}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            <button className="w-9 h-9 flex items-center justify-center rounded-full"
+              onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "video" })}
+              style={{ backgroundColor: "#f3ecff" }}>
+              <Video className="w-5 h-5" style={{ color: "#7C3AED" }} />
+            </button>
+            <button className="w-9 h-9 flex items-center justify-center rounded-full"
+              onClick={() => window.__callManager?.startCall({ calleeEmail: conversation.email, calleeName: displayName, callType: "audio" })}
+              style={{ backgroundColor: "#ecfeff" }}>
+              <Phone className="w-5 h-5" style={{ color: "#0F766E" }} />
+            </button>
+            <div className="relative">
+              <button className="w-9 h-9 flex items-center justify-center rounded-full" onClick={() => setShowMenu(v => !v)} style={{ backgroundColor: "#f8fafc" }}>
+                <MoreVertical className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+              </button>
+              {showMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                  <div className="absolute right-0 top-10 z-50 rounded-xl shadow-xl overflow-hidden"
+                    style={{ backgroundColor: "#fff", minWidth: 200 }}>
+                    {[
+                      { icon: VolumeX, label: muted ? "Unmute" : "Mute notifications", action: handleMute },
+                      { icon: Ban, label: blocked ? "Unblock" : "Block", action: handleBlock, danger: !blocked },
+                      { icon: AlertTriangle, label: "Report", action: () => setShowMenu(false), danger: true },
+                    ].map(({ icon: Icon, label, action, danger }) => (
+                      <button key={label} onClick={action}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 text-[14px]"
+                        style={{ color: danger ? "#E53935" : "#333", borderBottom: "1px solid #F5F5F5" }}>
+                        <Icon className="w-4 h-4" /> {label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Search bar (expands inside header) */}
+        {showSearch && (
+          <div className="px-3 pb-3 flex items-center gap-2">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1.5px solid var(--accent-primary)" }}>
+              <Search className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search messages, dates…"
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: "var(--text-primary)" }}
+              />
+              {searchQuery && (
+                <span className="text-[12px] font-medium shrink-0" style={{ color: "var(--text-hint)" }}>
+                  {searchMatches.length > 0 ? `${searchMatchIndex + 1}/${searchMatches.length}` : "0"}
+                </span>
+              )}
+            </div>
+            {/* Navigate matches */}
+            {searchMatches.length > 1 && (
+              <div className="flex flex-col gap-0.5">
+                <button onClick={() => setSearchMatchIndex(i => Math.max(0, i - 1))}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: "var(--bg-subtle)" }}>
+                  <ChevronUp className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+                </button>
+                <button onClick={() => setSearchMatchIndex(i => Math.min(searchMatches.length - 1, i + 1))}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: "var(--bg-subtle)" }}>
+                  <ChevronDown className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+                </button>
+              </div>
+            )}
+            <button onClick={closeSearch}
+              className="w-9 h-9 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Blocked banner */}
@@ -234,9 +318,16 @@ export default function DMChatView({ user, conversation, onBack }) {
         </div>
       )}
 
+      {/* No results banner */}
+      {showSearch && searchQuery && searchMatches.length === 0 && (
+        <div className="mx-4 mt-2 px-4 py-2.5 rounded-xl text-center text-sm shrink-0"
+          style={{ backgroundColor: "rgba(255,248,196,0.9)", color: "#7B6914" }}>
+          No messages found for "{searchQuery}"
+        </div>
+      )}
+
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-2 py-3" style={{ scrollbarWidth: "none" }}>
-        {/* Encrypted notice */}
         <div className="flex justify-center mb-4">
           <div className="px-4 py-1.5 rounded-lg text-[12px] text-center max-w-[280px]"
             style={{ backgroundColor: "rgba(255,248,196,0.9)", color: "#7B6914" }}>
@@ -253,10 +344,12 @@ export default function DMChatView({ user, conversation, onBack }) {
           </div>
         )}
 
-        {/* Group messages by date */}
         {visibleMessages.map((msg, idx) => {
           const prevMsg = visibleMessages[idx - 1];
           const showDate = !prevMsg || new Date(msg.created_date).toDateString() !== new Date(prevMsg.created_date).toDateString();
+          const isMatch = matchIds.has(msg.id);
+          const isCurrent = msg.id === currentMatchId;
+
           return (
             <React.Fragment key={msg.id}>
               {showDate && (
@@ -269,30 +362,42 @@ export default function DMChatView({ user, conversation, onBack }) {
                   </span>
                 </div>
               )}
-              <RichMessageBubble
-                message={msg}
-                isMe={msg.sender_email === user.email}
-                user={user}
-                onReply={setReplyTo}
-                onReact={handleReact}
-                onDelete={handleDelete}
-              />
+              <div
+                ref={el => { if (el) matchRefs.current[msg.id] = el; }}
+                style={isMatch ? {
+                  borderRadius: 16,
+                  outline: `2px solid ${isCurrent ? "var(--accent-primary)" : "rgba(79,70,229,0.25)"}`,
+                  backgroundColor: isCurrent ? "rgba(79,70,229,0.07)" : "transparent",
+                  transition: "background 0.2s",
+                } : {}}
+              >
+                <RichMessageBubble
+                  message={msg}
+                  isMe={msg.sender_email === user.email}
+                  user={user}
+                  onReply={setReplyTo}
+                  onReact={handleReact}
+                  onDelete={handleDelete}
+                />
+              </div>
             </React.Fragment>
           );
         })}
         <div ref={endRef} />
       </div>
 
-      <ChatInputBar
-        disabled={blocked}
-        replyTo={replyTo}
-        onCancelReply={() => setReplyTo(null)}
-        onSendText={(text) => createMsg({ text, message_type: "text" })}
-        onSendVoice={(audio_url) => createMsg({ audio_url, message_type: "voice", text: "" })}
-        onSendMedia={(urls) => createMsg({ media_urls: urls, message_type: urls[0]?.match(/video/) ? "video" : "image", text: "" })}
-        onSendGif={(gif_url) => createMsg({ gif_url, message_type: "gif", text: "" })}
-        onSendLocation={(loc) => createMsg({ location_data: loc, message_type: "location", text: "" })}
-      />
+      {!showSearch && (
+        <ChatInputBar
+          disabled={blocked}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onSendText={(text) => createMsg({ text, message_type: "text" })}
+          onSendVoice={(audio_url) => createMsg({ audio_url, message_type: "voice", text: "" })}
+          onSendMedia={(urls) => createMsg({ media_urls: urls, message_type: urls[0]?.match(/video/) ? "video" : "image", text: "" })}
+          onSendGif={(gif_url) => createMsg({ gif_url, message_type: "gif", text: "" })}
+          onSendLocation={(loc) => createMsg({ location_data: loc, message_type: "location", text: "" })}
+        />
+      )}
     </div>
   );
 }
