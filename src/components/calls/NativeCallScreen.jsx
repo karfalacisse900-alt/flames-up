@@ -377,6 +377,46 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     }
   };
 
+  const toggleScreenShare = async () => {
+    if (!pcRef.current) return;
+    if (screenSharing) {
+      // Switch back to camera
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+      }).catch(() => null);
+      if (!newStream) return;
+      const [videoTrack] = newStream.getVideoTracks();
+      const sender = pcRef.current.getSenders().find(s => s.track?.kind === "video");
+      if (sender && videoTrack) await sender.replaceTrack(videoTrack);
+      localStreamRef.current.getVideoTracks().forEach(t => t.stop());
+      const updated = new MediaStream([...localStreamRef.current.getAudioTracks(), videoTrack]);
+      localStreamRef.current = updated;
+      if (localVideoRef.current) { localVideoRef.current.srcObject = updated; localVideoRef.current.play().catch(() => {}); }
+      setScreenSharing(false);
+    } else {
+      // Start screen share
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false }).catch(() => null);
+      if (!screenStream) return;
+      const [screenTrack] = screenStream.getVideoTracks();
+      const sender = pcRef.current.getSenders().find(s => s.track?.kind === "video");
+      if (sender && screenTrack) await sender.replaceTrack(screenTrack);
+      localStreamRef.current.getVideoTracks().forEach(t => t.stop());
+      const updated = new MediaStream([...localStreamRef.current.getAudioTracks(), screenTrack]);
+      localStreamRef.current = updated;
+      if (localVideoRef.current) { localVideoRef.current.srcObject = updated; }
+      screenTrack.onended = () => toggleScreenShare(); // auto-stop when user stops sharing
+      setScreenSharing(true);
+    }
+  };
+
+  const handleAddPerson = async () => {
+    if (!addPersonEmail.trim()) return;
+    window.__callManager?.startCall({ calleeEmail: addPersonEmail.trim(), callType: session.call_type || "video" });
+    setShowAddPerson(false);
+    setAddPersonEmail("");
+  };
+
   const flipCamera = async () => {
     if (!localStreamRef.current || !pcRef.current) return;
     const newMode = facingMode === "user" ? "environment" : "user";
