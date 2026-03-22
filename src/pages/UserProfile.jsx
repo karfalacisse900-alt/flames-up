@@ -28,9 +28,13 @@ export default function UserProfile() {
   }, []);
 
   const { data: profileUser } = useQuery({
-    queryKey: ["user", email],
+    queryKey: ["userProfile", email],
     queryFn: async () => {
-      const users = await base44.entities.User.filter({ email });
+      // First try public UserProfile entity (visible to all users)
+      const profiles = await base44.entities.UserProfile.filter({ user_email: email });
+      if (profiles.length > 0) return profiles[0];
+      // Fallback: try User entity (only works for own profile)
+      const users = await base44.entities.User.filter({ email }).catch(() => []);
       return users[0] || null;
     },
     enabled: !!email,
