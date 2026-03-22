@@ -145,7 +145,11 @@ export default function ConversationListTab({ user, tab, onSelect, searchQuery =
               style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, ${avatarColor(conv.email)}bb)`, color: "#fff" }}>
               {conv.name?.[0]?.toUpperCase() || "?"}
             </div>
-            {/* Online dot placeholder */}
+            {isOnline(userPresenceMap[conv.email]) && (
+              <div className="absolute bottom-0.5 right-0.5">
+                <OnlineDot lastSeen={userPresenceMap[conv.email]} size={12} />
+              </div>
+            )}
           </div>
 
           {/* Content */}
