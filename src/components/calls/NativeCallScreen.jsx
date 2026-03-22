@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Users } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw } from "lucide-react";
+import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
 const avatarColor = (email) => COLORS[(email || "a").charCodeAt(0) % COLORS.length];
-
-// Simple WebRTC signaling via CallSession entity fields
-// We store SDP offers/answers and ICE candidates in the session
 
 export default function NativeCallScreen({ session, currentUser, onEnd }) {
   const [status, setStatus] = useState("connecting");
@@ -21,6 +18,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   const remoteVideoRef = useRef(null);
   const pcRef = useRef(null);
   const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(new MediaStream());
   const durationRef = useRef(null);
   const pollingRef = useRef(null);
   const sessionIdRef = useRef(session.id);
@@ -33,6 +31,20 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
 
   const formatDuration = (s) =>
     `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
+
+  // Attach local stream to video element whenever stream changes
+  useEffect(() => {
+    if (localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+  });
+
+  // Attach remote stream to video element
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+    }
+  });
 
   const cleanup = useCallback(() => {
     clearInterval(durationRef.current);
@@ -86,17 +98,15 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
     let cancelled = false;
 
     const setupCall = async () => {
-      // Get local media
       const constraints = {
         audio: true,
-        video: session.call_type !== "audio" ? { facingMode: "user" } : false,
+        video: session.call_type !== "audio" ? { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } : false,
       };
 
       let stream;
       try {
         stream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
-        // Try audio only fallback
+      } catch {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         } catch {
@@ -107,69 +117,66 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
 
       localStreamRef.current = stream;
+      // Directly set srcObject on the video element
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+        localVideoRef.current.play().catch(() => {});
       }
 
-      // Create peer connection
       const pc = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
+          { urls: "stun:stun2.l.google.com:19302" },
         ],
       });
       pcRef.current = pc;
 
       stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-      // Remote stream
-      const remoteStream = new MediaStream();
       pc.ontrack = (event) => {
-        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
+        event.streams[0].getTracks().forEach(track => {
+          remoteStreamRef.current.addTrack(track);
+        });
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStreamRef.current;
+          remoteVideoRef.current.play().catch(() => {});
+        }
         setRemoteVideoActive(true);
         setStatus("active");
       };
 
-      // Collect ICE candidates
       const iceCandidates = [];
       pc.onicecandidate = (event) => {
         if (event.candidate) iceCandidates.push(event.candidate.toJSON());
       };
 
       if (isCaller) {
-        // Create offer
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        // Wait for ICE gathering
         await new Promise(resolve => {
           if (pc.iceGatheringState === "complete") { resolve(); return; }
           const check = setInterval(() => {
             if (pc.iceGatheringState === "complete") { clearInterval(check); resolve(); }
           }, 200);
-          setTimeout(() => { clearInterval(check); resolve(); }, 3000);
+          setTimeout(() => { clearInterval(check); resolve(); }, 4000);
         });
 
-        // Store offer + ICE in session
         await base44.entities.CallSession.update(session.id, {
           webrtc_offer: JSON.stringify(pc.localDescription),
           webrtc_ice_caller: JSON.stringify(iceCandidates),
         }).catch(() => {});
 
-        // Poll for answer
         pollingRef.current = setInterval(async () => {
           if (cancelled || !pcRef.current) return;
-          const updated = await base44.entities.CallSession.filter({ id: session.id }).catch(() => []);
-          const s = updated[0] || updated;
-          const sess = Array.isArray(updated) ? updated[0] : updated;
+          const sessions = await base44.entities.CallSession.filter({ id: session.id }).catch(() => []);
+          const sess = Array.isArray(sessions) ? sessions[0] : sessions;
           if (!sess?.webrtc_answer) return;
           if (pc.signalingState !== "have-local-offer") { clearInterval(pollingRef.current); return; }
-
           try {
             const answer = JSON.parse(sess.webrtc_answer);
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
-            // Add callee ICE candidates
             if (sess.webrtc_ice_callee) {
               const candidates = JSON.parse(sess.webrtc_ice_callee);
               for (const c of candidates) {
@@ -181,7 +188,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         }, 1500);
 
       } else {
-        // Callee: poll for offer then send answer
         const waitForOffer = async () => {
           for (let i = 0; i < 20; i++) {
             if (cancelled) return;
@@ -191,7 +197,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
               const offer = JSON.parse(sess.webrtc_offer);
               await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
-              // Add caller ICE
               if (sess.webrtc_ice_caller) {
                 const candidates = JSON.parse(sess.webrtc_ice_caller);
                 for (const c of candidates) {
@@ -199,7 +204,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
                 }
               }
 
-              // Create answer
               const answer = await pc.createAnswer();
               await pc.setLocalDescription(answer);
 
@@ -208,7 +212,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
                 const check = setInterval(() => {
                   if (pc.iceGatheringState === "complete") { clearInterval(check); resolve(); }
                 }, 200);
-                setTimeout(() => { clearInterval(check); resolve(); }, 3000);
+                setTimeout(() => { clearInterval(check); resolve(); }, 4000);
               });
 
               await base44.entities.CallSession.update(session.id, {
@@ -219,7 +223,6 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
             }
             await new Promise(r => setTimeout(r, 1500));
           }
-          // Timeout — end call
           handleEnd(true);
         };
         waitForOffer();
@@ -246,23 +249,31 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   };
 
   const flipCamera = async () => {
-    if (!localStreamRef.current) return;
+    if (!localStreamRef.current || !pcRef.current) return;
     const newMode = facingMode === "user" ? "environment" : "user";
     setFacingMode(newMode);
     const newStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: false,
       video: { facingMode: newMode },
     }).catch(() => null);
-    if (!newStream || !pcRef.current) return;
+    if (!newStream) return;
     const [newVideoTrack] = newStream.getVideoTracks();
     const sender = pcRef.current.getSenders().find(s => s.track?.kind === "video");
     if (sender && newVideoTrack) await sender.replaceTrack(newVideoTrack);
     localStreamRef.current.getVideoTracks().forEach(t => t.stop());
-    if (localVideoRef.current) localVideoRef.current.srcObject = newStream;
-    localStreamRef.current = newStream;
+    const newFull = new MediaStream([
+      ...localStreamRef.current.getAudioTracks(),
+      newVideoTrack,
+    ]);
+    localStreamRef.current = newFull;
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = newFull;
+      localVideoRef.current.play().catch(() => {});
+    }
   };
 
   const color = avatarColor(partnerEmail);
+  const isAudioOnly = session.call_type === "audio";
 
   return (
     <div
@@ -273,19 +284,21 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {/* Remote video — fills screen */}
+      {/* Remote video / avatar — fills screen */}
       <div className="absolute inset-0">
-        {remoteVideoActive ? (
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover"
-          />
-        ) : (
+        {/* Always render video element; hide when no remote video */}
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          playsInline
+          className="w-full h-full object-cover"
+          style={{ display: remoteVideoActive && !isAudioOnly ? "block" : "none" }}
+        />
+
+        {/* Connecting / audio-only avatar */}
+        {(!remoteVideoActive || isAudioOnly) && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4"
             style={{ background: "linear-gradient(160deg, #0f0c29, #302b63, #24243e)" }}>
-            {/* Partner avatar while connecting */}
             <div className="relative flex items-center justify-center">
               {[1, 2, 3].map(i => (
                 <motion.div key={i} className="absolute rounded-full"
@@ -301,7 +314,7 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
             </div>
             <p className="text-white text-2xl font-bold mt-6">{partnerName}</p>
             <p className="text-white/50 text-base">
-              {status === "ended" ? "Call ended" : "Connecting…"}
+              {status === "ended" ? "Call ended" : status === "active" ? formatDuration(callDuration) : "Connecting…"}
             </p>
             {status === "connecting" && (
               <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white animate-spin mt-2" />
@@ -310,10 +323,17 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         )}
       </div>
 
-      {/* Local video — pip */}
-      {session.call_type !== "audio" && (
-        <div className="absolute top-20 right-4 z-10 rounded-2xl overflow-hidden shadow-xl"
-          style={{ width: 100, height: 140, border: "2px solid rgba(255,255,255,0.3)" }}>
+      {/* Local video PiP — always rendered, positioned top-right */}
+      {!isAudioOnly && (
+        <div className="absolute z-10 rounded-2xl overflow-hidden shadow-xl"
+          style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 72px)",
+            right: 16,
+            width: 100,
+            height: 140,
+            border: "2px solid rgba(255,255,255,0.3)",
+            background: "#111",
+          }}>
           <video
             ref={localVideoRef}
             autoPlay
@@ -325,9 +345,14 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
         </div>
       )}
 
+      {/* Audio-only local video (hidden but needed for stream) */}
+      {isAudioOnly && (
+        <video ref={localVideoRef} autoPlay playsInline muted style={{ display: "none" }} />
+      )}
+
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-4 py-4 shrink-0"
-        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)" }}>
+        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.75), transparent)" }}>
         <div>
           <p className="text-white font-bold text-lg">{partnerName}</p>
           <p className="text-white/60 text-sm">
@@ -350,36 +375,46 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       )}
 
       {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 pb-8 px-8"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 32px)" }}>
+      <div className="absolute bottom-0 left-0 right-0 z-10"
+        style={{
+          background: "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 36px)",
+          paddingTop: 24,
+          paddingLeft: 32,
+          paddingRight: 32,
+        }}>
         <div className="flex items-center justify-around">
           {/* Mic */}
           <button onClick={toggleMic}
             className="w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: micMuted ? "#E53935" : "rgba(255,255,255,0.2)" }}>
-            {micMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
+            style={{ backgroundColor: micMuted ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)" }}>
+            {micMuted
+              ? <MicOff className="w-6 h-6" style={{ color: "#111" }} />
+              : <Mic className="w-6 h-6 text-white" />}
           </button>
 
           {/* End call */}
           <button onClick={() => handleEnd(true)}
             className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "#E53935" }}>
+            style={{ backgroundColor: "#E53935", boxShadow: "0 8px 24px rgba(229,57,53,0.5)" }}>
             <PhoneOff className="w-7 h-7 text-white" />
           </button>
 
-          {/* Video toggle / flip */}
-          {session.call_type !== "audio" ? (
+          {/* Video toggle */}
+          {!isAudioOnly ? (
             <button onClick={toggleVideo}
               className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: videoOff ? "#E53935" : "rgba(255,255,255,0.2)" }}>
-              {videoOff ? <VideoOff className="w-6 h-6 text-white" /> : <Video className="w-6 h-6 text-white" />}
+              style={{ backgroundColor: videoOff ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)" }}>
+              {videoOff
+                ? <VideoOff className="w-6 h-6" style={{ color: "#111" }} />
+                : <Video className="w-6 h-6 text-white" />}
             </button>
           ) : (
             <div className="w-14 h-14" />
           )}
         </div>
 
-        {session.call_type !== "audio" && (
+        {!isAudioOnly && (
           <div className="flex justify-center mt-4">
             <button onClick={flipCamera}
               className="w-12 h-12 rounded-full flex items-center justify-center"
