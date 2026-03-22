@@ -17,8 +17,8 @@ function extractVideoId(src) {
   return m ? m[1] : null;
 }
 
-// Session mute preference — start muted for autoplay compliance
-const sessionPrefs = { muted: true };
+// Session mute preference — start unmuted, fall back if browser blocks autoplay
+const sessionPrefs = { muted: false };
 
 export default function StreamVideo({ src, postId, thumbnail, onDoubleTap }) {
   const videoRef = useRef(null);
@@ -174,9 +174,9 @@ export default function StreamVideo({ src, postId, thumbnail, onDoubleTap }) {
       className="relative w-full overflow-hidden"
       style={{
         borderRadius: 0,
-        aspectRatio: "9/16",
+        aspectRatio: "1/1",
         width: "100%",
-        maxHeight: "calc(100vw * 16 / 9)",
+        maxHeight: "100vw",
         background: "#000",
         cursor: "pointer",
         touchAction: "manipulation",
