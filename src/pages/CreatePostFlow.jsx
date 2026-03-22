@@ -131,6 +131,9 @@ export default function CreatePostFlow() {
         is_anonymous: postSettings.isAnonymous || false,
         media_type: "general",
         video_url: isVideo ? uploadedUrls[0] : undefined,
+        // "processing" until Cloudflare finishes encoding; "ready" for direct uploads that may be instant
+        video_status: isVideo ? "processing" : undefined,
+        video_thumbnail_url: isVideo && streamResult?.thumbnail_url ? streamResult.thumbnail_url : undefined,
         image_urls: !isVideo && uploadedUrls.length > 0 ? uploadedUrls : undefined,
         location_name: manualLoc?.name || undefined,
         location_city: manualLoc?.city || gpsLocation?.city || undefined,
