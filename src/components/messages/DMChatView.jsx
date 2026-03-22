@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, MoreVertical, Phone, Video, Ban, VolumeX, AlertTriangle, UserX } from "lucide-react";
-import MessageBubble from "./MessageBubble";
+import RichMessageBubble from "./RichMessageBubble";
 import ChatInputBar from "./ChatInputBar";
 import CreatorBadge from "@/components/creators/CreatorBadge.jsx";
 
@@ -266,7 +266,7 @@ export default function DMChatView({ user, conversation, onBack }) {
                   </span>
                 </div>
               )}
-              <MessageBubble
+              <RichMessageBubble
                 message={msg}
                 isMe={msg.sender_email === user.email}
                 user={user}
