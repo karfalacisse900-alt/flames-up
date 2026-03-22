@@ -39,6 +39,7 @@ function FlamesUpLogo() {
 
 export default function Layout({ children, currentPageName }) {
   useLayoutStabilizer();
+  useOnlinePresence(user);
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
