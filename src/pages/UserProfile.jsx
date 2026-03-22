@@ -246,7 +246,7 @@ export default function UserProfile() {
             )}
 
             {/* Social links */}
-            {(website || portfolio) && (
+            {(website || portfolio || tiktok || instagram) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {website && (
                   <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer"
@@ -258,6 +258,18 @@ export default function UserProfile() {
                   <a href={portfolio.startsWith("http") ? portfolio : `https://${portfolio}`} target="_blank" rel="noopener noreferrer"
                     style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
                     💼 Portfolio
+                  </a>
+                )}
+                {tiktok && (
+                  <a href={`https://tiktok.com/@${tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    🎵 TikTok
+                  </a>
+                )}
+                {instagram && (
+                  <a href={`https://instagram.com/${instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    📸 Instagram
                   </a>
                 )}
               </div>
