@@ -96,6 +96,20 @@ export default function GroupChatCompose({ group, user, members = [], replyTo, o
 
     const mentions = extractMentions(body);
 
+    // Send notifications to mentioned users
+    mentions.forEach(mentionedEmail => {
+      const mentionedMember = members.find(m => m.user_email === mentionedEmail);
+      base44.entities.Notification.create({
+        recipient_email: mentionedEmail,
+        actor_email: user.email,
+        actor_name: user.full_name || user.email?.split("@")[0] || "Someone",
+        type: "group_mention",
+        post_text: `mentioned you in ${group.name}: "${body.slice(0, 60)}"`,
+        ref_id: group.id,
+        is_read: false,
+      }).catch(() => {});
+    });
+
     await base44.entities.CommunityPost.create({
       type: "opinion",
       body: body.trim(),
