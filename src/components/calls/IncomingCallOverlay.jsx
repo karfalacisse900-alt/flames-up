@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Phone, PhoneOff } from "lucide-react";
+import { Phone, PhoneOff, Video } from "lucide-react";
 import { motion } from "framer-motion";
 
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
@@ -83,7 +83,9 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
             animate={{ scale: [1, 1.08, 1] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Phone className="w-7 h-7 text-white" />
+            {session.call_type === "video"
+              ? <Video className="w-7 h-7 text-white" />
+              : <Phone className="w-7 h-7 text-white" />}
           </motion.button>
           <span className="text-white/60 text-sm">Accept</span>
         </div>
