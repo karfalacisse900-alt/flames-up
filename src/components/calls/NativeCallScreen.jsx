@@ -218,14 +218,16 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
       pc.ontrack = (event) => {
         const incomingStream = event.streams[0];
         if (incomingStream) {
-          // Replace remote stream entirely
           remoteStreamRef.current = incomingStream;
         } else {
-          event.track.onunmute = () => {};
           remoteStreamRef.current.addTrack(event.track);
         }
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStreamRef.current;
+          // Critical: disable any browser-side audio processing on playback
+          // This prevents echo/reverb artifacts on the received audio
+          remoteVideoRef.current.volume = 1.0;
+          remoteVideoRef.current.muted = false;
           remoteVideoRef.current.play().catch(() => {});
         }
         setRemoteVideoActive(true);
