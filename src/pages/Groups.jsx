@@ -2,142 +2,82 @@ import React, { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Users, Lock, Bell, SlidersHorizontal } from "lucide-react";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
+import {
+  Search, Plus, Users, Lock, MapPin, Globe, Flame,
+  Star, Filter, DollarSign, X
+} from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
+import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
+import GroupStatusBar from "@/components/groups/GroupStatusBar";
+import GroupDetailModal from "@/components/groups/GroupDetailModal";
 
-// Category icons
-const CATEGORIES = [
-  { key: "all",     label: "All",     emoji: "🌐" },
-  { key: "music",   label: "Music",   emoji: "🎵" },
-  { key: "art",     label: "Art",     emoji: "🎨" },
-  { key: "gaming",  label: "Gaming",  emoji: "🎮" },
-  { key: "travel",  label: "Travel",  emoji: "✈️" },
-  { key: "tech",    label: "Tech",    emoji: "💻" },
-  { key: "fitness", label: "Fitness", emoji: "💪" },
-  { key: "food",    label: "Food",    emoji: "🍕" },
-  { key: "movies",  label: "Movies",  emoji: "🎬" },
-  { key: "sports",  label: "Sports",  emoji: "⚽" },
+const CATEGORY_TABS = [
+  { key: "all",      label: "All",      emoji: "✨" },
+  { key: "fitness",  label: "Fitness",  emoji: "💪" },
+  { key: "food",     label: "Food",     emoji: "🍕" },
+  { key: "travel",   label: "Travel",   emoji: "✈️" },
+  { key: "tech",     label: "Tech",     emoji: "💻" },
+  { key: "art",      label: "Art",      emoji: "🎨" },
+  { key: "music",    label: "Music",    emoji: "🎵" },
+  { key: "gaming",   label: "Gaming",   emoji: "🎮" },
+  { key: "movies",   label: "Movies",   emoji: "🎬" },
+  { key: "sports",   label: "Sports",   emoji: "⚽" },
 ];
 
-const FEED_TABS = ["Popular", "Last", "Nearby", "Meeting"];
-
-const GRADIENTS = {
-  fitness:  "linear-gradient(135deg,#0d9488,#16a34a)",
-  food:     "linear-gradient(135deg,#ea580c,#d97706)",
-  travel:   "linear-gradient(135deg,#0284c7,#6d28d9)",
-  tech:     "linear-gradient(135deg,#0284c7,#0369a1)",
-  art:      "linear-gradient(135deg,#7c3aed,#a21caf)",
-  music:    "linear-gradient(135deg,#db2777,#be185d)",
-  gaming:   "linear-gradient(135deg,#16a34a,#15803d)",
-  movies:   "linear-gradient(135deg,#7c3aed,#4338ca)",
-  sports:   "linear-gradient(135deg,#ea580c,#dc2626)",
-  general:  "linear-gradient(135deg,#64748b,#475569)",
+const CATEGORY_GRADIENTS = {
+  fitness: ["#0d9488","#16a34a"], food: ["#ea580c","#d97706"],
+  travel:  ["#0284c7","#6d28d9"], tech: ["#0284c7","#0369a1"],
+  art:     ["#7c3aed","#a21caf"], music: ["#db2777","#be185d"],
+  gaming:  ["#16a34a","#15803d"], movies: ["#7c3aed","#4338ca"],
+  sports:  ["#ea580c","#dc2626"], general: ["#64748b","#475569"],
 };
-
-function getGrad(cat) { return GRADIENTS[cat] || GRADIENTS.general; }
-
-// Member avatars stacked
-function MemberStack({ emails = [] }) {
-  const shown = emails.slice(0, 3);
-  return (
-    <div className="flex" style={{ gap: -6 }}>
-      {shown.map((e, i) => (
-        <div key={i} className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
-          style={{
-            background: getGrad("general"),
-            border: "2px solid rgba(255,255,255,0.25)",
-            marginLeft: i > 0 ? -8 : 0,
-            zIndex: shown.length - i,
-          }}>
-          {(e || "?")[0].toUpperCase()}
-        </div>
-      ))}
-    </div>
-  );
+function getGrad(cat) {
+  const [a, b] = CATEGORY_GRADIENTS[cat] || CATEGORY_GRADIENTS.general;
+  return `linear-gradient(135deg, ${a}, ${b})`;
 }
 
-// Large featured card (image background)
-function FeaturedGroupCard({ group, onOpen, onJoin, isMember }) {
-  const bgColor = getGrad(group.category);
+// Compact list card for My Groups section
+function GroupCard({ group, membership, onOpen, onJoin }) {
+  const isMember = !!membership;
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       onClick={() => onOpen(group)}
-      className="relative rounded-3xl overflow-hidden cursor-pointer"
-      style={{ aspectRatio: "4/3", background: bgColor, minHeight: 160 }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)" }} />
-
-      {/* Category emoji center top */}
-      <div className="absolute top-3 left-3 text-3xl">{CATEGORIES.find(c => c.key === group.category)?.emoji || "💬"}</div>
-
-      {/* Member stack */}
-      <div className="absolute top-3 right-3">
-        <MemberStack emails={[group.created_by, group.host_email].filter(Boolean)} />
-      </div>
-
-      {/* Bottom info */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-        <p className="text-white font-bold text-[15px] leading-tight truncate"
-          style={{ fontFamily: "var(--font-serif)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
-          {group.name}
-        </p>
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-white/70 text-[12px] truncate">
-            @{(group.created_by || "").split("@")[0]}
-          </p>
-          {!isMember ? (
-            <button
-              onClick={e => { e.stopPropagation(); onJoin(group); }}
-              className="px-3 py-1 rounded-full text-[12px] font-bold"
-              style={{ backgroundColor: "#fff", color: "#111" }}>
-              JOIN
-            </button>
-          ) : (
-            <span className="px-3 py-1 rounded-full text-[12px] font-bold"
-              style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>✓ IN</span>
-          )}
+      className="cursor-pointer p-4 rounded-2xl"
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+      <div className="flex gap-3">
+        <div className="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-2xl"
+          style={{ background: getGrad(group.category) }}>
+          {group.emoji || "💬"}
         </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-bold text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{group.name}</h3>
+            {group.is_private && <Lock className="w-3 h-3 shrink-0" style={{ color: "var(--text-hint)" }} />}
+          </div>
+          <p className="text-xs line-clamp-1 mb-1.5" style={{ color: "var(--text-hint)" }}>{group.description || "No description"}</p>
+          <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--text-hint)" }}>
+            <span className="flex items-center gap-0.5">
+              {group.group_type === "realworld" ? <MapPin className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+              {group.group_type === "realworld" ? "Real-World" : "Online"}
+            </span>
+            <span>·</span>
+            <span><Users className="w-2.5 h-2.5 inline mr-0.5" />{(group.member_count || 0).toLocaleString()}</span>
+          </div>
+        </div>
+        {isMember ? (
+          <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)" }}>
+            <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>✓</span>
+          </div>
+        ) : (
+          <button onClick={e => { e.stopPropagation(); onJoin(group); }}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white active:scale-95"
+            style={{ backgroundColor: "var(--accent-primary)" }}>Join</button>
+        )}
       </div>
     </motion.div>
-  );
-}
-
-// Feed list item
-function FeedGroupRow({ group, onOpen, onJoin, isMember }) {
-  return (
-    <div onClick={() => onOpen(group)}
-      className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-      style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-      <div className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-2xl"
-        style={{ background: getGrad(group.category) }}>
-        {CATEGORIES.find(c => c.key === group.category)?.emoji || "💬"}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <p className="font-bold text-[14px] truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-            {group.name}
-          </p>
-          {group.is_private && <Lock className="w-3 h-3 shrink-0" style={{ color: "var(--text-hint)" }} />}
-        </div>
-        <div className="flex items-center gap-2">
-          <MemberStack emails={[group.created_by].filter(Boolean)} />
-          <p className="text-[12px] truncate" style={{ color: "var(--text-hint)" }}>
-            {(group.member_count || 0).toLocaleString()} members · {group.description?.slice(0, 30) || group.category}
-          </p>
-        </div>
-      </div>
-      {!isMember && (
-        <button onClick={e => { e.stopPropagation(); onJoin(group); }}
-          className="shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold text-white"
-          style={{ backgroundColor: "var(--accent-primary)" }}>
-          Join
-        </button>
-      )}
-    </div>
   );
 }
 
@@ -146,15 +86,15 @@ export default function Groups() {
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeMembership, setActiveMembership] = useState(null);
   const [search, setSearch] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [feedTab, setFeedTab] = useState("Popular");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDiscoverFilters, setShowDiscoverFilters] = useState(false);
+  const [dismissedGroupIds, setDismissedGroupIds] = useState([]);
+  const [detailGroup, setDetailGroup] = useState(null);
   const qc = useQueryClient();
 
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
@@ -167,8 +107,7 @@ export default function Groups() {
     enabled: !!user?.email,
   });
 
-  const membershipMap = useMemo(() =>
-    Object.fromEntries(myMemberships.map(m => [m.group_id, m])), [myMemberships]);
+  const membershipMap = useMemo(() => Object.fromEntries(myMemberships.map(m => [m.group_id, m])), [myMemberships]);
 
   const handleJoin = async (group) => {
     if (!user || membershipMap[group.id]) return;
@@ -198,6 +137,7 @@ export default function Groups() {
   const handleOpenGroup = (group) => {
     setActiveGroup(group);
     setActiveMembership(membershipMap[group.id] || null);
+    setDetailGroup(null);
   };
 
   const handleCreated = (group) => {
@@ -208,19 +148,32 @@ export default function Groups() {
     setActiveGroup(group);
   };
 
-  const filtered = useMemo(() => {
-    let list = groups;
+  const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
+  
+  // All non-member groups go to swipe explore — apply filters
+  const discoverGroups = useMemo(() => {
+    let list = groups.filter(g => !membershipMap[g.id] && !dismissedGroupIds.includes(g.id));
     if (categoryFilter !== "all") list = list.filter(g => g.category === categoryFilter);
-    if (search.trim()) {
+    if (typeFilter !== "all") list = list.filter(g => g.group_type === typeFilter);
+    if (search) {
       const q = search.toLowerCase();
       list = list.filter(g => g.name.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
     }
-    if (feedTab === "Last") list = [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     return list;
-  }, [groups, categoryFilter, search, feedTab]);
+  }, [groups, membershipMap, dismissedGroupIds, categoryFilter, typeFilter, search]);
 
-  const featuredGroups = filtered.filter(g => !membershipMap[g.id]).slice(0, 4);
-  const feedGroups = filtered.slice(0, 30);
+  const filteredMyGroups = useMemo(() => {
+    if (!search) return myGroups;
+    const q = search.toLowerCase();
+    return myGroups.filter(g => g.name.toLowerCase().includes(q));
+  }, [myGroups, search]);
+
+  const isFiltering = search || categoryFilter !== "all" || typeFilter !== "all";
+
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+    await qc.invalidateQueries({ queryKey: ["groups"] });
+    await qc.invalidateQueries({ queryKey: ["myMemberships", user?.email] });
+  });
 
   if (activeGroup) {
     return (
@@ -231,135 +184,171 @@ export default function Groups() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh", paddingBottom: 100, backgroundColor: "var(--bg-app)" }}>
+    <div {...containerProps} style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
+      <PullIndicator />
 
       {/* ── Header ── */}
-      <div className="px-5 flex items-center justify-between"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)", paddingBottom: 16 }}>
-        <div>
-          <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-            Groups
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowSearch(v => !v)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            <Search className="w-4.5 h-4.5" style={{ width: 18, height: 18, color: "var(--text-secondary)" }} />
-          </button>
+      <div className="relative px-5 pt-6 pb-2" style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Groups</h1>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Join & create communities</p>
+          </div>
           {user && (
             <button onClick={() => setShowCreateModal(true)}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <Plus className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
+              style={{ backgroundColor: "var(--accent-primary)" }}>
+              <Plus className="w-4 h-4" /> Create
             </button>
           )}
         </div>
       </div>
 
-      {/* Search bar (expandable) */}
+      {/* ── Group Status Bar (replaces category icons) ── */}
+      {user && myGroups.length > 0 && (
+        <div style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+          <GroupStatusBar user={user} groups={groups} membershipMap={membershipMap} />
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <Search className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search groups…"
+            className="flex-1 bg-transparent text-sm outline-none"
+            style={{ color: "var(--text-primary)" }} />
+          {search && <button onClick={() => setSearch("")}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>}
+        </div>
+      </div>
+
+      {/* Filter toggle */}
+      <div className="px-4 pb-3 flex items-center gap-2">
+        <button onClick={() => setShowDiscoverFilters(v => !v)}
+          className="flex items-center gap-1.5 px-3 rounded-full text-xs font-semibold"
+          style={{
+            minHeight: 44,
+            backgroundColor: showDiscoverFilters ? "var(--accent-primary)" : "var(--bg-card)",
+            color: showDiscoverFilters ? "#fff" : "var(--text-secondary)",
+            border: `1px solid ${showDiscoverFilters ? "var(--accent-primary)" : "var(--border-light)"}`,
+          }}>
+          <Filter className="w-3 h-3" /> Filters
+          {(typeFilter !== "all" || categoryFilter !== "all") && <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />}
+        </button>
+        {(typeFilter !== "all" || categoryFilter !== "all") && (
+          <button onClick={() => { setTypeFilter("all"); setCategoryFilter("all"); }}
+            className="text-xs font-semibold px-2 py-1 rounded-full"
+            style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Collapsible filters */}
       <AnimatePresence>
-        {showSearch && (
+        {showDiscoverFilters && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            className="px-4 overflow-hidden" style={{ marginBottom: 8 }}>
-            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl"
-              style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--accent-primary)" }}>
-              <Search className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search groups…" autoFocus
-                className="flex-1 bg-transparent text-sm outline-none"
-                style={{ color: "var(--text-primary)" }} />
-              {search && (
-                <button onClick={() => setSearch("")}>
-                  <span className="text-xs" style={{ color: "var(--text-hint)" }}>✕</span>
-                </button>
-              )}
+            transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
+            <div className="flex gap-2 px-4 pb-1 overflow-x-auto scrollbar-hide">
+              {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
+                <button key={t.key} onClick={() => setTypeFilter(t.key)}
+                  className="shrink-0 px-3 rounded-full text-xs font-semibold"
+                  style={{
+                    minHeight: 44,
+                    backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
+                    color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
+                    border: "1px solid var(--border-light)",
+                  }}>{t.label}</button>
+              ))}
+            </div>
+            <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
+              {CATEGORY_TABS.map(c => (
+                <button key={c.key} onClick={() => setCategoryFilter(c.key)}
+                  className="shrink-0 flex items-center gap-1 px-3 rounded-full text-xs font-semibold"
+                  style={{
+                    minHeight: 44,
+                    backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
+                    color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",
+                    border: "1px solid var(--border-light)",
+                  }}>{c.emoji} {c.label}</button>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Category icon row ── */}
-      <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-2">
-        {CATEGORIES.map(cat => (
-          <button key={cat.key} onClick={() => setCategoryFilter(cat.key)}
-            className="flex flex-col items-center gap-1.5 shrink-0">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all"
-              style={{
-                background: categoryFilter === cat.key
-                  ? "linear-gradient(135deg, #1c1c2e, #2d2b55)"
-                  : "#1c1c2e",
-                boxShadow: categoryFilter === cat.key ? "0 4px 16px rgba(79,70,229,0.4)" : "none",
-                transform: categoryFilter === cat.key ? "scale(1.08)" : "scale(1)",
-                border: categoryFilter === cat.key ? "2px solid #7C3AED" : "2px solid transparent",
-              }}>
-              <span style={{ fontSize: 22 }}>{cat.emoji}</span>
+      {/* ── Content ── */}
+      <div className="px-4 pt-2 pb-6">
+
+        {/* Discover / Swipe to Explore — ALL non-member groups (with filters) */}
+        {discoverGroups.length > 0 && (
+          <section className="mb-6">
+            <div className="flex items-center justify-between mb-3 px-0.5">
+              <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
+                <Flame className="w-3.5 h-3.5 text-orange-500" /> Discover Groups
+              </p>
+              <span className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>
+                {discoverGroups.length} groups · Swipe to explore
+              </span>
             </div>
-            <span className="text-[11px] font-medium" style={{ color: categoryFilter === cat.key ? "var(--accent-primary)" : "var(--text-hint)" }}>
-              {cat.label}
-            </span>
-          </button>
-        ))}
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4 pb-2">
+              {discoverGroups.map(group => (
+                <div key={group.id} className="shrink-0 snap-center w-[82vw] max-w-[360px]">
+                  <div onClick={() => setDetailGroup(group)} className="cursor-pointer">
+                    <TrendingGroupCard
+                      group={group}
+                      onDismiss={() => setDismissedGroupIds(prev => [...prev, group.id])}
+                      onJoin={handleJoin}
+                      onOpen={(g) => setDetailGroup(g)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* My Groups */}
+        {filteredMyGroups.length > 0 && (
+          <section className="mb-6">
+            <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
+              <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups ({filteredMyGroups.length})
+            </p>
+            <div className="space-y-2">
+              {filteredMyGroups.map(g => (
+                <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
+                  onOpen={handleOpenGroup} onJoin={handleJoin} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Empty state */}
+        {discoverGroups.length === 0 && filteredMyGroups.length === 0 && (
+          <div className="py-16 text-center">
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="font-bold text-sm mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No groups found</p>
+            {user && (
+              <button onClick={() => setShowCreateModal(true)}
+                className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ backgroundColor: "var(--accent-primary)" }}>Create a New Group</button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ── Featured grid (2-col) ── */}
-      {featuredGroups.length > 0 && (
-        <div className="px-4 mt-4">
-          <div className="grid grid-cols-2 gap-3">
-            {featuredGroups.map(g => (
-              <FeaturedGroupCard
-                key={g.id} group={g}
-                onOpen={handleOpenGroup} onJoin={handleJoin}
-                isMember={!!membershipMap[g.id]}
-              />
-            ))}
-          </div>
-        </div>
+      {/* Group Detail Modal */}
+      {detailGroup && (
+        <GroupDetailModal
+          group={detailGroup}
+          isMember={!!membershipMap[detailGroup.id]}
+          onClose={() => setDetailGroup(null)}
+          onJoin={handleJoin}
+          onOpen={handleOpenGroup}
+        />
       )}
 
-      {/* ── Feed section ── */}
-      <div className="mt-5">
-        {/* Feed tabs */}
-        <div className="flex items-center gap-2 px-4 mb-3 overflow-x-auto scrollbar-hide">
-          {FEED_TABS.map(tab => {
-            const counts = { Popular: groups.length, Last: groups.length, Nearby: Math.floor(groups.length * 0.4), Meeting: Math.floor(groups.length * 0.2) };
-            return (
-              <button key={tab} onClick={() => setFeedTab(tab)}
-                className="shrink-0 flex items-center gap-1.5 px-0 py-1"
-                style={{ borderBottom: feedTab === tab ? "2.5px solid var(--text-primary)" : "2.5px solid transparent" }}>
-                <span className="font-bold text-[15px]"
-                  style={{ color: feedTab === tab ? "var(--text-primary)" : "var(--text-hint)" }}>
-                  {tab}
-                </span>
-                <span className="text-[12px] font-semibold"
-                  style={{ color: feedTab === tab ? "var(--text-secondary)" : "var(--text-hint)" }}>
-                  {counts[tab]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Feed rows */}
-        <div style={{ backgroundColor: "var(--bg-card)", borderRadius: "20px 20px 0 0", border: "1px solid var(--border-light)" }}>
-          {feedGroups.length === 0 ? (
-            <div className="py-16 text-center">
-              <div className="text-4xl mb-3">🔍</div>
-              <p className="font-semibold text-sm" style={{ color: "var(--text-hint)" }}>No groups found</p>
-            </div>
-          ) : (
-            feedGroups.map(g => (
-              <FeedGroupRow
-                key={g.id} group={g}
-                onOpen={handleOpenGroup} onJoin={handleJoin}
-                isMember={!!membershipMap[g.id]}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Create Group Modal */}
       <CreateGroupModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onCreated={handleCreated} user={user} />
     </div>
   );
