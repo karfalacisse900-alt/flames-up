@@ -246,6 +246,7 @@ export default function Layout({ children, currentPageName }) {
       }
 
       <MiniPlayerWrapper />
+      {user && <GlobalNotificationToast user={user} />}
     </div>);
 
 }
