@@ -156,10 +156,10 @@ export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
       onClick={handleTap}
       className="relative w-full overflow-hidden"
       style={{
-        borderRadius: 16,
+        borderRadius: 0,
         width: "100%",
         aspectRatio: "9/16",
-        maxHeight: "80vh",
+        maxHeight: "calc(100vw * 16 / 9)",
         cursor: "pointer",
         userSelect: "none",
         background: "#000",
