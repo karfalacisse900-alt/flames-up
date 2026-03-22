@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { OnlineDot, isOnline } from "@/components/hooks/useOnlinePresence";
 
 const COLORS = ["#25D366", "#128C7E", "#075E54", "#34B7F1", "#7B68EE", "#FF6B6B", "#FFA500"];
 const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
@@ -53,6 +54,19 @@ export default function ConversationListTab({ user, tab, onSelect, searchQuery =
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email }),
     enabled: !!user?.email,
   });
+
+  // Fetch all users to get last_seen for online indicator
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["usersPresence"],
+    queryFn: () => base44.entities.User.list(),
+    refetchInterval: 30000,
+    enabled: !!user?.email,
+  });
+  const userPresenceMap = useMemo(() => {
+    const m = {};
+    allUsers.forEach(u => { m[u.email] = u.last_seen; });
+    return m;
+  }, [allUsers]);
 
   useEffect(() => {
     if (!user?.email) return;
