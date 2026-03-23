@@ -63,6 +63,23 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
         bio,
         website_url: websiteUrl,
       });
+      // Sync to UserProfile entity so other users can see this data
+      const existing = await base44.entities.UserProfile.filter({ user_email: user.email });
+      const profileData = {
+        user_email: user.email,
+        user_name: user.full_name || displayName,
+        display_name: displayName,
+        username: usernameToSave,
+        bio,
+        avatar_url: avatarUrl,
+        banner_url: bannerUrl,
+        website: websiteUrl,
+      };
+      if (existing.length > 0) {
+        await base44.entities.UserProfile.update(existing[0].id, profileData);
+      } else {
+        await base44.entities.UserProfile.create(profileData);
+      }
       onUpdated?.();
       onClose();
     } catch (err) {

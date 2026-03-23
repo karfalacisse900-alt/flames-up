@@ -123,6 +123,30 @@ export default function Profile() {
     }
     await base44.auth.updateMe({ bio, about_me: aboutMe, display_name: displayName, username: usernameToSave, avatar_url: avatarUrl, profile_theme: profileTheme });
     setUser((prev) => ({ ...prev, bio, about_me: aboutMe, display_name: displayName, username: usernameToSave, avatar_url: avatarUrl, profile_theme: profileTheme }));
+    // Sync to UserProfile entity so other users can see this data
+    const existing = await base44.entities.UserProfile.filter({ user_email: user.email });
+    const profileData = {
+      user_email: user.email,
+      user_name: user.full_name || displayName,
+      display_name: displayName,
+      username: usernameToSave,
+      bio,
+      about_me: aboutMe,
+      avatar_url: avatarUrl,
+      profile_theme: profileTheme,
+      interests: user.interests || [],
+      looking_for: user.looking_for || [],
+      age: user.age || "",
+      city: user.city || "",
+      major: user.major || "",
+      graduation_year: user.graduation_year || "",
+      hobbies: user.hobbies || "",
+    };
+    if (existing.length > 0) {
+      await base44.entities.UserProfile.update(existing[0].id, profileData);
+    } else {
+      await base44.entities.UserProfile.create(profileData);
+    }
     setShowEdit(false);
   };
 
