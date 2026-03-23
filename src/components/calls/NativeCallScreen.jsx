@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { PhoneOff } from "lucide-react";
 import { useRealtimeKitClient } from "@cloudflare/realtimekit-react";
-import { RtkMeeting } from "@cloudflare/realtimekit-react-ui";
 import { base44 } from "@/api/base44Client";
+import FaceTimeCallScreen from "./FaceTimeCallScreen";
 
 export default function NativeCallScreen({ session, currentUser, onEnd }) {
   const [meeting, initMeeting] = useRealtimeKitClient();
@@ -93,14 +93,10 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[200]"
-      style={{
-        paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
-    >
-      <RtkMeeting meeting={meeting} />
-    </div>
+    <FaceTimeCallScreen
+      meeting={meeting}
+      session={session}
+      onEnd={onEnd}
+    />
   );
 }
