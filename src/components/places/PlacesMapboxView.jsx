@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft } from "lucide-react";
+import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft, Search, Navigation } from "lucide-react";
 import ProximityNotifier from "@/components/friends/ProximityNotifier";
 import CreatorMapMarkers from "@/components/creators/CreatorMapMarkers";
 import MapCategoryCarousel from "./MapCategoryCarousel";
@@ -10,14 +10,30 @@ import PlaceHub from "@/components/community/PlaceHub";
 import NearbyPeopleModal from "./NearbyPeopleModal";
 
 const CATEGORY_LAYERS = {
-  food:        ["restaurant", "food", "fast-food", "bakery", "bar"],
-  cafe:        ["cafe", "coffee"],
-  park:        ["park", "garden", "nature", "playground"],
-  events:      ["event", "stadium", "theatre", "concert", "entertainment"],
-  hidden_spot: [],
-  shopping:    ["shop", "store", "market", "mall", "clothing"],
-  study_spot:  ["library", "school", "university", "college"],
-  travel:      ["airport", "hotel", "transit", "bus", "train"],
+  restaurant:   ["restaurant"],
+  cafe:         ["cafe", "coffee"],
+  fast_food:    ["fast-food", "fast_food"],
+  park:         ["park", "garden", "nature", "playground"],
+  shopping:     ["shop", "store", "market", "mall", "clothing"],
+  grocery:      ["grocery", "supermarket"],
+  gas:          ["gas_station", "fuel", "gas-station"],
+  hotel:        ["hotel", "lodging"],
+  bar:          ["bar", "nightclub"],
+  hospital:     ["hospital", "clinic", "medical"],
+  pharmacy:     ["pharmacy", "drugstore"],
+  entertainment:["entertainment", "cinema", "theatre", "stadium"],
+  gym:          ["gym", "fitness", "sport"],
+  study_spot:   ["library", "school", "university", "college"],
+  travel:       ["airport", "transit", "bus", "train"],
+  bank:         ["bank", "atm"],
+  school:       ["school", "university", "college"],
+  church:       ["place_of_worship", "church"],
+  parking:      ["parking"],
+  spa:          ["spa", "beauty"],
+  airport:      ["airport"],
+  events:       ["event", "concert"],
+  hidden_spot:  [],
+  food:         ["restaurant", "food", "fast-food", "bakery"],
 };
 
 const RADIUS_OPTIONS = [1, 5, 10, 25];
@@ -64,6 +80,15 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const [popupCoords,          setPopupCoords]          = useState(null);
   const [showNearbyModal,      setShowNearbyModal]      = useState(false);
   const [follows,              setFollows]              = useState([]);
+
+  // Search
+  const [searchQuery,      setSearchQuery]      = useState("");
+  const [searchResults,    setSearchResults]    = useState([]);
+  const [searchLoading,    setSearchLoading]    = useState(false);
+  const [showSearch,       setShowSearch]       = useState(false);
+  const searchDebounceRef  = useRef(null);
+  const searchPinRef       = useRef(null);
+  const searchInputRef     = useRef(null);
 
   // Load follows for friend prioritization
   useEffect(() => {
@@ -171,6 +196,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     return () => {
       destroyed = true;
       if (mapInst.current) { mapInst.current.remove(); mapInst.current = null; }
+      if (searchPinRef.current) { searchPinRef.current.remove(); searchPinRef.current = null; }
     };
   }, [token, initCenter]);
 
@@ -277,17 +303,13 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
     };
   }, []);
 
-  // ── 6. Self avatar marker ──────────────────────────────────────────────
+  // ── 6. Self location — fixed-size blue dot (never scales with zoom) ────
   useEffect(() => {
     const map = mapInst.current;
     if (!map || !mapReady || !userLoc || !window.mapboxgl) return;
 
-    // If current user is an approved creator, remove the blue self marker — they get the orange one
     if (currentUser?.email && creatorEmails.has(currentUser.email)) {
-      if (selfMarkerRef.current) {
-        selfMarkerRef.current.remove();
-        selfMarkerRef.current = null;
-      }
+      if (selfMarkerRef.current) { selfMarkerRef.current.remove(); selfMarkerRef.current = null; }
       return;
     }
 
@@ -298,39 +320,51 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       return;
     }
 
+    // Outer wrapper — fixed pixel size, never scales
     const wrapper = document.createElement("div");
-    wrapper.style.cssText = "position:relative; width:52px; height:52px;";
+    wrapper.style.cssText = "position:relative; width:22px; height:22px; flex-shrink:0;";
 
+    // Accuracy halo — soft pulsing circle
+    const halo = document.createElement("div");
+    halo.style.cssText = `
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      width:44px; height:44px;
+      border-radius:50%;
+      background:rgba(37,99,235,0.15);
+      pointer-events:none;
+      animation:blueDotPulse 2.4s ease-in-out infinite;
+    `;
+    wrapper.appendChild(halo);
+
+    // White border ring
     const ring = document.createElement("div");
     ring.style.cssText = `
-      position:absolute; top:-8px; left:-8px; width:68px; height:68px; border-radius:50%;
-      border:2.5px solid rgba(79,70,229,0.5); pointer-events:none;
-      animation:selfPulse 2.2s ease-in-out infinite;
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      width:18px; height:18px;
+      border-radius:50%;
+      background:white;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      pointer-events:none;
     `;
     wrapper.appendChild(ring);
 
-    const circle = document.createElement("div");
-    circle.style.cssText = `
-      position:absolute; top:2px; left:2px;
-      width:48px; height:48px; border-radius:50%;
-      border:3px solid #4F46E5;
-      box-shadow:0 4px 20px rgba(79,70,229,0.5);
-      overflow:hidden;
-      background:linear-gradient(135deg,#4F46E5,#7C3AED);
-      display:flex; align-items:center; justify-content:center;
-      font-size:15px; font-weight:700; color:white;
+    // Blue solid dot
+    const dot = document.createElement("div");
+    dot.style.cssText = `
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      width:12px; height:12px;
+      border-radius:50%;
+      background:#2563EB;
+      box-shadow:0 2px 6px rgba(37,99,235,0.6);
+      pointer-events:none;
     `;
-
-    if (currentUser?.avatar_url) {
-      const img = document.createElement("img");
-      img.src = currentUser.avatar_url;
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;";
-      img.onerror = () => { img.remove(); circle.textContent = getInitials(currentUser?.full_name); };
-      circle.appendChild(img);
-    } else {
-      circle.textContent = getInitials(currentUser?.full_name);
-    }
-    wrapper.appendChild(circle);
+    wrapper.appendChild(dot);
 
     selfMarkerRef.current = new window.mapboxgl.Marker({ element: wrapper, anchor: "center" })
       .setLngLat([lng, lat])
@@ -488,9 +522,9 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   return (
     <div style={{ height: "100%", width: "100%", position: "relative", overflow: "hidden" }}>
       <style>{`
-        @keyframes selfPulse {
-          0%,100%{transform:scale(1);opacity:0.55;}
-          50%{transform:scale(1.4);opacity:0.15;}
+        @keyframes blueDotPulse {
+          0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}
+          50%{transform:translate(-50%,-50%) scale(1.6);opacity:0.15;}
         }
       `}</style>
 
@@ -511,41 +545,59 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Street Creator markers */}
       {mapReady && <CreatorMapMarkers map={mapInst.current} mapReady={mapReady} currentUserEmail={currentUser?.email} />}
 
-      {/* Category carousel */}
-      {mapReady && <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />}
-
-      {/* Radius + online badge row */}
+      {/* Search bar */}
       {mapReady && (
-        <div className="absolute top-16 left-0 right-0 z-20 flex items-center justify-between px-3 pointer-events-none">
-          {/* Nearby People toggle */}
-          <button
-            onClick={() => setShowNearbyModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
-            style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#0F172A" }}
-          >
-            <Users className="w-3.5 h-3.5" style={{ color:"#16A34A" }} />
-            <span style={{ color:"#16A34A" }}>
-              {mapPins.length > 0
-                ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
-                : "Nearby People"}
-            </span>
-          </button>
+        <div className="absolute z-20" style={{ top: 16, left: onBack ? 90 : 12, right: 12 }}>
+          <div className="relative">
+            <div
+              className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.97)",
+                backdropFilter: "blur(16px)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                border: "1px solid rgba(0,0,0,0.06)",
+              }}
+            >
+              <Search className="w-4 h-4 shrink-0" style={{ color: "#94A3B8" }} />
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={e => handleSearchInput(e.target.value)}
+                onFocus={() => setShowSearch(true)}
+                placeholder="Search places, cafes, parks…"
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: "#0F172A", border: "none", minHeight: "unset", boxShadow: "none", fontSize: 14, padding: 0 }}
+              />
+              {searchLoading && <Loader2 className="w-4 h-4 animate-spin shrink-0" style={{ color: "#94A3B8" }} />}
+              {searchQuery && !searchLoading && (
+                <button onClick={() => { setSearchQuery(""); setSearchResults([]); setShowSearch(false); if (searchPinRef.current) { searchPinRef.current.remove(); searchPinRef.current = null; } }}
+                  style={{ padding: 2 }}>
+                  <X className="w-4 h-4" style={{ color: "#94A3B8" }} />
+                </button>
+              )}
+            </div>
 
-          {/* Radius picker */}
-          <div className="relative pointer-events-auto">
-            <button onClick={() => setShowRadiusPanel(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", border:"1px solid rgba(0,0,0,0.06)", color:"#0F172A" }}>
-              <SlidersHorizontal className="w-3.5 h-3.5" />{radius}km
-            </button>
-            {showRadiusPanel && (
-              <div className="absolute top-full right-0 mt-1.5 rounded-2xl overflow-hidden py-1"
-                style={{ backgroundColor:"rgba(255,255,255,0.98)", backdropFilter:"blur(20px)", boxShadow:"0 8px 32px rgba(0,0,0,0.18)", minWidth:100 }}>
-                {RADIUS_OPTIONS.map(r => (
-                  <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
-                    className="w-full px-4 py-2.5 text-left text-xs font-bold"
-                    style={{ backgroundColor: radius===r?"#EEF2FF":"transparent", color: radius===r?"#4F46E5":"#0F172A" }}>
-                    {r} km
+            {/* Search results dropdown */}
+            {showSearch && searchResults.length > 0 && (
+              <div
+                className="absolute left-0 right-0 mt-2 rounded-2xl overflow-hidden"
+                style={{ backgroundColor: "rgba(255,255,255,0.99)", backdropFilter: "blur(20px)", boxShadow: "0 12px 40px rgba(0,0,0,0.18)", border: "1px solid rgba(0,0,0,0.06)", zIndex: 50 }}
+              >
+                {searchResults.map((feat, i) => (
+                  <button
+                    key={feat.id || i}
+                    onClick={() => handleSelectResult(feat)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                    style={{ borderBottom: i < searchResults.length - 1 ? "1px solid #F1F5F9" : "none", backgroundColor: "transparent" }}
+                  >
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "#EEF2FF" }}>
+                      <MapPin className="w-4 h-4" style={{ color: "#4F46E5" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: "#0F172A" }}>{feat.text || feat.place_name?.split(",")[0]}</p>
+                      <p className="text-xs truncate" style={{ color: "#94A3B8" }}>{feat.place_name}</p>
+                    </div>
+                    <Navigation className="w-4 h-4 shrink-0" style={{ color: "#CBD5E1" }} />
                   </button>
                 ))}
               </div>
@@ -553,6 +605,17 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
           </div>
         </div>
       )}
+
+      {/* Category carousel — sits below the search bar */}
+      {mapReady && (
+        <div className="absolute z-20" style={{ top: 68, left: 0, right: 0 }}>
+          <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />
+        </div>
+      )}
+
+      {/* Radius + online badge row */}
+      {mapReady && (
+        <div className="absolute z-20 flex items-center justify-between px-3 pointer-events-none" style={{ top: 120, left: 0, right: 0 }}>
 
       {/* Privacy panel */}
       {mapReady && currentUser && (

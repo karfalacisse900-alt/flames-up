@@ -54,7 +54,7 @@ export default function MapCategoryCarousel({ active, onChange }) {
   const allCats = showMore ? [...MAP_CATEGORIES.slice(0, -1), ...MORE_CATEGORIES] : MAP_CATEGORIES;
 
   return (
-    <div className="absolute top-4 left-0 right-0 z-20 px-3" style={{ pointerEvents: "none" }}>
+    <div className="px-3" style={{ pointerEvents: "none" }}>
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ pointerEvents: "auto" }}>
         {allCats.map(cat => {
           const isActive = active.includes(cat.key);
