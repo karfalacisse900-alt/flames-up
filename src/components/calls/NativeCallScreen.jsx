@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PhoneOff } from "lucide-react";
-import { useRealtimeKitClient } from "@cloudflare/realtimekit/react";
+import { useRealtimeKitClient } from "@cloudflare/realtimekit-react";
 import { RtkMeeting } from "@cloudflare/realtimekit-react-ui";
 import { base44 } from "@/api/base44Client";
 
