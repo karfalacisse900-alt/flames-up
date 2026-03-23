@@ -5,43 +5,34 @@ const REALTIME_BASE = "https://api.realtime.cloudflare.com/v2";
 function getAuthHeader() {
   const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
   const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
-  console.log("ORG_ID present:", !!orgId, "| ORG_ID length:", orgId?.length);
-  console.log("API_KEY present:", !!apiKey, "| API_KEY starts with Basic:", apiKey?.startsWith("Basic "));
-  if (apiKey && apiKey.startsWith("Basic ")) return apiKey;
-  if (orgId && apiKey) return `Basic ${btoa(`${orgId}:${apiKey}`)}`;
-  return `Bearer ${apiKey}`;
+  // Org ID might be stored without dashes — normalize to UUID format if 32 chars
+  let oid = orgId || "";
+  if (oid.length === 32 && !oid.includes("-")) {
+    oid = `${oid.slice(0,8)}-${oid.slice(8,12)}-${oid.slice(12,16)}-${oid.slice(16,20)}-${oid.slice(20)}`;
+  }
+  return `Basic ${btoa(`${oid}:${apiKey || ""}`)}`;
 }
 
 async function createMeeting(title) {
   const res = await fetch(`${REALTIME_BASE}/meetings`, {
     method: "POST",
-    headers: {
-      "Authorization": getAuthHeader(),
-      "Content-Type": "application/json",
-    },
+    headers: { "Authorization": getAuthHeader(), "Content-Type": "application/json" },
     body: JSON.stringify({ title }),
   });
   const data = await res.json();
-  console.log("Create meeting response:", JSON.stringify(data));
   if (!data.success) throw new Error(`Failed to create meeting: ${JSON.stringify(data)}`);
   return data.data.id;
 }
 
 async function addParticipant(meetingId, name, presetName) {
+  const body = { name, custom_participant_id: name };
+  if (presetName) body.preset_name = presetName;
   const res = await fetch(`${REALTIME_BASE}/meetings/${meetingId}/participants`, {
     method: "POST",
-    headers: {
-      "Authorization": getAuthHeader(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name,
-      preset_name: presetName,
-      custom_participant_id: name,
-    }),
+    headers: { "Authorization": getAuthHeader(), "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
   const data = await res.json();
-  console.log("Add participant response:", JSON.stringify(data));
   if (!data.success) throw new Error(`Failed to add participant: ${JSON.stringify(data)}`);
   return data.data.token;
 }
@@ -49,10 +40,7 @@ async function addParticipant(meetingId, name, presetName) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // Skip auth check for testing
-    let user;
-    try { user = await base44.auth.me(); } catch {}
-
+    const user = await base44.auth.me();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
     const { callerName, calleeName, sessionId, presetName } = await req.json();
@@ -64,21 +52,7 @@ Deno.serve(async (req) => {
     ]);
 
     return Response.json({ meetingId, callerToken, calleeToken });
-
-    const { callerName, calleeName, sessionId } = await req.json();
-
-    // Create a meeting
-    const meetingId = await createMeeting(`call-${sessionId}`);
-
-    // Add both participants
-    const [callerToken, calleeToken] = await Promise.all([
-      addParticipant(meetingId, callerName || "Caller"),
-      addParticipant(meetingId, calleeName || "Callee"),
-    ]);
-
-    return Response.json({ meetingId, callerToken, calleeToken });
   } catch (error) {
-    console.error("realtimeCall error:", error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
