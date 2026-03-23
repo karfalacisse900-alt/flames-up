@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { PhoneOff } from "lucide-react";
-import { useDyteClient, DyteProvider } from "@cloudflare/realtimekit-react";
-import { DyteMeeting } from "@cloudflare/realtimekit-react-ui";
+import { useRealtimeKitClient } from "@cloudflare/realtimekit/react";
+import { RtkMeeting } from "@cloudflare/realtimekit-react-ui";
 import { base44 } from "@/api/base44Client";
 
 export default function NativeCallScreen({ session, currentUser, onEnd }) {
-  const [meeting, initMeeting] = useDyteClient();
+  const [meeting, initMeeting] = useRealtimeKitClient();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
 
@@ -93,16 +93,14 @@ export default function NativeCallScreen({ session, currentUser, onEnd }) {
   }
 
   return (
-    <DyteProvider value={meeting}>
-      <div
-        className="fixed inset-0 z-[200]"
-        style={{
-          paddingTop: "env(safe-area-inset-top, 0px)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
-      >
-        <DyteMeeting meeting={meeting} mode="fill" />
-      </div>
-    </DyteProvider>
+    <div
+      className="fixed inset-0 z-[200]"
+      style={{
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
+      <RtkMeeting meeting={meeting} />
+    </div>
   );
 }
