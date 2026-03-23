@@ -616,6 +616,40 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       {/* Radius + online badge row */}
       {mapReady && (
         <div className="absolute z-20 flex items-center justify-between px-3 pointer-events-none" style={{ top: 120, left: 0, right: 0 }}>
+          <button
+            onClick={() => setShowNearbyModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
+            style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", color:"#0F172A" }}
+          >
+            <Users className="w-3.5 h-3.5" style={{ color:"#16A34A" }} />
+            <span style={{ color:"#16A34A" }}>
+              {mapPins.length > 0
+                ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}`
+                : "Nearby People"}
+            </span>
+          </button>
+
+          <div className="relative pointer-events-auto">
+            <button onClick={() => setShowRadiusPanel(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ backgroundColor:"rgba(255,255,255,0.95)", backdropFilter:"blur(12px)", boxShadow:"0 2px 12px rgba(0,0,0,0.12)", border:"1px solid rgba(0,0,0,0.06)", color:"#0F172A" }}>
+              <SlidersHorizontal className="w-3.5 h-3.5" />{radius}km
+            </button>
+            {showRadiusPanel && (
+              <div className="absolute top-full right-0 mt-1.5 rounded-2xl overflow-hidden py-1"
+                style={{ backgroundColor:"rgba(255,255,255,0.98)", backdropFilter:"blur(20px)", boxShadow:"0 8px 32px rgba(0,0,0,0.18)", minWidth:100 }}>
+                {RADIUS_OPTIONS.map(r => (
+                  <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
+                    className="w-full px-4 py-2.5 text-left text-xs font-bold"
+                    style={{ backgroundColor: radius===r?"#EEF2FF":"transparent", color: radius===r?"#4F46E5":"#0F172A" }}>
+                    {r} km
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Privacy panel */}
       {mapReady && currentUser && (
@@ -635,7 +669,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         </div>
       )}
 
-      {/* ── Location Quick Detail Bottom Sheet ── */}
+      {/* Location Quick Detail Bottom Sheet */}
       {selectedPlace && !showPlaceHub && (
         <LocationQuickCard
           place={selectedPlace}
@@ -672,7 +706,6 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
                 zoom: 16,
                 duration: 800,
               });
-              // Show popup after fly
               setTimeout(() => {
                 if (!mapInst.current) return;
                 const pt = mapInst.current.project([presence.location_lng, presence.location_lat]);
@@ -684,7 +717,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
         />
       )}
 
-      {/* Full PlaceHub modal — Posts, Photos, Events, Tips */}
+      {/* Full PlaceHub modal */}
       {showPlaceHub && selectedPlace && (
         <PlaceHub
           locationName={selectedPlace.name}
