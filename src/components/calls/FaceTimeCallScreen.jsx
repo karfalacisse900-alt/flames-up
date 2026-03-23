@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Volume2 } from "lucide-react";
-import { DyteGrid, DyteSelfView, DyteSimpleGrid } from "@cloudflare/realtimekit-react-ui";
+import { RtkUiProvider, RtkSimpleGrid, RtkSelfView } from "@cloudflare/realtimekit-react-ui";
 import { base44 } from "@/api/base44Client";
 
 export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
@@ -87,10 +87,9 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
       <div className="absolute inset-0 overflow-hidden">
         {remoteJoined && !isAudioCall ? (
           // DyteSimpleGrid renders all remote participants' video automatically
-          <DyteSimpleGrid
-            meeting={meeting}
-            style={{ width: "100%", height: "100%" }}
-          />
+          <RtkUiProvider meeting={meeting}>
+            <RtkSimpleGrid style={{ width: "100%", height: "100%" }} />
+          </RtkUiProvider>
         ) : (
           // Waiting screen
           <div
@@ -133,10 +132,9 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
             border: "2px solid rgba(255,255,255,0.2)"
           }}
         >
-          <DyteSelfView
-            meeting={meeting}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          <RtkUiProvider meeting={meeting}>
+            <RtkSelfView style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </RtkUiProvider>
         </div>
       )}
 
