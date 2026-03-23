@@ -78,7 +78,9 @@
     "vaul": "^1.1.2",
     "zod": "^3.24.2",
     "@babel/core": "^7.25.0",
-    "mapbox-gl": "^3.1.0"
+    "mapbox-gl": "^3.1.0",
+    "@cloudflare/realtimekit-react": "latest",
+    "@cloudflare/realtimekit-react-ui": "latest"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
