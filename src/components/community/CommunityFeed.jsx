@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -15,6 +15,42 @@ import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { motion, AnimatePresence } from "framer-motion";
 
 const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "Sydney", "Toronto", "Dubai", "Berlin", "Mumbai", "São Paulo", "Seoul", "Amsterdam", "Barcelona", "Singapore"];
+
+// Stable memoized wrapper — prevents re-render when other posts update
+const PostItem = memo(function PostItem({ post, user, expandedPost, onToggle, onUpvote, debate }) {
+  if (post.type === "debate" || post.type === "question") {
+    return (
+      <DebateCard
+        post={post}
+        debate={debate}
+        user={user}
+        onUpvote={onUpvote}
+        isExpanded={expandedPost === post.id}
+        onToggle={onToggle}
+      />
+    );
+  }
+  return (
+    <CommunityPostCard
+      post={post}
+      user={user}
+      onUpvote={onUpvote}
+      isExpanded={expandedPost === post.id}
+      onToggle={onToggle}
+      onLocationClick={() => {}}
+      onTap={() => {}}
+    />
+  );
+}, (prev, next) => {
+  // Only re-render if meaningful data changed
+  return (
+    prev.post.id === next.post.id &&
+    prev.post.updated_date === next.post.updated_date &&
+    prev.post.upvotes === next.post.upvotes &&
+    prev.post.comment_count === next.post.comment_count &&
+    prev.expandedPost === next.expandedPost
+  );
+});
 
 
 
@@ -372,7 +408,10 @@ export default function CommunityFeed({ user }) {
 
   const followedEmails = useMemo(() => follows.map(f => f.following_email), [follows]);
 
-  // Stable post order — sorted once on load, never re-sorted on likes
+  // Stable post ID order — only recomputes when the set of IDs changes (new/deleted post)
+  // Does NOT recompute on like/comment count updates
+  const postIdKey = useMemo(() => posts.map(p => p.id).sort().join(","), [posts]);
+
   const stablePostIds = useMemo(() => {
     if (posts.length === 0) return [];
     const list = posts.filter(p => p.type !== "review");
@@ -380,7 +419,7 @@ export default function CommunityFeed({ user }) {
       ? rankFeedForUser(list, user.email, debates, followedEmails)
       : [...list].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     return ranked.map(p => p.id);
-  }, [posts.map(p => p.id).sort().join(","), user?.email, debates.length, followedEmails.join(",")]);
+  }, [postIdKey, user?.email, debates.length, followedEmails.join(",")]);
 
   const uniqueCities = useMemo(() => {
     return [...new Set(posts.map(p => p.location_city).filter(Boolean))].sort();
@@ -394,13 +433,14 @@ export default function CommunityFeed({ user }) {
     return [...fromPosts, ...fromPopular].slice(0, 8);
   }, [cityInput, uniqueCities]);
 
+  // postMap updates on every post data change (likes etc) but doesn't trigger re-order
+  const postMap = useMemo(() => new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p])), [posts]);
+
   const filteredPosts = useMemo(() => {
-    const postMap = new Map(posts.filter(p => p.type !== "review").map(p => [p.id, p]));
     let base = stablePostIds.map(id => postMap.get(id)).filter(Boolean);
 
     if (activeFilter === "nearby") {
       if (!userCoords) return [];
-      // Dynamic radius: 25km in dense cities, up to 100km in rural areas
       const postsWithDistance = base
         .filter(p => p.location_lat && p.location_lng)
         .map(p => {
@@ -411,8 +451,6 @@ export default function CommunityFeed({ user }) {
           return { ...p, distance: km };
         })
         .sort((a, b) => a.distance - b.distance);
-      
-      // Adaptive radius: if we have posts within 10km, limit to 25km; else expand to 100km
       const hasNearby = postsWithDistance.some(p => p.distance <= 10);
       const maxRadius = hasNearby ? 25 : 100;
       base = postsWithDistance.filter(p => p.distance <= maxRadius);
@@ -420,42 +458,27 @@ export default function CommunityFeed({ user }) {
       base = base.filter(p => p.location_city?.toLowerCase() === activeFilter.toLowerCase());
     }
 
-    // Return in stable order (DO NOT re-sort after likes)
     return base;
-  }, [stablePostIds, posts, activeFilter, userCoords]);
+  }, [stablePostIds, postMap, activeFilter, userCoords]);
 
   const getDebateForPost = (postId) => debates.find(d => d.post_id === postId);
 
   const renderPostCard = useCallback((post) => {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
-    const card = post.type === "debate" || post.type === "question" ? (
-      <DebateCard 
-        post={post} 
-        debate={debate} 
-        user={user}
-        onUpvote={() => user && upvoteMut.mutate({ post })}
-        isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-      />
-    ) : (
-      <CommunityPostCard 
-        post={post} 
-        user={user}
-        onUpvote={() => user && upvoteMut.mutate({ post })}
-        isExpanded={expandedPost === post.id}
-        onToggle={() => setExpandedPost(expandedPost === post.id ? null : post.id)}
-        onLocationClick={() => {}}
-        onTap={() => {}}
-      />
-    );
-
     return (
-      <div key={post.id}>
-        {card}
+      <div key={post.id} style={{ minHeight: 80 }}>
+        <PostItem
+          post={post}
+          user={user}
+          expandedPost={expandedPost}
+          onToggle={() => setExpandedPost(prev => prev === post.id ? null : post.id)}
+          onUpvote={() => user && upvoteMut.mutate({ post })}
+          debate={debate}
+        />
       </div>
     );
-  }, [expandedPost, user, debates, upvoteMut]);
+  }, [expandedPost, user?.email, debates]);
 
   if (isLoading) {
     return (

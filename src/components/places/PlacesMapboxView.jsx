@@ -262,8 +262,19 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
       ));
     };
     fetch();
-    presenceSubRef.current = base44.entities.LocationPresence.subscribe(fetch);
-    return () => { if (presenceSubRef.current) presenceSubRef.current(); };
+    // Throttle real-time subscription — max one map re-render per 5s
+    let throttleTimer = null;
+    presenceSubRef.current = base44.entities.LocationPresence.subscribe(() => {
+      if (throttleTimer) return;
+      throttleTimer = setTimeout(() => {
+        throttleTimer = null;
+        fetch();
+      }, 5000);
+    });
+    return () => {
+      if (presenceSubRef.current) presenceSubRef.current();
+      if (throttleTimer) clearTimeout(throttleTimer);
+    };
   }, []);
 
   // ── 6. Self avatar marker ──────────────────────────────────────────────
