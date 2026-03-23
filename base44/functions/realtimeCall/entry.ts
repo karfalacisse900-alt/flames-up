@@ -5,13 +5,14 @@ const REALTIME_BASE = "https://api.realtime.cloudflare.com/v2";
 function getAuthHeader() {
   const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
   const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
+  // If API key is already a full Authorization header value (e.g. copied from dashboard)
+  if (apiKey && apiKey.startsWith("Basic ")) return apiKey;
   // Org ID might be stored without dashes — normalize to UUID format if 32 chars
   let oid = orgId || "";
   if (oid.length === 32 && !oid.includes("-")) {
     oid = `${oid.slice(0,8)}-${oid.slice(8,12)}-${oid.slice(12,16)}-${oid.slice(16,20)}-${oid.slice(20)}`;
   }
   return `Basic ${btoa(`${oid}:${apiKey || ""}`)}`;
-}
 
 async function createMeeting(title) {
   const res = await fetch(`${REALTIME_BASE}/meetings`, {
