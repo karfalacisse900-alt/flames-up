@@ -90,6 +90,41 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }
   const searchPinRef       = useRef(null);
   const searchInputRef     = useRef(null);
 
+  const handleSearchInput = (val) => {
+    setSearchQuery(val);
+    setShowSearch(true);
+    clearTimeout(searchDebounceRef.current);
+    if (!val.trim()) { setSearchResults([]); return; }
+    searchDebounceRef.current = setTimeout(async () => {
+      if (!token) return;
+      setSearchLoading(true);
+      try {
+        const center = userLoc ? `&proximity=${userLoc[0]},${userLoc[1]}` : "";
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(val)}.json?access_token=${token}&types=poi,address,place&limit=5${center}`
+        );
+        const data = await res.json();
+        setSearchResults(data.features || []);
+      } catch {}
+      setSearchLoading(false);
+    }, 350);
+  };
+
+  const handleSelectResult = (feat) => {
+    setShowSearch(false);
+    setSearchQuery(feat.text || feat.place_name?.split(",")[0] || "");
+    setSearchResults([]);
+    const [lng, lat] = feat.center || [];
+    if (!lng || !lat || !mapInst.current || !window.mapboxgl) return;
+    mapInst.current.flyTo({ center: [lng, lat], zoom: 15, duration: 900 });
+    if (searchPinRef.current) { searchPinRef.current.remove(); searchPinRef.current = null; }
+    const el = document.createElement("div");
+    el.style.cssText = "width:28px;height:36px;background:#4F46E5;border-radius:50% 50% 50% 0;transform:rotate(-45deg);";
+    searchPinRef.current = new window.mapboxgl.Marker({ element: el, anchor: "bottom" })
+      .setLngLat([lng, lat])
+      .addTo(mapInst.current);
+  };
+
   // Load follows for friend prioritization
   useEffect(() => {
     if (!currentUser?.email) return;
