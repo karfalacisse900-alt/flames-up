@@ -1,55 +1,88 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Maximize2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { PhoneOff } from "lucide-react";
+import { useDyteClient, DyteProvider } from "@cloudflare/realtimekit-react";
+import { DyteMeeting } from "@cloudflare/realtimekit-react-ui";
+import { base44 } from "@/api/base44Client";
 
 export default function VideoCallModal({ roomName, displayName, onClose }) {
-  const [muted, setMuted] = useState(false);
-  const [videoOff, setVideoOff] = useState(false);
-  const iframeRef = useRef(null);
-
-  const jitsiRoom = `flamesup-${roomName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`;
-  const jitsiUrl = `https://meet.jit.si/${jitsiRoom}#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.enableWelcomePage=false&interfaceConfig.SHOW_JITSI_WATERMARK=false&userInfo.displayName="${encodeURIComponent(displayName)}"`;  
+  const [meeting, initMeeting] = useDyteClient();
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const handleMessage = (e) => {
-      if (e.data?.action === "hangup") onClose();
+    const join = async () => {
+      const res = await base44.functions.invoke("realtimeCall", {
+        action: "join_group_call",
+        room_name: roomName,
+        participant_name: displayName,
+      });
+      const { token } = res.data;
+      if (!token) throw new Error("No token returned from server");
+      await initMeeting({
+        authToken: token,
+        defaults: { audio: true, video: true },
+      });
+      setReady(true);
     };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [onClose]);
+    join().catch((e) => setError(e?.message || "Failed to start call"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return (
-    <div className="fixed inset-0 z-[100] flex flex-col" style={{ backgroundColor: "#1a1a2e" }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 shrink-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#25D366" }} />
-          <span className="text-white font-semibold text-sm">Call in progress</span>
-        </div>
-        <button onClick={() => {
-          if (window.confirm("Leave the call?")) onClose();
-        }} className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "#E53935" }}>
-          <PhoneOff className="w-4 h-4 text-white" />
+  // Detect meeting end
+  useEffect(() => {
+    if (!meeting || !ready) return;
+    meeting.self.on("roomLeft", onClose);
+    return () => meeting.self.off?.("roomLeft", onClose);
+  }, [meeting, ready, onClose]);
+
+  if (error) {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4"
+        style={{ background: "#0a0a0f" }}
+      >
+        <PhoneOff className="w-14 h-14" style={{ color: "rgba(255,255,255,0.3)" }} />
+        <p className="text-white font-semibold text-lg">Call failed</p>
+        <p className="text-sm text-center px-8" style={{ color: "rgba(255,255,255,0.4)" }}>
+          {error}
+        </p>
+        <button
+          onClick={onClose}
+          className="px-6 py-3 rounded-2xl text-white font-bold"
+          style={{ backgroundColor: "#E53935" }}
+        >
+          Close
         </button>
       </div>
+    );
+  }
 
-      {/* Jitsi iframe */}
-      <div className="flex-1 relative">
-        <iframe
-          ref={iframeRef}
-          src={jitsiUrl}
-          allow="camera; microphone; display-capture; autoplay; clipboard-write"
-          className="w-full h-full border-0"
-          title="Video Call"
+  if (!ready || !meeting) {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4"
+        style={{ background: "#0a0a0f" }}
+      >
+        <div
+          className="w-10 h-10 rounded-full border-2 animate-spin"
+          style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "#fff" }}
         />
+        <p style={{ color: "rgba(255,255,255,0.6)" }}>Starting call…</p>
       </div>
+    );
+  }
 
-      {/* Info bar */}
-      <div className="px-4 py-3 shrink-0 text-center"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}>
-        <p className="text-white/60 text-xs">Powered by end-to-end encrypted video · Use call controls inside the video</p>
+  return (
+    <DyteProvider value={meeting}>
+      <div
+        className="fixed inset-0 z-[100]"
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        <DyteMeeting meeting={meeting} mode="fill" />
       </div>
-    </div>
+    </DyteProvider>
   );
 }
