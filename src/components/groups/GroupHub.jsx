@@ -12,17 +12,11 @@ import GroupMembersSheet from "./GroupMembersSheet";
 import CreateEventModal from "./CreateEventModal";
 import GroupModerationPanel from "./GroupModerationPanel";
 import GroupEventCard from "./GroupEventCard";
-import GroupGamesTab from "./GroupGamesTab";
 import GroupReactionTab from "./GroupReactionTab";
 import GroupMembersTab from "./GroupMembersTab";
-import VerifiedBadge from "./safety/VerifiedBadge";
-import HostVerificationModal from "./safety/HostVerificationModal";
-import SafetyToolsMenu from "./safety/SafetyToolsMenu";
-import EventSafetySettings from "./safety/EventSafetySettings";
-import GroupPreviewVideo from "./GroupPreviewVideo";
 import EditGroupModal from "./EditGroupModal";
 import PostStatusModal from "@/components/home/PostStatusModal";
-import { AnimatePresence as AnimatePresenceLocal } from "framer-motion";
+
 
 const CATEGORY_COLORS = {
   general: "linear-gradient(135deg, #64748b, #475569)",
