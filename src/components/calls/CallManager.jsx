@@ -103,24 +103,47 @@ export default function CallManager({ user }) {
         callType = callType || call_type || "video";
         if (!user?.email) return;
         const roomId = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
+        const callerName = user.full_name || user.email?.split("@")[0];
+        const calleeDisplayName = calleeName || calleeEmail?.split("@")[0];
+
+        // Create RealtimeKit meeting + participant tokens
+        let realtimeMeetingId, callerToken, calleeToken;
+        try {
+          const res = await base44.functions.invoke("realtimeCall", {
+            action: "create_call",
+            callerName,
+            calleeName: calleeDisplayName,
+            sessionId: roomId,
+          });
+          realtimeMeetingId = res.data.meetingId;
+          callerToken = res.data.callerToken;
+          calleeToken = res.data.calleeToken;
+        } catch (e) {
+          console.error("Failed to create RealtimeKit meeting:", e);
+          return;
+        }
+
         const session = await base44.entities.CallSession.create({
           room_id: roomId,
           caller_email: user.email,
-          caller_name: user.full_name || user.email?.split("@")[0],
+          caller_name: callerName,
           caller_avatar: user.avatar_url || "",
           callee_email: calleeEmail,
-          callee_name: calleeName || calleeEmail?.split("@")[0],
+          callee_name: calleeDisplayName,
           participant_emails: [user.email, calleeEmail],
           status: "ringing",
           call_type: callType,
+          realtime_meeting_id: realtimeMeetingId,
+          caller_token: callerToken,
+          callee_token: calleeToken,
         });
         // Send notification to callee
         await base44.entities.Notification.create({
           recipient_email: calleeEmail,
           actor_email: user.email,
-          actor_name: user.full_name || user.email?.split("@")[0] || "Someone",
+          actor_name: callerName,
           type: "creator_live",
-          post_text: `📞 Incoming ${callType} call from ${user.full_name || user.email?.split("@")[0]}`,
+          post_text: `📞 Incoming ${callType} call from ${callerName}`,
           ref_id: session.id,
           is_read: false,
         }).catch(() => {});
