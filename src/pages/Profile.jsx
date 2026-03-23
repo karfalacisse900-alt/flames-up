@@ -49,7 +49,7 @@ export default function Profile() {
   const { data: coinBalance = 0 } = useQuery({
     queryKey: ["coinBalance", user?.email],
     queryFn: () => getBalance(user.email),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   useEffect(() => {
@@ -67,37 +67,37 @@ export default function Profile() {
   const { data: myPosts = [] } = useQuery({
     queryKey: ["myPosts", user?.email],
     queryFn: () => base44.entities.Post.filter({ author_email: user.email }, "-created_date"),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   const { data: myArt = [] } = useQuery({
     queryKey: ["myArt", user?.email],
     queryFn: () => base44.entities.ArtPiece.filter({ creator_email: user.email }, "-created_date"),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   const { data: myReviews = [] } = useQuery({
     queryKey: ["myReviews", user?.email],
     queryFn: () => base44.entities.DiscoverReview.filter({ user_email: user.email }, "-created_date"),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   const { data: likedPosts = [] } = useQuery({
     queryKey: ["likedPosts", user?.email],
-    queryFn: () => base44.entities.Post.list("-created_date", 200).then(posts => posts.filter(p => p.liked_by?.includes(user.email))),
-    enabled: !!user?.email,
+    queryFn: () => base44.entities.Post.list("-created_date", 200).then((posts) => posts.filter((p) => p.liked_by?.includes(user.email))),
+    enabled: !!user?.email
   });
 
   const { data: followers = [] } = useQuery({
     queryKey: ["followers", user?.email],
     queryFn: () => base44.entities.Follow.filter({ following_email: user.email }),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   const { data: following = [] } = useQuery({
     queryKey: ["following", user?.email],
     queryFn: () => base44.entities.Follow.filter({ follower_email: user.email }),
-    enabled: !!user?.email,
+    enabled: !!user?.email
   });
 
   const THEMES = {
@@ -105,7 +105,7 @@ export default function Profile() {
     forest: { label: "Forest", bg: "#1a2e1e", accent: "#4ade80", banner: "linear-gradient(135deg, #1a3a20, #2d5a35)" },
     ocean: { label: "Ocean", bg: "#0f1e2e", accent: "#38bdf8", banner: "linear-gradient(135deg, #0f2a3f, #1e4060)" },
     sunset: { label: "Sunset", bg: "#2e1a0e", accent: "#fb923c", banner: "linear-gradient(135deg, #3d1f0a, #5a2e10)" },
-    lavender: { label: "Lavender", bg: "#1e1a2e", accent: "#c084fc", banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" },
+    lavender: { label: "Lavender", bg: "#1e1a2e", accent: "#c084fc", banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" }
   };
 
   const activeTheme = THEMES[user?.profile_theme || "default"] || THEMES.default;
@@ -115,7 +115,7 @@ export default function Profile() {
     // Validate username uniqueness if changed
     if (usernameToSave && usernameToSave !== user?.username) {
       const users = await base44.entities.User.list();
-      const taken = users.some(u => u.username === usernameToSave && u.email !== user.email);
+      const taken = users.some((u) => u.username === usernameToSave && u.email !== user.email);
       if (taken) {
         alert("That username is already taken. Please choose another.");
         return;
@@ -140,7 +140,7 @@ export default function Profile() {
   const computedBadges = (() => {
     const b = new Set(user?.badges || []);
     if (myPosts.length >= 1) b.add("first_post");
-    if (myPosts.some(p => (p.like_count || 0) >= 10)) b.add("popular_post");
+    if (myPosts.some((p) => (p.like_count || 0) >= 10)) b.add("popular_post");
     if (myArt.length >= 1) b.add("art_creator");
     return Array.from(b);
   })();
@@ -172,15 +172,15 @@ export default function Profile() {
           <div className="h-12 rounded-2xl skeleton" />
         </div>
         <div className="grid grid-cols-2 gap-3 mt-4">
-          {[0,1,2,3].map(i => <div key={i} className="aspect-square rounded-[20px] skeleton" />)}
+          {[0, 1, 2, 3].map((i) => <div key={i} className="aspect-square rounded-[20px] skeleton" />)}
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const fadeUp = {
     hidden: { opacity: 0, y: 18 },
-    show: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.3, ease: [0.22, 1, 0.36, 1] } }),
+    show: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.3, ease: [0.22, 1, 0.36, 1] } })
   };
 
   return (
@@ -197,40 +197,40 @@ export default function Profile() {
             <Link to={createPageUrl("Messages")} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
               <MessageSquare className="w-4 h-4" />
             </Link>
-            <button onClick={() => setShowEdit(true)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
-              <Edit2 className="w-4 h-4" />
-            </button>
+            
+
+            
             <div className="relative">
-              <button onClick={() => setShowMore(v => !v)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
+              <button onClick={() => setShowMore((v) => !v)} className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.9)", border: "1px solid var(--border-light)", color: "var(--text-primary)", boxShadow: "var(--elevation-1)" }}>
                 <MoreHorizontal className="w-4 h-4" />
               </button>
-              {showMore && (
-                <>
+              {showMore &&
+              <>
                   <div className="fixed inset-0 z-40" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} onClick={() => setShowMore(false)} />
                   <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl shadow-xl overflow-hidden"
-                    style={{ backgroundColor: "#FFFFFF", border: "1px solid var(--border-light)" }}>
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid var(--border-light)" }}>
                     {[
-                       { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
-                       { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
-                       { to: "/CreatorLanding", icon: <Sparkles className="w-4 h-4" />, label: "Creator Hub", color: "#E05C2A" },
-                       ...(user?.role === "admin" ? [
-                         { to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" },
-                         { to: createPageUrl("AdminContentManager"), icon: <BarChart2 className="w-4 h-4" />, label: "Content Manager", color: "#0EA5E9" },
-                       ] : []),
-                     ].map(({ to, icon, label, color }) => (
-                      <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
-                        style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                  { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
+                  { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
+                  { to: "/CreatorLanding", icon: <Sparkles className="w-4 h-4" />, label: "Creator Hub", color: "#E05C2A" },
+                  ...(user?.role === "admin" ? [
+                  { to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" },
+                  { to: createPageUrl("AdminContentManager"), icon: <BarChart2 className="w-4 h-4" />, label: "Content Manager", color: "#0EA5E9" }] :
+                  [])].
+                  map(({ to, icon, label, color }) =>
+                  <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
+                  style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
                         <span style={{ color }}>{icon}</span>
                         {label}
                       </Link>
-                    ))}
+                  )}
                     <Link to="/Settings" onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
-                      style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                  style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
                       <Cog className="w-4 h-4" style={{ color: "var(--text-secondary)" }} /> Settings
                     </Link>
                   </div>
                 </>
-              )}
+              }
             </div>
           </div>
         </div>
@@ -241,12 +241,12 @@ export default function Profile() {
             <div className="flex items-start gap-4 pt-2">
               <div className="relative shrink-0">
                 <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold"
-                  style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    (user.display_name || user.full_name || "U")[0]?.toUpperCase()
-                  )}
+                style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
+                  {user.avatar_url ?
+                  <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" /> :
+
+                  (user.display_name || user.full_name || "U")[0]?.toUpperCase()
+                  }
                 </div>
                 {isOnline && <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full" style={{ backgroundColor: "#c7f036", border: "2px solid white" }} />}
               </div>
@@ -257,26 +257,26 @@ export default function Profile() {
                 </h2>
                 {user.username && <p className="text-sm mt-1 font-semibold" style={{ color: "var(--text-hint)" }}>{user.username}</p>}
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {user.interests?.slice(0, 2).map((item) => (
-                    <span key={item} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                  {user.interests?.slice(0, 2).map((item) =>
+                  <span key={item} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
                       {item}
                     </span>
-                  ))}
-                  {!user.interests?.length && user.is_creator && (
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                  )}
+                  {!user.interests?.length && user.is_creator &&
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
                       Creator
                     </span>
-                  )}
+                  }
                 </div>
               </div>
             </div>
 
-            {(user.bio || user.about_me) && (
-              <div className="mt-4 rounded-[24px] px-4 py-3" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
+            {(user.bio || user.about_me) &&
+            <div className="mt-4 rounded-[24px] px-4 py-3" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
                 {user.bio && <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{user.bio}</p>}
                 {user.about_me && <p className="text-sm mt-1.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.about_me}</p>}
               </div>
-            )}
+            }
 
 
 
@@ -289,31 +289,31 @@ export default function Profile() {
         </div>
 
         {/* Gallery Grid */}
-        {myPosts.length === 0 ? (
-          <p className="text-center text-sm py-8 mt-4" style={{ color: "var(--text-hint)" }}>No posts yet</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 mt-4">
-            {myPosts.map(post => (
-              <div key={post.id} className="relative aspect-square rounded-[20px] overflow-hidden group cursor-pointer"
-                style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+        {myPosts.length === 0 ?
+        <p className="text-center text-sm py-8 mt-4" style={{ color: "var(--text-hint)" }}>No posts yet</p> :
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+            {myPosts.map((post) =>
+          <div key={post.id} className="relative aspect-square rounded-[20px] overflow-hidden group cursor-pointer"
+          style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
                   <p className="text-white text-xs line-clamp-2">{post.text}</p>
                 </div>
                 <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (!window.confirm("Delete this post?")) return;
-                    await base44.entities.Post.delete(post.id);
-                    queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                  style={{ color: "var(--text-hint)" }}>
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!window.confirm("Delete this post?")) return;
+                await base44.entities.Post.delete(post.id);
+                queryClient.invalidateQueries({ queryKey: ["myPosts", user.email] });
+              }}
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              style={{ color: "var(--text-hint)" }}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
 
       {/* Followers dialog */}
@@ -323,10 +323,10 @@ export default function Profile() {
             <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Followers ({followers.length})</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
-            {followers.length === 0 ? (
-              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p>
-            ) : followers.map((f) => (
-              <div key={f.id} className="flex items-center gap-3 justify-between py-2">
+            {followers.length === 0 ?
+            <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>No followers yet</p> :
+            followers.map((f) =>
+            <div key={f.id} className="flex items-center gap-3 justify-between py-2">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
                     {f.follower_name?.[0]?.toUpperCase() || "?"}
@@ -334,15 +334,15 @@ export default function Profile() {
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.follower_name}</p>
                 </div>
                 <button onClick={async () => {
-                  const alreadyFollowing = following.some(x => x.following_email === f.follower_email);
-                  if (alreadyFollowing) {
-                    await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.follower_email }).then(recs => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
-                  }
-                }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: following.some(x => x.following_email === f.follower_email) ? "var(--text-secondary)" : "var(--accent-primary)", borderColor: "var(--border-light)" }}>
-                  {following.some(x => x.following_email === f.follower_email) ? "Following" : "Follow"}
+                const alreadyFollowing = following.some((x) => x.following_email === f.follower_email);
+                if (alreadyFollowing) {
+                  await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.follower_email }).then((recs) => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
+                }
+              }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: following.some((x) => x.following_email === f.follower_email) ? "var(--text-secondary)" : "var(--accent-primary)", borderColor: "var(--border-light)" }}>
+                  {following.some((x) => x.following_email === f.follower_email) ? "Following" : "Follow"}
                 </button>
               </div>
-            ))}
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -354,10 +354,10 @@ export default function Profile() {
             <DialogTitle style={{ fontFamily: "var(--font-serif)" }}>Following ({following.length})</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 overflow-y-auto max-h-[50vh]">
-            {following.length === 0 ? (
-              <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p>
-            ) : following.map((f) => (
-              <div key={f.id} className="flex items-center gap-3 justify-between py-2">
+            {following.length === 0 ?
+            <p className="text-sm text-center py-4" style={{ color: "var(--text-hint)" }}>Not following anyone yet</p> :
+            following.map((f) =>
+            <div key={f.id} className="flex items-center gap-3 justify-between py-2">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)" }}>
                     {f.following_name?.[0]?.toUpperCase() || "?"}
@@ -365,12 +365,12 @@ export default function Profile() {
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{f.following_name}</p>
                 </div>
                 <button onClick={async () => {
-                  await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.following_email }).then(recs => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
-                }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
+                await base44.entities.Follow.filter({ follower_email: user.email, following_email: f.following_email }).then((recs) => recs[0]?.id && base44.entities.Follow.delete(recs[0].id));
+              }} className="text-xs px-2.5 py-1 rounded-full border" style={{ color: "var(--text-secondary)", borderColor: "var(--border-light)" }}>
                   Unfollow
                 </button>
               </div>
-            ))}
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -388,9 +388,9 @@ export default function Profile() {
             <Input
               placeholder="Type DELETE to confirm"
               value={deleteInput}
-              onChange={e => setDeleteInput(e.target.value)}
-              className="border-red-200 rounded-xl"
-            />
+              onChange={(e) => setDeleteInput(e.target.value)}
+              className="border-red-200 rounded-xl" />
+            
             <Button
               onClick={async () => {
                 if (deleteInput !== "DELETE") return;
@@ -402,8 +402,8 @@ export default function Profile() {
                 base44.auth.logout();
               }}
               disabled={deleteInput !== "DELETE"}
-              className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white disabled:opacity-50"
-            >
+              className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white disabled:opacity-50">
+              
               Permanently Delete Account
             </Button>
           </div>
@@ -411,40 +411,40 @@ export default function Profile() {
       </Dialog>
 
       {/* Boost post modal */}
-      {boostPost && (
-        <BoostPostModal
-          post={boostPost}
-          user={user}
-          balance={coinBalance}
-          onClose={() => setBoostPost(null)}
-          onBoosted={() => {
-            queryClient.invalidateQueries({ queryKey: ["myPosts", user?.email] });
-            queryClient.invalidateQueries({ queryKey: ["coinBalance", user?.email] });
-          }}
-        />
-      )}
+      {boostPost &&
+      <BoostPostModal
+        post={boostPost}
+        user={user}
+        balance={coinBalance}
+        onClose={() => setBoostPost(null)}
+        onBoosted={() => {
+          queryClient.invalidateQueries({ queryKey: ["myPosts", user?.email] });
+          queryClient.invalidateQueries({ queryKey: ["coinBalance", user?.email] });
+        }} />
+
+      }
 
       {/* Export data modal */}
       <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
 
       {/* AI Assistant deletion modal */}
-      <AIAssistantDeletion 
-        user={user} 
-        isOpen={showAIDeleteModal} 
-        onClose={() => setShowAIDeleteModal(false)} 
-      />
+      <AIAssistantDeletion
+        user={user}
+        isOpen={showAIDeleteModal}
+        onClose={() => setShowAIDeleteModal(false)} />
+      
 
       {/* Edit profile - New comprehensive editor */}
-      {showEdit && (
-        <ProfileEditor
-          user={user}
-          onClose={() => setShowEdit(false)}
-          onUpdated={() => {
-            base44.auth.me().then(u => setUser(u));
-            queryClient.invalidateQueries();
-          }}
-        />
-      )}
-    </motion.div>
-  );
+      {showEdit &&
+      <ProfileEditor
+        user={user}
+        onClose={() => setShowEdit(false)}
+        onUpdated={() => {
+          base44.auth.me().then((u) => setUser(u));
+          queryClient.invalidateQueries();
+        }} />
+
+      }
+    </motion.div>);
+
 }
