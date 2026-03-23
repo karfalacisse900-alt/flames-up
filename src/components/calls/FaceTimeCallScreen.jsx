@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Volume2 } from "lucide-react";
-import { RtkVideoTile, RtkAudio } from "@cloudflare/realtimekit-react-ui";
+import { RtkVideoTile } from "@cloudflare/realtimekit-react-ui";
 
 export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
   const [participants, setParticipants] = useState([]);
@@ -80,10 +80,7 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {/* Audio for all participants */}
-      {participants.map(p => (
-        <RtkAudio key={p.id} participant={p} />
-      ))}
+
 
       {/* Remote video — full screen */}
       <div className="absolute inset-0">
