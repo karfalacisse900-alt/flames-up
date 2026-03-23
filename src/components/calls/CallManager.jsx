@@ -81,7 +81,10 @@ export default function CallManager({ user }) {
     if (!incomingSession) return;
     clearRingTimer();
     await base44.entities.CallSession.update(incomingSession.id, { status: "active" }).catch(() => {});
-    setActiveSession(incomingSession);
+    // Re-fetch the session so we have the full record including realtime tokens
+    const sessions = await base44.entities.CallSession.filter({ id: incomingSession.id }).catch(() => []);
+    const full = Array.isArray(sessions) ? sessions[0] : sessions;
+    setActiveSession(full || incomingSession);
     setIncomingSession(null);
   }, [incomingSession]);
 
