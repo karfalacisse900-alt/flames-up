@@ -279,8 +279,8 @@ export default function UserProfile() {
             {!isOwnProfile && currentUser && (
               <div className="flex gap-2 mt-4">
                 <button onClick={handleMessage}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white"
-                  style={{ backgroundColor: "var(--accent-primary)" }}>
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm"
+                  style={{ backgroundColor: "var(--accent-primary)", color: "#ffffff" }}>
                   <MessageCircle className="w-4 h-4" />
                   Message
                 </button>

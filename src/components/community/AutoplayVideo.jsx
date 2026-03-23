@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
 import StreamVideo, { isStreamVideo } from "./StreamVideo";
 
-// Session-level mute preference — start unmuted, fall back to muted if browser blocks
-const sessionPrefs = { muted: false };
+// Session-level mute preference — start muted for reliable autoplay, user can unmute
+const sessionPrefs = { muted: true };
 
 // Global: only one video plays at a time
 let activeVideoRef = null;
@@ -16,7 +16,7 @@ export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const [muted, setMuted] = useState(sessionPrefs.muted);
+  const [muted, setMuted] = useState(true); // start muted for autoplay compatibility
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [buffering, setBuffering] = useState(false);
@@ -51,23 +51,19 @@ export default function AutoplayVideo({ src, postId, thumbnail, onDoubleTap }) {
     stopGlobal();
     activeVideoRef = videoRef;
     activeSetPlaying = setPlaying;
-    v.muted = sessionPrefs.muted;
-    setMuted(sessionPrefs.muted);
+    v.muted = true; // always start muted for autoplay
+    setMuted(true);
     v.play().then(() => {
       setPlaying(true);
       setBuffering(false);
+      // After playing starts, try unmuting if session prefers unmuted
+      if (!sessionPrefs.muted) {
+        v.muted = false;
+        setMuted(false);
+      }
     }).catch(() => {
-      // Autoplay blocked — try muted
-      v.muted = true;
-      sessionPrefs.muted = true;
-      setMuted(true);
-      v.play().then(() => {
-        setPlaying(true);
-        setBuffering(false);
-      }).catch(() => {
-        setPlaying(false);
-        setBuffering(false);
-      });
+      setPlaying(false);
+      setBuffering(false);
     });
   }, []);
 

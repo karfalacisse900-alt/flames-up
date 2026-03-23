@@ -45,6 +45,16 @@ export default function ProfileEditor({ user, onClose, onUpdated }) {
     setSaving(true);
     try {
       const usernameToSave = username ? `@${username.replace(/^@/, "")}` : "";
+      // Check uniqueness
+      if (usernameToSave && usernameToSave !== user?.username) {
+        const allUsers = await base44.entities.User.list();
+        const taken = allUsers.some(u => u.username === usernameToSave && u.email !== user.email);
+        if (taken) {
+          alert("That username is already taken. Please choose another.");
+          setSaving(false);
+          return;
+        }
+      }
       await base44.auth.updateMe({
         avatar_url: avatarUrl,
         banner_url: bannerUrl,
