@@ -53,20 +53,17 @@ Deno.serve(async (req) => {
     let user;
     try { user = await base44.auth.me(); } catch {}
 
-    const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
-    const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
-    const encoded = btoa((orgId || "") + ":" + (apiKey || ""));
-    const authHeader = "Basic " + encoded;
-    return Response.json({
-      debug: true,
-      orgId_present: !!orgId,
-      orgId_length: orgId ? orgId.length : 0,
-      orgId_prefix: orgId ? orgId.substring(0, 8) : null,
-      apiKey_present: !!apiKey,
-      apiKey_length: apiKey ? apiKey.length : 0,
-      apiKey_starts_with_basic: apiKey ? apiKey.startsWith("Basic ") : false,
-      auth_prefix: authHeader.substring(0, 30),
-    });
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { callerName, calleeName, sessionId, presetName } = await req.json();
+
+    const meetingId = await createMeeting(`call-${sessionId}`);
+    const [callerToken, calleeToken] = await Promise.all([
+      addParticipant(meetingId, callerName || "Caller", presetName),
+      addParticipant(meetingId, calleeName || "Callee", presetName),
+    ]);
+
+    return Response.json({ meetingId, callerToken, calleeToken });
 
     const { callerName, calleeName, sessionId } = await req.json();
 
