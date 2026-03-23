@@ -5,11 +5,10 @@ const REALTIME_BASE = "https://api.realtime.cloudflare.com/v2";
 function getAuthHeader() {
   const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
   const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
-  // If apiKey is already a full 'Basic ...' header value, use as-is
+  console.log("ORG_ID present:", !!orgId, "| ORG_ID length:", orgId?.length);
+  console.log("API_KEY present:", !!apiKey, "| API_KEY starts with Basic:", apiKey?.startsWith("Basic "));
   if (apiKey && apiKey.startsWith("Basic ")) return apiKey;
-  // If orgId is provided, encode as Basic base64(orgId:apiKey)
   if (orgId && apiKey) return `Basic ${btoa(`${orgId}:${apiKey}`)}`;
-  // Fallback: try Bearer
   return `Bearer ${apiKey}`;
 }
 
