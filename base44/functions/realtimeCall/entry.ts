@@ -55,16 +55,17 @@ Deno.serve(async (req) => {
 
     const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
     const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
-    // Debug: return credential info to diagnose auth issues
+    const encoded = btoa((orgId || "") + ":" + (apiKey || ""));
+    const authHeader = "Basic " + encoded;
     return Response.json({
       debug: true,
       orgId_present: !!orgId,
-      orgId_length: orgId?.length,
-      orgId_prefix: orgId?.substring(0, 8),
+      orgId_length: orgId ? orgId.length : 0,
+      orgId_prefix: orgId ? orgId.substring(0, 8) : null,
       apiKey_present: !!apiKey,
-      apiKey_length: apiKey?.length,
-      apiKey_starts_with_basic: apiKey?.startsWith("Basic "),
-      encoded_header: `Basic ${btoa(`${orgId || ""}:${apiKey || ""`)}`.substring(0, 30) + "...",
+      apiKey_length: apiKey ? apiKey.length : 0,
+      apiKey_starts_with_basic: apiKey ? apiKey.startsWith("Basic ") : false,
+      auth_prefix: authHeader.substring(0, 30),
     });
 
     const { callerName, calleeName, sessionId } = await req.json();
