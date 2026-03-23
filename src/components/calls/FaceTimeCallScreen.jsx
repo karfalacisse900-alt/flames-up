@@ -2,68 +2,126 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Volume2 } from "lucide-react";
 
 export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
-  const [participants, setParticipants] = useState([]);
+  const [remoteJoined, setRemoteJoined] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoOff, setVideoOff] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const timerRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const selfVideoRef = useRef(null);
+  const selfStreamRef = useRef(null);
 
-  // Track active participants
+  const isAudioCall = session?.call_type === "audio";
+
+  // ── Timer ────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // ── Self camera via getUserMedia (most reliable) ─────────────────────────
+  useEffect(() => {
+    if (isAudioCall) return;
+    let stopped = false;
+    navigator.mediaDevices?.getUserMedia({ video: { facingMode: "user" }, audio: false })
+      .then(stream => {
+        if (stopped) { stream.getTracks().forEach(t => t.stop()); return; }
+        selfStreamRef.current = stream;
+        if (selfVideoRef.current) {
+          selfVideoRef.current.srcObject = stream;
+          selfVideoRef.current.play().catch(() => {});
+        }
+      })
+      .catch(() => {}); // permission denied — show VideoOff placeholder
+    return () => {
+      stopped = true;
+      selfStreamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, [isAudioCall]);
+
+  // ── Remote participant tracking ──────────────────────────────────────────
   useEffect(() => {
     if (!meeting) return;
-    const update = () => {
-      try {
-        setParticipants(meeting.participants.active.toArray?.() || []);
-      } catch {}
+
+    // Helper: try every known SDK path to get tracks from a participant
+    const attachRemote = (participant) => {
+      if (!participant) return;
+      setRemoteJoined(true);
+
+      const tryAttach = () => {
+        const el = remoteVideoRef.current;
+        if (!el) return;
+
+        // Strategy 1: participant.streams (standard WebRTC-in-SDK)
+        const streams = participant.streams;
+        if (streams && streams.length > 0) {
+          el.srcObject = streams[0];
+          el.play().catch(() => {});
+          return;
+        }
+
+        // Strategy 2: videoTrack / audioTrack raw
+        const vTrack = participant.videoTrack || participant.video?.track;
+        const aTrack = participant.audioTrack || participant.audio?.track;
+        const tracks = [vTrack, aTrack].filter(Boolean);
+        if (tracks.length > 0) {
+          el.srcObject = new MediaStream(tracks);
+          el.play().catch(() => {});
+        }
+      };
+
+      tryAttach();
+      // Some SDKs fire trackAdded after participantJoined
+      participant.on?.("trackAdded", tryAttach);
+      participant.on?.("videoUpdate", tryAttach);
+      participant.on?.("audioUpdate", tryAttach);
+      participant.on?.("streamAdded", tryAttach);
     };
-    update();
-    meeting.participants.active.on?.("participantJoined", update);
-    meeting.participants.active.on?.("participantLeft", update);
+
+    // Check already-present participants
+    const getActive = () => {
+      try {
+        const arr = meeting.participants?.active?.toArray?.()
+          || (meeting.participants?.active ? [...meeting.participants.active] : []);
+        return arr.filter(p => p.id !== meeting.self?.id);
+      } catch { return []; }
+    };
+
+    const existing = getActive();
+    if (existing.length > 0) attachRemote(existing[0]);
+
+    // Listen for future joins
+    const onJoin = (p) => attachRemote(p);
+    const onLeave = () => {
+      const arr = getActive();
+      if (arr.length === 0) setRemoteJoined(false);
+    };
+
+    meeting.participants?.active?.on?.("participantJoined", onJoin);
+    meeting.participants?.active?.on?.("participantLeft", onLeave);
+    meeting.participants?.joined?.on?.("participantJoined", onJoin);
+
+    // Also try meeting-level events
+    meeting.on?.("participantJoined", onJoin);
+    meeting.on?.("participantLeft", onLeave);
+
     return () => {
-      meeting.participants.active.off?.("participantJoined", update);
-      meeting.participants.active.off?.("participantLeft", update);
+      meeting.participants?.active?.off?.("participantJoined", onJoin);
+      meeting.participants?.active?.off?.("participantLeft", onLeave);
+      meeting.participants?.joined?.off?.("participantJoined", onJoin);
+      meeting.off?.("participantJoined", onJoin);
+      meeting.off?.("participantLeft", onLeave);
     };
   }, [meeting]);
 
-  // Call timer
-  useEffect(() => {
-    timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
-    return () => clearInterval(timerRef.current);
-  }, []);
-
-  // Attach remote video stream
-  useEffect(() => {
-    const remote = participants[0];
-    if (!remote || !remoteVideoRef.current) return;
-    try {
-      const track = remote.videoTrack;
-      if (track) remoteVideoRef.current.srcObject = new MediaStream([track]);
-    } catch {}
-  }, [participants]);
-
-  // Attach self video stream
-  useEffect(() => {
-    if (!meeting?.self || !selfVideoRef.current) return;
-    try {
-      const track = meeting.self.videoTrack;
-      if (track) selfVideoRef.current.srcObject = new MediaStream([track]);
-    } catch {}
-  }, [meeting, videoOff]);
-
-  const formatTime = (s) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  };
-
+  // ── Controls ─────────────────────────────────────────────────────────────
   const toggleMic = useCallback(async () => {
     if (!meeting) return;
     if (audioMuted) {
-      await meeting.self.enableAudio?.().catch(() => {});
+      await meeting.self?.enableAudio?.().catch(() => {});
+      await meeting.self?.unmuteMic?.().catch(() => {});
     } else {
-      await meeting.self.disableAudio?.().catch(() => {});
+      await meeting.self?.disableAudio?.().catch(() => {});
+      await meeting.self?.muteMic?.().catch(() => {});
     }
     setAudioMuted(v => !v);
   }, [meeting, audioMuted]);
@@ -71,37 +129,41 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
   const toggleVideo = useCallback(async () => {
     if (!meeting) return;
     if (videoOff) {
-      await meeting.self.enableVideo?.().catch(() => {});
+      await meeting.self?.enableVideo?.().catch(() => {});
+      // Also resume local stream
+      selfStreamRef.current?.getVideoTracks().forEach(t => { t.enabled = true; });
     } else {
-      await meeting.self.disableVideo?.().catch(() => {});
+      await meeting.self?.disableVideo?.().catch(() => {});
+      selfStreamRef.current?.getVideoTracks().forEach(t => { t.enabled = false; });
     }
     setVideoOff(v => !v);
   }, [meeting, videoOff]);
 
   const flipCamera = useCallback(async () => {
-    await meeting.self.switchCamera?.().catch(() => {});
+    await meeting.self?.switchCamera?.().catch(() => {});
   }, [meeting]);
 
   const endCall = useCallback(async () => {
-    await meeting.leaveRoom?.().catch(() => {});
+    selfStreamRef.current?.getTracks().forEach(t => t.stop());
+    await meeting?.leaveRoom?.().catch(() => {});
     onEnd();
   }, [meeting, onEnd]);
 
-  const remoteParticipant = participants[0] || null;
-  const isAudioCall = session?.call_type === "audio";
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    return `${m}:${(s % 60).toString().padStart(2, "0")}`;
+  };
+
+  const remoteName = session?.callee_name || session?.caller_name || "User";
 
   return (
     <div
       className="fixed inset-0 z-[200] flex flex-col"
-      style={{
-        background: "#000",
-        paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
+      style={{ background: "#000", paddingTop: "env(safe-area-inset-top,0px)", paddingBottom: "env(safe-area-inset-bottom,0px)" }}
     >
-      {/* Remote video — full screen */}
+      {/* Remote — full screen */}
       <div className="absolute inset-0">
-        {remoteParticipant && !isAudioCall ? (
+        {remoteJoined && !isAudioCall ? (
           <video
             ref={remoteVideoRef}
             autoPlay
@@ -111,45 +173,41 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
         ) : (
           <div
             className="w-full h-full flex flex-col items-center justify-center gap-5"
-            style={{ background: "linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" }}
+            style={{ background: "linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)" }}
           >
             <div
               className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
+              style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)" }}
             >
-              {(session?.callee_name || session?.caller_name || "?")[0]?.toUpperCase()}
+              {remoteName[0]?.toUpperCase()}
             </div>
             <p className="text-white text-2xl font-bold" style={{ fontFamily: "var(--font-serif)" }}>
-              {session?.callee_name || session?.caller_name || "Calling…"}
+              {remoteName}
             </p>
-            {!remoteParticipant && (
-              <p className="text-white/60 text-sm">Connecting…</p>
-            )}
+            <p className="text-white/60 text-sm">
+              {remoteJoined ? "Connected" : "Connecting…"}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Top overlay — name + timer */}
+      {/* Remote audio element (always render for audio calls) */}
+      <audio ref={remoteVideoRef} autoPlay playsInline style={{ display: isAudioCall ? "block" : "none", position: "absolute", opacity: 0 }} />
+
+      {/* Top bar */}
       <div
         className="relative z-10 flex flex-col items-center pt-12 pb-4"
-        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 100%)" }}
+        style={{ background: "linear-gradient(to bottom,rgba(0,0,0,0.65) 0%,transparent 100%)" }}
       >
-        <p className="text-white font-bold text-lg" style={{ fontFamily: "var(--font-serif)" }}>
-          {session?.callee_name || session?.caller_name || "Call"}
-        </p>
+        <p className="text-white font-bold text-lg" style={{ fontFamily: "var(--font-serif)" }}>{remoteName}</p>
         <p className="text-white/70 text-sm mt-0.5">{formatTime(elapsed)}</p>
       </div>
 
-      {/* Self video — PiP top-right */}
+      {/* Self video PiP */}
       {!isAudioCall && (
         <div
           className="absolute z-20 rounded-2xl overflow-hidden"
-          style={{
-            width: 100, height: 140,
-            top: 80, right: 16,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-            border: "2px solid rgba(255,255,255,0.2)",
-          }}
+          style={{ width: 100, height: 140, top: 80, right: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.6)", border: "2px solid rgba(255,255,255,0.2)" }}
         >
           {!videoOff ? (
             <video
@@ -157,7 +215,7 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
               autoPlay
               playsInline
               muted
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center" style={{ background: "#1a1a1a" }}>
@@ -170,22 +228,17 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
       {/* Bottom controls */}
       <div
         className="absolute bottom-0 left-0 right-0 z-10 pb-10 pt-8"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)" }}
+        style={{ background: "linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 100%)" }}
       >
         <div className="flex items-center justify-center gap-6 px-8">
-          {/* Mute */}
           <button
             onClick={toggleMic}
             className="w-14 h-14 rounded-full flex items-center justify-center"
-            style={{
-              background: audioMuted ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)",
-              backdropFilter: "blur(10px)",
-            }}
+            style={{ background: audioMuted ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}
           >
             {audioMuted ? <MicOff className="w-6 h-6 text-black" /> : <Mic className="w-6 h-6 text-white" />}
           </button>
 
-          {/* End call */}
           <button
             onClick={endCall}
             className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -194,15 +247,11 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
             <PhoneOff className="w-7 h-7 text-white" />
           </button>
 
-          {/* Video toggle / Speaker */}
           {!isAudioCall ? (
             <button
               onClick={toggleVideo}
               className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{
-                background: videoOff ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)",
-                backdropFilter: "blur(10px)",
-              }}
+              style={{ background: videoOff ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}
             >
               {videoOff ? <VideoOff className="w-6 h-6 text-black" /> : <Video className="w-6 h-6 text-white" />}
             </button>
@@ -216,7 +265,6 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
           )}
         </div>
 
-        {/* Flip camera */}
         {!isAudioCall && (
           <div className="flex justify-center mt-4">
             <button
@@ -224,8 +272,7 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold"
               style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
             >
-              <RotateCcw className="w-4 h-4" />
-              Flip
+              <RotateCcw className="w-4 h-4" /> Flip
             </button>
           </div>
         )}
