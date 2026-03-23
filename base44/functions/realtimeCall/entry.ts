@@ -5,8 +5,12 @@ const REALTIME_BASE = "https://api.realtime.cloudflare.com/v2";
 function getAuthHeader() {
   const orgId = Deno.env.get("CLOUDFLARE_REALTIME_ORG_ID");
   const apiKey = Deno.env.get("CLOUDFLARE_REALTIME_API_KEY");
-  const encoded = btoa(`${orgId}:${apiKey}`);
-  return `Basic ${encoded}`;
+  // If apiKey is already a full 'Basic ...' header value, use as-is
+  if (apiKey && apiKey.startsWith("Basic ")) return apiKey;
+  // If orgId is provided, encode as Basic base64(orgId:apiKey)
+  if (orgId && apiKey) return `Basic ${btoa(`${orgId}:${apiKey}`)}`;
+  // Fallback: try Bearer
+  return `Bearer ${apiKey}`;
 }
 
 async function createMeeting(title) {
@@ -24,7 +28,7 @@ async function createMeeting(title) {
   return data.data.id;
 }
 
-async function addParticipant(meetingId, name, presetName = "group_call_host") {
+async function addParticipant(meetingId, name, presetName) {
   const res = await fetch(`${REALTIME_BASE}/meetings/${meetingId}/participants`, {
     method: "POST",
     headers: {
