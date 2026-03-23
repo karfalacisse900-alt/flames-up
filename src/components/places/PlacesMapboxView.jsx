@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import React, { useRef, useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft, Search, Navigation } from "lucide-react";
 import ProximityNotifier from "@/components/friends/ProximityNotifier";
