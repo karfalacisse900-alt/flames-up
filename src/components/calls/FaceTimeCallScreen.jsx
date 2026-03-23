@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { PhoneOff, Mic, MicOff, Video, VideoOff, RotateCcw, Volume2 } from "lucide-react";
-import { RtkVideoTile } from "@cloudflare/realtimekit-react-ui";
 
 export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
   const [participants, setParticipants] = useState([]);
@@ -71,6 +70,26 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
   const remoteParticipant = participants[0] || null;
   const isAudioCall = session?.call_type === "audio";
 
+  // Attach media streams to video elements
+  const remoteVideoRef = useRef(null);
+  const selfVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (!remoteParticipant || !remoteVideoRef.current) return;
+    try {
+      const stream = remoteParticipant.videoTrack ? new MediaStream([remoteParticipant.videoTrack]) : null;
+      if (stream) remoteVideoRef.current.srcObject = stream;
+    } catch {}
+  }, [remoteParticipant]);
+
+  useEffect(() => {
+    if (!meeting?.self || !selfVideoRef.current) return;
+    try {
+      const track = meeting.self.videoTrack;
+      if (track) selfVideoRef.current.srcObject = new MediaStream([track]);
+    } catch {}
+  }, [meeting?.self, videoOff]);
+
   return (
     <div
       className="fixed inset-0 z-[200] flex flex-col"
@@ -85,28 +104,12 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
       {/* Remote video — full screen */}
       <div className="absolute inset-0">
         {remoteParticipant && !isAudioCall ? (
-          <RtkVideoTile
-            participant={remoteParticipant}
-            meeting={meeting}
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
-        ) : (
-          // No remote yet or audio call — show avatar/name
-          <div className="w-full h-full flex flex-col items-center justify-center gap-5"
-            style={{ background: "linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" }}>
-            <div className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
-              {(session?.callee_name || session?.caller_name || "?")[0]?.toUpperCase()}
-            </div>
-            <p className="text-white text-2xl font-bold" style={{ fontFamily: "var(--font-serif)" }}>
-              {session?.callee_name || session?.caller_name || "Calling…"}
-            </p>
-            {!remoteParticipant && (
-              <p className="text-white/60 text-sm">Connecting…</p>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* Top overlay — name + timer */}
       <div
@@ -131,9 +134,11 @@ export default function FaceTimeCallScreen({ meeting, session, onEnd }) {
           }}
         >
           {!videoOff ? (
-            <RtkVideoTile
-              participant={meeting?.self}
-              meeting={meeting}
+            <video
+              ref={selfVideoRef}
+              autoPlay
+              playsInline
+              muted
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
