@@ -7,16 +7,19 @@ import { createPageUrl } from "../utils";
 import FriendRequestsSheet from "@/components/friends/FriendRequestsSheet";
 
 const typeConfig = {
-  new_follower:   { icon: UserPlus,      color: "#6366f1", bg: "rgba(99,102,241,0.12)",  label: "followed you",           emoji: "👤" },
-  post_liked:     { icon: Heart,         color: "#f43f5e", bg: "rgba(244,63,94,0.12)",   label: "liked your post",        emoji: "❤️" },
-  post_replied:   { icon: MessageSquare, color: "#6366f1", bg: "rgba(99,102,241,0.12)",  label: "replied to your post",   emoji: "💬" },
-  post_boosted:   { icon: Zap,           color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  label: "boosted your post",      emoji: "⚡" },
-  mention:        { icon: AtSign,        color: "#14b8a6", bg: "rgba(20,184,166,0.12)",  label: "mentioned you",          emoji: "📣" },
-  direct_message: { icon: MessageSquare, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "sent you a message",     emoji: "✉️" },
-  friend_request: { icon: UserPlus,      color: "#4F46E5", bg: "rgba(79,70,229,0.12)",  label: "sent you a friend request", emoji: "🤝" },
-  friend_accepted:{ icon: UserPlus,      color: "#16A34A", bg: "rgba(22,163,74,0.12)",  label: "accepted your friend request", emoji: "✅" },
-  friend_nearby:  { icon: MapPin,        color: "#F59E0B", bg: "rgba(245,158,11,0.12)", label: "is nearby!",             emoji: "📍" },
+  new_follower:    { color: "#6366f1", bg: "rgba(99,102,241,0.12)",  label: "followed you",                  emoji: "👤" },
+  post_liked:      { color: "#f43f5e", bg: "rgba(244,63,94,0.12)",   label: "liked your post",               emoji: "❤️" },
+  post_replied:    { color: "#6366f1", bg: "rgba(99,102,241,0.12)",  label: "replied to your post",          emoji: "💬" },
+  post_boosted:    { color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  label: "boosted your post",             emoji: "⚡" },
+  mention:         { color: "#14b8a6", bg: "rgba(20,184,166,0.12)",  label: "mentioned you",                 emoji: "📣" },
+  direct_message:  { color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", label: "sent you a message",            emoji: "✉️" },
+  friend_request:  { color: "#4F46E5", bg: "rgba(79,70,229,0.12)",  label: "sent you a friend request",     emoji: "🤝" },
+  friend_accepted: { color: "#16A34A", bg: "rgba(22,163,74,0.12)",  label: "accepted your friend request",  emoji: "✅" },
+  friend_nearby:   { color: "#F59E0B", bg: "rgba(245,158,11,0.12)", label: "is nearby!",                    emoji: "📍" },
 };
+
+const avatarColors = ["#7C3AED","#D98B62","#3C6E5A","#E05C7A","#4A7FC1","#B07843"];
+const getAvatarColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColors.length];
 
 function timeAgo(date) {
   const diff = (Date.now() - new Date(date)) / 1000;
@@ -177,59 +180,74 @@ export default function Notifications() {
           <p className="text-sm" style={{ color: "var(--text-hint)" }}>When people like, reply, or follow — it shows up here.</p>
         </div>
       ) : (
-        <div className="px-4 pt-4 space-y-1">
+        <div className="pt-2">
           {Object.entries(grouped).map(([dateLabel, notifs]) => (
             <div key={dateLabel}>
-              {/* Date group label */}
-              <p className="text-[11px] font-bold uppercase tracking-widest px-1 mb-2 mt-5 first:mt-0" style={{ color: "var(--text-hint)" }}>
+              <p className="text-[11px] font-bold uppercase tracking-widest px-4 py-2 mt-3 first:mt-0" style={{ color: "var(--text-hint)" }}>
                 {dateLabel}
               </p>
-
-              <div className="space-y-1.5">
+              <div>
                 {notifs.map((n) => {
                   const cfg = typeConfig[n.type] || typeConfig.post_liked;
-                  const Icon = cfg.icon;
+                  const actorInitial = (n.actor_name || "S")[0].toUpperCase();
+                  const avatarBg = getAvatarColor(n.actor_name);
                   return (
                     <div
                       key={n.id}
                       onClick={() => handleNotifClick(n)}
-                      className="flex items-start gap-3.5 p-3.5 rounded-2xl cursor-pointer active:scale-[0.99] transition-all"
+                      className="flex items-start gap-3.5 px-4 py-3.5 cursor-pointer active:bg-[var(--bg-subtle)] transition-colors"
                       style={{
-                        backgroundColor: n.is_read ? "var(--bg-card)" : "var(--bg-card)",
-                        border: `1px solid ${n.is_read ? "var(--border-light)" : cfg.color + "33"}`,
-                        boxShadow: n.is_read ? "none" : `0 2px 12px ${cfg.color}18`,
+                        backgroundColor: n.is_read ? "transparent" : cfg.bg.replace("0.12","0.06"),
+                        borderBottom: "1px solid var(--border-subtle)",
                       }}
                     >
-                      {/* Icon bubble */}
-                      <div
-                        className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: cfg.bg }}
-                      >
-                        <Icon className="w-5 h-5" style={{ color: cfg.color }} />
+                      {/* Avatar with type badge */}
+                      <div className="relative shrink-0">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold text-white overflow-hidden"
+                          style={{ background: `linear-gradient(135deg, ${avatarBg}cc, ${avatarBg})` }}>
+                          {n.actor_avatar_url ? (
+                            <img src={n.actor_avatar_url} alt={n.actor_name} className="w-full h-full object-cover" />
+                          ) : actorInitial}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px]"
+                          style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--bg-card)" }}>
+                          {cfg.emoji}
+                        </div>
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
+                        <p className="text-sm leading-snug break-words" style={{ color: "var(--text-primary)" }}>
                           <span className="font-bold">{n.actor_name || "Someone"}</span>{" "}
                           <span style={{ color: "var(--text-secondary)" }}>{cfg.label}</span>
+                          {n.post_text && (
+                            <span className="font-bold"> "{n.post_text.slice(0,40)}{n.post_text.length>40?"...":""}"</span>
+                          )}
                         </p>
-                        {n.post_text && (
-                          <p
-                            className="text-xs mt-1 line-clamp-2 leading-relaxed px-2.5 py-1.5 rounded-xl"
-                            style={{ color: "var(--text-secondary)", backgroundColor: "var(--bg-subtle)", fontStyle: "italic" }}
-                          >
-                            "{n.post_text}"
-                          </p>
-                        )}
-                        <p className="text-[11px] mt-1.5 font-medium" style={{ color: "var(--text-hint)" }}>
+                        <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>
                           {timeAgo(n.created_date)}
                         </p>
+                        {n.type === "friend_request" && !n.is_read && (
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={e => { e.stopPropagation(); markRead.mutate(n.id); }}
+                              className="px-4 py-1.5 rounded-xl text-xs font-semibold"
+                              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-medium)" }}>
+                              Dismiss
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); handleNotifClick(n); }}
+                              className="px-4 py-1.5 rounded-xl text-xs font-semibold text-white"
+                              style={{ backgroundColor: "var(--accent-primary)" }}>
+                              View
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Unread dot */}
                       {!n.is_read && (
-                        <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: cfg.color }} />
+                        <div className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ backgroundColor: cfg.color }} />
                       )}
                     </div>
                   );
