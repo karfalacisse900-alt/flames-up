@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  X, MapPin, Bookmark, BookmarkCheck, Image, Video, MessageSquare,
-  Calendar, Lightbulb, Users, BellPlus, BellOff, Navigation
+  X, MapPin, Bookmark, BookmarkCheck, MessageSquare,
+  Calendar, Users, BellPlus, BellOff, Navigation
 } from "lucide-react";
 import CommunityPostCard from "./CommunityPostCard";
 import PeopleHereNow from "@/components/places/PeopleHereNow";
@@ -16,12 +16,9 @@ import SpontaneousMeetupModal from "@/components/places/SpontaneousMeetupModal";
 
 const TABS = [
   { key: "posts",   label: "Posts",   icon: MessageSquare },
-  { key: "photos",  label: "Photos",  icon: Image },
-  { key: "videos",  label: "Videos",  icon: Video },
-  { key: "events",  label: "Events",  icon: Calendar },
   { key: "groups",  label: "Groups",  icon: Users },
-  { key: "tips",    label: "Tips",    icon: Lightbulb },
-  { key: "details", label: "Details", icon: MapPin },
+  { key: "events",  label: "Events",  icon: Calendar },
+  { key: "saved",   label: "Save",    icon: Bookmark },
 ];
 
 export default function PlaceHub({ locationName, locationData = {}, user, onClose, onUpvote }) {
@@ -253,54 +250,6 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
             }}>
             ✦ Post From Here
           </button>
-          <button
-            onClick={async () => {
-              if (!user) return;
-              const input = document.createElement("input");
-              input.type = "file";
-              input.accept = "image/*";
-              input.multiple = true;
-              input.onchange = async (e) => {
-                const files = Array.from(e.target.files);
-                if (files.length === 0) return;
-                
-                const uploadedUrls = [];
-                for (const file of files) {
-                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                  uploadedUrls.push(file_url);
-                }
-                
-                await base44.entities.CommunityPost.create({
-                  type: "opinion",
-                  body: `📸 Photo from ${locationName}`,
-                  title: `📸 Photo from ${locationName}`,
-                  author_email: user.email,
-                  author_name: user.full_name,
-                  author_avatar_url: user.avatar_url || "",
-                  image_urls: uploadedUrls,
-                  image_url: uploadedUrls[0] || "",
-                  location_name: locationName,
-                  location_city: locationData.city || "",
-                  location_region: locationData.region || "",
-                  location_country: locationData.country || "",
-                  location_lat: locationData.lat,
-                  location_lng: locationData.lng,
-                  moderation_status: "approved",
-                });
-                
-                qc.invalidateQueries({ queryKey: ["placePosts", locationName] });
-              };
-              input.click();
-            }}
-            className="px-4 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] flex items-center gap-2"
-            style={{
-              backgroundColor: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-light)"
-            }}>
-            <Image className="w-4 h-4" />
-            Add Photo
-          </button>
         </div>
       </div>
 
@@ -355,42 +304,9 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
               )
             )}
 
-            {/* PHOTOS */}
-            {activeTab === "photos" && (
-              photoPosts.length === 0 ? (
-                <div className="py-16 text-center px-8">
-                  <div className="text-4xl mb-3">📷</div>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No photos yet</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-0.5 p-0.5 pb-28">
-                  {photoPosts.flatMap(p => {
-                    const imgs = p.image_urls?.length > 0 ? p.image_urls : p.image_url ? [p.image_url] : [];
-                    return imgs.map((img, i) => (
-                      <div key={`${p.id}-${i}`} style={{ aspectRatio: "1" }} className="overflow-hidden">
-                        <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-                      </div>
-                    ));
-                  })}
-                </div>
-              )
-            )}
-
-            {/* VIDEOS */}
-            {activeTab === "videos" && (
-              videoPosts.length === 0 ? (
-                <div className="py-16 text-center px-8">
-                  <div className="text-4xl mb-3">🎬</div>
-                  <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No videos yet</p>
-                </div>
-              ) : (
-                <div className="pb-28">
-                  {videoPosts.map(p => (
-                    <CommunityPostCard key={p.id} post={p} user={user}
-                      onUpvote={() => handleLikePost(p)} onLocationClick={null} />
-                  ))}
-                </div>
-              )
+            {/* GROUPS */}
+            {activeTab === "groups" && (
+              <LocationGroupsTab locationName={locationName} locationData={locationData} />
             )}
 
             {/* EVENTS */}
@@ -403,78 +319,21 @@ export default function PlaceHub({ locationName, locationData = {}, user, onClos
               />
             )}
 
-            {/* GROUPS */}
-            {activeTab === "groups" && (
-              <LocationGroupsTab locationName={locationName} locationData={locationData} />
-            )}
-
-            {/* TIPS */}
-            {activeTab === "tips" && (
-              <LocationTipsTab locationName={locationName} locationData={locationData} user={user} />
-            )}
-
-            {/* DETAILS */}
-            {activeTab === "details" && (
-              <div className="p-4 pb-28 space-y-3">
-                {/* Address */}
-                {locationData.address && (
-                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>📍</div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>ADDRESS</p>
-                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{locationData.address}</p>
-                    </div>
-                  </div>
-                )}
-                {/* Hours */}
-                {locationData.hours && (
-                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🕐</div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>HOURS</p>
-                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{typeof locationData.hours === "string" ? locationData.hours : "See website"}</p>
-                    </div>
-                  </div>
-                )}
-                {/* Phone */}
-                {locationData.phone && (
-                  <a href={`tel:${locationData.phone}`} className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>📞</div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>PHONE</p>
-                      <p className="text-sm font-medium" style={{ color: "var(--accent-primary)" }}>{locationData.phone}</p>
-                    </div>
-                  </a>
-                )}
-                {/* Website */}
-                {locationData.website && (
-                  <a href={locationData.website.startsWith("http") ? locationData.website : `https://${locationData.website}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🌐</div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>WEBSITE</p>
-                      <p className="text-sm font-medium truncate" style={{ color: "var(--accent-primary)" }}>{locationData.website}</p>
-                    </div>
-                  </a>
-                )}
-                {/* Category */}
-                {locationData.category && (
-                  <div className="flex gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "var(--bg-subtle)" }}>🏷️</div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--text-hint)" }}>CATEGORY</p>
-                      <p className="text-sm font-medium capitalize" style={{ color: "var(--text-primary)" }}>{locationData.category.replace(/-/g, " ")}</p>
-                    </div>
-                  </div>
-                )}
-                {!locationData.address && !locationData.hours && !locationData.phone && !locationData.website && (
-                  <div className="py-12 text-center">
-                    <p className="text-4xl mb-3">ℹ️</p>
-                    <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>No details available yet</p>
-                    <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Details come from the map data</p>
-                  </div>
-                )}
+            {/* SAVED */}
+            {activeTab === "saved" && (
+              <div className="p-6 text-center">
+                <div className="text-4xl mb-3">{isSaved ? "🔖" : "📌"}</div>
+                <p className="text-sm font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  {isSaved ? "Place saved!" : "Save this place"}
+                </p>
+                <p className="text-xs mb-5" style={{ color: "var(--text-hint)" }}>
+                  {isSaved ? "You'll find it in your saved places." : "Add to your saved places for easy access."}
+                </p>
+                <button onClick={toggleSave} disabled={savedLoading}
+                  className="px-8 py-3 rounded-2xl text-sm font-bold transition-all"
+                  style={{ backgroundColor: isSaved ? "#2E6B4F" : "var(--accent-primary)", color: "#fff" }}>
+                  {isSaved ? "✓ Saved" : "Save Place"}
+                </button>
               </div>
             )}
 
