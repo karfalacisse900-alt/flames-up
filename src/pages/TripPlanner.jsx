@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MapPin, Plus, X, Trash2, ArrowUp, ArrowDown, Share2,
   Navigation, Search, Loader2, ChevronRight, Map, List,
-  Route, Clock, Save, ChevronDown, ChevronUp
+  Route, Save
 } from "lucide-react";
 
 const EMOJI_BY_CAT = { restaurant: "🍽️", cafe: "☕", park: "🌳", hotel: "🏨", museum: "🏛️", bar: "🍺", shopping_mall: "🛍️", tourist_attraction: "🗺️", default: "📍" };
