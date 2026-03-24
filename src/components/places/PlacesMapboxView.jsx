@@ -112,6 +112,11 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
   const [selectedPlace,    setSelectedPlace]    = useState(null);
   const [showPlaceHub,     setShowPlaceHub]     = useState(false);
 
+  // Auto-open nearby modal if navigated back from a nearby profile
+  useEffect(() => {
+    if (openNearby) setShowNearbyModal(true);
+  }, [openNearby]);
+
   useEffect(() => { myPresenceRef.current = myPresence; }, [myPresence]);
 
   // ── 1. Load user + token + avatar ──────────────────────────────────────
