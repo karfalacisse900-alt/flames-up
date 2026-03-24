@@ -139,14 +139,12 @@ export default function EditProfile() {
       bio: currentBio,
       about_me: currentAboutMe,
       city: currentCity,
-      age: currentAge,
+      age: currentAge ? String(currentAge) : "",
       major: currentMajor,
-      graduation_year: currentGraduationYear,
+      graduation_year: currentGraduationYear ? String(currentGraduationYear) : "",
       hobbies: currentHobbies,
       website: currentWebsite,
       website_url: currentWebsite,
-      tiktok: currentTiktok,
-      instagram: currentInstagram,
       interests: currentInterests,
       looking_for: currentLookingFor,
     };
@@ -166,9 +164,9 @@ export default function EditProfile() {
       avatar_url: currentAvatar,
       banner_url: currentBanner,
       city: currentCity,
-      age: currentAge,
+      age: currentAge ? String(currentAge) : "",
       major: currentMajor,
-      graduation_year: currentGraduationYear,
+      graduation_year: currentGraduationYear ? String(currentGraduationYear) : "",
       hobbies: currentHobbies,
       website: currentWebsite,
       tiktok: currentTiktok,
@@ -278,7 +276,7 @@ export default function EditProfile() {
         {sectionTitle("Personal Info")}
         <div className="space-y-4">
           <FieldInput label="City" value={currentCity} onChange={setCity} placeholder="e.g. New York" />
-          <FieldInput label="Age" value={currentAge} onChange={setAge} placeholder="e.g. 22" type="number" />
+          <FieldInput label="Age" value={currentAge} onChange={v => setAge(String(v))} placeholder="e.g. 22" />
           <FieldInput label="Major / Occupation" value={currentMajor} onChange={setMajor} placeholder="e.g. Computer Science" />
           <FieldInput label="Graduation Year" value={currentGraduationYear} onChange={setGraduationYear} placeholder="e.g. 2025" />
           <FieldInput label="Hobbies" value={currentHobbies} onChange={setHobbies} placeholder="e.g. hiking, painting…" />
