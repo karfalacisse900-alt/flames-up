@@ -217,6 +217,7 @@ export default function PlacesPage() {
       <AnimatePresence mode="wait">
       {viewMode === "map" && (
         <MapViewWrapper onOpenPlace={() => {}} user={user} onBack={() => setViewMode("feed")} openNearby={openNearbyOnLoad} />
+      )}
       </AnimatePresence>
 
       {/* SAVED PLACES VIEW */}
