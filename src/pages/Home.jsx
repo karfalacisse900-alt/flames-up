@@ -1,36 +1,89 @@
-import React, { useState, useEffect } from "react";
+// v2
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import WelcomePopup from "../components/home/WelcomePopup";
 import WelcomePage from "../components/home/WelcomePage";
 import HomeHeader from "@/components/home/HomeHeader";
 import DidYouKnowSection from "@/components/home/DidYouKnowSection";
+import CommunityFeed from "../components/community/CommunityFeed";
 import StatusBar from "@/components/home/StatusBar";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const containerRef = useRef(null);
+  const { containerProps, PullIndicator } = usePullToRefresh(() => {
+    // Refresh feed data here if needed
+    window.location.reload();
+  });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {}).finally(() => setAuthChecked(true));
   }, []);
 
-  if (!authChecked) return null;
-  if (!user) return <WelcomePage />;
+  useEffect(() => {
+    if (containerRef.current) {
+      Object.assign(containerRef.current, containerProps);
+    }
+  }, [containerProps]);
+
+  // Show nothing while checking auth to avoid flash
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          className="w-6 h-6 rounded-full border-2 border-t-transparent"
+          style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }}
+        />
+      </div>
+    );
+  }
+
+  // Show welcome page for unauthenticated users
+  if (!user) {
+    return <WelcomePage />;
+  }
 
   const divider = (
     <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)" }} />
   );
 
+  const stagger = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.07 } },
+  };
+  const fadeUp = {
+    hidden: { opacity: 0, y: 14 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
+  };
+
   return (
-    <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}>
-      <HomeHeader user={user} />
-      <StatusBar user={user} />
-      {divider}
-      <div className="px-4 py-4">
+    <motion.div
+      ref={containerRef}
+      initial="hidden"
+      animate="show"
+      variants={stagger}
+      style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}
+    >
+      <PullIndicator />
+      <motion.div variants={fadeUp}>
+        <HomeHeader user={user} />
+      </motion.div>
+
+      <motion.div variants={fadeUp}>
+        <StatusBar user={user} />
+      </motion.div>
+
+      <motion.div variants={fadeUp}>{divider}</motion.div>
+
+      {/* Listen, Don't Judge Feature Banner */}
+      <motion.div variants={fadeUp} className="px-4 py-4">
         <Link
           to={createPageUrl("ListenDontJudge")}
           className="block rounded-3xl overflow-hidden"
@@ -62,11 +115,13 @@ export default function Home() {
             </div>
           </motion.div>
         </Link>
-      </div>
-      {divider}
-      <DidYouKnowSection user={user} />
-      {divider}
+      </motion.div>
+
+      <motion.div variants={fadeUp}>{divider}</motion.div>
+      <motion.div variants={fadeUp}><DidYouKnowSection user={user} /></motion.div>
+      <motion.div variants={fadeUp}>{divider}</motion.div>
+      <CommunityFeed user={user} />
       <WelcomePopup />
-    </div>
+    </motion.div>
   );
 }

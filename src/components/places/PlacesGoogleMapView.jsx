@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft, Search, Navigation, Star, Phone, Globe, Clock } from "lucide-react";
@@ -22,149 +22,6 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 
 function getInitials(name) {
   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-}
-
-// ── Rich Place Quick Card (Google Places data) ────────────────────────────
-function PlaceQuickCard({ place, onClose, onExpand }) {
-  const [photoIdx, setPhotoIdx] = useState(0);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  };
-  const handleTouchEnd = (e) => {
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
-    if (Math.abs(dx) > 40 && dy < 60) {
-      if (dx < 0) setPhotoIdx(i => Math.min(i + 1, (place.photos?.length || 1) - 1));
-      else setPhotoIdx(i => Math.max(i - 1, 0));
-    }
-  };
-
-  const priceSymbol = place.price_level ? "$".repeat(place.price_level) : null;
-
-  return (
-    <div className="absolute bottom-4 left-3 right-3 z-30 rounded-3xl overflow-hidden"
-      style={{ backgroundColor: "rgba(255,255,255,0.99)", backdropFilter: "blur(20px)", boxShadow: "0 16px 48px rgba(0,0,0,0.22)", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "70vh" }}>
-
-      {/* Photo strip with swipe */}
-      {place.photos?.length > 0 && (
-        <div className="relative" style={{ height: 160 }}
-          onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <motion.img
-            key={photoIdx}
-            src={place.photos[photoIdx]}
-            alt={place.name}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2 }}
-            className="w-full h-full object-cover" />
-          {place.photos.length > 1 && (
-            <>
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                {place.photos.map((_, i) => (
-                  <button key={i} onClick={() => setPhotoIdx(i)}
-                    className="rounded-full transition-all"
-                    style={{ width: i === photoIdx ? 16 : 6, height: 6, backgroundColor: i === photoIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
-                ))}
-              </div>
-              <div className="absolute top-2 right-10 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}>
-                {photoIdx + 1} / {place.photos.length}
-              </div>
-            </>
-          )}
-          <button onClick={onClose}
-            className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "rgba(0,0,0,0.45)", minWidth: 32, minHeight: 32 }}>
-            <X className="w-4 h-4 text-white" />
-          </button>
-        </div>
-      )}
-
-      <div className="p-4">
-        {/* Name + category row */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base leading-tight" style={{ color: "#0F172A", fontFamily: "var(--font-serif)" }}>{place.name}</h3>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>{place.category}</span>
-              {priceSymbol && <span className="text-[11px] font-bold text-green-600">{priceSymbol}</span>}
-              {place.isOpen !== null && (
-                <span className="text-[11px] font-bold" style={{ color: place.isOpen ? "#16A34A" : "#DC2626" }}>
-                  {place.isOpen ? "Open now" : "Closed"}
-                </span>
-              )}
-            </div>
-          </div>
-          {!place.photos?.length && (
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full shrink-0"
-              style={{ backgroundColor: "#F1F5F9", minWidth: 32, minHeight: 32 }}>
-              <X className="w-4 h-4" style={{ color: "#64748B" }} />
-            </button>
-          )}
-        </div>
-
-        {/* Rating */}
-        {place.rating && (
-          <div className="flex items-center gap-1.5 mb-2">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map(s => (
-                <Star key={s} className="w-3.5 h-3.5" style={{ fill: s <= Math.round(place.rating) ? "#F59E0B" : "none", color: "#F59E0B" }} />
-              ))}
-            </div>
-            <span className="text-sm font-bold" style={{ color: "#0F172A" }}>{place.rating.toFixed(1)}</span>
-            {place.ratingCount && <span className="text-xs" style={{ color: "#94A3B8" }}>({place.ratingCount.toLocaleString()})</span>}
-          </div>
-        )}
-
-        {/* Address */}
-        {place.address && (
-          <p className="text-xs mb-3 truncate" style={{ color: "#64748B" }}>📍 {place.address}</p>
-        )}
-
-        {/* Quick chips */}
-        <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
-          {place.phone && (
-            <a href={`tel:${place.phone}`} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
-              style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
-              <Phone className="w-3.5 h-3.5" /> {place.phone}
-            </a>
-          )}
-          {place.website && (
-            <a href={place.website.startsWith("http") ? place.website : `https://${place.website}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
-              style={{ backgroundColor: "#EFF6FF", color: "#2563EB" }}>
-              <Globe className="w-3.5 h-3.5" /> Website
-            </a>
-          )}
-          {place.hours && (
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
-              style={{ backgroundColor: "#FFFBEB", color: "#D97706" }}>
-              <Clock className="w-3.5 h-3.5" /> Hours
-            </div>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          <button onClick={() => { if (place.lat && place.lng) window.open(`https://www.google.com/maps?q=${place.lat},${place.lng}`, "_blank"); }}
-            className="flex-1 py-3 rounded-2xl text-sm font-bold"
-            style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff", boxShadow: "0 4px 16px rgba(79,70,229,0.35)" }}>
-            🧭 Directions
-          </button>
-          <button onClick={onExpand}
-            className="flex-1 py-3 rounded-2xl text-sm font-bold"
-            style={{ backgroundColor: "#F1F5F9", color: "#0F172A", border: "1px solid #E2E8F0" }}>
-            📋 Posts & Photos
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 const CATEGORY_TO_GTYPE = {
@@ -677,6 +534,149 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
           onUpvote={() => {}}
         />
       )}
+    </div>
+  );
+}
+
+// ── Rich Place Quick Card (Google Places data) ────────────────────────────
+function PlaceQuickCard({ place, onClose, onExpand }) {
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    if (Math.abs(dx) > 40 && dy < 60) {
+      if (dx < 0) setPhotoIdx(i => Math.min(i + 1, (place.photos?.length || 1) - 1));
+      else setPhotoIdx(i => Math.max(i - 1, 0));
+    }
+  };
+
+  const priceSymbol = place.price_level ? "$".repeat(place.price_level) : null;
+
+  return (
+    <div className="absolute bottom-4 left-3 right-3 z-30 rounded-3xl overflow-hidden"
+      style={{ backgroundColor: "rgba(255,255,255,0.99)", backdropFilter: "blur(20px)", boxShadow: "0 16px 48px rgba(0,0,0,0.22)", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "70vh" }}>
+
+      {/* Photo strip with swipe */}
+      {place.photos?.length > 0 && (
+        <div className="relative" style={{ height: 160 }}
+          onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <motion.img
+            key={photoIdx}
+            src={place.photos[photoIdx]}
+            alt={place.name}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full h-full object-cover" />
+          {place.photos.length > 1 && (
+            <>
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                {place.photos.map((_, i) => (
+                  <button key={i} onClick={() => setPhotoIdx(i)}
+                    className="rounded-full transition-all"
+                    style={{ width: i === photoIdx ? 16 : 6, height: 6, backgroundColor: i === photoIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
+                ))}
+              </div>
+              <div className="absolute top-2 right-10 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}>
+                {photoIdx + 1} / {place.photos.length}
+              </div>
+            </>
+          )}
+          <button onClick={onClose}
+            className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(0,0,0,0.45)", minWidth: 32, minHeight: 32 }}>
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      )}
+
+      <div className="p-4">
+        {/* Name + category row */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-base leading-tight" style={{ color: "#0F172A", fontFamily: "var(--font-serif)" }}>{place.name}</h3>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
+                style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>{place.category}</span>
+              {priceSymbol && <span className="text-[11px] font-bold text-green-600">{priceSymbol}</span>}
+              {place.isOpen !== null && (
+                <span className="text-[11px] font-bold" style={{ color: place.isOpen ? "#16A34A" : "#DC2626" }}>
+                  {place.isOpen ? "Open now" : "Closed"}
+                </span>
+              )}
+            </div>
+          </div>
+          {!place.photos?.length && (
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full shrink-0"
+              style={{ backgroundColor: "#F1F5F9", minWidth: 32, minHeight: 32 }}>
+              <X className="w-4 h-4" style={{ color: "#64748B" }} />
+            </button>
+          )}
+        </div>
+
+        {/* Rating */}
+        {place.rating && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star key={s} className="w-3.5 h-3.5" style={{ fill: s <= Math.round(place.rating) ? "#F59E0B" : "none", color: "#F59E0B" }} />
+              ))}
+            </div>
+            <span className="text-sm font-bold" style={{ color: "#0F172A" }}>{place.rating.toFixed(1)}</span>
+            {place.ratingCount && <span className="text-xs" style={{ color: "#94A3B8" }}>({place.ratingCount.toLocaleString()})</span>}
+          </div>
+        )}
+
+        {/* Address */}
+        {place.address && (
+          <p className="text-xs mb-3 truncate" style={{ color: "#64748B" }}>📍 {place.address}</p>
+        )}
+
+        {/* Quick chips */}
+        <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
+          {place.phone && (
+            <a href={`tel:${place.phone}`} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
+              style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
+              <Phone className="w-3.5 h-3.5" /> {place.phone}
+            </a>
+          )}
+          {place.website && (
+            <a href={place.website.startsWith("http") ? place.website : `https://${place.website}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
+              style={{ backgroundColor: "#EFF6FF", color: "#2563EB" }}>
+              <Globe className="w-3.5 h-3.5" /> Website
+            </a>
+          )}
+          {place.hours && (
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0"
+              style={{ backgroundColor: "#FFFBEB", color: "#D97706" }}>
+              <Clock className="w-3.5 h-3.5" /> Hours
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <button onClick={() => { if (place.lat && place.lng) window.open(`https://www.google.com/maps?q=${place.lat},${place.lng}`, "_blank"); }}
+            className="flex-1 py-3 rounded-2xl text-sm font-bold"
+            style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff", boxShadow: "0 4px 16px rgba(79,70,229,0.35)" }}>
+            🧭 Directions
+          </button>
+          <button onClick={onExpand}
+            className="flex-1 py-3 rounded-2xl text-sm font-bold"
+            style={{ backgroundColor: "#F1F5F9", color: "#0F172A", border: "1px solid #E2E8F0" }}>
+            📋 Posts & Photos
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

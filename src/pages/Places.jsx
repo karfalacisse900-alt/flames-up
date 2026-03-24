@@ -1,33 +1,434 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
+import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import PlacesGoogleMapView from "@/components/places/PlacesGoogleMapView";
+import { MapPin, Bookmark, Map, List, Search, X, Route } from "lucide-react";
 import MapViewWrapper from "@/components/places/MapViewWrapper";
+import PlaceHub from "@/components/community/PlaceHub";
+import TrendingPlaces from "@/components/community/TrendingPlaces";
+import RealTrendingPlaces from "@/components/places/RealTrendingPlaces";
+import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
+import CommunityPostCard from "@/components/community/CommunityPostCard";
+import AddPlaceModal from "@/components/places/AddPlaceModal";
+import { requireVerified } from "@/components/auth/EmailVerificationGate";
+import { Link, useLocation } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
-export default function Places() {
+export default function PlacesPage() {
   const [user, setUser] = useState(null);
-  const [showMap, setShowMap] = useState(false);
+  const [viewMode, setViewMode] = useState("feed"); // "feed" | "map" | "saved"
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAllPlaces, setShowAllPlaces] = useState(false);
+  const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
+  const [openNearbyOnLoad, setOpenNearbyOnLoad] = useState(false);
+  const routeLocation = useLocation();
+  const qc = useQueryClient();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  if (showMap && user) {
-    return (
-      <MapViewWrapper>
-        <PlacesGoogleMapView user={user} onBack={() => setShowMap(false)} />
-      </MapViewWrapper>
-    );
-  }
+  // If navigated back from a nearby profile, switch to map and open nearby
+  useEffect(() => {
+    if (routeLocation.state?.openNearby) {
+      setViewMode("map");
+      setOpenNearbyOnLoad(true);
+      // Clear state so refresh doesn't re-trigger
+      window.history.replaceState({}, "");
+    }
+  }, [routeLocation.state]);
+
+  const { data: places = [] } = useQuery({
+    queryKey: ["realPlaces"],
+    queryFn: () => base44.entities.Place.list("-follower_count", 50),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["placeFeedPosts"],
+    queryFn: async () => {
+      const all = await base44.entities.CommunityPost.list("-created_date", 100);
+      // Only show posts with a specific named place (not just a city)
+      return all.filter(p => !p.group_id && p.location_name && p.location_name.trim().length > 2);
+    },
+    staleTime: 60000,
+  });
+
+  const { data: savedPlaces = [] } = useQuery({
+    queryKey: ["savedPlaces", user?.email],
+    queryFn: () => base44.entities.SavedPlace.filter({ user_email: user.email }),
+    enabled: !!user?.email,
+  });
+
+  const upvoteMut = useMutation({
+    mutationFn: ({ post }) => {
+      if (!user) return;
+      const hasLiked = post.upvoted_by?.includes(user.email);
+      return base44.entities.CommunityPost.update(post.id, {
+        upvotes: hasLiked ? Math.max(0, (post.upvotes || 0) - 1) : (post.upvotes || 0) + 1,
+        upvoted_by: hasLiked
+          ? (post.upvoted_by || []).filter(e => e !== user.email)
+          : [...(post.upvoted_by || []), user.email],
+      });
+    },
+    onMutate: ({ post }) => {
+      const hasLiked = post.upvoted_by?.includes(user?.email);
+      qc.setQueryData(["placeFeedPosts"], old =>
+        (old || []).map(p => p.id !== post.id ? p : {
+          ...p,
+          upvotes: hasLiked ? Math.max(0, (p.upvotes || 0) - 1) : (p.upvotes || 0) + 1,
+          upvoted_by: hasLiked
+            ? (p.upvoted_by || []).filter(e => e !== user.email)
+            : [...(p.upvoted_by || []), user.email],
+        })
+      );
+    },
+  });
+
+  const filteredPosts = useMemo(() => {
+    let list = posts;
+    if (selectedCategory !== "all") {
+      list = list.filter(p => p.place_tags?.includes(selectedCategory));
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(p =>
+        (p.location_name || "").toLowerCase().includes(q) ||
+        (p.location_city || "").toLowerCase().includes(q) ||
+        (p.body || "").toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [posts, selectedCategory, searchQuery]);
+
+  // Map markers — aggregate by location
+  const mapMarkers = useMemo(() => {
+    const seen = new Set();
+    return filteredPosts.filter(p => p.location_lat && p.location_lng).filter(p => {
+      const key = `${p.location_lat?.toFixed(3)},${p.location_lng?.toFixed(3)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [filteredPosts]);
+
+  const openPlace = (place) => setSelectedPlace(place);
+  const closePlace = () => setSelectedPlace(null);
+
+  const [seedingPlaces, setSeedingPlaces] = useState(false);
+  const seedPlaces = async () => {
+    setSeedingPlaces(true);
+    try {
+      const res = await base44.functions.invoke('seedRealPlaces', {});
+      qc.invalidateQueries({ queryKey: ["realPlaces"] });
+      alert(`✅ ${res.data.message || 'Places seeded successfully!'}`);
+    } catch (err) {
+      alert('❌ Error seeding places. Check console.');
+      console.error(err);
+    }
+    setSeedingPlaces(false);
+  };
+
+  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
+    await qc.invalidateQueries({ queryKey: ["realPlaces"] });
+    await qc.invalidateQueries({ queryKey: ["placeFeedPosts"] });
+  });
 
   return (
-    <div style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh", padding: "1rem" }}>
-      <button
-        onClick={() => setShowMap(true)}
-        className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
-        style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}
-      >
-        Open Map
-      </button>
+    <div {...containerProps} className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      <PullIndicator />
+      {/* Header */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="relative overflow-hidden px-4 pt-4 pb-3">
+          {/* Organic blobs */}
+          <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
+          <div className="absolute top-2 right-16 w-8 h-8 rounded-full opacity-15 pointer-events-none" style={{ background: "#D98B62" }} />
+
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-md" style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
+                <MapPin className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)", letterSpacing: "-0.3px" }}>Places</h1>
+                <p className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>Explore your world ✦</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Trip Planner Button */}
+              <Link
+                to={createPageUrl("TripPlanner")}
+                aria-label="Trip Planner"
+                className="rounded-xl flex items-center justify-center transition-all active:scale-90"
+                style={{ minWidth: 44, minHeight: 44, background: "linear-gradient(135deg,#4F46E5,#7C3AED)", boxShadow: "0 4px 12px rgba(79,70,229,0.3)" }}>
+                <Route className="w-4 h-4 text-white" />
+              </Link>
+
+              {/* View toggle */}
+              <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                {[
+                  { key: "feed", icon: List },
+                  { key: "map", icon: Map },
+                  { key: "saved", icon: Bookmark },
+                ].map(({ key, icon: Icon }) => (
+                  <button key={key} onClick={() => setViewMode(key)}
+                    aria-label={key}
+                    className="rounded-xl flex items-center justify-center transition-all"
+                    style={{
+                      minWidth: 40, minHeight: 40,
+                      backgroundColor: viewMode === key ? "#1E1E1E" : "transparent",
+                      color: viewMode === key ? "#fff" : "var(--text-hint)",
+                      boxShadow: viewMode === key ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
+                    }}>
+                    <Icon className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl relative z-10"
+            style={{ backgroundColor: "var(--bg-card)", border: "1.5px solid var(--border-light)", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search places, cities…"
+              className="flex-1 bg-transparent outline-none text-sm font-medium"
+              style={{ color: "var(--text-primary)" }}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")}>
+                <X className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Category filter */}
+        {viewMode === "feed" && (
+          <PlaceCategoryFilter active={selectedCategory} onChange={setSelectedCategory} />
+        )}
+      </div>
+
+      {/* MAP VIEW — full screen with its own place detail handling */}
+      <AnimatePresence mode="wait">
+      {viewMode === "map" && (
+        <MapViewWrapper onOpenPlace={() => {}} user={user} onBack={() => setViewMode("feed")} openNearby={openNearbyOnLoad} />
+      )}
+      </AnimatePresence>
+
+      {/* SAVED PLACES VIEW */}
+      {viewMode === "saved" && (
+        <div className="px-4 py-4">
+          {!user ? (
+            <div className="py-16 text-center">
+              <Bookmark className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>Sign in to see saved places</p>
+            </div>
+          ) : savedPlaces.length === 0 ? (
+            <div className="py-16 text-center">
+              <Bookmark className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
+              <p className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No saved places yet</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Tap "Want to go" on posts to save places</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>
+                {savedPlaces.length} saved place{savedPlaces.length !== 1 ? "s" : ""}
+              </p>
+              {savedPlaces.map(place => (
+                <button key={place.id}
+                  onClick={() => openPlace({ name: place.location_name, city: place.location_city, region: place.location_region, country: place.location_country, lat: place.location_lat, lng: place.location_lng })}
+                  className="w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all active:scale-[0.99]"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: "var(--accent-primary-light)" }}>
+                    <MapPin className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                      {place.location_name}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: "var(--text-hint)" }}>
+                      {[place.location_city, place.location_region, place.location_country].filter(Boolean).join(", ")}
+                    </p>
+                  </div>
+                  <span className="text-xs px-2 py-0.5 rounded-full shrink-0 ml-auto"
+                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                    {place.save_type === "want_to_go" ? "Want to go" : "Saved"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* FEED VIEW */}
+      {viewMode === "feed" && (
+        <div>
+          {/* Real trending places from Google Maps */}
+          <RealTrendingPlaces onSelectPlace={place => openPlace(place)} />
+
+          {/* Community trending places strip */}
+          <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
+
+          {/* See More Button */}
+          {places.length > 0 && !showAllPlaces && (
+            <div className="px-4 pb-3">
+              <button onClick={() => setShowAllPlaces(true)}
+                className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+                style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--border-medium)", color: "var(--text-primary)" }}>
+                🌍 See All Popular Places ({places.length})
+              </button>
+            </div>
+          )}
+
+          {/* Seed Places Button (only for admins or if no places) */}
+          {user?.role === "admin" && places.length < 10 && (
+            <div className="px-4 pb-3">
+              <button onClick={seedPlaces} disabled={seedingPlaces}
+                className="w-full py-3 rounded-2xl text-sm font-bold transition-all"
+                style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", opacity: seedingPlaces ? 0.6 : 1 }}>
+                {seedingPlaces ? "⏳ Seeding places..." : "🌍 Seed 24 Popular Places"}
+              </button>
+            </div>
+          )}
+
+          {/* Popular Places Grid (shown after clicking See More) */}
+          {places.length > 0 && showAllPlaces && (
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  Popular Places
+                </h2>
+                <button onClick={() => setShowAllPlaces(false)}
+                  className="text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                  Hide
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {places.map(place => (
+                  <Link key={place.id}
+                    to={createPageUrl(`PlaceDetail?placeId=${place.id}`)}
+                    className="rounded-2xl overflow-hidden transition-all active:scale-[0.98]"
+                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    {place.cover_image_url ? (
+                      <div className="w-full" style={{ aspectRatio: "16/9", position: "relative" }}>
+                        <img src={place.cover_image_url} alt={place.name} className="w-full h-full object-cover" loading="lazy" />
+                        {place.is_verified && (
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full flex items-center justify-center text-4xl" style={{ aspectRatio: "16/9", backgroundColor: "var(--bg-subtle)" }}>
+                        {place.category === "park" ? "🌳" : place.category === "library" ? "📚" : place.category === "cafe" ? "☕" : "📍"}
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <p className="text-sm font-bold mb-0.5 truncate" style={{ color: "var(--text-primary)" }}>
+                        {place.name}
+                      </p>
+                      <p className="text-[10px] mb-1.5 truncate" style={{ color: "var(--text-hint)" }}>
+                        {[place.city, place.region].filter(Boolean).join(", ")}
+                      </p>
+                      <p className="text-[10px] line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                        {place.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Divider */}
+          <div className="mx-4 mb-2" style={{ height: 1, backgroundColor: "var(--border-subtle)" }} />
+
+          {isLoading ? (
+            <div className="flex flex-col gap-3 px-4 py-4">
+              {[0, 1, 2].map(i => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  className="rounded-3xl overflow-hidden"
+                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
+                  <div className="skeleton h-44" />
+                  <div className="p-4 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="skeleton w-8 h-8 rounded-full" />
+                      <div className="skeleton h-3 w-28 rounded-full" />
+                    </div>
+                    <div className="skeleton h-3 w-full rounded-full" />
+                    <div className="skeleton h-3 w-4/5 rounded-full" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28 }}
+              className="py-16 text-center px-8"
+            >
+              <div className="text-4xl mb-3">🗺️</div>
+              <p className="text-sm font-bold mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {selectedCategory !== "all" ? `No ${selectedCategory} posts yet` : "No location posts yet"}
+              </p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                Posts tagged with a location will appear here
+              </p>
+            </motion.div>
+          ) : (
+            <div className="pb-28">
+              {filteredPosts.map((post, i) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.04, 0.28), duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <CommunityPostCard post={post} user={user}
+                    onUpvote={() => user && upvoteMut.mutate({ post })}
+                    onLocationClick={(locationData) => openPlace(locationData)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Place Hub Modal */}
+      {selectedPlace && (
+        <PlaceHub
+          locationName={selectedPlace.name || selectedPlace.city}
+          locationData={selectedPlace}
+          user={user}
+          onClose={closePlace}
+          onUpvote={(post) => upvoteMut.mutate({ post })}
+        />
+      )}
+
+      {/* Add Place Modal */}
+      {showAddPlaceModal && (
+        <AddPlaceModal
+          user={user}
+          onClose={() => setShowAddPlaceModal(false)}
+          onSuccess={() => qc.invalidateQueries({ queryKey: ["realPlaces"] })}
+        />
+      )}
     </div>
   );
 }
