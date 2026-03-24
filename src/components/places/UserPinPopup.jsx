@@ -1,9 +1,9 @@
 import React from "react";
-import { MessageCircle, Navigation, X } from "lucide-react";
+import { MessageCircle, User, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-export default function UserPinPopup({ presence, currentUser, onClose, onDirections }) {
+export default function UserPinPopup({ presence, currentUser, onClose }) {
   if (!presence) return null;
 
   const isSelf = currentUser?.email === presence.user_email;
@@ -81,32 +81,21 @@ export default function UserPinPopup({ presence, currentUser, onClose, onDirecti
 
       {/* Actions */}
       {!isSelf && (
-        <div className="flex flex-col gap-2 px-3 pb-3">
-          <div className="flex gap-2">
-            <Link
-              to={`/user/${encodeURIComponent(presence.user_email)}`}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold"
-              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
-            >
-              👤 Profile
-            </Link>
-            <Link
-              to={createPageUrl(`Messages?with=${presence.user_email}`)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold"
-              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}
-            >
-              <MessageCircle className="w-3.5 h-3.5" /> Message
-            </Link>
-          </div>
-          {onDirections && (
-            <button
-              onClick={onDirections}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold"
-              style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}
-            >
-              <Navigation className="w-3.5 h-3.5" /> Get Directions
-            </button>
-          )}
+        <div className="flex gap-2 px-3 pb-3">
+          <Link
+            to={`/user/${encodeURIComponent(presence.user_email)}`}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold"
+            style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}
+          >
+            <User className="w-3.5 h-3.5" /> Profile
+          </Link>
+          <Link
+            to={createPageUrl(`Messages?with=${presence.user_email}`)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold"
+            style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}
+          >
+            <MessageCircle className="w-3.5 h-3.5" /> Message
+          </Link>
         </div>
       )}
     </div>
