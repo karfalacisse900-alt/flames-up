@@ -55,18 +55,7 @@ function getInitials(name) {
 }
 
 export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, openNearby }) {
-  // Auto-open nearby modal if navigated back from nearby profile
-  useEffect(() => {
-    if (openNearby) setShowNearbyModal(true);
-  }, [openNearby]);
-
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
-  const [radius,              setRadius]              = useState(10);
-  const [showRadiusPanel,     setShowRadiusPanel]     = useState(false);
-  const [selectedUserPresence, setSelectedUserPresence] = useState(null);
-  const [popupCoords,          setPopupCoords]          = useState(null);
-  const [showNearbyModal,      setShowNearbyModal]      = useState(false);
-  const [follows,              setFollows]              = useState([]);
 
   // Search
   const [searchQuery,      setSearchQuery]      = useState("");
