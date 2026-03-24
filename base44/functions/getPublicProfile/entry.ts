@@ -8,15 +8,47 @@ Deno.serve(async (req) => {
   const { email } = await req.json();
   if (!email) return Response.json({ error: 'email required' }, { status: 400 });
 
-  // Check UserProfile entity first (public data, always up to date)
-  const profiles = await base44.asServiceRole.entities.UserProfile.filter({ user_email: email });
+  const isEmail = email.includes("@");
+
+  // 1. Try UserProfile by email or username
+  let profiles = [];
+  if (isEmail) {
+    profiles = await base44.asServiceRole.entities.UserProfile.filter({ user_email: email });
+  } else {
+    // It's a username slug — search by username (with or without @)
+    const slug = email.startsWith("@") ? email : "@" + email;
+    const slug2 = email.startsWith("@") ? email.slice(1) : email;
+    profiles = await base44.asServiceRole.entities.UserProfile.filter({ username: slug });
+    if (!profiles.length) {
+      profiles = await base44.asServiceRole.entities.UserProfile.filter({ username: slug2 });
+    }
+    // Also try matching user_name field
+    if (!profiles.length) {
+      profiles = await base44.asServiceRole.entities.UserProfile.filter({ user_name: slug2 });
+    }
+  }
+
   if (profiles.length > 0) {
     return Response.json({ profile: profiles[0] });
   }
 
-  // Fallback: read from User entity with service role
+  // 2. Fallback: scan User entity
   const allUsers = await base44.asServiceRole.entities.User.list("-created_date", 2000);
-  const found = allUsers.find(u => u.email === email);
+  let found = null;
+  if (isEmail) {
+    found = allUsers.find(u => u.email === email);
+  } else {
+    const slug2 = email.startsWith("@") ? email.slice(1) : email;
+    found = allUsers.find(u =>
+      u.username === email ||
+      u.username === "@" + slug2 ||
+      u.username === slug2 ||
+      u.full_name === slug2 ||
+      u.display_name === slug2 ||
+      u.email?.split("@")[0] === slug2
+    );
+  }
+
   if (!found) return Response.json({ profile: null });
 
   const profileData = {
