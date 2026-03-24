@@ -81,7 +81,6 @@ export default function Home() {
       {divider}
       <DidYouKnowSection user={user} />
       {divider}
-      <CommunityFeed user={user} />
       <WelcomePopup />
     </div>
   );
