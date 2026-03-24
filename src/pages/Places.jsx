@@ -11,7 +11,7 @@ import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import AddPlaceModal from "@/components/places/AddPlaceModal";
 import { requireVerified } from "@/components/auth/EmailVerificationGate";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function PlacesPage() {
