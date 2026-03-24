@@ -56,6 +56,29 @@ function getInitials(name) {
 
 export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, openNearby }) {
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
+  const [token,              setToken]              = useState(null);
+  const [currentUser,        setCurrentUser]        = useState(userProp || null);
+  const [userLoc,            setUserLoc]            = useState(null);
+  const [initCenter,         setInitCenter]         = useState(null);
+  const [mapReady,           setMapReady]           = useState(false);
+  const [nearbyUsers,        setNearbyUsers]        = useState([]);
+  const [follows,            setFollows]            = useState([]);
+  const [radius,             setRadius]             = useState(5);
+  const [showRadiusPanel,    setShowRadiusPanel]    = useState(false);
+  const [myPresence,         setMyPresence]         = useState(null);
+  const [showNearbyModal,    setShowNearbyModal]    = useState(false);
+  const [selectedUserPresence, setSelectedUserPresence] = useState(null);
+  const [popupCoords,        setPopupCoords]        = useState(null);
+  const [error,              setError]              = useState(null);
+
+  const mapRef          = useRef(null);
+  const mapInst         = useRef(null);
+  const selfMarkerRef   = useRef(null);
+  const userMarkersRef  = useRef({});
+  const gpsWatchRef     = useRef(null);
+  const dbThrottleRef   = useRef(null);
+  const presenceSubRef  = useRef(null);
+  const myPresenceRef   = useRef(null);
 
   // Search
   const [searchQuery,      setSearchQuery]      = useState("");
