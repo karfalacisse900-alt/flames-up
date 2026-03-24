@@ -27,7 +27,7 @@ export default function UserProfile() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  const { data: profileUser } = useQuery({
+  const { data: profileUser, isLoading: profileLoading } = useQuery({
     queryKey: ["userProfile", email],
     queryFn: async () => {
       const res = await base44.functions.invoke("getPublicProfile", { email });
@@ -139,6 +139,34 @@ export default function UserProfile() {
     lavender:{ banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" },
   };
   const theme = THEMES[profileUser?.profile_theme || "default"] || THEMES.default;
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen pb-24" style={{ backgroundColor: "#f3f6fb" }}>
+        <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 safe-top"
+          style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
+          <button onClick={() => navigate(-1)} style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="h-4 w-32 rounded-full skeleton" />
+        </div>
+        <div className="max-w-lg mx-auto px-4 pt-4">
+          <div className="rounded-[34px] p-6" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5" }}>
+            <div className="flex items-start gap-4">
+              <div className="w-24 h-24 rounded-full skeleton shrink-0" />
+              <div className="flex-1 pt-2 space-y-3">
+                <div className="h-6 w-40 rounded-full skeleton" />
+                <div className="h-4 w-24 rounded-full skeleton" />
+                <div className="h-4 w-32 rounded-full skeleton" />
+              </div>
+            </div>
+            <div className="mt-4 h-16 rounded-2xl skeleton" />
+            <div className="mt-3 h-10 rounded-2xl skeleton" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: "#f3f6fb" }}>
