@@ -170,6 +170,43 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
               className="absolute flex flex-col items-center gap-0.5"
               style={{ left: p.x - 26, top: p.y - 26, zIndex: 10 }}>
 
+        {/* Inline mini profile popup */}
+        {selectedPerson && (
+          <div className="mx-4 mt-3 rounded-2xl p-3 flex items-center gap-3"
+            style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+            <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center font-bold text-white"
+              style={{ background: selectedPerson.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(selectedPerson.user_email)}, ${getColor(selectedPerson.user_email)}aa)`, border: "2px solid rgba(0,210,120,0.5)" }}>
+              {selectedPerson.avatar_url
+                ? <img src={selectedPerson.avatar_url} alt="" className="w-full h-full object-cover" />
+                : getInitials(selectedPerson.user_name)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-white truncate">{selectedPerson.user_name || "User"}</p>
+              {selectedPerson.status_message && (
+                <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.5)" }}>"{selectedPerson.status_message}"</p>
+              )}
+              <p className="text-xs" style={{ color: "rgba(0,210,120,0.8)" }}>
+                {selectedPerson._dist < 1 ? "< 1 km" : `~${selectedPerson._dist.toFixed(1)} km`} away
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5 shrink-0">
+              <Link to={`/user/${encodeURIComponent(selectedPerson.user_email)}`}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-center"
+                style={{ backgroundColor: "rgba(99,102,241,0.25)", color: "#818cf8" }}>
+                Profile
+              </Link>
+              <button onClick={() => navigate(`/Messages?with=${selectedPerson.user_email}`)}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{ backgroundColor: "rgba(0,210,120,0.15)", color: "#00d27a" }}>
+                Message
+              </button>
+            </div>
+            <button onClick={() => setSelectedPerson(null)} className="ml-1 w-6 h-6 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.1)", minWidth: 24, minHeight: 24 }}>
+              <X className="w-3 h-3 text-white" />
+            </button>
+          </div>
+        )}
+
         {/* More people row */}
         {(nearby.length > 0 || morePeople.length > 0) && (
           <div className="px-5 mt-3 mb-2">
