@@ -26,11 +26,11 @@ const MENU_ITEMS = [
   },
   {
     id: "storyfeed",
-    label: "Story Feed",
-    description: "TikTok-style scrolling stories",
+    label: "ShopTheLook",
+    description: "Discover & shop fashion looks",
     icon: Film,
-    gradient: ["#0ea5e9", "#1d4ed8"],
-    emoji: "🎬",
+    gradient: ["#7C3AED", "#DB2777"],
+    emoji: "🛍️",
     page: "StoryFeed",
   },
   {
