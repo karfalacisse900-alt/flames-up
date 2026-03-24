@@ -18,15 +18,27 @@ export default function PlacesPage() {
   const [user, setUser] = useState(null);
   const [viewMode, setViewMode] = useState("feed"); // "feed" | "map" | "saved"
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedPlace, setSelectedPlace] = useState(null); // { name, city, ... }
+  const [selectedPlace, setSelectedPlace] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
   const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
+  const [openNearbyOnLoad, setOpenNearbyOnLoad] = useState(false);
+  const routeLocation = useLocation();
   const qc = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  // If navigated back from a nearby profile, switch to map and open nearby
+  useEffect(() => {
+    if (routeLocation.state?.openNearby) {
+      setViewMode("map");
+      setOpenNearbyOnLoad(true);
+      // Clear state so refresh doesn't re-trigger
+      window.history.replaceState({}, "");
+    }
+  }, [routeLocation.state]);
 
   const { data: places = [] } = useQuery({
     queryKey: ["realPlaces"],
