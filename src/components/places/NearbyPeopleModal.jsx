@@ -242,12 +242,12 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
             return (
               <div key={p.user_email} className="flex items-center gap-3 p-3 rounded-2xl"
                 style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <button onClick={() => navigate(`/user/${p.user_email}`)}
-                  className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm text-white shrink-0"
+                <button onClick={() => setSelectedPerson(selectedPerson?.user_email === p.user_email ? null : p)}
+                  className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center font-bold text-sm text-white shrink-0"
                   style={{ background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(p.user_email)}, ${getColor(p.user_email)}aa)`, border: "2px solid rgba(0,210,120,0.3)" }}>
                   {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : getInitials(p.user_name)}
                 </button>
-                <div className="flex-1 min-w-0" onClick={() => navigate(`/user/${p.user_email}`)}>
+                <div className="flex-1 min-w-0" onClick={() => setSelectedPerson(selectedPerson?.user_email === p.user_email ? null : p)}>
                   <p className="font-semibold text-sm leading-tight text-white truncate">{p.user_name || "Anonymous"}</p>
                   <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
                     {distMi < 1 ? "< 1 mile" : `~${Math.round(distMi)} miles`} away
