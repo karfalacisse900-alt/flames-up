@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { X, MessageCircle, UserPlus, UserCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { X, MessageCircle, UserPlus, UserCheck, Navigation } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -25,6 +25,7 @@ const getColor = (str) => AVATAR_COLORS[(str||"a").charCodeAt(0) % AVATAR_COLORS
 export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, followedEmails = [], onClose, onHighlight }) {
   const navigate = useNavigate();
   const [friendSent, setFriendSent] = useState({});
+  const [selectedPerson, setSelectedPerson] = useState(null);
   const radarRef = useRef(null);
   const [radarSize, setRadarSize] = useState(300);
   const [sweepAngle, setSweepAngle] = useState(0);
@@ -165,25 +166,9 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
           {radarPeople.map(p => (
             <button
               key={p.user_email}
-              onClick={() => navigate(`/user/${p.user_email}`)}
+              onClick={() => setSelectedPerson(selectedPerson?.user_email === p.user_email ? null : p)}
               className="absolute flex flex-col items-center gap-0.5"
               style={{ left: p.x - 26, top: p.y - 26, zIndex: 10 }}>
-              <div className="w-[52px] h-[52px] rounded-full overflow-hidden flex items-center justify-center font-bold text-sm text-white"
-                style={{
-                  background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(p.user_email)}, ${getColor(p.user_email)}aa)`,
-                  border: "2.5px solid rgba(0,210,120,0.6)",
-                  boxShadow: "0 0 10px rgba(0,210,120,0.35)",
-                }}>
-                {p.avatar_url
-                  ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" />
-                  : getInitials(p.user_name)}
-              </div>
-              <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.85)", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
-                {(p.user_name || "").split(" ")[0]}
-              </span>
-            </button>
-          ))}
-        </div>
 
         {/* More people row */}
         {(nearby.length > 0 || morePeople.length > 0) && (
