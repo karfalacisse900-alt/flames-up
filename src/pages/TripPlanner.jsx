@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MapPin, Plus, X, Trash2, ArrowUp, ArrowDown, Share2,
   Navigation, Search, Loader2, ChevronRight, Map, List,
-  Route, Save
+  Route, Save, Users, UserPlus
 } from "lucide-react";
 
 const EMOJI_BY_CAT = { restaurant: "🍽️", cafe: "☕", park: "🌳", hotel: "🏨", museum: "🏛️", bar: "🍺", shopping_mall: "🛍️", tourist_attraction: "🗺️", default: "📍" };
@@ -36,6 +36,10 @@ export default function TripPlanner() {
   const [shareEmail, setShareEmail] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [collabEmail, setCollabEmail] = useState("");
+  const [showCollabModal, setShowCollabModal] = useState(false);
+  const [sharedTrips, setSharedTrips] = useState([]);
+  const [activeTab, setActiveTab] = useState("my"); // "my" | "shared"
 
   const mapRef = useRef(null);
   const mapInst = useRef(null);
@@ -51,10 +55,14 @@ export default function TripPlanner() {
     base44.functions.invoke("googleMapsToken", {}).then(r => setApiKey(r.data?.key || r.data)).catch(() => {});
   }, []);
 
-  // Load my trips
+  // Load my trips + shared trips
   useEffect(() => {
     if (!user?.email) return;
     base44.entities.Trip.filter({ creator_email: user.email }, "-created_date", 50).then(setMyTrips).catch(() => {});
+    // Load trips where user is a collaborator
+    base44.entities.Trip.list("-created_date", 200).then(all => {
+      setSharedTrips(all.filter(t => t.creator_email !== user.email && (t.collaborators || []).includes(user.email)));
+    }).catch(() => {});
   }, [user?.email]);
 
   // Init Google Maps when view === map and apiKey ready
@@ -234,8 +242,29 @@ export default function TripPlanner() {
     setShowShareModal(false);
   };
 
+  const addCollaborator = async () => {
+    if (!collabEmail.trim() || !activeTrip?.id) return;
+    const collabs = [...new Set([...(activeTrip.collaborators || []), collabEmail.trim()])];
+    const updated = await base44.entities.Trip.update(activeTrip.id, { collaborators: collabs });
+    setActiveTrip(prev => ({ ...prev, collaborators: collabs }));
+    setMyTrips(prev => prev.map(t => t.id === updated.id ? updated : t));
+    setCollabEmail("");
+  };
+
+  const removeCollaborator = async (email) => {
+    if (!activeTrip?.id) return;
+    const collabs = (activeTrip.collaborators || []).filter(e => e !== email);
+    await base44.entities.Trip.update(activeTrip.id, { collaborators: collabs });
+    setActiveTrip(prev => ({ ...prev, collaborators: collabs }));
+    setMyTrips(prev => prev.map(t => t.id === activeTrip.id ? { ...t, collaborators: collabs } : t));
+  };
+
+  const isOwner = activeTrip?.creator_email === user?.email;
+  const canEdit = isOwner || (activeTrip?.collaborators || []).includes(user?.email);
+
   const totalDist = distances.filter(Boolean).reduce((a, b) => a + b, 0);
   const stops = activeTrip?.stops || [];
+  const collabs = activeTrip?.collaborators || [];
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}>
@@ -288,14 +317,24 @@ export default function TripPlanner() {
 
         {/* View toggle when editing */}
         {activeTrip && (
-          <div className="flex gap-1 p-1 rounded-2xl self-start" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", width: "fit-content" }}>
-            {[{ key: "list", icon: List }, { key: "map", icon: Map }].map(({ key, icon: Icon }) => (
-              <button key={key} onClick={() => setView(key)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                style={{ backgroundColor: view === key ? "#4F46E5" : "transparent", color: view === key ? "#fff" : "var(--text-hint)" }}>
-                <Icon className="w-3.5 h-3.5" /> {key === "list" ? "Itinerary" : "Map"}
+          <div className="flex gap-2">
+            <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", width: "fit-content" }}>
+              {[{ key: "list", icon: List }, { key: "map", icon: Map }].map(({ key, icon: Icon }) => (
+                <button key={key} onClick={() => setView(key)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                  style={{ backgroundColor: view === key ? "#4F46E5" : "transparent", color: view === key ? "#fff" : "var(--text-hint)" }}>
+                  <Icon className="w-3.5 h-3.5" /> {key === "list" ? "Itinerary" : "Map"}
+                </button>
+              ))}
+            </div>
+            {isOwner && (
+              <button onClick={() => setShowCollabModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{ backgroundColor: collabs.length > 0 ? "#EEF2FF" : "var(--bg-card)", border: "1px solid var(--border-light)", color: collabs.length > 0 ? "#4F46E5" : "var(--text-secondary)" }}>
+                <Users className="w-3.5 h-3.5" />
+                {collabs.length > 0 ? `${collabs.length} Collab${collabs.length > 1 ? "s" : ""}` : "Invite"}
               </button>
-            ))}
+            )}
           </div>
         )}
       </div>
@@ -483,43 +522,106 @@ export default function TripPlanner() {
 
       {/* MY TRIPS LIST (no active trip) */}
       {!activeTrip && (
-        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
-          {myTrips.length === 0 && !showNewTripForm ? (
-            <div className="py-20 text-center">
-              <div className="text-6xl mb-4">✈️</div>
-              <p className="text-lg font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No trips yet</p>
-              <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>Create your first trip to start planning an adventure</p>
-              <button onClick={() => setShowNewTripForm(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold"
-                style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}>
-                <Plus className="w-4 h-4" /> Create First Trip
+        <div className="flex-1 overflow-y-auto pb-32">
+          {/* Tab switcher */}
+          <div className="flex gap-1 mx-4 mt-4 mb-3 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            {[{ key: "my", label: "My Trips" }, { key: "shared", label: `Shared (${sharedTrips.length})` }].map(({ key, label }) => (
+              <button key={key} onClick={() => setActiveTab(key)}
+                className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
+                style={{ backgroundColor: activeTab === key ? "#4F46E5" : "transparent", color: activeTab === key ? "#fff" : "var(--text-hint)" }}>
+                {label}
               </button>
+            ))}
+          </div>
+
+          {activeTab === "my" && (
+            <div className="px-4 space-y-3">
+              {myTrips.length === 0 && !showNewTripForm ? (
+                <div className="py-20 text-center">
+                  <div className="text-6xl mb-4">✈️</div>
+                  <p className="text-lg font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No trips yet</p>
+                  <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>Create your first trip to start planning</p>
+                  <button onClick={() => setShowNewTripForm(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold"
+                    style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}>
+                    <Plus className="w-4 h-4" /> Create First Trip
+                  </button>
+                </div>
+              ) : (
+                myTrips.map(trip => <TripCard key={trip.id} trip={trip} onClick={() => { setActiveTrip(trip); setView("list"); }} />)
+              )}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {myTrips.map(trip => (
-                <motion.button key={trip.id} onClick={() => { setActiveTrip(trip); setView("list"); }}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all active:scale-[0.98]"
-                  style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-2xl"
-                    style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.12))", border: "1px solid rgba(79,70,229,0.2)" }}>
-                    🗺️
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>{trip.title}</p>
-                    <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-                      {trip.stops?.length || 0} stop{(trip.stops?.length || 0) !== 1 ? "s" : ""}
-                      {trip.total_distance_km ? ` · ${formatKm(trip.total_distance_km)}` : ""}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
-                </motion.button>
-              ))}
+          )}
+
+          {activeTab === "shared" && (
+            <div className="px-4 space-y-3">
+              {sharedTrips.length === 0 ? (
+                <div className="py-20 text-center">
+                  <div className="text-5xl mb-4">🤝</div>
+                  <p className="text-base font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No shared trips yet</p>
+                  <p className="text-sm" style={{ color: "var(--text-hint)" }}>When someone adds you as a collaborator, trips appear here</p>
+                </div>
+              ) : (
+                sharedTrips.map(trip => <TripCard key={trip.id} trip={trip} onClick={() => { setActiveTrip(trip); setView("list"); }} shared />) 
+              )}
             </div>
           )}
         </div>
       )}
+
+      {/* Collaborators Modal */}
+      <AnimatePresence>
+        {showCollabModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            onClick={() => setShowCollabModal(false)}>
+            <motion.div initial={{ y: 80 }} animate={{ y: 0 }} exit={{ y: 80 }}
+              className="w-full max-w-md rounded-3xl p-6"
+              style={{ backgroundColor: "var(--bg-card)" }}
+              onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-1">
+                <Users className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+                <h3 className="text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Collaborators</h3>
+              </div>
+              <p className="text-xs mb-4" style={{ color: "var(--text-hint)" }}>Collaborators can view, edit stops, add notes, and save this trip.</p>
+
+              {/* Current collabs */}
+              {collabs.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {collabs.map(email => (
+                    <div key={email} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "#4F46E5" }}>
+                          {email[0].toUpperCase()}
+                        </div>
+                        <span className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)", maxWidth: 200 }}>{email}</span>
+                      </div>
+                      <button onClick={() => removeCollaborator(email)}
+                        className="w-6 h-6 flex items-center justify-center rounded-full" style={{ backgroundColor: "#FEE2E2", minWidth: 24, minHeight: 24 }}>
+                        <X className="w-3 h-3" style={{ color: "#DC2626" }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <input value={collabEmail} onChange={e => setCollabEmail(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && addCollaborator()}
+                  placeholder="Add by email…"
+                  className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+                <button onClick={addCollaborator}
+                  className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1"
+                  style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}>
+                  <UserPlus className="w-3.5 h-3.5" /> Add
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Share Modal */}
       <AnimatePresence>
@@ -542,7 +644,6 @@ export default function TripPlanner() {
                 style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}>
                 Share Trip
               </button>
-              {/* Google Maps link */}
               <button onClick={() => window.open(`https://www.google.com/maps/dir/${(activeTrip?.stops || []).filter(s => s.lat).map(s => `${s.lat},${s.lng}`).join("/")}`, "_blank")}
                 className="w-full mt-2 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2"
                 style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}>
@@ -553,5 +654,28 @@ export default function TripPlanner() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function TripCard({ trip, onClick, shared }) {
+  return (
+    <motion.button onClick={onClick}
+      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all active:scale-[0.98]"
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-2xl"
+        style={{ background: shared ? "linear-gradient(135deg,rgba(20,184,166,0.12),rgba(16,185,129,0.12))" : "linear-gradient(135deg,rgba(79,70,229,0.12),rgba(124,58,237,0.12))", border: `1px solid ${shared ? "rgba(20,184,166,0.2)" : "rgba(79,70,229,0.2)"}` }}>
+        {shared ? "🤝" : "🗺️"}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>{trip.title}</p>
+        <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+          {trip.stops?.length || 0} stop{(trip.stops?.length || 0) !== 1 ? "s" : ""}
+          {trip.total_distance_km ? ` · ${trip.total_distance_km.toFixed(1)}km` : ""}
+          {shared ? ` · by ${trip.creator_name || trip.creator_email?.split("@")[0]}` : ""}
+        </p>
+      </div>
+      <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+    </motion.button>
   );
 }
