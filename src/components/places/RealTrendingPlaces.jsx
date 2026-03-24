@@ -98,26 +98,15 @@ export default function RealTrendingPlaces({ onSelectPlace }) {
 
   if (loading) return (
     <div className="px-4 py-4">
+      <div ref={mapDivRef} style={{ position: "fixed", width: 1, height: 1, visibility: "hidden", pointerEvents: "none", zIndex: -9999, overflow: "hidden", top: "-9999px", left: "-9999px" }} />
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-        <span className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Trending Near You</span>
-      </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-        {[0,1,2,3].map(i => (
-          <div key={i} className="shrink-0 rounded-2xl overflow-hidden skeleton" style={{ width: 160, height: 180 }} />
-        ))}
-      </div>
-      {/* invisible div for PlacesService */}
-      <div ref={mapDivRef} style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
-    </div>
-  );
 
-  if (!places.length) return <div ref={mapDivRef} style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />;
+  if (!places.length) return <div ref={mapDivRef} style={{ position: "fixed", width: 1, height: 1, visibility: "hidden", pointerEvents: "none", zIndex: -9999, top: "-9999px", left: "-9999px" }} />;
 
   return (
     <div className="px-4 py-4">
-      {/* invisible map div */}
-      <div ref={mapDivRef} style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
+      {/* invisible map div — fully offscreen so it never bleeds through */}
+      <div ref={mapDivRef} style={{ position: "fixed", width: 1, height: 1, visibility: "hidden", pointerEvents: "none", zIndex: -9999, top: "-9999px", left: "-9999px" }} />
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

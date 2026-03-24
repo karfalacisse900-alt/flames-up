@@ -540,6 +540,21 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
 // ── Rich Place Quick Card (Google Places data) ────────────────────────────
 function PlaceQuickCard({ place, onClose, onExpand }) {
   const [photoIdx, setPhotoIdx] = useState(0);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const handleTouchEnd = (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    if (Math.abs(dx) > 40 && dy < 60) {
+      if (dx < 0) setPhotoIdx(i => Math.min(i + 1, (place.photos?.length || 1) - 1));
+      else setPhotoIdx(i => Math.max(i - 1, 0));
+    }
+  };
 
   const priceSymbol = place.price_level ? "$".repeat(place.price_level) : null;
 
@@ -547,18 +562,31 @@ function PlaceQuickCard({ place, onClose, onExpand }) {
     <div className="absolute bottom-4 left-3 right-3 z-30 rounded-3xl overflow-hidden"
       style={{ backgroundColor: "rgba(255,255,255,0.99)", backdropFilter: "blur(20px)", boxShadow: "0 16px 48px rgba(0,0,0,0.22)", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "70vh" }}>
 
-      {/* Photo strip */}
+      {/* Photo strip with swipe */}
       {place.photos?.length > 0 && (
-        <div className="relative" style={{ height: 160 }}>
-          <img src={place.photos[photoIdx]} alt={place.name} className="w-full h-full object-cover" />
+        <div className="relative" style={{ height: 160 }}
+          onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <motion.img
+            key={photoIdx}
+            src={place.photos[photoIdx]}
+            alt={place.name}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full h-full object-cover" />
           {place.photos.length > 1 && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-              {place.photos.map((_, i) => (
-                <button key={i} onClick={() => setPhotoIdx(i)}
-                  className="rounded-full transition-all"
-                  style={{ width: i === photoIdx ? 16 : 6, height: 6, backgroundColor: i === photoIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
-              ))}
-            </div>
+            <>
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                {place.photos.map((_, i) => (
+                  <button key={i} onClick={() => setPhotoIdx(i)}
+                    className="rounded-full transition-all"
+                    style={{ width: i === photoIdx ? 16 : 6, height: 6, backgroundColor: i === photoIdx ? "#fff" : "rgba(255,255,255,0.5)" }} />
+                ))}
+              </div>
+              <div className="absolute top-2 right-10 px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}>
+                {photoIdx + 1} / {place.photos.length}
+              </div>
+            </>
           )}
           <button onClick={onClose}
             className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full"
