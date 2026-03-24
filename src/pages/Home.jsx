@@ -1,4 +1,3 @@
-// v2
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
@@ -17,7 +16,6 @@ export default function Home() {
   const [authChecked, setAuthChecked] = useState(false);
   const containerRef = useRef(null);
   const { containerProps, PullIndicator } = usePullToRefresh(() => {
-    // Refresh feed data here if needed
     window.location.reload();
   });
 
@@ -31,7 +29,6 @@ export default function Home() {
     }
   }, [containerProps]);
 
-  // Show nothing while checking auth to avoid flash
   if (!authChecked) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
@@ -45,7 +42,6 @@ export default function Home() {
     );
   }
 
-  // Show welcome page for unauthenticated users
   if (!user) {
     return <WelcomePage />;
   }
@@ -82,7 +78,6 @@ export default function Home() {
 
       <motion.div variants={fadeUp}>{divider}</motion.div>
 
-      {/* Listen, Don't Judge Feature Banner */}
       <motion.div variants={fadeUp} className="px-4 py-4">
         <Link
           to={createPageUrl("ListenDontJudge")}
