@@ -54,24 +54,11 @@ function getInitials(name) {
   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack }) {
-  const mapRef         = useRef(null);
-  const mapInst        = useRef(null);
-  const selfMarkerRef  = useRef(null);
-  const userMarkersRef = useRef({});
-  const presenceSubRef = useRef(null);
-  const gpsWatchRef    = useRef(null);
-  const dbThrottleRef  = useRef(null);
-  const myPresenceRef  = useRef(null);
-
-  const [token,        setToken]        = useState(null);
-  const [initCenter,   setInitCenter]   = useState(null); // reactive, used for map init
-  const [userLoc,      setUserLoc]      = useState(null);
-  const [mapReady,     setMapReady]     = useState(false);
-  const [error,        setError]        = useState(null);
-  const [currentUser,  setCurrentUser]  = useState(null);
-  const [myPresence,   setMyPresence]   = useState(null);
-  const [nearbyUsers,  setNearbyUsers]  = useState([]);
+export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, openNearby }) {
+  // Auto-open nearby modal if navigated back from nearby profile
+  useEffect(() => {
+    if (openNearby) setShowNearbyModal(true);
+  }, [openNearby]);
 
   const [activeCategories,   setActiveCategories]   = useState(["all"]);
   const [radius,              setRadius]              = useState(10);
