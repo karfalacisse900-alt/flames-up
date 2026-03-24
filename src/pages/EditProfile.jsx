@@ -131,6 +131,15 @@ export default function EditProfile() {
   const handleSave = async () => {
     setSaving(true);
     const usernameToSave = currentUsername ? `@${currentUsername.replace(/^@/, "")}` : "";
+    // Check username availability
+    if (usernameToSave && usernameToSave !== user?.username) {
+      const res = await base44.functions.invoke("checkUsernameAvailable", { username: usernameToSave }).catch(() => null);
+      if (res?.data?.available === false) {
+        alert("That username is already taken. Please choose a different one.");
+        setSaving(false);
+        return;
+      }
+    }
     const profileData = {
       avatar_url: currentAvatar,
       banner_url: currentBanner,
@@ -145,10 +154,11 @@ export default function EditProfile() {
       hobbies: currentHobbies,
       website: currentWebsite,
       website_url: currentWebsite,
+      tiktok: currentTiktok,
+      instagram: currentInstagram,
       interests: currentInterests,
       looking_for: currentLookingFor,
     };
-
     // Save to User entity (own data)
     await base44.auth.updateMe(profileData);
 
