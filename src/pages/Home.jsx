@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
-import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import WelcomePopup from "../components/home/WelcomePopup";
 import WelcomePage from "../components/home/WelcomePage";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -11,23 +10,22 @@ import DidYouKnowSection from "@/components/home/DidYouKnowSection";
 import CommunityFeed from "../components/community/CommunityFeed";
 import StatusBar from "@/components/home/StatusBar";
 
+const stagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.07 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
+};
+
 export default function Home() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const containerRef = useRef(null);
-  const { containerProps, PullIndicator } = usePullToRefresh(() => {
-    window.location.reload();
-  });
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {}).finally(() => setAuthChecked(true));
   }, []);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      Object.assign(containerRef.current, containerProps);
-    }
-  }, [containerProps]);
 
   if (!authChecked) {
     return (
@@ -35,7 +33,7 @@ export default function Home() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          className="w-6 h-6 rounded-full border-2 border-t-transparent"
+          className="w-6 h-6 rounded-full border-2"
           style={{ borderColor: "var(--accent-primary)", borderTopColor: "transparent" }}
         />
       </div>
@@ -50,24 +48,13 @@ export default function Home() {
     <div style={{ height: 1, background: "linear-gradient(to right, transparent, var(--border-light) 20%, var(--border-medium) 50%, var(--border-light) 80%, transparent)" }} />
   );
 
-  const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.07 } },
-  };
-  const fadeUp = {
-    hidden: { opacity: 0, y: 14 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
-  };
-
   return (
     <motion.div
-      ref={containerRef}
       initial="hidden"
       animate="show"
       variants={stagger}
       style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}
     >
-      <PullIndicator />
       <motion.div variants={fadeUp}>
         <HomeHeader user={user} />
       </motion.div>
