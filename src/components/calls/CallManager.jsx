@@ -48,8 +48,8 @@ export default function CallManager({ user }) {
         startRingTimer(event.data);
       }
       if (event.type === "update") {
-        // If the active session was ended remotely
-        if (activeSession && event.id === activeSession.id && event.data?.status === "ended") {
+        // If the active session was ended or declined remotely
+        if (activeSession && event.id === activeSession.id && ["ended", "declined"].includes(event.data?.status)) {
           setActiveSession(null);
         }
         // Keep active session data in sync (e.g. status change to "active")

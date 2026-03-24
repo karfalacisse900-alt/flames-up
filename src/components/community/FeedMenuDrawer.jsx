@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Clock } from "lucide-react";
+import { X, MapPin, Clock, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -14,6 +14,15 @@ const MENU_ITEMS = [
     emoji: "📍",
     page: "LiveNearby",
     badge: "LIVE",
+  },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    description: "News, activity, photos & more",
+    icon: LayoutDashboard,
+    gradient: ["#C026D3", "#9333EA"],
+    emoji: "🗂️",
+    page: "Dashboard",
   },
   {
     id: "temporary",

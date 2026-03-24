@@ -202,9 +202,9 @@ export default function DMChatView({ user, conversation, onBack }) {
             <p className="font-bold text-[16px] truncate" style={{ color: "#1e293b" }}>{displayName}</p>
             {partnerCreator && <CreatorBadge category={partnerCreator.category} size="xs" />}
           </div>
-          <p className="text-[12px] font-medium" style={{ color: "#C026D3" }}>
-            {muted ? "🔇 Muted" : "Typing..."}
-          </p>
+          <p className="text-[12px] font-medium" style={{ color: muted ? "#94A3B8" : "#22C55E" }}>
+              {muted ? "🔇 Muted" : "Online"}
+            </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
