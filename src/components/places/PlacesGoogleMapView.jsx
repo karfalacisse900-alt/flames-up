@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { Loader2, MapPin, SlidersHorizontal, X, Users, ArrowLeft, Search, Navigation, Star, Phone, Globe, Clock } from "lucide-react";
