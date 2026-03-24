@@ -493,6 +493,28 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
         display:flex; align-items:center; justify-content:center;
         font-size:13px; font-weight:700; color:white;
       `;
+      if (p.avatar_url) {
+        const img = document.createElement("img");
+        img.src = p.avatar_url;
+        img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+        img.onerror = () => { img.remove(); el.textContent = getInitials(p.user_name); };
+        el.appendChild(img);
+      } else {
+        el.textContent = getInitials(p.user_name);
+      }
+
+      el.addEventListener("click", e => {
+        e.stopPropagation();
+        const pt = map.project([p.location_lng, p.location_lat]);
+        setPopupCoords({ x: pt.x, y: pt.y });
+        setSelectedUserPresence(p);
+      });
+
+      const marker = new window.mapboxgl.Marker({ element: el, anchor: "center" })
+        .setLngLat([p.location_lng, p.location_lat])
+        .addTo(map);
+      userMarkersRef.current[p.user_email] = marker;
+    });
 
     // Remove stale
     Object.keys(userMarkersRef.current).forEach(email => {
