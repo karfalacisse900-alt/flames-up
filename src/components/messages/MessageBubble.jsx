@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { CornerUpLeft, Copy, Trash2 } from "lucide-react";
+import { CornerUpLeft, Copy, Trash2, Check } from "lucide-react";
 
 const REACTION_EMOJIS = ["❤️", "😂", "😮", "😢", "👍", "🔥", "🎉"];
 
@@ -15,7 +15,11 @@ function formatTime(date) {
   catch { return ""; }
 }
 
-export default function MessageBubble({ message, isMe, user, onReply, onReact, onDelete }) {
+const COLORS = ["#C026D3", "#7C3AED", "#2563EB", "#059669", "#D97706"];
+const avatarColor = (str) => COLORS[(str || "a").charCodeAt(0) % COLORS.length];
+const getInitials = (name) => (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+export default function MessageBubble({ message, isMe, user, onReply, onReact, onDelete, partnerAvatar, partnerName }) {
   const [showMenu, setShowMenu] = useState(false);
   const longPress = useLongPress(() => setShowMenu(true));
 
@@ -32,28 +36,43 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
   const handleReact = (emoji) => { onReact?.(message.id, emoji); setShowMenu(false); };
 
   const bubbleBg = isDeleted
-    ? "var(--bg-subtle)"
+    ? "#f1f5f9"
     : isMe
-    ? "linear-gradient(135deg, #7C3AED, #DB2777)"
-    : "linear-gradient(135deg, #eff6ff, #f5f3ff)";
-  const bubbleRadius = isMe
-    ? "20px 6px 20px 20px"
-    : "6px 20px 20px 20px";
+    ? "linear-gradient(135deg, #C026D3, #9333EA)"
+    : "#FFFFFF";
+
+  const bubbleShadow = isDeleted ? "none" : isMe
+    ? "0 4px 16px rgba(192,38,211,0.25)"
+    : "0 2px 8px rgba(0,0,0,0.07)";
+
+  const bubbleRadius = isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px";
 
   return (
-    <div className={`flex mb-1 ${isMe ? "justify-end" : "justify-start"}`} style={{ paddingLeft: isMe ? 60 : 0, paddingRight: isMe ? 0 : 60 }}>
-      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`} style={{ maxWidth: "100%", position: "relative" }}>
+    <div className={`flex items-end gap-2 mb-2 ${isMe ? "justify-end" : "justify-start"}`}
+      style={{ paddingLeft: isMe ? 52 : 0, paddingRight: isMe ? 0 : 52 }}>
+
+      {/* Left avatar for received */}
+      {!isMe && (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 self-end mb-5 text-xs font-bold text-white overflow-hidden"
+          style={{ background: partnerAvatar ? "transparent" : `linear-gradient(135deg, ${avatarColor(message.sender_email)}, #9333EA)`, minWidth: 32 }}>
+          {partnerAvatar
+            ? <img src={partnerAvatar} alt="" className="w-full h-full object-cover" />
+            : getInitials(partnerName || message.sender_name || message.sender_email)}
+        </div>
+      )}
+
+      <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`} style={{ maxWidth: "72%", position: "relative" }}>
 
         {/* Reply quote */}
         {message.reply_preview && !isDeleted && (
           <div className="w-full mb-1 px-3 py-2 rounded-2xl text-xs overflow-hidden"
             style={{
-              backgroundColor: isMe ? "rgba(255,255,255,0.18)" : "#f3ecff",
-              borderLeft: `3px solid ${isMe ? "#F9A8D4" : "#8B5CF6"}`,
-              color: isMe ? "rgba(255,255,255,0.88)" : "#5B4B8A",
+              backgroundColor: isMe ? "rgba(255,255,255,0.18)" : "#fdf4ff",
+              borderLeft: `3px solid ${isMe ? "#F9A8D4" : "#C026D3"}`,
+              color: isMe ? "rgba(255,255,255,0.88)" : "#7e22ce",
               maxWidth: 260,
             }}>
-            <span style={{ color: isMe ? "#fff" : "#7C3AED", fontWeight: 700 }}>↩ Reply</span>
+            <span style={{ color: isMe ? "#fff" : "#C026D3", fontWeight: 700 }}>↩ Reply</span>
             <p className="truncate mt-0.5">{message.reply_preview}</p>
           </div>
         )}
@@ -65,16 +84,15 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
           style={{
             background: bubbleBg,
             borderRadius: bubbleRadius,
-            border: isDeleted ? "1px solid var(--border-light)" : (isMe ? "none" : "1px solid #ede9fe"),
-            boxShadow: isDeleted ? "none" : "0 10px 24px rgba(15,23,42,0.08)",
-            padding: isOnlyMedia ? 4 : isVoice ? "8px 12px" : "8px 12px 7px",
+            border: isMe ? "none" : (isDeleted ? "1px solid #e2e8f0" : "1px solid #f1f5f9"),
+            boxShadow: bubbleShadow,
+            padding: isOnlyMedia ? 4 : isVoice ? "10px 14px" : "10px 14px 8px",
             cursor: "pointer",
-            maxWidth: 280,
             minWidth: isVoice ? 180 : undefined,
           }}>
 
           {isDeleted ? (
-            <p className="text-sm italic px-1" style={{ color: "var(--text-hint)" }}>🚫 This message was deleted</p>
+            <p className="text-sm italic px-1" style={{ color: "#94A3B8" }}>🚫 This message was deleted</p>
 
           ) : isVoice ? (
             <audio src={message.audio_url} controls style={{ height: 32, minWidth: 180, maxWidth: 240 }} />
@@ -86,42 +104,31 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
             <div className={message.media_urls.length > 1 ? "grid grid-cols-2 gap-0.5" : ""}>
               {message.media_urls.map((url, i) => (
                 <img key={i} src={url} alt="" className="rounded-xl object-cover w-full"
-                  style={{ maxHeight: 220, borderRadius: isOnlyMedia ? 14 : undefined }} />
+                  style={{ maxHeight: 220 }} />
               ))}
             </div>
 
           ) : isLocation ? (
-            <div className="flex items-center gap-2 text-sm py-1" style={{ color: isMe ? "#fff" : "var(--text-primary)" }}>
+            <div className="flex items-center gap-2 text-sm py-1" style={{ color: isMe ? "#fff" : "#1e293b" }}>
               <span className="text-lg">📍</span>
               <span>{message.location_data?.name || "Shared location"}</span>
             </div>
 
           ) : (
-            <p style={{ fontSize: 14.5, lineHeight: 1.45, color: isDeleted ? "var(--text-hint)" : isMe ? "#fff" : "var(--text-primary)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            <p style={{ fontSize: 14.5, lineHeight: 1.5, color: isDeleted ? "#94A3B8" : isMe ? "#fff" : "#1e293b", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {message.text}
             </p>
           )}
-
-          {/* Time + read receipt (inside bubble for text, outside for media) */}
-          {!isDeleted && !isOnlyMedia && !hasGif && (
-            <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-end"}`} style={{ minWidth: 50 }}>
-              <span style={{ fontSize: 11, color: isMe ? "rgba(255,255,255,0.78)" : "var(--text-hint)", lineHeight: 1 }}>{formatTime(message.created_date)}</span>
-              {isMe && (
-                <span style={{ fontSize: 11, color: message.is_read ? "#BFDBFE" : "rgba(255,255,255,0.7)", lineHeight: 1, fontWeight: 700 }}>
-                  {message.is_read ? "✓✓" : "✓"}
-                </span>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Time outside for media */}
-        {!isDeleted && (isOnlyMedia || hasGif) && (
-          <div className="flex items-center gap-1 mt-0.5 px-1">
-            <span style={{ fontSize: 11, color: "var(--text-hint)" }}>{formatTime(message.created_date)}</span>
+        {/* Timestamp + read receipt outside bubble */}
+        {!isDeleted && (
+          <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? "justify-end" : "justify-start"}`}>
+            <span style={{ fontSize: 11, color: "#94A3B8" }}>{formatTime(message.created_date)}</span>
             {isMe && (
-              <span style={{ fontSize: 11, color: "var(--accent-primary)", fontWeight: 700 }}>
-                {message.is_read ? "✓✓" : "✓"}
+              <span className="flex items-center" style={{ color: message.is_read ? "#3B82F6" : "#94A3B8" }}>
+                <Check className="w-3 h-3" strokeWidth={3} />
+                {message.is_read && <Check className="w-3 h-3 -ml-1.5" strokeWidth={3} />}
               </span>
             )}
           </div>
@@ -134,9 +141,9 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
               <button key={emoji} onClick={() => handleReact(emoji)}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]"
                 style={{
-                  backgroundColor: emails.includes(user?.email) ? "#ede9fe" : "#fff",
-                  border: `1px solid ${emails.includes(user?.email) ? "#8B5CF6" : "#ddd"}`,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                  backgroundColor: emails.includes(user?.email) ? "#fdf4ff" : "#fff",
+                  border: `1px solid ${emails.includes(user?.email) ? "#C026D3" : "#e2e8f0"}`,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
                 }}>
                 {emoji} <span style={{ color: "#555" }}>{emails.length}</span>
               </button>
@@ -149,17 +156,17 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
       {showMenu && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-          <div className={`fixed z-50 rounded-2xl shadow-2xl overflow-hidden`}
+          <div className="fixed z-50 rounded-2xl shadow-2xl overflow-hidden"
             style={{
               bottom: "30%",
               [isMe ? "right" : "left"]: 16,
-              backgroundColor: "var(--bg-card)",
+              backgroundColor: "#fff",
               minWidth: 200,
-              border: "1px solid var(--border-light)",
-              boxShadow: "var(--elevation-4)",
+              border: "1px solid #f1f5f9",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             }}>
             {/* Emoji bar */}
-            <div className="flex gap-2 px-4 py-3" style={{ borderBottom: "1px solid #F5F5F5" }}>
+            <div className="flex gap-2 px-4 py-3" style={{ borderBottom: "1px solid #f8fafc" }}>
               {REACTION_EMOJIS.map(e => (
                 <button key={e} onClick={() => handleReact(e)} className="text-2xl" style={{ lineHeight: 1 }}>{e}</button>
               ))}
@@ -171,7 +178,7 @@ export default function MessageBubble({ message, isMe, user, onReply, onReact, o
             ].filter(a => !a.hide).map(({ icon: Icon, label, action, danger }) => (
               <button key={label} onClick={action}
                 className="w-full flex items-center gap-3 px-5 py-3.5 text-[14px]"
-                style={{ color: danger ? "#E53935" : "#333", borderBottom: "1px solid #F5F5F5" }}>
+                style={{ color: danger ? "#E53935" : "#333", borderBottom: "1px solid #f8fafc" }}>
                 <Icon className="w-4 h-4 shrink-0" /> {label}
               </button>
             ))}
