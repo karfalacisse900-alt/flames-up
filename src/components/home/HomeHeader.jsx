@@ -17,7 +17,8 @@ export default function HomeHeader({ user }) {
 
   return (
     <div
-      className="relative overflow-hidden px-5 pt-5 pb-5"
+      className="relative overflow-hidden px-5 pb-5"
+      style={{ borderBottom: "1px solid var(--border-subtle)", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
       style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
       {/* Organic background blobs */}

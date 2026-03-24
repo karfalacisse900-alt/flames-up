@@ -80,9 +80,8 @@ export default function Discover() {
 
       {/* ── Sticky Header ── */}
       <div
-        className="sticky top-0 z-30 px-4 pt-4 pb-3"
-        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)", isolation: "isolate" }}
-      >
+        className="sticky top-0 z-30 px-4 pb-3"
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-subtle)", isolation: "isolate", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
         {/* Title row */}
         <div className="flex items-center justify-between mb-3">
           {view === "browse" && activeTab === "apps" ? (
