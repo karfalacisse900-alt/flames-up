@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Phone, PhoneOff, Video, MessageCircle } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
+import { base44 } from "@/api/base44Client";
 
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
 const avatarColor = (email) => COLORS[(email || "a").charCodeAt(0) % COLORS.length];
@@ -16,6 +16,11 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
   const [showReplies, setShowReplies] = useState(false);
   const [customText, setCustomText] = useState("");
   const [showCustom, setShowCustom] = useState(false);
+
+  useEffect(() => {
+    if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+    return () => { if (navigator.vibrate) navigator.vibrate(0); };
+  }, []);
 
   const handleQuickReply = async (text) => {
     const convId = [session.callee_email, session.caller_email].sort().join("_");
@@ -47,7 +52,7 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
         overflow: "hidden",
       }}
     >
-      {/* Blurred background — caller avatar as backdrop */}
+      {/* Blurred background */}
       <div className="absolute inset-0">
         {session.caller_avatar ? (
           <img src={session.caller_avatar} alt="" className="w-full h-full object-cover" style={{ filter: "blur(28px) brightness(0.55) saturate(1.4)", transform: "scale(1.1)" }} />
@@ -60,7 +65,6 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
       {/* Content */}
       <div className="relative flex flex-col items-center flex-1 pt-12">
 
-        {/* Call type label */}
         <p className="text-white/70 text-base font-medium mb-1 tracking-wide">
           Incoming {isVideo ? "Video" : "Voice"} Call
         </p>
@@ -78,13 +82,10 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
             style={{ background: `linear-gradient(135deg, ${color}, #7C3AED)`, color: "#fff", border: "4px solid rgba(255,255,255,0.35)", boxShadow: "0 12px 40px rgba(0,0,0,0.5)" }}>
             {session.caller_avatar ? (
               <img src={session.caller_avatar} alt={name} className="w-full h-full object-cover" />
-            ) : (
-              name[0]?.toUpperCase()
-            )}
+            ) : name[0]?.toUpperCase()}
           </div>
         </div>
 
-        {/* Caller name */}
         <h2 className="text-white text-[28px] font-bold text-center px-6 leading-tight">{name}</h2>
         <p className="text-white/50 text-sm mt-1 mb-8">{session.caller_email}</p>
 
@@ -103,12 +104,38 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
               className="w-full max-w-xs px-4 space-y-2 mb-4">
               {QUICK_REPLIES.map(r => (
                 <button key={r} onClick={() => handleQuickReply(r)}
+                  className="w-full py-3 px-4 rounded-2xl text-sm font-semibold text-center"
+                  style={{ backgroundColor: "rgba(60,60,80,0.75)", backdropFilter: "blur(12px)", color: "rgba(255,255,255,0.9)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  {r}
+                </button>
+              ))}
+              {!showCustom ? (
+                <button onClick={() => setShowCustom(true)}
+                  className="w-full py-3 px-4 rounded-2xl text-sm font-semibold text-center"
+                  style={{ backgroundColor: "rgba(60,60,80,0.5)", color: "rgba(255,255,255,0.6)" }}>
+                  Custom...
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={customText}
+                    onChange={e => setCustomText(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)" }}
+                    autoFocus
+                  />
+                  <button onClick={() => customText.trim() && handleQuickReply(customText.trim())}
+                    className="px-3 py-2 rounded-xl text-sm font-bold"
+                    style={{ backgroundColor: "#C026D3", color: "#fff" }}>Send</button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Action buttons — iOS-style bottom row */}
+      {/* Action buttons */}
       <div className="relative px-10 pb-4">
         <div className="flex items-center justify-between">
 
@@ -122,7 +149,7 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
             <span className="text-white text-sm font-semibold">Decline</span>
           </div>
 
-          {/* Accept (audio) */}
+          {/* Accept audio (video call only) */}
           {isVideo && (
             <div className="flex flex-col items-center gap-3">
               <motion.button whileTap={{ scale: 0.88 }} onClick={onAccept}
@@ -136,7 +163,7 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
             </div>
           )}
 
-          {/* Accept (video / main accept) */}
+          {/* Accept */}
           <div className="flex flex-col items-center gap-3">
             <motion.button whileTap={{ scale: 0.88 }} onClick={onAccept}
               className="w-[72px] h-[72px] rounded-full flex items-center justify-center"
