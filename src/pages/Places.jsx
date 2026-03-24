@@ -3,10 +3,11 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Bookmark, Map, List, Search, X, Plus } from "lucide-react";
+import { MapPin, Bookmark, Map, List, Search, X, Route } from "lucide-react";
 import MapViewWrapper from "@/components/places/MapViewWrapper";
 import PlaceHub from "@/components/community/PlaceHub";
 import TrendingPlaces from "@/components/community/TrendingPlaces";
+import RealTrendingPlaces from "@/components/places/RealTrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import AddPlaceModal from "@/components/places/AddPlaceModal";
@@ -157,13 +158,14 @@ export default function PlacesPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Add Place Button */}
-              <button onClick={() => user ? setShowAddPlaceModal(true) : base44.auth.redirectToLogin()}
-                aria-label="Add place"
+              {/* Trip Planner Button */}
+              <Link
+                to={createPageUrl("TripPlanner")}
+                aria-label="Trip Planner"
                 className="rounded-xl flex items-center justify-center transition-all active:scale-90"
-                style={{ minWidth: 44, minHeight: 44, backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                <Plus className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
-              </button>
+                style={{ minWidth: 44, minHeight: 44, background: "linear-gradient(135deg,#4F46E5,#7C3AED)", boxShadow: "0 4px 12px rgba(79,70,229,0.3)" }}>
+                <Route className="w-4 h-4 text-white" />
+              </Link>
 
               {/* View toggle */}
               <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
@@ -270,7 +272,10 @@ export default function PlacesPage() {
       {/* FEED VIEW */}
       {viewMode === "feed" && (
         <div>
-          {/* Trending places strip - MAIN SECTION */}
+          {/* Real trending places from Google Maps */}
+          <RealTrendingPlaces onSelectPlace={place => openPlace(place)} />
+
+          {/* Community trending places strip */}
           <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
 
           {/* See More Button */}

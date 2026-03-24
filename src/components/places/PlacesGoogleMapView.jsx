@@ -496,8 +496,8 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         <PlaceQuickCard place={selectedPlace} onClose={() => setSelectedPlace(null)} onExpand={() => setShowPlaceHub(true)} />
       )}
 
-      {/* Map canvas */}
-      <div ref={mapRef} style={{ height: "100%", width: "100%", touchAction: "none" }} />
+      {/* Map canvas — position absolute so it never causes layout reflows that blink */}
+      <div ref={mapRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
 
       {/* Loading */}
       {!mapReady && (
