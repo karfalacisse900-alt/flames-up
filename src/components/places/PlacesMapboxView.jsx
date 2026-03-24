@@ -69,6 +69,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
   const [showNearbyModal,    setShowNearbyModal]    = useState(false);
   const [selectedUserPresence, setSelectedUserPresence] = useState(null);
   const [popupCoords,        setPopupCoords]        = useState(null);
+  const [routeLine,          setRouteLine]          = useState(null); // {coords: [[lng,lat]...]}
   const [error,              setError]              = useState(null);
 
   const mapRef          = useRef(null);
@@ -79,6 +80,7 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
   const dbThrottleRef   = useRef(null);
   const presenceSubRef  = useRef(null);
   const myPresenceRef   = useRef(null);
+  const routeLayerAdded = useRef(false);
 
   // Search
   const [searchQuery,      setSearchQuery]      = useState("");
@@ -88,6 +90,33 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
   const searchDebounceRef  = useRef(null);
   const searchPinRef       = useRef(null);
   const searchInputRef     = useRef(null);
+
+  // Directions: draw route line on map
+  const handleGetDirections = async (presence) => {
+    if (!userLoc || !mapInst.current || !token) return;
+    const [uLng, uLat] = userLoc;
+    const dLng = presence.location_lng;
+    const dLat = presence.location_lat;
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${uLng},${uLat};${dLng},${dLat}?geometries=geojson&access_token=${token}`
+      );
+      const data = await res.json();
+      const coords = data.routes?.[0]?.geometry?.coordinates;
+      if (!coords) return;
+      const map = mapInst.current;
+      if (map.getLayer("route-line")) map.removeLayer("route-line");
+      if (map.getSource("route")) map.removeSource("route");
+      map.addSource("route", { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: coords } } });
+      map.addLayer({ id: "route-line", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#4F46E5", "line-width": 4, "line-opacity": 0.85 } });
+      // Fit bounds
+      const lngs = coords.map(c => c[0]);
+      const lats = coords.map(c => c[1]);
+      map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 80 });
+    } catch {}
+    setSelectedUserPresence(null);
+    setPopupCoords(null);
+  };
 
   const handleSearchInput = (val) => {
     setSearchQuery(val);
@@ -456,36 +485,14 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
 
       const el = document.createElement("div");
       el.style.cssText = `
-        width:42px; height:42px; border-radius:50%;
-        border:2.5px solid #fff;
-        box-shadow:0 3px 14px rgba(0,0,0,0.22);
+        width:52px; height:52px; border-radius:16px;
+        border:3px solid #fff;
+        box-shadow:0 4px 18px rgba(0,0,0,0.28);
         cursor:pointer; overflow:hidden;
         background:linear-gradient(135deg,#7C3AED,#4F46E5);
         display:flex; align-items:center; justify-content:center;
         font-size:13px; font-weight:700; color:white;
       `;
-      if (p.avatar_url) {
-        const img = document.createElement("img");
-        img.src = p.avatar_url;
-        img.style.cssText = "width:100%;height:100%;object-fit:cover;";
-        img.onerror = () => { img.remove(); el.textContent = getInitials(p.user_name); };
-        el.appendChild(img);
-      } else {
-        el.textContent = getInitials(p.user_name);
-      }
-
-      el.addEventListener("click", e => {
-        e.stopPropagation();
-        const pt = map.project([p.location_lng, p.location_lat]);
-        setPopupCoords({ x: pt.x, y: pt.y });
-        setSelectedUserPresence(p);
-      });
-
-      const marker = new window.mapboxgl.Marker({ element: el, anchor: "center" })
-        .setLngLat([p.location_lng, p.location_lat])
-        .addTo(map);
-      userMarkersRef.current[p.user_email] = marker;
-    });
 
     // Remove stale
     Object.keys(userMarkersRef.current).forEach(email => {
