@@ -37,38 +37,41 @@ export default function UserProfile() {
     staleTime: 60000,
   });
 
+  // Use real email from profile (param may be a username slug)
+  const realEmail = profileUser?.user_email || (email?.includes("@") ? email : null);
+
   const { data: userPosts = [] } = useQuery({
-    queryKey: ["userPosts", email],
+    queryKey: ["userPosts", realEmail],
     queryFn: async () => {
-      const posts = await base44.entities.CommunityPost.filter({ author_email: email }, "-created_date", 30);
+      const posts = await base44.entities.CommunityPost.filter({ author_email: realEmail }, "-created_date", 30);
       return posts.filter(p => !p.tags?.includes("listen_dont_judge")).map(normalizePost);
     },
-    enabled: !!email,
+    enabled: !!realEmail,
     staleTime: 60000,
   });
 
   const { data: livePosts = [] } = useQuery({
-    queryKey: ["userLivePosts", email],
+    queryKey: ["userLivePosts", realEmail],
     queryFn: async () => {
-      const posts = await base44.entities.LivePost.filter({ author_email: email }, "-created_date", 10);
+      const posts = await base44.entities.LivePost.filter({ author_email: realEmail }, "-created_date", 10);
       const now = new Date();
       return posts.filter(p => new Date(p.expires_at) > now);
     },
-    enabled: !!email,
+    enabled: !!realEmail,
     staleTime: 60000,
   });
 
   const { data: followData } = useQuery({
-    queryKey: ["followStatus", email, currentUser?.email],
+    queryKey: ["followStatus", realEmail, currentUser?.email],
     queryFn: async () => {
-      if (!currentUser?.email || currentUser.email === email) return null;
+      if (!currentUser?.email || !realEmail || currentUser.email === realEmail) return null;
       const follows = await base44.entities.Follow.filter({
         follower_email: currentUser.email,
-        following_email: email,
+        following_email: realEmail,
       });
       return follows[0] || null;
     },
-    enabled: !!currentUser?.email && currentUser?.email !== email,
+    enabled: !!currentUser?.email && !!realEmail && currentUser?.email !== realEmail,
   });
 
   const isFollowing = !!followData;
@@ -81,11 +84,11 @@ export default function UserProfile() {
       await base44.entities.Follow.create({
         follower_email: currentUser.email,
         follower_name: currentUser.full_name,
-        following_email: email,
+        following_email: realEmail,
         following_name: effectiveName,
       });
     }
-    qc.invalidateQueries({ queryKey: ["followStatus", email, currentUser?.email] });
+    qc.invalidateQueries({ queryKey: ["followStatus", realEmail, currentUser?.email] });
   };
 
   const handleMessage = () => {
@@ -95,13 +98,13 @@ export default function UserProfile() {
 
   const handleReport = () => {
     if (!currentUser) return;
-    base44.entities.Report.create({ content_type: "user", content_id: email, reason: "Reported from profile", reporter_email: currentUser.email });
+    base44.entities.Report.create({ content_type: "user", content_id: realEmail || email, reason: "Reported from profile", reporter_email: currentUser.email });
     alert("User reported. Our team will review this.");
   };
 
   const handleBlock = async () => {
     if (!currentUser) return;
-    await base44.entities.BlockedUser.create({ blocker_email: currentUser.email, blocked_email: email });
+    await base44.entities.BlockedUser.create({ blocker_email: currentUser.email, blocked_email: realEmail || email });
     alert("User blocked");
     navigate(-1);
   };
@@ -126,7 +129,7 @@ export default function UserProfile() {
   const instagram = profileUser?.instagram;
   const bannerUrl = profileUser?.banner_url;
 
-  const isOwnProfile = currentUser?.email === email;
+  const isOwnProfile = currentUser?.email === realEmail || currentUser?.email === email;
 
   const THEMES = {
     default: { banner: "linear-gradient(135deg, #EEF2FF, #F1F5F9)" },
@@ -281,7 +284,7 @@ export default function UserProfile() {
                   Message
                 </button>
                 <FriendRequestButton
-                  targetEmail={email}
+                  targetEmail={realEmail || email}
                   targetName={effectiveName}
                   targetAvatar={avatarUrl}
                   currentUser={currentUser}
