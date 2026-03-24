@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Phone, PhoneOff, Video, MessageCircle } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 
 const COLORS = ["#7C3AED", "#0F766E", "#E53935", "#D97706", "#1D4ED8"];
@@ -13,11 +14,22 @@ const QUICK_REPLIES = [
 
 export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
   const [showReplies, setShowReplies] = useState(false);
+  const [customText, setCustomText] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
 
-  useEffect(() => {
-    if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
-    return () => { if (navigator.vibrate) navigator.vibrate(0); };
-  }, []);
+  const handleQuickReply = async (text) => {
+    const convId = [session.callee_email, session.caller_email].sort().join("_");
+    await base44.entities.DirectMessage.create({
+      conversation_id: convId,
+      sender_email: session.callee_email,
+      sender_name: session.callee_name || session.callee_email,
+      receiver_email: session.caller_email,
+      text: `[Call declined] ${text}`,
+      message_type: "text",
+      is_read: false,
+    }).catch(() => {});
+    onDecline();
+  };
 
   const name = session.caller_name || session.caller_email?.split("@")[0] || "Someone";
   const color = avatarColor(session.caller_email);
@@ -90,17 +102,7 @@ export default function IncomingCallOverlay({ session, onAccept, onDecline }) {
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               className="w-full max-w-xs px-4 space-y-2 mb-4">
               {QUICK_REPLIES.map(r => (
-                <button key={r} onClick={() => onDecline()}
-                  className="w-full py-3 px-4 rounded-2xl text-sm font-semibold text-center"
-                  style={{ backgroundColor: "rgba(60,60,80,0.75)", backdropFilter: "blur(12px)", color: "rgba(255,255,255,0.9)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                  {r}
-                </button>
-              ))}
-              <button onClick={() => onDecline()}
-                className="w-full py-3 px-4 rounded-2xl text-sm font-semibold text-center"
-                style={{ backgroundColor: "rgba(60,60,80,0.5)", color: "rgba(255,255,255,0.6)" }}>
-                Custom
-              </button>
+                <button key={r} onClick={() => handleQuickReply(r)}
             </motion.div>
           )}
         </AnimatePresence>
