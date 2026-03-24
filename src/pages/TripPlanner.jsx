@@ -494,16 +494,16 @@ export default function TripPlanner() {
 
       {/* ACTIVE TRIP — MAP VIEW */}
       {activeTrip && view === "map" && (
-        <div className="flex-1 relative" style={{ minHeight: "calc(100vh - 140px)" }}>
-          <div ref={mapRef} style={{ height: "100%", width: "100%", minHeight: 400 }} />
+        <div style={{ position: "relative", height: "calc(100dvh - 140px)", overflow: "hidden", WebkitOverflowScrolling: "touch" }}>
+          <div ref={mapRef} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
           {!mapReady && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
+            <div className="absolute inset-0 flex items-center justify-center z-10" style={{ backgroundColor: "var(--bg-app)" }}>
               <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--accent-primary)" }} />
             </div>
           )}
           {/* Stop labels overlay */}
           {stops.length > 0 && (
-            <div className="absolute bottom-4 left-3 right-3 rounded-2xl p-3 overflow-x-auto scrollbar-hide"
+            <div className="absolute bottom-4 left-3 right-3 z-10 rounded-2xl p-3 overflow-x-auto scrollbar-hide"
               style={{ backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
               <div className="flex gap-2">
                 {stops.map((stop, i) => (
