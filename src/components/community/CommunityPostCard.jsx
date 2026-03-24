@@ -371,7 +371,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               )}
               <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
                 <span className="text-xs font-medium shrink-0" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
-                {(post.location_name || post.location_city) && (
+                {post.place_id && (post.location_name || post.location_city) && (
                   <>
                     <span className="shrink-0" style={{ color: "var(--text-hint)" }}>•</span>
                     <button
