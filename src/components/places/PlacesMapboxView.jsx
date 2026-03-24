@@ -711,7 +711,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
           pointerEvents:"auto",
         }}>
           <UserPinPopup presence={selectedUserPresence} currentUser={currentUser}
-            onClose={() => { setSelectedUserPresence(null); setPopupCoords(null); }} />
+           onClose={() => { setSelectedUserPresence(null); setPopupCoords(null); }}
+           onDirections={() => handleGetDirections(selectedUserPresence)} />
         </div>
       )}
 
