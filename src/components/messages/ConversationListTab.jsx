@@ -68,16 +68,18 @@ export default function ConversationListTab({ user, tab, onSelect, searchQuery =
     return m;
   }, [allUsers]);
 
-  useEffect(() => {
-    if (!user?.email) return;
-    const unsub = base44.entities.DirectMessage.subscribe((event) => {
-      if (event.data?.receiver_email === user.email || event.data?.sender_email === user.email) {
-        queryClient.invalidateQueries({ queryKey: ["dmSent", user.email] });
-        queryClient.invalidateQueries({ queryKey: ["dmReceived", user.email] });
-      }
-    });
-    return unsub;
-  }, [user?.email, queryClient]);
+  // Fetch UserProfiles to get real avatars
+  const { data: allProfiles = [] } = useQuery({
+    queryKey: ["userProfilesForMessages"],
+    queryFn: () => base44.entities.UserProfile.list("-updated_date", 500),
+    enabled: !!user?.email,
+    staleTime: 60000,
+  });
+  const profileAvatarMap = useMemo(() => {
+    const m = {};
+    allProfiles.forEach(p => { if (p.user_email && p.avatar_url) m[p.user_email] = p.avatar_url; });
+    return m;
+  }, [allProfiles]);
 
   const followingEmails = useMemo(() => new Set(myFollowing.map(f => f.following_email)), [myFollowing]);
 
@@ -141,14 +143,14 @@ export default function ConversationListTab({ user, tab, onSelect, searchQuery =
 
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold"
+            <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold overflow-hidden"
               style={{ background: `linear-gradient(135deg, ${avatarColor(conv.email)}, ${avatarColor(conv.email)}bb)`, color: "#fff" }}>
-              {conv.name?.[0]?.toUpperCase() || "?"}
+              {profileAvatarMap[conv.email] ? (
+                <img src={profileAvatarMap[conv.email]} alt={conv.name} className="w-full h-full object-cover" />
+              ) : (
+                conv.name?.[0]?.toUpperCase() || "?"
+              )}
             </div>
-            {isOnline(userPresenceMap[conv.email]) && (
-              <div className="absolute bottom-0.5 right-0.5">
-                <OnlineDot lastSeen={userPresenceMap[conv.email]} size={12} />
-              </div>
             )}
           </div>
 
