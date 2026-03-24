@@ -188,6 +188,11 @@ export default function EditProfile() {
       hobbies: currentHobbies,
       website: currentWebsite,
       tiktok: currentTiktok,
+      instagram: currentInstagram,
+      interests: currentInterests,
+      looking_for: currentLookingFor,
+    };
+    if (existing.length > 0) {
       await base44.entities.UserProfile.update(existing[0].id, publicData);
     } else {
       await base44.entities.UserProfile.create(publicData);
