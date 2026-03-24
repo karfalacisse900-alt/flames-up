@@ -18,8 +18,7 @@ export default function HomeHeader({ user }) {
   return (
     <div
       className="relative overflow-hidden px-5 pb-5"
-      style={{ borderBottom: "1px solid var(--border-subtle)", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
-      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      style={{ borderBottom: "1px solid var(--border-subtle)", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}
     >
       {/* Organic background blobs */}
       <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #E05C2A, #F97316)" }} />
