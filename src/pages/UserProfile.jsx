@@ -19,6 +19,7 @@ export default function UserProfile() {
   const { email: emailParam } = useParams();
   const urlParams = new URLSearchParams(window.location.search);
   const email = emailParam || urlParams.get("email");
+  const fromNearby = urlParams.get("from") === "nearby";
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const qc = useQueryClient();
@@ -173,7 +174,7 @@ export default function UserProfile() {
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 safe-top"
         style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <button onClick={() => navigate(-1)} aria-label="Go back" style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", touchAction: "manipulation" }}>
+        <button onClick={() => fromNearby ? navigate("/Places", { state: { openNearby: true } }) : navigate(-1)} aria-label="Go back" style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", touchAction: "manipulation" }}>
           <ArrowLeft className="w-5 h-5" />
         </button>
         <span className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>

@@ -79,14 +79,13 @@ export default function EditProfile() {
   const [aboutMe, setAboutMe] = useState(null);
   const [city, setCity] = useState(null);
   const [age, setAge] = useState(null);
-  const [major, setMajor] = useState(null);
-  const [graduationYear, setGraduationYear] = useState(null);
   const [hobbies, setHobbies] = useState(null);
   const [website, setWebsite] = useState(null);
   const [tiktok, setTiktok] = useState(null);
   const [instagram, setInstagram] = useState(null);
   const [interests, setInterests] = useState(null);
   const [lookingFor, setLookingFor] = useState(null);
+  const [displayNameError, setDisplayNameError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -99,8 +98,6 @@ export default function EditProfile() {
   const currentAboutMe = val(aboutMe, "about_me");
   const currentCity = val(city, "city");
   const currentAge = val(age, "age");
-  const currentMajor = val(major, "major");
-  const currentGraduationYear = val(graduationYear, "graduation_year");
   const currentHobbies = val(hobbies, "hobbies");
   const currentWebsite = val(website, "website") || val(null, "website_url");
   const currentTiktok = val(tiktok, "tiktok");
@@ -109,6 +106,20 @@ export default function EditProfile() {
   const currentLookingFor = lookingFor ?? (user?.looking_for ?? []);
 
   const getInitials = () => (currentName || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+
+  const validateDisplayName = (name) => {
+    if (/[^a-zA-Z\s\-']/.test(name)) {
+      setDisplayNameError("Display name can only contain letters, spaces, hyphens, and apostrophes");
+      return false;
+    }
+    setDisplayNameError("");
+    return true;
+  };
+
+  const handleDisplayNameChange = (val) => {
+    setDisplayName(val);
+    validateDisplayName(val);
+  };
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
@@ -129,6 +140,7 @@ export default function EditProfile() {
   };
 
   const handleSave = async () => {
+    if (!validateDisplayName(currentName)) return;
     setSaving(true);
     const usernameToSave = currentUsername ? `@${currentUsername.replace(/^@/, "")}` : "";
     // Check username availability
@@ -149,8 +161,6 @@ export default function EditProfile() {
       about_me: currentAboutMe,
       city: currentCity,
       age: currentAge ? String(currentAge) : "",
-      major: currentMajor,
-      graduation_year: currentGraduationYear ? String(currentGraduationYear) : "",
       hobbies: currentHobbies,
       website: currentWebsite,
       website_url: currentWebsite,
@@ -175,16 +185,9 @@ export default function EditProfile() {
       banner_url: currentBanner,
       city: currentCity,
       age: currentAge ? String(currentAge) : "",
-      major: currentMajor,
-      graduation_year: currentGraduationYear ? String(currentGraduationYear) : "",
       hobbies: currentHobbies,
       website: currentWebsite,
       tiktok: currentTiktok,
-      instagram: currentInstagram,
-      interests: currentInterests,
-      looking_for: currentLookingFor,
-    };
-    if (existing.length > 0) {
       await base44.entities.UserProfile.update(existing[0].id, publicData);
     } else {
       await base44.entities.UserProfile.create(publicData);
@@ -254,7 +257,10 @@ export default function EditProfile() {
         {/* Basic Info */}
         {sectionTitle("Basic Info")}
         <div className="space-y-4">
-          <FieldInput label="Display Name" value={currentName} onChange={setDisplayName} placeholder="Your name" />
+          <div>
+            <FieldInput label="Display Name" value={currentName} onChange={handleDisplayNameChange} placeholder="Your name" />
+            {displayNameError && <p className="text-xs mt-1" style={{ color: "#E05C7A" }}>{displayNameError}</p>}
+          </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Username</label>
             <div className="flex items-center px-4 rounded-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 48 }}>
@@ -285,10 +291,8 @@ export default function EditProfile() {
         {/* Personal Info */}
         {sectionTitle("Personal Info")}
         <div className="space-y-4">
-          <FieldInput label="City" value={currentCity} onChange={setCity} placeholder="e.g. New York" />
+          <FieldInput label="Borough" value={currentCity} onChange={setCity} placeholder="e.g. Brooklyn" />
           <FieldInput label="Age" value={currentAge} onChange={v => setAge(String(v))} placeholder="e.g. 22" />
-          <FieldInput label="Major / Occupation" value={currentMajor} onChange={setMajor} placeholder="e.g. Computer Science" />
-          <FieldInput label="Graduation Year" value={currentGraduationYear} onChange={setGraduationYear} placeholder="e.g. 2025" />
           <FieldInput label="Hobbies" value={currentHobbies} onChange={setHobbies} placeholder="e.g. hiking, painting…" />
         </div>
 
