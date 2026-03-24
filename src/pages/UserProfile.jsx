@@ -238,9 +238,7 @@ export default function UserProfile() {
               <div className="mt-3 rounded-[20px] px-4 py-3 space-y-2" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--text-hint)" }}>Personal Info</p>
                 {age && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Age</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{age}</span></div>}
-                {city && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>City</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{city}</span></div>}
-                {major && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Major</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{major}</span></div>}
-                {graduationYear && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Graduation</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{graduationYear}</span></div>}
+                {city && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Borough</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{city}</span></div>}
                 {hobbies && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Hobbies</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{Array.isArray(hobbies) ? hobbies.join(", ") : hobbies}</span></div>}
               </div>
             )}
