@@ -38,6 +38,7 @@ export default function UserProfile() {
     staleTime: 60000,
   });
 
+  // Use real email from profile (param may be a username slug)
   const realEmail = profileUser?.user_email || (email?.includes("@") ? email : null);
 
   const { data: userPosts = [] } = useQuery({
@@ -76,33 +77,6 @@ export default function UserProfile() {
 
   const isFollowing = !!followData;
 
-  const avatarUrl = profileUser?.avatar_url;
-  const rawName = profileUser?.display_name || profileUser?.user_name || profileUser?.full_name;
-  const effectiveName = rawName || email?.split("@")[0] || "User";
-  const username = profileUser?.username;
-  const bio = profileUser?.bio;
-  const aboutMe = profileUser?.about_me;
-  const interests = profileUser?.interests || [];
-  const lookingFor = profileUser?.looking_for || [];
-  const age = profileUser?.age;
-  const city = profileUser?.city;
-  const hobbies = profileUser?.hobbies;
-  const website = profileUser?.website || profileUser?.website_url;
-  const portfolio = profileUser?.portfolio || profileUser?.portfolio_url;
-  const tiktok = profileUser?.tiktok;
-  const instagram = profileUser?.instagram;
-  const bannerUrl = profileUser?.banner_url;
-  const isOwnProfile = currentUser?.email === realEmail || currentUser?.email === email;
-
-  const THEMES = {
-    default:  { banner: "linear-gradient(135deg, #EEF2FF, #F1F5F9)" },
-    forest:   { banner: "linear-gradient(135deg, #1a3a20, #2d5a35)" },
-    ocean:    { banner: "linear-gradient(135deg, #0f2a3f, #1e4060)" },
-    sunset:   { banner: "linear-gradient(135deg, #3d1f0a, #5a2e10)" },
-    lavender: { banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" },
-  };
-  const theme = THEMES[profileUser?.profile_theme || "default"] || THEMES.default;
-
   const handleFollow = async () => {
     if (!currentUser) { alert("Please log in to follow users"); return; }
     if (isFollowing && followData) {
@@ -136,6 +110,37 @@ export default function UserProfile() {
     navigate(-1);
   };
 
+  // Build display info — UserProfile entity uses display_name, user_name; User entity uses full_name
+  const avatarUrl = profileUser?.avatar_url;
+  const rawName = profileUser?.display_name || profileUser?.user_name || profileUser?.full_name;
+  const effectiveName = rawName || email?.split("@")[0] || "User";
+  const username = profileUser?.username;
+  const bio = profileUser?.bio;
+  const aboutMe = profileUser?.about_me;
+  const interests = profileUser?.interests || [];
+  const lookingFor = profileUser?.looking_for || [];
+  const age = profileUser?.age;
+  const city = profileUser?.city;
+  const major = profileUser?.major;
+  const graduationYear = profileUser?.graduation_year;
+  const hobbies = profileUser?.hobbies;
+  const website = profileUser?.website || profileUser?.website_url;
+  const portfolio = profileUser?.portfolio || profileUser?.portfolio_url;
+  const tiktok = profileUser?.tiktok;
+  const instagram = profileUser?.instagram;
+  const bannerUrl = profileUser?.banner_url;
+
+  const isOwnProfile = currentUser?.email === realEmail || currentUser?.email === email;
+
+  const THEMES = {
+    default: { banner: "linear-gradient(135deg, #EEF2FF, #F1F5F9)" },
+    forest:  { banner: "linear-gradient(135deg, #1a3a20, #2d5a35)" },
+    ocean:   { banner: "linear-gradient(135deg, #0f2a3f, #1e4060)" },
+    sunset:  { banner: "linear-gradient(135deg, #3d1f0a, #5a2e10)" },
+    lavender:{ banner: "linear-gradient(135deg, #2a1f3d, #3d2b5a)" },
+  };
+  const theme = THEMES[profileUser?.profile_theme || "default"] || THEMES.default;
+
   if (profileLoading) {
     return (
       <div className="min-h-screen pb-24" style={{ backgroundColor: "#f3f6fb" }}>
@@ -153,9 +158,11 @@ export default function UserProfile() {
               <div className="flex-1 pt-2 space-y-3">
                 <div className="h-6 w-40 rounded-full skeleton" />
                 <div className="h-4 w-24 rounded-full skeleton" />
+                <div className="h-4 w-32 rounded-full skeleton" />
               </div>
             </div>
             <div className="mt-4 h-16 rounded-2xl skeleton" />
+            <div className="mt-3 h-10 rounded-2xl skeleton" />
           </div>
         </div>
       </div>
@@ -167,8 +174,7 @@ export default function UserProfile() {
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-3 px-4 py-3 safe-top"
         style={{ backgroundColor: "var(--bg-card)", borderBottom: "1px solid var(--border-light)" }}>
-        <button onClick={() => fromNearby ? navigate("/Places", { state: { openNearby: true } }) : navigate(-1)}
-          style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+        <button onClick={() => fromNearby ? navigate("/Places", { state: { openNearby: true } }) : navigate(-1)} aria-label="Go back" style={{ minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", touchAction: "manipulation" }}>
           <ArrowLeft className="w-5 h-5" />
         </button>
         <span className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
@@ -177,10 +183,11 @@ export default function UserProfile() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 pt-4">
-        {/* Profile Card */}
+        {/* Profile Card — same design as own Profile page */}
         <div className="relative overflow-hidden rounded-[34px] p-4"
           style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
 
+          {/* Banner */}
           {bannerUrl ? (
             <img src={bannerUrl} alt="" className="absolute inset-x-0 top-0 w-full object-cover" style={{ height: 112, opacity: 0.85 }} />
           ) : (
@@ -188,13 +195,19 @@ export default function UserProfile() {
           )}
 
           <div className="relative">
+            {/* Avatar + name row */}
             <div className="flex items-start gap-4 pt-2">
-              <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold shrink-0"
-                style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
-                {avatarUrl
-                  ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                  : effectiveName[0]?.toUpperCase()}
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold"
+                  style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    (effectiveName)[0]?.toUpperCase()
+                  )}
+                </div>
               </div>
+
               <div className="flex-1 min-w-0 pt-2">
                 <h2 className="text-[24px] font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
                   {effectiveName}
@@ -202,14 +215,17 @@ export default function UserProfile() {
                 {username && <p className="text-sm mt-1 font-semibold" style={{ color: "var(--text-hint)" }}>{username}</p>}
                 {interests.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {interests.slice(0, 2).map(item => (
-                      <span key={item} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>{item}</span>
+                    {interests.slice(0, 2).map((item) => (
+                      <span key={item} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                        {item}
+                      </span>
                     ))}
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Bio / about */}
             {(bio || aboutMe) && (
               <div className="mt-4 rounded-[24px] px-4 py-3" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
                 {bio && <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{bio}</p>}
@@ -217,7 +233,8 @@ export default function UserProfile() {
               </div>
             )}
 
-            {(age || city || hobbies) && (
+            {/* Personal info */}
+            {(age || city || major || graduationYear || hobbies) && (
               <div className="mt-3 rounded-[20px] px-4 py-3 space-y-2" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--text-hint)" }}>Personal Info</p>
                 {age && <div className="flex gap-3 text-sm"><span style={{ color: "var(--text-hint)", width: 110 }}>Age</span><span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{age}</span></div>}
@@ -226,6 +243,7 @@ export default function UserProfile() {
               </div>
             )}
 
+            {/* Looking For */}
             {lookingFor.length > 0 && (
               <div className="mt-3">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--text-hint)" }}>Looking For</p>
@@ -239,32 +257,58 @@ export default function UserProfile() {
               </div>
             )}
 
+            {/* All interest tags */}
             {interests.length > 0 && (
               <div className="mt-3">
                 <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--text-hint)" }}>Interests</p>
                 <div className="flex flex-wrap gap-1.5">
                   {interests.map((tag, i) => (
-                    <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>{tag}</span>
+                    <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "#d9eef7", color: "#2d5b7c" }}>
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
+            {/* Social links */}
             {(website || portfolio || tiktok || instagram) && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {website && <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>🌐 Website</a>}
-                {portfolio && <a href={portfolio.startsWith("http") ? portfolio : `https://${portfolio}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>💼 Portfolio</a>}
-                {tiktok && <a href={`https://tiktok.com/@${tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>🎵 TikTok</a>}
-                {instagram && <a href={`https://instagram.com/${instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>📸 Instagram</a>}
+                {website && (
+                  <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    🌐 Website
+                  </a>
+                )}
+                {portfolio && (
+                  <a href={portfolio.startsWith("http") ? portfolio : `https://${portfolio}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    💼 Portfolio
+                  </a>
+                )}
+                {tiktok && (
+                  <a href={`https://tiktok.com/@${tiktok.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    🎵 TikTok
+                  </a>
+                )}
+                {instagram && (
+                  <a href={`https://instagram.com/${instagram.replace(/^@/, "")}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, color: "var(--accent-primary)", padding: "4px 12px", borderRadius: 20, backgroundColor: "var(--accent-primary-light)", fontWeight: 600 }}>
+                    📸 Instagram
+                  </a>
+                )}
               </div>
             )}
 
+            {/* Action buttons */}
             {!isOwnProfile && currentUser && (
               <div className="flex gap-2 mt-4">
                 <button onClick={handleMessage}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm"
                   style={{ backgroundColor: "var(--accent-primary)", color: "#ffffff" }}>
-                  <MessageCircle className="w-4 h-4" /> Message
+                  <MessageCircle className="w-4 h-4" />
+                  Message
                 </button>
                 <FriendRequestButton
                   targetEmail={realEmail || email}
@@ -279,8 +323,12 @@ export default function UserProfile() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleReport}><Flag className="w-4 h-4 mr-2" /> Report</DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleBlock} className="text-red-600"><UserX className="w-4 h-4 mr-2" /> Block</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleReport}>
+                      <Flag className="w-4 h-4 mr-2" /> Report
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleBlock} className="text-red-600">
+                      <UserX className="w-4 h-4 mr-2" /> Block
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -296,6 +344,7 @@ export default function UserProfile() {
           </div>
         </div>
 
+        {/* Live Activities */}
         {livePosts.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-3">
@@ -308,6 +357,7 @@ export default function UserProfile() {
           </div>
         )}
 
+        {/* Posts */}
         <div className="mt-4">
           <h3 className="text-lg font-bold mb-3" style={{ fontFamily: "var(--font-serif)" }}>Posts</h3>
           {userPosts.length === 0 ? (
@@ -327,7 +377,10 @@ export default function UserProfile() {
                     const newUpvotedBy = alreadyLiked
                       ? (post.upvoted_by || []).filter(e => e !== currentUser.email)
                       : [...(post.upvoted_by || []), currentUser.email];
-                    await base44.entities.CommunityPost.update(post.id, { upvotes: newUpvotedBy.length, upvoted_by: newUpvotedBy });
+                    await base44.entities.CommunityPost.update(post.id, {
+                      upvotes: newUpvotedBy.length,
+                      upvoted_by: newUpvotedBy,
+                    });
                   }}
                 />
               ))}

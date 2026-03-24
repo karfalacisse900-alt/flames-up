@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Clock, LayoutDashboard, Film } from "lucide-react";
+import { X, MapPin, Clock, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -23,15 +23,6 @@ const MENU_ITEMS = [
     gradient: ["#C026D3", "#9333EA"],
     emoji: "🗂️",
     page: "Dashboard",
-  },
-  {
-    id: "storyfeed",
-    label: "ShopTheLook",
-    description: "Discover & shop fashion looks",
-    icon: Film,
-    gradient: ["#7C3AED", "#DB2777"],
-    emoji: "🛍️",
-    page: "StoryFeed",
   },
   {
     id: "temporary",
