@@ -234,7 +234,7 @@ const BOROUGHS = [
     name: "The Bronx",
     tagline: "Birthplace of hip-hop and so much more",
     description: "The New York Botanical Garden, amazing Bronx Zoo, Arthur Avenue Italian market, and hip-hop history",
-    image: "https://images.unsplash.com/photo-1594818379496-da1e345b0ded?w=600&h=400&fit=crop",
+    image: "https://images.unsplash.com/photo-1546268060-2592ff93ee24?w=600&h=400&fit=crop",
     emoji: "🎵",
     neighborhoods: [
       {
