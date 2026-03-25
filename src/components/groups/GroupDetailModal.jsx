@@ -1,42 +1,42 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Users, ChevronLeft, MessageSquare } from "lucide-react";
+import { ChevronLeft, Bookmark, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import moment from "moment";
 
-const CATEGORY_GRADIENTS = {
-  fitness:  ["#0d9488","#16a34a"], food: ["#ea580c","#d97706"],
-  travel:   ["#0284c7","#6d28d9"], tech: ["#0284c7","#0369a1"],
-  art:      ["#7c3aed","#a21caf"], music: ["#db2777","#be185d"],
-  gaming:   ["#16a34a","#15803d"], movies: ["#7c3aed","#4338ca"],
-  sports:   ["#ea580c","#dc2626"], general: ["#64748b","#475569"],
+const GRADIENTS = {
+  sports: "linear-gradient(135deg,#ea580c,#dc2626)",
+  fitness: "linear-gradient(135deg,#0d9488,#16a34a)",
+  food: "linear-gradient(135deg,#ea580c,#d97706)",
+  music: "linear-gradient(135deg,#db2777,#be185d)",
+  tech: "linear-gradient(135deg,#0284c7,#0369a1)",
+  art: "linear-gradient(135deg,#7c3aed,#a21caf)",
+  travel: "linear-gradient(135deg,#0284c7,#6d28d9)",
+  gaming: "linear-gradient(135deg,#16a34a,#15803d)",
+  movies: "linear-gradient(135deg,#7c3aed,#4338ca)",
+  general: "linear-gradient(135deg,#64748b,#475569)",
 };
 
-function getGrad(cat) {
-  const [a, b] = CATEGORY_GRADIENTS[cat] || CATEGORY_GRADIENTS.general;
-  return `linear-gradient(135deg, ${a}, ${b})`;
+function Avatar({ name, size = 38 }) {
+  const colors = ["#4F46E5","#7C3AED","#DB2777","#EA580C","#16A34A","#0284C7"];
+  const idx = name ? name.charCodeAt(0) % colors.length : 0;
+  const letter = (name?.[0] || "U").toUpperCase();
+  return (
+    <div style={{ width: size, height: size, borderRadius: "50%", backgroundColor: colors[idx], flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+      fontWeight: 700, fontSize: size * 0.38 }}>
+      {letter}
+    </div>
+  );
 }
 
 function getTags(group) {
   const tags = [];
   if (group.category) tags.push(group.category);
   const words = (group.name || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  words.slice(0, 3).forEach(w => { if (!tags.includes(w)) tags.push(w); });
-  return tags.slice(0, 5);
-}
-
-function Avatar({ name, imageUrl, size = 36 }) {
-  const letter = (name?.[0] || "U").toUpperCase();
-  const colors = ["#4F46E5","#7C3AED","#DB2777","#EA580C","#16A34A","#0284C7"];
-  const idx = name ? name.charCodeAt(0) % colors.length : 0;
-  return (
-    <div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
-      backgroundColor: colors[idx], display: "flex", alignItems: "center", justifyContent: "center",
-      color: "white", fontWeight: 700, fontSize: size * 0.4 }}>
-      {imageUrl ? <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : letter}
-    </div>
-  );
+  words.slice(0, 4).forEach(w => { if (!tags.includes(w)) tags.push(w); });
+  return tags.slice(0, 6);
 }
 
 export default function GroupDetailModal({ group, isMember, onClose, onJoin, onOpen }) {
@@ -51,123 +51,125 @@ export default function GroupDetailModal({ group, isMember, onClose, onJoin, onO
   const previewPosts = posts.slice(0, 3);
   const tags = getTags(group);
 
-  // Derive a "creator" display post — the description as if authored by admin
-  const authorHandle = group.creator_name
-    ? group.creator_name.toLowerCase().replace(/\s+/g, "_")
-    : group.creator_email?.split("@")[0] || "admin";
+  const authorHandle = (group.creator_name || group.creator_email || "admin")
+    .toLowerCase().replace(/\s+/g, "_").replace(/@.*/, "");
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[150]" onClick={onClose}
-        style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}>
+        style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
         <motion.div
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="absolute bottom-0 left-0 right-0 rounded-t-[28px] overflow-hidden"
-          style={{ backgroundColor: "#ffffff", maxHeight: "92dvh", overflowY: "auto" }}
+          className="absolute bottom-0 left-0 right-0"
+          style={{ backgroundColor: "#ffffff", borderRadius: "28px 28px 0 0",
+            maxHeight: "92dvh", overflowY: "auto" }}
           onClick={e => e.stopPropagation()}
         >
-          {/* Top bar */}
-          <div className="flex items-center px-4 pt-4 pb-2">
+          {/* Header bar */}
+          <div style={{ display: "flex", alignItems: "center", padding: "16px 16px 8px" }}>
             <button onClick={onClose}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "var(--bg-subtle)" }}>
-              <ChevronLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
+              style={{ width: 36, height: 36, borderRadius: "50%", border: "none",
+                backgroundColor: "#F1F5F9", display: "flex", alignItems: "center",
+                justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <ChevronLeft style={{ width: 18, height: 18, color: "#0F172A" }} />
             </button>
-            <p className="flex-1 text-center text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+            <p style={{ flex: 1, textAlign: "center", fontSize: 17, fontWeight: 700,
+              color: "#0F172A", fontFamily: "var(--font-serif)" }}>
               {group.name}
             </p>
-            <div className="w-9 h-9" />
+            <div style={{ width: 36 }} />
           </div>
 
-          {/* Cover image / gradient */}
-          <div className="relative mx-4 rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
-            {group.cover_url ? (
-              <img src={group.cover_url} alt={group.name} className="w-full h-full object-cover" />
-            ) : group.logo_url ? (
-              <img src={group.logo_url} alt={group.name} className="w-full h-full object-cover" />
+          {/* Cover image */}
+          <div style={{ margin: "0 16px", borderRadius: 20, overflow: "hidden", position: "relative", aspectRatio: "16/10" }}>
+            {group.cover_url || group.logo_url ? (
+              <img src={group.cover_url || group.logo_url} alt={group.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-6xl"
-                style={{ background: getGrad(group.category) }}>
+              <div style={{ width: "100%", height: "100%", background: GRADIENTS[group.category] || GRADIENTS.general,
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 60 }}>
                 {group.emoji || "💬"}
               </div>
             )}
-            {/* Slide dots indicator */}
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-              <div className="w-4 h-1 rounded-full bg-white opacity-90" />
-              <div className="w-1 h-1 rounded-full bg-white opacity-50" />
-              <div className="w-1 h-1 rounded-full bg-white opacity-50" />
+            {/* Bookmark */}
+            <button style={{ position: "absolute", top: 12, right: 12, width: 34, height: 34,
+              borderRadius: 10, backgroundColor: "rgba(255,255,255,0.88)", backdropFilter: "blur(8px)",
+              border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Bookmark style={{ width: 16, height: 16, color: "#0F172A" }} />
+            </button>
+            {/* Dot indicators */}
+            <div style={{ position: "absolute", bottom: 10, left: 0, right: 0,
+              display: "flex", justifyContent: "center", gap: 4 }}>
+              <div style={{ width: 20, height: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.95)" }} />
+              <div style={{ width: 4, height: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.5)" }} />
+              <div style={{ width: 4, height: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.5)" }} />
             </div>
-            {/* Member count badge */}
-            {group.member_count > 0 && (
-              <div className="absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 rounded-full"
-                style={{ backgroundColor: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)" }}>
-                <Users className="w-3 h-3" style={{ color: "#0F172A" }} />
-                <span className="text-xs font-bold" style={{ color: "#0F172A" }}>{group.member_count}</span>
-              </div>
-            )}
           </div>
 
-          {/* Description + tags */}
-          <div className="px-5 pt-4 pb-3">
-            <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--text-primary)" }}>
-              <span className="font-bold">{authorHandle} </span>
+          {/* Description */}
+          <div style={{ padding: "16px 20px 8px" }}>
+            <p style={{ fontSize: 15, color: "#0F172A", lineHeight: 1.6, marginBottom: 6 }}>
+              <span style={{ fontWeight: 700 }}>{authorHandle} </span>
               {group.description || `Join ${group.name} and connect with others!`}
             </p>
             {tags.length > 0 && (
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              <p style={{ fontSize: 14, color: "#64748B", lineHeight: 1.7 }}>
                 {tags.map(t => `#${t}`).join(" ")}
               </p>
             )}
           </div>
 
-          {/* Comment-style recent posts */}
-          {previewPosts.length > 0 && (
-            <div className="px-5 pb-2">
-              {previewPosts.map(post => {
-                const handle = (post.author_name || post.author_email || "user")
-                  .toLowerCase().replace(/\s+/g, "_").replace(/@.*/, "");
-                return (
-                  <div key={post.id} className="flex gap-3 mb-4">
-                    <Avatar name={post.author_name || post.author_email} size={36} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{handle}</span>
-                        <span className="text-xs" style={{ color: "var(--text-hint)" }}>
-                          {moment(post.created_date).fromNow(true)}
-                        </span>
-                      </div>
-                      <p className="text-sm leading-snug line-clamp-2" style={{ color: "var(--text-secondary)" }}>
-                        {post.text || post.content || "Shared a post"}
-                      </p>
-                      <button className="text-xs font-semibold mt-1" style={{ color: "var(--text-hint)" }}>Reply</button>
+          {/* Comments / recent posts */}
+          <div style={{ padding: "8px 20px 16px" }}>
+            {previewPosts.map(post => {
+              const handle = (post.author_name || post.author_email || "user")
+                .toLowerCase().replace(/\s+/g, "_").replace(/@.*/, "");
+              return (
+                <div key={post.id} style={{ display: "flex", gap: 12, marginBottom: 16, alignItems: "flex-start" }}>
+                  <Avatar name={post.author_name || post.author_email} size={38} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 3 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>{handle}</span>
+                      <span style={{ fontSize: 12, color: "#94A3B8" }}>
+                        {moment(post.created_date).fromNow(true)}
+                      </span>
                     </div>
+                    <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.5,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                      {post.text || post.content || "Shared a post in this group."}
+                    </p>
+                    <button style={{ fontSize: 13, color: "#94A3B8", fontWeight: 600, background: "none",
+                      border: "none", padding: 0, marginTop: 4, cursor: "pointer" }}>
+                      Reply
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
 
           {/* Bottom action bar */}
-          <div className="sticky bottom-0 bg-white px-4 pb-6 pt-3 flex items-center gap-3"
-            style={{ borderTop: "1px solid var(--border-light)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px 28px",
+            borderTop: "1px solid #F1F5F9", backgroundColor: "#fff" }}>
             <button onClick={() => { onClose(); onOpen(group); }}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "var(--bg-subtle)" }}>
-              <MessageSquare className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+              style={{ width: 50, height: 50, borderRadius: 16, border: "1.5px solid #E2E8F0",
+                backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, cursor: "pointer" }}>
+              <MessageSquare style={{ width: 20, height: 20, color: "#0F172A" }} />
             </button>
             {isMember ? (
               <button onClick={() => { onClose(); onOpen(group); }}
-                className="flex-1 py-3.5 rounded-2xl text-base font-bold text-white"
-                style={{ backgroundColor: "#0F172A" }}>
+                style={{ flex: 1, padding: "15px 0", borderRadius: 999, border: "none",
+                  backgroundColor: "#0F172A", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
                 Open chat
               </button>
             ) : (
               <button onClick={() => { onJoin(group); onClose(); }}
-                className="flex-1 py-3.5 rounded-2xl text-base font-bold text-white"
-                style={{ backgroundColor: "#0F172A" }}>
+                style={{ flex: 1, padding: "15px 0", borderRadius: 999, border: "none",
+                  backgroundColor: "#0F172A", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
                 Join now
               </button>
             )}

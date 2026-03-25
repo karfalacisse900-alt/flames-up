@@ -5,34 +5,88 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, X } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
-import GroupGridCard from "@/components/groups/GroupGridCard";
 import GroupDetailModal from "@/components/groups/GroupDetailModal";
 
-const TABS = [
-  { key: "for_you", label: "For you" },
-  { key: "popular", label: "Most popular" },
+const CATEGORY_SECTIONS = [
+  { key: "sports",  label: "Sport communities",   },
+  { key: "fitness", label: "Fitness communities",  },
+  { key: "food",    label: "Cooking posts",        },
+  { key: "music",   label: "Music communities",    },
+  { key: "tech",    label: "Tech communities",     },
+  { key: "art",     label: "Art communities",      },
+  { key: "travel",  label: "Travel communities",   },
+  { key: "gaming",  label: "Gaming communities",   },
+  { key: "movies",  label: "Movie communities",    },
+  { key: "general", label: "General",              },
 ];
 
-const CATEGORY_SECTIONS = [
-  { key: "sports",  label: "Sport communities",   emoji: "🏃" },
-  { key: "fitness", label: "Fitness communities",  emoji: "💪" },
-  { key: "food",    label: "Food communities",     emoji: "🍕" },
-  { key: "music",   label: "Music communities",    emoji: "🎵" },
-  { key: "tech",    label: "Tech communities",     emoji: "💻" },
-  { key: "art",     label: "Art communities",      emoji: "🎨" },
-  { key: "travel",  label: "Travel communities",   emoji: "✈️" },
-  { key: "gaming",  label: "Gaming communities",   emoji: "🎮" },
-];
+function GroupCard({ group, onClick }) {
+  const memberCount = group.member_count || 0;
+  const tags = [];
+  if (group.category) tags.push(group.category);
+  const words = (group.name || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  words.slice(0, 3).forEach(w => { if (!tags.includes(w)) tags.push(w); });
+
+  const GRADIENTS = {
+    sports: "linear-gradient(135deg,#ea580c,#dc2626)",
+    fitness: "linear-gradient(135deg,#0d9488,#16a34a)",
+    food: "linear-gradient(135deg,#ea580c,#d97706)",
+    music: "linear-gradient(135deg,#db2777,#be185d)",
+    tech: "linear-gradient(135deg,#0284c7,#0369a1)",
+    art: "linear-gradient(135deg,#7c3aed,#a21caf)",
+    travel: "linear-gradient(135deg,#0284c7,#6d28d9)",
+    gaming: "linear-gradient(135deg,#16a34a,#15803d)",
+    movies: "linear-gradient(135deg,#7c3aed,#4338ca)",
+    general: "linear-gradient(135deg,#64748b,#475569)",
+  };
+  const gradBg = GRADIENTS[group.category] || GRADIENTS.general;
+
+  return (
+    <button onClick={onClick} className="text-left w-full" style={{ background: "none", border: "none", padding: 0 }}>
+      {/* Cover */}
+      <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "3/4" }}>
+        {group.cover_url || group.logo_url ? (
+          <img src={group.cover_url || group.logo_url} alt={group.name}
+            className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl"
+            style={{ background: gradBg }}>
+            {group.emoji || "💬"}
+          </div>
+        )}
+        {/* Member badge */}
+        {memberCount > 0 && (
+          <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: "rgba(240,240,240,0.92)", backdropFilter: "blur(6px)" }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#333" }}>{memberCount}</span>
+          </div>
+        )}
+      </div>
+      {/* Name */}
+      <p className="font-bold mt-2 leading-tight" style={{ fontSize: 14, color: "#0F172A", fontFamily: "var(--font-serif)" }}>
+        {group.name}
+      </p>
+      {/* Hashtags */}
+      <p style={{ fontSize: 12, color: "#94A3B8", marginTop: 2, lineHeight: 1.5 }}>
+        {tags.map(t => `#${t}`).join(" ")}
+      </p>
+    </button>
+  );
+}
 
 export default function Groups() {
   const [user, setUser] = useState(null);
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeMembership, setActiveMembership] = useState(null);
-  const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("for_you");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [detailGroup, setDetailGroup] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [search, setSearch] = useState("");
   const qc = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
@@ -89,41 +143,6 @@ export default function Groups() {
     setActiveGroup(group);
   };
 
-  const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
-  const myGroupsCount = myGroups.length;
-
-  // Filter by search
-  const filteredGroups = useMemo(() => {
-    if (!search.trim()) return groups;
-    const q = search.toLowerCase();
-    return groups.filter(g =>
-      g.name?.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q)
-    );
-  }, [groups, search]);
-
-  // Sort by tab
-  const sortedGroups = useMemo(() => {
-    if (activeTab === "popular") return [...filteredGroups].sort((a, b) => (b.member_count || 0) - (a.member_count || 0));
-    // For you: mix member groups first, then discover
-    const mine = filteredGroups.filter(g => membershipMap[g.id]);
-    const discover = filteredGroups.filter(g => !membershipMap[g.id]);
-    return [...mine, ...discover];
-  }, [filteredGroups, activeTab, membershipMap]);
-
-  // Group by category for sections
-  const groupsByCategory = useMemo(() => {
-    const map = {};
-    CATEGORY_SECTIONS.forEach(cat => {
-      const list = sortedGroups.filter(g => g.category === cat.key);
-      if (list.length > 0) map[cat.key] = list;
-    });
-    // "Other" catch-all
-    const knownCats = new Set(CATEGORY_SECTIONS.map(c => c.key));
-    const others = sortedGroups.filter(g => !knownCats.has(g.category));
-    if (others.length > 0) map["__other"] = others;
-    return map;
-  }, [sortedGroups]);
-
   if (activeGroup) {
     return (
       <GroupHub group={activeGroup} user={user} membership={activeMembership}
@@ -132,143 +151,138 @@ export default function Groups() {
     );
   }
 
-  // First name
   const firstName = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "there";
+  const fullName = user?.full_name || user?.email?.split("@")[0] || "User";
+
+  // Filtered groups
+  const filtered = search.trim()
+    ? groups.filter(g => g.name?.toLowerCase().includes(search.toLowerCase()) || g.description?.toLowerCase().includes(search.toLowerCase()))
+    : groups;
+
+  // Sort by tab
+  const sorted = activeTab === "popular"
+    ? [...filtered].sort((a, b) => (b.member_count || 0) - (a.member_count || 0))
+    : filtered;
+
+  // Group by category
+  const byCategory = {};
+  CATEGORY_SECTIONS.forEach(cat => {
+    const list = sorted.filter(g => g.category === cat.key);
+    if (list.length > 0) byCategory[cat.key] = list;
+  });
+  const knownCats = new Set(CATEGORY_SECTIONS.map(c => c.key));
+  const others = sorted.filter(g => !knownCats.has(g.category));
+  if (others.length > 0) byCategory["__other"] = others;
 
   return (
-    <div style={{ minHeight: "100dvh", backgroundColor: "#ffffff", paddingBottom: 88 }}>
-      {/* ── Header ── */}
-      <div className="px-5 pt-5 pb-4" style={{ paddingTop: "max(env(safe-area-inset-top, 20px), 20px)" }}>
-        <div className="flex items-center justify-between">
-          {/* User greeting */}
+    <div style={{ minHeight: "100dvh", backgroundColor: "#ffffff" }}>
+      {/* ── HEADER ── */}
+      <div className="px-4" style={{ paddingTop: "max(env(safe-area-inset-top, 16px), 16px)", paddingBottom: 12, backgroundColor: "#fff" }}>
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            {user && (
-              <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-base font-bold text-white"
-                style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
-                {user.profile_image_url
-                  ? <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
-                  : (user.full_name?.[0] || user.email?.[0] || "U").toUpperCase()
-                }
-              </div>
-            )}
+            {/* Avatar */}
+            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+              background: "linear-gradient(135deg,#4F46E5,#7C3AED)", display: "flex", alignItems: "center",
+              justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 16 }}>
+              {user?.profile_image_url
+                ? <img src={user.profile_image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : (user?.full_name?.[0] || "U").toUpperCase()}
+            </div>
             <div>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Welcome back,</p>
-              <p className="text-base font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                {firstName}
-              </p>
+              <p style={{ fontSize: 13, color: "#94A3B8", lineHeight: 1 }}>Welcome back,</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", fontFamily: "var(--font-serif)", lineHeight: 1.2 }}>{fullName}</p>
             </div>
           </div>
-
-          {/* Search icon */}
           <button onClick={() => setShowSearch(v => !v)}
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--bg-subtle)" }}>
-            <Search className="w-4.5 h-4.5" style={{ color: "var(--text-secondary)", width: 18, height: 18 }} />
+            style={{ width: 40, height: 40, borderRadius: "50%", border: "none",
+              backgroundColor: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <Search style={{ width: 18, height: 18, color: "#475569" }} />
           </button>
         </div>
 
-        {/* Search bar */}
+        {/* Search */}
         <AnimatePresence>
           {showSearch && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.18 }} style={{ overflow: "hidden" }}>
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl mt-3"
-                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
-                <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+              style={{ overflow: "hidden", marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px",
+                borderRadius: 16, backgroundColor: "#F1F5F9", border: "1px solid #E2E8F0" }}>
+                <Search style={{ width: 16, height: 16, color: "#94A3B8", flexShrink: 0 }} />
                 <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Search communities…"
-                  className="flex-1 bg-transparent text-sm outline-none"
-                  style={{ color: "var(--text-primary)" }} />
-                {search && <button onClick={() => setSearch("")}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>}
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none",
+                    fontSize: 14, color: "#0F172A", minHeight: "unset", boxShadow: "none", padding: 0 }} />
+                {search && <button onClick={() => setSearch("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  <X style={{ width: 16, height: 16, color: "#94A3B8" }} />
+                </button>}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Tab bar + Create */}
-        <div className="flex items-center gap-3 mt-4">
-          {TABS.map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
-              style={{
-                backgroundColor: activeTab === tab.key ? "var(--text-primary)" : "transparent",
-                color: activeTab === tab.key ? "#fff" : "var(--text-secondary)",
-                border: activeTab === tab.key ? "none" : "1px solid var(--border-light)",
-              }}>
-              {tab.label}
-            </button>
-          ))}
+        {/* Tab pills + Create */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button onClick={() => setActiveTab("for_you")}
+            style={{ padding: "9px 18px", borderRadius: 999, border: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 700,
+              backgroundColor: activeTab === "for_you" ? "#0F172A" : "transparent",
+              color: activeTab === "for_you" ? "#fff" : "#64748B" }}>
+            For you
+          </button>
+          <button onClick={() => setActiveTab("popular")}
+            style={{ padding: "9px 18px", borderRadius: 999, cursor: "pointer",
+              fontSize: 14, fontWeight: 600,
+              backgroundColor: "transparent",
+              color: activeTab === "popular" ? "#0F172A" : "#64748B",
+              border: activeTab === "popular" ? "1.5px solid #0F172A" : "1.5px solid #E2E8F0" }}>
+            Most popular
+          </button>
           <button onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 ml-auto"
-            style={{ backgroundColor: "#EEF2FF", color: "#4F46E5", border: "none" }}>
-            <Plus className="w-3.5 h-3.5" /> Create
+            style={{ marginLeft: "auto", padding: "9px 16px", borderRadius: 999, border: "none",
+              backgroundColor: "#14B8A6", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 4 }}>
+            <Plus style={{ width: 14, height: 14 }} /> Create
           </button>
         </div>
       </div>
 
-      {/* ── My Groups strip (if member of any) ── */}
-      {myGroupsCount > 0 && !search && (
-        <div className="px-5 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              My communities
-            </p>
-            <span className="text-sm font-semibold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-              {myGroupsCount} active
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {myGroups.slice(0, 4).map(group => (
-              <GroupGridCard key={group.id} group={group} onClick={() => handleOpenGroup(group)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Category Sections ── */}
-      <div className="px-5">
+      {/* ── CONTENT ── */}
+      <div style={{ padding: "0 16px 100px" }}>
         {search ? (
-          // Search results — flat grid
           <>
-            <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: "var(--text-hint)" }}>
-              {filteredGroups.length} results
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+              {filtered.length} results
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              {filteredGroups.map(group => (
-                <GroupGridCard key={group.id} group={group}
-                  onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {filtered.map(g => (
+                <GroupCard key={g.id} group={g}
+                  onClick={() => membershipMap[g.id] ? handleOpenGroup(g) : setDetailGroup(g)} />
               ))}
             </div>
-            {filteredGroups.length === 0 && (
-              <div className="py-16 text-center">
-                <div className="text-4xl mb-3">🔍</div>
-                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>No communities found</p>
-              </div>
-            )}
           </>
         ) : (
           CATEGORY_SECTIONS.map(cat => {
-            const list = groupsByCategory[cat.key];
+            const list = byCategory[cat.key];
             if (!list || list.length === 0) return null;
-            const myCount = list.filter(g => membershipMap[g.id]).length;
+            const activeCount = list.filter(g => membershipMap[g.id]).length;
             return (
-              <section key={cat.key} className="mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                    {cat.emoji} {cat.label}
-                  </h2>
-                  {myCount > 0 && (
-                    <span className="text-sm font-semibold px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                      {myCount} active
-                    </span>
+              <section key={cat.key} style={{ marginBottom: 32 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                  <p style={{ fontSize: 17, fontWeight: 700, color: "#0F172A", fontFamily: "var(--font-serif)" }}>
+                    {cat.label}
+                  </p>
+                  {activeCount > 0 ? (
+                    <span style={{ fontSize: 13, color: "#64748B", fontWeight: 500 }}>{activeCount} active</span>
+                  ) : (
+                    <button style={{ fontSize: 13, color: "#64748B", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>
+                      View all
+                    </button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {list.slice(0, 6).map(group => (
-                    <GroupGridCard key={group.id} group={group}
-                      onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  {list.slice(0, 6).map(g => (
+                    <GroupCard key={g.id} group={g}
+                      onClick={() => membershipMap[g.id] ? handleOpenGroup(g) : setDetailGroup(g)} />
                   ))}
                 </div>
               </section>
@@ -276,51 +290,39 @@ export default function Groups() {
           })
         )}
 
-        {/* Other / uncategorized */}
-        {!search && groupsByCategory["__other"]?.length > 0 && (
-          <section className="mb-8">
-            <h2 className="font-bold text-base mb-3" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              💬 Other communities
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {groupsByCategory["__other"].slice(0, 6).map(group => (
-                <GroupGridCard key={group.id} group={group}
-                  onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
+        {/* Other */}
+        {!search && byCategory["__other"]?.length > 0 && (
+          <section style={{ marginBottom: 32 }}>
+            <p style={{ fontSize: 17, fontWeight: 700, color: "#0F172A", fontFamily: "var(--font-serif)", marginBottom: 14 }}>
+              Other communities
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {byCategory["__other"].slice(0, 6).map(g => (
+                <GroupCard key={g.id} group={g}
+                  onClick={() => membershipMap[g.id] ? handleOpenGroup(g) : setDetailGroup(g)} />
               ))}
             </div>
           </section>
         )}
 
-        {/* Empty state */}
-        {!search && Object.keys(groupsByCategory).length === 0 && (
-          <div className="py-20 text-center">
-            <div className="text-5xl mb-4">🏘️</div>
-            <p className="font-bold text-lg mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              No communities yet
-            </p>
-            <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
-              Be the first to create one!
-            </p>
+        {Object.keys(byCategory).length === 0 && !search && (
+          <div style={{ textAlign: "center", paddingTop: 80 }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🏘️</div>
+            <p style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", marginBottom: 8 }}>No communities yet</p>
+            <p style={{ fontSize: 14, color: "#64748B", marginBottom: 24 }}>Be the first to create one!</p>
             <button onClick={() => setShowCreateModal(true)}
-              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
+              style={{ padding: "12px 24px", borderRadius: 16, backgroundColor: "#0F172A", color: "#fff",
+                fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer" }}>
               Create a Community
             </button>
           </div>
         )}
       </div>
 
-      {/* Group Detail Modal */}
       {detailGroup && (
-        <GroupDetailModal
-          group={detailGroup}
-          isMember={!!membershipMap[detailGroup.id]}
-          onClose={() => setDetailGroup(null)}
-          onJoin={handleJoin}
-          onOpen={handleOpenGroup}
-        />
+        <GroupDetailModal group={detailGroup} isMember={!!membershipMap[detailGroup.id]}
+          onClose={() => setDetailGroup(null)} onJoin={handleJoin} onOpen={handleOpenGroup} />
       )}
-
       <CreateGroupModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onCreated={handleCreated} user={user} />
     </div>
   );
