@@ -11,8 +11,7 @@ import RealTrendingPlaces from "@/components/places/RealTrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import AddPlaceModal from "@/components/places/AddPlaceModal";
-import { requireVerified } from "@/components/auth/EmailVerificationGate";
-import { Link, useLocation } from "react-router-dom";
+import CommunityEvents from "@/components/places/CommunityEvents";
 import { createPageUrl } from "@/utils";
 
 export default function PlacesPage() {
@@ -275,16 +274,7 @@ export default function PlacesPage() {
           {/* Trending Near You from Google Maps */}
           <RealTrendingPlaces onSelectPlace={place => openPlace(place)} />
 
-          {/* See More Button */}
-          {places.length > 0 && !showAllPlaces && (
-            <div className="px-4 pb-3">
-              <button onClick={() => setShowAllPlaces(true)}
-                className="w-full py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
-                style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--border-medium)", color: "var(--text-primary)" }}>
-                🌍 See All Popular Places ({places.length})
-              </button>
-            </div>
-          )}
+
 
           {/* Seed Places Button (only for admins or if no places) */}
           {user?.role === "admin" && places.length < 10 && (
@@ -346,6 +336,9 @@ export default function PlacesPage() {
               </div>
             </div>
           )}
+
+          {/* Community Events */}
+          <CommunityEvents />
 
           {/* Divider */}
           <div className="mx-4 mb-2" style={{ height: 1, backgroundColor: "var(--border-subtle)" }} />
