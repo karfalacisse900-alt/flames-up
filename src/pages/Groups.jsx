@@ -2,96 +2,37 @@ import React, { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePullToRefresh } from "@/components/hooks/usePullToRefresh";
-import {
-  Search, Plus, Users, Lock, MapPin, Globe, Flame,
-  Star, Filter, DollarSign, X
-} from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 import GroupHub from "@/components/groups/GroupHub";
-import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
-import GroupStatusBar from "@/components/groups/GroupStatusBar";
+import GroupGridCard from "@/components/groups/GroupGridCard";
 import GroupDetailModal from "@/components/groups/GroupDetailModal";
 
-const CATEGORY_TABS = [
-  { key: "all",      label: "All",      emoji: "✨" },
-  { key: "fitness",  label: "Fitness",  emoji: "💪" },
-  { key: "food",     label: "Food",     emoji: "🍕" },
-  { key: "travel",   label: "Travel",   emoji: "✈️" },
-  { key: "tech",     label: "Tech",     emoji: "💻" },
-  { key: "art",      label: "Art",      emoji: "🎨" },
-  { key: "music",    label: "Music",    emoji: "🎵" },
-  { key: "gaming",   label: "Gaming",   emoji: "🎮" },
-  { key: "movies",   label: "Movies",   emoji: "🎬" },
-  { key: "sports",   label: "Sports",   emoji: "⚽" },
+const TABS = [
+  { key: "for_you", label: "For you" },
+  { key: "popular", label: "Most popular" },
 ];
 
-const CATEGORY_GRADIENTS = {
-  fitness: ["#0d9488","#16a34a"], food: ["#ea580c","#d97706"],
-  travel:  ["#0284c7","#6d28d9"], tech: ["#0284c7","#0369a1"],
-  art:     ["#7c3aed","#a21caf"], music: ["#db2777","#be185d"],
-  gaming:  ["#16a34a","#15803d"], movies: ["#7c3aed","#4338ca"],
-  sports:  ["#ea580c","#dc2626"], general: ["#64748b","#475569"],
-};
-function getGrad(cat) {
-  const [a, b] = CATEGORY_GRADIENTS[cat] || CATEGORY_GRADIENTS.general;
-  return `linear-gradient(135deg, ${a}, ${b})`;
-}
-
-// Compact list card for My Groups section
-function GroupCard({ group, membership, onOpen, onJoin }) {
-  const isMember = !!membership;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      onClick={() => onOpen(group)}
-      className="cursor-pointer p-4 rounded-2xl"
-      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-      <div className="flex gap-3">
-        <div className="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-2xl"
-          style={{ background: getGrad(group.category) }}>
-          {group.emoji || "💬"}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-bold text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{group.name}</h3>
-            {group.is_private && <Lock className="w-3 h-3 shrink-0" style={{ color: "var(--text-hint)" }} />}
-          </div>
-          <p className="text-xs line-clamp-1 mb-1.5" style={{ color: "var(--text-hint)" }}>{group.description || "No description"}</p>
-          <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--text-hint)" }}>
-            <span className="flex items-center gap-0.5">
-              {group.group_type === "realworld" ? <MapPin className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
-              {group.group_type === "realworld" ? "Real-World" : "Online"}
-            </span>
-            <span>·</span>
-            <span><Users className="w-2.5 h-2.5 inline mr-0.5" />{(group.member_count || 0).toLocaleString()}</span>
-          </div>
-        </div>
-        {isMember ? (
-          <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full" style={{ backgroundColor: "var(--accent-primary-light)" }}>
-            <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>✓</span>
-          </div>
-        ) : (
-          <button onClick={e => { e.stopPropagation(); onJoin(group); }}
-            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white active:scale-95"
-            style={{ backgroundColor: "var(--accent-primary)" }}>Join</button>
-        )}
-      </div>
-    </motion.div>
-  );
-}
+const CATEGORY_SECTIONS = [
+  { key: "sports",  label: "Sport communities",   emoji: "🏃" },
+  { key: "fitness", label: "Fitness communities",  emoji: "💪" },
+  { key: "food",    label: "Food communities",     emoji: "🍕" },
+  { key: "music",   label: "Music communities",    emoji: "🎵" },
+  { key: "tech",    label: "Tech communities",     emoji: "💻" },
+  { key: "art",     label: "Art communities",      emoji: "🎨" },
+  { key: "travel",  label: "Travel communities",   emoji: "✈️" },
+  { key: "gaming",  label: "Gaming communities",   emoji: "🎮" },
+];
 
 export default function Groups() {
   const [user, setUser] = useState(null);
   const [activeGroup, setActiveGroup] = useState(null);
   const [activeMembership, setActiveMembership] = useState(null);
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("for_you");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDiscoverFilters, setShowDiscoverFilters] = useState(false);
-  const [dismissedGroupIds, setDismissedGroupIds] = useState([]);
   const [detailGroup, setDetailGroup] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
   const qc = useQueryClient();
 
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
@@ -149,31 +90,39 @@ export default function Groups() {
   };
 
   const myGroups = useMemo(() => groups.filter(g => membershipMap[g.id]), [groups, membershipMap]);
-  
-  // All non-member groups go to swipe explore — apply filters
-  const discoverGroups = useMemo(() => {
-    let list = groups.filter(g => !membershipMap[g.id] && !dismissedGroupIds.includes(g.id));
-    if (categoryFilter !== "all") list = list.filter(g => g.category === categoryFilter);
-    if (typeFilter !== "all") list = list.filter(g => g.group_type === typeFilter);
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(g => g.name.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
-    }
-    return list;
-  }, [groups, membershipMap, dismissedGroupIds, categoryFilter, typeFilter, search]);
+  const myGroupsCount = myGroups.length;
 
-  const filteredMyGroups = useMemo(() => {
-    if (!search) return myGroups;
+  // Filter by search
+  const filteredGroups = useMemo(() => {
+    if (!search.trim()) return groups;
     const q = search.toLowerCase();
-    return myGroups.filter(g => g.name.toLowerCase().includes(q));
-  }, [myGroups, search]);
+    return groups.filter(g =>
+      g.name?.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q)
+    );
+  }, [groups, search]);
 
-  const isFiltering = search || categoryFilter !== "all" || typeFilter !== "all";
+  // Sort by tab
+  const sortedGroups = useMemo(() => {
+    if (activeTab === "popular") return [...filteredGroups].sort((a, b) => (b.member_count || 0) - (a.member_count || 0));
+    // For you: mix member groups first, then discover
+    const mine = filteredGroups.filter(g => membershipMap[g.id]);
+    const discover = filteredGroups.filter(g => !membershipMap[g.id]);
+    return [...mine, ...discover];
+  }, [filteredGroups, activeTab, membershipMap]);
 
-  const { containerProps, PullIndicator } = usePullToRefresh(async () => {
-    await qc.invalidateQueries({ queryKey: ["groups"] });
-    await qc.invalidateQueries({ queryKey: ["myMemberships", user?.email] });
-  });
+  // Group by category for sections
+  const groupsByCategory = useMemo(() => {
+    const map = {};
+    CATEGORY_SECTIONS.forEach(cat => {
+      const list = sortedGroups.filter(g => g.category === cat.key);
+      if (list.length > 0) map[cat.key] = list;
+    });
+    // "Other" catch-all
+    const knownCats = new Set(CATEGORY_SECTIONS.map(c => c.key));
+    const others = sortedGroups.filter(g => !knownCats.has(g.category));
+    if (others.length > 0) map["__other"] = others;
+    return map;
+  }, [sortedGroups]);
 
   if (activeGroup) {
     return (
@@ -183,157 +132,180 @@ export default function Groups() {
     );
   }
 
-  return (
-    <div {...containerProps} style={{ minHeight: "100dvh", paddingBottom: 88, backgroundColor: "var(--bg-app)" }}>
-      <PullIndicator />
+  // First name
+  const firstName = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "there";
 
+  return (
+    <div style={{ minHeight: "100dvh", backgroundColor: "#ffffff", paddingBottom: 88 }}>
       {/* ── Header ── */}
-      <div className="relative px-5 pt-6 pb-2" style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 24px)" }}>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Groups</h1>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Join & create communities</p>
+      <div className="px-5 pt-5 pb-4" style={{ paddingTop: "max(env(safe-area-inset-top, 20px), 20px)" }}>
+        <div className="flex items-center justify-between">
+          {/* User greeting */}
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-base font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}>
+                {user.profile_image_url
+                  ? <img src={user.profile_image_url} alt="" className="w-full h-full object-cover" />
+                  : (user.full_name?.[0] || user.email?.[0] || "U").toUpperCase()
+                }
+              </div>
+            )}
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Welcome back,</p>
+              <p className="text-base font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                {firstName}
+              </p>
+            </div>
           </div>
-          {user && (
-            <button onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold text-white"
-              style={{ backgroundColor: "var(--accent-primary)" }}>
-              <Plus className="w-4 h-4" /> Create
-            </button>
+
+          {/* Search icon */}
+          <button onClick={() => setShowSearch(v => !v)}
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "var(--bg-subtle)" }}>
+            <Search className="w-4.5 h-4.5" style={{ color: "var(--text-secondary)", width: 18, height: 18 }} />
+          </button>
+        </div>
+
+        {/* Search bar */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.18 }} style={{ overflow: "hidden" }}>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl mt-3"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+                <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+                <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="Search communities…"
+                  className="flex-1 bg-transparent text-sm outline-none"
+                  style={{ color: "var(--text-primary)" }} />
+                {search && <button onClick={() => setSearch("")}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>}
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+
+        {/* Tab bar + Create */}
+        <div className="flex items-center gap-3 mt-4">
+          {TABS.map(tab => (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              style={{
+                backgroundColor: activeTab === tab.key ? "var(--text-primary)" : "transparent",
+                color: activeTab === tab.key ? "#fff" : "var(--text-secondary)",
+                border: activeTab === tab.key ? "none" : "1px solid var(--border-light)",
+              }}>
+              {tab.label}
+            </button>
+          ))}
+          <button onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 ml-auto"
+            style={{ backgroundColor: "#EEF2FF", color: "#4F46E5", border: "none" }}>
+            <Plus className="w-3.5 h-3.5" /> Create
+          </button>
         </div>
       </div>
 
-      {/* ── Group Status Bar (replaces category icons) ── */}
-      {user && myGroups.length > 0 && (
-        <div style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-          <GroupStatusBar user={user} groups={groups} membershipMap={membershipMap} />
+      {/* ── My Groups strip (if member of any) ── */}
+      {myGroupsCount > 0 && !search && (
+        <div className="px-5 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              My communities
+            </p>
+            <span className="text-sm font-semibold px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+              {myGroupsCount} active
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {myGroups.slice(0, 4).map(group => (
+              <GroupGridCard key={group.id} group={group} onClick={() => handleOpenGroup(group)} />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Search */}
-      <div className="px-4 pt-3 pb-2">
-        <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          <Search className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search groups…"
-            className="flex-1 bg-transparent text-sm outline-none"
-            style={{ color: "var(--text-primary)" }} />
-          {search && <button onClick={() => setSearch("")}><X className="w-4 h-4" style={{ color: "var(--text-hint)" }} /></button>}
-        </div>
-      </div>
-
-      {/* Filter toggle */}
-      <div className="px-4 pb-3 flex items-center gap-2">
-        <button onClick={() => setShowDiscoverFilters(v => !v)}
-          className="flex items-center gap-1.5 px-3 rounded-full text-xs font-semibold"
-          style={{
-            minHeight: 44,
-            backgroundColor: showDiscoverFilters ? "var(--accent-primary)" : "var(--bg-card)",
-            color: showDiscoverFilters ? "#fff" : "var(--text-secondary)",
-            border: `1px solid ${showDiscoverFilters ? "var(--accent-primary)" : "var(--border-light)"}`,
-          }}>
-          <Filter className="w-3 h-3" /> Filters
-          {(typeFilter !== "all" || categoryFilter !== "all") && <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />}
-        </button>
-        {(typeFilter !== "all" || categoryFilter !== "all") && (
-          <button onClick={() => { setTypeFilter("all"); setCategoryFilter("all"); }}
-            className="text-xs font-semibold px-2 py-1 rounded-full"
-            style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)" }}>
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Collapsible filters */}
-      <AnimatePresence>
-        {showDiscoverFilters && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
-            <div className="flex gap-2 px-4 pb-1 overflow-x-auto scrollbar-hide">
-              {[{ key: "all", label: "All" }, { key: "realworld", label: "📍 Real-World" }, { key: "online", label: "🌐 Online" }].map(t => (
-                <button key={t.key} onClick={() => setTypeFilter(t.key)}
-                  className="shrink-0 px-3 rounded-full text-xs font-semibold"
-                  style={{
-                    minHeight: 44,
-                    backgroundColor: typeFilter === t.key ? "var(--accent-primary)" : "var(--bg-card)",
-                    color: typeFilter === t.key ? "#fff" : "var(--text-secondary)",
-                    border: "1px solid var(--border-light)",
-                  }}>{t.label}</button>
-              ))}
-            </div>
-            <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
-              {CATEGORY_TABS.map(c => (
-                <button key={c.key} onClick={() => setCategoryFilter(c.key)}
-                  className="shrink-0 flex items-center gap-1 px-3 rounded-full text-xs font-semibold"
-                  style={{
-                    minHeight: 44,
-                    backgroundColor: categoryFilter === c.key ? "var(--accent-primary)" : "var(--bg-card)",
-                    color: categoryFilter === c.key ? "#fff" : "var(--text-secondary)",
-                    border: "1px solid var(--border-light)",
-                  }}>{c.emoji} {c.label}</button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Content ── */}
-      <div className="px-4 pt-2 pb-6">
-
-        {/* Discover / Swipe to Explore — ALL non-member groups (with filters) */}
-        {discoverGroups.length > 0 && (
-          <section className="mb-6">
-            <div className="flex items-center justify-between mb-3 px-0.5">
-              <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: "var(--text-hint)" }}>
-                <Flame className="w-3.5 h-3.5 text-orange-500" /> Discover Groups
-              </p>
-              <span className="text-[11px] font-semibold" style={{ color: "var(--text-hint)" }}>
-                {discoverGroups.length} groups · Swipe to explore
-              </span>
-            </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4 pb-2">
-              {discoverGroups.map(group => (
-                <div key={group.id} className="shrink-0 snap-center w-[82vw] max-w-[360px]">
-                  <div onClick={() => setDetailGroup(group)} className="cursor-pointer">
-                    <TrendingGroupCard
-                      group={group}
-                      onDismiss={() => setDismissedGroupIds(prev => [...prev, group.id])}
-                      onJoin={handleJoin}
-                      onOpen={(g) => setDetailGroup(g)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* My Groups */}
-        {filteredMyGroups.length > 0 && (
-          <section className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
-              <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups ({filteredMyGroups.length})
+      {/* ── Category Sections ── */}
+      <div className="px-5">
+        {search ? (
+          // Search results — flat grid
+          <>
+            <p className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: "var(--text-hint)" }}>
+              {filteredGroups.length} results
             </p>
-            <div className="space-y-2">
-              {filteredMyGroups.map(g => (
-                <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
-                  onOpen={handleOpenGroup} onJoin={handleJoin} />
+            <div className="grid grid-cols-2 gap-4">
+              {filteredGroups.map(group => (
+                <GroupGridCard key={group.id} group={group}
+                  onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
+              ))}
+            </div>
+            {filteredGroups.length === 0 && (
+              <div className="py-16 text-center">
+                <div className="text-4xl mb-3">🔍</div>
+                <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>No communities found</p>
+              </div>
+            )}
+          </>
+        ) : (
+          CATEGORY_SECTIONS.map(cat => {
+            const list = groupsByCategory[cat.key];
+            if (!list || list.length === 0) return null;
+            const myCount = list.filter(g => membershipMap[g.id]).length;
+            return (
+              <section key={cat.key} className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                    {cat.emoji} {cat.label}
+                  </h2>
+                  {myCount > 0 && (
+                    <span className="text-sm font-semibold px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                      {myCount} active
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {list.slice(0, 6).map(group => (
+                    <GroupGridCard key={group.id} group={group}
+                      onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        )}
+
+        {/* Other / uncategorized */}
+        {!search && groupsByCategory["__other"]?.length > 0 && (
+          <section className="mb-8">
+            <h2 className="font-bold text-base mb-3" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              💬 Other communities
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {groupsByCategory["__other"].slice(0, 6).map(group => (
+                <GroupGridCard key={group.id} group={group}
+                  onClick={() => membershipMap[group.id] ? handleOpenGroup(group) : setDetailGroup(group)} />
               ))}
             </div>
           </section>
         )}
 
         {/* Empty state */}
-        {discoverGroups.length === 0 && filteredMyGroups.length === 0 && (
-          <div className="py-16 text-center">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="font-bold text-sm mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No groups found</p>
-            {user && (
-              <button onClick={() => setShowCreateModal(true)}
-                className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ backgroundColor: "var(--accent-primary)" }}>Create a New Group</button>
-            )}
+        {!search && Object.keys(groupsByCategory).length === 0 && (
+          <div className="py-20 text-center">
+            <div className="text-5xl mb-4">🏘️</div>
+            <p className="font-bold text-lg mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              No communities yet
+            </p>
+            <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
+              Be the first to create one!
+            </p>
+            <button onClick={() => setShowCreateModal(true)}
+              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ backgroundColor: "var(--accent-primary)" }}>
+              Create a Community
+            </button>
           </div>
         )}
       </div>
