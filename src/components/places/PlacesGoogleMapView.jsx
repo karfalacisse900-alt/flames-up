@@ -10,7 +10,7 @@ import LocationPrivacyPanel from "./LocationPrivacyPanel";
 import PlaceHub from "@/components/community/PlaceHub";
 import NearbyPeopleModal from "./NearbyPeopleModal";
 
-const RADIUS_OPTIONS = [1, 5, 10, 25];
+const RADIUS_OPTIONS = [1, 3, 5, 10]; // in miles
 
 function haversineKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -341,14 +341,14 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
     if (!userLoc) return [];
     return nearbyUsers
       .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && !creatorEmails.has(p.user_email) && friendSet.has(p.user_email))
-      .filter(p => haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius)
+      .filter(p => haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius * 1.60934)
       .map(p => ({ ...p, _dist: haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) }))
       .sort((a, b) => a._dist - b._dist).slice(0, 15);
   }, [nearbyUsers, userLoc, radius, currentUser?.email, follows]);
 
   const extraNearby = useMemo(() => {
     if (!userLoc) return 0;
-    const total = nearbyUsers.filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius).length;
+    const total = nearbyUsers.filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius * 1.60934).length;
     return Math.max(0, total - 15);
   }, [nearbyUsers, userLoc, radius, currentUser?.email]);
 
@@ -462,7 +462,7 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
             <button onClick={() => setShowRadiusPanel(v => !v)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
               style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", border: "1px solid rgba(0,0,0,0.06)", color: "#0F172A" }}>
-              <SlidersHorizontal className="w-3.5 h-3.5" />{radius}km
+              <SlidersHorizontal className="w-3.5 h-3.5" />{radius} mi
             </button>
             {showRadiusPanel && (
               <div className="absolute top-full right-0 mt-1.5 rounded-2xl overflow-hidden py-1"
@@ -471,7 +471,7 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
                   <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
                     className="w-full px-4 py-2.5 text-left text-xs font-bold"
                     style={{ backgroundColor: radius === r ? "#EEF2FF" : "transparent", color: radius === r ? "#4F46E5" : "#0F172A" }}>
-                    {r} km
+                    {r} mi
                   </button>
                 ))}
               </div>

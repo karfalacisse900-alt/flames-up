@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { X, MessageCircle, UserPlus, UserCheck } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, MessageCircle, UserPlus, UserCheck, Users, MapPin, Wifi, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
@@ -7,11 +8,7 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-    Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLng / 2) ** 2;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -19,31 +16,32 @@ function getInitials(name) {
   return (name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-const AVATAR_COLORS = ["#7C3AED","#E05C7A","#3C6E5A","#D98B62","#4A7FC1","#B07843"];
-const getColor = (str) => AVATAR_COLORS[(str||"a").charCodeAt(0) % AVATAR_COLORS.length];
+const AVATAR_COLORS = ["#7C3AED", "#E05C7A", "#3C6E5A", "#D98B62", "#4A7FC1", "#B07843", "#0891B2", "#D97706"];
+const getColor = (str) => AVATAR_COLORS[(str || "a").charCodeAt(0) % AVATAR_COLORS.length];
+
+function Avatar({ presence, size = 48 }) {
+  const color = getColor(presence.user_email);
+  return (
+    <div
+      className="rounded-full overflow-hidden flex items-center justify-center font-bold text-white shrink-0"
+      style={{
+        width: size, height: size, minWidth: size,
+        background: presence.avatar_url ? "transparent" : `linear-gradient(135deg, ${color}, ${color}99)`,
+        border: "2.5px solid rgba(255,255,255,0.8)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        fontSize: size * 0.3,
+      }}>
+      {presence.avatar_url
+        ? <img src={presence.avatar_url} alt="" className="w-full h-full object-cover" />
+        : getInitials(presence.user_name)}
+    </div>
+  );
+}
 
 export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, followedEmails = [], onClose, onHighlight }) {
   const navigate = useNavigate();
   const [friendSent, setFriendSent] = useState({});
-  const radarRef = useRef(null);
-  const [radarSize, setRadarSize] = useState(300);
-  const [sweepAngle, setSweepAngle] = useState(0);
-
-  useEffect(() => {
-    const el = radarRef.current;
-    if (el) setRadarSize(el.offsetWidth);
-  }, []);
-
-  // Animate sweep line
-  useEffect(() => {
-    let raf;
-    const animate = () => {
-      setSweepAngle(a => (a + 0.6) % 360);
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  const [search, setSearch] = useState("");
 
   const [uLng, uLat] = userLoc || [0, 0];
 
@@ -53,35 +51,19 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
       .filter(p => p.visibility_mode === "everyone" || p.visibility_mode == null)
       .map(p => ({
         ...p,
-        _dist: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
+        _distKm: haversineKm(uLat, uLng, p.location_lat, p.location_lng),
+        _distMi: haversineKm(uLat, uLng, p.location_lat, p.location_lng) * 0.621371,
       }))
-      .filter(p => p._dist <= 25)
-      .sort((a, b) => a._dist - b._dist);
+      .filter(p => p._distKm <= 40)
+      .sort((a, b) => a._distKm - b._distKm);
   }, [allUsers, userLoc, currentUser?.email]);
 
-  const maxDist = nearby.length > 0 ? Math.max(...nearby.map(p => p._dist), 1) : 1;
-  const r = radarSize / 2;
+  const filtered = search.trim()
+    ? nearby.filter(p => (p.user_name || "").toLowerCase().includes(search.toLowerCase()))
+    : nearby;
 
-  // Place people on radar using their bearing + distance
-  const positioned = useMemo(() => {
-    return nearby.map((p, i) => {
-      // Random stable angle based on email hash
-      const hash = p.user_email.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const angle = (hash * 137.508) % 360; // golden angle spread
-      const normDist = Math.max(0.15, p._dist / maxDist); // 0.15 to 1.0
-      const rad = (angle * Math.PI) / 180;
-      const dist = normDist * (r * 0.82);
-      return {
-        ...p,
-        x: r + Math.sin(rad) * dist,
-        y: r - Math.cos(rad) * dist,
-        angle,
-      };
-    });
-  }, [nearby, r, maxDist]);
-
-  const radarPeople = positioned.slice(0, 6);
-  const morePeople = positioned.slice(6);
+  const friends = filtered.filter(p => followedEmails.includes(p.user_email));
+  const others = filtered.filter(p => !followedEmails.includes(p.user_email));
 
   const sendFriendRequest = async (e, presence) => {
     e.stopPropagation();
@@ -106,161 +88,197 @@ export default function NearbyPeopleModal({ allUsers, userLoc, currentUser, foll
     } catch {}
   };
 
+  function formatDist(mi) {
+    if (mi < 0.1) return "< 0.1 mi";
+    if (mi < 1) return `${(mi).toFixed(1)} mi`;
+    return `${Math.round(mi)} mi`;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
       onClick={onClose}>
-      <div
-        className="w-full max-w-lg rounded-t-3xl flex flex-col"
-        style={{ backgroundColor: "#0d1117", maxHeight: "90vh", boxShadow: "0 -8px 60px rgba(0,0,0,0.6)" }}
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        className="w-full max-w-lg flex flex-col"
+        style={{ backgroundColor: "var(--bg-card)", borderRadius: "28px 28px 0 0", maxHeight: "85vh", boxShadow: "0 -8px 48px rgba(0,0,0,0.2)" }}
         onClick={e => e.stopPropagation()}>
 
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)" }} />
+        <div className="flex justify-center pt-3 pb-1 shrink-0">
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
         </div>
 
-        {/* Radar area */}
-        <div className="relative mx-auto mt-2" style={{ width: "min(90vw, 340px)", aspectRatio: "1" }} ref={radarRef}>
-          <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${radarSize} ${radarSize}`}>
-            {/* Concentric circles */}
-            {[0.25, 0.5, 0.75, 1].map(scale => (
-              <circle key={scale}
-                cx={r} cy={r} r={r * scale * 0.96}
-                fill="none" stroke="rgba(100,200,160,0.15)" strokeWidth="1" />
-            ))}
-            {/* Crosshair lines */}
-            <line x1={r} y1={r * 0.04} x2={r} y2={r * 1.96} stroke="rgba(100,200,160,0.1)" strokeWidth="1" />
-            <line x1={r * 0.04} y1={r} x2={r * 1.96} y2={r} stroke="rgba(100,200,160,0.1)" strokeWidth="1" />
-
-            {/* Sweep gradient */}
-            <defs>
-              <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(0,220,130,0)" />
-                <stop offset="100%" stopColor="rgba(0,220,130,0)" />
-              </radialGradient>
-            </defs>
-            <path
-              d={`M ${r} ${r} L ${r} ${r * 0.04} A ${r * 0.96} ${r * 0.96} 0 0 1 ${r + r * 0.96 * Math.sin((60 * Math.PI) / 180)} ${r - r * 0.96 * Math.cos((60 * Math.PI) / 180)} Z`}
-              fill="rgba(0,210,120,0.07)"
-              transform={`rotate(${sweepAngle} ${r} ${r})`}
-            />
-            {/* Sweep line */}
-            <line
-              x1={r} y1={r}
-              x2={r + r * 0.96 * Math.sin((sweepAngle * Math.PI) / 180)}
-              y2={r - r * 0.96 * Math.cos((sweepAngle * Math.PI) / 180)}
-              stroke="rgba(0,210,120,0.7)" strokeWidth="1.5"
-            />
-            {/* Center dot */}
-            <circle cx={r} cy={r} r={5} fill="#00d27a" opacity="0.9" />
-
-            {/* Compass labels */}
-            {[["N",r,14],["S",r,radarSize-6],["W",10,r+4],["E",radarSize-8,r+4]].map(([lbl,x,y]) => (
-              <text key={lbl} x={x} y={y} textAnchor="middle" fontSize="10" fill="rgba(100,200,160,0.5)" fontWeight="600">{lbl}</text>
-            ))}
-          </svg>
-
-          {/* Avatar dots on radar */}
-          {radarPeople.map(p => (
-            <button
-              key={p.user_email}
-              onClick={() => navigate(`/user/${p.user_email}`)}
-              className="absolute flex flex-col items-center gap-0.5"
-              style={{ left: p.x - 26, top: p.y - 26, zIndex: 10 }}>
-              <div className="w-[52px] h-[52px] rounded-full overflow-hidden flex items-center justify-center font-bold text-sm text-white"
-                style={{
-                  background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(p.user_email)}, ${getColor(p.user_email)}aa)`,
-                  border: "2.5px solid rgba(0,210,120,0.6)",
-                  boxShadow: "0 0 10px rgba(0,210,120,0.35)",
-                }}>
-                {p.avatar_url
-                  ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" />
-                  : getInitials(p.user_name)}
+        {/* Header */}
+        <div className="px-5 pb-4 pt-2 shrink-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-black leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                Nearby People
+              </h2>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-2 h-2 rounded-full bg-green-500" style={{ animation: "pulse 2s infinite" }} />
+                <p className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  {nearby.length > 0 ? `${nearby.length} people sharing location` : "No one visible nearby"}
+                </p>
               </div>
-              <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.85)", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
-                {(p.user_name || "").split(" ")[0]}
-              </span>
+            </div>
+            <button onClick={onClose}
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
             </button>
-          ))}
+          </div>
+
+          {/* Stats row */}
+          {nearby.length > 0 && (
+            <div className="flex gap-3 mt-3">
+              {[
+                { label: "Nearby", value: nearby.length, icon: Users, color: "#4F46E5" },
+                { label: "Friends", value: friends.length, icon: UserCheck, color: "#16A34A" },
+                { label: "Radius", value: "25 mi", icon: MapPin, color: "#D97706" },
+              ].map(stat => (
+                <div key={stat.label} className="flex-1 p-2.5 rounded-2xl text-center"
+                  style={{ backgroundColor: stat.color + "10", border: `1px solid ${stat.color}25` }}>
+                  <p className="text-base font-black" style={{ color: stat.color }}>{stat.value}</p>
+                  <p className="text-[10px] font-semibold mt-0.5" style={{ color: "var(--text-hint)" }}>{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Search */}
+          {nearby.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl mt-3"
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
+              <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-hint)" }} />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name…"
+                className="flex-1 bg-transparent text-sm outline-none"
+                style={{ color: "var(--text-primary)", border: "none", minHeight: "unset", boxShadow: "none", padding: 0, fontSize: 13 }} />
+            </div>
+          )}
         </div>
 
-        {/* More people row */}
-        {(nearby.length > 0 || morePeople.length > 0) && (
-          <div className="px-5 mt-3 mb-2">
-            <p className="text-sm font-semibold mb-3" style={{ color: "rgba(255,255,255,0.7)" }}>
-              {nearby.length === 0 ? "No one nearby" : `${nearby.length} people nearby`}
-            </p>
-            {morePeople.length > 0 && (
-              <div className="flex items-center gap-1.5 mb-3">
-                <p className="text-xs mr-1" style={{ color: "rgba(255,255,255,0.4)" }}>More nearby</p>
-                {morePeople.slice(0, 5).map(p => (
-                  <button key={p.user_email} onClick={() => navigate(`/user/${p.user_email}`)}
-                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs text-white shrink-0"
-                    style={{ background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(p.user_email)}, ${getColor(p.user_email)}aa)`, border: "2px solid rgba(255,255,255,0.15)" }}>
-                    {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : getInitials(p.user_name)}
-                  </button>
-                ))}
-                {morePeople.length > 5 && (
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", border: "2px solid rgba(255,255,255,0.1)" }}>
-                    +{morePeople.length - 5}
+        {/* List */}
+        <div className="flex-1 overflow-y-auto px-4 pb-8">
+          {nearby.length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="text-4xl mb-3">📡</div>
+              <p className="font-bold text-sm mb-1" style={{ color: "var(--text-primary)" }}>No one nearby</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>
+                When others share their location, they'll appear here
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-sm" style={{ color: "var(--text-hint)" }}>No results for "{search}"</p>
+            </div>
+          ) : (
+            <>
+              {/* Friends section */}
+              {friends.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1.5"
+                    style={{ color: "var(--text-hint)" }}>
+                    <UserCheck className="w-3 h-3 text-green-500" /> Friends Nearby
+                  </p>
+                  <div className="space-y-2">
+                    {friends.map(p => <PersonRow key={p.user_email} p={p} currentUser={currentUser} friendSent={friendSent} isFriend={true} formatDist={formatDist} navigate={navigate} sendFriendRequest={sendFriendRequest} onHighlight={onHighlight} onClose={onClose} />)}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+
+              {/* Others section */}
+              {others.length > 0 && (
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1.5"
+                    style={{ color: "var(--text-hint)" }}>
+                    <Wifi className="w-3 h-3" /> People Nearby
+                  </p>
+                  <div className="space-y-2">
+                    {others.slice(0, 20).map(p => <PersonRow key={p.user_email} p={p} currentUser={currentUser} friendSent={friendSent} isFriend={false} formatDist={formatDist} navigate={navigate} sendFriendRequest={sendFriendRequest} onHighlight={onHighlight} onClose={onClose} />)}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </motion.div>
+
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
+    </div>
+  );
+}
+
+function PersonRow({ p, currentUser, friendSent, isFriend, formatDist, navigate, sendFriendRequest, onHighlight, onClose }) {
+  const color = getColor(p.user_email);
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer"
+      style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}
+      onClick={() => navigate(`/user/${p.user_email}`)}>
+
+      {/* Avatar */}
+      <div className="relative shrink-0">
+        <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-bold text-white"
+          style={{ background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${color}, ${color}88)`, fontSize: 16 }}>
+          {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : getInitials(p.user_name)}
+        </div>
+        {isFriend && (
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "#16A34A", border: "2px solid var(--bg-card)" }}>
+            <UserCheck className="w-2 h-2 text-white" />
           </div>
         )}
-
-        {/* People list */}
-        <div className="flex-1 overflow-y-auto px-4 pb-8 flex flex-col gap-2">
-          {nearby.slice(0, 10).map(p => {
-            const isFriend = followedEmails.includes(p.user_email);
-            const distMi = p._dist * 0.621371;
-            return (
-              <div key={p.user_email} className="flex items-center gap-3 p-3 rounded-2xl"
-                style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <button onClick={() => navigate(`/user/${p.user_email}`)}
-                  className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm text-white shrink-0"
-                  style={{ background: p.avatar_url ? "transparent" : `linear-gradient(135deg, ${getColor(p.user_email)}, ${getColor(p.user_email)}aa)`, border: "2px solid rgba(0,210,120,0.3)" }}>
-                  {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : getInitials(p.user_name)}
-                </button>
-                <div className="flex-1 min-w-0" onClick={() => navigate(`/user/${p.user_email}`)}>
-                  <p className="font-semibold text-sm leading-tight text-white truncate">{p.user_name || "Anonymous"}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    {distMi < 1 ? "< 1 mile" : `~${Math.round(distMi)} miles`} away
-                  </p>
-                </div>
-                {currentUser && p.user_email !== currentUser.email && (
-                  <div className="flex gap-1.5 shrink-0">
-                    <button onClick={() => navigate(`/Messages?with=${p.user_email}`)}
-                      className="w-8 h-8 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: "rgba(0,210,120,0.15)" }}>
-                      <MessageCircle className="w-4 h-4" style={{ color: "#00d27a" }} />
-                    </button>
-                    {!isFriend && (
-                      <button onClick={(e) => sendFriendRequest(e, p)} disabled={!!friendSent[p.user_email]}
-                        className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: friendSent[p.user_email] ? "rgba(0,210,120,0.15)" : "rgba(99,102,241,0.2)" }}>
-                        {friendSent[p.user_email]
-                          ? <UserCheck className="w-4 h-4" style={{ color: "#00d27a" }} />
-                          : <UserPlus className="w-4 h-4" style={{ color: "#818cf8" }} />}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Close */}
-        <button onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-          <X className="w-4 h-4 text-white" />
-        </button>
       </div>
-    </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-sm truncate leading-tight" style={{ color: "var(--text-primary)" }}>
+          {p.user_name || "Anonymous"}
+        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="flex items-center gap-0.5 text-xs" style={{ color: "var(--text-hint)" }}>
+            <MapPin className="w-2.5 h-2.5" />
+            {formatDist(p._distMi)} away
+          </span>
+          {p.status_message && (
+            <span className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>· {p.status_message}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      {currentUser && p.user_email !== currentUser.email && (
+        <div className="flex gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
+          <button onClick={() => navigate(`/Messages?with=${p.user_email}`)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: "#EEF2FF" }}>
+            <MessageCircle className="w-4 h-4" style={{ color: "#4F46E5" }} />
+          </button>
+          {!isFriend && (
+            <button onClick={(e) => sendFriendRequest(e, p)} disabled={!!friendSent[p.user_email]}
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: friendSent[p.user_email] ? "#F0FDF4" : "#EEF2FF" }}>
+              {friendSent[p.user_email]
+                ? <UserCheck className="w-4 h-4" style={{ color: "#16A34A" }} />
+                : <UserPlus className="w-4 h-4" style={{ color: "#4F46E5" }} />}
+            </button>
+          )}
+          <button
+            onClick={() => { if (onHighlight) { onHighlight(p); } if (onClose) onClose(); }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: "#ECFDF5" }}>
+            <MapPin className="w-4 h-4" style={{ color: "#16A34A" }} />
+          </button>
+        </div>
+      )}
+    </motion.div>
   );
 }
