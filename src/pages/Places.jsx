@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { MapPin, Bookmark, Map, List, Search, X, Route } from "lucide-react";
 import MapViewWrapper from "@/components/places/MapViewWrapper";
 import PlaceHub from "@/components/community/PlaceHub";
-import TrendingPlaces from "@/components/community/TrendingPlaces";
+
 import RealTrendingPlaces from "@/components/places/RealTrendingPlaces";
 import PlaceCategoryFilter from "@/components/community/PlaceCategoryFilter";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
@@ -272,11 +272,8 @@ export default function PlacesPage() {
       {/* FEED VIEW */}
       {viewMode === "feed" && (
         <div>
-          {/* Real trending places from Google Maps */}
+          {/* Trending Near You from Google Maps */}
           <RealTrendingPlaces onSelectPlace={place => openPlace(place)} />
-
-          {/* Community trending places strip */}
-          <TrendingPlaces onSelectPlace={place => openPlace({ name: place.name, city: place.city, region: place.region, lat: place.lat, lng: place.lng })} />
 
           {/* See More Button */}
           {places.length > 0 && !showAllPlaces && (
