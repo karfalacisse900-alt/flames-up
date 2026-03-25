@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import PlacesGoogleMapView from "./PlacesGoogleMapView";
+import PlacesInteractiveMap from "./PlacesInteractiveMap";
 
 /**
  * Wraps the map and hides the bottom nav while it's mounted.
@@ -24,7 +24,7 @@ export default function MapViewWrapper({ onOpenPlace, user, onBack, openNearby }
       transition={{ duration: 0.2 }}
       style={{ position: "fixed", inset: 0, zIndex: 40, top: 0, left: 0, right: 0, bottom: 0 }}
     >
-      <PlacesGoogleMapView onOpenPlace={onOpenPlace} user={user} onBack={onBack} openNearby={openNearby} />
+      <PlacesInteractiveMap onBack={onBack} user={user} />
     </motion.div>
   );
 }
