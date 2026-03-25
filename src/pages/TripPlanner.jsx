@@ -1,560 +1,375 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { base44 } from "@/api/base44Client";
-import TripDestinationCard from "@/components/TripDestinationCard";
-import TripDetailModal from "@/components/TripDetailModal";
-import {
-  Search, Loader2, ChevronRight, Map, List,
-  Route, Save, Users, UserPlus, Sparkles, ChevronLeft,
-  DollarSign, Calendar, Heart, Briefcase, Star, Wand2,
-  MapPin, Plus, X, Trash2, ArrowUp, ArrowDown, Share2, Navigation
-} from "lucide-react";
+import { ChevronLeft, MapPin, Search, Bell } from "lucide-react";
+import BoroughDetail from "@/components/explore/BoroughDetail";
 
-function formatKm(km) {
-  if (!km) return "—";
-  return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
-}
-
-// ── AI Onboarding Wizard (unchanged from original) ──────────────────────────
-const INTERESTS = ["🍽️ Food & Dining", "🏛️ Culture & History", "🌿 Nature & Outdoors", "🛍️ Shopping", "🎭 Nightlife & Entertainment", "🏖️ Beach & Relaxation", "🎨 Art & Museums", "⛪ Religious & Spiritual", "🏋️ Adventure & Sports", "📸 Photography Spots"];
-const BUDGETS = [{ label: "Budget", icon: "$", desc: "Hostels, local eats" }, { label: "Mid-range", icon: "$$", desc: "Hotels, casual dining" }, { label: "Luxury", icon: "$$$", desc: "Premium stays & dining" }];
-const TRAVEL_STYLES = [{ label: "Relaxed", emoji: "😌", desc: "Slow pace, less stops" }, { label: "Balanced", emoji: "🚶", desc: "Mix of everything" }, { label: "Packed", emoji: "⚡", desc: "See as much as possible" }];
-
-function AIWizard({ user, onTripGenerated, onClose }) {
-  const [step, setStep] = useState(0);
-  const [destination, setDestination] = useState("");
-  const [days, setDays] = useState(3);
-  const [budget, setBudget] = useState("Mid-range");
-  const [groupSize, setGroupSize] = useState(2);
-  const [interests, setInterests] = useState([]);
-  const [travelStyle, setTravelStyle] = useState("Balanced");
-  const [generating, setGenerating] = useState(false);
-
-  const toggleInterest = (i) => setInterests(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
-
-  const generate = async () => {
-    if (!destination.trim()) return;
-    setGenerating(true);
-    const prompt = `You are an expert travel planner AI. Create a hyper-personalized ${days}-day trip itinerary for: ${destination}.
-Traveler profile:
-- Budget: ${budget}
-- Group size: ${groupSize} people
-- Travel style: ${travelStyle}
-- Interests: ${interests.join(", ") || "general sightseeing"}
-
-Return a JSON object with this exact schema:
-{
-  "title": "Creative trip title",
-  "description": "2-sentence compelling description",
-  "highlights": ["highlight1", "highlight2", "highlight3"],
-  "stops": [
-    {
-      "name": "Place name",
-      "address": "Full address",
-      "category": "restaurant|museum|park|hotel|attraction|bar|cafe",
-      "note": "Why visit + tip (1-2 sentences)",
-      "day": 1,
-      "type": "accommodation|activity|dining|transport"
-    }
-  ],
-  "budget_tip": "Budget-specific money-saving or splurge tip",
-  "best_time": "Best time to visit each attraction",
-  "local_tip": "Insider local tip"
-}
-Include ${Math.min(days * 4, 16)} stops total spread across ${days} days. Mix accommodation, dining, and activities. Tailor everything to the ${budget} budget and ${interests.join(", ")} interests.`;
-
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          description: { type: "string" },
-          highlights: { type: "array", items: { type: "string" } },
-          stops: { type: "array", items: { type: "object" } },
-          budget_tip: { type: "string" },
-          best_time: { type: "string" },
-          local_tip: { type: "string" },
-        }
-      }
-    });
-
-    const trip = {
-      title: result.title || `${destination} Trip`,
-      description: result.description || "",
-      creator_email: user.email,
-      creator_name: user.full_name || user.email.split("@")[0],
-      stops: (result.stops || []).map(s => ({ name: s.name, address: s.address || "", category: s.category || "place", note: s.note || "", lat: null, lng: null, photo: null, day: s.day, type: s.type })),
-      is_public: false,
-      ai_highlights: result.highlights || [],
-      ai_budget_tip: result.budget_tip || "",
-      ai_best_time: result.best_time || "",
-      ai_local_tip: result.local_tip || "",
-      ai_generated: true,
-    };
-
-    const created = await base44.entities.Trip.create(trip);
-    setGenerating(false);
-    onTripGenerated(created);
-  };
-
-  const steps = [
-    {
-      title: "Where to?",
-      subtitle: "Tell me your dream destination",
-      content: (
-        <div>
-          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-card)", border: "2px solid var(--accent-primary)", boxShadow: "0 0 0 3px rgba(79,70,229,0.1)" }}>
-            <MapPin className="w-5 h-5 shrink-0" style={{ color: "var(--accent-primary)" }} />
-            <input value={destination} onChange={e => setDestination(e.target.value)}
-              placeholder="Paris, Tokyo, New York…"
-              autoFocus
-              className="flex-1 bg-transparent text-base font-semibold outline-none"
-              style={{ color: "var(--text-primary)", border: "none", boxShadow: "none", minHeight: "unset", padding: 0 }} />
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>How many days?</p>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setDays(d => Math.max(1, d - 1))}
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minWidth: 36, minHeight: 36 }}>−</button>
-              <span className="text-xl font-black w-8 text-center" style={{ color: "var(--accent-primary)" }}>{days}</span>
-              <button onClick={() => setDays(d => Math.min(14, d + 1))}
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minWidth: 36, minHeight: 36 }}>+</button>
-            </div>
-          </div>
-        </div>
-      ),
-      valid: destination.trim().length > 0,
-    },
-    {
-      title: "Travel Style",
-      subtitle: "Pick your budget & pace",
-      content: (
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Budget</p>
-            <div className="grid grid-cols-3 gap-2">
-              {BUDGETS.map(b => (
-                <button key={b.label} onClick={() => setBudget(b.label)}
-                  className="flex flex-col items-center p-3 rounded-2xl transition-all"
-                  style={{ backgroundColor: budget === b.label ? "#4F46E5" : "var(--bg-card)", border: `2px solid ${budget === b.label ? "#4F46E5" : "var(--border-light)"}`, color: budget === b.label ? "#fff" : "var(--text-primary)" }}>
-                  <span className="text-lg font-black">{b.icon}</span>
-                  <span className="text-xs font-bold mt-1">{b.label}</span>
-                  <span className="text-[10px] mt-0.5 opacity-75">{b.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: "var(--text-hint)" }}>Travel Pace</p>
-            <div className="grid grid-cols-3 gap-2">
-              {TRAVEL_STYLES.map(s => (
-                <button key={s.label} onClick={() => setTravelStyle(s.label)}
-                  className="flex flex-col items-center p-3 rounded-2xl transition-all"
-                  style={{ backgroundColor: travelStyle === s.label ? "#7C3AED" : "var(--bg-card)", border: `2px solid ${travelStyle === s.label ? "#7C3AED" : "var(--border-light)"}`, color: travelStyle === s.label ? "#fff" : "var(--text-primary)" }}>
-                  <span className="text-2xl">{s.emoji}</span>
-                  <span className="text-xs font-bold mt-1">{s.label}</span>
-                  <span className="text-[10px] mt-0.5 opacity-75">{s.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Group size</p>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setGroupSize(g => Math.max(1, g - 1))}
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minWidth: 36, minHeight: 36 }}>−</button>
-              <span className="text-xl font-black w-8 text-center" style={{ color: "var(--accent-primary)" }}>{groupSize}</span>
-              <button onClick={() => setGroupSize(g => Math.min(20, g + 1))}
-                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", minWidth: 36, minHeight: 36 }}>+</button>
-            </div>
-          </div>
-        </div>
-      ),
-      valid: true,
-    },
-    {
-      title: "Interests",
-      subtitle: "What excites you most?",
-      content: (
-        <div className="flex flex-wrap gap-2">
-          {INTERESTS.map(interest => (
-            <button key={interest} onClick={() => toggleInterest(interest)}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-sm font-semibold transition-all"
-              style={{ backgroundColor: interests.includes(interest) ? "#4F46E5" : "var(--bg-card)", border: `2px solid ${interests.includes(interest) ? "#4F46E5" : "var(--border-light)"}`, color: interests.includes(interest) ? "#fff" : "var(--text-primary)" }}>
-              {interest}
-            </button>
-          ))}
-        </div>
-      ),
-      valid: true,
-    },
-  ];
-
-  const current = steps[step];
-
-  if (generating) return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8"
-      style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)" }}>
-      <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        className="w-20 h-20 rounded-3xl mb-6 flex items-center justify-center"
-        style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED, #EC4899)" }}>
-        <Sparkles className="w-10 h-10 text-white" />
-      </motion.div>
-      <h2 className="text-2xl font-black text-white mb-2 text-center" style={{ fontFamily: "var(--font-serif)" }}>
-        Crafting your perfect trip…
-      </h2>
-      <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.6)" }}>
-        AI is personalizing {days} days in {destination} just for you
-      </p>
-      <div className="mt-8 flex gap-1.5">
-        {[0,1,2,3,4].map(i => (
-          <motion.div key={i} animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.18 }}
-            className="w-2 h-2 rounded-full" style={{ backgroundColor: "#818CF8" }} />
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "var(--bg-app)" }}>
-      <div className="px-4 pt-4 pb-4" style={{ paddingTop: "max(env(safe-area-inset-top, 16px), 16px)", background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)" }}>
-        <div className="flex items-center justify-between mb-4">
-          <button onClick={step > 0 ? () => setStep(s => s - 1) : onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-            <ChevronLeft className="w-5 h-5 text-white" />
-          </button>
-          <div className="flex gap-1.5">
-            {steps.map((_, i) => (
-              <div key={i} className="h-1.5 rounded-full transition-all"
-                style={{ width: i === step ? 24 : 8, backgroundColor: i <= step ? "#fff" : "rgba(255,255,255,0.3)" }} />
-            ))}
-          </div>
-          <div className="w-9" />
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-            <Wand2 className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-white" style={{ fontFamily: "var(--font-serif)" }}>{current.title}</h2>
-            <p className="text-xs text-white opacity-75">{current.subtitle}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-5">
-        <AnimatePresence mode="wait">
-          <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}>
-            {current.content}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="px-4 pb-8 pt-3" style={{ paddingBottom: "max(env(safe-area-inset-bottom, 24px), 24px)" }}>
-        {step < steps.length - 1 ? (
-          <button onClick={() => setStep(s => s + 1)} disabled={!current.valid}
-            className="w-full py-4 rounded-2xl text-base font-black"
-            style={{ background: current.valid ? "linear-gradient(135deg,#4F46E5,#7C3AED)" : "var(--bg-subtle)", color: current.valid ? "#fff" : "var(--text-hint)", boxShadow: current.valid ? "0 8px 24px rgba(79,70,229,0.4)" : "none" }}>
-            Continue →
-          </button>
-        ) : (
-          <button onClick={generate}
-            className="w-full py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED,#EC4899)", color: "#fff", boxShadow: "0 8px 24px rgba(79,70,229,0.4)" }}>
-            <Sparkles className="w-5 h-5" /> Generate My Trip ✨
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// NYC Destinations Database
-const NYC_DESTINATIONS = [
+const BOROUGHS = [
   {
-    id: 1,
-    name: "SoHo",
-    description: "Trendy neighborhood with art galleries, boutiques, and world-class dining",
-    tagline: "Arts, Culture & Nightlife",
-    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=500&h=600&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop",
+    id: "manhattan",
+    name: "Manhattan",
+    tagline: "The heart of New York City",
+    description: "World-famous skyline, iconic museums, hidden delis, and neighborhoods full of character",
+    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&h=400&fit=crop",
+    emoji: "🏙️",
+    neighborhoods: [
+      {
+        name: "SoHo",
+        description: "Cast-iron architecture, boutique shopping, indie galleries and coffee shops on cobblestone streets",
+        image: "https://images.unsplash.com/photo-1555529771-835f59fc5ef7?w=400&h=300&fit=crop",
+        spots: [
+          { name: "McNally Jackson Books", type: "📚 Bookstore", cost: "Free", desc: "Independent bookstore with great reads and a cozy reading nook" },
+          { name: "Soho Square Park", type: "🌿 Public Space", cost: "Free", desc: "Great people-watching spot in the heart of SoHo" },
+          { name: "Housing Works Bookstore", type: "📚 Thrift + Books", cost: "Free", desc: "Beloved used bookstore & café that funds a great cause" },
+          { name: "Artists & Fleas Market", type: "🛍️ Market", cost: "Free entry", desc: "Local artisan market with unique jewelry, clothing, and art" },
+        ],
+      },
+      {
+        name: "Upper East Side",
+        description: "Museum Mile, Central Park access, old-money charm, and hidden neighborhood gems",
+        image: "https://images.unsplash.com/photo-1516557595335-b1b49fcb5b3d?w=400&h=300&fit=crop",
+        spots: [
+          { name: "The Metropolitan Museum", type: "🎨 Museum", cost: "Pay-what-you-wish (NY residents)", desc: "One of the world's greatest art museums spanning 5,000 years" },
+          { name: "Central Park (East Side)", type: "🌿 Park", cost: "Free", desc: "Walk through Conservatory Garden or rent a rowboat at the lake" },
+          { name: "Neue Galerie", type: "🎨 Museum", cost: "$25", desc: "Intimate German/Austrian art museum — stunning Klimt collection" },
+          { name: "Carl Schurz Park", type: "🌿 Park", cost: "Free", desc: "Quiet riverside park with East River views — locals' favorite" },
+        ],
+      },
+      {
+        name: "Harlem",
+        description: "Rich African-American culture, jazz history, gospel brunches, and soul food institutions",
+        image: "https://images.unsplash.com/photo-1571986655572-b26ab95b8bcc?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Marcus Garvey Park", type: "🌿 Park", cost: "Free", desc: "Historic park with amphitheater, pools, and community events" },
+          { name: "Studio Museum in Harlem", type: "🎨 Museum", cost: "Free on Sundays", desc: "Celebrates artists of African descent with rotating exhibitions" },
+          { name: "Apollo Theater", type: "🎭 Landmark", cost: "Free to walk by, tours from $16", desc: "Iconic venue where Ella Fitzgerald, James Brown and Michael Jackson launched" },
+          { name: "Strivers' Row", type: "🏛️ Architecture", cost: "Free", desc: "Historic townhouses where Harlem Renaissance greats once lived" },
+        ],
+      },
+      {
+        name: "Lower East Side",
+        description: "Immigrant history, vintage shops, street art, night markets, and budget-friendly eats",
+        image: "https://images.unsplash.com/photo-1487659055127-d4b66b1690bb?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Tenement Museum", type: "🏛️ Museum", cost: "$30", desc: "Walk through restored immigrant apartments — a must-see for NYC history" },
+          { name: "Essex Market", type: "🍽️ Market", cost: "Free entry", desc: "Vibrant indoor market with vendors from all over the world" },
+          { name: "Orchard Street", type: "🛍️ Shopping", cost: "Free to browse", desc: "Historic bargain shopping street now full of indie boutiques" },
+          { name: "Sara D. Roosevelt Park", type: "🌿 Park", cost: "Free", desc: "Community park with basketball courts and seasonal farmers market" },
+        ],
+      },
+      {
+        name: "Greenwich Village",
+        description: "Bohemian brownstones, live jazz clubs, The Strand, hidden gardens, and NYU energy",
+        image: "https://images.unsplash.com/photo-1534080564842-39a9e635b032?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Washington Square Park", type: "🌿 Park", cost: "Free", desc: "Iconic arch, chess players, musicians — the soul of the Village" },
+          { name: "The Strand Bookstore", type: "📚 Bookstore", cost: "Free to browse", desc: "18 miles of books — legendary indie bookstore since 1927" },
+          { name: "Village Vanguard", type: "🎵 Jazz Club", cost: "$35 + 2-drink min", desc: "The most storied jazz club in NYC, opened in 1935" },
+          { name: "Jefferson Market Garden", type: "🌿 Garden", cost: "Free", desc: "Hidden community garden open to public on weekends in season" },
+        ],
+      },
+      {
+        name: "Chinatown & Little Italy",
+        description: "Authentic dim sum, fish markets, festival streets, and a mix of generations of immigrants",
+        image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Columbus Park", type: "🌿 Park", cost: "Free", desc: "Watch mahjong games, tai chi, and community life — totally free" },
+          { name: "Canal Street Market", type: "🛍️ Market", cost: "Free entry", desc: "Rotating vendors with food, art, and unique finds" },
+          { name: "Museum of Chinese in America", type: "🏛️ Museum", cost: "$14", desc: "Tells the stories of Chinese Americans through powerful exhibits" },
+          { name: "Mulberry Street", type: "🍕 Dining", cost: "Varies", desc: "Walk the original Little Italy strip — try a cannoli from Ferrara" },
+        ],
+      },
     ],
-    budgetStart: 150,
-    duration: 2,
-    activityLevel: "Moderate",
-    accommodation: "3-4 star hotels",
-    fullDescription: "SoHo is Manhattan's most prestigious shopping and dining district. Browse independent boutiques on Spring Street, catch world-class exhibitions at cutting-edge galleries, and enjoy Michelin-starred restaurants alongside casual eateries. The neighborhood's cast-iron architecture and vibrant street life make it perfect for both culture seekers and foodies.",
-    highlights: [
-      "Gallery hopping on West Broadway",
-      "Shopping on Spring Street",
-      "Michelin-starred restaurants",
-      "Street art and historic architecture",
-    ],
-    bestTime: "Year-round; best in fall & spring for comfortable weather",
-    special: true,
   },
   {
-    id: 2,
-    name: "Williamsburg",
-    description: "Hip Brooklyn neighborhood with rooftop bars, indie coffee shops, and street art",
-    tagline: "Hip & Creative Energy",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=600&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1489749798305-4fea3ba63d60?w=600&h=400&fit=crop",
+    id: "brooklyn",
+    name: "Brooklyn",
+    tagline: "Creative, cultural, and always evolving",
+    description: "Rooftop bars with Manhattan views, street murals, artisan markets, beaches, and world-class dining",
+    image: "https://images.unsplash.com/photo-1508779105133-6f9df59d3e65?w=600&h=400&fit=crop",
+    emoji: "🌉",
+    neighborhoods: [
+      {
+        name: "Williamsburg",
+        description: "The epicenter of Brooklyn cool — vintage shops, rooftop bars, street art, and great coffee",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Brooklyn Flea Market", type: "🛍️ Market", cost: "Free entry", desc: "One of the best flea markets in the country, weekends year-round" },
+          { name: "East River State Park", type: "🌿 Park", cost: "Free", desc: "Sit on the waterfront and enjoy stunning Manhattan skyline views" },
+          { name: "Smorgasburg", type: "🍽️ Market", cost: "Free entry", desc: "100+ local food vendors every weekend — a NYC institution" },
+          { name: "The Brooklyn Art Library", type: "📚 Gallery", cost: "Free", desc: "Quirky library housing thousands of hand-made sketchbooks from artists worldwide" },
+        ],
+      },
+      {
+        name: "DUMBO",
+        description: "Instagram-famous bridge views, cobblestone streets, galleries, and weekend markets",
+        image: "https://images.unsplash.com/photo-1569154941061-e231b4aa8ebb?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Brooklyn Bridge Park", type: "🌿 Park", cost: "Free", desc: "Sprawling waterfront park with piers, gardens, mini golf, and kayaking" },
+          { name: "Jane's Carousel", type: "🎠 Attraction", cost: "$3", desc: "Restored 1922 carousel in a stunning Nouvel-designed pavilion" },
+          { name: "DUMBO Arts", type: "🎨 Gallery", cost: "Free", desc: "Gallery district with rotating exhibitions from emerging artists" },
+          { name: "Washington Street Photo Spot", type: "📸 Landmark", cost: "Free", desc: "The iconic framed Manhattan Bridge view — most photographed in Brooklyn" },
+        ],
+      },
+      {
+        name: "Park Slope",
+        description: "Leafy brownstones, Prospect Park, farmers markets, and a laid-back family vibe",
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Prospect Park", type: "🌿 Park", cost: "Free", desc: "Brooklyn's beloved park — boathouse, meadows, bike paths, and concerts" },
+          { name: "Brooklyn Museum", type: "🎨 Museum", cost: "Pay-what-you-wish 1st Sat", desc: "World-class collection in a stunning Beaux-Arts building" },
+          { name: "Brooklyn Botanic Garden", type: "🌸 Garden", cost: "Free Tues + select times", desc: "Japanese Garden, cherry blossoms in spring, and rose garden" },
+          { name: "Grand Army Plaza Greenmarket", type: "🛒 Market", cost: "Free", desc: "Year-round farmers market with local produce, bread, and flowers" },
+        ],
+      },
+      {
+        name: "Coney Island",
+        description: "Classic boardwalk, historic amusement rides, beaches, and Nathan's Famous hot dogs",
+        image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Coney Island Beach", type: "🏖️ Beach", cost: "Free", desc: "3.5 miles of public beach — crowded but iconic in summer" },
+          { name: "Luna Park", type: "🎡 Amusement", cost: "Pay per ride", desc: "Historic amusement park — ride the Cyclone roller coaster" },
+          { name: "New York Aquarium", type: "🐟 Attraction", cost: "$22.95", desc: "Sharks, sea lions, and ocean wonders by the sea" },
+          { name: "Coney Island Boardwalk", type: "🚶 Walk", cost: "Free", desc: "Classic American boardwalk — free to stroll with shops and food" },
+        ],
+      },
     ],
-    budgetStart: 120,
-    duration: 2,
-    activityLevel: "Relaxed",
-    accommodation: "Boutique hotels & Airbnb",
-    fullDescription: "Williamsburg is Brooklyn's creative heart, known for trendy rooftop bars, vintage fashion boutiques, and Instagram-worthy street murals. Walk the waterfront for Manhattan views, explore the vibrant nightlife scene, and discover emerging artists at independent galleries. The neighborhood perfectly blends hipster cool with authentic community charm.",
-    highlights: [
-      "Rooftop bars with skyline views",
-      "Vintage shopping on Bedford Ave",
-      "Street art & murals",
-      "Craft breweries and cafés",
-    ],
-    bestTime: "Summer for outdoor bars; autumn for perfect weather",
   },
   {
-    id: 3,
-    name: "Upper East Side",
-    description: "Upscale Manhattan with world-famous museums, Central Park access, and fine dining",
-    tagline: "Culture, History & Elegance",
-    image: "https://images.unsplash.com/photo-1516557595335-b1b49fcb5b3d?w=500&h=600&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1516557595335-b1b49fcb5b3d?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop",
+    id: "queens",
+    name: "Queens",
+    tagline: "The world's most diverse borough",
+    description: "Over 160 languages spoken, incredible international food, Flushing Meadows, and Rockaway Beach",
+    image: "https://images.unsplash.com/photo-1569154941061-e231b4aa8ebb?w=600&h=400&fit=crop",
+    emoji: "🌏",
+    neighborhoods: [
+      {
+        name: "Flushing",
+        description: "Authentic Asian cuisine, bustling markets, and one of the largest Chinatowns outside Asia",
+        image: "https://images.unsplash.com/photo-1555529771-835f59fc5ef7?w=400&h=300&fit=crop",
+        spots: [
+          { name: "New World Mall Food Court", type: "🍜 Dining", cost: "$5–15", desc: "Incredible, cheap Asian food — dumplings, noodles, bubble tea and more" },
+          { name: "Flushing Meadows Corona Park", type: "🌿 Park", cost: "Free", desc: "Massive park with a lake, Unisphere, and Queens Museum" },
+          { name: "Queens Museum", type: "🎨 Museum", cost: "Pay-what-you-wish", desc: "Home to the famous 1964 World's Fair Panorama of NYC" },
+          { name: "Queens Botanical Garden", type: "🌸 Garden", cost: "$6 ($4 for NYC residents)", desc: "Peaceful garden in the middle of the city" },
+        ],
+      },
+      {
+        name: "Astoria",
+        description: "Greek and Mediterranean food, live music venues, and a tight-knit arts community",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Socrates Sculpture Park", type: "🎨 Park", cost: "Free", desc: "Outdoor sculpture park on the waterfront with rotating exhibitions" },
+          { name: "Museum of the Moving Image", type: "🎬 Museum", cost: "$20 (free Fri evenings)", desc: "Fascinating look at film, TV, and digital media" },
+          { name: "Astoria Park", type: "🌿 Park", cost: "Free", desc: "Stunning views of the Hell Gate Bridge and East River" },
+          { name: "31st Street Food Strip", type: "🍴 Dining", cost: "Varies", desc: "Line of authentic Greek restaurants and bakeries" },
+        ],
+      },
+      {
+        name: "Rockaway Beach",
+        description: "NYC's favorite summer escape — real waves, surfing, boardwalk, and seafood",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Rockaway Beach", type: "🏖️ Beach", cost: "Free", desc: "NYC's best surf beach with designated surfing sections" },
+          { name: "The Rockaway Hotel Rooftop", type: "🍹 Bar", cost: "Free to visit", desc: "Cool rooftop bar with ocean views and sunset cocktails" },
+          { name: "Rockaway Beach Surf Club", type: "🏄 Activity", cost: "Lessons from $100", desc: "Take a surfing lesson in NYC's only surf-able waves" },
+          { name: "Fort Tilden", type: "🌿 Nature", cost: "Free", desc: "Abandoned military fort with dunes, trails, and secluded beaches" },
+        ],
+      },
     ],
-    budgetStart: 200,
-    duration: 3,
-    activityLevel: "Moderate",
-    accommodation: "Luxury hotels",
-    fullDescription: "Home to the world's best museums including the Met, MoMA, and Natural History Museum, the Upper East Side is a cultural paradise. Stroll through Central Park, enjoy upscale shopping on Madison Avenue, and dine at renowned restaurants. Perfect for art lovers and those seeking sophisticated NYC experiences.",
-    highlights: [
-      "Metropolitan Museum of Art",
-      "Central Park walks & picnics",
-      "Madison Avenue shopping",
-      "Fine dining institutions",
-    ],
-    bestTime: "Spring (cherry blossoms in Park) and fall foliage",
   },
   {
-    id: 4,
-    name: "Lower East Side",
-    description: "Bohemian neighborhood with vintage shops, dive bars, street food, and nightlife",
-    tagline: "Budget-Friendly & Eclectic",
-    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&h=600&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1487659055127-d4b66b1690bb?w=600&h=400&fit=crop",
+    id: "bronx",
+    name: "The Bronx",
+    tagline: "Birthplace of hip-hop and so much more",
+    description: "The New York Botanical Garden, amazing Bronx Zoo, Arthur Avenue Italian market, and hip-hop history",
+    image: "https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=600&h=400&fit=crop",
+    emoji: "🎵",
+    neighborhoods: [
+      {
+        name: "Fordham & Arthur Avenue",
+        description: "The 'Real Little Italy' — old-school Italian bakeries, delis, and family restaurants",
+        image: "https://images.unsplash.com/photo-1534080564842-39a9e635b032?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Arthur Avenue Retail Market", type: "🧀 Market", cost: "Free entry", desc: "Indoor market with fresh pasta, cheese, meats, and produce — authentic Italian" },
+          { name: "Bronx Zoo", type: "🦁 Zoo", cost: "From $25 (free Wednesdays)", desc: "One of the largest urban zoos in the world — over 6,000 animals" },
+          { name: "New York Botanical Garden", type: "🌸 Garden", cost: "$35 (free Wednesdays)", desc: "250 stunning acres with world-class garden collections" },
+          { name: "Fordham University Campus", type: "🏛️ Campus", cost: "Free to walk", desc: "Gothic stone buildings — one of NYC's most beautiful campuses" },
+        ],
+      },
+      {
+        name: "South Bronx & Hip-Hop Heritage",
+        description: "The birthplace of hip-hop culture, street art, and community murals",
+        image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Universal Hip Hop Museum", type: "🎵 Museum", cost: "Check for current pricing", desc: "Celebrating the birth and global impact of hip-hop culture" },
+          { name: "1520 Sedgwick Avenue", type: "🏛️ Landmark", cost: "Free to view", desc: "The apartment building where DJ Kool Herc threw the first hip-hop party in 1973" },
+          { name: "Andrew Freedman Home", type: "🎨 Gallery", cost: "Free events", desc: "Historic building with free community arts events and exhibitions" },
+          { name: "Bronx River Trail", type: "🚴 Trail", cost: "Free", desc: "Scenic greenway along the Bronx River through the heart of the borough" },
+        ],
+      },
     ],
-    budgetStart: 80,
-    duration: 2,
-    activityLevel: "High",
-    accommodation: "Budget hostels & hotels",
-    fullDescription: "The Lower East Side is NYC's most authentic, affordable neighborhood. Explore the historic immigrant tenement buildings, discover tiny vintage shops along Orchard Street, and experience legendary dive bars and underground music venues. Street food vendors offer world-class cuisine at budget prices.",
-    highlights: [
-      "Vintage shopping on Orchard Street",
-      "Legendary dive bars",
-      "Street food & ethnic cuisine",
-      "Historic tenement museums",
-    ],
-    bestTime: "Summer (outdoor dining & markets) year-round affordability",
-    special: true,
   },
   {
-    id: 5,
-    name: "Greenwich Village",
-    description: "Charming West Village with tree-lined streets, jazz clubs, bookstores, and cafés",
-    tagline: "Bohemian & Literary",
-    image: "https://images.unsplash.com/photo-1534080564842-39a9e635b032?w=500&h=600&fit=crop",
-    images: [
-      "https://images.unsplash.com/photo-1534080564842-39a9e635b032?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
+    id: "staten-island",
+    name: "Staten Island",
+    tagline: "NYC's hidden gem borough",
+    description: "Free ferry views of the Statue of Liberty, snug Harbor, historic village, and beautiful waterfront parks",
+    image: "https://images.unsplash.com/photo-1571986655572-b26ab95b8bcc?w=600&h=400&fit=crop",
+    emoji: "⛴️",
+    neighborhoods: [
+      {
+        name: "St. George & Ferry Terminal",
+        description: "The arrival point — Staten Island ferry, waterfront arts, and Sailor's Snug Harbor",
+        image: "https://images.unsplash.com/photo-1516557595335-b1b49fcb5b3d?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Staten Island Ferry", type: "⛴️ Ferry", cost: "FREE", desc: "Best free attraction in NYC — stunning Statue of Liberty and Manhattan skyline views" },
+          { name: "Snug Harbor Cultural Center", type: "🎨 Park & Museum", cost: "Free grounds, $8 museum", desc: "Stunning 83-acre park with Greek Revival buildings, Chinese Scholar's Garden, and galleries" },
+          { name: "Staten Island Museum", type: "🏛️ Museum", cost: "$10 (free Sundays)", desc: "Natural history, art, and culture of Staten Island" },
+          { name: "St. George Theatre", type: "🎭 Theater", cost: "Varies by show", desc: "Beautifully restored 1929 theater with regular performances" },
+        ],
+      },
+      {
+        name: "Historic Richmond Town",
+        description: "Living history museum of colonial-era New York on 100 acres",
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+        spots: [
+          { name: "Historic Richmond Town", type: "🏛️ Museum Village", cost: "$10", desc: "28 historic buildings — live demonstrations of colonial-era life in NYC" },
+          { name: "LaTourette Park & Golf", type: "🌿 Park", cost: "Free to hike", desc: "Over 500 acres of forest with hiking trails and a historic house" },
+          { name: "Voelcker's Beer Garden", type: "🍺 Historic Site", cost: "Free to visit exterior", desc: "One of the last historic beer gardens from the 19th century" },
+          { name: "Clay Pit Ponds", type: "🌿 Nature", cost: "Free", desc: "NYC's only state park preserve — spring-fed streams, birds, and peace" },
+        ],
+      },
     ],
-    budgetStart: 140,
-    duration: 2,
-    activityLevel: "Relaxed",
-    accommodation: "Boutique hotels",
-    fullDescription: "Greenwich Village is Manhattan's most picturesque neighborhood with charming brownstones, intimate jazz clubs, and iconic bookstores like The Strand. Walk the tree-lined streets, discover hidden gardens, visit historic cafés where artists once gathered, and catch live jazz in legendary clubs. A romantic escape within NYC.",
-    highlights: [
-      "Live jazz at Blue Note & Village Vanguard",
-      "The Strand Bookstore (18 miles of books)",
-      "Hidden gardens & tree-lined streets",
-      "Historic cafés & restaurants",
-    ],
-    bestTime: "Fall for mild weather; summer for outdoor jazz",
   },
 ];
 
-// ── Main TripPlanner ──────────────────────────────────────────────────────────
 export default function TripPlanner() {
-  const [user, setUser] = useState(null);
-  const [myTrips, setMyTrips] = useState([]);
-  const [activeTrip, setActiveTrip] = useState(null);
-  const [showAIWizard, setShowAIWizard] = useState(false);
-  const [activeTab, setActiveTab] = useState("browse");
-  const [selectedDestination, setSelectedDestination] = useState(null);
-  const [showDestinationModal, setShowDestinationModal] = useState(false);
-  const [sharedTrips, setSharedTrips] = useState([]);
+  const [selectedBorough, setSelectedBorough] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+  const filtered = searchQuery.trim()
+    ? BOROUGHS.map(b => ({
+        ...b,
+        neighborhoods: b.neighborhoods.filter(n =>
+          n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          n.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          n.spots?.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        ),
+      })).filter(b => b.neighborhoods.length > 0)
+    : BOROUGHS;
 
-  useEffect(() => {
-    if (!user?.email) return;
-    base44.entities.Trip.filter({ creator_email: user.email }, "-created_date", 50).then(setMyTrips).catch(() => {});
-    base44.entities.Trip.list("-created_date", 200).then(all => {
-      setSharedTrips(all.filter(t => t.creator_email !== user.email && (t.collaborators || []).includes(user.email)));
-    }).catch(() => {});
-  }, [user?.email]);
-
-  const handleDestinationClick = (dest) => {
-    setSelectedDestination(dest);
-    setShowDestinationModal(true);
-  };
-
-  const handleBookDestination = () => {
-    setShowDestinationModal(false);
-    setTimeout(() => setShowAIWizard(true), 300);
-  };
+  if (selectedBorough) {
+    return (
+      <BoroughDetail
+        borough={selectedBorough}
+        onBack={() => setSelectedBorough(null)}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-app)", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}>
-      {/* Destination Detail Modal */}
-      <AnimatePresence>
-        {showDestinationModal && selectedDestination && (
-          <TripDetailModal
-            destination={selectedDestination}
-            onClose={() => setShowDestinationModal(false)}
-            onBook={handleBookDestination}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* AI Wizard */}
-      <AnimatePresence>
-        {showAIWizard && user && (
-          <AIWizard user={user} onClose={() => setShowAIWizard(false)}
-            onTripGenerated={(trip) => { setMyTrips(prev => [trip, ...prev]); setActiveTrip(trip); setShowAIWizard(false); }} />
-        )}
-      </AnimatePresence>
-
-      {!activeTrip ? (
-        <>
-          {/* Header */}
-          <div className="sticky top-0 z-30 px-4 pt-4 pb-4" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-subtle)", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
-            {/* Greeting */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Good to see you,</p>
-                <h1 className="text-2xl font-black leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                  {user?.full_name?.split(" ")[0] || "Explorer"}
-                </h1>
-              </div>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold" style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                {user?.full_name?.[0] || "?"}
-              </div>
-            </div>
-
-            {/* Search bar */}
-            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <Search className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-              <input
-                type="text"
-                placeholder="Find your next adventure"
-                className="flex-1 bg-transparent text-sm outline-none"
-                style={{ color: "var(--text-primary)", border: "none", minHeight: "unset", boxShadow: "none", padding: 0 }}
-              />
-            </div>
-
-            {/* Tab switcher */}
-            <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              {[{ key: "browse", label: "Browse Destinations" }, { key: "my", label: "My Trips" }].map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all whitespace-nowrap"
-                  style={{ backgroundColor: activeTab === key ? "#4F46E5" : "transparent", color: activeTab === key ? "#fff" : "var(--text-hint)" }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Header */}
+      <div
+        className="sticky top-0 z-30 px-4 pb-4"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
+          backgroundColor: "var(--bg-nav)",
+          backdropFilter: "blur(20px)",
+          borderBottom: "1px solid var(--border-subtle)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Explore</p>
+            <h1
+              className="text-2xl font-black leading-tight"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}
+            >
+              New York City
+            </h1>
           </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto pb-32">
-            {activeTab === "browse" && (
-              <div className="px-4 pt-4 space-y-4">
-                {NYC_DESTINATIONS.map(dest => (
-                  <div key={dest.id} onClick={() => handleDestinationClick(dest)}>
-                    <TripDestinationCard destination={dest} onClick={() => handleDestinationClick(dest)} />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === "my" && (
-              <div className="px-4 pt-4">
-                {myTrips.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <div className="text-5xl mb-3">✈️</div>
-                    <p className="text-base font-bold mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>No trips yet</p>
-                    <p className="text-sm" style={{ color: "var(--text-hint)" }}>Create your first trip with AI</p>
-                    <button onClick={() => setShowAIWizard(true)} className="mt-4 px-4 py-2.5 rounded-2xl text-sm font-bold" style={{ background: "linear-gradient(135deg,#4F46E5,#7C3AED)", color: "#fff" }}>
-                      Create Trip
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {myTrips.map(trip => (
-                      <motion.button
-                        key={trip.id}
-                        onClick={() => setActiveTrip(trip)}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all active:scale-[0.98]"
-                        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
-                      >
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: "linear-gradient(135deg,rgba(79,70,229,0.2),rgba(236,72,153,0.2))", border: "1px solid rgba(79,70,229,0.2)" }}>
-                          ✨
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{trip.title}</p>
-                          <p className="text-xs" style={{ color: "var(--text-hint)" }}>{trip.stops?.length || 0} stops</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
-                      </motion.button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            🗽
           </div>
-        </>
-      ) : (
-        // Active trip view (simplified for space)
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          <button onClick={() => setActiveTrip(null)} className="mb-4 px-4 py-2 rounded-xl text-sm font-bold" style={{ backgroundColor: "var(--bg-card)" }}>
-            ← Back
-          </button>
-          <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>{activeTrip.title}</h2>
-          <p style={{ color: "var(--text-secondary)" }}>{activeTrip.description}</p>
         </div>
-      )}
+
+        {/* Search */}
+        <div
+          className="flex items-center gap-2 px-4 py-3 rounded-2xl"
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}
+        >
+          <Search className="w-4 h-4 shrink-0" style={{ color: "var(--text-hint)" }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search neighborhoods, spots…"
+            className="flex-1 bg-transparent text-sm outline-none"
+            style={{ color: "var(--text-primary)", border: "none", minHeight: "unset", boxShadow: "none", padding: 0 }}
+          />
+        </div>
+      </div>
+
+      <div className="px-4 pt-5 pb-32">
+        {/* Intro blurb */}
+        {!searchQuery && (
+          <p className="text-sm mb-5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Discover hidden spots, free activities, local dining, libraries, markets, and community events — across all five boroughs.
+          </p>
+        )}
+
+        {/* Borough Cards */}
+        <div className="space-y-4">
+          {filtered.map((borough, idx) => (
+            <motion.button
+              key={borough.id}
+              onClick={() => setSelectedBorough(borough)}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.06 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full rounded-3xl overflow-hidden text-left relative"
+              style={{ height: 220, display: "block" }}
+            >
+              {/* Background image */}
+              <img
+                src={borough.image}
+                alt={borough.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Gradient overlay */}
+              <div
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%)" }}
+              />
+
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">{borough.emoji}</span>
+                      <h2 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-serif)" }}>
+                        {borough.name}
+                      </h2>
+                    </div>
+                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
+                      {borough.tagline}
+                    </p>
+                  </div>
+                  <div
+                    className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold"
+                    style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(8px)" }}
+                  >
+                    {borough.neighborhoods.length} areas →
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
