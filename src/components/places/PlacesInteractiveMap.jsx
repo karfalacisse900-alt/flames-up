@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { ChevronLeft, X, MapPin, Star, ExternalLink, Search, Navigation } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 const CATEGORIES = [
   { key: "all",     label: "All",      emoji: "🗺️", color: "#4F46E5", bg: "#EEF2FF" },
