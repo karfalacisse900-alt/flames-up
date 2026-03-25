@@ -168,23 +168,17 @@ export default function PlacesInteractiveMap({ onBack, user }) {
   // Load Google Maps
   useEffect(() => {
     if (window.google?.maps) { setMapLoaded(true); return; }
-    const apiKey = "AIzaSyD1m9iJV8kEBGX2NpFSsxH9O7C4OIwFtYk"; // Will use proxy
     const script = document.createElement("script");
-    // Use backend token endpoint if available, else load directly
-    fetch("/api/functions/googleMapsToken", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) })
-      .then(r => r.json())
-      .then(data => {
-        const key = data.token || "";
+    base44.functions.invoke("googleMapsToken", {})
+      .then(res => {
+        const key = res?.data?.key || "";
         script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
         script.async = true;
         script.defer = true;
         script.onload = () => setMapLoaded(true);
         document.head.appendChild(script);
       })
-      .catch(() => {
-        // Fallback: try loading with existing env
-        setMapLoaded(true);
-      });
+      .catch(() => setMapLoaded(false));
     return () => {};
   }, []);
 
