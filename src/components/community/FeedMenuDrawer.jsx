@@ -6,16 +6,6 @@ import { createPageUrl } from "@/utils";
 
 const MENU_ITEMS = [
   {
-    id: "live_nearby",
-    label: "Live Nearby",
-    description: "Real-time activities around you",
-    icon: MapPin,
-    gradient: ["#f43f5e", "#e11d48"],
-    emoji: "📍",
-    page: "LiveNearby",
-    badge: "LIVE",
-  },
-  {
     id: "dashboard",
     label: "Dashboard",
     description: "News, activity, photos & more",
@@ -23,16 +13,6 @@ const MENU_ITEMS = [
     gradient: ["#C026D3", "#9333EA"],
     emoji: "🗂️",
     page: "Dashboard",
-  },
-  {
-    id: "temporary",
-    label: "Temporary Posts",
-    description: "Flash posts that expire",
-    icon: Clock,
-    gradient: ["#f59e0b", "#d97706"],
-    emoji: "⏳",
-    page: "LiveNearby",
-    comingSoon: true,
   },
 ];
 
