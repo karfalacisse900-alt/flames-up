@@ -1,5 +1,5 @@
 import React from "react";
-import { Users } from "lucide-react";
+import { Users, Radio } from "lucide-react";
 
 const CATEGORY_GRADIENTS = {
   fitness: ["#0d9488","#16a34a"], food: ["#ea580c","#d97706"],
@@ -28,7 +28,7 @@ function getTags(group) {
   return tags.slice(0, 4);
 }
 
-export default function GroupGridCard({ group, onClick }) {
+export default function GroupGridCard({ group, onClick, isLive }) {
   const tags = getTags(group);
 
   return (
@@ -50,6 +50,14 @@ export default function GroupGridCard({ group, onClick }) {
           </div>
         )}
 
+        {/* Live Now badge */}
+        {isLive && (
+          <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full"
+            style={{ backgroundColor: "#EF4444", backdropFilter: "blur(8px)" }}>
+            <Radio className="w-3 h-3" style={{ color: "#fff" }} />
+            <span className="text-xs font-bold" style={{ color: "#fff" }}>LIVE</span>
+          </div>
+        )}
         {/* Member count badge */}
         {group.member_count > 0 && (
           <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full"

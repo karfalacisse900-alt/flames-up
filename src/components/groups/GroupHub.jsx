@@ -16,6 +16,7 @@ import GroupReactionTab from "./GroupReactionTab";
 import GroupMembersTab from "./GroupMembersTab";
 import EditGroupModal from "./EditGroupModal";
 import PostStatusModal from "@/components/home/PostStatusModal";
+import GroupLiveTab from "./GroupLiveTab";
 
 
 const CATEGORY_COLORS = {
@@ -39,6 +40,7 @@ const TABS = [
   { key: "events", label: "Events", icon: Calendar },
   { key: "members", label: "Members", icon: Users },
   { key: "media", label: "Watch", icon: Film },
+  { key: "live", label: "Live", icon: Radio },
 ];
 
 export default function GroupHub({ group: initialGroup, user, membership, onBack, onJoin, onLeave, isMember }) {
@@ -457,6 +459,11 @@ export default function GroupHub({ group: initialGroup, user, membership, onBack
           {/* MEDIA / WATCH TAB */}
           {activeTab === "media" && (
             <GroupReactionTab group={group} user={user} isMember={isMember} />
+          )}
+
+          {/* LIVE TAB */}
+          {activeTab === "live" && (
+            <GroupLiveTab group={group} user={user} isAdmin={isAdmin} isMember={isMember} />
           )}
         </motion.div>
       </AnimatePresence>
