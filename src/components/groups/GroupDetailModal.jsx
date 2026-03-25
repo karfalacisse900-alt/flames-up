@@ -1,14 +1,11 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Users, Lock, Globe, MapPin, DollarSign, Star, Phone, Mail, Calendar } from "lucide-react";
+import { X, Users, ChevronLeft, MessageSquare } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import moment from "moment";
 
-const CATEGORY_EMOJIS = {
-  fitness: "💪", food: "🍕", travel: "✈️", study: "📚", tech: "💻",
-  art: "🎨", music: "🎵", gaming: "🎮", books: "📖", movies: "🎬",
-  health: "🏃", sports: "⚽", relationships: "❤️", motivation: "🔥", general: "💬",
-};
-
-const GRADIENTS = {
+const CATEGORY_GRADIENTS = {
   fitness:  ["#0d9488","#16a34a"], food: ["#ea580c","#d97706"],
   travel:   ["#0284c7","#6d28d9"], tech: ["#0284c7","#0369a1"],
   art:      ["#7c3aed","#a21caf"], music: ["#db2777","#be185d"],
@@ -17,193 +14,163 @@ const GRADIENTS = {
 };
 
 function getGrad(cat) {
-  const [a, b] = GRADIENTS[cat] || GRADIENTS.general;
+  const [a, b] = CATEGORY_GRADIENTS[cat] || CATEGORY_GRADIENTS.general;
   return `linear-gradient(135deg, ${a}, ${b})`;
+}
+
+function getTags(group) {
+  const tags = [];
+  if (group.category) tags.push(group.category);
+  const words = (group.name || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  words.slice(0, 3).forEach(w => { if (!tags.includes(w)) tags.push(w); });
+  return tags.slice(0, 5);
+}
+
+function Avatar({ name, imageUrl, size = 36 }) {
+  const letter = (name?.[0] || "U").toUpperCase();
+  const colors = ["#4F46E5","#7C3AED","#DB2777","#EA580C","#16A34A","#0284C7"];
+  const idx = name ? name.charCodeAt(0) % colors.length : 0;
+  return (
+    <div style={{ width: size, height: size, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+      backgroundColor: colors[idx], display: "flex", alignItems: "center", justifyContent: "center",
+      color: "white", fontWeight: 700, fontSize: size * 0.4 }}>
+      {imageUrl ? <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : letter}
+    </div>
+  );
 }
 
 export default function GroupDetailModal({ group, isMember, onClose, onJoin, onOpen }) {
   if (!group) return null;
 
-  const statsItems = [
-    { label: "Popular", value: group.member_count || 0 },
-    { label: "Posts", value: group.post_count || Math.floor((group.member_count || 0) * 0.8) },
-    { label: "Active", value: Math.floor((group.member_count || 0) * 0.4) },
-    { label: "Events", value: group.event_count || Math.floor((group.member_count || 0) * 0.1) },
-  ];
+  const { data: posts = [] } = useQuery({
+    queryKey: ["groupPostsPreview", group.id],
+    queryFn: () => base44.entities.CommunityPost.filter({ group_id: group.id }, "-created_date", 5),
+    staleTime: 60000,
+  });
+
+  const previewPosts = posts.slice(0, 3);
+  const tags = getTags(group);
+
+  // Derive a "creator" display post — the description as if authored by admin
+  const authorHandle = group.creator_name
+    ? group.creator_name.toLowerCase().replace(/\s+/g, "_")
+    : group.creator_email?.split("@")[0] || "admin";
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[150]" onClick={onClose}
-        style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}>
+        style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}>
         <motion.div
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="absolute bottom-0 left-0 right-0 rounded-t-[32px] overflow-hidden"
-          style={{ backgroundColor: "var(--bg-card)", maxHeight: "90dvh", overflowY: "auto" }}
+          className="absolute bottom-0 left-0 right-0 rounded-t-[28px] overflow-hidden"
+          style={{ backgroundColor: "#ffffff", maxHeight: "92dvh", overflowY: "auto" }}
           onClick={e => e.stopPropagation()}
         >
-          {/* Cover gradient */}
-          <div className="relative h-44" style={{ background: getGrad(group.category) }}>
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5) 100%)" }} />
+          {/* Top bar */}
+          <div className="flex items-center px-4 pt-4 pb-2">
             <button onClick={onClose}
-              className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
-              <X className="w-4 h-4 text-white" />
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <ChevronLeft className="w-4 h-4" style={{ color: "var(--text-primary)" }} />
             </button>
-            {/* Logo */}
-            <div className="absolute bottom-[-28px] left-5 w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-3xl"
-              style={{ backgroundColor: "var(--bg-card)", border: "3px solid var(--bg-card)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
-              {group.logo_url
-                ? <img src={group.logo_url} alt="" className="w-full h-full object-cover" />
-                : <span>{group.emoji || CATEGORY_EMOJIS[group.category] || "💬"}</span>}
-            </div>
+            <p className="flex-1 text-center text-base font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              {group.name}
+            </p>
+            <div className="w-9 h-9" />
           </div>
 
-          {/* Content */}
-          <div className="px-5 pt-10 pb-6">
-            {/* Name + badges */}
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-xl leading-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-                  {group.name}
-                </h2>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                    {CATEGORY_EMOJIS[group.category] || "💬"} {group.category}
-                  </span>
-                  {group.is_private && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1"
-                      style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                      <Lock className="w-3 h-3" /> Private
-                    </span>
-                  )}
-                  {group.group_type === "realworld" && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1"
-                      style={{ backgroundColor: "#FFF7ED", color: "#C2410C" }}>
-                      <MapPin className="w-3 h-3" /> Real-World
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-4 gap-2 my-4">
-              {statsItems.map(s => (
-                <div key={s.label} className="flex flex-col items-center py-3 rounded-2xl"
-                  style={{ backgroundColor: "var(--bg-subtle)" }}>
-                  <span className="font-bold text-lg" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-                    {s.value}
-                  </span>
-                  <span className="text-[11px] font-medium" style={{ color: "var(--text-hint)" }}>{s.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Description */}
-            {group.description && (
-              <div className="mb-4">
-                <h4 className="font-bold text-sm mb-1.5" style={{ color: "var(--text-primary)" }}>About</h4>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{group.description}</p>
+          {/* Cover image / gradient */}
+          <div className="relative mx-4 rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
+            {group.cover_url ? (
+              <img src={group.cover_url} alt={group.name} className="w-full h-full object-cover" />
+            ) : group.logo_url ? (
+              <img src={group.logo_url} alt={group.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-6xl"
+                style={{ background: getGrad(group.category) }}>
+                {group.emoji || "💬"}
               </div>
             )}
-
-            {/* Details list */}
-            <div className="space-y-3 mb-5">
-              {group.created_by && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "var(--accent-primary-light)" }}>
-                    <Star className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Owner</p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {group.created_by?.split("@")[0] || "Admin"}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--bg-subtle)" }}>
-                  <Users className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Members</p>
-                  <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {(group.member_count || 0).toLocaleString()} members
-                  </p>
-                </div>
+            {/* Slide dots indicator */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+              <div className="w-4 h-1 rounded-full bg-white opacity-90" />
+              <div className="w-1 h-1 rounded-full bg-white opacity-50" />
+              <div className="w-1 h-1 rounded-full bg-white opacity-50" />
+            </div>
+            {/* Member count badge */}
+            {group.member_count > 0 && (
+              <div className="absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 rounded-full"
+                style={{ backgroundColor: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)" }}>
+                <Users className="w-3 h-3" style={{ color: "#0F172A" }} />
+                <span className="text-xs font-bold" style={{ color: "#0F172A" }}>{group.member_count}</span>
               </div>
-              {group.location_city && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#FFF7ED" }}>
-                    <MapPin className="w-4 h-4" style={{ color: "#C2410C" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Location</p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {[group.location_city, group.location_country].filter(Boolean).join(", ")}
-                    </p>
-                  </div>
-                </div>
-              )}
-              {group.is_paid && group.monthly_fee && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#F0FDF4" }}>
-                    <DollarSign className="w-4 h-4" style={{ color: "#16A34A" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Membership Fee</p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      ${group.monthly_fee}/month
-                    </p>
-                  </div>
-                </div>
-              )}
-              {group.contact_email && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "var(--bg-subtle)" }}>
-                    <Mail className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: "var(--text-hint)" }}>Contact</p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
-                      {group.contact_email}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
+          </div>
 
-            {/* Actions */}
-            <div className="flex gap-3">
-              <button onClick={() => { onClose(); onOpen(group); }}
-                className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)" }}>
-                View Group
-              </button>
-              {!isMember ? (
-                <button onClick={() => { onJoin(group); onClose(); }}
-                  className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-white"
-                  style={{ backgroundColor: "var(--accent-primary)" }}>
-                  Join Group
-                </button>
-              ) : (
-                <button onClick={() => { onClose(); onOpen(group); }}
-                  className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-white"
-                  style={{ backgroundColor: "var(--accent-primary)" }}>
-                  Open Chat
-                </button>
-              )}
+          {/* Description + tags */}
+          <div className="px-5 pt-4 pb-3">
+            <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--text-primary)" }}>
+              <span className="font-bold">{authorHandle} </span>
+              {group.description || `Join ${group.name} and connect with others!`}
+            </p>
+            {tags.length > 0 && (
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {tags.map(t => `#${t}`).join(" ")}
+              </p>
+            )}
+          </div>
+
+          {/* Comment-style recent posts */}
+          {previewPosts.length > 0 && (
+            <div className="px-5 pb-2">
+              {previewPosts.map(post => {
+                const handle = (post.author_name || post.author_email || "user")
+                  .toLowerCase().replace(/\s+/g, "_").replace(/@.*/, "");
+                return (
+                  <div key={post.id} className="flex gap-3 mb-4">
+                    <Avatar name={post.author_name || post.author_email} size={36} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{handle}</span>
+                        <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+                          {moment(post.created_date).fromNow(true)}
+                        </span>
+                      </div>
+                      <p className="text-sm leading-snug line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                        {post.text || post.content || "Shared a post"}
+                      </p>
+                      <button className="text-xs font-semibold mt-1" style={{ color: "var(--text-hint)" }}>Reply</button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          )}
+
+          {/* Bottom action bar */}
+          <div className="sticky bottom-0 bg-white px-4 pb-6 pt-3 flex items-center gap-3"
+            style={{ borderTop: "1px solid var(--border-light)" }}>
+            <button onClick={() => { onClose(); onOpen(group); }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "var(--bg-subtle)" }}>
+              <MessageSquare className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+            </button>
+            {isMember ? (
+              <button onClick={() => { onClose(); onOpen(group); }}
+                className="flex-1 py-3.5 rounded-2xl text-base font-bold text-white"
+                style={{ backgroundColor: "#0F172A" }}>
+                Open chat
+              </button>
+            ) : (
+              <button onClick={() => { onJoin(group); onClose(); }}
+                className="flex-1 py-3.5 rounded-2xl text-base font-bold text-white"
+                style={{ backgroundColor: "#0F172A" }}>
+                Join now
+              </button>
+            )}
           </div>
         </motion.div>
       </div>
