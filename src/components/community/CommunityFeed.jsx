@@ -467,7 +467,14 @@ export default function CommunityFeed({ user }) {
     const debate = getDebateForPost(post.id);
     if (user?.email) trackPostView(post.id);
     return (
-      <div key={post.id} style={{ minHeight: 80 }}>
+      <div
+        key={post.id}
+        style={{
+          contentVisibility: "auto",
+          containIntrinsicSize: "0 420px",
+          minHeight: 80,
+        }}
+      >
         <PostItem
           post={post}
           user={user}

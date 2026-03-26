@@ -1,6 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, Bookmark, BookmarkCheck, Users, Clock, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+
+const eventPhotoCache = {};
 
 const EVENTS = [
   {
@@ -314,7 +317,29 @@ const BOROUGH_FILTERS = ["All", "Manhattan", "Brooklyn", "Queens", "The Bronx", 
 function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
   const [photoIndex, setPhotoIndex] = useState(0);
   const touchStartX = useRef(null);
-  const photos = event.photos || [event.image];
+  const [photos, setPhotos] = useState(event.photos || []);
+  const [photoLoading, setPhotoLoading] = useState(true);
+
+  useEffect(() => {
+    const key = event.title;
+    if (eventPhotoCache[key] !== undefined) {
+      setPhotos(eventPhotoCache[key].length > 0 ? eventPhotoCache[key] : (event.photos || []));
+      setPhotoLoading(false);
+      return;
+    }
+    let cancelled = false;
+    base44.functions.invoke('getPlacePhoto', { place_name: event.title, city: "New York City", max_photos: 6 })
+      .then(res => {
+        if (cancelled) return;
+        const urls = res?.data?.photo_urls || [];
+        const result = urls.length > 0 ? urls : (event.photos || []);
+        eventPhotoCache[key] = urls;
+        setPhotos(result);
+      })
+      .catch(() => { setPhotos(event.photos || []); })
+      .finally(() => { if (!cancelled) setPhotoLoading(false); });
+    return () => { cancelled = true; };
+  }, [event.title]);
 
   return (
     <motion.div
@@ -336,71 +361,79 @@ function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
           else if (dx > 40) setPhotoIndex(i => (i - 1 + photos.length) % photos.length);
         }}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.img
-            key={photoIndex}
-            src={photos[photoIndex]}
-            alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.2 }}
-            loading="lazy"
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.65) 100%)" }} />
-
-        {/* Photo dots */}
-        {photos.length > 1 && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-            {photos.map((_, i) => (
-              <button key={i} onClick={() => setPhotoIndex(i)}
-                className="rounded-full transition-all"
-                style={{ width: i === photoIndex ? 16 : 6, height: 6, backgroundColor: i === photoIndex ? "#fff" : "rgba(255,255,255,0.5)" }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Arrow buttons */}
-        {photos.length > 1 && (
+        {photoLoading ? (
+          <div className="w-full h-full skeleton" />
+        ) : (
           <>
-            <button onClick={() => setPhotoIndex(i => (i - 1 + photos.length) % photos.length)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
-              <ChevronLeft className="w-4 h-4 text-white" />
-            </button>
-            <button onClick={() => setPhotoIndex(i => (i + 1) % photos.length)}
-              className="absolute right-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
-              <ChevronRight className="w-4 h-4 text-white" />
-            </button>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.img
+                key={photoIndex}
+                src={photos[photoIndex]}
+                alt={event.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.2 }}
+                loading="lazy"
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.65) 100%)" }} />
+
+            {photos.length > 1 && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                {photos.map((_, i) => (
+                  <button key={i} onClick={() => setPhotoIndex(i)}
+                    className="rounded-full transition-all"
+                    style={{ width: i === photoIndex ? 16 : 6, height: 6, backgroundColor: i === photoIndex ? "#fff" : "rgba(255,255,255,0.5)" }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {photos.length > 1 && (
+              <>
+                <button onClick={() => setPhotoIndex(i => (i - 1 + photos.length) % photos.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
+                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
+                  <ChevronLeft className="w-4 h-4 text-white" />
+                </button>
+                <button onClick={() => setPhotoIndex(i => (i + 1) % photos.length)}
+                  className="absolute right-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
+                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
+                  <ChevronRight className="w-4 h-4 text-white" />
+                </button>
+              </>
+            )}
           </>
         )}
 
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold"
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold z-10"
           style={{ backgroundColor: event.cost === "Free" || event.cost === "Free entry" ? "rgba(16,185,129,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", backdropFilter: "blur(4px)" }}>
           {event.cost}
         </div>
-        <div className="absolute top-3 right-12 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+        <div className="absolute top-3 right-12 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 z-10"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff", backdropFilter: "blur(4px)" }}>
           <Users className="w-3 h-3" /> {event.attendees.toLocaleString()}
         </div>
         <button onClick={() => onToggleSaved(event.id)}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10"
           style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}>
           {saved ? <BookmarkCheck className="w-4 h-4" style={{ color: "#818CF8" }} /> : <Bookmark className="w-4 h-4 text-white" />}
         </button>
-        <div className="absolute bottom-3 left-3">
-          <span className="text-sm font-semibold text-white">{event.type}</span>
-        </div>
-        <div className="absolute bottom-3 right-3">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
-            {event.borough}
-          </span>
-        </div>
+        {!photoLoading && (
+          <>
+            <div className="absolute bottom-3 left-3 z-10">
+              <span className="text-sm font-semibold text-white">{event.type}</span>
+            </div>
+            <div className="absolute bottom-3 right-3 z-10">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
+                {event.borough}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="p-4">
