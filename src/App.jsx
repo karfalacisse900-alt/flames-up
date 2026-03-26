@@ -28,6 +28,7 @@ const Settings       = lazy(() => import('./pages/Settings'));
 const EditProfile    = lazy(() => import('./pages/EditProfile'));
 const Dashboard      = lazy(() => import('./pages/Dashboard'));
 const TripPlanner    = lazy(() => import('./pages/TripPlanner'));
+const AdminScamReports = lazy(() => import('./pages/AdminScamReports'));
 
 function SuspensePage({ children }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
@@ -115,6 +116,7 @@ const AuthenticatedApp = () => {
           <Route path="/EditProfile" element={<SuspensePage><LayoutWrapper currentPageName="EditProfile"><EditProfile /></LayoutWrapper></SuspensePage>} />
           <Route path="/Dashboard" element={<SuspensePage><LayoutWrapper currentPageName="Dashboard"><Dashboard /></LayoutWrapper></SuspensePage>} />
           <Route path="/TripPlanner" element={<SuspensePage><LayoutWrapper currentPageName="TripPlanner"><TripPlanner /></LayoutWrapper></SuspensePage>} />
+          <Route path="/AdminScamReports" element={<SuspensePage><LayoutWrapper currentPageName="AdminScamReports"><AdminScamReports /></LayoutWrapper></SuspensePage>} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </motion.div>

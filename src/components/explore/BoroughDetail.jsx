@@ -1,9 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import SpotCard from "./SpotCard";
+import { base44 } from "@/api/base44Client";
+
+function useNeighborhoodPhoto(name, fallback) {
+  const [url, setUrl] = useState(fallback);
+  useEffect(() => {
+    let cancelled = false;
+    base44.functions.invoke("getPlacePhoto", { place_name: name, city: "New York City", max_photos: 1 })
+      .then(res => { if (!cancelled && res.data?.photo_url) setUrl(res.data.photo_url); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [name]);
+  return url;
+}
 
 function NeighborhoodCard({ neighborhood, onClick }) {
+  const photo = useNeighborhoodPhoto(neighborhood.name, neighborhood.image);
   return (
     <motion.button
       onClick={onClick}
@@ -11,7 +25,7 @@ function NeighborhoodCard({ neighborhood, onClick }) {
       className="w-full rounded-3xl overflow-hidden text-left relative"
       style={{ height: 180 }}
     >
-      <img src={neighborhood.image} alt={neighborhood.name} className="absolute inset-0 w-full h-full object-cover" />
+      <img src={photo} alt={neighborhood.name} className="absolute inset-0 w-full h-full object-cover" onError={e => { e.target.src = neighborhood.image; }} />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.72) 100%)" }} />
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h3 className="text-xl font-black text-white mb-1" style={{ fontFamily: "var(--font-serif)" }}>

@@ -409,9 +409,11 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         zIndex: 60,
       });
       marker.addListener("click", () => {
-        const bounds = mapRef.current.getBoundingClientRect();
-        setPopupCoords({ x: bounds.width / 2, y: bounds.height / 3 });
+        const bounds = mapRef.current?.getBoundingClientRect() || { width: 400, height: 600 };
+        setSelectedPlace(null);
+        setShowPlaceHub(false);
         setSelectedUserPresence({ user_email: c.user_email, user_name: c.full_name, avatar_url: c.profile_image, status_message: c.bio, location_lat: c.latitude, location_lng: c.longitude });
+        setPopupCoords({ x: bounds.width / 2, y: bounds.height / 3 });
       });
       creatorMarkersRef.current[c.id] = marker;
     });
