@@ -390,19 +390,19 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative", overflow: "hidden" }}>
-      {/* ── TOP BAR: Back + Search in one row ── */}
+      {/* Back button */}
       {onBack && (
-        <button onClick={onBack} className="absolute z-30 w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ top: "max(env(safe-area-inset-top, 12px), 12px)", left: 12, backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "#0F172A" }} />
+        <button onClick={onBack} className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold"
+          style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)", color: "#0F172A" }}>
+          <ArrowLeft className="w-4 h-4" /> Places
         </button>
       )}
 
       <ProximityNotifier currentUser={currentUser} userLoc={userLoc ? [userLoc.lng, userLoc.lat] : null} followedEmails={follows} />
 
-      {/* ── Search ── */}
+      {/* Search */}
       {mapReady && (
-        <div className="absolute z-20" style={{ top: "max(env(safe-area-inset-top, 12px), 12px)", left: onBack ? 56 : 12, right: 12 }}>
+        <div className="absolute z-20" style={{ top: 16, left: onBack ? 90 : 12, right: 12 }}>
           <div className="relative">
             <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
               style={{ backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", border: "1px solid rgba(0,0,0,0.06)" }}>
@@ -442,51 +442,40 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         </div>
       )}
 
-      {/* ── Category carousel ── */}
+      {/* Category carousel */}
       {mapReady && (
-        <div className="absolute z-20" style={{ top: 60, left: 0, right: 0 }}>
+        <div className="absolute z-20" style={{ top: 68, left: 0, right: 0 }}>
           <MapCategoryCarousel active={activeCategories} onChange={setActiveCategories} />
         </div>
       )}
 
-      {/* ── Bottom-right control cluster ── */}
+      {/* Nearby + radius row */}
       {mapReady && (
-        <div className="absolute z-20 flex flex-col items-end gap-2 pointer-events-none" style={{ bottom: 24, right: 12 }}>
-          {/* Nearby People */}
+        <div className="absolute z-20 flex items-center justify-between px-3 pointer-events-none" style={{ top: 120, left: 0, right: 0 }}>
           <button onClick={() => setShowNearbyModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold pointer-events-auto"
-            style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)", color: "#0F172A" }}>
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
+            style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: "#0F172A" }}>
             <Users className="w-3.5 h-3.5" style={{ color: "#16A34A" }} />
-            <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby` : "Nearby"}</span>
+            <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}` : "Nearby People"}</span>
           </button>
-          {/* Radius + location cluster */}
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {/* My location */}
-            <button onClick={() => { if (userLoc && mapInst.current) { mapInst.current.panTo(userLoc); mapInst.current.setZoom(16); } }}
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
-              <Navigation className="w-4 h-4" style={{ color: "#4F46E5" }} />
+          <div className="relative pointer-events-auto">
+            <button onClick={() => setShowRadiusPanel(v => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", border: "1px solid rgba(0,0,0,0.06)", color: "#0F172A" }}>
+              <SlidersHorizontal className="w-3.5 h-3.5" />{radius} mi
             </button>
-            {/* Radius */}
-            <div className="relative">
-              <button onClick={() => setShowRadiusPanel(v => !v)}
-                className="flex items-center gap-1 px-3 py-2 rounded-full text-xs font-bold"
-                style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.15)", color: "#0F172A" }}>
-                <SlidersHorizontal className="w-3 h-3" />{radius} mi
-              </button>
-              {showRadiusPanel && (
-                <div className="absolute bottom-full right-0 mb-1.5 rounded-2xl overflow-hidden py-1"
-                  style={{ backgroundColor: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: 90 }}>
-                  {RADIUS_OPTIONS.map(r => (
-                    <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
-                      className="w-full px-4 py-2.5 text-left text-xs font-bold"
-                      style={{ backgroundColor: radius === r ? "#EEF2FF" : "transparent", color: radius === r ? "#4F46E5" : "#0F172A" }}>
-                      {r} mi
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {showRadiusPanel && (
+              <div className="absolute top-full right-0 mt-1.5 rounded-2xl overflow-hidden py-1"
+                style={{ backgroundColor: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: 100 }}>
+                {RADIUS_OPTIONS.map(r => (
+                  <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
+                    className="w-full px-4 py-2.5 text-left text-xs font-bold"
+                    style={{ backgroundColor: radius === r ? "#EEF2FF" : "transparent", color: radius === r ? "#4F46E5" : "#0F172A" }}>
+                    {r} mi
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
