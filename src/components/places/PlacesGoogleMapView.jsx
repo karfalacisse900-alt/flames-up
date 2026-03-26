@@ -449,23 +449,25 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         </div>
       )}
 
-      {/* Nearby + radius row */}
+      {/* Bottom-right controls: nearby + radius stacked */}
       {mapReady && (
-        <div className="absolute z-20 flex items-center justify-between px-3 pointer-events-none" style={{ top: 120, left: 0, right: 0 }}>
+        <div className="absolute z-20 flex flex-col items-end gap-2" style={{ bottom: selectedPlace ? 260 : 20, right: 12 }}>
+          {/* Nearby people */}
           <button onClick={() => setShowNearbyModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-auto"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
             style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: "#0F172A" }}>
             <Users className="w-3.5 h-3.5" style={{ color: "#16A34A" }} />
-            <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby${extraNearby > 0 ? ` +${extraNearby} more` : ""}` : "Nearby People"}</span>
+            <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby` : "Nearby"}</span>
           </button>
-          <div className="relative pointer-events-auto">
+          {/* Radius */}
+          <div className="relative">
             <button onClick={() => setShowRadiusPanel(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
               style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", border: "1px solid rgba(0,0,0,0.06)", color: "#0F172A" }}>
               <SlidersHorizontal className="w-3.5 h-3.5" />{radius} mi
             </button>
             {showRadiusPanel && (
-              <div className="absolute top-full right-0 mt-1.5 rounded-2xl overflow-hidden py-1"
+              <div className="absolute bottom-full right-0 mb-1.5 rounded-2xl overflow-hidden py-1"
                 style={{ backgroundColor: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: 100 }}>
                 {RADIUS_OPTIONS.map(r => (
                   <button key={r} onClick={() => { setRadius(r); setShowRadiusPanel(false); }}
