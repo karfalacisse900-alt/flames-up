@@ -61,7 +61,7 @@ export default function SpotCard({ spot, index }) {
       return;
     }
     let cancelled = false;
-    base44.functions.invoke('getPlacePhoto', { place_name: spot.name, city: "New York City", max_photos: 4 })
+    base44.functions.invoke('getPlacePhoto', { place_name: spot.name, city: "New York City", max_photos: 6 })
       .then(res => {
         if (cancelled) return;
         const urls = res?.data?.photo_urls || (res?.data?.photo_url ? [res.data.photo_url] : []);

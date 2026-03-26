@@ -49,6 +49,7 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
   const [popupCoords, setPopupCoords] = useState(null);
   const [error, setError] = useState(null);
   const [activeCategories, setActiveCategories] = useState(["all"]);
+  const [mapType, setMapType] = useState("roadmap");
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaceHub, setShowPlaceHub] = useState(false);
   const [creatorEmails, setCreatorEmails] = useState(new Set());
@@ -449,7 +450,7 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         </div>
       )}
 
-      {/* Bottom-right controls: nearby + radius stacked */}
+      {/* Bottom-right controls: nearby + radius + satellite stacked */}
       {mapReady && (
         <div className="absolute z-20 flex flex-col items-end gap-2" style={{ bottom: selectedPlace ? 260 : 20, right: 12 }}>
           {/* Nearby people */}
@@ -458,6 +459,17 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
             style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: "#0F172A" }}>
             <Users className="w-3.5 h-3.5" style={{ color: "#16A34A" }} />
             <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby` : "Nearby"}</span>
+          </button>
+          {/* Satellite toggle */}
+          <button
+            onClick={() => {
+              const next = mapType === "roadmap" ? "satellite" : "roadmap";
+              setMapType(next);
+              mapInst.current?.setMapTypeId(next);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
+            style={{ backgroundColor: mapType === "satellite" ? "#1E40AF" : "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: mapType === "satellite" ? "#fff" : "#0F172A" }}>
+            🛰️ {mapType === "satellite" ? "Road" : "Satellite"}
           </button>
           {/* Radius */}
           <div className="relative">
