@@ -1,5 +1,5 @@
 // v2 - no framer-motion
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Heart, ExternalLink, Plus, X, ChevronRight } from "lucide-react";
@@ -97,6 +97,7 @@ export default function DidYouKnowSection({ user }) {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [current, setCurrent] = useState(0);
+  const touchStartX = useRef(null);
 
   const { data: posts = [] } = useQuery({
     queryKey: ["didYouKnow"],
@@ -149,7 +150,7 @@ export default function DidYouKnowSection({ user }) {
             style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)", border: "1px solid var(--accent-primary)30" }}>
             See all
           </Link>
-          {user && (
+          {user?.role === "admin" && (
             <button onClick={() => setShowForm(true)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)30" }}>
@@ -163,7 +164,15 @@ export default function DidYouKnowSection({ user }) {
       {post ? (
         <div key={post.id}
           className="p-4 rounded-2xl fade-slide-in"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)" }}>
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            if (touchStartX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            touchStartX.current = null;
+            if (dx < -40 && posts.length > 1) setCurrent(c => (c + 1) % posts.length);
+            if (dx > 40 && posts.length > 1) setCurrent(c => (c - 1 + posts.length) % posts.length);
+          }}
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", background: "linear-gradient(135deg, #2E6B4F08 0%, #D98B6205 100%)", cursor: "grab" }}>
             {post.title && (
               <p className="text-xs font-bold mb-1.5 uppercase tracking-wide" style={{ color: "var(--accent-primary)" }}>
                 <KeywordHighlight text={post.title} />
