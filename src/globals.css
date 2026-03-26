@@ -9,30 +9,31 @@
   --font-serif: 'Manrope', system-ui, sans-serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  --bg-app:     #F6F7FB;
-  --bg-card:    #FFFFFF;
-  --bg-nav:     rgba(255,255,255,0.78);
-  --bg-subtle:  #EEF2F7;
-  --bg-modal:   #FFFFFF;
+  /* Organic earth-tone palette */
+  --bg-app:     #F4F0E8;
+  --bg-card:    #FDFAF4;
+  --bg-nav:     rgba(253,250,244,0.88);
+  --bg-subtle:  #EDE8DC;
+  --bg-modal:   #FDFAF4;
 
-  --text-primary:   #0F172A;
-  --text-secondary: #475569;
-  --text-hint:      #94A3B8;
-  --border-light:   #E2E8F0;
-  --border-medium:  #CBD5E1;
-  --border-subtle:  #F1F5F9;
+  --text-primary:   #1C2B1A;
+  --text-secondary: #4A5E47;
+  --text-hint:      #8A9E86;
+  --border-light:   #D5CCB8;
+  --border-medium:  #BFB49C;
+  --border-subtle:  #EAE4D6;
 
-  --accent-primary:       #4F46E5;
-  --accent-primary-hover: #4338CA;
-  --accent-primary-light: #EEF2FF;
-  --accent-secondary:       #14B8A6;
-  --accent-secondary-hover: #0F9F92;
+  --accent-primary:       #2D6A4F;
+  --accent-primary-hover: #1B4332;
+  --accent-primary-light: #D8F3DC;
+  --accent-secondary:       #74C69D;
+  --accent-secondary-hover: #52B788;
 
-  --elevation-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
-  --elevation-2: 0 10px 25px rgba(15, 23, 42, 0.06), 0 4px 10px rgba(15, 23, 42, 0.04);
-  --elevation-3: 0 16px 40px rgba(15, 23, 42, 0.10), 0 6px 18px rgba(15, 23, 42, 0.06);
-  --elevation-4: 0 24px 56px rgba(15, 23, 42, 0.14), 0 10px 24px rgba(15, 23, 42, 0.08);
-  --elevation-5: 0 32px 72px rgba(15, 23, 42, 0.18), 0 16px 36px rgba(15, 23, 42, 0.10);
+  --elevation-1: 0 2px 6px rgba(28, 43, 26, 0.06), 0 1px 2px rgba(28, 43, 26, 0.04);
+  --elevation-2: 0 8px 24px rgba(28, 43, 26, 0.08), 0 3px 8px rgba(28, 43, 26, 0.05);
+  --elevation-3: 0 16px 40px rgba(28, 43, 26, 0.10), 0 6px 16px rgba(28, 43, 26, 0.07);
+  --elevation-4: 0 24px 56px rgba(28, 43, 26, 0.13), 0 10px 24px rgba(28, 43, 26, 0.08);
+  --elevation-5: 0 32px 72px rgba(28, 43, 26, 0.16), 0 16px 36px rgba(28, 43, 26, 0.10);
 
   --touch-target-min: 44px;
 
@@ -131,12 +132,12 @@ body {
 
 /* ── Micro-interactions & depth ── */
 button {
-  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease, background-color 200ms ease, border-color 200ms ease, opacity 160ms ease !important;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 240ms ease, background-color 220ms ease, border-color 220ms ease, opacity 180ms ease !important;
   will-change: transform, box-shadow;
   transform-origin: center;
   min-height: var(--touch-target-min);
   min-width: var(--touch-target-min);
-  border-radius: 0.95rem;
+  border-radius: 1.25rem;
 }
 @media (hover: hover) {
   button:hover:not(:disabled) {
@@ -311,21 +312,22 @@ input, textarea, select, label {
 .wave-bar:nth-child(4) { animation-delay: 0.36s; }
 .wave-bar:nth-child(5) { animation-delay: 0.48s; }
 
-/* ── Input Fields (Depth & Focus) ── */
+/* ── Input Fields (Organic & Soft) ── */
 input, textarea, select {
   font-size: 16px !important;
   min-height: var(--touch-target-min);
-  background-color: var(--bg-card) !important;
+  background-color: var(--bg-subtle) !important;
   color: var(--text-primary) !important;
-  border: 1px solid var(--border-light) !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  border-radius: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  border: 1.5px solid var(--border-light) !important;
+  box-shadow: inset 0 1px 3px rgba(28, 43, 26, 0.04);
+  border-radius: 1.25rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, background-color 0.2s ease;
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent-primary) !important;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12), var(--elevation-1) !important;
+  box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.14), inset 0 1px 2px rgba(28, 43, 26, 0.03) !important;
   transform: translateY(-1px);
+  background-color: var(--bg-card) !important;
   outline: none;
 }
 input::placeholder, textarea::placeholder {
@@ -565,30 +567,31 @@ input, textarea, [contenteditable],
   animation: scroll-up 20s linear infinite;
 }
 
-/* ── Primary Button Style (10% Accent) ── */
+/* ── Primary Button Style (Organic) ── */
 .btn-primary {
   background-color: var(--accent-primary);
   color: white;
   box-shadow: var(--elevation-2);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.75rem 1.75rem;
+  border-radius: 1.5rem;
   font-weight: 600;
   min-height: var(--touch-target-min);
+  letter-spacing: 0.01em;
 }
 .btn-primary:hover:not(:disabled) {
   background-color: var(--accent-primary-hover);
   box-shadow: var(--elevation-3);
 }
 
-/* ── Secondary Button (30% Secondary) ── */
+/* ── Secondary Button (Organic) ── */
 .btn-secondary {
   background-color: var(--bg-subtle);
   color: var(--text-primary);
   box-shadow: var(--elevation-1);
-  border: 2px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  border-radius: 1.5rem;
   font-weight: 500;
   min-height: var(--touch-target-min);
 }
@@ -755,24 +758,24 @@ p, .body { font-size: 0.98rem; line-height: 1.7; }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app:     #0B1120;
-    --bg-card:    #111827;
-    --bg-nav:     rgba(15, 23, 42, 0.82);
-    --bg-subtle:  #172033;
-    --bg-modal:   #111827;
+    --bg-app:     #0D1610;
+    --bg-card:    #142018;
+    --bg-nav:     rgba(13, 22, 16, 0.88);
+    --bg-subtle:  #1A2B1E;
+    --bg-modal:   #142018;
 
-    --text-primary:   #E5E7EB;
-    --text-secondary: #CBD5E1;
-    --text-hint:      #94A3B8;
-    --border-light:   #1F2937;
-    --border-medium:  #334155;
-    --border-subtle:  #0F172A;
+    --text-primary:   #E8F5E2;
+    --text-secondary: #A8C5A0;
+    --text-hint:      #6B9064;
+    --border-light:   #253D28;
+    --border-medium:  #3A5C3E;
+    --border-subtle:  #111E14;
 
-    --accent-primary:       #818CF8;
-    --accent-primary-hover: #6366F1;
-    --accent-primary-light: #1E1B4B;
-    --accent-secondary:       #2DD4BF;
-    --accent-secondary-hover: #14B8A6;
+    --accent-primary:       #52B788;
+    --accent-primary-hover: #74C69D;
+    --accent-primary-light: #1A3D2B;
+    --accent-secondary:       #95D5B2;
+    --accent-secondary-hover: #74C69D;
 
     --background:       222 47% 9%;
     --foreground:       210 20% 92%;
