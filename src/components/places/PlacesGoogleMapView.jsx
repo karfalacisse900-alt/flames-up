@@ -452,7 +452,7 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
 
       {/* Bottom-right controls: nearby + radius + satellite stacked */}
       {mapReady && (
-        <div className="absolute z-20 flex flex-col items-end gap-2" style={{ bottom: selectedPlace ? 260 : 20, right: 12 }}>
+        <div className="absolute z-20 flex flex-col items-end gap-2" style={{ bottom: selectedPlace ? 310 : 20, right: 12 }}>
           {/* Nearby people */}
           <button onClick={() => setShowNearbyModal(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
@@ -495,8 +495,10 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
       )}
 
       {mapReady && currentUser && (
-        <LocationPrivacyPanel user={currentUser} presence={myPresence}
-          onUpdate={updates => setMyPresence(prev => ({ ...(prev || {}), ...updates }))} />
+        <div className="absolute z-20" style={{ bottom: selectedPlace ? 310 : 80, left: 12 }}>
+          <LocationPrivacyPanel user={currentUser} presence={myPresence}
+            onUpdate={updates => setMyPresence(prev => ({ ...(prev || {}), ...updates }))} />
+        </div>
       )}
 
       {selectedUserPresence && popupCoords && (
