@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Menu } from "lucide-react";
 
 const TABS = [
-  { id: "apps",     label: "Apps & Tools",   emoji: "🧰", description: "Discover useful apps and tools" },
-  { id: "dyk",      label: "Did You Know",    emoji: "💡", description: "Learn something new daily" },
+  { id: "apps", label: "Apps & Tools", emoji: "🧰", description: "Discover useful apps and tools" },
 ];
 
 export default function DiscoverMenuDrawer({ activeTab, onChange }) {

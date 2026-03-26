@@ -6,7 +6,6 @@ import DiscoverMenuDrawer from "@/components/discover/DiscoverMenuDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import DiscoverExplorer from "@/components/discover/DiscoverExplorer";
 import DiscoverAppsTabNew from "@/components/discover/DiscoverAppsTabNew";
-import DYKTab from "@/components/discover/DYKTab";
 import DiscoverItemModal from "@/components/discover/DiscoverItemModal";
 
 // Cache refresh
@@ -129,9 +128,7 @@ export default function Discover() {
 
       {/* ── Content ── */}
       <div className="pt-2">
-        {activeTab === "dyk" ? (
-          <DYKTab user={user} />
-        ) : view === "explore" ? (
+        {view === "explore" ? (
           <DiscoverExplorer
             items={items}
             isLoading={isLoading}

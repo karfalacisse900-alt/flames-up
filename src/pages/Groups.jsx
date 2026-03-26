@@ -10,7 +10,6 @@ import {
 import GroupHub from "@/components/groups/GroupHub";
 import TrendingGroupCard from "@/components/groups/TrendingGroupCard";
 import CreateGroupModal from "@/components/groups/CreateGroupModal";
-import GroupStatusBar from "@/components/groups/GroupStatusBar";
 import GroupDetailModal from "@/components/groups/GroupDetailModal";
 
 const CATEGORY_TABS = [
@@ -204,12 +203,7 @@ export default function Groups() {
         </div>
       </div>
 
-      {/* ── Group Status Bar (replaces category icons) ── */}
-      {user && myGroups.length > 0 && (
-        <div style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-          <GroupStatusBar user={user} groups={groups} membershipMap={membershipMap} />
-        </div>
-      )}
+
 
       {/* Search */}
       <div className="px-4 pt-3 pb-2">
@@ -281,7 +275,22 @@ export default function Groups() {
       {/* ── Content ── */}
       <div className="px-4 pt-2 pb-6">
 
-        {/* Discover / Swipe to Explore — ALL non-member groups (with filters) */}
+        {/* My Groups — at the top */}
+        {filteredMyGroups.length > 0 && (
+          <section className="mb-6">
+            <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
+              <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups ({filteredMyGroups.length})
+            </p>
+            <div className="space-y-2">
+              {filteredMyGroups.map(g => (
+                <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
+                  onOpen={handleOpenGroup} onJoin={handleJoin} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Discover Groups */}
         {discoverGroups.length > 0 && (
           <section className="mb-6">
             <div className="flex items-center justify-between mb-3 px-0.5">
@@ -304,21 +313,6 @@ export default function Groups() {
                     />
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* My Groups */}
-        {filteredMyGroups.length > 0 && (
-          <section className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
-              <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups ({filteredMyGroups.length})
-            </p>
-            <div className="space-y-2">
-              {filteredMyGroups.map(g => (
-                <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
-                  onOpen={handleOpenGroup} onJoin={handleJoin} />
               ))}
             </div>
           </section>

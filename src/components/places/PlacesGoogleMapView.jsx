@@ -53,6 +53,8 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaceHub, setShowPlaceHub] = useState(false);
   const [creatorEmails, setCreatorEmails] = useState(new Set());
+  const [creatorsData, setCreatorsData] = useState([]);
+  const creatorMarkersRef = useRef({});
 
   // Search
   const [searchQuery, setSearchQuery] = useState("");
@@ -245,11 +247,16 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
       .catch(() => {});
   }, [currentUser?.email]);
 
-  // Creator emails
+  // Creator data (emails + locations)
   useEffect(() => {
-    base44.entities.Creator.filter({ approval_status: "approved" })
-      .then(rows => setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean))))
-      .catch(() => {});
+    const load = () => base44.entities.Creator.filter({ approval_status: "approved" })
+      .then(rows => {
+        setCreatorEmails(new Set(rows.map(r => r.user_email).filter(Boolean)));
+        setCreatorsData(rows.filter(c => c.latitude && c.longitude));
+      }).catch(() => {});
+    load();
+    const unsub = base44.entities.Creator.subscribe(() => requestIdleCallback ? requestIdleCallback(load) : setTimeout(load, 200));
+    return unsub;
   }, []);
 
   // Presence subscription
@@ -336,12 +343,11 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
     });
   }, [mapReady, userLoc?.lat, userLoc?.lng, currentUser?.email, creatorEmails]);
 
-  // Friend markers
-  const friendSet = new Set(follows);
+  // All nearby user markers (not just friends)
   const mapPins = useMemo(() => {
     if (!userLoc) return [];
     return nearbyUsers
-      .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && !creatorEmails.has(p.user_email) && friendSet.has(p.user_email))
+      .filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && !creatorEmails.has(p.user_email))
       .filter(p => haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius * 1.60934)
       .map(p => ({ ...p, _dist: haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) }))
       .sort((a, b) => a._dist - b._dist).slice(0, 15);
@@ -349,10 +355,12 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
 
   const extraNearby = useMemo(() => {
     if (!userLoc) return 0;
-    const total = nearbyUsers.filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email && haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius * 1.60934).length;
+    const total = nearbyUsers.filter(p => p.location_lat && p.location_lng && p.user_email !== currentUser?.email
+      && haversineKm(userLoc.lat, userLoc.lng, p.location_lat, p.location_lng) <= radius * 1.60934).length;
     return Math.max(0, total - 15);
   }, [nearbyUsers, userLoc, radius, currentUser?.email]);
 
+  // User markers (all nearby)
   useEffect(() => {
     if (!mapReady || !window.google?.maps) return;
     const activeEmails = new Set();
@@ -362,16 +370,16 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         userMarkersRef.current[p.user_email].setPosition({ lat: p.location_lat, lng: p.location_lng });
         return;
       }
+      const isFriend = follows.includes(p.user_email);
+      const svgColor = isFriend ? '#7C3AED' : '#0EA5E9';
       const marker = new window.google.maps.Marker({
         position: { lat: p.location_lat, lng: p.location_lng },
         map: mapInst.current,
-        icon: { url: p.avatar_url || `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="#7C3AED"/><text x="20" y="26" font-size="14" text-anchor="middle" fill="white" font-weight="bold">${getInitials(p.user_name)}</text></svg>`)}`, scaledSize: new window.google.maps.Size(40, 40), anchor: new window.google.maps.Point(20, 20) },
+        icon: { url: p.avatar_url || `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="${svgColor}"/><text x="20" y="26" font-size="14" text-anchor="middle" fill="white" font-weight="bold">${getInitials(p.user_name)}</text></svg>`)}`, scaledSize: new window.google.maps.Size(40, 40), anchor: new window.google.maps.Point(20, 20) },
         zIndex: 50,
       });
       marker.addListener("click", () => {
-        const proj = mapInst.current.getProjection();
         const bounds = mapRef.current.getBoundingClientRect();
-        const pt = proj?.fromLatLngToPoint(new window.google.maps.LatLng(p.location_lat, p.location_lng));
         setPopupCoords({ x: bounds.width / 2, y: bounds.height / 3 });
         setSelectedUserPresence(p);
       });
@@ -381,6 +389,36 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
       if (!activeEmails.has(email)) { userMarkersRef.current[email].setMap(null); delete userMarkersRef.current[email]; }
     });
   }, [mapPins, mapReady]);
+
+  // Creator markers on Google Map
+  useEffect(() => {
+    if (!mapReady || !window.google?.maps) return;
+    const activeIds = new Set(creatorsData.map(c => c.id));
+    creatorsData.forEach(c => {
+      if (creatorMarkersRef.current[c.id]) {
+        creatorMarkersRef.current[c.id].setPosition({ lat: c.latitude, lng: c.longitude });
+        return;
+      }
+      const emoji = { painter:'🎨', dancer:'💃', musician:'🎵', videographer:'🎬', photographer:'📸', street_performer:'🎭', comedian:'😂', magician:'🪄', tattoo_artist:'✒️', caricaturist:'✏️' }[c.category] || '🌟';
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52"><circle cx="26" cy="26" r="24" fill="#E05C2A" stroke="white" stroke-width="3"/><text x="26" y="33" font-size="18" text-anchor="middle">${emoji}</text></svg>`;
+      const marker = new window.google.maps.Marker({
+        position: { lat: c.latitude, lng: c.longitude },
+        map: mapInst.current,
+        icon: { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`, scaledSize: new window.google.maps.Size(52, 52), anchor: new window.google.maps.Point(26, 26) },
+        title: c.full_name,
+        zIndex: 60,
+      });
+      marker.addListener("click", () => {
+        const bounds = mapRef.current.getBoundingClientRect();
+        setPopupCoords({ x: bounds.width / 2, y: bounds.height / 3 });
+        setSelectedUserPresence({ user_email: c.user_email, user_name: c.full_name, avatar_url: c.profile_image, status_message: c.bio, location_lat: c.latitude, location_lng: c.longitude });
+      });
+      creatorMarkersRef.current[c.id] = marker;
+    });
+    Object.keys(creatorMarkersRef.current).forEach(id => {
+      if (!activeIds.has(id)) { creatorMarkersRef.current[id].setMap(null); delete creatorMarkersRef.current[id]; }
+    });
+  }, [creatorsData, mapReady]);
 
   if (error) return (
     <div className="flex flex-col items-center justify-center h-full gap-3">
