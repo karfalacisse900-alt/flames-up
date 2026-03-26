@@ -105,12 +105,13 @@ function AIChatModal({ onClose }) {
 
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a friendly, knowledgeable NYC city guide. Keep responses concise (2–4 paragraphs max), practical, and specific to New York City. Include real place names, neighborhoods, and tips. Format key places in **bold**.
+        model: "gemini_3_flash",
+        prompt: `You are an expert NYC local guide — friendly, direct, and specific. Answer ONLY what the user is asking. Do NOT list all 5 boroughs unless asked. Do NOT write bullet-point lists unless it genuinely helps. Write like a knowledgeable friend texting you advice. Be concise — 2-3 short paragraphs max. Use **bold** for key place names. Give actionable, specific recommendations with real addresses or cross streets when helpful. If the user asks about a specific neighborhood, topic, or activity, stay focused on that.
 
-Conversation so far:
+Conversation:
 ${history}
 
-Respond to the latest user message as the NYC guide assistant.`,
+Respond now. Stay focused and concise.`,
       });
       setMessages(prev => [...prev, { role: "assistant", text: res }]);
     } catch {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Star, MapPin, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -46,6 +46,7 @@ export default function SpotCard({ spot, index }) {
   const [photos, setPhotos] = useState([]);
   const [photoLoading, setPhotoLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const touchStartX = useRef(null);
 
   const isFree = spot.cost === "Free" || spot.cost === "FREE" || spot.cost.startsWith("Free") || spot.cost === "$0 entry";
   const typeLabel = getTypeLabel(spot.type);
@@ -89,7 +90,18 @@ export default function SpotCard({ spot, index }) {
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}
     >
       {/* Photo carousel */}
-      <div className="relative select-none" style={{ height: 220 }}>
+      <div
+        className="relative select-none"
+        style={{ height: 220, touchAction: "pan-y" }}
+        onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={e => {
+          if (touchStartX.current === null || !hasPhotos || photos.length < 2) return;
+          const dx = e.changedTouches[0].clientX - touchStartX.current;
+          touchStartX.current = null;
+          if (dx < -40) setPhotoIndex(i => (i + 1) % photos.length);
+          else if (dx > 40) setPhotoIndex(i => (i - 1 + photos.length) % photos.length);
+        }}
+      >
         {photoLoading ? (
           <div className="w-full h-full skeleton" />
         ) : hasPhotos ? (
