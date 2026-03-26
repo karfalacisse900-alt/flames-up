@@ -1,280 +1,377 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, MapPin, Bot, Flag, ChevronDown, ChevronUp, X, Send, Loader2, ArrowLeft, ShieldCheck, Eye, Navigation } from "lucide-react";
+import { ChevronDown, ChevronUp, Flag, Bot, Send, Loader2, Share2, ShieldCheck, MapPin, AlertTriangle, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// ── Golden Rules ──────────────────────────────────────────────────────────────
+const RULES = [
+  {
+    id: "slow_down",
+    step: "RULE 1",
+    icon: "⏸️",
+    title: "Slow Down",
+    desc: "Scammers create urgency. If someone is rushing you, that's a red flag. Take a breath before you act.",
+    detail: "Real opportunities don't disappear in 30 seconds. Whether it's a 'free gift', a deal, or someone asking for help — pressure is the scammer's #1 tool. Step back, think, and walk away if needed.",
+  },
+  {
+    id: "spot_check",
+    step: "RULE 2",
+    icon: "🔍",
+    title: "Spot Check",
+    desc: "Look for signs. Does the situation feel off? Is someone too friendly? Are prices not shown? Trust your gut.",
+    detail: "Ask yourself: Why is this stranger approaching me? Would a legitimate business operate this way? If something feels wrong, it probably is. Scammers rely on confusion and distraction.",
+  },
+  {
+    id: "never_pay",
+    step: "RULE 3",
+    icon: "🛑",
+    title: "Never Pay Unexpectedly",
+    desc: "If you didn't agree to pay something upfront, don't. Surprise bills, 'free' items with fees, and cash demands are all scam tactics.",
+    detail: "Whether it's a bracelet placed on your wrist, a CD forced into your hand, or a photo taken without asking — you owe nothing. Say 'No thank you' firmly and walk away. You are not obligated.",
+  },
+];
 
 // ── Scam Data ─────────────────────────────────────────────────────────────────
 const SCAMS = [
-  { id: 1, category: "street", title: "Fake Monk Bracelet", emoji: "📿", what: "Someone puts a bracelet on your wrist 'for free', then aggressively demands money.", avoid: "Never let strangers place anything on your body. Say 'No thank you' firmly and walk away.", hotspots: ["Times Square", "Grand Central", "Brooklyn Bridge"], lat: 40.758, lng: -73.9855 },
-  { id: 2, category: "street", title: "CD / Mixtape Hustle", emoji: "💿", what: "Person hands you a CD, signs it, chats you up — then pressures you to pay for it.", avoid: "Don't accept CDs or physical items from strangers. Keep walking.", hotspots: ["Times Square", "Herald Square"], lat: 40.756, lng: -73.989 },
-  { id: 3, category: "street", title: "Petition / Signature Trap", emoji: "📋", what: "Someone asks you to sign a petition for a cause, then pressures you for a cash donation.", avoid: "Don't stop for clipboard people. If you want to donate, do it online to verified orgs.", hotspots: ["Midtown", "Union Square"], lat: 40.7359, lng: -73.9911 },
-  { id: 4, category: "street", title: "Costumed Character Photo", emoji: "🎭", what: "People in costumes (Elmo, Spider-Man) offer free photos — then demand large tips or get aggressive.", avoid: "Only take photos if you've agreed on a price beforehand. It's never truly free.", hotspots: ["Times Square"], lat: 40.758, lng: -73.9855 },
-  { id: 5, category: "street", title: "3-Card Monte", emoji: "🃏", what: "A street card game that looks easy to win. It's always rigged with a hired crowd.", avoid: "Never play street gambling games. The house always wins.", hotspots: ["Midtown", "Penn Station area"], lat: 40.7506, lng: -73.9936 },
-  { id: 6, category: "street", title: '"Found Ring" Trick', emoji: "💍", what: "Stranger 'finds' a ring near you and offers to sell it cheap. It's fake jewelry.", avoid: "Ignore it. Don't engage.", hotspots: ["Midtown", "Lower Manhattan"], lat: 40.7127, lng: -74.0059 },
-  { id: 7, category: "street", title: "Free Gift Trap", emoji: "🎁", what: "Stranger gives a gift to your child or you 'for free', then pressures you to pay.", avoid: "Politely decline anything offered for free by strangers.", hotspots: ["Midtown", "Tourist areas"], lat: 40.754, lng: -73.984 },
-  { id: 8, category: "transit", title: "Subway Swipe Scam", emoji: "🚇", what: "Person offers to swipe you into the subway cheaper using a stolen or invalid MetroCard.", avoid: "Always use your own payment. Using a stolen card is also illegal for you.", hotspots: ["Busy subway stations"], lat: 40.7506, lng: -73.9971 },
-  { id: 9, category: "transit", title: "Fake Uber / Ride Pickup", emoji: "🚗", what: "Someone near an airport or venue pretends to be your Uber or Lyft driver.", avoid: "Always verify license plate, car model, and driver photo in your app before getting in.", hotspots: ["JFK Airport", "LaGuardia", "Penn Station"], lat: 40.7484, lng: -73.9967 },
-  { id: 10, category: "transit", title: "Broken Taxi Meter", emoji: "🚕", what: "Driver claims meter is broken and charges a high random price at destination.", avoid: "Insist on using the meter or agree on price before the ride. Exit if refused.", hotspots: ["Airports", "Midtown"], lat: 40.7549, lng: -73.9840 },
-  { id: 11, category: "digital", title: "Fake Event Tickets", emoji: "🎟️", what: "Scalpers outside venues sell fake or invalid tickets at discounted prices.", avoid: "Buy only from official box offices or verified apps like Ticketmaster.", hotspots: ["Madison Square Garden", "Barclays Center", "Broadway"], lat: 40.7505, lng: -73.9934 },
-  { id: 12, category: "digital", title: "Fake Apartment Rental", emoji: "🏠", what: "Cheap listing online asking for deposit before you can see the place. It's fake.", avoid: "Never pay before viewing in person. Use verified platforms only.", hotspots: ["Online listings"], lat: 40.730, lng: -73.935 },
-  { id: 13, category: "digital", title: "Bar Overcharge Scam", emoji: "🍺", what: "Prices aren't shown clearly. You get hit with a huge bill at the end.", avoid: "Always ask for the price before ordering. Check the bill carefully.", hotspots: ["Nightlife areas", "Lower East Side", "Meatpacking District"], lat: 40.7408, lng: -74.0042 },
-  { id: 14, category: "theft", title: "ATM Distraction Theft", emoji: "🏧", what: "Someone distracts you at an ATM while an accomplice steals your card or cash.", avoid: "Use ATMs in well-lit areas. Don't engage strangers. Cover your PIN.", hotspots: ["Busy ATM locations"], lat: 40.752, lng: -73.977 },
-  { id: 15, category: "theft", title: "Phone Snatch Setup", emoji: "📱", what: "Someone bumps into you while another grabs your phone. Happens in crowds.", avoid: "Keep phone in pocket in crowded areas. Be aware of distractions.", hotspots: ["Times Square", "Subway platforms", "Concerts"], lat: 40.758, lng: -73.9855 },
-  { id: 16, category: "theft", title: '"Can I Use Your Phone?"', emoji: "☎️", what: "Stranger asks to borrow your phone urgently, then runs away with it.", avoid: "Never hand your phone to a stranger. Offer to dial a number yourself instead.", hotspots: ["Tourist areas", "Midtown"], lat: 40.755, lng: -73.986 },
-  { id: 17, category: "street", title: "Fake Charity Collectors", emoji: "🪣", what: "People collecting for 'kids' or 'schools' with no real organization behind them.", avoid: "Only donate online to verified charities. Ask for official credentials.", hotspots: ["Busy intersections", "Shopping areas"], lat: 40.748, lng: -73.985 },
-  { id: 18, category: "street", title: "Street Performer Pressure", emoji: "🎪", what: "Performers asking aggressively for tips after uninvited performances near you.", avoid: "You're not obligated to tip. Move on if pressured.", hotspots: ["Times Square", "Subway stations"], lat: 40.758, lng: -73.9855 },
-  { id: 19, category: "transit", title: "Fake Parking Attendant", emoji: "🅿️", what: "Unofficial person guides you to park, then demands cash payment.", avoid: "Only pay official parking meters or marked attendant booths.", hotspots: ["Brooklyn", "Queens parking areas"], lat: 40.678, lng: -73.944 },
-  { id: 20, category: "theft", title: "Overfriendly Stranger Setup", emoji: "🤝", what: "An extremely friendly stranger builds quick trust, then steals from you or leads you into a scam.", avoid: "Be polite but cautious with overly friendly strangers in tourist areas.", hotspots: ["Times Square", "Central Park", "Popular tourist spots"], lat: 40.7851, lng: -73.9683 },
+  { id: 1, cat: "street", emoji: "📿", title: "Fake Monk Bracelet", what: "Someone puts a bracelet on your wrist 'for free', then demands money.", avoid: "Never let strangers place anything on your body. Walk away firmly.", spots: ["Times Square", "Grand Central"] },
+  { id: 2, cat: "street", emoji: "💿", title: "CD / Mixtape Hustle", what: "Person hands you a CD, signs it, chats you up — then demands payment.", avoid: "Don't accept CDs or physical items from strangers.", spots: ["Times Square", "Herald Square"] },
+  { id: 3, cat: "street", emoji: "📋", title: "Petition / Signature Trap", what: "Someone asks you to sign a petition, then pressures you for a cash donation.", avoid: "Don't stop for clipboard people. Donate online to verified orgs only.", spots: ["Midtown", "Union Square"] },
+  { id: 4, cat: "street", emoji: "🎭", title: "Costumed Character Photo", what: "Elmo, Spider-Man, etc. offer free photos — then demand tips aggressively.", avoid: "Agree on price before any photo. It is never truly free.", spots: ["Times Square"] },
+  { id: 5, cat: "street", emoji: "🃏", title: "3-Card Monte", what: "A street card game that looks easy to win. It's always rigged with a hired crowd.", avoid: "Never play street gambling games. The house always wins.", spots: ["Midtown", "Penn Station area"] },
+  { id: 6, cat: "street", emoji: "💍", title: '"Found Ring" Trick', what: "Stranger 'finds' a ring near you and offers to sell it cheap. It's fake jewelry.", avoid: "Ignore it. Don't engage or make eye contact.", spots: ["Midtown", "Lower Manhattan"] },
+  { id: 7, cat: "street", emoji: "🎁", title: "Free Gift Trap", what: "Stranger gives a gift to your child or you 'for free', then pressures you to pay.", avoid: "Politely decline anything offered for free by strangers.", spots: ["Tourist areas"] },
+  { id: 8, cat: "street", emoji: "🪣", title: "Fake Charity Collectors", what: "Collecting for 'kids' or 'schools' with no real organization behind them.", avoid: "Only donate online to verified charities.", spots: ["Busy intersections"] },
+  { id: 9, cat: "transit", emoji: "🚇", title: "Subway Swipe Scam", what: "Person offers to swipe you in cheaper using a stolen or invalid MetroCard.", avoid: "Always use your own payment. Using a stolen card is illegal for you too.", spots: ["Busy subway stations"] },
+  { id: 10, cat: "transit", emoji: "🚗", title: "Fake Uber / Ride Pickup", what: "Someone near an airport pretends to be your Uber driver.", avoid: "Always verify license plate, car model, and driver photo in the app.", spots: ["JFK", "LaGuardia", "Penn Station"] },
+  { id: 11, cat: "transit", emoji: "🚕", title: "Broken Taxi Meter", what: "Driver claims meter is broken and charges a random high price.", avoid: "Insist on the meter or agree price before the ride. Exit if refused.", spots: ["Airports", "Midtown"] },
+  { id: 12, cat: "transit", emoji: "🅿️", title: "Fake Parking Attendant", what: "Unofficial person guides you to park, then demands cash.", avoid: "Only pay official machines or marked attendant booths.", spots: ["Brooklyn", "Queens"] },
+  { id: 13, cat: "tickets", emoji: "🎟️", title: "Fake Event Tickets", what: "Scalpers outside venues sell fake or invalid tickets.", avoid: "Buy only from official box offices or verified apps.", spots: ["MSG", "Barclays Center", "Broadway"] },
+  { id: 14, cat: "tickets", emoji: "🏠", title: "Fake Apartment Rental", what: "Cheap listing online asking for deposit before you can view the place.", avoid: "Never pay before viewing in person. Use verified platforms only.", spots: ["Online listings"] },
+  { id: 15, cat: "tickets", emoji: "🍺", title: "Bar Overcharge Scam", what: "Prices not shown clearly. You get hit with a huge bill at the end.", avoid: "Always ask for the price before ordering. Check the bill.", spots: ["Lower East Side", "Meatpacking District"] },
+  { id: 16, cat: "theft", emoji: "🏧", title: "ATM Distraction Theft", what: "Someone distracts you at an ATM while an accomplice steals your card or cash.", avoid: "Use ATMs in well-lit areas. Cover your PIN. Don't engage strangers.", spots: ["Busy ATM locations"] },
+  { id: 17, cat: "theft", emoji: "📱", title: "Phone Snatch Setup", what: "Someone bumps you while another grabs your phone in crowds.", avoid: "Keep phone in pocket in crowded areas. Be aware of distractions.", spots: ["Times Square", "Subway", "Concerts"] },
+  { id: 18, cat: "theft", emoji: "☎️", title: '"Can I Use Your Phone?"', what: "Stranger asks to borrow your phone urgently, then runs away with it.", avoid: "Never hand your phone to a stranger. Offer to dial for them instead.", spots: ["Tourist areas"] },
+  { id: 19, cat: "theft", emoji: "🤝", title: "Overfriendly Stranger Setup", what: "An extremely friendly stranger builds trust quickly, then scams you.", avoid: "Be polite but cautious. Genuine locals don't approach tourists this way.", spots: ["Times Square", "Central Park"] },
+  { id: 20, cat: "street", emoji: "🎪", title: "Street Performer Pressure", what: "Performers ask aggressively for tips after uninvited performances.", avoid: "You are not obligated to tip. Move on without engaging.", spots: ["Times Square", "Subway stations"] },
 ];
 
-const CATEGORIES = [
-  { value: "all", label: "All Alerts", emoji: "🚨", color: "#DC2626" },
-  { value: "street", label: "Street Scams", emoji: "🏙️", color: "#EA580C" },
-  { value: "transit", label: "Transit", emoji: "🚇", color: "#2563EB" },
-  { value: "digital", label: "Tickets & Online", emoji: "💻", color: "#7C3AED" },
-  { value: "theft", label: "Theft & Pickpocket", emoji: "👜", color: "#DC2626" },
+const CATS = [
+  { value: "all", label: "All Scams", color: "#1C1C1E" },
+  { value: "street", label: "Street", color: "#EA580C" },
+  { value: "transit", label: "Transit", color: "#2563EB" },
+  { value: "tickets", label: "Tickets & Online", color: "#7C3AED" },
+  { value: "theft", label: "Theft", color: "#DC2626" },
 ];
-
-const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.value, c]));
 
 export default function ListenDontJudge() {
   const [user, setUser] = useState(null);
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [expandedId, setExpandedId] = useState(null);
-  const [activeTab, setActiveTab] = useState("alerts"); // alerts | map | ai | report
-  const [mapReady, setMapReady] = useState(false);
-  const [apiKey, setApiKey] = useState(null);
-  const mapRef = useRef(null);
-  const mapInst = useRef(null);
+  const [activeCat, setActiveCat] = useState("all");
+  const [expandedScam, setExpandedScam] = useState(null);
+  const [expandedRule, setExpandedRule] = useState(null);
+  const [activeTab, setActiveTab] = useState("scams"); // scams | map | ai | report
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-    base44.functions.invoke("googleMapsToken", {}).then(res => setApiKey(res.data?.key || res.data)).catch(() => {});
   }, []);
 
-  const filtered = activeCategory === "all" ? SCAMS : SCAMS.filter(s => s.category === activeCategory);
+  const filtered = activeCat === "all" ? SCAMS : SCAMS.filter(s => s.cat === activeCat);
 
-  // Init map when tab switches to map
-  useEffect(() => {
-    if (activeTab !== "map" || !apiKey || mapInst.current) return;
-    let destroyed = false;
-    const init = async () => {
-      if (!window.google?.maps) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement("script");
-          s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-          s.async = true; s.onload = resolve; s.onerror = reject;
-          document.head.appendChild(s);
-        });
-      }
-      if (destroyed || !mapRef.current) return;
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 40.7549, lng: -73.984 }, zoom: 13,
-        disableDefaultUI: true, gestureHandling: "greedy",
-        styles: [{ featureType: "poi", elementType: "labels.icon", stylers: [{ visibility: "simplified" }] }],
-      });
-      mapInst.current = map;
-
-      // Add scam pins
-      SCAMS.forEach(scam => {
-        const cat = CAT_MAP[scam.category] || CAT_MAP.all;
-        const markerHtml = `<div style="background:${cat.color};color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)">${scam.emoji}</div>`;
-        const el = document.createElement("div");
-        el.innerHTML = markerHtml;
-        const marker = new window.google.maps.Marker({
-          position: { lat: scam.lat, lng: scam.lng },
-          map,
-          icon: { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="${cat.color}" stroke="white" stroke-width="3"/><text x="20" y="26" font-size="14" text-anchor="middle">${scam.emoji}</text></svg>`)}`, scaledSize: new window.google.maps.Size(40, 40), anchor: new window.google.maps.Point(20, 20) },
-          title: scam.title,
-        });
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: `<div style="max-width:220px;font-family:sans-serif;padding:4px 0"><div style="font-weight:700;font-size:14px;margin-bottom:4px">${scam.emoji} ${scam.title}</div><div style="font-size:12px;color:#555;margin-bottom:6px">${scam.what.slice(0, 100)}…</div><div style="font-size:11px;color:#16a34a;font-weight:600">✅ ${scam.avoid.slice(0, 80)}…</div></div>`,
-        });
-        marker.addListener("click", () => infoWindow.open(map, marker));
-      });
-      setMapReady(true);
-    };
-    init().catch(console.error);
-    return () => { destroyed = true; };
-  }, [activeTab, apiKey]);
+  const share = () => {
+    if (navigator.share) navigator.share({ title: "Stay Safe NYC", text: "Know the most common NYC scams and how to avoid them. Stay safe!" });
+  };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="sticky top-0 z-30" style={{ backgroundColor: "var(--bg-nav)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border-light)" }}>
-        <div className="max-w-2xl mx-auto px-4 pt-4 pb-3">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0" style={{ background: "linear-gradient(135deg,#DC2626,#EA580C)" }}>
-              🛡️
-            </div>
-            <div className="flex-1">
-              <h1 className="text-lg font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Stay Safe NYC</h1>
-              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Safety alerts & scam awareness</p>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#DC2626" }}>
-              <AlertTriangle className="w-3.5 h-3.5" /> {SCAMS.length} alerts
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-1 p-1 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
-            {[
-              { id: "alerts", label: "Alerts", icon: ShieldCheck },
-              { id: "map", label: "Map", icon: MapPin },
-              { id: "ai", label: "Ask AI", icon: Bot },
-              { id: "report", label: "Report", icon: Flag },
-            ].map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all"
-                  style={{ backgroundColor: isActive ? "#DC2626" : "transparent", color: isActive ? "#fff" : "var(--text-secondary)" }}>
-                  <Icon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+    <div className="min-h-screen pb-24" style={{ backgroundColor: "#FAFAF7", fontFamily: "var(--font-sans)" }}>
+      {/* Sticky Tab Bar */}
+      <div className="sticky top-0 z-30" style={{ backgroundColor: "rgba(250,250,247,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid #E5E5E0" }}>
+        <div className="max-w-2xl mx-auto px-4 py-3 flex gap-1">
+          {[
+            { id: "scams", label: "Scams" },
+            { id: "rules", label: "3 Rules" },
+            { id: "map", label: "Map" },
+            { id: "ai", label: "Ask AI" },
+            { id: "report", label: "Report" },
+          ].map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
+              style={{ backgroundColor: activeTab === tab.id ? "#1C1C1E" : "transparent", color: activeTab === tab.id ? "#fff" : "#6B7280" }}>
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Alerts Tab */}
-      {activeTab === "alerts" && (
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          {/* Warning banner */}
-          <div className="rounded-2xl p-4 mb-4 flex gap-3" style={{ background: "linear-gradient(135deg, rgba(220,38,38,0.08), rgba(234,88,12,0.08))", border: "1px solid rgba(220,38,38,0.2)" }}>
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
-            <div>
-              <p className="text-sm font-bold mb-0.5" style={{ color: "#DC2626" }}>Common NYC Scams</p>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                Stay aware of these common situations targeting tourists and new residents in New York City.
-              </p>
-            </div>
+      {/* SCAMS TAB */}
+      {activeTab === "scams" && (
+        <div className="max-w-2xl mx-auto px-4">
+          {/* Hero */}
+          <div className="pt-8 pb-6 text-center">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#EA580C" }}>NYC Safety Alerts</p>
+            <h1 className="text-3xl font-black leading-tight mb-3" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)", letterSpacing: "-0.03em" }}>
+              No matter the scam, <span style={{ textDecoration: "underline", textDecorationStyle: "wavy", textDecorationColor: "#FBBF24" }}>know the signs</span> to stay safe in NYC.
+            </h1>
+            <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>
+              Protect yourself and others from common street scams, transit tricks, and tourist traps across New York City.
+            </p>
           </div>
 
-          {/* Category filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-            {CATEGORIES.map(cat => {
-              const isActive = activeCategory === cat.value;
-              return (
-                <button key={cat.value} onClick={() => setActiveCategory(cat.value)}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
-                  style={{ backgroundColor: isActive ? cat.color : "var(--bg-card)", color: isActive ? "#fff" : "var(--text-secondary)", border: `1.5px solid ${isActive ? cat.color : "var(--border-light)"}` }}>
-                  {cat.emoji} {cat.label}
-                </button>
-              );
-            })}
+          {/* Category chips */}
+          <div className="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4">
+            {CATS.map(cat => (
+              <button key={cat.value} onClick={() => setActiveCat(cat.value)}
+                className="shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all"
+                style={{ backgroundColor: activeCat === cat.value ? cat.color : "#F3F4F6", color: activeCat === cat.value ? "#fff" : "#374151", border: "none" }}>
+                {cat.label}
+              </button>
+            ))}
           </div>
 
-          {/* Alert cards */}
-          <div className="flex flex-col gap-3">
-            {filtered.map(scam => {
-              const cat = CAT_MAP[scam.category];
-              const isExp = expandedId === scam.id;
+          {/* Scam Cards — ScamSpotter style */}
+          <div className="space-y-0 mb-6" style={{ border: "1.5px solid #E5E5E0", borderRadius: 20, overflow: "hidden" }}>
+            {filtered.map((scam, idx) => {
+              const isExp = expandedScam === scam.id;
+              const catColor = CATS.find(c => c.value === scam.cat)?.color || "#1C1C1E";
               return (
-                <motion.div key={scam.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl overflow-hidden"
-                  style={{ backgroundColor: "var(--bg-card)", border: `1px solid var(--border-light)`, boxShadow: "var(--elevation-1)" }}>
-                  <button className="w-full text-left p-4" onClick={() => setExpandedId(isExp ? null : scam.id)}>
-                    <div className="flex items-start gap-3">
-                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
-                        style={{ backgroundColor: `${cat?.color}18` }}>
-                        {scam.emoji}
+                <div key={scam.id} style={{ borderTop: idx === 0 ? "none" : "1px solid #E5E5E0", backgroundColor: "#fff" }}>
+                  <button className="w-full text-left px-5 py-4" onClick={() => setExpandedScam(isExp ? null : scam.id)}>
+                    <div className="flex items-start gap-4">
+                      {/* Check + Icon column */}
+                      <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: "#F9FAFB" }}>
+                          {scam.emoji}
+                        </div>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: catColor }}>
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{scam.title}</p>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
-                            style={{ backgroundColor: `${cat?.color}18`, color: cat?.color }}>
-                            {cat?.emoji} {cat?.label}
-                          </span>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: catColor }}>{scam.cat}</p>
+                        <p className="font-black text-base leading-snug mb-1" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>{scam.title}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>{scam.what}</p>
+                        <div className="flex items-center gap-1 mt-2" style={{ color: catColor }}>
+                          <span className="text-xs font-bold">Read more</span>
+                          {isExp ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </div>
-                        <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                          {isExp ? scam.what : scam.what.slice(0, 80) + (scam.what.length > 80 ? "…" : "")}
-                        </p>
-                      </div>
-                      <div className="shrink-0 mt-0.5">
-                        {isExp ? <ChevronUp className="w-4 h-4" style={{ color: "var(--text-hint)" }} /> : <ChevronDown className="w-4 h-4" style={{ color: "var(--text-hint)" }} />}
                       </div>
                     </div>
                   </button>
-
                   <AnimatePresence>
                     {isExp && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}>
-                        <div className="px-4 pb-4 space-y-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                          <div className="pt-3">
-                            <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-hint)" }}>⚠️ What Happens</p>
-                            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{scam.what}</p>
-                          </div>
-                          <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)" }}>
-                            <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "#16A34A" }}>✅ How to Avoid</p>
-                            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{scam.avoid}</p>
-                          </div>
-                          {scam.hotspots?.length > 0 && (
-                            <div>
-                              <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-hint)" }}>📍 Common Locations</p>
+                        <div className="px-5 pb-5 ml-12" style={{ borderTop: "1px dashed #E5E5E0" }}>
+                          <div className="pt-4 space-y-3">
+                            <div className="p-3 rounded-2xl" style={{ backgroundColor: "#FEF9C3" }}>
+                              <p className="text-xs font-bold mb-1" style={{ color: "#92400E" }}>⚠️ What happens</p>
+                              <p className="text-sm leading-relaxed" style={{ color: "#78350F" }}>{scam.what}</p>
+                            </div>
+                            <div className="p-3 rounded-2xl" style={{ backgroundColor: "#F0FDF4" }}>
+                              <p className="text-xs font-bold mb-1" style={{ color: "#166534" }}>✅ How to avoid it</p>
+                              <p className="text-sm leading-relaxed" style={{ color: "#15803D" }}>{scam.avoid}</p>
+                            </div>
+                            {scam.spots?.length > 0 && (
                               <div className="flex flex-wrap gap-1.5">
-                                {scam.hotspots.map(h => (
-                                  <span key={h} className="text-xs px-2 py-1 rounded-full font-medium"
-                                    style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)" }}>
-                                    {h}
+                                {scam.spots.map(s => (
+                                  <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1" style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>
+                                    <MapPin className="w-2.5 h-2.5" /> {s}
                                   </span>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               );
             })}
           </div>
+
+          {/* Share CTA */}
+          <button onClick={share}
+            className="w-full py-4 rounded-2xl text-sm font-bold text-white mb-8 flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#1C1C1E" }}>
+            <Share2 className="w-4 h-4" />
+            SHARE THESE TIPS
+          </button>
         </div>
       )}
 
-      {/* Map Tab */}
-      {activeTab === "map" && (
-        <div className="relative" style={{ height: "calc(100dvh - 130px)" }}>
-          {!apiKey && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "var(--bg-app)" }}>
-              <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--accent-primary)" }} />
-            </div>
-          )}
-          <div ref={mapRef} style={{ position: "absolute", inset: 0 }} />
-          {/* Legend */}
-          {apiKey && (
-            <div className="absolute top-3 left-3 right-3 z-10">
-              <div className="rounded-2xl p-3 flex flex-wrap gap-2" style={{ backgroundColor: "rgba(255,255,255,0.96)", backdropFilter: "blur(16px)", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-                <p className="w-full text-xs font-bold mb-1" style={{ color: "#0F172A" }}>🗺️ Scam hotspot map — tap a pin for details</p>
-                {CATEGORIES.filter(c => c.value !== "all").map(cat => (
-                  <div key={cat.value} className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: "#374151" }}>
-                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                    {cat.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* 3 RULES TAB */}
+      {activeTab === "rules" && (
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="pt-8 pb-6 text-center">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#EA580C" }}>The Foundation</p>
+            <h1 className="text-3xl font-black leading-tight mb-3" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)", letterSpacing: "-0.03em" }}>
+              No matter the scheme, we can <span style={{ textDecoration: "underline", textDecorationStyle: "wavy", textDecorationColor: "#FBBF24" }}>apply</span> the three golden rules to spot the scam.
+            </h1>
+          </div>
+
+          <div className="space-y-0 mb-8" style={{ border: "1.5px solid #E5E5E0", borderRadius: 20, overflow: "hidden" }}>
+            {RULES.map((rule, idx) => {
+              const isExp = expandedRule === rule.id;
+              return (
+                <div key={rule.id} style={{ borderTop: idx === 0 ? "none" : "1px solid #E5E5E0", backgroundColor: "#fff" }}>
+                  <button className="w-full text-left px-5 py-5" onClick={() => setExpandedRule(isExp ? null : rule.id)}>
+                    <div className="flex items-start gap-4">
+                      <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "#F9FAFB" }}>
+                          {rule.icon}
+                        </div>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: "#FBBF24" }}>
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "#FBBF24" }}>{rule.step}</p>
+                        <p className="font-black text-xl leading-snug mb-1" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>{rule.title}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>{rule.desc}</p>
+                        <div className="flex items-center gap-1 mt-2" style={{ color: "#FBBF24" }}>
+                          <span className="text-xs font-bold">Read more</span>
+                          {isExp ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {isExp && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <div className="px-5 pb-5 ml-14" style={{ borderTop: "1px dashed #E5E5E0" }}>
+                          <p className="pt-4 text-sm leading-relaxed" style={{ color: "#374151" }}>{rule.detail}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+
+          <button onClick={share}
+            className="w-full py-4 rounded-2xl text-sm font-bold text-white mb-8 flex items-center justify-center gap-2"
+            style={{ backgroundColor: "#1C1C1E" }}>
+            <Share2 className="w-4 h-4" />
+            SHARE THESE TIPS
+          </button>
         </div>
       )}
 
-      {/* AI Tab */}
-      {activeTab === "ai" && <AIAssistant user={user} />}
+      {/* MAP TAB */}
+      {activeTab === "map" && <ScamMap />}
 
-      {/* Report Tab */}
+      {/* AI TAB */}
+      {activeTab === "ai" && <AIAssistant />}
+
+      {/* REPORT TAB */}
       {activeTab === "report" && <ReportForm user={user} />}
     </div>
   );
 }
 
-// ── AI Safety Assistant ───────────────────────────────────────────────────────
-function AIAssistant({ user }) {
+// ── Scam Map ─────────────────────────────────────────────────────────────────
+function ScamMap() {
+  const [apiKey, setApiKey] = useState(null);
+  const [ready, setReady] = useState(false);
+  const mapRef = useRef(null);
+  const mapInst = useRef(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    base44.functions.invoke("googleMapsToken", {}).then(res => {
+      if (mountedRef.current) setApiKey(res.data?.key || res.data);
+    }).catch(() => {});
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!apiKey || !mapRef.current || mapInst.current) return;
+
+    const init = async () => {
+      if (!window.google?.maps) {
+        await new Promise((resolve, reject) => {
+          if (document.querySelector('script[src*="maps.googleapis.com"]')) { resolve(); return; }
+          const s = document.createElement("script");
+          s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+          s.async = true; s.defer = true;
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      if (!mountedRef.current || !mapRef.current) return;
+
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: { lat: 40.7549, lng: -73.984 },
+        zoom: 13,
+        disableDefaultUI: true,
+        gestureHandling: "greedy",
+        clickableIcons: false,
+      });
+      mapInst.current = map;
+
+      // Cluster scams by location (group same lat/lng nearby)
+      const placed = new Set();
+      SCAMS.forEach(scam => {
+        const catColor = { street: "#EA580C", transit: "#2563EB", tickets: "#7C3AED", theft: "#DC2626" }[scam.cat] || "#1C1C1E";
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><circle cx="22" cy="22" r="20" fill="${catColor}" stroke="white" stroke-width="3"/><text x="22" y="29" font-size="16" text-anchor="middle">${scam.emoji}</text></svg>`;
+        const marker = new window.google.maps.Marker({
+          position: { lat: scam.lat || 40.7549 + (scam.id * 0.0023 % 0.04 - 0.02), lng: scam.lng || -73.984 + (scam.id * 0.0031 % 0.04 - 0.02) },
+          map,
+          icon: { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`, scaledSize: new window.google.maps.Size(44, 44), anchor: new window.google.maps.Point(22, 22) },
+          title: scam.title,
+          optimized: true,
+        });
+        const info = new window.google.maps.InfoWindow({
+          content: `<div style="max-width:200px;padding:4px 0;font-family:sans-serif"><b style="font-size:13px">${scam.emoji} ${scam.title}</b><p style="font-size:11px;color:#555;margin:4px 0">${scam.what}</p><p style="font-size:11px;color:#16a34a;font-weight:600">✅ ${scam.avoid}</p></div>`,
+        });
+        marker.addListener("click", () => info.open(map, marker));
+      });
+
+      if (mountedRef.current) setReady(true);
+    };
+
+    init().catch(console.error);
+  }, [apiKey]);
+
+  return (
+    <div style={{ height: "calc(100dvh - 108px)", position: "relative", overflow: "hidden" }}>
+      {/* Map container — GPU-composited, never remounted */}
+      <div
+        ref={mapRef}
+        style={{
+          position: "absolute", inset: 0,
+          transform: "translateZ(0)",
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+        }}
+      />
+      {/* Legend overlay */}
+      {ready && (
+        <div style={{ position: "absolute", bottom: 16, left: 12, right: 12, zIndex: 10, pointerEvents: "none" }}>
+          <div className="rounded-2xl p-3 flex flex-wrap gap-x-4 gap-y-1.5"
+            style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+            <p className="w-full text-xs font-bold mb-0.5" style={{ color: "#1C1C1E" }}>🗺️ Tap a pin to see scam details</p>
+            {[{ c: "#EA580C", l: "Street" }, { c: "#2563EB", l: "Transit" }, { c: "#7C3AED", l: "Tickets" }, { c: "#DC2626", l: "Theft" }].map(item => (
+              <div key={item.l} className="flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: "#374151" }}>
+                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.c }} /> {item.l}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {!ready && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#FAFAF7", zIndex: 5 }}>
+          <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#EA580C" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AI Assistant ──────────────────────────────────────────────────────────────
+function AIAssistant() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "👋 Hi! I'm your NYC Safety Assistant. Ask me anything like:\n\n• \"Is Times Square safe at night?\"\n• \"What scams happen near Central Park?\"\n• \"How do I avoid getting scammed on the subway?\"" }
+    { role: "assistant", content: "👋 Hi! I'm your NYC Safety Assistant.\n\nAsk me anything:\n• \"Is Times Square safe at night?\"\n• \"What scams happen near the subway?\"\n• \"How do I spot a ticket scam?\"" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -282,35 +379,35 @@ function AIAssistant({ user }) {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  const scamContext = SCAMS.map(s => `${s.title}: ${s.what} Avoid: ${s.avoid}. Common at: ${s.hotspots?.join(", ")}.`).join("\n");
+  const context = SCAMS.map(s => `${s.title}: ${s.what} Avoid: ${s.avoid}. Common at: ${s.spots?.join(", ")}.`).join("\n");
 
   const send = async () => {
     if (!input.trim() || loading) return;
-    const userMsg = input.trim();
+    const q = input.trim();
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+    setMessages(p => [...p, { role: "user", content: q }]);
     setLoading(true);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an NYC safety expert helping tourists and new residents avoid scams. Answer concisely and helpfully based on this scam database:\n\n${scamContext}\n\nUser question: ${userMsg}`,
+        prompt: `You are an NYC safety expert. Answer concisely using this scam database:\n\n${context}\n\nQuestion: ${q}`,
       });
-      setMessages(prev => [...prev, { role: "assistant", content: res }]);
+      setMessages(p => [...p, { role: "assistant", content: res }]);
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't get a response. Please try again." }]);
+      setMessages(p => [...p, { role: "assistant", content: "Sorry, couldn't get a response. Please try again." }]);
     }
     setLoading(false);
   };
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col" style={{ height: "calc(100dvh - 140px)" }}>
+    <div className="max-w-2xl mx-auto flex flex-col" style={{ height: "calc(100dvh - 108px)" }}>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line`}
+            <div className="max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line"
               style={{
-                backgroundColor: msg.role === "user" ? "#DC2626" : "var(--bg-card)",
-                color: msg.role === "user" ? "#fff" : "var(--text-primary)",
-                border: msg.role === "assistant" ? "1px solid var(--border-light)" : "none",
+                backgroundColor: msg.role === "user" ? "#1C1C1E" : "#fff",
+                color: msg.role === "user" ? "#fff" : "#1C1C1E",
+                border: msg.role === "assistant" ? "1px solid #E5E5E0" : "none",
               }}>
               {msg.content}
             </div>
@@ -318,24 +415,22 @@ function AIAssistant({ user }) {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="px-4 py-3 rounded-2xl flex items-center gap-2" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#DC2626" }} />
-              <span className="text-sm" style={{ color: "var(--text-hint)" }}>Thinking…</span>
+            <div className="px-4 py-3 rounded-2xl flex items-center gap-2" style={{ backgroundColor: "#fff", border: "1px solid #E5E5E0" }}>
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#EA580C" }} />
+              <span className="text-sm" style={{ color: "#9CA3AF" }}>Thinking…</span>
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
-
-      <div className="px-4 py-3 flex gap-2" style={{ borderTop: "1px solid var(--border-light)", backgroundColor: "var(--bg-nav)", backdropFilter: "blur(16px)" }}>
-        <input value={input} onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && send()}
+      <div className="px-4 py-3 flex gap-2" style={{ borderTop: "1px solid #E5E5E0", backgroundColor: "rgba(250,250,247,0.96)", backdropFilter: "blur(16px)" }}>
+        <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()}
           placeholder='Ask: "Is this area safe?"'
           className="flex-1 px-4 py-2.5 rounded-2xl text-sm outline-none"
-          style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+          style={{ backgroundColor: "#F3F4F6", border: "1px solid #E5E5E0", color: "#1C1C1E" }} />
         <button onClick={send} disabled={!input.trim() || loading}
           className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: "#DC2626", opacity: input.trim() ? 1 : 0.4 }}>
+          style={{ backgroundColor: "#1C1C1E", opacity: input.trim() ? 1 : 0.35 }}>
           <Send className="w-4 h-4 text-white" />
         </button>
       </div>
@@ -345,86 +440,63 @@ function AIAssistant({ user }) {
 
 // ── Report Form ───────────────────────────────────────────────────────────────
 function ReportForm({ user }) {
-  const [form, setForm] = useState({ title: "", description: "", location: "", category: "street" });
-  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", location: "", cat: "street" });
+  const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (!form.title.trim() || !form.description.trim()) return;
     setLoading(true);
     await base44.entities.Report.create({
-      content_type: "user",
-      content_id: "scam_report",
-      reason: `[${form.category}] ${form.title}: ${form.description} | Location: ${form.location}`,
-      reporter_email: user?.email || "anonymous",
-      status: "pending",
+      content_type: "user", content_id: "scam_report",
+      reason: `[${form.cat}] ${form.title}: ${form.description} | Location: ${form.location}`,
+      reporter_email: user?.email || "anonymous", status: "pending",
     });
     setLoading(false);
-    setSubmitted(true);
+    setDone(true);
   };
 
-  if (submitted) return (
-    <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+  if (done) return (
+    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <div className="text-6xl mb-4">✅</div>
-      <h3 className="text-xl font-bold mb-2" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Report Submitted</h3>
-      <p className="text-sm mb-6" style={{ color: "var(--text-hint)" }}>Thank you for helping keep NYC safer. Our team will review your report.</p>
-      <button onClick={() => setSubmitted(false)} className="px-6 py-3 rounded-2xl text-sm font-bold text-white" style={{ backgroundColor: "#DC2626" }}>Submit Another</button>
+      <h3 className="text-2xl font-black mb-2" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>Report Submitted</h3>
+      <p className="text-sm mb-6" style={{ color: "#6B7280" }}>Thank you for helping keep NYC safer. Our team will review your submission.</p>
+      <button onClick={() => setDone(false)} className="px-8 py-3 rounded-2xl text-sm font-bold text-white" style={{ backgroundColor: "#1C1C1E" }}>Submit Another</button>
     </div>
   );
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
-      <div className="rounded-2xl p-4 flex gap-3" style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)" }}>
-        <Flag className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#DC2626" }} />
-        <div>
-          <p className="text-sm font-bold mb-0.5" style={{ color: "#DC2626" }}>Report a Scam or Safety Issue</p>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Help others stay safe by reporting scams you've witnessed or experienced.</p>
-        </div>
+      <div className="pt-4 pb-2">
+        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#EA580C" }}>Community Report</p>
+        <h2 className="text-2xl font-black" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>Report a Scam</h2>
+        <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Help others stay safe by reporting what you saw or experienced.</p>
       </div>
-
-      <div className="space-y-3">
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide mb-1.5 block" style={{ color: "var(--text-hint)" }}>Category</label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.filter(c => c.value !== "all").map(cat => (
-              <button key={cat.value} onClick={() => setForm(f => ({ ...f, category: cat.value }))}
-                className="px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ backgroundColor: form.category === cat.value ? cat.color : "var(--bg-card)", color: form.category === cat.value ? "#fff" : "var(--text-secondary)", border: `1.5px solid ${form.category === cat.value ? cat.color : "var(--border-light)"}` }}>
-                {cat.emoji} {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide mb-1.5 block" style={{ color: "var(--text-hint)" }}>Title *</label>
-          <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            placeholder="e.g. Bracelet scam near Times Square"
-            className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-        </div>
-
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide mb-1.5 block" style={{ color: "var(--text-hint)" }}>What happened? *</label>
-          <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-            placeholder="Describe what you saw or experienced in detail…"
-            rows={4} className="w-full px-4 py-3 rounded-xl text-sm resize-none"
-            style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-        </div>
-
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide mb-1.5 block" style={{ color: "var(--text-hint)" }}>Location (optional)</label>
-          <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-            placeholder="e.g. Near Times Square subway entrance"
-            className="w-full px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
-        </div>
-
-        <button onClick={submit} disabled={!form.title.trim() || !form.description.trim() || loading}
-          className="w-full py-4 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2"
-          style={{ backgroundColor: "#DC2626", opacity: form.title.trim() && form.description.trim() ? 1 : 0.45 }}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
-          Submit Report
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {[{ v: "street", l: "Street" }, { v: "transit", l: "Transit" }, { v: "tickets", l: "Tickets" }, { v: "theft", l: "Theft" }].map(c => (
+          <button key={c.v} onClick={() => setForm(f => ({ ...f, cat: c.v }))}
+            className="px-4 py-2 rounded-full text-xs font-bold"
+            style={{ backgroundColor: form.cat === c.v ? "#1C1C1E" : "#F3F4F6", color: form.cat === c.v ? "#fff" : "#374151" }}>
+            {c.l}
+          </button>
+        ))}
       </div>
+      <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+        placeholder="Title (e.g. Bracelet scam near Times Square)"
+        className="w-full px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: "#F3F4F6", border: "1px solid #E5E5E0", color: "#1C1C1E" }} />
+      <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+        placeholder="Describe what happened in detail…" rows={4}
+        className="w-full px-4 py-3 rounded-2xl text-sm resize-none"
+        style={{ backgroundColor: "#F3F4F6", border: "1px solid #E5E5E0", color: "#1C1C1E" }} />
+      <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+        placeholder="Location (optional, e.g. Times Square)"
+        className="w-full px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: "#F3F4F6", border: "1px solid #E5E5E0", color: "#1C1C1E" }} />
+      <button onClick={submit} disabled={!form.title.trim() || !form.description.trim() || loading}
+        className="w-full py-4 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2"
+        style={{ backgroundColor: "#1C1C1E", opacity: form.title.trim() && form.description.trim() ? 1 : 0.4 }}>
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
+        SUBMIT REPORT
+      </button>
     </div>
   );
 }

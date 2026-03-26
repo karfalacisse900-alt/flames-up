@@ -14,11 +14,11 @@ import CallManager from "@/components/calls/CallManager";
 import { useOnlinePresence } from "@/components/hooks/useOnlinePresence";
 
 const navItems = [
-{ name: "Home",    icon: Home,    page: "Home" },
-{ name: "Places", icon: MapPin,  page: "Places" },
+{ name: "Home",      icon: Home,    page: "Home" },
+{ name: "Places",   icon: MapPin,  page: "Places" },
 { name: "Discover", icon: Search,  page: "Discover" },
-{ name: "Groups",  icon: Users,   page: "Groups" },
-{ name: "Profile", icon: User,    page: "Profile" },
+{ name: "Groups",   icon: Users,   page: "Groups" },
+{ name: "Profile",  icon: User,    page: "Profile" },
 ];
 
 const ADMIN_PAGES = ["AdminContentManager", "AdminAnalytics", "AdminModeration"];
