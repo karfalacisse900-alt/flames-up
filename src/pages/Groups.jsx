@@ -37,6 +37,30 @@ function getGrad(cat) {
   return `linear-gradient(135deg, ${a}, ${b})`;
 }
 
+// Horizontal chip card for My Groups
+function MyGroupChip({ group, onOpen }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+      onClick={() => onOpen(group)}
+      className="cursor-pointer p-3 rounded-2xl h-full"
+      style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: 88 }}>
+      <div className="flex flex-col gap-2">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+          style={{ background: getGrad(group.category) }}>
+          {group.emoji || "💬"}
+        </div>
+        <div className="min-w-0">
+          <p className="font-bold text-xs truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>{group.name}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: "var(--text-hint)" }}>
+            <Users className="w-2.5 h-2.5 inline mr-0.5" />{(group.member_count || 0).toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // Compact list card for My Groups section
 function GroupCard({ group, membership, onOpen, onJoin }) {
   const isMember = !!membership;
@@ -275,16 +299,17 @@ export default function Groups() {
       {/* ── Content ── */}
       <div className="px-4 pt-2 pb-6">
 
-        {/* My Groups — at the top */}
+        {/* My Groups — horizontal scroll at the top */}
         {filteredMyGroups.length > 0 && (
           <section className="mb-6">
             <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-3" style={{ color: "var(--text-hint)" }}>
               <Star className="w-3.5 h-3.5" style={{ color: "var(--accent-secondary)" }} /> My Groups ({filteredMyGroups.length})
             </p>
-            <div className="space-y-2">
+            <div className="flex gap-3 overflow-x-auto -mx-4 px-4 pb-1" style={{ scrollSnapType: "x mandatory" }}>
               {filteredMyGroups.map(g => (
-                <GroupCard key={g.id} group={g} membership={membershipMap[g.id]}
-                  onOpen={handleOpenGroup} onJoin={handleJoin} />
+                <div key={g.id} className="shrink-0" style={{ width: 220, scrollSnapAlign: "start" }}>
+                  <MyGroupChip group={g} membership={membershipMap[g.id]} onOpen={handleOpenGroup} />
+                </div>
               ))}
             </div>
           </section>
