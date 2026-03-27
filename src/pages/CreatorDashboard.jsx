@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { MapPin, X, Instagram, Youtube, Globe, Edit3, CheckCircle, Clock, AlertCircle, Upload, Loader2, MessageCircle, Check } from "lucide-react";
+import {
+  MapPin, X, Instagram, Youtube, Globe, Edit3,
+  Clock, Loader2, MessageCircle, Check, Navigation,
+  Zap, ChevronRight
+} from "lucide-react";
 import CreatorProfileEditor from "@/components/creators/CreatorProfileEditor.jsx";
 import CreatorApplyForm from "@/components/creators/CreatorApplyForm.jsx";
 import PortfolioUploader from "@/components/creators/PortfolioUploader.jsx";
@@ -48,70 +52,45 @@ export default function CreatorDashboard() {
   }, []);
 
   const stopTracking = () => {
-    if (locationWatchRef.current !== null) {
-      navigator.geolocation.clearWatch(locationWatchRef.current);
-      locationWatchRef.current = null;
-    }
-    if (locationIntervalRef.current !== null) {
-      clearInterval(locationIntervalRef.current);
-      locationIntervalRef.current = null;
-    }
+    if (locationWatchRef.current !== null) { navigator.geolocation.clearWatch(locationWatchRef.current); locationWatchRef.current = null; }
+    if (locationIntervalRef.current !== null) { clearInterval(locationIntervalRef.current); locationIntervalRef.current = null; }
   };
 
-  const pushLocation = (creatorId) => {
+  const pushLocation = (id) => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        await base44.entities.Creator.update(creatorId, {
-          latitude,
-          longitude,
-          last_updated: new Date().toISOString(),
-        });
-      },
-      null,
-      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+      async (pos) => { await base44.entities.Creator.update(id, { latitude: pos.coords.latitude, longitude: pos.coords.longitude, last_updated: new Date().toISOString() }); },
+      null, { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
     );
   };
 
-  const startTracking = (creatorId) => {
+  const startTracking = (id) => {
     if (!navigator.geolocation) return;
-    // watchPosition for continuous updates
     locationWatchRef.current = navigator.geolocation.watchPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        await base44.entities.Creator.update(creatorId, {
-          latitude,
-          longitude,
-          last_updated: new Date().toISOString(),
-        });
-      },
-      null,
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      async (pos) => { await base44.entities.Creator.update(id, { latitude: pos.coords.latitude, longitude: pos.coords.longitude, last_updated: new Date().toISOString() }); },
+      null, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
-    // Also push every 2 minutes as a heartbeat so location never gets stale
-    locationIntervalRef.current = setInterval(() => pushLocation(creatorId), 2 * 60 * 1000);
+    locationIntervalRef.current = setInterval(() => pushLocation(id), 2 * 60 * 1000);
   };
 
   const handleOpen = async () => {
     if (!creator || toggling) return;
     setToggling(true);
     try {
-      const pos = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
-      );
-      const { latitude, longitude } = pos.coords;
-      const updated = await base44.entities.Creator.update(creator.id, {
-        availability_status: "open",
-        latitude,
-        longitude,
-        last_updated: new Date().toISOString(),
-      });
-      setCreator(prev => ({ ...prev, availability_status: "open", latitude, longitude }));
+      const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 }));
+      await base44.entities.Creator.update(creator.id, { availability_status: "open", latitude: pos.coords.latitude, longitude: pos.coords.longitude, last_updated: new Date().toISOString() });
+      setCreator(prev => ({ ...prev, availability_status: "open", latitude: pos.coords.latitude, longitude: pos.coords.longitude }));
       startTracking(creator.id);
-    } catch (e) {
-      alert("Could not get your location. Please enable GPS and try again.");
-    }
+    } catch { alert("Could not get your location. Please enable GPS and try again."); }
+    setToggling(false);
+  };
+
+  const handleClose = async () => {
+    if (!creator || toggling) return;
+    setToggling(true);
+    stopTracking();
+    await base44.entities.Creator.update(creator.id, { availability_status: "closed", last_updated: new Date().toISOString() });
+    setCreator(prev => ({ ...prev, availability_status: "closed" }));
     setToggling(false);
   };
 
@@ -127,31 +106,15 @@ export default function CreatorDashboard() {
   const savePromotion = async () => {
     if (!creator) return;
     setSavingStatus(true);
-    await base44.entities.Creator.update(creator.id, {
-      promotion_type: promotionData.type,
-      promotion_description: promotionData.description,
-      is_discoverable: true,
-    });
+    await base44.entities.Creator.update(creator.id, { promotion_type: promotionData.type, promotion_description: promotionData.description, is_discoverable: true });
     setCreator(prev => ({ ...prev, ...promotionData, is_discoverable: true }));
     setEditingPromotion(false);
     setSavingStatus(false);
   };
 
-  const handleClose = async () => {
-    if (!creator || toggling) return;
-    setToggling(true);
-    stopTracking();
-    await base44.entities.Creator.update(creator.id, {
-      availability_status: "closed",
-      last_updated: new Date().toISOString(),
-    });
-    setCreator(prev => ({ ...prev, availability_status: "closed" }));
-    setToggling(false);
-  };
-
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg-app)" }}>
-      <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--accent-primary)" }} />
+      <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />
     </div>
   );
 
@@ -161,36 +124,24 @@ export default function CreatorDashboard() {
     </div>
   );
 
-  // No creator profile yet
   if (!creator) return (
-    <div className="min-h-screen" style={{ background: "var(--bg-app)" }}>
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl"
-            style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}>
-            🎨
-          </div>
-          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-            Become a Street Creator
-          </h1>
-          <p className="text-sm" style={{ color: "var(--text-hint)" }}>
-            Apply to showcase your talent on the map. Painters, musicians, dancers, photographers and more are welcome.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowApply(true)}
-          className="w-full py-4 rounded-2xl font-bold text-white text-lg"
-          style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)", boxShadow: "0 8px 24px rgba(224,92,42,0.4)" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "var(--bg-app)" }}>
+      <div className="w-full max-w-sm text-center">
+        <div className="w-24 h-24 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-5xl"
+          style={{ background: "linear-gradient(135deg, #1C2B1A, #2D6A4F)" }}>🎨</div>
+        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+          Become a Street Creator
+        </h1>
+        <p className="text-sm mb-8" style={{ color: "var(--text-hint)" }}>
+          Apply to showcase your talent on the map. Painters, musicians, dancers, photographers and more are welcome.
+        </p>
+        <button onClick={() => setShowApply(true)}
+          className="w-full py-4 rounded-2xl font-bold text-white text-base"
+          style={{ backgroundColor: "var(--accent-primary)" }}>
           Apply Now
         </button>
       </div>
-      {showApply && (
-        <CreatorApplyForm
-          user={user}
-          onClose={() => setShowApply(false)}
-          onCreated={(c) => { setCreator(c); setShowApply(false); }}
-        />
-      )}
+      {showApply && <CreatorApplyForm user={user} onClose={() => setShowApply(false)} onCreated={(c) => { setCreator(c); setShowApply(false); }} />}
     </div>
   );
 
@@ -199,24 +150,21 @@ export default function CreatorDashboard() {
   const isApproved = creator.approval_status === "approved";
   const isOpen = creator.availability_status === "open";
 
-  // Pending/Rejected states
   if (!isApproved) return (
-    <div className="min-h-screen" style={{ background: "var(--bg-app)" }}>
-      <div className="max-w-lg mx-auto px-4 py-8 text-center">
-        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl"
-          style={{ background: isPending ? "#FFF7ED" : "#FEF2F2" }}>
-          {isPending ? <Clock className="w-10 h-10" style={{ color: "#F97316" }} /> : <X className="w-10 h-10" style={{ color: "#EF4444" }} />}
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--bg-app)" }}>
+      <div className="w-full max-w-sm text-center">
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
+          style={{ backgroundColor: isPending ? "#FFF7ED" : "#FEF2F2" }}>
+          {isPending ? <Clock className="w-9 h-9" style={{ color: "#F97316" }} /> : <X className="w-9 h-9" style={{ color: "#EF4444" }} />}
         </div>
         <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
           {isPending ? "Application Under Review" : "Application Rejected"}
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-hint)" }}>
-          {isPending
-            ? "Your creator application is being reviewed. You'll gain access once approved by an admin."
-            : "Your application was not approved. Please contact support for more information."}
+        <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>
+          {isPending ? "Your creator application is being reviewed by our team." : "Your application was not approved. Please contact support."}
         </p>
-        <div className="mt-6 p-4 rounded-2xl text-left" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          <p className="text-xs font-bold mb-1" style={{ color: "var(--text-hint)" }}>SUBMITTED PROFILE</p>
+        <div className="p-4 rounded-2xl text-left" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <p className="text-xs font-bold mb-1 uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Submitted as</p>
           <p className="font-bold" style={{ color: "var(--text-primary)" }}>{creator.full_name}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{CATEGORY_LABELS[creator.category]}</p>
         </div>
@@ -224,276 +172,202 @@ export default function CreatorDashboard() {
     </div>
   );
 
-  // Approved Dashboard
+  // ── Approved Dashboard ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen pb-10" style={{ background: "var(--bg-app)" }}>
-      <div className="max-w-lg mx-auto px-4 pt-6">
+    <div className="min-h-screen pb-16" style={{ background: "var(--bg-app)" }}>
+      <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--accent-primary)" }}>Creator Dashboard</p>
-            <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
-              {creator.full_name}
-            </h1>
-            <p className="text-sm" style={{ color: "var(--text-hint)" }}>{CATEGORY_LABELS[creator.category]}</p>
-          </div>
-          <button
-            onClick={() => setShowEditor(true)}
-            className="p-2.5 rounded-2xl"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            <Edit3 className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-          </button>
-        </div>
-
-        {/* Profile Preview */}
-        <div className="rounded-3xl overflow-hidden mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          {creator.profile_image ? (
-            <img src={creator.profile_image} alt={creator.full_name} className="w-full h-44 object-cover" />
-          ) : (
-            <div className="w-full h-44 flex items-center justify-center text-6xl"
-              style={{ background: "linear-gradient(135deg, #E05C2A22, #F9731622)" }}>
-              🎨
+        {/* ── Profile Hero Card ── */}
+        <div className="rounded-3xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          {/* Cover */}
+          <div className="relative h-36" style={{ background: "linear-gradient(135deg, #1C2B1A, #2D6A4F)" }}>
+            {creator.profile_image && (
+              <img src={creator.profile_image} alt="" className="w-full h-full object-cover opacity-50" />
+            )}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%)" }} />
+            {/* Edit button */}
+            <button onClick={() => setShowEditor(true)}
+              className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+              <Edit3 className="w-4 h-4 text-white" />
+            </button>
+            {/* Status pill */}
+            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: isOpen ? "rgba(22,163,74,0.9)" : "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}>
+              <div className={`w-2 h-2 rounded-full ${isOpen ? "bg-white animate-pulse" : "bg-gray-400"}`} />
+              <span className="text-xs font-bold text-white">{isOpen ? "Live" : "Offline"}</span>
             </div>
-          )}
-          <div className="p-4">
+          </div>
+
+          {/* Profile info */}
+          <div className="px-4 pb-4 pt-3">
+            <div className="flex items-start gap-3">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden -mt-8 border-2 border-white shrink-0"
+                style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.15)", backgroundColor: "var(--bg-subtle)" }}>
+                {creator.profile_image
+                  ? <img src={creator.profile_image} alt="" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-2xl">{CATEGORY_LABELS[creator.category]?.split(" ")[0]}</div>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+                  {creator.full_name}
+                </h1>
+                <p className="text-sm font-semibold" style={{ color: "var(--accent-primary)" }}>
+                  {CATEGORY_LABELS[creator.category]}
+                </p>
+              </div>
+              {creator.price && (
+                <span className="px-3 py-1.5 rounded-full text-xs font-bold shrink-0"
+                  style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
+                  💰 {creator.price}
+                </span>
+              )}
+            </div>
+
             {creator.description && (
-              <p className="text-sm leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 {creator.description}
               </p>
             )}
-            {creator.price && (
-              <span className="inline-block text-sm font-bold px-3 py-1.5 rounded-full"
-                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
-                💰 {creator.price}
-              </span>
+
+            {/* Social links */}
+            {(creator.instagram_url || creator.tiktok_url || creator.youtube_url || creator.website_url) && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {creator.instagram_url && <a href={creator.instagram_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#FDF2F8", color: "#DB2777" }}><Instagram className="w-3 h-3" /> IG</a>}
+                {creator.tiktok_url && <a href={creator.tiktok_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#F0FFFE", color: "#0D9488" }}>🎵 TT</a>}
+                {creator.youtube_url && <a href={creator.youtube_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}><Youtube className="w-3 h-3" /> YT</a>}
+                {creator.website_url && <a href={creator.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}><Globe className="w-3 h-3" /> Web</a>}
+              </div>
+            )}
+
+            {isOpen && creator.latitude && (
+              <div className="flex items-center gap-1.5 mt-3 text-xs" style={{ color: "var(--text-hint)" }}>
+                <MapPin className="w-3 h-3" />
+                <span>{creator.latitude.toFixed(4)}, {creator.longitude.toFixed(4)}</span>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Status Badge */}
-        <div className="flex items-center justify-center gap-2 mb-6 py-2 rounded-2xl"
-          style={{ backgroundColor: isOpen ? "#F0FDF4" : "var(--bg-subtle)", border: `1px solid ${isOpen ? "#86EFAC" : "var(--border-light)"}` }}>
-          <div className={`w-2.5 h-2.5 rounded-full ${isOpen ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
-          <span className="text-sm font-bold" style={{ color: isOpen ? "#16A34A" : "var(--text-secondary)" }}>
-            {isOpen ? "You're LIVE on the map" : "You're hidden from the map"}
-          </span>
+        {/* ── Availability Toggle ── */}
+        <div className="rounded-3xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Availability</p>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={handleOpen} disabled={isOpen || toggling}
+              className="py-4 rounded-2xl font-bold text-base text-white flex flex-col items-center gap-1 transition-all active:scale-95"
+              style={{ backgroundColor: isOpen ? "#86EFAC" : "#16A34A", opacity: isOpen ? 0.5 : 1 }}>
+              {toggling && !isOpen ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span className="text-2xl">🟢</span><span className="text-sm">Go Live</span></>}
+            </button>
+            <button onClick={handleClose} disabled={!isOpen || toggling}
+              className="py-4 rounded-2xl font-bold text-base text-white flex flex-col items-center gap-1 transition-all active:scale-95"
+              style={{ backgroundColor: !isOpen ? "#FCA5A5" : "#DC2626", opacity: !isOpen ? 0.5 : 1 }}>
+              {toggling && isOpen ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span className="text-2xl">🔴</span><span className="text-sm">Go Offline</span></>}
+            </button>
+          </div>
         </div>
 
-        {/* OPEN / CLOSE Buttons */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <button
-            onClick={handleOpen}
-            disabled={isOpen || toggling}
-            className="py-5 rounded-3xl font-black text-xl text-white relative overflow-hidden"
-            style={{
-              background: isOpen ? "#86EFAC" : "linear-gradient(135deg, #16A34A, #22C55E)",
-              boxShadow: isOpen ? "none" : "0 8px 32px rgba(22,163,74,0.4)",
-              opacity: isOpen ? 0.6 : 1,
-            }}>
-            {toggling && !isOpen ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (
-              <>
-                <div className="text-3xl mb-1">🟢</div>
-                OPEN
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleClose}
-            disabled={!isOpen || toggling}
-            className="py-5 rounded-3xl font-black text-xl text-white"
-            style={{
-              background: !isOpen ? "#FCA5A5" : "linear-gradient(135deg, #DC2626, #EF4444)",
-              boxShadow: !isOpen ? "none" : "0 8px 32px rgba(220,38,38,0.4)",
-              opacity: !isOpen ? 0.6 : 1,
-            }}>
-            {toggling && isOpen ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (
-              <>
-                <div className="text-3xl mb-1">🔴</div>
-                CLOSE
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* What You're Promoting */}
-        <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+        {/* ── Status Message ── */}
+        <div className="rounded-3xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="text-lg">🎯</div>
-              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>What You're Promoting</p>
+              <MessageCircle className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Status Message</p>
+            </div>
+            {!editingStatus && (
+              <button onClick={() => setEditingStatus(true)} className="text-xs font-bold px-2.5 py-1 rounded-lg"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>Edit</button>
+            )}
+          </div>
+          {editingStatus ? (
+            <div className="flex gap-2">
+              <input value={statusMsg} onChange={e => setStatusMsg(e.target.value)} maxLength={80}
+                placeholder="e.g. Giving 20% discount today! 🎉"
+                className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
+              <button onClick={saveStatus} disabled={savingStatus}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: "var(--accent-primary)" }}>
+                {savingStatus ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Check className="w-4 h-4 text-white" />}
+              </button>
+              <button onClick={() => { setEditingStatus(false); setStatusMsg(creator.status_message || ""); }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: "var(--bg-subtle)" }}>
+                <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+              </button>
+            </div>
+          ) : creator.status_message ? (
+            <p className="text-sm flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+              <span className="text-base">💬</span> {creator.status_message}
+            </p>
+          ) : (
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>No status yet. Add one to attract customers!</p>
+          )}
+        </div>
+
+        {/* ── What You're Promoting ── */}
+        <div className="rounded-3xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4" style={{ color: "#F97316" }} />
+              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Promoting</p>
             </div>
             {!editingPromotion && (
-              <button onClick={() => setEditingPromotion(true)}
-                className="text-xs font-bold px-2 py-1 rounded-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                Edit
-              </button>
+              <button onClick={() => setEditingPromotion(true)} className="text-xs font-bold px-2.5 py-1 rounded-lg"
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>Edit</button>
             )}
           </div>
           {editingPromotion ? (
             <div className="space-y-2">
-              <select
-                value={promotionData.type}
-                onChange={e => setPromotionData({ ...promotionData, type: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl text-sm"
+              <select value={promotionData.type} onChange={e => setPromotionData({ ...promotionData, type: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}>
-                <option value="">Select promotion type</option>
+                <option value="">Select type</option>
                 <option value="shop">🛍️ Shop/Business</option>
                 <option value="hosting">🎪 Hosting Event/Show</option>
                 <option value="content">📱 Content Creator</option>
                 <option value="service">💼 Service Provider</option>
                 <option value="activity">🎯 Activity/Experience</option>
               </select>
-              <input
-                value={promotionData.description}
-                onChange={e => setPromotionData({ ...promotionData, description: e.target.value })}
-                maxLength={120}
-                placeholder="e.g. Custom portrait paintings, live bookings available"
-                className="w-full px-3 py-2 rounded-xl text-sm"
-                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-              />
+              <input value={promotionData.description} onChange={e => setPromotionData({ ...promotionData, description: e.target.value })}
+                maxLength={120} placeholder="e.g. Custom portrait paintings, live bookings available"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }} />
               <div className="flex gap-2">
                 <button onClick={savePromotion} disabled={savingStatus || !promotionData.type}
-                  className="flex-1 px-3 py-2 rounded-xl text-white text-sm font-bold"
-                  style={{ background: "linear-gradient(135deg,#16A34A,#22C55E)" }}>
-                  {savingStatus ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : <Check className="w-4 h-4 mx-auto" />}
+                  className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold flex items-center justify-center"
+                  style={{ backgroundColor: "var(--accent-primary)", opacity: !promotionData.type ? 0.4 : 1 }}>
+                  {savingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
                 </button>
                 <button onClick={() => setEditingPromotion(false)}
-                  className="flex-1 px-3 py-2 rounded-xl text-sm"
-                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                  <X className="w-4 h-4 mx-auto" />
-                </button>
+                  className="flex-1 py-2.5 rounded-xl text-sm"
+                  style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>Cancel</button>
               </div>
             </div>
           ) : promotionData.type ? (
-            <div className="mt-2">
+            <div>
               <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                {promotionData.type === "shop" ? "🛍️ Shop/Business" : 
-                 promotionData.type === "hosting" ? "🎪 Hosting Event/Show" :
-                 promotionData.type === "content" ? "📱 Content Creator" :
-                 promotionData.type === "service" ? "💼 Service Provider" : "🎯 Activity/Experience"}
+                {promotionData.type === "shop" ? "🛍️ Shop/Business" : promotionData.type === "hosting" ? "🎪 Hosting Event/Show" : promotionData.type === "content" ? "📱 Content Creator" : promotionData.type === "service" ? "💼 Service Provider" : "🎯 Activity/Experience"}
               </p>
-              {promotionData.description && (
-                <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{promotionData.description}</p>
-              )}
-              <div className="mt-3 inline-block px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
-                ✓ Discoverable on Map
-              </div>
+              {promotionData.description && <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>{promotionData.description}</p>}
+              <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>✓ Discoverable on Map</span>
             </div>
           ) : (
-            <p className="text-xs italic mt-2" style={{ color: "var(--text-hint)" }}>Set what you're promoting to appear on the discovery map!</p>
+            <p className="text-xs" style={{ color: "var(--text-hint)" }}>Set what you're promoting to appear on the discovery map!</p>
           )}
         </div>
 
-        {/* Status Message */}
-        <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" style={{ color: "var(--accent-primary)" }} />
-              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Live Status Message</p>
-            </div>
-            {!editingStatus && (
-              <button onClick={() => setEditingStatus(true)}
-                className="text-xs font-bold px-2 py-1 rounded-lg"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                Edit
-              </button>
-            )}
+        {/* ── Portfolio ── */}
+        <div className="rounded-3xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+          <div className="px-4 pt-4 pb-1">
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>Portfolio</p>
           </div>
-          {editingStatus ? (
-            <div className="flex gap-2">
-              <input
-                value={statusMsg}
-                onChange={e => setStatusMsg(e.target.value)}
-                maxLength={80}
-                placeholder="e.g. Giving 20% discount today! 🎉"
-                className="flex-1 px-3 py-2 rounded-xl text-sm"
-                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
-              />
-              <button onClick={saveStatus} disabled={savingStatus}
-                className="px-3 py-2 rounded-xl text-white text-sm font-bold"
-                style={{ background: "linear-gradient(135deg,#16A34A,#22C55E)" }}>
-                {savingStatus ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              </button>
-              <button onClick={() => { setEditingStatus(false); setStatusMsg(creator.status_message || ""); }}
-                className="px-3 py-2 rounded-xl text-sm"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : creator.status_message ? (
-            <div className="flex items-start gap-2 mt-1">
-              <div className="text-lg">💬</div>
-              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{creator.status_message}</p>
-            </div>
-          ) : (
-            <p className="text-xs italic mt-1" style={{ color: "var(--text-hint)" }}>No status message set. Add one to attract customers!</p>
-          )}
-        </div>
-
-        {/* Portfolio */}
-        <div className="mb-6">
           <PortfolioUploader creator={creator} onUpdated={setCreator} />
         </div>
 
-        {/* Location info */}
-        {isOpen && creator.latitude && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-6"
-            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            <MapPin className="w-4 h-4 shrink-0" style={{ color: "var(--accent-primary)" }} />
-            <p className="text-xs" style={{ color: "var(--text-hint)" }}>
-              Location active · {creator.latitude.toFixed(4)}, {creator.longitude.toFixed(4)}
-            </p>
-          </div>
-        )}
-
-        {/* Social Links */}
-        {(creator.instagram_url || creator.tiktok_url || creator.youtube_url || creator.website_url) && (
-          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Social Links</p>
-            <div className="flex flex-wrap gap-2">
-              {creator.instagram_url && (
-                <a href={creator.instagram_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
-                  style={{ backgroundColor: "#FDF2F8", color: "#DB2777" }}>
-                  <Instagram className="w-3.5 h-3.5" /> Instagram
-                </a>
-              )}
-              {creator.tiktok_url && (
-                <a href={creator.tiktok_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
-                  style={{ backgroundColor: "#F0FFFE", color: "#0D9488" }}>
-                  🎵 TikTok
-                </a>
-              )}
-              {creator.youtube_url && (
-                <a href={creator.youtube_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
-                  style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}>
-                  <Youtube className="w-3.5 h-3.5" /> YouTube
-                </a>
-              )}
-              {creator.website_url && (
-                <a href={creator.website_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
-                  style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}>
-                  <Globe className="w-3.5 h-3.5" /> Website
-                </a>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {showEditor && (
-        <CreatorProfileEditor
-          creator={creator}
-          onClose={() => setShowEditor(false)}
-          onSaved={(updated) => { setCreator(updated); setShowEditor(false); }}
-        />
+        <CreatorProfileEditor creator={creator} onClose={() => setShowEditor(false)} onSaved={(updated) => { setCreator(updated); setShowEditor(false); }} />
       )}
     </div>
   );
