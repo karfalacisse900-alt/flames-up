@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, Users, Volume2, VolumeX } from "lucide-react";
+import { X, Users, Volume2, VolumeX, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -211,20 +211,20 @@ export default function TrendingGroupCard({ group, onDismiss, onJoin, onOpen }) 
           )}
         </div>
 
-        <div className="flex gap-2.5">
-          <button
-            onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-            className="flex-1 py-3 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "white", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)" }}
-          >
-            Pass
-          </button>
+        <div className="flex gap-2.5 items-center">
           <button
             onClick={(e) => { e.stopPropagation(); onJoin(group); }}
             className="flex-1 py-3 rounded-full text-sm font-bold"
             style={{ backgroundColor: "white", color: "var(--accent-primary)" }}
           >
             Join Group
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onOpen(group); }}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.25)" }}
+          >
+            <ChevronRight className="w-5 h-5 text-white" />
           </button>
         </div>
       </div>

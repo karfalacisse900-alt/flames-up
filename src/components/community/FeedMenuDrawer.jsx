@@ -14,6 +14,15 @@ const MENU_ITEMS = [
     emoji: "🗂️",
     page: "Dashboard",
   },
+  {
+    id: "fashion",
+    label: "Fashion Feed",
+    description: "Explore & share fashion styles",
+    icon: LayoutDashboard,
+    gradient: ["#D97706", "#F59E0B"],
+    emoji: "👗",
+    page: "FashionFeed",
+  },
 ];
 
 export default function FeedMenuDrawer({ isOpen, onClose }) {
