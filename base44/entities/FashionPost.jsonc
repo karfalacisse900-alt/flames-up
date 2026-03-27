@@ -5,6 +5,12 @@
     "image_url": {
       "type": "string"
     },
+    "image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "title": {
       "type": "string"
     },
@@ -19,6 +25,10 @@
       "items": {
         "type": "string"
       }
+    },
+    "shop_link": {
+      "type": "string",
+      "description": "Link to shop the outfit"
     },
     "author_email": {
       "type": "string"
