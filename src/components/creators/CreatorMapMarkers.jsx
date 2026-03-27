@@ -85,10 +85,12 @@ function buildMarkerEl(c) {
 export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
   const [creators, setCreators] = useState([]);
   const [selectedCreator, setSelectedCreator] = useState(null);
-  // Store lngLat instead of pixel coords — reproject when needed
   const [selectedLngLat, setSelectedLngLat] = useState(null);
+  // Pixel coords updated via map move listener for smooth popup tracking
+  const [popupPixel, setPopupPixel] = useState(null);
   const markersRef = useRef({});
   const creatorsRef = useRef({});
+  const selectedLngLatRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
@@ -123,7 +125,10 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         const creator = creatorsRef.current[c.id];
-        setSelectedLngLat([creator.longitude, creator.latitude]);
+        const lngLat = [creator.longitude, creator.latitude];
+        selectedLngLatRef.current = lngLat;
+        setSelectedLngLat(lngLat);
+        setPopupPixel(map.project(lngLat));
         setSelectedCreator({ ...creator });
       });
 
@@ -143,10 +148,20 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
     });
   }, [creators, map, mapReady]);
 
-  // Compute pixel coords from lngLat each render (stays accurate across zoom/pan)
-  const popupCoords = selectedCreator && selectedLngLat && map
-    ? map.project(selectedLngLat)
-    : null;
+  // Update popup pixel coords on map move/zoom so it tracks the marker
+  useEffect(() => {
+    if (!map) return;
+    const update = () => {
+      if (selectedLngLatRef.current) {
+        setPopupPixel(map.project(selectedLngLatRef.current));
+      }
+    };
+    map.on("move", update);
+    map.on("zoom", update);
+    return () => { map.off("move", update); map.off("zoom", update); };
+  }, [map]);
+
+  const popupCoords = popupPixel;
 
   return (
     <>
@@ -163,7 +178,7 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
           coords={popupCoords}
           mapContainer={map.getContainer()}
           currentUserEmail={currentUserEmail}
-          onClose={() => { setSelectedCreator(null); setSelectedLngLat(null); }}
+          onClose={() => { setSelectedCreator(null); setSelectedLngLat(null); selectedLngLatRef.current = null; setPopupPixel(null); }}
         />
       )}
     </>

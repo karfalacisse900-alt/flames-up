@@ -1,10 +1,25 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import TaggedImage from "./TaggedImage";
+
+// Preload an image URL into browser cache
+function preloadImage(url) {
+  if (!url) return;
+  const img = new window.Image();
+  img.src = url;
+}
 
 export default function PhotoCarousel({ images, tags = [], aspectRatio = "4/5" }) {
   const [current, setCurrent] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Preload current, next and previous images
+  useEffect(() => {
+    if (!images || count === 0) return;
+    preloadImage(images[current]);
+    preloadImage(images[(current + 1) % count]);
+    preloadImage(images[(current - 1 + count) % count]);
+  }, [current, images, count]);
   const dragStartX = useRef(null);
   const isDragging = useRef(false);
   const containerRef = useRef(null);
