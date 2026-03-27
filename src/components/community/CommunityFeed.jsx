@@ -489,34 +489,41 @@ export default function CommunityFeed({ user }) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-0 py-3" style={{ backgroundColor: "#F5F0E8" }}>
+      <div className="flex flex-col gap-3 px-4 py-6">
         {[0, 1, 2, 3].map(i => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            style={{ backgroundColor: "#FDFAF5", borderTop: "1px solid #E8E2D8", borderBottom: "1px solid #E8E2D8", marginBottom: 8 }}
+            className="rounded-3xl overflow-hidden"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-subtle)", boxShadow: "0 2px 12px rgba(15,23,42,0.04)" }}
           >
+            {/* Header */}
             <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-              <div className="w-10 h-10 rounded-full skeleton shrink-0" style={{ backgroundColor: "#E8E2D8" }} />
+              <div className="w-11 h-11 rounded-full skeleton shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-28 rounded-full" style={{ backgroundColor: "#E8E2D8" }} />
-                <div className="h-2.5 w-20 rounded-full" style={{ backgroundColor: "#EDE8DC" }} />
+                <div className="h-3 w-28 rounded-full skeleton" />
+                <div className="h-2.5 w-20 rounded-full skeleton" />
               </div>
-              <div className="w-16 h-7 rounded-full" style={{ backgroundColor: "#E8E2D8" }} />
+              <div className="w-16 h-7 rounded-full skeleton" />
             </div>
+            {/* Body */}
             <div className="px-4 pb-3 space-y-2">
-              <div className="h-3.5 rounded-full" style={{ backgroundColor: "#E8E2D8" }} />
-              <div className="h-3.5 w-5/6 rounded-full" style={{ backgroundColor: "#EDE8DC" }} />
+              <div className="h-3.5 rounded-full skeleton" />
+              <div className="h-3.5 w-5/6 rounded-full skeleton" />
+              <div className="h-3.5 w-3/4 rounded-full skeleton" />
             </div>
+            {/* Optional image placeholder (every other card) */}
             {i % 2 === 0 && (
-              <div className="mx-4 mb-3 h-44 rounded-2xl" style={{ backgroundColor: "#E8E2D8" }} />
+              <div className="mx-4 mb-3 h-44 rounded-2xl skeleton" />
             )}
-            <div className="flex items-center gap-3 px-4 py-3" style={{ borderTop: "1px solid #E8E2D8" }}>
-              <div className="h-8 w-16 rounded-full" style={{ backgroundColor: "#E8E2D8" }} />
-              <div className="h-8 w-20 rounded-full" style={{ backgroundColor: "#EDE8DC" }} />
-              <div className="h-8 w-16 rounded-full" style={{ backgroundColor: "#E8E2D8" }} />
+            {/* Actions bar */}
+            <div className="flex items-center gap-3 px-4 py-3 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+              <div className="h-8 w-16 rounded-full skeleton" />
+              <div className="h-8 w-20 rounded-full skeleton" />
+              <div className="h-8 w-16 rounded-full skeleton" />
+              <div className="ml-auto h-8 w-8 rounded-full skeleton" />
             </div>
           </motion.div>
         ))}
@@ -527,16 +534,16 @@ export default function CommunityFeed({ user }) {
   return (
     <div
       {...containerProps}
-      style={{ backgroundColor: "#F5F0E8", maxWidth: 680, margin: "0 auto" }}
+      style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
     >
       <FeedMenuDrawer isOpen={showFeedMenu} onClose={() => setShowFeedMenu(false)} />
 
       {/* Sticky feed header */}
       <div className="sticky top-0 z-20" style={{ 
-        backgroundColor: "rgba(245,240,232,0.96)",
+        backgroundColor: "var(--bg-nav)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        borderBottom: "1px solid #E8E2D8",
+        borderBottom: "1px solid var(--border-subtle)",
       }}>
         <div className="px-4 pt-2.5 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -544,24 +551,26 @@ export default function CommunityFeed({ user }) {
               onClick={() => setShowFeedMenu(true)}
               aria-label="Feed menu"
               className="rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "#E8E2D8", border: "1px solid #D5CCB8", minWidth: 44, minHeight: 44 }}
+              style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", minWidth: 44, minHeight: 44 }}
             >
-              <Menu className="w-4 h-4" style={{ color: "#6B6355" }} />
+              <Menu className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
             </button>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Single location toggle */}
             <div className="relative" ref={pickerRef}>
-              <div className="flex items-center rounded-full overflow-hidden" style={{ border: "1px solid #D5CCB8", backgroundColor: activeFilter !== "global" ? "#1C1A16" : "#E8E2D8" }}>
+              <div className="flex items-center rounded-full overflow-hidden" style={{ border: "1px solid var(--border-light)", backgroundColor: activeFilter !== "global" ? "var(--accent-primary)" : "var(--bg-subtle)" }}>
                 <button
                   onClick={() => setShowPicker(p => !p)}
                   className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-xs font-semibold transition-all"
-                  style={{ color: activeFilter !== "global" ? "#fff" : "#6B6355" }}>
+                  style={{ color: activeFilter !== "global" ? "#fff" : "var(--text-secondary)" }}>
                   {activeFilter === "global" && <><Globe className="w-3 h-3" /> Global</>}
                   {activeFilter === "nearby" && <><MapPin className="w-3 h-3" /> {detectedArea || "Nearby"}</>}
                   {activeFilter !== "global" && activeFilter !== "nearby" && <><MapPin className="w-3 h-3" /> {activeFilter}</>}
                   <ChevronDown className="w-3 h-3" />
                 </button>
+                {/* X to reset to Global */}
                 {activeFilter !== "global" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setActiveFilter("global"); setShowPicker(false); }}
@@ -574,19 +583,22 @@ export default function CommunityFeed({ user }) {
 
               {showPicker && (
                 <div className="absolute right-0 top-9 w-64 rounded-2xl shadow-lg z-50 overflow-hidden"
-                  style={{ backgroundColor: "#FDFAF5", border: "1px solid #E8E2D8" }}>
-                  <div className="p-2 border-b" style={{ borderColor: "#E8E2D8" }}>
+                  style={{ backgroundColor: "#FFFFFF", border: "1px solid #E2E8F0" }}>
+                  {/* Global & Nearby */}
+                  <div className="p-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                     <button onClick={() => { setActiveFilter("global"); setShowPicker(false); }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all"
-                      style={{ backgroundColor: activeFilter === "global" ? "#E8E2D8" : "transparent", color: activeFilter === "global" ? "#1C1A16" : "#6B6355" }}>
+                      style={{ backgroundColor: activeFilter === "global" ? "var(--accent-primary-light)" : "transparent", color: activeFilter === "global" ? "var(--accent-primary)" : "var(--text-primary)" }}>
                       <Globe className="w-4 h-4" /> Global
                     </button>
                     <button onClick={() => { setActiveFilter("nearby"); setShowPicker(false); }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all"
-                      style={{ backgroundColor: activeFilter === "nearby" ? "#E8E2D8" : "transparent", color: activeFilter === "nearby" ? "#1C1A16" : "#6B6355" }}>
+                      style={{ backgroundColor: activeFilter === "nearby" ? "var(--accent-primary-light)" : "transparent", color: activeFilter === "nearby" ? "var(--accent-primary)" : "var(--text-primary)" }}>
                       <MapPin className="w-4 h-4" /> Nearby {detectedArea && `(${detectedArea})`}
                     </button>
                   </div>
+
+                  {/* City search */}
                   <div className="p-2">
                     <input
                       autoFocus
@@ -595,13 +607,13 @@ export default function CommunityFeed({ user }) {
                       onChange={(e) => setCityInput(e.target.value)}
                       placeholder="Search city…"
                       className="w-full px-3 py-1.5 rounded-xl text-sm outline-none mb-2"
-                      style={{ backgroundColor: "#E8E2D8", border: "1px solid #D5CCB8", color: "#1C1A16" }}
+                      style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-primary)" }}
                     />
                     <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
                       {citySuggestions.map(c => (
                         <button key={c} onClick={() => { setActiveFilter(c); setCityInput(""); setShowPicker(false); }}
                           className="w-full text-left px-3 py-1.5 rounded-xl text-sm transition-all"
-                          style={{ backgroundColor: activeFilter === c ? "#E8E2D8" : "transparent", color: activeFilter === c ? "#1C1A16" : "#6B6355" }}>
+                          style={{ backgroundColor: activeFilter === c ? "var(--accent-primary-light)" : "transparent", color: activeFilter === c ? "var(--accent-primary)" : "var(--text-primary)" }}>
                           🏙 {c}
                         </button>
                       ))}
@@ -615,7 +627,7 @@ export default function CommunityFeed({ user }) {
               to={createPageUrl("CreatePostFlow")}
               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ backgroundColor: "#1C1A16", color: "#fff" }}>
+              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
               <Plus className="w-3 h-3" /> Post
             </Link>
           </div>
@@ -628,48 +640,57 @@ export default function CommunityFeed({ user }) {
       </AnimatePresence>
 
       {/* Feed */}
-      <div className="pb-28 flex flex-col gap-0 py-2">
+      <div className="pb-28 flex flex-col gap-3 py-3">
         {activeFilter === "nearby" && locationLoading ? (
           <div className="py-16 flex flex-col items-center gap-3">
-            <Loader2 className="w-7 h-7 animate-spin" style={{ color: "#1C1A16" }} />
-            <p className="text-sm" style={{ color: "#A09880" }}>Finding your location…</p>
+            <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-sm" style={{ color: "var(--text-hint)" }}>Finding your location…</p>
           </div>
         ) : activeFilter === "nearby" && !userCoords ? (
           <div className="py-16 text-center px-8">
-            <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: "#A09880" }} />
-            <p className="text-base font-bold mb-1.5" style={{ color: "#1C1A16", fontFamily: "var(--font-serif)" }}>Location access needed</p>
-            <p className="text-sm mb-5" style={{ color: "#A09880" }}>Allow location to see posts from people near you</p>
-            <button onClick={detectLocation} className="px-6 py-3 rounded-2xl text-sm font-bold text-white" style={{ backgroundColor: "#1C1A16" }}>Enable Location</button>
+            <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--text-hint)" }} />
+            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Location access needed</p>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Allow location to see posts from people near you</p>
+            <button onClick={detectLocation}
+              className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)" }}>
+              Enable Location
+            </button>
           </div>
         ) : filteredPosts.length === 0 && !isLoading ? (
-          <div className="py-16 text-center px-8">
+          <div className="py-16 text-center px-8" style={{ animation: "fadeIn 0.3s ease" }}>
             <div className="text-5xl mb-4">{activeFilter === "nearby" ? "📍" : activeFilter === "global" ? "💬" : "🏙"}</div>
-            <p className="text-base font-bold mb-1.5" style={{ color: "#1C1A16", fontFamily: "var(--font-serif)" }}>
+            <p className="text-base font-bold mb-1.5" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
               {activeFilter === "nearby" ? "No posts near you yet" : activeFilter === "global" ? "Start the conversation" : `No posts from ${activeFilter} yet`}
             </p>
-            <p className="text-sm mb-5" style={{ color: "#A09880" }}>Be the first to share something here!</p>
-            <Link to={createPageUrl("CreatePostFlow")} onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
-               className="px-6 py-3 rounded-2xl text-sm font-bold text-white inline-block"
-               style={{ backgroundColor: "#1C1A16" }}>
+            <p className="text-sm mb-5" style={{ color: "var(--text-hint)" }}>Be the first to share something here!</p>
+            <Link
+               to={createPageUrl("CreatePostFlow")}
+               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
+               className="px-6 py-3 rounded-2xl text-sm font-bold text-white"
+               style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", boxShadow: "0 4px 16px rgba(46,107,79,0.35)" }}>
                ✦ {activeFilter === "nearby" ? "Post from here" : "Create First Post"}
              </Link>
           </div>
         ) : (
           <>
             {filteredPosts.map(renderPostCard)}
+            {/* Infinite scroll trigger */}
             {hasMore && (
               <div ref={observerRef} className="py-8 flex justify-center">
-                <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#1C1A16" }} />
+                <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--accent-primary)" }} />
               </div>
             )}
             {!hasMore && filteredPosts.length > 0 && (
               <div className="text-center py-6" style={{ minHeight: 60 }}>
-                <p className="text-sm" style={{ color: "#A09880" }}>You've reached the end 🎉</p>
+                <p className="text-sm" style={{ color: "var(--text-hint)" }}>You've reached the end 🎉</p>
               </div>
             )}
           </>
         )}
       </div>
+
+
     </div>
   );
 }
