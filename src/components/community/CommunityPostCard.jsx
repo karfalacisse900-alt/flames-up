@@ -170,7 +170,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
     return (
       <div className="relative mx-3 my-2">
         <div className="rounded-3xl overflow-hidden"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+          style={{ backgroundColor: "#FDFAF5", border: "1px solid #E8E2D8", boxShadow: "0 2px 12px rgba(28,26,22,0.06)" }}>
 
           {/* Author header */}
           <div className="flex items-center gap-2.5 px-4 pt-4 pb-3">
@@ -196,17 +196,17 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             <div className="flex-1 min-w-0">
               {showAuthor ? (
                 <Link to={`/user/${encodeURIComponent(post.author_email)}`}
-                  className="text-xs font-bold block truncate" style={{ color: "var(--text-primary)" }}>
+                  className="text-xs font-bold block truncate" style={{ color: "#1C1A16" }}>
                   {post.author_name || "User"}
                 </Link>
               ) : (
-                <span className="text-xs font-bold block" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
+                <span className="text-xs font-bold block" style={{ color: "#6B6355" }}>Anonymous</span>
               )}
-              <span className="text-[10px]" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+              <span className="text-[10px]" style={{ color: "#A09880" }}>{timeAgo(post.created_date)}</span>
             </div>
             {/* Three-dot menu */}
             <div className="relative">
-              <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+              <button onClick={() => setShowMenu(v => !v)} className="p-1.5 rounded-full" style={{ color: "#A09880" }}>
                 <MoreHorizontal className="w-4 h-4" />
               </button>
               <AnimatePresence>
@@ -217,16 +217,16 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                   exit={{ opacity: 0, scale: 0.88, y: -8 }}
                   transition={{ duration: 0.16, ease: [0.34, 1.56, 0.64, 1] }}
                   className="absolute right-0 top-full mt-1 rounded-2xl overflow-hidden z-40 min-w-[140px]"
-                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E2E8F0", transformOrigin: "top right" }}>
+                  style={{ backgroundColor: "#FDFAF5", boxShadow: "0 8px 32px rgba(28,26,22,0.18)", border: "1px solid #E8E2D8", transformOrigin: "top right" }}>
                   {post.link && (
-                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left font-semibold" style={{ color: "var(--accent-primary)" }}>
+                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left font-semibold" style={{ color: "#2D6A4F" }}>
                       <ExternalLink className="w-3.5 h-3.5" /> Open link
                     </button>
                   )}
-                  <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                  <button onClick={handleCopyLink} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#1C1A16" }}>
                     <LinkIcon className="w-3.5 h-3.5" /> Copy link
                   </button>
-                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "var(--text-primary)" }}>
+                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left" style={{ color: "#1C1A16" }}>
                     <EyeOff className="w-3.5 h-3.5" /> Not interested
                   </button>
                   {!isOwnPost && user && (
@@ -258,7 +258,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               return (
                 <p className="leading-relaxed whitespace-pre-line"
                   style={{
-                    color: "var(--text-primary)",
+                    color: "#1C1A16",
                     fontSize,
                     fontWeight: 600,
                     fontFamily: "var(--font-serif)",
@@ -271,46 +271,33 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center px-2 pb-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          <div className="flex items-center px-2 pb-2 border-t" style={{ borderColor: "#E8E2D8" }}>
             <div className="relative">
               <button
                 onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
                 onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
                 onClick={handleLike}
                 className={`flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-medium transition-all ${likeBounce ? "heart-bounce" : ""}`}
-                style={{ color: hasLiked ? "#E05C7A" : "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+                style={{ color: hasLiked ? "#E05C7A" : "#A09880", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
                 <span className="text-[16px] leading-none">{hasLiked ? "❤️" : "🤍"}</span>
                 {(post.upvotes || 0) > 0 && <span>{post.upvotes}</span>}
               </button>
-              {showReactions && (
-                <div
-                  className="absolute bottom-full left-0 mb-2 flex gap-1 p-2 rounded-2xl z-30"
-                  style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid var(--border-light)", animation: "fadeIn 0.12s ease" }}
-                  onMouseLeave={() => setShowReactions(false)}>
-                  {REACTIONS.map(r => (
-                    <button key={r}
-                      onClick={() => { handleLike(); setShowReactions(false); }}
-                      className="text-xl w-10 h-10 flex items-center justify-center rounded-full chip"
-                      style={{ backgroundColor: "var(--bg-subtle)" }}>{r}</button>
-                  ))}
-                </div>
-              )}
             </div>
             <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
-              style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+              style={{ color: "#A09880", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
               <MessageCircle className="w-[18px] h-[18px]" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
             </Link>
             <button onClick={handleShare}
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
-              style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
+              style={{ color: "#A09880", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
               <Share2 className="w-[18px] h-[18px]" />
             </button>
             <button onClick={() => user ? setShowSaveModal(true) : null}
               className="ml-auto flex items-center justify-center rounded-full transition-all chip"
-              style={{ color: saved ? "var(--accent-primary)" : "var(--text-hint)", minWidth: 44, minHeight: 44 }}>
-              <Bookmark className="w-[18px] h-[18px]" style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+              style={{ color: saved ? "#2D6A4F" : "#A09880", minWidth: 44, minHeight: 44 }}>
+              <Bookmark className="w-[18px] h-[18px]" style={{ fill: saved ? "#2D6A4F" : "none" }} />
             </button>
           </div>
         </div>
@@ -325,55 +312,52 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
 
   return (
     <div className="relative w-full">
-      {/* Modern card container */}
       <div className="w-full overflow-hidden" 
         style={{ 
-          backgroundColor: "var(--bg-card)",
-          borderTop: "1px solid var(--border-subtle)",
-          borderBottom: "1px solid var(--border-subtle)",
+          backgroundColor: "#FDFAF5",
+          borderTop: "1px solid #E8E2D8",
+          borderBottom: "1px solid #E8E2D8",
         }}>
         {/* ── HEADER SECTION ── */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-            {/* Profile Picture */}
             <div className="shrink-0 flex-shrink-0">
               {showAuthor ? (
                 <Link to={`/user/${encodeURIComponent(post.author_email)}`}>
                   {post.author_avatar_url ? (
                     <img src={post.author_avatar_url} alt={post.author_name}
                       loading="lazy" decoding="async"
-                      className="w-11 h-11 rounded-full object-cover"
-                      style={{ border: "2px solid var(--border-light)" }} />
+                      className="w-10 h-10 rounded-full object-cover"
+                      style={{ border: "1.5px solid #E8E2D8" }} />
                   ) : (
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
-                      style={{ background: `linear-gradient(135deg, ${avatarColor}55, ${avatarColor}88)`, color: avatarColor, border: "2px solid var(--border-light)" }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                      style={{ background: `linear-gradient(135deg, ${avatarColor}55, ${avatarColor}88)`, color: avatarColor, border: "1.5px solid #E8E2D8" }}>
                       {initials}
                     </div>
                   )}
                 </Link>
               ) : (
-                <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold"
-                  style={{ background: "linear-gradient(135deg, #ddd, #bbb)", color: "#888", border: "2px solid var(--border-light)" }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: "linear-gradient(135deg, #E8E2D8, #D5CCB8)", color: "#A09880", border: "1.5px solid #E8E2D8" }}>
                   ?
                 </div>
               )}
             </div>
 
-            {/* Username + Meta Info */}
             <div className="flex-1 min-w-0 overflow-hidden">
               {showAuthor ? (
                 <Link to={`/user/${encodeURIComponent(post.author_email)}`}
-                  className="text-sm font-bold block truncate leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--text-primary)" }}>
+                  className="text-sm font-bold block truncate leading-tight" style={{ color: "#1C1A16" }}>
                   {post.author_name || "User"}
                 </Link>
               ) : (
-                <span className="text-sm font-bold block leading-tight" style={{ color: "var(--text-secondary)" }}>Anonymous</span>
+                <span className="text-sm font-bold block leading-tight" style={{ color: "#6B6355" }}>Anonymous</span>
               )}
               <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
-                <span className="text-xs font-medium shrink-0" style={{ color: "var(--text-hint)" }}>{timeAgo(post.created_date)}</span>
+                <span className="text-xs shrink-0" style={{ color: "#A09880" }}>{timeAgo(post.created_date)}</span>
                 {post.place_id && (post.location_name || post.location_city) && (
                   <>
-                    <span className="shrink-0" style={{ color: "var(--text-hint)" }}>•</span>
+                    <span className="shrink-0" style={{ color: "#A09880" }}>•</span>
                     <button
                       onClick={() => {
                         const query = post.location_lat && post.location_lng
@@ -381,8 +365,8 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                           : encodeURIComponent([post.location_name, post.location_city, post.location_region, post.location_country].filter(Boolean).join(", "));
                         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
                       }}
-                      className="flex items-center gap-0.5 text-xs font-semibold truncate overflow-hidden"
-                      style={{ color: "var(--accent-primary)" }}>
+                      className="flex items-center gap-0.5 text-xs font-semibold truncate"
+                      style={{ color: "#2D6A4F" }}>
                       <MapPin className="w-3 h-3 shrink-0" />
                       <span className="truncate">{post.location_name || [post.location_city, post.location_region].filter(Boolean).join(", ")}</span>
                     </button>
@@ -392,23 +376,20 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             </div>
           </div>
 
-          {/* Right Side Actions */}
           <div className="flex items-center gap-2 shrink-0">
             {!isOwnPost && showAuthor && !!user && (
               <button onClick={handleFollow}
                 className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  backgroundColor: isFollowing ? "var(--accent-primary-light)" : "var(--bg-card)",
-                  color: isFollowing ? "var(--accent-primary)" : "#111",
-                  border: `1.5px solid ${isFollowing ? "var(--accent-primary)" : "var(--border-medium)"}`,
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
+                  backgroundColor: isFollowing ? "#D8F3DC" : "#E8E2D8",
+                  color: isFollowing ? "#2D6A4F" : "#1C1A16",
+                  border: `1.5px solid ${isFollowing ? "#74C69D" : "#D5CCB8"}`,
                 }}>
                 {isFollowing ? "Following" : "Follow"}
               </button>
             )}
-            {/* Three-dot menu */}
             <div className="relative">
-              <button onClick={() => setShowMenu(v => !v)} className="p-2 rounded-full hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-hint)" }}>
+              <button onClick={() => setShowMenu(v => !v)} className="p-2 rounded-full" style={{ color: "#A09880" }}>
                 <MoreHorizontal className="w-5 h-5" />
               </button>
               <AnimatePresence>
@@ -419,16 +400,16 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                   exit={{ opacity: 0, scale: 0.88, y: -8 }}
                   transition={{ duration: 0.16, ease: [0.34, 1.56, 0.64, 1] }}
                   className="absolute right-0 top-full mt-2 rounded-2xl overflow-hidden z-40 min-w-[160px]"
-                  style={{ backgroundColor: "#FFFFFF", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid #E2E8F0", transformOrigin: "top right" }}>
+                  style={{ backgroundColor: "#FDFAF5", boxShadow: "0 12px 40px rgba(28,26,22,0.2)", border: "1px solid #E8E2D8", transformOrigin: "top right" }}>
                   {post.link && (
-                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left font-semibold hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--accent-primary)" }}>
+                    <button onClick={() => { window.open(post.link, "_blank"); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left font-semibold" style={{ color: "#2D6A4F" }}>
                       <ExternalLink className="w-4 h-4" /> Open link
                     </button>
                   )}
-                  <button onClick={handleCopyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                  <button onClick={handleCopyLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style={{ color: "#1C1A16" }}>
                     <LinkIcon className="w-4 h-4" /> Copy link
                   </button>
-                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "var(--text-primary)" }}>
+                  <button onClick={() => { setNotInterested(true); setShowMenu(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style={{ color: "#1C1A16" }}>
                     <EyeOff className="w-4 h-4" /> Not interested
                   </button>
                   {!isOwnPost && user && (
@@ -437,12 +418,12 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                     </div>
                   )}
                   {isOwnPost && (
-                    <button onClick={handleDelete} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "#E05C7A" }}>
+                    <button onClick={handleDelete} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style={{ color: "#E05C7A" }}>
                       <Trash2 className="w-4 h-4" /> Delete
                     </button>
                   )}
                   {!isOwnPost && (
-                    <button onClick={handleReport} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[var(--bg-subtle)] transition-colors" style={{ color: "#E05C7A" }}>
+                    <button onClick={handleReport} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style={{ color: "#E05C7A" }}>
                       <Flag className="w-4 h-4" /> Report post
                     </button>
                   )}
@@ -453,11 +434,11 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           </div>
         </div>
 
-        {/* ── CAPTION (ABOVE MEDIA) ── */}
+        {/* ── CAPTION ── */}
         {(post.title || post.body) && (
           <div className="px-4 pb-3">
             {post.title && (
-              <h3 className="font-bold text-base mb-1.5 leading-snug break-words" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
+              <h3 className="font-bold text-base mb-1.5 leading-snug break-words" style={{ color: "#1C1A16", fontFamily: "var(--font-serif)" }}>
                 {post.title}
               </h3>
             )}
@@ -465,11 +446,10 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
               const cleanText = bodyIsRich ? stripHtml(post.body) : (post.type === "quote_of_day" ? `"${post.body}"` : post.body);
               const isLong = cleanText.length > 200;
               const displayText = !captionExpanded && isLong ? cleanText.slice(0, 200) : cleanText;
-              
               return (
                 <div className="text-[15px] leading-relaxed break-words"
                   style={{
-                    color: "var(--text-secondary)",
+                    color: "#6B6355",
                     fontFamily: post.type === "quote_of_day" ? "var(--font-serif)" : "var(--font-sans)",
                     fontStyle: post.type === "quote_of_day" ? "italic" : "normal",
                     wordWrap: "break-word",
@@ -484,10 +464,9 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                     </p>
                   )}
                   {isLong && (
-                    <button 
-                      onClick={() => setCaptionExpanded(v => !v)}
+                    <button onClick={() => setCaptionExpanded(v => !v)}
                       className="text-sm font-semibold mt-1 block"
-                      style={{ color: "var(--accent-primary)" }}>
+                      style={{ color: "#1C1A16" }}>
                       {captionExpanded ? "See less" : "See more"}
                     </button>
                   )}
@@ -497,7 +476,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           </div>
         )}
 
-        {/* ── MEDIA SECTION ── */}
+        {/* ── MEDIA ── */}
         {(() => {
         const rawImgs = (post.image_urls?.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : []);
         const imgs = rawImgs.map(normalizeMediaUrl).filter(url => url && url.trim());
@@ -513,19 +492,9 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             {videoUrl && videoUrl.trim() && (
               <div className="relative w-full">
                 {videoStatus === "ready" ? (
-                  <AutoplayVideo
-                    src={videoUrl}
-                    postId={post.id}
-                    thumbnail={thumbnail}
-                    onDoubleTap={() => handleLike()}
-                  />
+                  <AutoplayVideo src={videoUrl} postId={post.id} thumbnail={thumbnail} onDoubleTap={() => handleLike()} />
                 ) : (
-                  <VideoProcessingBanner
-                    postId={post.id}
-                    videoId={videoUrl}
-                    thumbnail={thumbnail}
-                    onReady={() => {}}
-                  />
+                  <VideoProcessingBanner postId={post.id} videoId={videoUrl} thumbnail={thumbnail} onReady={() => {}} />
                 )}
                 {post.text_overlay && videoStatus === "ready" && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8" style={{ zIndex: 10 }}>
@@ -552,23 +521,22 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           <div className="flex flex-wrap gap-2 px-4 mb-3">
             {post.place_tags.map(tag => (
               <span key={tag} className="text-xs px-3 py-1.5 rounded-full font-semibold"
-                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>
                 {tag === "food" ? "🍔" : tag === "events" ? "🎉" : tag === "park" ? "🌳" : tag === "coffee" ? "☕" : tag === "hidden_spot" ? "🔍" : tag === "free_activities" ? "🆓" : tag === "study_spot" ? "📚" : tag === "travel" ? "✈️" : "📍"} {tag.replace(/_/g, " ")}
               </span>
             ))}
           </div>
         )}
 
-        {/* ── ENGAGEMENT ACTIONS ── */}
-        <div className="flex items-center justify-start flex-wrap px-3 py-2 gap-1">
-          {/* Like */}
+        {/* ── ACTIONS ── */}
+        <div className="flex items-center justify-start flex-wrap px-3 py-2 gap-1" style={{ borderTop: "1px solid #E8E2D8" }}>
           <div className="relative">
             <button
               onTouchStart={handlePressStart} onTouchEnd={handlePressEnd}
               onMouseDown={handlePressStart} onMouseUp={handlePressEnd}
               onClick={handleLike}
               className={`flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-all ${likeBounce ? "heart-bounce" : ""}`}
-              style={{ color: hasLiked ? "#E05C7A" : "var(--text-secondary)", minHeight: "44px" }}>
+              style={{ color: hasLiked ? "#E05C7A" : "#A09880", minHeight: "44px" }}>
               <Heart className="w-5 h-5" style={{ fill: hasLiked ? "#E05C7A" : "none", strokeWidth: hasLiked ? 0 : 2 }} />
               <span className="text-sm font-semibold">Like</span>
               {(post.upvotes || 0) > 0 && <span className="text-sm font-semibold">{post.upvotes}</span>}
@@ -576,13 +544,13 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             {showReactions && (
               <div
                 className="absolute bottom-full left-0 mb-2 flex gap-1.5 p-2.5 rounded-2xl z-30"
-                style={{ backgroundColor: "var(--bg-card)", boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: "1px solid var(--border-light)" }}
+                style={{ backgroundColor: "#FDFAF5", boxShadow: "0 12px 40px rgba(28,26,22,0.2)", border: "1px solid #E8E2D8" }}
                 onMouseLeave={() => setShowReactions(false)}>
                 {REACTIONS.map(r => (
                   <button key={r}
                     onClick={() => { handleLike(); setShowReactions(false); }}
                     className="text-2xl w-11 h-11 flex items-center justify-center rounded-full transition-transform hover:scale-110"
-                    style={{ backgroundColor: "var(--bg-subtle)" }}>
+                    style={{ backgroundColor: "#F5F0E8" }}>
                     {r}
                   </button>
                 ))}
@@ -590,42 +558,37 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
             )}
           </div>
 
-          {/* Comment */}
           <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full"
+            style={{ color: "#A09880", minHeight: "44px" }}>
             <MessageCircle className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-semibold">Comment</span>
             {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
           </Link>
 
-          {/* Share */}
           <button onClick={handleShare}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-full"
+            style={{ color: "#A09880", minHeight: "44px" }}>
             <Share2 className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-semibold">Share</span>
           </button>
 
-          {/* Save — pushed right */}
           <button onClick={() => user ? setShowSaveModal(true) : null}
-            className="ml-auto flex items-center justify-center p-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
-            style={{ color: saved ? "var(--accent-primary)" : "var(--text-secondary)", minHeight: "44px", minWidth: "44px" }}>
-            <Bookmark className="w-5 h-5" strokeWidth={2} style={{ fill: saved ? "var(--accent-primary)" : "none" }} />
+            className="ml-auto flex items-center justify-center p-2 rounded-full"
+            style={{ color: saved ? "#2D6A4F" : "#A09880", minHeight: "44px", minWidth: "44px" }}>
+            <Bookmark className="w-5 h-5" strokeWidth={2} style={{ fill: saved ? "#2D6A4F" : "none" }} />
           </button>
         </div>
 
-
         {post.tags?.includes("daily_challenge") && (
           <div className="px-4 pb-3">
-            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: "#1A423122", color: "#2E6B4F" }}>
+            <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold" style={{ backgroundColor: "#D8F3DC", color: "#2D6A4F" }}>
               ⚡ Daily Challenge Entry
             </span>
           </div>
         )}
       </div>
 
-      {/* Backdrop to close menu */}
       {showMenu && <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />}
 
       {showSaveModal && (
@@ -635,7 +598,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
         url={`${window.location.origin}?post=${post.id}`} text={post.title || post.body?.slice(0, 100)} />
     </div>
   );
-}
+  }
 
 const MemoizedCommunityPostCard = memo(CommunityPostCard, (prev, next) =>
   prev.post.id === next.post.id &&
