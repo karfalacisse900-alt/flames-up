@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { ChevronDown, ChevronUp, Flag, Send, Loader2, Share2, Check, X, MapPin, Bell, BellOff, ShieldAlert } from "lucide-react";
+import { Flag, Send, Loader2, Share2, Check, X, Bell, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── High-risk zones for geolocation alerts ────────────────────────────────────
@@ -63,7 +63,7 @@ const CATS = [
 export default function ListenDontJudge() {
   const [user, setUser] = useState(null);
   const [activeCat, setActiveCat] = useState("all");
-  const [selectedScam, setSelectedScam] = useState(null);
+  const [expandedScam, setExpandedScam] = useState(null);
   const [expandedRule, setExpandedRule] = useState(null);
   const [activeTab, setActiveTab] = useState("scams");
   const [geoAlert, setGeoAlert] = useState(null); // { zone, scams }
@@ -194,35 +194,57 @@ export default function ListenDontJudge() {
             ))}
           </div>
 
-          {/* Scam Cards — horizontal box layout */}
+          {/* Scam Cards — inline expand like rules */}
           <div className="space-y-2 mb-6">
             {filtered.map((scam) => {
               const catColor = CATS.find(c => c.value === scam.cat)?.color || "#1C1C1E";
+              const isExp = expandedScam === scam.id;
               return (
-                <button key={scam.id} onClick={() => setSelectedScam(scam)}
-                  className="w-full text-left rounded-2xl flex items-center gap-4 px-4 py-4 transition-all active:scale-98"
+                <div key={scam.id} className="rounded-2xl overflow-hidden"
                   style={{ backgroundColor: "#fff", border: "1.5px solid #E5E5E0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                  {/* Left: icon */}
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
-                    style={{ backgroundColor: `${catColor}14` }}>
-                    {scam.emoji}
-                  </div>
-                  {/* Middle: text */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: catColor }}>{scam.cat}</p>
+                  <button className="w-full text-left flex items-center gap-4 px-4 py-4"
+                    onClick={() => setExpandedScam(isExp ? null : scam.id)}>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+                      style={{ backgroundColor: `${catColor}14` }}>
+                      {scam.emoji}
                     </div>
-                    <p className="font-black text-sm leading-snug" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>{scam.title}</p>
-                    <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#9CA3AF" }}>{scam.what}</p>
-                  </div>
-                  {/* Right: check + arrow */}
-                  <div className="flex flex-col items-center gap-1.5 shrink-0">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: catColor }}>
-                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: catColor }}>{scam.cat}</p>
+                      <p className="font-black text-sm leading-snug" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>{scam.title}</p>
+                      <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#9CA3AF" }}>{scam.what}</p>
                     </div>
-                    <p className="text-[10px] font-bold" style={{ color: catColor }}>Read more</p>
-                  </div>
-                </button>
+                    <div className="flex flex-col items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: catColor }}>
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </div>
+                      <p className="text-[10px] font-bold" style={{ color: catColor }}>{isExp ? "Less" : "More"}</p>
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {isExp && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <div className="px-4 pb-4 pt-1 space-y-3" style={{ borderTop: "1px dashed #E5E5E0" }}>
+                          <div className="rounded-2xl p-3" style={{ backgroundColor: "#FFFBEB" }}>
+                            <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#92400E" }}>⚠️ What Happens</p>
+                            <p className="text-sm leading-relaxed" style={{ color: "#78350F" }}>{scam.what}</p>
+                          </div>
+                          <div className="rounded-2xl p-3" style={{ backgroundColor: "#F0FDF4" }}>
+                            <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#166534" }}>✅ How to Avoid</p>
+                            <p className="text-sm leading-relaxed" style={{ color: "#15803D" }}>{scam.avoid}</p>
+                          </div>
+                          {scam.spots?.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {scam.spots.map(s => (
+                                <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                                  style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>📍 {s}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               );
             })}
           </div>
@@ -298,80 +320,6 @@ export default function ListenDontJudge() {
       {/* REPORT TAB */}
       {activeTab === "report" && <ReportForm user={user} />}
 
-      {/* Scam Detail Modal */}
-      <AnimatePresence>
-        {selectedScam && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}
-            onClick={() => setSelectedScam(null)}>
-            <motion.div
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="w-full max-w-2xl rounded-t-3xl overflow-hidden"
-              style={{ backgroundColor: "#fff", maxHeight: "90dvh", overflowY: "auto" }}
-              onClick={e => e.stopPropagation()}>
-              {/* Modal header */}
-              <div className="sticky top-0 flex items-center justify-between px-5 pt-5 pb-4"
-                style={{ backgroundColor: "#fff", borderBottom: "1px solid #F3F4F6" }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                    style={{ backgroundColor: `${CATS.find(c => c.value === selectedScam.cat)?.color}14` }}>
-                    {selectedScam.emoji}
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest"
-                      style={{ color: CATS.find(c => c.value === selectedScam.cat)?.color }}>
-                      {selectedScam.cat}
-                    </p>
-                    <p className="font-black text-lg leading-tight" style={{ color: "#1C1C1E", fontFamily: "var(--font-serif)" }}>{selectedScam.title}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedScam(null)}
-                  className="w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "#F3F4F6" }}>
-                  <X className="w-4 h-4" style={{ color: "#6B7280" }} />
-                </button>
-              </div>
-
-              {/* Modal body */}
-              <div className="px-5 py-5 space-y-4">
-                <div className="rounded-2xl p-4" style={{ backgroundColor: "#FFFBEB" }}>
-                  <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#92400E" }}>⚠️ What Happens</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "#78350F" }}>{selectedScam.what}</p>
-                </div>
-                <div className="rounded-2xl p-4" style={{ backgroundColor: "#F0FDF4" }}>
-                  <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#166534" }}>✅ How to Avoid It</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "#15803D" }}>{selectedScam.avoid}</p>
-                </div>
-                {selectedScam.spots?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#6B7280" }}>📍 Common Locations</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedScam.spots.map(s => (
-                        <span key={s} className="text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5"
-                          style={{ backgroundColor: "#F3F4F6", color: "#374151" }}>
-                          <MapPin className="w-3 h-3" /> {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="rounded-2xl p-4" style={{ backgroundColor: "#EFF6FF" }}>
-                  <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#1D4ED8" }}>💡 Golden Rule</p>
-                  <p className="text-sm" style={{ color: "#1E40AF" }}>Slow down. Spot the signs. Never pay unexpectedly.</p>
-                </div>
-                <button onClick={() => { if (navigator.share) navigator.share({ title: selectedScam.title, text: `Watch out for: ${selectedScam.title}. ${selectedScam.avoid}` }); }}
-                  className="w-full py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 mt-2"
-                  style={{ backgroundColor: "#1C1C1E" }}>
-                  <Share2 className="w-4 h-4" /> Share this tip
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
