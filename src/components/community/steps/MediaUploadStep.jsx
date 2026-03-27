@@ -3,6 +3,8 @@ import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CameraUploadStep from "./CameraUploadStep";
 
+const isMobileDevice = () => typeof navigator !== "undefined" && (navigator.maxTouchPoints > 0 || /Mobi|Android/i.test(navigator.userAgent));
+
 export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, setSelectedMode }) {
   const photoVideoInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -163,7 +165,7 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
 
               {/* Camera Record */}
               <button
-                onClick={() => setShowCamera(true)}
+                onClick={() => isMobileDevice() ? cameraInputRef.current?.click() : setShowCamera(true)}
                 className="p-6 rounded-2xl flex flex-col items-center gap-3 text-white font-bold transition-all active:scale-95 shadow-lg"
                 style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
               >

@@ -41,7 +41,7 @@ export default function GroupDetailModal({ group, isMember, onClose, onJoin, onO
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="absolute bottom-0 left-0 right-0 rounded-t-[32px] overflow-hidden"
-          style={{ backgroundColor: "var(--bg-card)", maxHeight: "90dvh", overflowY: "auto" }}
+          style={{ backgroundColor: "var(--bg-app)", maxHeight: "90dvh", overflowY: "auto", isolation: "isolate" }}
           onClick={e => e.stopPropagation()}
         >
           {/* Cover gradient */}
@@ -54,7 +54,7 @@ export default function GroupDetailModal({ group, isMember, onClose, onJoin, onO
             </button>
             {/* Logo */}
             <div className="absolute bottom-[-28px] left-5 w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-3xl"
-              style={{ backgroundColor: "var(--bg-card)", border: "3px solid var(--bg-card)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
+              style={{ backgroundColor: "var(--bg-app)", border: "3px solid var(--bg-app)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
               {group.logo_url
                 ? <img src={group.logo_url} alt="" className="w-full h-full object-cover" />
                 : <span>{group.emoji || CATEGORY_EMOJIS[group.category] || "💬"}</span>}
