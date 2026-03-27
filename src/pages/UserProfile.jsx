@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { normalizePost } from "@/utils/normalizeMediaUrl";
+import { Instagram, Youtube, Globe, MapPin, DollarSign } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FriendRequestButton from "@/components/friends/FriendRequestButton";
 import { MessageCircle, ArrowLeft, Flag, UserX, Zap, MoreHorizontal } from "lucide-react";
@@ -60,6 +61,17 @@ export default function UserProfile() {
     },
     enabled: !!realEmail,
     staleTime: 60000,
+  });
+
+  // Fetch creator profile for this user
+  const { data: creatorProfile } = useQuery({
+    queryKey: ["creatorProfile", realEmail],
+    queryFn: async () => {
+      const rows = await base44.entities.Creator.filter({ user_email: realEmail, approval_status: "approved" });
+      return rows[0] || null;
+    },
+    enabled: !!realEmail,
+    staleTime: 120000,
   });
 
   const { data: followData } = useQuery({
@@ -343,6 +355,67 @@ export default function UserProfile() {
             )}
           </div>
         </div>
+
+        {/* Creator Profile Section */}
+        {creatorProfile && (
+          <div className="mt-4 rounded-3xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            {/* Cover */}
+            <div className="relative h-32" style={{ background: "linear-gradient(135deg, #1C2B1A, #2D6A4F)" }}>
+              {creatorProfile.profile_image && (
+                <img src={creatorProfile.profile_image} alt="" className="w-full h-full object-cover opacity-60" />
+              )}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6))" }} />
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: creatorProfile.availability_status === "open" ? "rgba(22,163,74,0.9)" : "rgba(0,0,0,0.4)" }}>
+                <div className={`w-1.5 h-1.5 rounded-full ${creatorProfile.availability_status === "open" ? "bg-white animate-pulse" : "bg-gray-400"}`} />
+                {creatorProfile.availability_status === "open" ? "Live Now" : "Offline"}
+              </div>
+              <div className="absolute bottom-3 left-4">
+                <p className="text-white font-bold text-sm">{creatorProfile.full_name}</p>
+                <p className="text-white/80 text-xs">{creatorProfile.category?.replace(/_/g, " ")}</p>
+              </div>
+            </div>
+            <div className="px-4 py-4 space-y-3">
+              {creatorProfile.description && (
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{creatorProfile.description}</p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {creatorProfile.price && (
+                  <span className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}>
+                    <DollarSign className="w-3 h-3" />{creatorProfile.price}
+                  </span>
+                )}
+                {creatorProfile.city && (
+                  <span className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)" }}>
+                    <MapPin className="w-3 h-3" />{creatorProfile.city}
+                  </span>
+                )}
+              </div>
+              {(creatorProfile.instagram_url || creatorProfile.tiktok_url || creatorProfile.youtube_url || creatorProfile.website_url) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {creatorProfile.instagram_url && <a href={creatorProfile.instagram_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#FDF2F8", color: "#DB2777" }}><Instagram className="w-3 h-3" /> IG</a>}
+                  {creatorProfile.tiktok_url && <a href={creatorProfile.tiktok_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#F0FFFE", color: "#0D9488" }}>🎵 TT</a>}
+                  {creatorProfile.youtube_url && <a href={creatorProfile.youtube_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#FEF2F2", color: "#DC2626" }}><Youtube className="w-3 h-3" /> YT</a>}
+                  {creatorProfile.website_url && <a href={creatorProfile.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "#EEF2FF", color: "#4F46E5" }}><Globe className="w-3 h-3" /> Web</a>}
+                </div>
+              )}
+              {creatorProfile.portfolio_images?.length > 0 && (
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "var(--text-hint)" }}>Portfolio</p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {creatorProfile.portfolio_images.slice(0, 6).map((img, i) => (
+                      <div key={i} className="rounded-xl overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                        <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Live Activities */}
         {livePosts.length > 0 && (

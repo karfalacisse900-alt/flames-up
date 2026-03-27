@@ -34,7 +34,7 @@ export default function CreatorProfileEditor({ creator, onClose, onSaved }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex flex-col overflow-y-auto"
-      style={{ backgroundColor: "var(--bg-modal)" }}>
+      style={{ backgroundColor: "#FDFAF4" }}>
       <div className="max-w-lg mx-auto w-full px-4 pb-12 pt-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>

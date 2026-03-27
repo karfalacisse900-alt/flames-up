@@ -83,8 +83,9 @@ export default function PhotoCarousel({ images, tags = [], aspectRatio = "4/5" }
     );
   }
 
-  // translateX: each image is 100% wide, slide by (-current * 100%) + drag px
-  const translateX = `calc(${-current * 100}% + ${dragOffset}px)`;
+  // translateX: % is relative to the STRIP's own width (count * containerW),
+  // so to shift by `current` container-widths we use (current / count * 100%) of strip.
+  const translateX = `calc(${(-current * 100) / count}% + ${dragOffset}px)`;
   const transitionStyle = isDragging.current ? "none" : "transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)";
 
   return (

@@ -151,6 +151,13 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
             </span>
           )}
         </div>
+        {creator.city && (
+          <div className="px-4 pb-1">
+            <span className="text-[11px] flex items-center gap-1" style={{ color: "#64748B" }}>
+              📍 {creator.city}
+            </span>
+          </div>
+        )}
 
         {/* Status message */}
         {creator.status_message && (
