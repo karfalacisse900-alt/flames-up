@@ -41,7 +41,7 @@ export default function GroupDetailModal({ group, isMember, onClose, onJoin, onO
           exit={{ y: "100%" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="absolute bottom-0 left-0 right-0 rounded-t-[32px] overflow-hidden"
-          style={{ backgroundColor: "var(--bg-app)", maxHeight: "90dvh", overflowY: "auto", isolation: "isolate" }}
+          style={{ backgroundColor: "#FDFAF4", maxHeight: "90dvh", overflowY: "auto", isolation: "isolate" }}
           onClick={e => e.stopPropagation()}
         >
           {/* Cover gradient */}
