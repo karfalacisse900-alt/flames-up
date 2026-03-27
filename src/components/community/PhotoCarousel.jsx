@@ -12,6 +12,7 @@ export default function PhotoCarousel({ images, tags = [], aspectRatio = "4/5" }
   const [current, setCurrent] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const count = images?.length || 0;
 
   // Preload current, next and previous images
   useEffect(() => {
@@ -23,7 +24,6 @@ export default function PhotoCarousel({ images, tags = [], aspectRatio = "4/5" }
   const dragStartX = useRef(null);
   const isDragging = useRef(false);
   const containerRef = useRef(null);
-  const count = images?.length || 0;
 
   const getTagsForImage = (index) => {
     if (!tags || !Array.isArray(tags)) return [];
