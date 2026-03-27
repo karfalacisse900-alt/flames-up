@@ -88,7 +88,7 @@ export default function CreateNowStatusModal({ user, onClose, onCreated }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
       onClick={onClose}
     >
       <motion.div

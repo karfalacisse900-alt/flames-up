@@ -101,10 +101,15 @@ export default function CreatorMapMarkers({ map, mapReady, currentUserEmail }) {
       setCreators(all.filter(c => c.latitude && c.longitude));
     };
     load();
-    // Poll every 3 minutes to pick up fresh location updates
-    const interval = setInterval(load, 3 * 60 * 1000);
-    const unsub = base44.entities.Creator.subscribe(() => load());
-    return () => { clearInterval(interval); unsub(); };
+    // Poll every 5 minutes — avoid frequent re-renders that cause marker jitter
+    const interval = setInterval(load, 5 * 60 * 1000);
+    // Throttle subscription: only reload after 10s quiet period
+    let subTimer = null;
+    const unsub = base44.entities.Creator.subscribe(() => {
+      clearTimeout(subTimer);
+      subTimer = setTimeout(load, 10000);
+    });
+    return () => { clearInterval(interval); clearTimeout(subTimer); unsub(); };
   }, []);
 
   useEffect(() => {

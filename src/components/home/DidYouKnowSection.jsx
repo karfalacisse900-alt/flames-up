@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Heart, ExternalLink, Plus, X, ChevronRight } from "lucide-react";
+import { Heart, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import KeywordHighlight from "@/components/KeywordHighlight";
@@ -95,7 +95,6 @@ function SubmitForm({ user, onClose, onSuccess }) {
 
 export default function DidYouKnowSection({ user }) {
   const qc = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef(null);
 
@@ -138,26 +137,9 @@ export default function DidYouKnowSection({ user }) {
   return (
     <div className="px-4 pt-4 pb-2">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <Link to={createPageUrl("DidYouKnow")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="text-lg">💡</span>
-          <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Did You Know?</p>
-          <ChevronRight className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link to={createPageUrl("DidYouKnow")}
-            className="text-xs font-semibold px-3 py-1.5 rounded-full"
-            style={{ color: "var(--accent-primary)", backgroundColor: "var(--accent-primary-light)", border: "1px solid var(--accent-primary)30" }}>
-            See all
-          </Link>
-          {user?.role === "admin" && (
-            <button onClick={() => setShowForm(true)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1px solid var(--accent-primary)30" }}>
-              <Plus className="w-3 h-3" /> Submit
-            </button>
-          )}
-        </div>
+      <div className="flex items-center mb-3">
+        <span className="text-lg mr-2">💡</span>
+        <p className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Did You Know?</p>
       </div>
 
       {/* Card */}
@@ -224,17 +206,6 @@ export default function DidYouKnowSection({ user }) {
         </Link>
       )}
 
-      {/* Submit form modal */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-lg mx-auto rounded-t-3xl flex flex-col" style={{ backgroundColor: "#FAFAF8", maxHeight: "90vh", animation: "slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1)" }} onClick={e => e.stopPropagation()}>
-            <div className="h-1.5 w-12 rounded-full mx-auto mt-3 mb-1" style={{ backgroundColor: "#CEC8BC" }} />
-            <div className="overflow-y-auto flex-1 pb-8">
-              <SubmitForm user={user} onClose={() => setShowForm(false)} onSuccess={() => qc.invalidateQueries({ queryKey: ["didYouKnow"] })} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
