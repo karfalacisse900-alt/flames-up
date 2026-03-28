@@ -216,6 +216,8 @@ export default function PlacesMapboxView({ onOpenPlace, user: userProp, onBack, 
         zoom: 14,
         pitch: 0, bearing: 0,
         attributionControl: false,
+        fadeDuration: 0,          // eliminate tile fade-in blink on zoom
+        antialias: true,
       });
 
       map.addControl(new mbgl.NavigationControl({ showCompass: false }), "bottom-right");

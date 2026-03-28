@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Heart, Star, MapPin, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -76,7 +76,6 @@ export default function SpotCard({ spot, index }) {
 
   const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(spot.name + " New York City")}`;
   const hasPhotos = photos.length > 0;
-  const currentPhoto = photos[photoIndex] || null;
 
   const prev = (e) => { e.stopPropagation(); setPhotoIndex(i => (i - 1 + photos.length) % photos.length); };
   const next = (e) => { e.stopPropagation(); setPhotoIndex(i => (i + 1) % photos.length); };
@@ -105,19 +104,23 @@ export default function SpotCard({ spot, index }) {
         {photoLoading ? (
           <div className="w-full h-full skeleton" />
         ) : hasPhotos ? (
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.img
-              key={photoIndex}
-              src={currentPhoto}
-              alt={spot.name}
-              className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.22 }}
-              loading="lazy"
-            />
-          </AnimatePresence>
+          // CSS strip — no unmount/remount, zero blink
+          <div
+            style={{
+              display: "flex",
+              width: `${photos.length * 100}%`,
+              height: "100%",
+              transform: `translateX(${(-photoIndex * 100) / photos.length}%)`,
+              transition: "transform 0.28s cubic-bezier(0.25,1,0.5,1)",
+              willChange: "transform",
+            }}
+          >
+            {photos.map((src, i) => (
+              <div key={i} style={{ width: `${100 / photos.length}%`, flexShrink: 0, height: "100%" }}>
+                <img src={src} alt={spot.name} className="w-full h-full object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div
             className="w-full h-full flex items-end p-4"
