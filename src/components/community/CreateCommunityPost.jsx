@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { scanContent, getScanMessage } from "@/utils/contentScanner";
+import ContentScanBanner from "@/components/ui/ContentScanBanner";
 import { uploadToR2 } from "@/utils/uploadToR2";
 import { X, ImageIcon, Save, Plus, Zap } from "lucide-react";
 import { getSmartLinksEnabled, setSmartLinksEnabled, SMART_LINKS_PREF_KEY } from "./SmartText";
@@ -57,6 +59,8 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mediaError, setMediaError] = useState(false);
+  const [scanStatus, setScanStatus] = useState(null);
+  const [scanMessage, setScanMessage] = useState("");
   const [draftSaved, setDraftSaved] = useState(false);
   const [location, setLocation] = useState(null);
   const [placeTags, setPlaceTags] = useState([]);
@@ -140,42 +144,70 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
     for (const d of existing) await base44.entities.PostDraft.delete(d.id);
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    // multi-photo: add to existing imageFiles array (max 10)
-    const newEntries = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
-    setImageFiles(prev => {
-      const combined = [...prev, ...newEntries].slice(0, 10);
-      return combined;
-    });
-    setVideoFile(null);
-    setVideoPreview(null);
-    setImageFile(null);
-    setImagePreview(null);
-    setImageUrl("");
-    setEditingFile(null);
+
+    setScanStatus("scanning");
+    const accepted = [];
+    for (const f of files) {
+      try {
+        const result = await scanContent(f, "image");
+        if (result?.verdict === "rejected") {
+          const msg = getScanMessage(result);
+          setScanStatus("rejected");
+          setScanMessage(msg?.message || "");
+          continue;
+        }
+        if (result?.verdict === "flagged") {
+          setScanStatus("flagged");
+          setScanMessage(getScanMessage(result)?.message || "");
+        } else {
+          setScanStatus("authentic");
+          setTimeout(() => setScanStatus(null), 2500);
+        }
+        accepted.push({ file: f, preview: URL.createObjectURL(f) });
+      } catch { accepted.push({ file: f, preview: URL.createObjectURL(f) }); }
+    }
+
+    if (accepted.length > 0) {
+      setImageFiles(prev => [...prev, ...accepted].slice(0, 10));
+      setVideoFile(null); setVideoPreview(null);
+      setImageFile(null); setImagePreview(null);
+      setImageUrl(""); setEditingFile(null);
+    }
     e.target.value = "";
   };
 
-  const handleVideoUpload = (e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setScanStatus("scanning");
+    try {
+      const result = await scanContent(file, "video");
+      if (result?.verdict === "rejected") {
+        setScanStatus("rejected");
+        setScanMessage(getScanMessage(result)?.message || "");
+        e.target.value = "";
+        return;
+      }
+      if (result?.verdict === "flagged") {
+        setScanStatus("flagged");
+        setScanMessage(getScanMessage(result)?.message || "");
+      } else {
+        setScanStatus("authentic");
+        setTimeout(() => setScanStatus(null), 2500);
+      }
+    } catch { setScanStatus(null); }
+
     const url = URL.createObjectURL(file);
-    // Check duration
     const vid = document.createElement("video");
     vid.src = url;
     vid.onloadedmetadata = () => {
-      if (vid.duration > 60) {
-        setVideoError("Video must be 60 seconds or less.");
-        return;
-      }
-      setVideoFile(file);
-      setVideoPreview(url);
-      setVideoDuration(Math.round(vid.duration));
-      setVideoError("");
-      setImageFile(null);
-      setImagePreview(null);
+      if (vid.duration > 60) { setVideoError("Video must be 60 seconds or less."); return; }
+      setVideoFile(file); setVideoPreview(url); setVideoDuration(Math.round(vid.duration));
+      setVideoError(""); setImageFile(null); setImagePreview(null);
     };
     e.target.value = "";
   };
@@ -394,6 +426,15 @@ export default function CreateCommunityPost({ user, onClose, onCreated, challeng
                     style={{ fontSize: 14 }}
                   />
                 </div>
+              )}
+
+              {/* Scan banner */}
+              {scanStatus && (
+                <ContentScanBanner
+                  status={scanStatus}
+                  message={scanMessage}
+                  onDismiss={() => setScanStatus(null)}
+                />
               )}
 
               {/* Photo/GIF/Video upload */}

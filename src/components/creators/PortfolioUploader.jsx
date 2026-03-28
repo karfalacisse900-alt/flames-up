@@ -2,24 +2,50 @@ import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, X, Loader2, ImageIcon } from "lucide-react";
 import { uploadToCloudflare } from "@/utils/uploadToCloudflare";
+import { scanContent, getScanMessage } from "@/utils/contentScanner";
+import ContentScanBanner from "@/components/ui/ContentScanBanner";
 
 export default function PortfolioUploader({ creator, onUpdated }) {
   const [uploading, setUploading] = useState(false);
+  const [scanStatus, setScanStatus] = useState(null);
+  const [scanMessage, setScanMessage] = useState("");
   const inputRef = useRef(null);
   const images = creator.portfolio_images || [];
 
   const handleFiles = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+
+    const accepted = [];
+    for (const file of files) {
+      setScanStatus("scanning");
+      try {
+        const result = await scanContent(file, "image");
+        if (result?.verdict === "rejected") {
+          setScanStatus("rejected");
+          setScanMessage(getScanMessage(result)?.message || "");
+          continue;
+        }
+        if (result?.verdict === "flagged") {
+          setScanStatus("flagged");
+          setScanMessage(getScanMessage(result)?.message || "");
+        } else {
+          setScanStatus("authentic");
+          setTimeout(() => setScanStatus(null), 2500);
+        }
+        accepted.push(file);
+      } catch { accepted.push(file); }
+    }
+
+    if (!accepted.length) { setUploading(false); e.target.value = ""; return; }
+
     setUploading(true);
     const urls = [];
-    for (const file of files) {
+    for (const file of accepted) {
       const { file_url } = await uploadToCloudflare(file);
       urls.push(file_url);
     }
-    const updated = await base44.entities.Creator.update(creator.id, {
-      portfolio_images: [...images, ...urls],
-    });
+    await base44.entities.Creator.update(creator.id, { portfolio_images: [...images, ...urls] });
     onUpdated({ ...creator, portfolio_images: [...images, ...urls] });
     setUploading(false);
     e.target.value = "";
@@ -33,6 +59,11 @@ export default function PortfolioUploader({ creator, onUpdated }) {
 
   return (
     <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+      {scanStatus && (
+        <div className="mb-3">
+          <ContentScanBanner status={scanStatus} message={scanMessage} onDismiss={() => setScanStatus(null)} />
+        </div>
+      )}
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>My Work / Portfolio</p>
         <button onClick={() => inputRef.current?.click()} disabled={uploading}

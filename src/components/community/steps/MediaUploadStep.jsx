@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import { Upload, Play, X, GripVertical, Cloud, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CameraUploadStep from "./CameraUploadStep";
+import { scanContent, getScanMessage } from "@/utils/contentScanner";
+import ContentScanBanner from "@/components/ui/ContentScanBanner";
 
 const isMobileDevice = () => typeof navigator !== "undefined" && (navigator.maxTouchPoints > 0 || /Mobi|Android/i.test(navigator.userAgent));
 
@@ -12,6 +14,8 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
   const dragCounter = useRef(0);
   const [compressing, setCompressing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [scanStatus, setScanStatus] = useState(null); // scanning | rejected | flagged | authentic
+  const [scanMessage, setScanMessage] = useState("");
 
   const compressMedia = async (file) => {
     try {
@@ -55,6 +59,31 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
         continue;
       }
 
+      // Scan for AI-generated content
+      const contentType = file.type.startsWith("video/") ? "video" : "image";
+      setScanStatus("scanning");
+      setScanMessage("");
+      try {
+        const scanResult = await scanContent(file, contentType);
+        const msg = getScanMessage(scanResult);
+        if (scanResult?.verdict === "rejected") {
+          setScanStatus("rejected");
+          setScanMessage(msg?.message || "");
+          continue; // Skip this file
+        }
+        if (scanResult?.verdict === "flagged") {
+          setScanStatus("flagged");
+          setScanMessage(msg?.message || "");
+          // Allow flagged content but show warning
+        } else {
+          setScanStatus("authentic");
+          setTimeout(() => setScanStatus(null), 3000);
+        }
+      } catch (e) {
+        console.error("Scan failed:", e);
+        setScanStatus(null);
+      }
+
       // Compress before creating preview
       const processedFile = await compressMedia(file);
 
@@ -68,14 +97,12 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
           type: processedFile.type,
           duration: 0,
           edits: {},
+          scan_verdict: scanStatus === "flagged" ? "flagged" : "authentic",
         };
 
-        // Get video duration
         if (processedFile.type.startsWith("video/")) {
           const video = document.createElement("video");
-          video.onloadedmetadata = () => {
-            item.duration = video.duration;
-          };
+          video.onloadedmetadata = () => { item.duration = video.duration; };
           video.src = preview;
         }
 
@@ -129,6 +156,16 @@ export default function MediaUploadStep({ mediaItems, setMediaItems, onNext, set
     <div className="min-h-screen pb-24" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Main content */}
       <div className="px-4 pt-6 max-w-2xl mx-auto">
+        {/* Scan status banner */}
+        {scanStatus && (
+          <div className="mb-4">
+            <ContentScanBanner
+              status={scanStatus}
+              message={scanMessage}
+              onDismiss={() => setScanStatus(null)}
+            />
+          </div>
+        )}
         {mediaItems.length === 0 ? (
           <>
             {/* Empty state - Large upload area */}

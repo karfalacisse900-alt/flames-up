@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, X, Heart, Bookmark, Upload, Loader2, ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { scanContent, getScanMessage } from "@/utils/contentScanner";
+import ContentScanBanner from "@/components/ui/ContentScanBanner";
 
 const BG = "#F5F0E8";
 const STYLE_CATEGORIES = ["All", "Casual", "Bohemian", "Grunge", "Chic", "Streetwear", "Vintage", "Minimalist", "Sporty", "Glam"];
@@ -75,13 +77,39 @@ function UploadModal({ user, onClose, onSuccess }) {
   const [previews, setPreviews] = useState([]);
   const [form, setForm] = useState({ title: "", description: "", style: "Casual", tags: "", shop_link: "" });
   const [saving, setSaving] = useState(false);
+  const [scanStatus, setScanStatus] = useState(null);
+  const [scanMessage, setScanMessage] = useState("");
   const fileRef = useRef(null);
 
-  const handleFiles = (e) => {
+  const handleFiles = async (e) => {
     const files = Array.from(e.target.files || []);
-    const toAdd = files.slice(0, MAX_IMAGES - imageFiles.length);
-    setImageFiles(prev => [...prev, ...toAdd]);
-    setPreviews(prev => [...prev, ...toAdd.map(f => URL.createObjectURL(f))]);
+    const candidates = files.slice(0, MAX_IMAGES - imageFiles.length);
+    const accepted = [];
+    const acceptedPreviews = [];
+    for (const f of candidates) {
+      setScanStatus("scanning");
+      try {
+        const result = await scanContent(f, "image");
+        if (result?.verdict === "rejected") {
+          setScanStatus("rejected");
+          setScanMessage(getScanMessage(result)?.message || "");
+          continue;
+        }
+        if (result?.verdict === "flagged") {
+          setScanStatus("flagged");
+          setScanMessage(getScanMessage(result)?.message || "");
+        } else {
+          setScanStatus("authentic");
+          setTimeout(() => setScanStatus(null), 2500);
+        }
+        accepted.push(f);
+        acceptedPreviews.push(URL.createObjectURL(f));
+      } catch { accepted.push(f); acceptedPreviews.push(URL.createObjectURL(f)); }
+    }
+    if (accepted.length) {
+      setImageFiles(prev => [...prev, ...accepted]);
+      setPreviews(prev => [...prev, ...acceptedPreviews]);
+    }
     e.target.value = "";
   };
 
@@ -110,6 +138,11 @@ function UploadModal({ user, onClose, onSuccess }) {
             <X className="w-4 h-4" style={{ color: "#1C1A16" }} />
           </button>
         </div>
+        {scanStatus && (
+          <div className="mb-4">
+            <ContentScanBanner status={scanStatus} message={scanMessage} onDismiss={() => setScanStatus(null)} />
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-2 mb-4">
           {previews.map((src, idx) => (
             <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1/1" }}>
