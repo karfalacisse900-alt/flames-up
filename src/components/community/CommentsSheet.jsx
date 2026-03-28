@@ -147,7 +147,7 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
   const color = getAvatarColor(reply.author_name);
   const isOwn = currentUserEmail && reply.author_email === currentUserEmail;
   return (
-    <div className="rounded-[22px] p-4 mt-3" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)" }}>
+    <div className="rounded-[22px] p-4 mt-3" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
       <div className="flex gap-3">
         {reply.author_avatar_url ? (
           <img src={reply.author_avatar_url} alt={reply.author_name} className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -158,15 +158,15 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{reply.author_name || "Anonymous"}</span>
-            <span className="text-xs" style={{ color: "var(--text-hint)" }}>• {timeAgo(reply.created_date)}</span>
+            <span className="text-sm font-semibold" style={{ color: "#fff" }}>{reply.author_name || "Anonymous"}</span>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>• {timeAgo(reply.created_date)}</span>
             {isOwn && <button onClick={() => onDelete(reply)} className="ml-auto p-1 rounded-full" style={{ color: "#E05C7A" }}><Trash2 className="w-3.5 h-3.5" /></button>}
           </div>
           {reply.type === "voice" ? <VoicePlayer audioUrl={reply.audio_url} />
             : reply.type === "image" && reply.image_url ? <img src={reply.image_url} alt="comment" className="rounded-2xl mt-1 max-w-full object-cover" style={{ maxHeight: 200 }} />
             : reply.type === "sticker" ? <span className="text-4xl">{reply.body}</span>
             : reply.type === "gif" && reply.gif_url ? <img src={reply.gif_url} alt="GIF" className="rounded-2xl mt-1 max-w-full" style={{ maxHeight: 180 }} />
-            : <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}><SmartText text={reply.body} /></p>}
+            : <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}><SmartText text={reply.body} /></p>}
           <div className="flex items-center gap-3 mt-3">
             <button onClick={() => setLiked(v => !v)} className="text-xs flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ color: liked ? "#E05C7A" : "var(--text-hint)", backgroundColor: "var(--bg-subtle)" }}>
               {liked ? "😊" : "🙂"} <span>1</span>
@@ -344,39 +344,46 @@ export default function CommentsSheet({ postId, user, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] flex items-end"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      className="fixed inset-0 z-[60]"
+      style={{ backgroundColor: "#0D0D0D" }}
       onClick={onClose}
     >
       <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 380, damping: 36 }}
-        className="w-full max-w-lg mx-auto rounded-t-3xl flex flex-col"
-        style={{ backgroundColor: "var(--bg-modal)", maxHeight: "80dvh", minHeight: "50dvh" }}
+        transition={{ type: "spring", stiffness: 320, damping: 34 }}
+        className="absolute inset-0 flex flex-col max-w-lg mx-auto"
+        style={{ backgroundColor: "#111" }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Handle + header */}
-        <div className="shrink-0 px-4 pt-3 pb-2">
-          <div className="h-1.5 w-12 rounded-full mx-auto mb-3" style={{ backgroundColor: "var(--border-medium)" }} />
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>
-              Comments {allReplies.length > 0 && <span className="text-sm font-normal" style={{ color: "var(--text-hint)" }}>({allReplies.length})</span>}
-            </h3>
-            <button onClick={onClose} className="p-1.5 rounded-full" style={{ backgroundColor: "var(--bg-subtle)" }}>
-              <X className="w-4 h-4" style={{ color: "var(--text-hint)" }} />
-            </button>
+        {/* Post preview header */}
+        <div className="relative shrink-0" style={{ height: 220, backgroundColor: "#1a1a1a" }}>
+          {post?.image_url && (
+            <img src={post.image_url} alt="" className="w-full h-full object-cover opacity-60" />
+          )}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%)" }} />
+          <button onClick={onClose}
+            className="absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "rgba(255,255,255,0.12)", minHeight: "unset", minWidth: "unset" }}>
+            <X className="w-4 h-4 text-white" />
+          </button>
+          <div className="absolute bottom-4 left-4 right-4">
+            {post?.title && <p className="text-white font-bold text-lg leading-tight line-clamp-1" style={{ fontFamily: "var(--font-serif)" }}>{post.title}</p>}
+            {post?.body && <p className="text-white/75 text-sm mt-1 line-clamp-2 leading-relaxed">{post.body?.replace(/<[^>]*>/g, "").slice(0, 100)}</p>}
+            <p className="text-white/50 text-xs mt-2 font-semibold">
+              {allReplies.length} comment{allReplies.length !== 1 ? "s" : ""}
+            </p>
           </div>
         </div>
 
         {/* Comments list */}
-        <div className="flex-1 overflow-y-auto px-4 py-3" style={{ overscrollBehavior: "contain", backgroundColor: "#f6f8fc" }}>
+        <div className="flex-1 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: "contain" }}>
           {allReplies.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-4xl mb-2">💬</p>
-              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No comments yet</p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Be the first to comment!</p>
+              <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>No comments yet</p>
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>Be the first to comment!</p>
             </div>
           ) : (
             allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} currentUserEmail={user?.email} onDelete={handleDeleteComment} />)
@@ -388,7 +395,7 @@ export default function CommentsSheet({ postId, user, onClose }) {
         <AnimatePresence>
           {activePanel === "sticker" && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              style={{ overflow: "hidden", borderTop: "1px solid var(--border-subtle)", backgroundColor: "var(--bg-modal)" }}>
+              style={{ overflow: "hidden", borderTop: "1px solid rgba(255,255,255,0.08)", backgroundColor: "#1a1a1a" }}>
               <StickerPicker onSelect={s => { commentMut.mutate({ body: s, type: "sticker" }); setActivePanel(null); }} />
             </motion.div>
           )}
@@ -396,22 +403,22 @@ export default function CommentsSheet({ postId, user, onClose }) {
 
         {/* Input bar */}
         <div className="shrink-0 px-3 py-3" style={{
-          backgroundColor: "var(--bg-card)",
-          borderTop: "1px solid var(--border-subtle)",
+          backgroundColor: "#1a1a1a",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)"
         }}>
           {user ? (
-            <div className="flex items-center gap-2 px-3 py-3 rounded-[22px]" style={{ backgroundColor: "#fff", border: "2px solid #dbe4ff", boxShadow: "0 2px 10px rgba(15,23,42,0.04)" }}>
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-[22px]" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)" }}>
               <input
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate({ body: commentText.trim(), type: "text" })}
-                placeholder="Write a comment…"
+                placeholder="Add a comment…"
                 className="flex-1 text-sm bg-transparent outline-none min-w-0"
-                style={{ color: "var(--text-primary)", fontSize: 16 }}
+                style={{ color: "#fff", fontSize: 16 }}
               />
               <div className="flex items-center gap-0.5 shrink-0">
-                <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+                <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-full" style={{ color: "rgba(255,255,255,0.5)" }}>
                   <ImageIcon className="w-4 h-4" />
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
@@ -421,25 +428,25 @@ export default function CommentsSheet({ postId, user, onClose }) {
                   setUploading(false);
                   commentMut.mutate({ body: "", type: "image", image_url: file_url });
                 }} />
-                <button onClick={() => setShowGif(true)} className="p-1.5 rounded-full text-xs font-bold" style={{ color: "var(--text-hint)" }}>GIF</button>
+                <button onClick={() => setShowGif(true)} className="p-1.5 rounded-full text-xs font-bold" style={{ color: "rgba(255,255,255,0.5)" }}>GIF</button>
                 <button onClick={() => setActivePanel(p => p === "sticker" ? null : "sticker")} className="p-1.5 rounded-full"
-                  style={{ color: activePanel === "sticker" ? "var(--accent-primary)" : "var(--text-hint)" }}>
+                  style={{ color: activePanel === "sticker" ? "#6366F1" : "rgba(255,255,255,0.5)" }}>
                   <Smile className="w-4 h-4" />
                 </button>
                 <VoiceRecorder onSend={(blob) => voiceMut.mutate(blob)} />
                 {commentText.trim() && (
                   <button onClick={() => commentMut.mutate({ body: commentText.trim(), type: "text" })}
                     disabled={commentMut.isPending || uploading}
-                    className="p-1.5 rounded-full" style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
+                    className="p-1.5 rounded-full" style={{ backgroundColor: "#6366F1", color: "#fff" }}>
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </div>
           ) : (
-            <p className="text-sm text-center py-2" style={{ color: "var(--text-hint)" }}>Sign in to comment</p>
+            <p className="text-sm text-center py-2" style={{ color: "rgba(255,255,255,0.4)" }}>Sign in to comment</p>
           )}
-          {(commentMut.isPending || uploading) && <p className="text-xs text-center mt-1" style={{ color: "var(--text-hint)" }}>Sending…</p>}
+          {(commentMut.isPending || uploading) && <p className="text-xs text-center mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Sending…</p>}
         </div>
       </motion.div>
 

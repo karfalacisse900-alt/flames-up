@@ -365,48 +365,26 @@ function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
           <div className="w-full h-full skeleton" />
         ) : (
           <>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.img
-                key={photoIndex}
-                src={photos[photoIndex]}
-                alt={event.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.2 }}
-                loading="lazy"
-              />
-            </AnimatePresence>
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.65) 100%)" }} />
-
-            {photos.length > 1 && (
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-                {photos.map((_, i) => (
-                  <button key={i} onClick={() => setPhotoIndex(i)}
-                    className="rounded-full transition-all"
-                    style={{ width: i === photoIndex ? 16 : 6, height: 6, backgroundColor: i === photoIndex ? "#fff" : "rgba(255,255,255,0.5)" }}
-                  />
+            {/* Strip carousel — no blink */}
+            <div style={{
+              position: "absolute", inset: 0, overflow: "hidden",
+              display: "flex", width: "100%", height: "100%"
+            }}>
+              <div style={{
+                display: "flex",
+                width: `${photos.length * 100}%`,
+                height: "100%",
+                transform: `translateX(${(-photoIndex * 100) / photos.length}%)`,
+                transition: "transform 0.3s cubic-bezier(0.25,1,0.5,1)",
+                willChange: "transform",
+              }}>
+                {photos.map((src, i) => (
+                  <div key={i} style={{ width: `${100 / photos.length}%`, flexShrink: 0, height: "100%" }}>
+                    <img src={src} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
                 ))}
               </div>
-            )}
-
-            {photos.length > 1 && (
-              <>
-                <button onClick={() => setPhotoIndex(i => (i - 1 + photos.length) % photos.length)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
-                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
-                  <ChevronLeft className="w-4 h-4 text-white" />
-                </button>
-                <button onClick={() => setPhotoIndex(i => (i + 1) % photos.length)}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center z-10"
-                  style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
-                  <ChevronRight className="w-4 h-4 text-white" />
-                </button>
-              </>
-            )}
-          </>
-        )}
+            </div>
 
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold z-10"
           style={{ backgroundColor: event.cost === "Free" || event.cost === "Free entry" ? "rgba(16,185,129,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", backdropFilter: "blur(4px)" }}>
@@ -432,6 +410,8 @@ function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
                 {event.borough}
               </span>
             </div>
+          </>
+        )}
           </>
         )}
       </div>

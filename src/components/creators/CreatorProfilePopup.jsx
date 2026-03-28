@@ -75,32 +75,10 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
           pointerEvents: "auto",
         }}>
 
-        {/* Portfolio / Cover image */}
+        {/* Portfolio / Cover — always 180px tall */}
         <div className="relative overflow-hidden"
-          style={{ height: images.length > 0 ? 160 : 80, background: "linear-gradient(135deg,#1C2B1A,#2D6A4F)", cursor: images.length > 0 ? "pointer" : "default" }}
+          style={{ height: 180, background: "linear-gradient(135deg,#1C2B1A,#2D6A4F)", cursor: "pointer" }}
           onClick={() => images.length > 0 && setFullscreen(true)}>
-          {images.length > 0 ? (
-            <>
-              <img src={images[photoIdx]} alt="" className="w-full h-full object-cover" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)" }} />
-              {images.length > 1 && (
-                <>
-                  <button onClick={prevPhoto}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-                    <ChevronLeft className="w-4 h-4 text-white" />
-                  </button>
-                  <button onClick={nextPhoto}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-                    <ChevronRight className="w-4 h-4 text-white" />
-                  </button>
-                  <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1">
-                    {images.map((_, i) => (
-                      <div key={i} className="rounded-full transition-all"
-                        style={{ width: i === photoIdx ? 14 : 5, height: 5, backgroundColor: i === photoIdx ? "white" : "rgba(255,255,255,0.5)" }} />
-                    ))}
-                  </div>
                 </>
               )}
               <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
