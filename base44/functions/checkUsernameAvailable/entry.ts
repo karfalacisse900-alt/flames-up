@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -6,13 +6,21 @@ Deno.serve(async (req) => {
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { username } = await req.json();
-  if (!username) return Response.json({ available: true });
+  if (!username) return Response.json({ available: false, error: "No username provided" });
 
-  const normalized = username.startsWith("@") ? username : `@${username}`;
+  // Validate format first
+  const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+  if (!USERNAME_RE.test(username)) {
+    return Response.json({ available: false, error: "Invalid username format" });
+  }
 
-  // Check UserProfile entity
-  const profiles = await base44.asServiceRole.entities.UserProfile.filter({ username: normalized });
-  const taken = profiles.some(p => p.user_email !== user.email);
+  const normalized = username.toLowerCase();
+
+  // Check User entity directly for uniqueness
+  const allUsers = await base44.asServiceRole.entities.User.list("-created_date", 5000);
+  const taken = allUsers.some(
+    u => u.username?.toLowerCase() === normalized && u.email !== user.email
+  );
 
   return Response.json({ available: !taken });
 });

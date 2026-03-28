@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Users, Shield, ChevronRight, X, Check, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { MapPin, Users, Shield, ChevronRight, X, Check, Eye, EyeOff, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
+
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+const FULLNAME_RE = /^[a-zA-Z ]{3,50}$/
 
 // ── Fake animated pins for the landing background ──────────────────────────
 const FAKE_PINS = [
@@ -75,14 +78,57 @@ export default function Onboarding() {
   const [step, setStep] = useState("landing");
   const [slideIdx, setSlideIdx] = useState(0);
   const [form, setForm] = useState({ email: "", password: "", username: "" });
-  const [profile, setProfile] = useState({ username: "", status: "", avatar: null });
+  const [profile, setProfile] = useState({ username: "", fullName: "", status: "", avatar: null });
+  const [profileErrors, setProfileErrors] = useState({});
+  const [usernameStatus, setUsernameStatus] = useState(null); // null | "checking" | "available" | "taken" | "invalid"
   const [privacy, setPrivacy] = useState("everyone");
   const [interests, setInterests] = useState([]);
   const [locationGranted, setLocationGranted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const slideTimer = useRef(null);
+  const usernameTimer = useRef(null);
 
   const goNext = (to) => setStep(to);
+
+  // Real-time username availability check
+  const checkUsername = useCallback((val) => {
+    clearTimeout(usernameTimer.current);
+    if (!val) { setUsernameStatus(null); return; }
+    if (!USERNAME_RE.test(val)) { setUsernameStatus("invalid"); return; }
+    setUsernameStatus("checking");
+    usernameTimer.current = setTimeout(async () => {
+      try {
+        const res = await base44.functions.invoke("checkUsernameAvailable", { username: val });
+        setUsernameStatus(res.data?.available ? "available" : "taken");
+      } catch { setUsernameStatus(null); }
+    }, 500);
+  }, []);
+
+  const handleProfileContinue = async () => {
+    const errors = {};
+    if (!USERNAME_RE.test(profile.username)) errors.username = "3–20 chars, letters/numbers/underscores only.";
+    if (!FULLNAME_RE.test(profile.fullName?.trim() || "")) errors.fullName = "3–50 chars, letters and spaces only.";
+    if (usernameStatus === "taken") errors.username = "That username is already taken.";
+    if (usernameStatus === "checking") errors.username = "Still checking availability…";
+    setProfileErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setProfileSaving(true);
+    setProfileError("");
+    try {
+      const res = await base44.functions.invoke("claimUsername", {
+        username: profile.username,
+        full_name: profile.fullName,
+      });
+      if (res.data?.error) { setProfileError(res.data.error); setProfileSaving(false); return; }
+      goNext("location");
+    } catch (err) {
+      setProfileError(err.message || "Something went wrong. Please try again.");
+    }
+    setProfileSaving(false);
+  };
 
   // Auto-advance slides
   useEffect(() => {
@@ -374,52 +420,118 @@ export default function Onboarding() {
             initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}>
 
             <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "2rem", fontWeight: 800, color: "#F1F5F9", marginBottom: 6 }}>
-              Set up your profile
+              Claim your username
             </h2>
-            <p style={{ color: "#64748B", marginBottom: 32, fontSize: "0.95rem" }}>Tell the world a little about you</p>
+            <p style={{ color: "#64748B", marginBottom: 24, fontSize: "0.95rem" }}>Usernames are permanent — choose wisely</p>
 
-            {/* Avatar picker */}
-            <div className="flex flex-col items-center mb-8">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                className="w-24 h-24 rounded-full flex items-center justify-center mb-3 relative"
-                style={{ backgroundColor: "rgba(79,70,229,0.15)", border: "2px dashed rgba(79,70,229,0.4)" }}>
-                <span style={{ fontSize: 40 }}>😊</span>
-                <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "#4F46E5", border: "2px solid #0B1120" }}>
-                  <span style={{ fontSize: 12 }}>+</span>
-                </div>
-              </motion.button>
-              <span style={{ color: "#64748B", fontSize: "0.8rem" }}>Tap to add photo</span>
-            </div>
+            <div className="flex flex-col gap-4 mb-6">
 
-            <div className="flex flex-col gap-3 mb-8">
-              <input
-                type="text" placeholder="Username"
-                value={profile.username}
-                onChange={e => setProfile(p => ({ ...p, username: e.target.value }))}
-                className="w-full px-4 py-3.5 rounded-2xl text-sm outline-none"
-                style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#F1F5F9" }} />
-              <div className="relative">
+              {/* Full name */}
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "#94A3B8" }}>Full Name</label>
                 <input
-                  type="text" placeholder='Short status (e.g. "Exploring NYC") — optional'
-                  value={profile.status}
-                  maxLength={60}
-                  onChange={e => setProfile(p => ({ ...p, status: e.target.value }))}
+                  type="text" placeholder="e.g. Jordan Smith"
+                  value={profile.fullName}
+                  onChange={e => {
+                    setProfile(p => ({ ...p, fullName: e.target.value }));
+                    setProfileErrors(er => ({ ...er, fullName: undefined }));
+                  }}
                   className="w-full px-4 py-3.5 rounded-2xl text-sm outline-none"
-                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#F1F5F9" }} />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "#475569" }}>{profile.status.length}/60</span>
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${profileErrors.fullName ? "#EF4444" : "rgba(255,255,255,0.1)"}`,
+                    color: "#F1F5F9"
+                  }} />
+                {profileErrors.fullName && (
+                  <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#EF4444" }}>
+                    <AlertCircle className="w-3 h-3" /> {profileErrors.fullName}
+                  </p>
+                )}
+                <p className="text-xs mt-1" style={{ color: "#475569" }}>Letters and spaces only, 3–50 characters</p>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "#94A3B8" }}>Username</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: "#64748B" }}>@</span>
+                  <input
+                    type="text" placeholder="yourname"
+                    value={profile.username}
+                    onChange={e => {
+                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+                      setProfile(p => ({ ...p, username: val }));
+                      setProfileErrors(er => ({ ...er, username: undefined }));
+                      checkUsername(val);
+                    }}
+                    maxLength={20}
+                    className="w-full pl-8 pr-10 py-3.5 rounded-2xl text-sm outline-none"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.06)",
+                      border: `1px solid ${
+                        usernameStatus === "taken" || profileErrors.username ? "#EF4444" :
+                        usernameStatus === "available" ? "#10B981" :
+                        "rgba(255,255,255,0.1)"
+                      }`,
+                      color: "#F1F5F9"
+                    }} />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameStatus === "checking" && <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#64748B" }} />}
+                    {usernameStatus === "available" && <CheckCircle2 className="w-4 h-4" style={{ color: "#10B981" }} />}
+                    {usernameStatus === "taken" && <AlertCircle className="w-4 h-4" style={{ color: "#EF4444" }} />}
+                  </div>
+                </div>
+                {usernameStatus === "available" && (
+                  <p className="text-xs mt-1" style={{ color: "#10B981" }}>✓ Available!</p>
+                )}
+                {(usernameStatus === "taken" || profileErrors.username) && (
+                  <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#EF4444" }}>
+                    <AlertCircle className="w-3 h-3" /> {profileErrors.username || "That username is already taken."}
+                  </p>
+                )}
+                {usernameStatus === "invalid" && (
+                  <p className="text-xs mt-1" style={{ color: "#F59E0B" }}>3–20 characters: letters, numbers, underscores only</p>
+                )}
+                {!usernameStatus && !profileErrors.username && (
+                  <p className="text-xs mt-1" style={{ color: "#475569" }}>3–20 characters · letters, numbers, underscores · permanent</p>
+                )}
+              </div>
+
+              {/* Short status (optional) */}
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "#94A3B8" }}>Short Bio <span style={{ fontWeight: 400 }}>(optional)</span></label>
+                <div className="relative">
+                  <input
+                    type="text" placeholder='e.g. "Exploring NYC"'
+                    value={profile.status}
+                    maxLength={60}
+                    onChange={e => setProfile(p => ({ ...p, status: e.target.value }))}
+                    className="w-full px-4 py-3.5 rounded-2xl text-sm outline-none"
+                    style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#F1F5F9" }} />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "#475569" }}>{profile.status.length}/60</span>
+                </div>
               </div>
             </div>
 
+            {profileError && (
+              <div className="mb-4 px-4 py-3 rounded-2xl flex items-center gap-2" style={{ backgroundColor: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)" }}>
+                <AlertCircle className="w-4 h-4 shrink-0" style={{ color: "#EF4444" }} />
+                <p className="text-sm" style={{ color: "#FCA5A5" }}>{profileError}</p>
+              </div>
+            )}
+
             <div className="mt-auto flex flex-col gap-3">
-              <button onClick={() => goNext("location")}
-                className="w-full py-4 rounded-2xl font-bold text-base"
-                style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)", color: "#fff", boxShadow: "0 8px 32px rgba(79,70,229,0.4)" }}>
-                Continue
-              </button>
-              <button onClick={() => goNext("location")} style={{ color: "#475569", fontSize: "0.85rem" }} className="text-center">
-                Skip for now
+              <button
+                onClick={handleProfileContinue}
+                disabled={profileSaving || usernameStatus === "checking" || usernameStatus === "taken"}
+                className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2"
+                style={{
+                  background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
+                  color: "#fff",
+                  boxShadow: "0 8px 32px rgba(79,70,229,0.4)",
+                  opacity: (profileSaving || usernameStatus === "checking" || usernameStatus === "taken") ? 0.6 : 1
+                }}>
+                {profileSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Continue"}
               </button>
             </div>
           </motion.div>
