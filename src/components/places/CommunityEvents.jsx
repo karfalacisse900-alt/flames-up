@@ -348,44 +348,49 @@ function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
       className="rounded-3xl overflow-hidden"
       style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}
     >
-      {/* Photo carousel */}
-      <div
-        className="relative"
-        style={{ height: 200, touchAction: "pan-y" }}
-        onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
-        onTouchEnd={e => {
-          if (touchStartX.current === null || photos.length < 2) return;
-          const dx = e.changedTouches[0].clientX - touchStartX.current;
-          touchStartX.current = null;
-          if (dx < -40) setPhotoIndex(i => (i + 1) % photos.length);
-          else if (dx > 40) setPhotoIndex(i => (i - 1 + photos.length) % photos.length);
-        }}
-      >
+      {/* Photo mosaic grid */}
+      <div className="relative" style={{ height: 200 }}>
         {photoLoading ? (
           <div className="w-full h-full skeleton" />
-        ) : (
-          <>
-            {/* Strip carousel — no blink */}
-            <div style={{
-              position: "absolute", inset: 0, overflow: "hidden",
-              display: "flex", width: "100%", height: "100%"
-            }}>
-              <div style={{
-                display: "flex",
-                width: `${photos.length * 100}%`,
-                height: "100%",
-                transform: `translateX(${(-photoIndex * 100) / photos.length}%)`,
-                transition: "transform 0.3s cubic-bezier(0.25,1,0.5,1)",
-                willChange: "transform",
-              }}>
-                {photos.map((src, i) => (
-                  <div key={i} style={{ width: `${100 / photos.length}%`, flexShrink: 0, height: "100%" }}>
-                    <img src={src} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                ))}
+        ) : photos.length === 0 ? (
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#1C2B1A" }}>
+            <span className="text-4xl">{event.type?.split(" ")[0] || "🗽"}</span>
+          </div>
+        ) : photos.length === 1 ? (
+          <img src={photos[0]} alt={event.title} className="w-full h-full object-cover" />
+        ) : photos.length === 2 ? (
+          <div className="flex h-full gap-0.5">
+            {photos.slice(0,2).map((src, i) => (
+              <div key={i} className="flex-1 h-full overflow-hidden">
+                <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
               </div>
+            ))}
+          </div>
+        ) : photos.length === 3 ? (
+          <div className="flex h-full gap-0.5">
+            <div className="flex-1 h-full overflow-hidden">
+              <img src={photos[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
             </div>
+            <div className="flex flex-col flex-1 gap-0.5 h-full">
+              {photos.slice(1,3).map((src, i) => (
+                <div key={i} className="flex-1 overflow-hidden">
+                  <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* 2x2 grid for 4+ photos */
+          <div className="grid grid-cols-2 grid-rows-2 gap-0.5 h-full">
+            {photos.slice(0,4).map((src, i) => (
+              <div key={i} className="overflow-hidden relative">
+                <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        )}
 
+        {/* Overlays */}
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold z-10"
           style={{ backgroundColor: event.cost === "Free" || event.cost === "Free entry" ? "rgba(16,185,129,0.9)" : "rgba(0,0,0,0.6)", color: "#fff", backdropFilter: "blur(4px)" }}>
           {event.cost}
@@ -396,24 +401,18 @@ function EventCard({ event, saved, rsvped, onToggleSaved, onToggleRsvp }) {
         </div>
         <button onClick={() => onToggleSaved(event.id)}
           className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10"
-          style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)", minHeight: "unset", minWidth: "unset" }}>
           {saved ? <BookmarkCheck className="w-4 h-4" style={{ color: "#818CF8" }} /> : <Bookmark className="w-4 h-4 text-white" />}
         </button>
-        {!photoLoading && (
-          <>
-            <div className="absolute bottom-3 left-3 z-10">
-              <span className="text-sm font-semibold text-white">{event.type}</span>
-            </div>
-            <div className="absolute bottom-3 right-3 z-10">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
-                {event.borough}
-              </span>
-            </div>
-          </>
-        )}
-          </>
-        )}
+        <div className="absolute bottom-3 left-3 z-10">
+          <span className="text-sm font-semibold text-white" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{event.type}</span>
+        </div>
+        <div className="absolute bottom-3 right-3 z-10">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff", backdropFilter: "blur(4px)" }}>
+            {event.borough}
+          </span>
+        </div>
       </div>
 
       <div className="p-4">
