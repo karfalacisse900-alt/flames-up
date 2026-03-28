@@ -17,32 +17,29 @@ export default function HomeHeader({ user }) {
 
   return (
     <div
-      className="relative overflow-hidden px-5 pb-5"
+      className="relative overflow-hidden px-5 pb-4"
       style={{ borderBottom: "1px solid var(--border-subtle)", paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}
     >
-      {/* Organic background blobs */}
-      <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, #E05C2A, #F97316)" }} />
-      <div className="absolute -top-2 right-20 w-14 h-14 rounded-full opacity-10 pointer-events-none" style={{ background: "#2E6B4F" }} />
-      <div className="absolute top-8 -left-4 w-20 h-20 rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle, #2E6B4F, #4CAF7D)" }} />
-
+      {/* Subtle grain overlay for premium feel */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.025]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
       <div className="flex items-center justify-between relative z-10">
         {/* Left: logo + greeting */}
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-0.5">
             <motion.div
               whileTap={{ scale: 0.9, rotate: -8 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="w-8 h-8 rounded-2xl flex items-center justify-center shadow-md"
-              style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
+              className="w-7 h-7 rounded-xl flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #1C1A16, #3D3A34)" }}
             >
-              <Flame style={{ width: 18, height: 18, color: "#fff", fill: "#fff" }} />
+              <Flame style={{ width: 14, height: 14, color: "#D4A96A", fill: "#D4A96A" }} />
             </motion.div>
-            <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)", letterSpacing: "-0.4px" }}>
+            <span className="text-lg tracking-[-0.03em]" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)", fontWeight: 700, fontStyle: "italic" }}>
               flames-up
             </span>
           </div>
-          <p className="text-xs font-semibold pl-1" style={{ color: "var(--text-hint)" }}>
-            {greeting()}{firstName ? `, ${firstName} ✦` : " ✦"}
+          <p className="text-[11px] font-medium pl-0.5 tracking-wide uppercase" style={{ color: "var(--text-hint)", letterSpacing: "0.06em" }}>
+            {greeting()}{firstName ? `, ${firstName}` : ""}
           </p>
         </div>
 

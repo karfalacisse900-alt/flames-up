@@ -29,10 +29,10 @@ const WIDE_PAGES = ["Gallery", "Discover", "WeeklyChallenges", "HallOfFame", "Ar
 function FlamesUpLogo() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #E05C2A, #F97316)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Flame style={{ width: 16, height: 16, color: "#fff", fill: "#fff" }} />
+      <div style={{ width: 26, height: 26, borderRadius: 8, background: "linear-gradient(135deg, #1C1A16, #3D3A34)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Flame style={{ width: 13, height: 13, color: "#D4A96A", fill: "#D4A96A" }} />
       </div>
-      <span style={{ fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)", letterSpacing: "-0.3px" }}>flames-up</span>
+      <span style={{ fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: 16, fontStyle: "italic", color: "var(--text-primary)", letterSpacing: "-0.2px" }}>flames-up</span>
     </div>
   );
 }

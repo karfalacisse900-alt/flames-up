@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap');
 
 
 @tailwind base;
@@ -6,28 +6,28 @@
 @tailwind utilities;
 
 :root {
-  --font-serif: 'Manrope', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Organic earth-tone palette */
-  --bg-app:     #F4F0E8;
-  --bg-card:    #FDFAF4;
-  --bg-nav:     rgba(253,250,244,0.88);
-  --bg-subtle:  #EDE8DC;
-  --bg-modal:   #FDFAF4;
+  /* Premium organic palette */
+  --bg-app:     #F5F2EC;
+  --bg-card:    #FDFCF9;
+  --bg-nav:     rgba(253,252,249,0.92);
+  --bg-subtle:  #EDEBE4;
+  --bg-modal:   #FDFCF9;
 
-  --text-primary:   #1C2B1A;
-  --text-secondary: #4A5E47;
-  --text-hint:      #8A9E86;
-  --border-light:   #D5CCB8;
-  --border-medium:  #BFB49C;
-  --border-subtle:  #EAE4D6;
+  --text-primary:   #181C17;
+  --text-secondary: #47594A;
+  --text-hint:      #8C9E88;
+  --border-light:   #DDD8CC;
+  --border-medium:  #C5BAA4;
+  --border-subtle:  #ECEAE3;
 
-  --accent-primary:       #2D6A4F;
-  --accent-primary-hover: #1B4332;
-  --accent-primary-light: #D8F3DC;
-  --accent-secondary:       #74C69D;
-  --accent-secondary-hover: #52B788;
+  --accent-primary:       #263F2A;
+  --accent-primary-hover: #182B1C;
+  --accent-primary-light: #E0EDE2;
+  --accent-secondary:       #5A9478;
+  --accent-secondary-hover: #3D7A5C;
 
   --elevation-1: 0 2px 6px rgba(28, 43, 26, 0.06), 0 1px 2px rgba(28, 43, 26, 0.04);
   --elevation-2: 0 8px 24px rgba(28, 43, 26, 0.08), 0 3px 8px rgba(28, 43, 26, 0.05);
@@ -755,9 +755,9 @@ nav.fixed,
 
 /* ── Dark Mode ── */
 /* ── Typography Scale (Readability) ── */
-h1, .h1 { font-family: var(--font-serif); font-size: 2.1rem; font-weight: 800; line-height: 1.08; letter-spacing: -0.035em; }
-h2, .h2 { font-family: var(--font-serif); font-size: 1.65rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.025em; }
-h3, .h3 { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+h1, .h1 { font-family: var(--font-serif); font-size: 2.1rem; font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; font-style: italic; }
+h2, .h2 { font-family: var(--font-serif); font-size: 1.65rem; font-weight: 700; line-height: 1.18; letter-spacing: -0.005em; }
+h3, .h3 { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
 h4, .h4 { font-size: 1.08rem; font-weight: 700; line-height: 1.35; }
 p, .body { font-size: 0.98rem; line-height: 1.7; }
 .caption { font-size: 0.875rem; line-height: 1.6; }
@@ -770,22 +770,22 @@ p, .body { font-size: 0.98rem; line-height: 1.7; }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app:     #0D1610;
-    --bg-card:    #142018;
-    --bg-nav:     rgba(13, 22, 16, 0.88);
-    --bg-subtle:  #1A2B1E;
-    --bg-modal:   #142018;
+    --bg-app:     #0F110E;
+    --bg-card:    #161A14;
+    --bg-nav:     rgba(15, 17, 14, 0.92);
+    --bg-subtle:  #1C2118;
+    --bg-modal:   #161A14;
 
-    --text-primary:   #E8F5E2;
-    --text-secondary: #A8C5A0;
-    --text-hint:      #6B9064;
-    --border-light:   #253D28;
-    --border-medium:  #3A5C3E;
-    --border-subtle:  #111E14;
+    --text-primary:   #EAF0E6;
+    --text-secondary: #A6BCA0;
+    --text-hint:      #6C8869;
+    --border-light:   #262E22;
+    --border-medium:  #384036;
+    --border-subtle:  #131710;
 
-    --accent-primary:       #52B788;
-    --accent-primary-hover: #74C69D;
-    --accent-primary-light: #1A3D2B;
+    --accent-primary:       #7DBF9A;
+    --accent-primary-hover: #95CEB0;
+    --accent-primary-light: #1A3024;
     --accent-secondary:       #95D5B2;
     --accent-secondary-hover: #74C69D;
 

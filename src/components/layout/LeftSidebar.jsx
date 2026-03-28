@@ -30,14 +30,14 @@ export default function LeftSidebar({ currentPageName, unreadCount }) {
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-3 mb-6">
         <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #E05C2A, #F97316)" }}
+          className="w-7 h-7 rounded-xl flex items-center justify-center"
+          style={{ background: "linear-gradient(135deg, #1C1A16, #3D3A34)" }}
         >
-          <Flame className="w-4 h-4 text-white fill-white" />
+          <Flame className="w-3.5 h-3.5" style={{ color: "#D4A96A", fill: "#D4A96A" }} />
         </div>
         <span
-          className="text-base font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}
+          className="text-base tracking-tight"
+          style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 700, color: "var(--text-primary)" }}
         >
           flames-up
         </span>

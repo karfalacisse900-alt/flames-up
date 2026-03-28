@@ -213,7 +213,7 @@ export default function Profile() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
       className="overflow-y-auto overscroll-contain px-4 pt-4 pb-8"
-      style={{ backgroundColor: "#f3f6fb", minHeight: "calc(100dvh - 64px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
+      style={{ backgroundColor: "var(--bg-app)", minHeight: "calc(100dvh - 64px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-4 px-1">
           <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>Profile</h1>
@@ -259,13 +259,13 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[34px] p-4 md:p-5" style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 16px 40px rgba(15,23,42,0.08)" }}>
+        <div className="relative overflow-hidden rounded-[28px] p-4 md:p-5" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 8px 32px rgba(24,28,23,0.08)" }}>
           <div className="absolute inset-x-0 top-0 h-28" style={{ background: activeTheme.banner, opacity: 0.18 }} />
           <div className="relative">
             <div className="flex items-start gap-4 pt-2">
               <div className="relative shrink-0">
                 <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold"
-                style={{ backgroundColor: "#d9eef7", color: "var(--accent-primary)", border: "4px solid #fff", boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}>
+                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--accent-primary)", border: "3px solid var(--bg-card)", boxShadow: "0 4px 20px rgba(24,28,23,0.14)" }}>
                   {user.avatar_url ?
                   <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" /> :
 
@@ -296,7 +296,7 @@ export default function Profile() {
             </div>
 
             {(user.bio || user.about_me) &&
-            <div className="mt-4 rounded-[24px] px-4 py-3" style={{ backgroundColor: "#f7f9fc", border: "1px solid #edf2f7" }}>
+            <div className="mt-4 rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-subtle)" }}>
                 {user.bio && <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{user.bio}</p>}
                 {user.about_me && <p className="text-sm mt-1.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{user.about_me}</p>}
               </div>
@@ -319,7 +319,7 @@ export default function Profile() {
         <div className="grid grid-cols-2 gap-3 mt-4">
             {myPosts.map((post) =>
           <div key={post.id} className="relative aspect-square rounded-[20px] overflow-hidden group cursor-pointer"
-          style={{ backgroundColor: "rgba(255,255,255,0.96)", border: "1px solid #e7edf5", boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "var(--elevation-1)" }}>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
                   <p className="text-white text-xs line-clamp-2">{post.text}</p>
                 </div>
