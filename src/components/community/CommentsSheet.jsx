@@ -147,7 +147,7 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
   const color = getAvatarColor(reply.author_name);
   const isOwn = currentUserEmail && reply.author_email === currentUserEmail;
   return (
-    <div className="rounded-[22px] p-4 mt-3" style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+    <div className="rounded-[22px] p-4 mt-3" style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)" }}>
       <div className="flex gap-3">
         {reply.author_avatar_url ? (
           <img src={reply.author_avatar_url} alt={reply.author_name} className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -158,15 +158,15 @@ function CommentItem({ reply, currentUserEmail, onDelete }) {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-semibold" style={{ color: "#fff" }}>{reply.author_name || "Anonymous"}</span>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>• {timeAgo(reply.created_date)}</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{reply.author_name || "Anonymous"}</span>
+            <span className="text-xs" style={{ color: "var(--text-hint)" }}>• {timeAgo(reply.created_date)}</span>
             {isOwn && <button onClick={() => onDelete(reply)} className="ml-auto p-1 rounded-full" style={{ color: "#E05C7A" }}><Trash2 className="w-3.5 h-3.5" /></button>}
           </div>
           {reply.type === "voice" ? <VoicePlayer audioUrl={reply.audio_url} />
             : reply.type === "image" && reply.image_url ? <img src={reply.image_url} alt="comment" className="rounded-2xl mt-1 max-w-full object-cover" style={{ maxHeight: 200 }} />
             : reply.type === "sticker" ? <span className="text-4xl">{reply.body}</span>
             : reply.type === "gif" && reply.gif_url ? <img src={reply.gif_url} alt="GIF" className="rounded-2xl mt-1 max-w-full" style={{ maxHeight: 180 }} />
-            : <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}><SmartText text={reply.body} /></p>}
+            : <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}><SmartText text={reply.body} /></p>}
           <div className="flex items-center gap-3 mt-3">
             <button onClick={() => setLiked(v => !v)} className="text-xs flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ color: liked ? "#E05C7A" : "var(--text-hint)", backgroundColor: "var(--bg-subtle)" }}>
               {liked ? "😊" : "🙂"} <span>1</span>
@@ -375,14 +375,13 @@ export default function CommentsSheet({ postId, user, onClose }) {
           {allReplies.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-4xl mb-2">💬</p>
-              <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>No comments yet</p>
-              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>Be the first to comment!</p>
+              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No comments yet</p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Be the first to comment!</p>
             </div>
           ) : (
             allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} currentUserEmail={user?.email} onDelete={handleDeleteComment} />)
           )}
           <div style={{ height: 8 }} />
-          <div style={{ height: 16 }} />
         </div>
 
         {/* Sticker panel */}
