@@ -18,6 +18,12 @@ function StripCarousel({ images, aspectRatio = "3/4" }) {
   const dragging = useRef(false);
   const count = images.length;
 
+  // Preload adjacent images to eliminate blink
+  useEffect(() => {
+    const toPreload = [idx, idx + 1, idx - 1].filter(i => i >= 0 && i < count);
+    toPreload.forEach(i => { const img = new Image(); img.src = images[i]; });
+  }, [idx, images, count]);
+
   const goTo = (n) => setIdx(Math.max(0, Math.min(count - 1, n)));
 
   return (

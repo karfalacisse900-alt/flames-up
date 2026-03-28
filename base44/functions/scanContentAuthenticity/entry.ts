@@ -17,34 +17,39 @@ Deno.serve(async (req) => {
     let prompt = "";
 
     if (content_type === "image") {
-      prompt = `You are an AI content authenticity detector for a social platform that requires only real, authentic user-generated content.
+      prompt = `You are reviewing an image uploaded by a user to a social platform. Your job is to determine if this is a real photo taken by a human, or clearly AI-generated.
 
-Analyze this image carefully and determine if it is:
-1. AI-GENERATED: Created by AI tools like Midjourney, DALL-E, Stable Diffusion, etc.
-2. HEAVILY MANIPULATED: Edited far beyond normal photo editing (face swaps, deepfakes, synthetic elements)
-3. AUTHENTIC: A real photograph taken by a human
+IMPORTANT BIAS: You MUST strongly favor "authentic". Real phone photos often look imperfect, grainy, blurry, have harsh lighting, or look like casual snapshots. These are NOT signs of AI generation.
 
-Look for these AI-generation signals:
-- Unnatural skin texture (too smooth, waxy, plastic-like)
-- Impossible or surreal lighting that defies physics
-- Anatomical errors (extra fingers, distorted hands, malformed ears)
-- Background inconsistencies (blurring, artifacts, repeated patterns)
-- Text that is garbled or illegible
-- Unnaturally perfect symmetry in faces
-- Dreamlike or hyper-stylized aesthetic typical of AI art
-- Metadata signals embedded in the visual style
+Only mark as "rejected" if the image is UNMISTAKABLY AI-generated with extreme certainty — for example: perfectly rendered fantasy scenes, obvious Midjourney/DALL-E art style with surreal lighting and impossible anatomy, text that is completely garbled gibberish throughout.
+
+Do NOT reject:
+- Normal phone photos, even if they look slightly edited or filtered
+- Photos with Instagram-style color grading
+- Portrait mode / bokeh photos
+- Group selfies or blurry candid shots
+- Fashion photos, outfit shots, food photos
+- Photos with some noise or compression artifacts
+- Anything that could plausibly be a real person's camera roll
+
+Only reject if ALL of the following are true:
+- Clearly synthetic, not a real photo
+- Obvious AI art aesthetic (Midjourney/DALL-E style)
+- Confidence of AI generation is above 0.92
+
+Otherwise return "authentic".
 
 Respond ONLY with this JSON:
 {
   "verdict": "authentic" | "flagged" | "rejected",
   "confidence": 0.0-1.0,
-  "reason": "brief explanation (max 2 sentences)"
+  "reason": "brief explanation (max 1 sentence)"
 }
 
-Rules:
-- verdict "rejected" = clearly AI-generated (confidence > 0.75)
-- verdict "flagged" = uncertain, possibly AI or heavily edited (confidence 0.45-0.75)
-- verdict "authentic" = real photograph (confidence > 0.6 for authenticity)`;
+Thresholds:
+- "rejected" = unmistakably AI-generated art, confidence > 0.92
+- "flagged" = very likely AI-generated but uncertain, confidence 0.85-0.92
+- "authentic" = everything else including normal photos, edited photos, filtered photos`;
     } else if (content_type === "video") {
       prompt = `You are an AI content authenticity detector for a social platform. 
       

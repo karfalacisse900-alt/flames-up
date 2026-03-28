@@ -80,6 +80,13 @@ export default function SpotCard({ spot, index }) {
   const prev = (e) => { e.stopPropagation(); setPhotoIndex(i => (i - 1 + photos.length) % photos.length); };
   const next = (e) => { e.stopPropagation(); setPhotoIndex(i => (i + 1) % photos.length); };
 
+  // Preload adjacent photos to prevent blink
+  useEffect(() => {
+    if (photos.length < 2) return;
+    const toLoad = [photoIndex + 1, photoIndex - 1].filter(i => i >= 0 && i < photos.length);
+    toLoad.forEach(i => { const img = new Image(); img.src = photos[i]; });
+  }, [photoIndex, photos]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}

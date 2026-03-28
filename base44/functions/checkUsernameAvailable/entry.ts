@@ -18,8 +18,12 @@ Deno.serve(async (req) => {
 
   // Check User entity directly for uniqueness
   const allUsers = await base44.asServiceRole.entities.User.list("-created_date", 5000);
+  // Only block if another user has EXPLICITLY claimed this username (username_confirmed = true)
+  // Auto-generated usernames from onSignup are NOT confirmed and don't block claims
   const taken = allUsers.some(
-    u => u.username?.toLowerCase() === normalized && u.email !== user.email
+    u => u.username?.toLowerCase() === normalized &&
+         u.email !== user.email &&
+         u.username_confirmed === true
   );
 
   return Response.json({ available: !taken });

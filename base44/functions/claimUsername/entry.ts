@@ -30,8 +30,12 @@ Deno.serve(async (req) => {
     // ── Check uniqueness (case-insensitive, atomic read) ───────────────────
     // Fetch all users with this username (ignoring the requesting user)
     const existing = await base44.asServiceRole.entities.User.list("-created_date", 5000);
+    // Only block if another user has explicitly confirmed/claimed this username
+    // Auto-generated usernames (from onSignup) are not confirmed and don't block claims
     const taken = existing.some(
-      u => u.username?.toLowerCase() === normalizedUsername && u.email !== user.email
+      u => u.username?.toLowerCase() === normalizedUsername &&
+           u.email !== user.email &&
+           u.username_confirmed === true
     );
 
     if (taken) {
