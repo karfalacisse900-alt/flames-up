@@ -79,12 +79,29 @@ export default function CreatorProfilePopup({ creator, coords, mapContainer, onC
         <div className="relative overflow-hidden"
           style={{ height: 180, background: "linear-gradient(135deg,#1C2B1A,#2D6A4F)", cursor: "pointer" }}
           onClick={() => images.length > 0 && setFullscreen(true)}>
+          {images.length > 0 ? (
+            <>
+              <div style={{ display: "flex", width: `${images.length * 100}%`, height: "100%", transform: `translateX(${(-photoIdx * 100) / images.length}%)`, transition: "transform 0.3s ease" }}>
+                {images.map((src, i) => (
+                  <div key={i} style={{ width: `${100 / images.length}%`, flexShrink: 0, height: "100%" }}>
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+              {images.length > 1 && (
+                <>
+                  <button onClick={prevPhoto} className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)", minHeight: "unset", minWidth: "unset" }}>
+                    <ChevronLeft className="w-3 h-3 text-white" />
+                  </button>
+                  <button onClick={nextPhoto} className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)", minHeight: "unset", minWidth: "unset" }}>
+                    <ChevronRight className="w-3 h-3 text-white" />
+                  </button>
+                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                    style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+                    {photoIdx + 1}/{images.length}
+                  </div>
                 </>
               )}
-              <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
-                {photoIdx + 1}/{images.length}
-              </div>
             </>
           ) : creator.profile_image ? (
             <img src={creator.profile_image} alt="" className="w-full h-full object-cover" />
