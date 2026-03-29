@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, Image, Video, Link2, BookOpen, Plus, ChevronDown, Play } from "lucide-react";
+import { X, Image, Video, Link2, BookOpen, ChevronDown, Play, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -213,22 +213,22 @@ export default function DiscoverPostComposer({ user, onClose, onPosted }) {
       {/* Bottom toolbar */}
       <div className="flex items-center gap-2 px-4 py-3"
         style={{ borderTop: "1px solid var(--border-light)", paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)" }}>
-        <button onClick={() => mediaInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
-          <Image className="w-4 h-4" style={{ color: "#16A34A" }} />
-          Photo
-        </button>
-        <button onClick={() => mediaInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
-          <Video className="w-4 h-4" style={{ color: "#2563EB" }} />
-          Video
-        </button>
         <input ref={mediaInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
           onChange={e => handleMediaUpload(e.target.files)} />
+        <button onClick={() => mediaInputRef.current?.click()}
+          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
+          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1.5px solid var(--accent-primary)", minHeight: "unset", minWidth: "unset" }}>
+          <Image className="w-4 h-4" />
+          Photo / Video
+        </button>
+        <button onClick={() => mediaInputRef.current?.click()}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-semibold"
+          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
+          <Camera className="w-4 h-4" style={{ color: "#2563EB" }} />
+          Camera
+        </button>
         <span className="ml-auto text-xs" style={{ color: "var(--text-hint)" }}>
-          {mediaItems.length > 0 ? `${mediaItems.length} file${mediaItems.length > 1 ? "s" : ""} added` : "Mix photos & videos"}
+          {mediaItems.length > 0 ? `${mediaItems.length} file${mediaItems.length > 1 ? "s" : ""} added` : ""}
         </span>
       </div>
     </div>

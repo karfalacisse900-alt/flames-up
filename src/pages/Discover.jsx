@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, PenSquare } from "lucide-react";
+import { Bell, PenSquare, MapPin, Navigation, Map, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ArticleFeed from "@/components/discover/ArticleFeed";
 import ArticleDetail from "@/components/discover/ArticleDetail";
 import DiscoverPostComposer from "@/components/discover/DiscoverPostComposer";
@@ -13,7 +14,15 @@ const TABS = [
   { id: "daily", label: "Daily" },
 ];
 
+const PLACE_SHORTCUTS = [
+  { id: "around", label: "Around Me", emoji: "📍", desc: "What's nearby" },
+  { id: "nearby", label: "Nearby", emoji: "🧭", desc: "Close by" },
+  { id: "places", label: "Places", emoji: "🗺️", desc: "Explore" },
+  { id: "events", label: "Events", emoji: "🎉", desc: "Happening now" },
+];
+
 export default function Discover() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("foryou");
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -90,6 +99,21 @@ export default function Discover() {
                   {tab.badge}
                 </span>
               )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Location shortcuts */}
+      <div className="px-4 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Explore Your Area</p>
+        <div className="grid grid-cols-4 gap-2">
+          {PLACE_SHORTCUTS.map(s => (
+            <button key={s.id} onClick={() => navigate("/NearbyPlaces")}
+              className="flex flex-col items-center gap-1.5 py-3 rounded-2xl"
+              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
+              <span className="text-2xl">{s.emoji}</span>
+              <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{s.label}</span>
             </button>
           ))}
         </div>
