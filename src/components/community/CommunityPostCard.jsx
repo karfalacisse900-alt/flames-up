@@ -2,6 +2,7 @@ import React, { useState, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
+import CommentsSheet from "./CommentsSheet";
 
 import { MessageCircle, Share2, Bookmark, Plus, Trash2, MoreHorizontal, Flag, Link as LinkIcon, EyeOff, MapPin, Heart, ExternalLink } from "lucide-react";
 import { normalizeMediaUrl } from "@/utils/normalizeMediaUrl";
@@ -137,6 +138,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   };
 
   const [notInterested, setNotInterested] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
   if (notInterested) return null;
@@ -296,12 +298,12 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
                 </div>
               )}
             </div>
-            <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
+            <button onClick={() => setShowComments(true)}
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
               style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
               <MessageCircle className="w-[18px] h-[18px]" />
               {(post.comment_count || 0) > 0 && <span>{post.comment_count}</span>}
-            </Link>
+            </button>
             <button onClick={handleShare}
               className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-xs font-semibold chip"
               style={{ color: "var(--text-hint)", minWidth: 44, minHeight: 44, justifyContent: "center" }}>
@@ -319,6 +321,11 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
         {showSaveModal && <SavePostModal post={post} user={user} onClose={() => { setShowSaveModal(false); setSaved(true); }} />}
         <ShareSheet open={showShareSheet} onClose={() => setShowShareSheet(false)}
           url={`${window.location.origin}?post=${post.id}`} text={post.title || post.body?.slice(0, 100)} />
+        <AnimatePresence>
+          {showComments && (
+            <CommentsSheet postId={post.id} user={user} onClose={() => setShowComments(false)} />
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -591,13 +598,13 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           </div>
 
           {/* Comment */}
-          <Link to={createPageUrl(`PostComments?postId=${post.id}`)}
+          <button onClick={() => setShowComments(true)}
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
             <MessageCircle className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-semibold">Comment</span>
             {(post.comment_count || 0) > 0 && <span className="text-sm font-semibold">{post.comment_count}</span>}
-          </Link>
+          </button>
 
           {/* Share */}
           <button onClick={handleShare}
@@ -633,6 +640,11 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
       )}
       <ShareSheet open={showShareSheet} onClose={() => setShowShareSheet(false)}
         url={`${window.location.origin}?post=${post.id}`} text={post.title || post.body?.slice(0, 100)} />
+      <AnimatePresence>
+        {showComments && (
+          <CommentsSheet postId={post.id} user={user} onClose={() => setShowComments(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
