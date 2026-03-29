@@ -630,13 +630,12 @@ export default function CommunityFeed({ user }) {
                 onClick={() => setShowTipComposer(v => !v)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
                 style={{
-                  background: showTipComposer ? "linear-gradient(135deg, #2E6B4F, #4CAF7D)" : "var(--bg-subtle)",
-                  color: showTipComposer ? "#fff" : "var(--text-secondary)",
-                  border: showTipComposer ? "none" : "1.5px solid var(--border-light)",
-                  boxShadow: showTipComposer ? "0 2px 8px rgba(46,107,79,0.35)" : "none",
+                  background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)",
+                  color: "#fff",
+                  boxShadow: "0 2px 8px rgba(46,107,79,0.35)",
                   minHeight: 32,
                 }}>
-                🪙 Post
+                Post
               </button>
             )}
           </div>

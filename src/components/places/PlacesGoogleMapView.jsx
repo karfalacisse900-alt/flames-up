@@ -127,7 +127,9 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
 
       const map = new window.google.maps.Map(mapRef.current, {
         center: userLoc,
-        zoom: 15,
+        zoom: 18,
+        tilt: 45,
+        heading: 0,
         disableDefaultUI: true,
         zoomControl: false,
         gestureHandling: "greedy",
