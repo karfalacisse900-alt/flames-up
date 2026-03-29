@@ -69,16 +69,13 @@ Deno.serve(async (req) => {
       console.log(`Initialized user ${user.email}: username=${updates.username}, referral=${updates.referral_code}`);
     }
 
-    // Sync new user to Supabase profiles table - await properly
+    // Sync new user to Supabase profiles table
     try {
       const freshUser = await base44.auth.me();
-      
-      // Deterministic UUID from user id — same user always maps to same Supabase row
       const encoder = new TextEncoder();
       const hashBuf = await crypto.subtle.digest("SHA-256", encoder.encode(String(freshUser.id)));
       const hex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,"0")).join("");
       const profileId = `${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-${hex.slice(16,17)}${hex.slice(17,20)}-${hex.slice(20,32)}`;
-
       const profileRecord = {
         id: profileId,
         email: freshUser.email || 'unknown@flames-up.com',
@@ -86,26 +83,36 @@ Deno.serve(async (req) => {
         avatar_url: freshUser.avatar_url || null,
         updated_at: new Date().toISOString(),
       };
-      
       const sbRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
         method: "POST",
-        headers: {
-          "apikey": SUPABASE_SERVICE_ROLE_KEY,
-          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates",
-        },
+        headers: { "apikey": SUPABASE_SERVICE_ROLE_KEY, "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" },
         body: JSON.stringify(profileRecord),
       });
-      
-      if (!sbRes.ok) {
-        const errText = await sbRes.text();
-        console.error("Supabase profile sync failed:", sbRes.status, errText);
-      } else {
-        console.log(`Synced new user ${freshUser.email} to Supabase profiles`);
-      }
+      if (!sbRes.ok) console.error("Supabase profile sync failed:", sbRes.status, await sbRes.text());
+      else console.log(`Synced new user ${freshUser.email} to Supabase profiles`);
     } catch (sbErr) {
       console.error("Supabase sync error (non-fatal):", sbErr.message);
+    }
+
+    // Sync new user to Cloudflare D1
+    try {
+      const freshUser = await base44.auth.me();
+      const dbId = Deno.env.get("CLOUDFLARE_D1_DATABASE_ID");
+      const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+      const token = Deno.env.get("CLOUDFLARE_API_TOKEN");
+      if (dbId && accountId && token) {
+        await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${dbId}/query`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sql: `INSERT INTO users (id, email, full_name, username, role, updated_at) VALUES (?, ?, ?, ?, ?, datetime('now')) ON CONFLICT(id) DO UPDATE SET full_name=excluded.full_name, username=excluded.username, updated_at=excluded.updated_at`,
+            params: [freshUser.id, freshUser.email, freshUser.full_name || "", updates.username || freshUser.username || "", freshUser.role || "user"],
+          }),
+        });
+        console.log(`Synced new user ${freshUser.email} to D1`);
+      }
+    } catch (d1Err) {
+      console.error("D1 sync error (non-fatal):", d1Err.message);
     }
 
     return Response.json({ success: true, ...updates });

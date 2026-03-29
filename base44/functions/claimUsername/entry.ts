@@ -1,6 +1,30 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+async function checkRateLimit(key, limit, windowSeconds) {
+  try {
+    const accountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+    const nsId = Deno.env.get("CLOUDFLARE_KV_NAMESPACE_ID");
+    const token = Deno.env.get("CLOUDFLARE_API_TOKEN");
+    if (!accountId || !nsId || !token) return true; // fail open
+    const CF_API = "https://api.cloudflare.com/client/v4";
+    const rlKey = `rl:${key}`;
+    const res = await fetch(`${CF_API}/accounts/${accountId}/storage/kv/namespaces/${nsId}/values/${encodeURIComponent(rlKey)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const now = Date.now();
+    let state = { count: 0, windowStart: now };
+    if (res.status === 200) state = JSON.parse(await res.text());
+    if (state.count >= limit) return false; // blocked
+    state.count++;
+    const ttl = Math.max(1, windowSeconds - Math.floor((now - state.windowStart) / 1000));
+    await fetch(`${CF_API}/accounts/${accountId}/storage/kv/namespaces/${nsId}/values/${encodeURIComponent(rlKey)}?expiration_ttl=${ttl}`, {
+      method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "text/plain" }, body: JSON.stringify(state),
+    });
+    return true;
+  } catch { return true; } // fail open
+}
 const FULLNAME_RE = /^[a-zA-Z ]{3,50}$/;
 
 Deno.serve(async (req) => {
@@ -8,6 +32,10 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Rate limit: 5 attempts per user per 10 minutes
+    const allowed = await checkRateLimit(`user:${user.email}:claimUsername`, 5, 600);
+    if (!allowed) return Response.json({ error: "Too many attempts. Please wait a few minutes." }, { status: 429 });
 
     const { username, full_name } = await req.json();
 
