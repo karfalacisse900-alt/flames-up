@@ -356,7 +356,7 @@ export default function CommentsSheet({ postId, user, onClose }) {
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 320, damping: 34 }}
         className="flex flex-col w-full max-w-lg mx-auto"
-        style={{ backgroundColor: "var(--bg-card)", borderRadius: "20px 20px 0 0", height: "80vh", boxShadow: "0 -8px 40px rgba(0,0,0,0.22)" }}
+        style={{ backgroundColor: "#FDFCF9", borderRadius: "20px 20px 0 0", height: "80vh", boxShadow: "0 -8px 40px rgba(0,0,0,0.22)" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Handle */}

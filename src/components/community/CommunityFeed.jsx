@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Plus, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
 import FeedMenuDrawer from "./FeedMenuDrawer";
+import QuickTipComposer from "./QuickTipComposer";
 import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
@@ -623,6 +624,19 @@ export default function CommunityFeed({ user }) {
               )}
             </div>
 
+            {user && (
+              <button
+                onClick={() => setShowTipComposer(v => !v)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+                style={{
+                  backgroundColor: showTipComposer ? "#FFF3E0" : "var(--bg-subtle)",
+                  color: showTipComposer ? "#E65100" : "var(--text-secondary)",
+                  border: `1.5px solid ${showTipComposer ? "#FF9800" : "var(--border-light)"}`,
+                  minHeight: 32,
+                }}>
+                ⚡ Tip
+              </button>
+            )}
             <Link
               to={createPageUrl("CreatePostFlow")}
               onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
@@ -634,9 +648,19 @@ export default function CommunityFeed({ user }) {
         </div>
       </div>
 
-      {/* New posts floating pill */}
+      {/* Quick Tip Composer */}
       <AnimatePresence>
-        {false && null /* posts now auto-insert via real-time subscription */}
+        {showTipComposer && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <QuickTipComposer user={user} onPosted={() => setShowTipComposer(false)} />
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Feed */}
