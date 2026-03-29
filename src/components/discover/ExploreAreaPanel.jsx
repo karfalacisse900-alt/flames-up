@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import NearbyEventsPage from "./NearbyEventsPage";
 import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -234,6 +235,7 @@ export default function ExploreAreaPanel({ onClose }) {
   const [activeCategory, setActiveCategory] = useState("restaurant");
   const [error, setError] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showEvents, setShowEvents] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) { setError("Geolocation not supported"); setLocationLoading(false); return; }
@@ -254,13 +256,13 @@ export default function ExploreAreaPanel({ onClose }) {
   }, []);
 
   const fetchPlaces = useCallback(async () => {
-    if (!coords) return;
+    if (!coords || activeCategory === "event") return;
     setLoading(true);
     const cat = CATEGORIES.find(c => c.id === activeCategory);
     try {
       const res = await base44.functions.invoke("nearbyPlaces", {
         lat: coords.lat, lng: coords.lng, radius: 8047,
-        type: activeCategory === "event" ? "tourist_attraction" : activeCategory,
+        type: activeCategory,
         keyword: cat?.keyword || "",
       });
       setPlaces(res.data?.results || []);
@@ -268,7 +270,22 @@ export default function ExploreAreaPanel({ onClose }) {
     setLoading(false);
   }, [coords, activeCategory]);
 
-  useEffect(() => { if (coords) fetchPlaces(); }, [coords, activeCategory]);
+  useEffect(() => {
+    if (activeCategory === "event") { setShowEvents(true); return; }
+    setShowEvents(false);
+    if (coords) fetchPlaces();
+  }, [coords, activeCategory]);
+
+  if (showEvents) {
+    return (
+      <NearbyEventsPage
+        coords={coords}
+        locationName={locationName}
+        onClose={() => { setShowEvents(false); setActiveCategory("restaurant"); }}
+        onSelectEvent={(ev) => setSelectedPlace({ ...ev, isEvent: true })}
+      />
+    );
+  }
 
   if (selectedPlace) {
     return (
