@@ -236,6 +236,9 @@ export default function ExploreAreaPanel({ onClose }) {
   const [error, setError] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showEvents, setShowEvents] = useState(false);
+  const [filterFree, setFilterFree] = useState(false);
+  const [filterTopRated, setFilterTopRated] = useState(false);
+  const [filterOpenNow, setFilterOpenNow] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) { setError("Geolocation not supported"); setLocationLoading(false); return; }
@@ -321,7 +324,7 @@ export default function ExploreAreaPanel({ onClose }) {
         </div>
 
         {/* Category pills */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4 pb-3">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4 pb-2">
           {CATEGORIES.map(cat => (
             <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0"
@@ -335,6 +338,28 @@ export default function ExploreAreaPanel({ onClose }) {
             </button>
           ))}
         </div>
+
+        {/* Filter toggles */}
+        {activeCategory !== "event" && (
+          <div className="flex gap-2 px-4 pb-3">
+            {[
+              { label: "🆓 Free Entry", active: filterFree, set: () => setFilterFree(v => !v) },
+              { label: "⭐ Top Rated", active: filterTopRated, set: () => setFilterTopRated(v => !v) },
+              { label: "🟢 Open Now", active: filterOpenNow, set: () => setFilterOpenNow(v => !v) },
+            ].map(f => (
+              <button key={f.label} onClick={f.set}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
+                style={{
+                  backgroundColor: f.active ? "var(--accent-primary)" : "var(--bg-card)",
+                  color: f.active ? "#fff" : "var(--text-secondary)",
+                  border: `1px solid ${f.active ? "transparent" : "var(--border-light)"}`,
+                  minHeight: "unset", minWidth: "unset",
+                }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -362,51 +387,61 @@ export default function ExploreAreaPanel({ onClose }) {
           </div>
         ) : (
           <>
-            <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-hint)" }}>{places.length} places found</p>
-            <div className="grid grid-cols-2 gap-3">
-              {places.map(place => {
-                const dist = coords ? haversine(coords.lat, coords.lng, place.lat, place.lng) : null;
-                const cat = CATEGORIES.find(c => place.types?.includes(c.id));
-                return (
-                  <button key={place.id} onClick={() => setSelectedPlace(place)}
-                    className="rounded-2xl overflow-hidden text-left"
-                    style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
-                    {place.photo ? (
-                      <div className="relative">
-                        <img src={place.photo} alt={place.name} className="w-full object-cover" style={{ height: 120 }} />
-                        {place.open_now !== undefined && (
-                          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: place.open_now ? "#16A34A" : "#DC2626", color: "#fff" }}>
-                            {place.open_now ? "Open" : "Closed"}
-                          </span>
+            {/* Apply filters */}
+          {(() => {
+            let list = places;
+            if (filterFree) list = list.filter(p => !p.price_level || p.price_level === 0);
+            if (filterTopRated) list = list.filter(p => p.rating >= 4.2);
+            if (filterOpenNow) list = list.filter(p => p.open_now === true);
+            const displayPlaces = list;
+            return (
+              <>
+                <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-hint)" }}>{displayPlaces.length} places found</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {displayPlaces.map(place => {
+                    const dist = coords ? haversine(coords.lat, coords.lng, place.lat, place.lng) : null;
+                    const cat = CATEGORIES.find(c => place.types?.includes(c.id));
+                    return (
+                      <button key={place.id} onClick={() => setSelectedPlace(place)}
+                        className="rounded-2xl overflow-hidden text-left"
+                        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
+                        {place.photo ? (
+                          <div className="relative">
+                            <img src={place.photo} alt={place.name} className="w-full object-cover" style={{ height: 120 }} />
+                            {place.open_now !== undefined && (
+                              <span className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: place.open_now ? "#16A34A" : "#DC2626", color: "#fff" }}>
+                                {place.open_now ? "Open" : "Closed"}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-full flex items-center justify-center text-3xl" style={{ height: 120, backgroundColor: "var(--bg-subtle)" }}>
+                            {cat?.emoji || "📍"}
+                          </div>
                         )}
-                      </div>
-                    ) : (
-                      <div className="w-full flex items-center justify-center text-3xl" style={{ height: 120, backgroundColor: "var(--bg-subtle)" }}>
-                        {cat?.emoji || "📍"}
-                      </div>
-                    )}
-                    <div className="p-3">
-                      <p className="font-semibold text-sm leading-tight mb-1 line-clamp-1" style={{ color: "var(--text-primary)" }}>{place.name}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-0.5">
-                          {place.rating && (
-                            <>
-                              <Star className="w-3 h-3" style={{ color: "#F59E0B", fill: "#F59E0B" }} />
-                              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{place.rating}</span>
-                            </>
+                        <div className="p-3">
+                          <p className="font-semibold text-sm leading-tight mb-1 line-clamp-1" style={{ color: "var(--text-primary)" }}>{place.name}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-0.5">
+                              {place.rating && (
+                                <><Star className="w-3 h-3" style={{ color: "#F59E0B", fill: "#F59E0B" }} />
+                                <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{place.rating}</span></>
+                              )}
+                            </div>
+                            {dist && <span className="text-xs" style={{ color: "var(--text-hint)" }}>{dist} mi</span>}
+                          </div>
+                          {place.price_level && (
+                            <p className="text-xs font-semibold mt-0.5" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(place.price_level)}</p>
                           )}
                         </div>
-                        {dist && <span className="text-xs" style={{ color: "var(--text-hint)" }}>{dist} mi</span>}
-                      </div>
-                      {place.price_level && (
-                        <p className="text-xs font-semibold mt-0.5" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(place.price_level)}</p>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
           </>
         )}
       </div>
