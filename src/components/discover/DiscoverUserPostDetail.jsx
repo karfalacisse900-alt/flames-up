@@ -31,7 +31,7 @@ export default function DiscoverUserPostDetail({ post, user, onClose, onUpdate }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 sticky top-0 z-10"
         style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 12px), 12px)" }}>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ArticleFeed from "@/components/discover/ArticleFeed";
 import ArticleDetail from "@/components/discover/ArticleDetail";
 import DiscoverPostComposer from "@/components/discover/DiscoverPostComposer";
+import DiscoverUserPostDetail from "@/components/discover/DiscoverUserPostDetail";
 
 const TABS = [
   { id: "foryou", label: "For you" },
@@ -26,6 +27,7 @@ export default function Discover() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("foryou");
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedUserPost, setSelectedUserPost] = useState(null);
   const [showComposer, setShowComposer] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
 
@@ -41,6 +43,10 @@ export default function Discover() {
         onPosted={() => { setShowComposer(false); setFeedKey(k => k + 1); }}
       />
     );
+  }
+
+  if (selectedUserPost) {
+    return <DiscoverUserPostDetail post={selectedUserPost} user={user} onClose={() => setSelectedUserPost(null)} onUpdate={() => setFeedKey(k => k + 1)} />;
   }
 
   if (selectedArticle) {
@@ -120,7 +126,7 @@ export default function Discover() {
       </div>
 
       {/* Feed */}
-      <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} />
+      <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} onUserPostClick={setSelectedUserPost} />
     </div>
   );
 }

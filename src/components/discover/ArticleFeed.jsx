@@ -80,7 +80,7 @@ function generateArticles(tab) {
   });
 }
 
-export default function ArticleFeed({ tab, user, onArticleClick }) {
+export default function ArticleFeed({ tab, user, onArticleClick, onUserPostClick }) {
   const [articles, setArticles] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +113,7 @@ export default function ArticleFeed({ tab, user, onArticleClick }) {
   return (
     <div className="divide-y" style={{ borderColor: "var(--border-light)" }}>
       {userPosts.map(post => (
-        <DiscoverUserPostCard key={post.id} post={post} user={user} onUpdate={loadUserPosts} />
+        <DiscoverUserPostCard key={post.id} post={post} user={user} onUpdate={loadUserPosts} onPostClick={onUserPostClick} />
       ))}
       {articles.map((article) => (
         <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />

@@ -3,14 +3,12 @@ import { Heart, MessageCircle, Link2, BookOpen, Play, MoreHorizontal, Minus } fr
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence } from "framer-motion";
 import DiscoverCommentSheet from "./DiscoverCommentSheet";
-import DiscoverUserPostDetail from "./DiscoverUserPostDetail";
 
 const avatarColors = ["#7C69C4", "#D98B62", "#3C6E5A", "#E05C7A", "#4A7FC1"];
 const getColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColors.length];
 
-export default function DiscoverUserPostCard({ post, user, onUpdate }) {
+export default function DiscoverUserPostCard({ post, user, onUpdate, onPostClick }) {
   const [showComments, setShowComments] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comment_count || 0);
   const [liked, setLiked] = useState(post.liked_by?.includes(user?.email));
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
@@ -38,7 +36,7 @@ export default function DiscoverUserPostCard({ post, user, onUpdate }) {
   return (
     <>
       {/* Card — clickable to open detail */}
-      <div onClick={() => setShowDetail(true)} className="flex flex-col gap-3 px-4 py-5 cursor-pointer active:opacity-80"
+      <div onClick={() => onPostClick?.(post)} className="flex flex-col gap-3 px-4 py-5 cursor-pointer active:opacity-80"
         style={{ borderBottom: "1px solid var(--border-light)", backgroundColor: "var(--bg-app)" }}>
 
         {/* Author row — matches ArticleCard exactly */}
@@ -143,15 +141,6 @@ export default function DiscoverUserPostCard({ post, user, onUpdate }) {
         )}
       </AnimatePresence>
 
-      {/* Full detail view */}
-      {showDetail && (
-        <DiscoverUserPostDetail
-          post={{ ...post, like_count: likeCount, liked_by: liked ? [...(post.liked_by || []), user?.email] : (post.liked_by || []) }}
-          user={user}
-          onClose={() => setShowDetail(false)}
-          onUpdate={onUpdate}
-        />
-      )}
     </>
   );
 }
