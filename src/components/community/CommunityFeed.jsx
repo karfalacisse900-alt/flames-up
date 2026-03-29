@@ -630,21 +630,15 @@ export default function CommunityFeed({ user }) {
                 onClick={() => setShowTipComposer(v => !v)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
                 style={{
-                  backgroundColor: showTipComposer ? "#FFF3E0" : "var(--bg-subtle)",
-                  color: showTipComposer ? "#E65100" : "var(--text-secondary)",
-                  border: `1.5px solid ${showTipComposer ? "#FF9800" : "var(--border-light)"}`,
+                  background: showTipComposer ? "linear-gradient(135deg, #2E6B4F, #4CAF7D)" : "var(--bg-subtle)",
+                  color: showTipComposer ? "#fff" : "var(--text-secondary)",
+                  border: showTipComposer ? "none" : "1.5px solid var(--border-light)",
+                  boxShadow: showTipComposer ? "0 2px 8px rgba(46,107,79,0.35)" : "none",
                   minHeight: 32,
                 }}>
-                ⚡ Tip
+                🪙 Post
               </button>
             )}
-            <Link
-              to={createPageUrl("CreatePostFlow")}
-              onClick={(e) => { if (!requireVerified(user)) e.preventDefault(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ background: "linear-gradient(135deg, #2E6B4F, #4CAF7D)", color: "#fff", boxShadow: "0 2px 8px rgba(46,107,79,0.35)" }}>
-              <Plus className="w-3 h-3" /> Post
-            </Link>
           </div>
         </div>
       </div>

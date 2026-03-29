@@ -490,33 +490,48 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
         </div>
       )}
 
-      {/* Bottom-right controls: nearby + radius + satellite stacked */}
+      {/* Right-side floating controls (Lime-style) */}
       {mapReady && (
-        <div className="absolute z-20 flex flex-col items-end gap-2" style={{ bottom: selectedPlace ? 310 : 20, right: 12 }}>
+        <div className="absolute z-20 flex flex-col items-center gap-2" style={{ bottom: selectedPlace ? 310 : 90, right: 12 }}>
           {/* Nearby people */}
           <button onClick={() => setShowNearbyModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
-            style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: "#0F172A" }}>
-            <Users className="w-3.5 h-3.5" style={{ color: "#16A34A" }} />
-            <span style={{ color: "#16A34A" }}>{mapPins.length > 0 ? `${mapPins.length} nearby` : "Nearby"}</span>
+            className="w-11 h-11 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset" }}
+            title="Nearby people">
+            <Users className="w-5 h-5" style={{ color: "#16A34A" }} />
+          </button>
+          {/* Zoom In */}
+          <button onClick={() => mapInst.current?.setZoom((mapInst.current.getZoom() || 15) + 1)}
+            className="w-11 h-11 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset", fontSize: 22, fontWeight: 300, color: "#374151" }}
+            title="Zoom in">+</button>
+          {/* Zoom Out */}
+          <button onClick={() => mapInst.current?.setZoom((mapInst.current.getZoom() || 15) - 1)}
+            className="w-11 h-11 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset", fontSize: 22, fontWeight: 300, color: "#374151" }}
+            title="Zoom out">−</button>
+          {/* Recenter */}
+          <button onClick={() => userLoc && mapInst.current?.panTo(userLoc)}
+            className="w-11 h-11 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset" }}
+            title="My location">
+            <Navigation className="w-4 h-4" style={{ color: "#2563EB" }} />
           </button>
           {/* Satellite toggle */}
           <button
-            onClick={() => {
-              const next = mapType === "roadmap" ? "satellite" : "roadmap";
-              setMapType(next);
-              mapInst.current?.setMapTypeId(next);
-            }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
-            style={{ backgroundColor: mapType === "satellite" ? "#1E40AF" : "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", color: mapType === "satellite" ? "#fff" : "#0F172A" }}>
-            🛰️ {mapType === "satellite" ? "Road" : "Satellite"}
+            onClick={() => { const next = mapType === "roadmap" ? "satellite" : "roadmap"; setMapType(next); mapInst.current?.setMapTypeId(next); }}
+            className="w-11 h-11 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: mapType === "satellite" ? "#1E40AF" : "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset", fontSize: 18 }}
+            title={mapType === "satellite" ? "Road map" : "Satellite"}>
+            🛰️
           </button>
           {/* Radius */}
           <div className="relative">
             <button onClick={() => setShowRadiusPanel(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold"
-              style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)", border: "1px solid rgba(0,0,0,0.06)", color: "#0F172A" }}>
-              <SlidersHorizontal className="w-3.5 h-3.5" />{radius} mi
+              className="w-11 h-11 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "rgba(255,255,255,0.97)", boxShadow: "0 2px 12px rgba(0,0,0,0.18)", minHeight: "unset", minWidth: "unset" }}
+              title="Radius">
+              <SlidersHorizontal className="w-4 h-4" style={{ color: "#374151" }} />
             </button>
             {showRadiusPanel && (
               <div className="absolute bottom-full right-0 mb-1.5 rounded-2xl overflow-hidden py-1"
@@ -535,9 +550,19 @@ export default function PlacesGoogleMapView({ onOpenPlace, user: userProp, onBac
       )}
 
       {mapReady && currentUser && (
-        <div className="absolute z-20" style={{ bottom: selectedPlace ? 310 : 80, left: 12 }}>
+        <div className="absolute z-20" style={{ bottom: selectedPlace ? 310 : 90, left: 12 }}>
           <LocationPrivacyPanel user={currentUser} presence={myPresence}
             onUpdate={updates => setMyPresence(prev => ({ ...(prev || {}), ...updates }))} />
+        </div>
+      )}
+
+      {/* Nearby people count badge */}
+      {mapReady && mapPins.length > 0 && (
+        <div className="absolute z-20" style={{ bottom: selectedPlace ? 310 : 90, left: 12, marginTop: 60 }}>
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-full"
+            style={{ backgroundColor: "#16A34A", boxShadow: "0 2px 12px rgba(22,163,74,0.4)" }}>
+            <span className="text-xs font-bold text-white">👥 {mapPins.length} nearby</span>
+          </div>
         </div>
       )}
 
