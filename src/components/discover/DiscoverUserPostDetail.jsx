@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, Heart, MessageCircle, Link2, BookOpen, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Bookmark, Share2, Heart, MessageCircle, Link2, BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { AnimatePresence } from "framer-motion";
 import DiscoverCommentSheet from "./DiscoverCommentSheet";
@@ -13,11 +13,12 @@ export default function DiscoverUserPostDetail({ post, user, onClose, onUpdate }
   const [commentCount, setCommentCount] = useState(post.comment_count || 0);
   const [liked, setLiked] = useState(post.liked_by?.includes(user?.email));
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
+  const [bookmarked, setBookmarked] = useState(false);
 
   const media = post.media_urls || [];
   const types = post.media_types || [];
   const color = getColor(post.author_name);
-  const dateStr = new Date(post.created_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const dateStr = new Date(post.created_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   const handleLike = async () => {
     if (!user) return;
@@ -30,121 +31,154 @@ export default function DiscoverUserPostDetail({ post, user, onClose, onUpdate }
     onUpdate?.();
   };
 
+  // Estimate read time
+  const wordCount = post.body?.split(/\s+/).length || 0;
+  const readTime = Math.max(1, Math.round(wordCount / 200));
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 sticky top-0 z-10"
+      {/* Top nav — same as ArticleDetail */}
+      <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3"
         style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 12px), 12px)" }}>
-        <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full"
+        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full"
           style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-          <ArrowLeft className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
         </button>
-        <span className="text-sm font-semibold" style={{ color: "var(--text-hint)" }}>Community</span>
-      </div>
-
-      {/* Author */}
-      <div className="flex items-center gap-3 px-4 py-4">
-        {post.author_avatar ? (
-          <img src={post.author_avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-        ) : (
-          <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base"
-            style={{ background: `linear-gradient(135deg, ${color}44, ${color}88)`, color }}>
-            {(post.author_name?.[0] || "U").toUpperCase()}
-          </div>
-        )}
-        <div>
-          <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{post.author_name}</p>
-          <p className="text-xs" style={{ color: "var(--text-hint)" }}>{dateStr}</p>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setBookmarked(v => !v)} className="w-10 h-10 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+            <Bookmark className="w-4 h-4" style={{ color: bookmarked ? "var(--accent-primary)" : "var(--text-secondary)", fill: bookmarked ? "var(--accent-primary)" : "none" }} />
+          </button>
+          <button className="w-10 h-10 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+            <MoreHorizontal className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+          </button>
         </div>
       </div>
 
-      {/* Title */}
-      {post.title && (
-        <h1 className="px-4 pb-3 text-2xl font-bold leading-tight" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-          {post.title}
-        </h1>
-      )}
+      <div className="px-4 py-6 pb-32 max-w-xl mx-auto">
+        {/* Title */}
+        {post.title && (
+          <h1 className="text-2xl font-bold leading-tight mb-3"
+            style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
+            {post.title}
+          </h1>
+        )}
 
-      {/* Body */}
-      <p className="px-4 pb-4 text-base leading-relaxed" style={{ color: "var(--text-primary)" }}>
-        {post.body}
-      </p>
+        {/* Body preview as subtitle (italic) — first sentence only */}
+        {post.body && (
+          <p className="text-lg leading-relaxed mb-6" style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
+            {post.body.split(".")[0]}.
+          </p>
+        )}
 
-      {/* Media */}
-      {media.length > 0 && (
-        <div className="px-4 pb-4">
-          <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "4/3", backgroundColor: "#000" }}>
-            {types[mediaIdx] === "video" ? (
-              <video src={media[mediaIdx]} className="w-full h-full object-cover" controls playsInline />
+        {/* Meta */}
+        <p className="text-sm mb-4" style={{ color: "var(--text-hint)" }}>
+          {readTime} min read · {dateStr}
+        </p>
+
+        {/* Author row — matches ArticleDetail */}
+        <div className="flex items-center justify-between mb-6 pb-5" style={{ borderBottom: "1px solid var(--border-light)" }}>
+          <div className="flex items-center gap-3">
+            {post.author_avatar ? (
+              <img src={post.author_avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
             ) : (
-              <img src={media[mediaIdx]} alt="" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                style={{ background: `linear-gradient(135deg, ${color}44, ${color}88)`, color }}>
+                {(post.author_name?.[0] || "U").toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{post.author_name}</p>
+              <p className="text-xs" style={{ color: "var(--text-hint)" }}>Community</p>
+            </div>
+          </div>
+          <button className="px-4 py-1.5 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: "var(--accent-primary)", color: "#fff", minHeight: "unset", minWidth: "unset" }}>
+            Follow
+          </button>
+        </div>
+
+        {/* Hero media — first item full width like ArticleDetail */}
+        {media.length > 0 && (
+          <div className="mb-6 -mx-4 relative">
+            {types[mediaIdx] === "video" ? (
+              <video src={media[mediaIdx]} className="w-full object-cover" style={{ maxHeight: 280 }} controls playsInline />
+            ) : (
+              <img src={media[mediaIdx]} alt={post.title} className="w-full object-cover" style={{ maxHeight: 280 }} />
             )}
             {media.length > 1 && (
-              <>
-                {mediaIdx > 0 && (
-                  <button onClick={() => setMediaIdx(i => i - 1)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.5)", minHeight: "unset", minWidth: "unset" }}>
-                    <ChevronLeft className="w-4 h-4 text-white" />
-                  </button>
-                )}
-                {mediaIdx < media.length - 1 && (
-                  <button onClick={() => setMediaIdx(i => i + 1)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.5)", minHeight: "unset", minWidth: "unset" }}>
-                    <ChevronRight className="w-4 h-4 text-white" />
-                  </button>
-                )}
-                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
-                  {media.map((_, i) => (
-                    <button key={i} onClick={() => setMediaIdx(i)}
-                      className="rounded-full"
-                      style={{ width: i === mediaIdx ? 16 : 6, height: 6, backgroundColor: i === mediaIdx ? "#fff" : "rgba(255,255,255,0.5)", minHeight: "unset", minWidth: "unset" }} />
-                  ))}
-                </div>
-              </>
+              <div className="flex justify-center gap-1.5 mt-2">
+                {media.map((_, i) => (
+                  <button key={i} onClick={() => setMediaIdx(i)}
+                    className="rounded-full"
+                    style={{ width: i === mediaIdx ? 16 : 6, height: 6, backgroundColor: i === mediaIdx ? "var(--accent-primary)" : "var(--border-medium)", minHeight: "unset", minWidth: "unset" }} />
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-center mt-2 px-4" style={{ color: "var(--text-hint)" }}>
+              {post.title || "Community post"}
+            </p>
+          </div>
+        )}
+
+        {/* Full body */}
+        <div className="space-y-4">
+          {post.body?.split("\n").filter(p => p.trim()).map((para, i) => (
+            <p key={i} className="text-base leading-relaxed" style={{ color: "var(--text-primary)", lineHeight: 1.8 }}>
+              {para}
+            </p>
+          ))}
+        </div>
+
+        {/* Source */}
+        {(post.book_name || post.source_link || post.source_label) && (
+          <div className="mt-6 p-4 rounded-2xl flex flex-col gap-2"
+            style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            {post.source_label && <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-hint)" }}>{post.source_label}</p>}
+            {post.book_name && (
+              <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                <BookOpen className="w-4 h-4" /> {post.book_name}
+              </div>
+            )}
+            {post.source_link && (
+              <a href={post.source_link} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--accent-primary)" }}>
+                <Link2 className="w-4 h-4" /> View source
+              </a>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Source */}
-      {(post.book_name || post.source_link) && (
-        <div className="mx-4 mb-4 p-4 rounded-2xl flex flex-col gap-2"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-          {post.book_name && (
-            <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-              <BookOpen className="w-4 h-4" /> {post.book_name}
-            </div>
-          )}
-          {post.source_link && (
-            <a href={post.source_link} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--accent-primary)" }}>
-              <Link2 className="w-4 h-4" /> View source
-            </a>
-          )}
-        </div>
-      )}
-
-      {/* Actions bar */}
-      <div className="mx-4 mb-6 flex items-center gap-4 py-3 px-4 rounded-2xl"
-        style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+      {/* Bottom action bar — matches ArticleDetail */}
+      <div className="fixed bottom-0 left-0 right-0 flex items-center justify-between px-6 py-3"
+        style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border-light)", paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)" }}>
         <button onClick={handleLike}
-          className="flex items-center gap-1.5 text-sm font-semibold"
+          className="flex items-center gap-2 text-sm font-semibold"
           style={{ color: liked ? "#E05C7A" : "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
           <Heart className="w-5 h-5" style={{ fill: liked ? "#E05C7A" : "none", stroke: "currentColor" }} />
           {likeCount}
         </button>
         <button onClick={() => setShowComments(true)}
-          className="flex items-center gap-1.5 text-sm font-semibold"
+          className="flex items-center gap-2 text-sm font-semibold"
           style={{ color: "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
           <MessageCircle className="w-5 h-5" />
           {commentCount}
         </button>
+        <button onClick={() => setBookmarked(v => !v)}
+          className="flex items-center gap-2 text-sm font-semibold"
+          style={{ color: bookmarked ? "var(--accent-primary)" : "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
+          <Bookmark className="w-5 h-5" style={{ fill: bookmarked ? "currentColor" : "none" }} />
+        </button>
+        <button className="flex items-center gap-2 text-sm font-semibold"
+          style={{ color: "var(--text-secondary)", minHeight: "unset", minWidth: "unset" }}>
+          <Share2 className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Comments overlay */}
+      {/* Comments sheet */}
       <AnimatePresence>
         {showComments && (
           <>
