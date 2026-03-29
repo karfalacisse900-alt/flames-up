@@ -69,6 +69,7 @@ export default function CommunityFeed({ user }) {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [showTipComposer, setShowTipComposer] = useState(false);
   const observerRef = useRef(null);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
