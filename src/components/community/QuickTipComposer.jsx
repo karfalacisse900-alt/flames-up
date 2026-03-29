@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { checkContent } from "../moderation/moderationHelper";
 
-export default function QuickTipComposer({ user }) {
+export default function QuickTipComposer({ user, onPosted }) {
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [postedFlash, setPostedFlash] = useState(false);
@@ -39,7 +39,7 @@ export default function QuickTipComposer({ user }) {
       });
       setText("");
       setPostedFlash(true);
-      setTimeout(() => setPostedFlash(false), 2000);
+      setTimeout(() => { setPostedFlash(false); if (onPosted) onPosted(); }, 1500);
       qc.invalidateQueries({ queryKey: ["communityPosts"] });
     } catch (e) {
       console.error("Tip post failed:", e);
