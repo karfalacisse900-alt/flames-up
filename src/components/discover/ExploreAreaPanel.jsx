@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const CATEGORIES = [
   { id: "restaurant", label: "Food", emoji: "🍽️" },
   { id: "bar", label: "Nightlife", emoji: "🍸" },
   { id: "shopping_mall", label: "Shopping", emoji: "🛍️" },
-  { id: "event", label: "Events", emoji: "🎉", keyword: "local event market festival" },
+  { id: "event", label: "Events", emoji: "🎉", keyword: "local event market festival outdoor movie" },
   { id: "tourist_attraction", label: "Sights", emoji: "🏛️" },
   { id: "park", label: "Outdoor", emoji: "🌳" },
   { id: "movie_theater", label: "Movies", emoji: "🎬" },
@@ -23,93 +23,195 @@ function haversine(lat1, lng1, lat2, lng2) {
   return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
 }
 
-function PlaceDetailSheet({ place, userLat, userLng, onClose }) {
-  const dist = userLat && place.lat ? haversine(userLat, userLng, place.lat, place.lng) : null;
-  const cat = CATEGORIES.find(c => place.types?.includes(c.id));
+function PlaceDetailPage({ placeId, basicPlace, userLat, userLng, onClose }) {
+  const [detail, setDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activePhoto, setActivePhoto] = useState(0);
+  const cat = CATEGORIES.find(c => basicPlace.types?.includes(c.id));
+  const dist = userLat && basicPlace.lat ? haversine(userLat, userLng, basicPlace.lat, basicPlace.lng) : null;
+
+  useEffect(() => {
+    base44.functions.invoke("nearbyPlaces", { place_id: placeId })
+      .then(res => { if (res.data?.detail) setDetail(res.data.detail); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [placeId]);
+
+  const d = detail || basicPlace;
+  const photos = detail?.photos?.length ? detail.photos : basicPlace.photo ? [basicPlace.photo] : [];
+
   return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl overflow-hidden sheet-enter max-w-lg mx-auto"
-        style={{ backgroundColor: "var(--bg-modal)", maxHeight: "80vh", overflowY: "auto" }}>
-        {/* Hero */}
-        {place.photo ? (
-          <img src={place.photo} alt={place.name} className="w-full object-cover" style={{ height: 200 }} />
-        ) : (
-          <div className="w-full flex items-center justify-center text-6xl" style={{ height: 160, backgroundColor: "var(--bg-subtle)" }}>
-            {cat?.emoji || "📍"}
+    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+      {/* Header */}
+      <div className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3"
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
+        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
+          style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+        </button>
+        <h1 className="text-lg font-bold truncate" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{basicPlace.name}</h1>
+      </div>
+
+      <div className="pb-28">
+        {/* Photo grid — fashion feed style */}
+        {photos.length > 0 && (
+          <div className="mb-0">
+            {/* Main photo */}
+            <div className="relative" style={{ height: 260 }}>
+              <img src={photos[activePhoto]} alt={d.name} className="w-full h-full object-cover" />
+              {d.open_now !== undefined && (
+                <span className="absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full"
+                  style={{ backgroundColor: d.open_now ? "#16A34A" : "#DC2626", color: "#fff" }}>
+                  {d.open_now ? "Open now" : "Closed"}
+                </span>
+              )}
+              {dist && (
+                <span className="absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1"
+                  style={{ backgroundColor: "rgba(0,0,0,0.55)", color: "#fff" }}>
+                  <Navigation className="w-3 h-3" />{dist} mi
+                </span>
+              )}
+            </div>
+            {/* Thumbnail strip */}
+            {photos.length > 1 && (
+              <div className="flex gap-1.5 px-4 pt-2 overflow-x-auto scrollbar-hide">
+                {photos.map((p, i) => (
+                  <button key={i} onClick={() => setActivePhoto(i)}
+                    className="shrink-0 rounded-xl overflow-hidden"
+                    style={{ width: 68, height: 52, border: i === activePhoto ? "2px solid var(--accent-primary)" : "2px solid transparent", minHeight: "unset", minWidth: "unset" }}>
+                    <img src={p} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Close */}
-        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)", minHeight: "unset", minWidth: "unset" }}>
-          <X className="w-4 h-4 text-white" />
-        </button>
+        {loading && (
+          <div className="flex justify-center py-6">
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--accent-primary)" }} />
+          </div>
+        )}
 
-        <div className="p-5 pb-10">
-          {/* Name & status */}
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h2 className="text-xl font-bold leading-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{place.name}</h2>
-            {place.open_now !== undefined && (
-              <span className="shrink-0 text-xs font-bold px-2 py-1 rounded-full mt-1"
-                style={{ backgroundColor: place.open_now ? "#DCFCE7" : "#FEE2E2", color: place.open_now ? "#16A34A" : "#DC2626" }}>
-                {place.open_now ? "Open" : "Closed"}
+        <div className="px-4 pt-4 space-y-4">
+          {/* Name, category, rating */}
+          <div>
+            <div className="flex items-start justify-between gap-2">
+              <h2 className="text-xl font-bold leading-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{d.name}</h2>
+              {d.price_level && (
+                <span className="shrink-0 text-sm font-bold mt-1" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(d.price_level)}</span>
+              )}
+            </div>
+            {cat && (
+              <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mt-1"
+                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                {cat.emoji} {cat.label}
               </span>
             )}
           </div>
 
-          {/* Category tag */}
-          {cat && (
-            <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-3"
-              style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-              {cat.emoji} {cat.label}
-            </span>
+          {/* Rating */}
+          {d.rating && (
+            <div className="flex items-center gap-2 p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map(s => (
+                  <Star key={s} className="w-4 h-4" style={{ color: "#F59E0B", fill: s <= Math.round(d.rating) ? "#F59E0B" : "none" }} />
+                ))}
+              </div>
+              <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{d.rating}</span>
+              {d.user_ratings_total && (
+                <span className="text-xs" style={{ color: "var(--text-hint)" }}>
+                  ({d.user_ratings_total > 1000 ? (d.user_ratings_total/1000).toFixed(1)+"k" : d.user_ratings_total} reviews)
+                </span>
+              )}
+            </div>
           )}
 
-          {/* Rating & distance */}
-          <div className="flex items-center gap-4 mb-4">
-            {place.rating && (
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4" style={{ color: "#F59E0B", fill: "#F59E0B" }} />
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{place.rating}</span>
-                {place.user_ratings_total && (
-                  <span className="text-xs" style={{ color: "var(--text-hint)" }}>
-                    ({place.user_ratings_total > 1000 ? (place.user_ratings_total/1000).toFixed(1)+"k" : place.user_ratings_total})
-                  </span>
-                )}
+          {/* Summary / description */}
+          {detail?.summary && (
+            <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{detail.summary}</p>
+            </div>
+          )}
+
+          {/* Info card */}
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+            {d.address && (
+              <div className="flex items-start gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--accent-secondary)" }} />
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{d.address || basicPlace.address}</p>
               </div>
             )}
-            {dist && (
-              <div className="flex items-center gap-1">
-                <Navigation className="w-3.5 h-3.5" style={{ color: "var(--text-hint)" }} />
-                <span className="text-sm" style={{ color: "var(--text-hint)" }}>{dist} mi away</span>
-              </div>
+            {detail?.phone && (
+              <a href={`tel:${detail.phone}`} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)", color: "inherit", textDecoration: "none" }}>
+                <Phone className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{detail.phone}</p>
+              </a>
             )}
-            {place.price_level && (
-              <span className="text-sm font-semibold" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(place.price_level)}</span>
+            {detail?.website && (
+              <a href={detail.website} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)", color: "inherit", textDecoration: "none" }}>
+                <Globe className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
+                <p className="text-sm truncate" style={{ color: "var(--accent-primary)" }}>{detail.website.replace(/^https?:\/\/(www\.)?/, "")}</p>
+              </a>
+            )}
+            {detail?.weekday_text?.length > 0 && (
+              <details className="px-4 py-3">
+                <summary className="flex items-center gap-3 cursor-pointer list-none">
+                  <Clock className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Opening hours</span>
+                  <ChevronRight className="w-4 h-4 ml-auto" style={{ color: "var(--text-hint)" }} />
+                </summary>
+                <div className="mt-2 pl-7 space-y-1">
+                  {detail.weekday_text.map((t, i) => (
+                    <p key={i} className="text-xs" style={{ color: "var(--text-secondary)" }}>{t}</p>
+                  ))}
+                </div>
+              </details>
             )}
           </div>
 
-          {/* Address */}
-          {place.address && (
-            <div className="flex items-start gap-2 mb-3 p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-subtle)" }}>
-              <MapPin className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--accent-secondary)" }} />
-              <p className="text-sm" style={{ color: "var(--text-primary)" }}>{place.address}</p>
+          {/* Reviews */}
+          {detail?.reviews?.length > 0 && (
+            <div>
+              <h3 className="text-base font-bold mb-3" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>What people say</h3>
+              <div className="space-y-3">
+                {detail.reviews.map((r, i) => (
+                  <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
+                          {r.author[0]}
+                        </div>
+                        <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{r.author}</span>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} className="w-3 h-3" style={{ color: "#F59E0B", fill: s <= r.rating ? "#F59E0B" : "none" }} />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{r.text}</p>
+                    <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>{r.time}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 mt-4">
-            {place.lat && place.lng && (
-              <a href={`https://maps.google.com/?q=${place.lat},${place.lng}`} target="_blank" rel="noopener noreferrer"
+          <div className="flex gap-3 pt-2">
+            {d.lat && d.lng && (
+              <a href={`https://maps.google.com/?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold"
                 style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
                 <Navigation className="w-4 h-4" />
-                Directions
+                Get Directions
               </a>
             )}
-            {place.website && (
-              <a href={place.website} target="_blank" rel="noopener noreferrer"
+            {detail?.website && (
+              <a href={detail.website} target="_blank" rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold"
                 style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}>
                 <Globe className="w-4 h-4" />
@@ -119,7 +221,7 @@ function PlaceDetailSheet({ place, userLat, userLng, onClose }) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -168,11 +270,23 @@ export default function ExploreAreaPanel({ onClose }) {
 
   useEffect(() => { if (coords) fetchPlaces(); }, [coords, activeCategory]);
 
+  if (selectedPlace) {
+    return (
+      <PlaceDetailPage
+        placeId={selectedPlace.id}
+        basicPlace={selectedPlace}
+        userLat={coords?.lat}
+        userLng={coords?.lng}
+        onClose={() => setSelectedPlace(null)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Header */}
       <div className="sticky top-0 z-30"
-        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 12px), 12px)" }}>
+        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
         <div className="flex items-center gap-3 px-4 pb-3">
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
             style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
@@ -241,9 +355,17 @@ export default function ExploreAreaPanel({ onClose }) {
                     className="rounded-2xl overflow-hidden text-left"
                     style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
                     {place.photo ? (
-                      <img src={place.photo} alt={place.name} className="w-full object-cover" style={{ height: 110 }} />
+                      <div className="relative">
+                        <img src={place.photo} alt={place.name} className="w-full object-cover" style={{ height: 120 }} />
+                        {place.open_now !== undefined && (
+                          <span className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: place.open_now ? "#16A34A" : "#DC2626", color: "#fff" }}>
+                            {place.open_now ? "Open" : "Closed"}
+                          </span>
+                        )}
+                      </div>
                     ) : (
-                      <div className="w-full flex items-center justify-center text-3xl" style={{ height: 110, backgroundColor: "var(--bg-subtle)" }}>
+                      <div className="w-full flex items-center justify-center text-3xl" style={{ height: 120, backgroundColor: "var(--bg-subtle)" }}>
                         {cat?.emoji || "📍"}
                       </div>
                     )}
@@ -251,19 +373,17 @@ export default function ExploreAreaPanel({ onClose }) {
                       <p className="font-semibold text-sm leading-tight mb-1 line-clamp-1" style={{ color: "var(--text-primary)" }}>{place.name}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-0.5">
-                          {place.rating && <>
-                            <Star className="w-3 h-3" style={{ color: "#F59E0B", fill: "#F59E0B" }} />
-                            <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{place.rating}</span>
-                          </>}
+                          {place.rating && (
+                            <>
+                              <Star className="w-3 h-3" style={{ color: "#F59E0B", fill: "#F59E0B" }} />
+                              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{place.rating}</span>
+                            </>
+                          )}
                         </div>
-                        {dist && (
-                          <span className="text-xs" style={{ color: "var(--text-hint)" }}>{dist} mi</span>
-                        )}
+                        {dist && <span className="text-xs" style={{ color: "var(--text-hint)" }}>{dist} mi</span>}
                       </div>
-                      {place.open_now !== undefined && (
-                        <span className="text-xs font-semibold" style={{ color: place.open_now ? "#16A34A" : "#DC2626" }}>
-                          {place.open_now ? "Open now" : "Closed"}
-                        </span>
+                      {place.price_level && (
+                        <p className="text-xs font-semibold mt-0.5" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(place.price_level)}</p>
                       )}
                     </div>
                   </button>
@@ -273,16 +393,6 @@ export default function ExploreAreaPanel({ onClose }) {
           </>
         )}
       </div>
-
-      {/* Place detail */}
-      {selectedPlace && (
-        <PlaceDetailSheet
-          place={selectedPlace}
-          userLat={coords?.lat}
-          userLng={coords?.lng}
-          onClose={() => setSelectedPlace(null)}
-        />
-      )}
     </div>
   );
 }
