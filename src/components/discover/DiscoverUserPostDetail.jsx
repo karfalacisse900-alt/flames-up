@@ -9,6 +9,7 @@ const getColor = (name) => avatarColors[(name || "U").charCodeAt(0) % avatarColo
 
 export default function DiscoverUserPostDetail({ post, user, onClose, onUpdate }) {
   const [mediaIdx, setMediaIdx] = useState(0);
+  const touchStartX = React.useRef(null);
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comment_count || 0);
   const [liked, setLiked] = useState(post.liked_by?.includes(user?.email));
@@ -101,7 +102,18 @@ export default function DiscoverUserPostDetail({ post, user, onClose, onUpdate }
 
         {/* Hero media — first item full width like ArticleDetail */}
         {media.length > 0 && (
-          <div className="mb-6 -mx-4 relative">
+          <div className="mb-6 -mx-4 relative"
+            onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchEnd={e => {
+              if (touchStartX.current === null) return;
+              const diff = touchStartX.current - e.changedTouches[0].clientX;
+              if (Math.abs(diff) > 40) {
+                if (diff > 0) setMediaIdx(i => Math.min(i + 1, media.length - 1));
+                else setMediaIdx(i => Math.max(i - 1, 0));
+              }
+              touchStartX.current = null;
+            }}
+          >
             {types[mediaIdx] === "video" ? (
               <video src={media[mediaIdx]} className="w-full object-cover" style={{ maxHeight: 280 }} controls playsInline />
             ) : (

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, PenSquare, MapPin, Navigation, Map, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Bell, PenSquare } from "lucide-react";
 import ArticleFeed from "@/components/discover/ArticleFeed";
+import ExploreAreaPanel from "@/components/discover/ExploreAreaPanel";
 import ArticleDetail from "@/components/discover/ArticleDetail";
 import DiscoverPostComposer from "@/components/discover/DiscoverPostComposer";
 import DiscoverUserPostDetail from "@/components/discover/DiscoverUserPostDetail";
@@ -15,18 +15,13 @@ const TABS = [
   { id: "daily", label: "Daily" },
 ];
 
-const PLACE_SHORTCUTS = [
-  { id: "around", label: "Around Me", emoji: "📍", desc: "What's nearby" },
-  { id: "nearby", label: "Nearby", emoji: "🧭", desc: "Close by" },
-  { id: "places", label: "Places", emoji: "🗺️", desc: "Explore" },
-  { id: "events", label: "Events", emoji: "🎉", desc: "Happening now" },
-];
+
 
 export default function Discover() {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("foryou");
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showExplore, setShowExplore] = useState(false);
   const [selectedUserPost, setSelectedUserPost] = useState(null);
   const [showComposer, setShowComposer] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
@@ -110,20 +105,29 @@ export default function Discover() {
         </div>
       </div>
 
-      {/* Location shortcuts */}
-      <div className="px-4 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
-        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--text-hint)" }}>Explore Your Area</p>
-        <div className="grid grid-cols-4 gap-2">
-          {PLACE_SHORTCUTS.map(s => (
-            <button key={s.id} onClick={() => navigate("/NearbyPlaces")}
-              className="flex flex-col items-center gap-1.5 py-3 rounded-2xl"
-              style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
-              <span className="text-2xl">{s.emoji}</span>
-              <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{s.label}</span>
-            </button>
-          ))}
-        </div>
+
+      {/* Explore Your Area toggle */}
+      <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
+        <button
+          onClick={() => setShowExplore(v => !v)}
+          className="flex items-center justify-between w-full px-4 py-3 rounded-2xl"
+          style={{
+            backgroundColor: showExplore ? "var(--accent-primary)" : "var(--bg-card)",
+            border: "1px solid var(--border-light)",
+            minHeight: "unset", minWidth: "unset",
+          }}>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🗺️</span>
+            <span className="text-sm font-bold" style={{ color: showExplore ? "#fff" : "var(--text-primary)" }}>Explore Your Area</span>
+          </div>
+          <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: showExplore ? "rgba(255,255,255,0.2)" : "var(--bg-subtle)", color: showExplore ? "#fff" : "var(--text-hint)" }}>
+            {showExplore ? "Hide" : "Show"}
+          </span>
+        </button>
       </div>
+
+      {/* Explore panel */}
+      {showExplore && <ExploreAreaPanel onClose={() => setShowExplore(false)} />}
 
       {/* Feed */}
       <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} onUserPostClick={setSelectedUserPost} />
