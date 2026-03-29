@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import ArticleCard from "./ArticleCard";
+import DiscoverUserPostCard from "./DiscoverUserPostCard";
 
 // Curated articles per tab — fetched via AI or hardcoded seeds
 const TAB_TOPICS = {
@@ -81,15 +82,23 @@ function generateArticles(tab) {
 
 export default function ArticleFeed({ tab, user, onArticleClick }) {
   const [articles, setArticles] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const loadUserPosts = async () => {
+    try {
+      const posts = await base44.entities.DiscoverUserPost.list("-created_date", 50);
+      setUserPosts(tab === "foryou" ? posts : posts.filter(p => p.tab === tab));
+    } catch {}
+  };
 
   useEffect(() => {
     setLoading(true);
-    // Simulate a quick fetch
     const t = setTimeout(() => {
       setArticles(generateArticles(tab));
       setLoading(false);
     }, 350);
+    loadUserPosts();
     return () => clearTimeout(t);
   }, [tab]);
 
@@ -103,7 +112,10 @@ export default function ArticleFeed({ tab, user, onArticleClick }) {
 
   return (
     <div className="divide-y" style={{ borderColor: "var(--border-light)" }}>
-      {articles.map((article, idx) => (
+      {userPosts.map(post => (
+        <DiscoverUserPostCard key={post.id} post={post} user={user} onUpdate={loadUserPosts} />
+      ))}
+      {articles.map((article) => (
         <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
       ))}
     </div>

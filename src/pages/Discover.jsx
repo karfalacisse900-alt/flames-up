@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell } from "lucide-react";
+import { Bell, PenSquare } from "lucide-react";
 import ArticleFeed from "@/components/discover/ArticleFeed";
 import ArticleDetail from "@/components/discover/ArticleDetail";
+import DiscoverPostComposer from "@/components/discover/DiscoverPostComposer";
 
 const TABS = [
   { id: "foryou", label: "For you" },
@@ -16,10 +17,22 @@ export default function Discover() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("foryou");
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showComposer, setShowComposer] = useState(false);
+  const [feedKey, setFeedKey] = useState(0);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
+
+  if (showComposer && user) {
+    return (
+      <DiscoverPostComposer
+        user={user}
+        onClose={() => setShowComposer(false)}
+        onPosted={() => { setShowComposer(false); setFeedKey(k => k + 1); }}
+      />
+    );
+  }
 
   if (selectedArticle) {
     return <ArticleDetail article={selectedArticle} user={user} onBack={() => setSelectedArticle(null)} />;
@@ -40,10 +53,19 @@ export default function Discover() {
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>
             Discover
           </h1>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-            <Bell className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-          </button>
+          <div className="flex items-center gap-2">
+            {user && (
+              <button onClick={() => setShowComposer(true)}
+                className="w-10 h-10 flex items-center justify-center rounded-full"
+                style={{ backgroundColor: "var(--accent-primary)", minHeight: "unset", minWidth: "unset" }}>
+                <PenSquare className="w-4 h-4 text-white" />
+              </button>
+            )}
+            <button className="w-10 h-10 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+              <Bell className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -74,7 +96,7 @@ export default function Discover() {
       </div>
 
       {/* Feed */}
-      <ArticleFeed tab={activeTab} user={user} onArticleClick={setSelectedArticle} />
+      <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} />
     </div>
   );
 }
