@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Mic, Square, Play, Pause, ImageIcon, Smile, Search, X, Trash2 } from "lucide-react";
+import { Send, Mic, Square, Play, Pause, ImageIcon, Smile, Search, X, Trash2, Share2, Plus, ArrowUp } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import SmartText from "./SmartText";
@@ -339,6 +339,8 @@ export default function CommentsSheet({ postId, user, onClose }) {
     ...voiceReplies.map(v => ({ ...v, type: "voice" })),
   ].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
+  const QUICK_REPLIES = ["I really like...", "Where can I buy this?", "I wonder if...", "This is amazing! 🔥"];
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -354,34 +356,36 @@ export default function CommentsSheet({ postId, user, onClose }) {
         exit={{ y: "100%" }}
         transition={{ type: "spring", stiffness: 320, damping: 34 }}
         className="flex flex-col w-full max-w-lg mx-auto"
-        style={{ backgroundColor: "var(--bg-card)", borderRadius: "24px 24px 0 0", maxHeight: "78vh", boxShadow: "0 -8px 40px rgba(0,0,0,0.18)" }}
+        style={{ backgroundColor: "var(--bg-card)", borderRadius: "20px 20px 0 0", height: "80vh", boxShadow: "0 -8px 40px rgba(0,0,0,0.22)" }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Handle + header */}
-        <div className="shrink-0 px-4 pt-3 pb-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
-          <div className="w-10 h-1 rounded-full mx-auto mb-3" style={{ backgroundColor: "var(--border-medium)" }} />
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-base" style={{ color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
-              Comments <span className="font-normal text-sm" style={{ color: "var(--text-hint)" }}>· {allReplies.length}</span>
-            </h3>
-            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-              <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-            </button>
-          </div>
+        {/* Handle */}
+        <div className="shrink-0 flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "var(--border-medium)" }} />
+        </div>
+
+        {/* Header: X | Comments | Share */}
+        <div className="shrink-0 flex items-center justify-between px-4 pb-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+            <X className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+          </button>
+          <h3 className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>Comments</h3>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+            <Share2 className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
+          </button>
         </div>
 
         {/* Comments list */}
-        <div className="flex-1 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: "contain" }}>
+        <div className="flex-1 overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
           {allReplies.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-4xl mb-2">💬</p>
-              <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No comments yet</p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>Be the first to comment!</p>
+            <div className="h-full flex items-center justify-center px-8 text-center">
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-hint)" }}>Share feedback, ask a question or give a high five</p>
             </div>
           ) : (
-            allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} currentUserEmail={user?.email} onDelete={handleDeleteComment} />)
+            <div className="px-4 py-3 space-y-1">
+              {allReplies.map(reply => <CommentItem key={`${reply.type}-${reply.id}`} reply={reply} currentUserEmail={user?.email} onDelete={handleDeleteComment} />)}
+            </div>
           )}
-          <div style={{ height: 8 }} />
         </div>
 
         {/* Sticker panel */}
@@ -394,6 +398,22 @@ export default function CommentsSheet({ postId, user, onClose }) {
           )}
         </AnimatePresence>
 
+        {/* Quick reply chips */}
+        {user && (
+          <div className="shrink-0 px-4 py-2 flex gap-2 overflow-x-auto scrollbar-hide" style={{ borderTop: "1px solid var(--border-light)" }}>
+            {QUICK_REPLIES.map(chip => (
+              <button
+                key={chip}
+                onClick={() => commentMut.mutate({ body: chip, type: "text" })}
+                className="shrink-0 px-4 py-2 rounded-full text-sm whitespace-nowrap"
+                style={{ backgroundColor: "var(--bg-subtle)", border: "1px solid var(--border-light)", color: "var(--text-secondary)", minHeight: 36 }}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Input bar */}
         <div className="shrink-0 px-3 py-3" style={{
           backgroundColor: "var(--bg-card)",
@@ -401,19 +421,30 @@ export default function CommentsSheet({ postId, user, onClose }) {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)"
         }}>
           {user ? (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-[22px]" style={{ backgroundColor: "var(--bg-subtle)", border: "1.5px solid var(--border-light)" }}>
-              <input
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate({ body: commentText.trim(), type: "text" })}
-                placeholder="Add a comment…"
-                className="flex-1 text-sm bg-transparent outline-none min-w-0"
-                style={{ color: "var(--text-primary)", fontSize: 16 }}
-              />
-              <div className="flex items-center gap-0.5 shrink-0">
-                <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-full" style={{ color: "var(--text-hint)" }}>
+            <div className="flex items-center gap-2">
+              {/* + button */}
+              <button
+                onClick={() => setActivePanel(p => p === "sticker" ? null : "sticker")}
+                className="w-9 h-9 flex items-center justify-center rounded-full shrink-0"
+                style={{ border: "1.5px solid var(--border-medium)", backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset", color: "var(--text-secondary)" }}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+
+              {/* Text input */}
+              <div className="flex-1 flex items-center px-4 rounded-full" style={{ backgroundColor: "var(--bg-subtle)", border: "1.5px solid var(--border-light)", minHeight: 44 }}>
+                <input
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && commentText.trim() && commentMut.mutate({ body: commentText.trim(), type: "text" })}
+                  placeholder="Love the color!"
+                  className="flex-1 text-sm bg-transparent outline-none min-w-0"
+                  style={{ color: "var(--text-primary)", fontSize: 16 }}
+                />
+                <button onClick={() => fileRef.current?.click()} className="ml-1 p-1" style={{ color: "var(--text-hint)", minHeight: "unset", minWidth: "unset" }}>
                   <ImageIcon className="w-4 h-4" />
                 </button>
+                <button onClick={() => setShowGif(true)} className="p-1 text-xs font-bold" style={{ color: "var(--text-hint)", minHeight: "unset", minWidth: "unset" }}>GIF</button>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
                   if (!e.target.files?.[0]) return;
                   setUploading(true);
@@ -421,20 +452,21 @@ export default function CommentsSheet({ postId, user, onClose }) {
                   setUploading(false);
                   commentMut.mutate({ body: "", type: "image", image_url: file_url });
                 }} />
-                <button onClick={() => setShowGif(true)} className="p-1.5 rounded-full text-xs font-bold" style={{ color: "var(--text-hint)" }}>GIF</button>
-                <button onClick={() => setActivePanel(p => p === "sticker" ? null : "sticker")} className="p-1.5 rounded-full"
-                  style={{ color: activePanel === "sticker" ? "#6366F1" : "var(--text-hint)" }}>
-                  <Smile className="w-4 h-4" />
-                </button>
-                <VoiceRecorder onSend={(blob) => voiceMut.mutate(blob)} />
-                {commentText.trim() && (
-                  <button onClick={() => commentMut.mutate({ body: commentText.trim(), type: "text" })}
-                    disabled={commentMut.isPending || uploading}
-                    className="p-1.5 rounded-full" style={{ backgroundColor: "#6366F1", color: "#fff" }}>
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
-                )}
               </div>
+
+              {/* Send button — always visible, pink circle with up arrow */}
+              <button
+                onClick={() => commentText.trim() && commentMut.mutate({ body: commentText.trim(), type: "text" })}
+                disabled={commentMut.isPending || uploading || !commentText.trim()}
+                className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
+                style={{
+                  background: commentText.trim() ? "linear-gradient(135deg,#E05C7A,#F97316)" : "var(--bg-subtle)",
+                  minHeight: "unset", minWidth: "unset",
+                  border: commentText.trim() ? "none" : "1.5px solid var(--border-medium)",
+                }}
+              >
+                <ArrowUp className="w-4 h-4" style={{ color: commentText.trim() ? "#fff" : "var(--text-hint)" }} />
+              </button>
             </div>
           ) : (
             <p className="text-sm text-center py-2" style={{ color: "var(--text-hint)" }}>Sign in to comment</p>
