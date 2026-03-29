@@ -210,26 +210,27 @@ export default function DiscoverPostComposer({ user, onClose, onPosted }) {
         </AnimatePresence>
       </div>
 
-      {/* Bottom toolbar */}
+      {/* Bottom toolbar — always visible, fixed at bottom */}
       <div className="flex items-center gap-2 px-4 py-3"
-        style={{ borderTop: "1px solid var(--border-light)", paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)" }}>
+        style={{ borderTop: "2px solid var(--border-light)", backgroundColor: "var(--bg-card)", paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)", flexShrink: 0 }}>
         <input ref={mediaInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
           onChange={e => handleMediaUpload(e.target.files)} />
         <button onClick={() => mediaInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
-          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)", border: "1.5px solid var(--accent-primary)", minHeight: "unset", minWidth: "unset" }}>
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold flex-1 justify-center"
+          style={{ backgroundColor: "var(--accent-primary)", color: "#fff", minHeight: "unset", minWidth: "unset" }}>
           <Image className="w-4 h-4" />
-          Photo / Video
+          Add Photo / Video
         </button>
         <button onClick={() => mediaInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-semibold"
+          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl text-sm font-semibold"
           style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", border: "1px solid var(--border-light)", minHeight: "unset", minWidth: "unset" }}>
           <Camera className="w-4 h-4" style={{ color: "#2563EB" }} />
-          Camera
         </button>
-        <span className="ml-auto text-xs" style={{ color: "var(--text-hint)" }}>
-          {mediaItems.length > 0 ? `${mediaItems.length} file${mediaItems.length > 1 ? "s" : ""} added` : ""}
-        </span>
+        {mediaItems.length > 0 && (
+          <span className="text-xs font-semibold" style={{ color: "var(--accent-secondary)", whiteSpace: "nowrap" }}>
+            {mediaItems.length} file{mediaItems.length > 1 ? "s" : ""}
+          </span>
+        )}
       </div>
     </div>
   );
