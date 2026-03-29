@@ -40,6 +40,10 @@ export default function Discover() {
     );
   }
 
+  if (showExplore) {
+    return <ExploreAreaPanel onClose={() => setShowExplore(false)} />;
+  }
+
   if (selectedUserPost) {
     return <DiscoverUserPostDetail post={selectedUserPost} user={user} onClose={() => setSelectedUserPost(null)} onUpdate={() => setFeedKey(k => k + 1)} />;
   }
@@ -126,8 +130,7 @@ export default function Discover() {
         </button>
       </div>
 
-      {/* Explore panel */}
-      {showExplore && <ExploreAreaPanel onClose={() => setShowExplore(false)} />}
+
 
       {/* Feed */}
       <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} onUserPostClick={setSelectedUserPost} />
