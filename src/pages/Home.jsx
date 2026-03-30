@@ -69,7 +69,7 @@ export default function Home() {
       initial="hidden"
       animate="show"
       variants={stagger}
-      style={{ backgroundColor: "var(--bg-app)", minHeight: "100dvh" }}
+      style={{ backgroundColor: "#FFFFFF", minHeight: "100dvh" }}
     >
       <PullIndicator />
       <motion.div variants={fadeUp}>

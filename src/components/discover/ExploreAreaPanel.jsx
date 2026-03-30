@@ -41,186 +41,174 @@ function PlaceDetailPage({ placeId, basicPlace, userLat, userLng, onClose }) {
   const d = detail || basicPlace;
   const photos = detail?.photos?.length ? detail.photos : basicPlace.photo ? [basicPlace.photo] : [];
 
+  const priceStr = d.price_level ? "$".repeat(d.price_level) : null;
+  const openText = d.open_now !== undefined ? (d.open_now ? "Open" : "Closed") : null;
+  const closingTime = detail?.weekday_text?.[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]?.split(": ")[1] || null;
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3"
-        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
-        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
-          style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+    <div className="min-h-screen relative" style={{ backgroundColor: "#000" }}>
+      {/* Full-bleed photo */}
+      <div className="relative w-full" style={{ height: "55vh", minHeight: 280 }}>
+        {photos.length > 0 ? (
+          <img src={photos[activePhoto]} alt={d.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-6xl" style={{ backgroundColor: "#1a1a1a" }}>
+            {cat?.emoji || "📍"}
+          </div>
+        )}
+        {/* Back button */}
+        <button onClick={onClose}
+          className="absolute top-0 left-4 w-9 h-9 flex items-center justify-center rounded-full"
+          style={{ top: "max(env(safe-area-inset-top,16px),16px)", backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+          <ArrowLeft className="w-4 h-4 text-white" />
         </button>
-        <h1 className="text-lg font-bold truncate" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{basicPlace.name}</h1>
+        {/* Top right actions */}
+        <div className="absolute right-4 flex gap-2" style={{ top: "max(env(safe-area-inset-top,16px),16px)" }}>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+            <Bookmark className="w-4 h-4 text-white" />
+          </button>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+            <Globe className="w-4 h-4 text-white" />
+          </button>
+          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        {/* Photo dots */}
+        {photos.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+            {photos.map((_, i) => (
+              <button key={i} onClick={() => setActivePhoto(i)}
+                className="rounded-full transition-all"
+                style={{ width: i === activePhoto ? 20 : 6, height: 6, backgroundColor: i === activePhoto ? "#fff" : "rgba(255,255,255,0.5)", minHeight: "unset", minWidth: "unset" }} />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="pb-28">
-        {/* Photo grid — fashion feed style */}
-        {photos.length > 0 && (
-          <div className="mb-0">
-            {/* Main photo */}
-            <div className="relative" style={{ height: 260 }}>
-              <img src={photos[activePhoto]} alt={d.name} className="w-full h-full object-cover" />
-              {d.open_now !== undefined && (
-                <span className="absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full"
-                  style={{ backgroundColor: d.open_now ? "#16A34A" : "#DC2626", color: "#fff" }}>
-                  {d.open_now ? "Open now" : "Closed"}
-                </span>
-              )}
-              {dist && (
-                <span className="absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1"
-                  style={{ backgroundColor: "rgba(0,0,0,0.55)", color: "#fff" }}>
-                  <Navigation className="w-3 h-3" />{dist} mi
-                </span>
-              )}
-            </div>
-            {/* Thumbnail strip */}
-            {photos.length > 1 && (
-              <div className="flex gap-1.5 px-4 pt-2 overflow-x-auto scrollbar-hide">
-                {photos.map((p, i) => (
-                  <button key={i} onClick={() => setActivePhoto(i)}
-                    className="shrink-0 rounded-xl overflow-hidden"
-                    style={{ width: 68, height: 52, border: i === activePhoto ? "2px solid var(--accent-primary)" : "2px solid transparent", minHeight: "unset", minWidth: "unset" }}>
-                    <img src={p} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {loading && (
-          <div className="flex justify-center py-6">
-            <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--accent-primary)" }} />
-          </div>
-        )}
-
-        <div className="px-4 pt-4 space-y-4">
-          {/* Name, category, rating */}
-          <div>
-            <div className="flex items-start justify-between gap-2">
-              <h2 className="text-xl font-bold leading-tight" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>{d.name}</h2>
-              {d.price_level && (
-                <span className="shrink-0 text-sm font-bold mt-1" style={{ color: "var(--accent-secondary)" }}>{"$".repeat(d.price_level)}</span>
-              )}
-            </div>
-            {cat && (
-              <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mt-1"
-                style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                {cat.emoji} {cat.label}
-              </span>
-            )}
-          </div>
-
-          {/* Rating */}
-          {d.rating && (
-            <div className="flex items-center gap-2 p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} className="w-4 h-4" style={{ color: "#F59E0B", fill: s <= Math.round(d.rating) ? "#F59E0B" : "none" }} />
-                ))}
-              </div>
-              <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{d.rating}</span>
-              {d.user_ratings_total && (
-                <span className="text-xs" style={{ color: "var(--text-hint)" }}>
-                  ({d.user_ratings_total > 1000 ? (d.user_ratings_total/1000).toFixed(1)+"k" : d.user_ratings_total} reviews)
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Summary / description */}
-          {detail?.summary && (
-            <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{detail.summary}</p>
-            </div>
-          )}
-
-          {/* Info card */}
-          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-            {d.address && (
-              <div className="flex items-start gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--accent-secondary)" }} />
-                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{d.address || basicPlace.address}</p>
-              </div>
-            )}
-            {detail?.phone && (
-              <a href={`tel:${detail.phone}`} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)", color: "inherit", textDecoration: "none" }}>
-                <Phone className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
-                <p className="text-sm" style={{ color: "var(--text-primary)" }}>{detail.phone}</p>
-              </a>
-            )}
-            {detail?.website && (
-              <a href={detail.website} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)", color: "inherit", textDecoration: "none" }}>
-                <Globe className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
-                <p className="text-sm truncate" style={{ color: "var(--accent-primary)" }}>{detail.website.replace(/^https?:\/\/(www\.)?/, "")}</p>
-              </a>
-            )}
-            {detail?.weekday_text?.length > 0 && (
-              <details className="px-4 py-3">
-                <summary className="flex items-center gap-3 cursor-pointer list-none">
-                  <Clock className="w-4 h-4 shrink-0" style={{ color: "var(--accent-secondary)" }} />
-                  <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Opening hours</span>
-                  <ChevronRight className="w-4 h-4 ml-auto" style={{ color: "var(--text-hint)" }} />
-                </summary>
-                <div className="mt-2 pl-7 space-y-1">
-                  {detail.weekday_text.map((t, i) => (
-                    <p key={i} className="text-xs" style={{ color: "var(--text-secondary)" }}>{t}</p>
-                  ))}
-                </div>
-              </details>
-            )}
-          </div>
-
-          {/* Reviews */}
-          {detail?.reviews?.length > 0 && (
-            <div>
-              <h3 className="text-base font-bold mb-3" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>What people say</h3>
-              <div className="space-y-3">
-                {detail.reviews.map((r, i) => (
-                  <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                          style={{ backgroundColor: "var(--accent-primary-light)", color: "var(--accent-primary)" }}>
-                          {r.author[0]}
-                        </div>
-                        <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{r.author}</span>
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        {[1,2,3,4,5].map(s => (
-                          <Star key={s} className="w-3 h-3" style={{ color: "#F59E0B", fill: s <= r.rating ? "#F59E0B" : "none" }} />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{r.text}</p>
-                    <p className="text-xs mt-1" style={{ color: "var(--text-hint)" }}>{r.time}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            {d.lat && d.lng && (
-              <a href={`https://maps.google.com/?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold"
-                style={{ backgroundColor: "var(--accent-primary)", color: "#fff" }}>
-                <Navigation className="w-4 h-4" />
-                Get Directions
-              </a>
-            )}
-            {detail?.website && (
-              <a href={detail.website} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold"
-                style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-primary)", border: "1px solid var(--border-light)" }}>
-                <Globe className="w-4 h-4" />
-                Website
-              </a>
-            )}
-          </div>
+      {/* Bottom card — dark */}
+      <div className="relative z-10 rounded-t-3xl px-5 pt-5 pb-32" style={{ backgroundColor: "#1C1C1E", marginTop: -24 }}>
+        {/* Name + meta row */}
+        <h2 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "var(--font-serif)" }}>{d.name}</h2>
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          {d.address && <span className="text-xs text-gray-400">{d.address?.split(",")[0]}</span>}
+          {dist && <>
+            <span className="text-gray-600">·</span>
+            <span className="text-xs text-gray-400">🚗 {dist} mi</span>
+          </>}
+          {priceStr && <>
+            <span className="text-gray-600">·</span>
+            <span className="text-xs text-gray-400">{priceStr}</span>
+          </>}
         </div>
+
+        {/* Open status */}
+        {openText && (
+          <div className="flex items-center gap-1.5 mb-4">
+            <span className="text-sm font-semibold" style={{ color: d.open_now ? "#34D399" : "#F87171" }}>{openText}</span>
+            {closingTime && <span className="text-xs text-gray-500">· {closingTime}</span>}
+          </div>
+        )}
+
+        {/* Social proof chips */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4">
+          {d.rating && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0" style={{ backgroundColor: "#2C2C2E", minHeight: "unset" }}>
+              <span className="text-xs">⭐</span>
+              <span className="text-xs font-semibold text-white">{d.rating}</span>
+              {d.user_ratings_total && <span className="text-xs text-gray-400">({d.user_ratings_total > 1000 ? (d.user_ratings_total/1000).toFixed(1)+"k" : d.user_ratings_total})</span>}
+            </div>
+          )}
+          {cat && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0" style={{ backgroundColor: "#2C2C2E", minHeight: "unset" }}>
+              <span className="text-xs">{cat.emoji}</span>
+              <span className="text-xs font-semibold text-white">{cat.label}</span>
+            </div>
+          )}
+          {d.user_ratings_total > 100 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0" style={{ backgroundColor: "#2C2C2E", minHeight: "unset" }}>
+              <span className="text-xs">👍</span>
+              <span className="text-xs font-semibold text-white">{d.user_ratings_total > 1000 ? Math.floor(d.user_ratings_total/1000)+"k+" : d.user_ratings_total+"+"} reviews</span>
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        {loading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-gray-500" /></div>}
+        {detail?.summary && (
+          <div className="mb-4">
+            <p className="text-sm leading-relaxed text-gray-300">{detail.summary}</p>
+            {cat && <p className="text-xs text-gray-500 mt-2">↳ {cat.label} · {cat.emoji}</p>}
+          </div>
+        )}
+
+        {/* Divider */}
+        <div className="mb-5" style={{ height: 1, backgroundColor: "#2C2C2E" }} />
+
+        {/* Action buttons */}
+        <div className="grid grid-cols-4 gap-3 mb-5">
+          {detail?.phone && (
+            <a href={`tel:${detail.phone}`} className="flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#2C2C2E" }}>
+                <Phone className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs text-gray-400">Call</span>
+            </a>
+          )}
+          {d.lat && d.lng && (
+            <a href={`https://maps.google.com/?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#2C2C2E" }}>
+                <Navigation className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs text-gray-400">Directions</span>
+            </a>
+          )}
+          {detail?.website && (
+            <a href={detail.website} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#2C2C2E" }}>
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs text-gray-400">Website</span>
+            </a>
+          )}
+          {detail?.weekday_text?.length > 0 && (
+            <details className="flex flex-col items-center gap-1.5" open={false}>
+              <summary className="flex flex-col items-center gap-1.5 list-none cursor-pointer">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#2C2C2E" }}>
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xs text-gray-400">Hours</span>
+              </summary>
+              <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={e => e.currentTarget === e.target && e.currentTarget.parentElement.removeAttribute('open')}>
+                <div className="w-full rounded-t-3xl p-5 pb-10" style={{ backgroundColor: "#1C1C1E" }}>
+                  <h3 className="text-white font-bold mb-3">Hours</h3>
+                  {detail.weekday_text.map((t, i) => <p key={i} className="text-xs text-gray-400 mb-1">{t}</p>)}
+                </div>
+              </div>
+            </details>
+          )}
+        </div>
+
+        {/* Reviews */}
+        {detail?.reviews?.length > 0 && (
+          <div>
+            <h3 className="text-base font-bold text-white mb-3">What people say</h3>
+            <div className="space-y-3">
+              {detail.reviews.slice(0,3).map((r, i) => (
+                <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: "#2C2C2E" }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "#3A3A3C", color: "#fff" }}>{r.author[0]}</div>
+                      <span className="text-sm font-semibold text-white">{r.author}</span>
+                    </div>
+                    <div className="flex gap-0.5">{[1,2,3,4,5].map(s => <Star key={s} className="w-3 h-3" style={{ color: "#F59E0B", fill: s <= r.rating ? "#F59E0B" : "none" }} />)}</div>
+                  </div>
+                  <p className="text-xs leading-relaxed text-gray-400">{r.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

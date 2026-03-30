@@ -53,12 +53,12 @@ export default function Discover() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-30"
         style={{
-          backgroundColor: "var(--bg-app)",
+          backgroundColor: "#FFFFFF",
           paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
           borderBottom: "1px solid var(--border-light)",
         }}
