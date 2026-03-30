@@ -49,7 +49,6 @@ const StatusViewer         = withSuspense(lazy(() => import('./pages/StatusViewe
 const UserProfile          = withSuspense(lazy(() => import('./pages/UserProfile')));
 const Wallet               = withSuspense(lazy(() => import('./pages/Wallet')));
 const WeeklyChallenges     = withSuspense(lazy(() => import('./pages/WeeklyChallenges')));
-const ExploreArea          = withSuspense(lazy(() => import('./pages/ExploreArea')));
 
 export const PAGES = {
   "AdminAnalytics":       AdminAnalytics,
@@ -96,7 +95,6 @@ export const PAGES = {
   "UserProfile":          UserProfile,
   "Wallet":               Wallet,
   "WeeklyChallenges":     WeeklyChallenges,
-  "ExploreArea":          ExploreArea,
 };
 
 export const pagesConfig = {
