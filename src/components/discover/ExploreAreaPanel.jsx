@@ -226,7 +226,7 @@ function PlaceDetailPage({ placeId, basicPlace, userLat, userLng, onClose }) {
   );
 }
 
-export default function ExploreAreaPanel({ onClose }) {
+export default function ExploreAreaPanel({ onClose, inline = false }) {
   const [coords, setCoords] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [locationLoading, setLocationLoading] = useState(true);
@@ -302,12 +302,10 @@ export default function ExploreAreaPanel({ onClose }) {
     );
   }
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Header */}
-      <div className="sticky top-0 z-30"
-        style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
-        <div className="flex items-center gap-3 px-4 pb-3">
+  const sectionHeader = (
+    <div style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)" }}>
+      {!inline && (
+        <div className="flex items-center gap-3 px-4 pb-3" style={{ paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
             style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
             <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
@@ -322,48 +320,70 @@ export default function ExploreAreaPanel({ onClose }) {
             )}
           </div>
         </div>
+      )}
+      {inline && (
+        <div className="px-4 pt-4 pb-2">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-lg">🗺️</span>
+            <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Explore Your Area</h2>
+          </div>
+          {locationName && (
+            <div className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" style={{ color: "var(--accent-secondary)" }} />
+              <p className="text-xs font-medium" style={{ color: "var(--accent-secondary)" }}>Near {locationName}</p>
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* Category pills */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4 pb-2">
-          {CATEGORIES.map(cat => (
-            <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0"
+      {/* Category pills */}
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4 py-2">
+        {CATEGORIES.map(cat => (
+          <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0"
+            style={{
+              backgroundColor: activeCategory === cat.id ? "var(--accent-primary)" : "var(--bg-card)",
+              color: activeCategory === cat.id ? "#fff" : "var(--text-secondary)",
+              border: `1px solid ${activeCategory === cat.id ? "transparent" : "var(--border-light)"}`,
+              minHeight: "unset", minWidth: "unset",
+            }}>
+            {cat.emoji} {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Filter toggles */}
+      {activeCategory !== "event" && (
+        <div className="flex gap-2 px-4 pb-3">
+          {[
+            { label: "🆓 Free Entry", active: filterFree, set: () => setFilterFree(v => !v) },
+            { label: "⭐ Top Rated", active: filterTopRated, set: () => setFilterTopRated(v => !v) },
+            { label: "🟢 Open Now", active: filterOpenNow, set: () => setFilterOpenNow(v => !v) },
+          ].map(f => (
+            <button key={f.label} onClick={f.set}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={{
-                backgroundColor: activeCategory === cat.id ? "var(--accent-primary)" : "var(--bg-card)",
-                color: activeCategory === cat.id ? "#fff" : "var(--text-secondary)",
-                border: `1px solid ${activeCategory === cat.id ? "transparent" : "var(--border-light)"}`,
+                backgroundColor: f.active ? "var(--accent-primary)" : "var(--bg-card)",
+                color: f.active ? "#fff" : "var(--text-secondary)",
+                border: `1px solid ${f.active ? "transparent" : "var(--border-light)"}`,
                 minHeight: "unset", minWidth: "unset",
               }}>
-              {cat.emoji} {cat.label}
+              {f.label}
             </button>
           ))}
         </div>
+      )}
+    </div>
+  );
 
-        {/* Filter toggles */}
-        {activeCategory !== "event" && (
-          <div className="flex gap-2 px-4 pb-3">
-            {[
-              { label: "🆓 Free Entry", active: filterFree, set: () => setFilterFree(v => !v) },
-              { label: "⭐ Top Rated", active: filterTopRated, set: () => setFilterTopRated(v => !v) },
-              { label: "🟢 Open Now", active: filterOpenNow, set: () => setFilterOpenNow(v => !v) },
-            ].map(f => (
-              <button key={f.label} onClick={f.set}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
-                style={{
-                  backgroundColor: f.active ? "var(--accent-primary)" : "var(--bg-card)",
-                  color: f.active ? "#fff" : "var(--text-secondary)",
-                  border: `1px solid ${f.active ? "transparent" : "var(--border-light)"}`,
-                  minHeight: "unset", minWidth: "unset",
-                }}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+  return (
+    <div className={inline ? "" : "min-h-screen"} style={{ backgroundColor: "var(--bg-app)" }}>
+      {inline ? sectionHeader : (
+        <div className="sticky top-0 z-30">{sectionHeader}</div>
+      )}
 
       {/* Content */}
-      <div className="px-4 py-4 pb-28">
+      <div className="px-4 py-4" style={{ paddingBottom: inline ? 24 : 112 }}>
         {locationLoading ? (
           <div className="flex flex-col items-center gap-3 py-20">
             <Loader2 className="w-7 h-7 animate-spin" style={{ color: "var(--accent-primary)" }} />

@@ -21,7 +21,7 @@ export default function Discover() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("foryou");
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const [showExplore, setShowExplore] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedUserPost, setSelectedUserPost] = useState(null);
   const [showComposer, setShowComposer] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
@@ -40,8 +40,8 @@ export default function Discover() {
     );
   }
 
-  if (showExplore) {
-    return <ExploreAreaPanel onClose={() => setShowExplore(false)} />;
+  if (selectedPlace) {
+    return null; // handled inside ExploreAreaPanel
   }
 
   if (selectedUserPost) {
@@ -110,27 +110,8 @@ export default function Discover() {
       </div>
 
 
-      {/* Explore Your Area toggle */}
-      <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
-        <button
-          onClick={() => setShowExplore(v => !v)}
-          className="flex items-center justify-between w-full px-4 py-3 rounded-2xl"
-          style={{
-            backgroundColor: showExplore ? "var(--accent-primary)" : "var(--bg-card)",
-            border: "1px solid var(--border-light)",
-            minHeight: "unset", minWidth: "unset",
-          }}>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🗺️</span>
-            <span className="text-sm font-bold" style={{ color: showExplore ? "#fff" : "var(--text-primary)" }}>Explore Your Area</span>
-          </div>
-          <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: showExplore ? "rgba(255,255,255,0.2)" : "var(--bg-subtle)", color: showExplore ? "#fff" : "var(--text-hint)" }}>
-            {showExplore ? "Hide" : "Show"}
-          </span>
-        </button>
-      </div>
-
-
+      {/* Explore Your Area — inline section */}
+      <ExploreAreaPanel inline />
 
       {/* Feed */}
       <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} onUserPostClick={setSelectedUserPost} />

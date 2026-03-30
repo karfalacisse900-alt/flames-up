@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { MapPin, Bookmark, Map, List, Route } from "lucide-react";
 import MapViewWrapper from "@/components/places/MapViewWrapper";
+import ExploreAreaPanel from "@/components/discover/ExploreAreaPanel";
 import PlaceHub from "@/components/community/PlaceHub";
 import RealTrendingPlaces from "@/components/places/RealTrendingPlaces";
 import CommunityEvents from "@/components/places/CommunityEvents";
@@ -161,6 +162,7 @@ export default function PlacesPage() {
         <div className="pb-28">
           <RealTrendingPlaces onSelectPlace={place => openPlace(place)} />
           <CommunityEvents />
+          <ExploreAreaPanel inline />
         </div>
       )}
 
