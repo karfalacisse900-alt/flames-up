@@ -70,36 +70,55 @@ export default function ArticleDetail({ article, user, onBack }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-app)" }}>
-      {/* Top nav */}
-      <div
-        className="sticky top-0 z-30 flex items-center justify-between px-4 py-3"
-        style={{
-          backgroundColor: "var(--bg-app)",
-          borderBottom: "1px solid var(--border-light)",
-          paddingTop: "max(env(safe-area-inset-top, 12px), 12px)",
-        }}
-      >
-        <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
-        </button>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-            <Play className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-          </button>
-          <button onClick={() => setBookmarked(v => !v)} className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-            <Bookmark className="w-4 h-4" style={{ color: bookmarked ? "var(--accent-primary)" : "var(--text-secondary)", fill: bookmarked ? "var(--accent-primary)" : "none" }} />
-          </button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
-            <MoreHorizontal className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-          </button>
-        </div>
-      </div>
 
-      <div className="px-4 py-6 pb-32 max-w-xl mx-auto">
+      {/* Hero image — full bleed, no text on top */}
+      {article.image && (
+        <div className="relative w-full" style={{ height: 320 }}>
+          <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+          {/* Floating action buttons over image */}
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4"
+            style={{ paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
+            <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setBookmarked(v => !v)} className="w-10 h-10 flex items-center justify-center rounded-full"
+                style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+                <Bookmark className="w-4 h-4" style={{ color: bookmarked ? "#FCD34D" : "white", fill: bookmarked ? "#FCD34D" : "none" }} />
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full"
+                style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
+                <MoreHorizontal className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* If no image, show normal top nav */}
+      {!article.image && (
+        <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3"
+          style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)", paddingTop: "max(env(safe-area-inset-top, 12px), 12px)" }}>
+          <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+            <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-primary)" }} />
+          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setBookmarked(v => !v)} className="w-10 h-10 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+              <Bookmark className="w-4 h-4" style={{ color: bookmarked ? "var(--accent-primary)" : "var(--text-secondary)", fill: bookmarked ? "var(--accent-primary)" : "none" }} />
+            </button>
+            <button className="w-10 h-10 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: "var(--bg-subtle)", minHeight: "unset", minWidth: "unset" }}>
+              <MoreHorizontal className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Content — solid background below image */}
+      <div className="px-4 py-6 pb-32 max-w-xl mx-auto" style={{ backgroundColor: "var(--bg-app)" }}>
         {/* Member-only badge */}
         {article.isMemberOnly && (
           <div className="flex items-center gap-1.5 mb-4">
@@ -115,7 +134,7 @@ export default function ArticleDetail({ article, user, onBack }) {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-lg leading-relaxed mb-6"
+        <p className="text-lg leading-relaxed mb-4"
           style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
           {article.subtitle}
         </p>
@@ -145,16 +164,6 @@ export default function ArticleDetail({ article, user, onBack }) {
           </button>
         </div>
 
-        {/* Hero image */}
-        {article.image && (
-          <div className="mb-6 -mx-4">
-            <img src={article.image} alt={article.title} className="w-full object-cover" style={{ maxHeight: 280 }} />
-            <p className="text-xs text-center mt-2 px-4" style={{ color: "var(--text-hint)" }}>
-              Image related to {article.title}
-            </p>
-          </div>
-        )}
-
         {/* Body */}
         <div className="space-y-4">
           {bodyText.split("\n\n").map((para, i) => {
@@ -183,7 +192,6 @@ export default function ArticleDetail({ article, user, onBack }) {
                 </ul>
               );
             }
-            // Handle numbered list
             if (/^\d\./.test(para)) {
               const items = para.split("\n").filter(l => l.trim());
               return (

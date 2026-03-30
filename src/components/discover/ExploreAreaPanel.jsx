@@ -303,7 +303,7 @@ export default function ExploreAreaPanel({ onClose, inline = false }) {
   }
 
   const sectionHeader = (
-    <div style={{ backgroundColor: "var(--bg-app)", borderBottom: "1px solid var(--border-light)" }}>
+    <div style={{ backgroundColor: "var(--bg-app)", borderTop: inline ? "1px solid var(--border-light)" : "none", borderBottom: "1px solid var(--border-light)" }}>
       {!inline && (
         <div className="flex items-center gap-3 px-4 pb-3" style={{ paddingTop: "max(env(safe-area-inset-top,12px),12px)" }}>
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full shrink-0"
