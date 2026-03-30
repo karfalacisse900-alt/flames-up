@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Plus, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
+import CommunityPostDetail from "./CommunityPostDetail";
 import FeedMenuDrawer from "./FeedMenuDrawer";
 import QuickTipComposer from "./QuickTipComposer";
 import { createPageUrl } from "@/utils";
@@ -18,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const POPULAR_CITIES = ["New York", "London", "Paris", "Tokyo", "Los Angeles", "Sydney", "Toronto", "Dubai", "Berlin", "Mumbai", "São Paulo", "Seoul", "Amsterdam", "Barcelona", "Singapore"];
 
 // Stable memoized wrapper — prevents re-render when other posts update
-const PostItem = memo(function PostItem({ post, user, expandedPost, onToggle, onUpvote, debate }) {
+const PostItem = memo(function PostItem({ post, user, expandedPost, onToggle, onUpvote, onTap, debate }) {
   if (post.type === "debate" || post.type === "question") {
     return (
       <DebateCard
@@ -39,7 +40,7 @@ const PostItem = memo(function PostItem({ post, user, expandedPost, onToggle, on
       isExpanded={expandedPost === post.id}
       onToggle={onToggle}
       onLocationClick={() => {}}
-      onTap={() => {}}
+      onTap={onTap}
     />
   );
 }, (prev, next) => {
@@ -70,6 +71,7 @@ export default function CommunityFeed({ user }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [showTipComposer, setShowTipComposer] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const observerRef = useRef(null);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
@@ -483,6 +485,7 @@ export default function CommunityFeed({ user }) {
           expandedPost={expandedPost}
           onToggle={() => setExpandedPost(prev => prev === post.id ? null : post.id)}
           onUpvote={() => user && upvoteMut.mutate({ post })}
+          onTap={() => setSelectedPost(post)}
           debate={debate}
         />
       </div>
@@ -538,6 +541,16 @@ export default function CommunityFeed({ user }) {
       {...containerProps}
       style={{ backgroundColor: "var(--bg-app)", maxWidth: 680, margin: "0 auto" }}
     >
+      <AnimatePresence>
+        {selectedPost && (
+          <CommunityPostDetail
+            post={selectedPost}
+            user={user}
+            onClose={() => setSelectedPost(null)}
+            onUpvote={() => upvoteMut.mutate({ post: selectedPost })}
+          />
+        )}
+      </AnimatePresence>
       <FeedMenuDrawer isOpen={showFeedMenu} onClose={() => setShowFeedMenu(false)} />
 
       {/* Sticky feed header */}

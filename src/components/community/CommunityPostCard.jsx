@@ -170,7 +170,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   // ── Text-Only card layout ──────────────────────────────────────────────────
   if (isTextOnly) {
     return (
-      <div className="relative mx-3 my-2">
+      <div className="relative mx-3 my-2" onClick={onTap} style={{ cursor: onTap ? "pointer" : "default" }}>
         <div className="rounded-3xl overflow-hidden"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
 
@@ -333,7 +333,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   return (
     <div className="relative w-full">
       {/* Modern card container */}
-      <div className="w-full overflow-hidden" 
+      <div className="w-full overflow-hidden" onClick={onTap} style={{ cursor: onTap ? "pointer" : "default" }} 
         style={{ 
           backgroundColor: "var(--bg-card)",
           borderTop: "1px solid var(--border-subtle)",
