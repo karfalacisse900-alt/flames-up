@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import NearbyEventsPage from "./NearbyEventsPage";
 import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ChevronRight, Bookmark } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -28,6 +28,7 @@ function PlaceDetailPage({ placeId, basicPlace, userLat, userLng, onClose }) {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
+  const touchStartX = useRef(null);
   const cat = CATEGORIES.find(c => basicPlace.types?.includes(c.id));
   const dist = userLat && basicPlace.lat ? haversine(userLat, userLng, basicPlace.lat, basicPlace.lng) : null;
 
@@ -47,60 +48,77 @@ function PlaceDetailPage({ placeId, basicPlace, userLat, userLng, onClose }) {
 
   return (
     <div className="min-h-screen relative" style={{ backgroundColor: "#000" }}>
-      {/* Full-bleed photo */}
-      <div className="relative w-full" style={{ height: "55vh", minHeight: 280 }}>
-        {photos.length > 0 ? (
-          <img src={photos[activePhoto]} alt={d.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl" style={{ backgroundColor: "#1a1a1a" }}>
-            {cat?.emoji || "📍"}
-          </div>
-        )}
-        {/* Back button */}
-        <button onClick={onClose}
-          className="absolute top-0 left-4 w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ top: "max(env(safe-area-inset-top,16px),16px)", backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
-          <ArrowLeft className="w-4 h-4 text-white" />
-        </button>
-        {/* Top right actions */}
-        <div className="absolute right-4 flex gap-2" style={{ top: "max(env(safe-area-inset-top,16px),16px)" }}>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
-            <Bookmark className="w-4 h-4 text-white" />
-          </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
-            <Globe className="w-4 h-4 text-white" />
-          </button>
-          <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", minHeight: "unset", minWidth: "unset" }}>
-            <X className="w-4 h-4 text-white" />
-          </button>
+      {/* Full-bleed photo carousel with swipe */}
+      <div
+      className="relative w-full overflow-hidden"
+      style={{ height: "55vh", minHeight: 300 }}
+      onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+      onTouchEnd={e => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+          if (diff > 0) setActivePhoto(p => Math.min(p + 1, photos.length - 1));
+          else setActivePhoto(p => Math.max(p - 1, 0));
+        }
+        touchStartX.current = null;
+      }}
+      >
+      {photos.length > 0 ? (
+        <div
+          className="flex h-full transition-transform duration-300"
+          style={{ width: `${photos.length * 100}%`, transform: `translateX(-${activePhoto * (100 / photos.length)}%)` }}
+        >
+          {photos.map((src, i) => (
+            <div key={i} style={{ width: `${100 / photos.length}%`, flexShrink: 0 }}>
+              <img src={src} alt={d.name} className="w-full h-full object-cover" />
+            </div>
+          ))}
         </div>
-        {/* Photo dots */}
-        {photos.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
-            {photos.map((_, i) => (
-              <button key={i} onClick={() => setActivePhoto(i)}
-                className="rounded-full transition-all"
-                style={{ width: i === activePhoto ? 20 : 6, height: 6, backgroundColor: i === activePhoto ? "#fff" : "rgba(255,255,255,0.5)", minHeight: "unset", minWidth: "unset" }} />
-            ))}
-          </div>
-        )}
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-6xl" style={{ backgroundColor: "#1a1a1a" }}>
+          {cat?.emoji || "📍"}
+        </div>
+      )}
+      {/* Gradient overlay bottom */}
+      <div className="absolute bottom-0 left-0 right-0" style={{ height: 100, background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }} />
+      {/* Back button */}
+      <button onClick={onClose}
+        className="absolute left-4 w-9 h-9 flex items-center justify-center rounded-full"
+        style={{ top: "max(env(safe-area-inset-top,16px),16px)", backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(10px)", minHeight: "unset", minWidth: "unset" }}>
+        <ArrowLeft className="w-4 h-4 text-white" />
+      </button>
+      {/* Top right actions */}
+      <div className="absolute right-4 flex gap-2" style={{ top: "max(env(safe-area-inset-top,16px),16px)" }}>
+        <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(10px)", minHeight: "unset", minWidth: "unset" }}>
+          <Bookmark className="w-4 h-4 text-white" />
+        </button>
+        <button className="w-9 h-9 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(10px)", minHeight: "unset", minWidth: "unset" }}>
+          <Globe className="w-4 h-4 text-white" />
+        </button>
+      </div>
+      {/* Photo dots */}
+      {photos.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+          {photos.map((_, i) => (
+            <div key={i}
+              className="rounded-full transition-all"
+              style={{ width: i === activePhoto ? 20 : 6, height: 6, backgroundColor: i === activePhoto ? "#fff" : "rgba(255,255,255,0.4)" }} />
+          ))}
+        </div>
+      )}
+      {/* Place name on image bottom */}
+      <div className="absolute bottom-8 left-5 right-5">
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-serif)", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>{d.name}</h2>
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {d.address && <span className="text-sm text-white/80">{d.address?.split(",")[0]}</span>}
+          {dist && <><span className="text-white/50">·</span><span className="text-sm text-white/80">🚗 {dist} mi</span></>}
+          {priceStr && <><span className="text-white/50">·</span><span className="text-sm text-white/80">{priceStr}</span></>}
+        </div>
+      </div>
       </div>
 
       {/* Bottom card — dark */}
       <div className="relative z-10 rounded-t-3xl px-5 pt-5 pb-32" style={{ backgroundColor: "#1C1C1E", marginTop: -24 }}>
-        {/* Name + meta row */}
-        <h2 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "var(--font-serif)" }}>{d.name}</h2>
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          {d.address && <span className="text-xs text-gray-400">{d.address?.split(",")[0]}</span>}
-          {dist && <>
-            <span className="text-gray-600">·</span>
-            <span className="text-xs text-gray-400">🚗 {dist} mi</span>
-          </>}
-          {priceStr && <>
-            <span className="text-gray-600">·</span>
-            <span className="text-xs text-gray-400">{priceStr}</span>
-          </>}
-        </div>
 
         {/* Open status */}
         {openText && (
