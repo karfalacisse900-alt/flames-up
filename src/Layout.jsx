@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
-import { Home, Palette, User, Search, Flame, Users, MapPin } from "lucide-react";
+import { Home, Palette, User, Search, Flame, Users, MapPin, Compass } from "lucide-react";
 
 import AppAIAssistant from "@/components/AppAIAssistant";
 import MiniPlayerWrapper from "@/components/discover/MiniPlayerWrapper.jsx";
@@ -17,7 +17,7 @@ const navItems = [
 { name: "Home",      icon: Home,    page: "Home" },
 { name: "Places",   icon: MapPin,  page: "Places" },
 { name: "Discover", icon: Search,  page: "Discover" },
-{ name: "Fashion",  icon: Palette, page: "FashionFeed" },
+{ name: "Explore",  icon: Compass, page: "ExploreArea" },
 { name: "Profile",  icon: User,    page: "Profile" },
 ];
 
