@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Bell, PenSquare, ChevronDown, MessageCircle, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import ArticleFeed from "@/components/discover/ArticleFeed";
 import ArticleDetail from "@/components/discover/ArticleDetail";
 import DiscoverPostComposer from "@/components/discover/DiscoverPostComposer";
@@ -124,29 +122,6 @@ export default function Discover() {
           ))}
         </div>
       </div>
-
-      {/* Local news section header */}
-      <div className="flex items-center justify-between px-4 pt-5 pb-2">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-serif)", color: "var(--text-primary)" }}>Today's local news</h2>
-        <Link to={createPageUrl("ExploreArea")}
-          className="text-sm font-semibold px-3 py-1.5 rounded-full"
-          style={{ backgroundColor: "var(--bg-subtle)", color: "var(--text-secondary)", textDecoration: "none" }}>
-          Explore area
-        </Link>
-      </div>
-
-      {/* Write a post CTA */}
-      {user && (
-        <div className="mx-4 mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl"
-          style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", cursor: "pointer" }}
-          onClick={() => setShowComposer(true)}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0"
-            style={{ backgroundColor: "var(--accent-primary)" }}>
-            {(user.full_name || user.email || "U")[0].toUpperCase()}
-          </div>
-          <span className="text-sm" style={{ color: "var(--text-hint)" }}>Share something with your neighbors…</span>
-        </div>
-      )}
 
       {/* Feed */}
       <ArticleFeed key={feedKey} tab={activeTab} user={user} onArticleClick={setSelectedArticle} onUserPostClick={setSelectedUserPost} />
