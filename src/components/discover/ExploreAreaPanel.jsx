@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import NearbyEventsPage from "./NearbyEventsPage";
-import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Navigation, Loader2, X, Phone, Globe, Clock, ChevronRight, Bookmark } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const CATEGORIES = [
