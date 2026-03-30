@@ -66,7 +66,7 @@ function stripHtml(html) {
   return text.replace(/\n{3,}/g, "\n\n");
 }
 
-function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
+function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap, openCommentsOnTap }) {
   const hasLiked = user?.email && post.upvoted_by?.includes(user.email);
   const [showReactions, setShowReactions] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -168,9 +168,15 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   const isTextOnly = post.type === "text_only";
 
   // ── Text-Only card layout ──────────────────────────────────────────────────
+  const handleCardClick = (e) => {
+    // Don't open detail if clicking on action buttons
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    if (onTap) onTap();
+  };
+
   if (isTextOnly) {
     return (
-      <div className="relative mx-3 my-2" onClick={onTap} style={{ cursor: onTap ? "pointer" : "default" }}>
+      <div className="relative mx-3 my-2" onClick={handleCardClick} style={{ cursor: onTap ? "pointer" : "default" }}>
         <div className="rounded-3xl overflow-hidden"
           style={{ backgroundColor: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
 
@@ -333,7 +339,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
   return (
     <div className="relative w-full">
       {/* Modern card container */}
-      <div className="w-full overflow-hidden" onClick={onTap} style={{ cursor: onTap ? "pointer" : "default" }} 
+      <div className="w-full overflow-hidden" onClick={handleCardClick} style={{ cursor: onTap ? "pointer" : "default" }} 
         style={{ 
           backgroundColor: "var(--bg-card)",
           borderTop: "1px solid var(--border-subtle)",
@@ -598,7 +604,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap }) {
           </div>
 
           {/* Comment */}
-          <button onClick={() => setShowComments(true)}
+          <button onClick={(e) => { e.stopPropagation(); onTap ? onTap() : setShowComments(true); }}
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
             <MessageCircle className="w-5 h-5" strokeWidth={2} />

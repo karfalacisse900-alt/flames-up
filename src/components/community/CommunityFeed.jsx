@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Plus, MapPin, Loader2, Globe, ChevronDown, X, Menu } from "lucide-react";
 import CommunityPostDetail from "./CommunityPostDetail";
+import NewsCard, { NEWS_ITEMS } from "../discover/NewsCard";
 import FeedMenuDrawer from "./FeedMenuDrawer";
 import QuickTipComposer from "./QuickTipComposer";
 import { createPageUrl } from "@/utils";
@@ -705,7 +706,15 @@ export default function CommunityFeed({ user }) {
           </div>
         ) : (
           <>
-            {filteredPosts.map(renderPostCard)}
+            {filteredPosts.map((post, idx) => (
+              <React.Fragment key={post.id}>
+                {renderPostCard(post)}
+                {/* Interleave news card every 4 community posts */}
+                {(idx + 1) % 4 === 0 && NEWS_ITEMS[(idx / 4) % NEWS_ITEMS.length] && (
+                  <NewsCard item={NEWS_ITEMS[Math.floor(idx / 4) % NEWS_ITEMS.length]} />
+                )}
+              </React.Fragment>
+            ))}
             {/* Infinite scroll trigger */}
             {hasMore && (
               <div ref={observerRef} className="py-8 flex justify-center">
