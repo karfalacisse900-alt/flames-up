@@ -604,7 +604,7 @@ function CommunityPostCard({ post, user, onUpvote, onLocationClick, onTap, openC
           </div>
 
           {/* Comment */}
-          <button onClick={(e) => { e.stopPropagation(); onTap ? onTap() : setShowComments(true); }}
+          <button onClick={(e) => { e.stopPropagation(); if (onTap) { onTap(); } else { setShowComments(true); } }}
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-full transition-colors hover:bg-[var(--bg-subtle)]"
             style={{ color: "var(--text-secondary)", minHeight: "44px" }}>
             <MessageCircle className="w-5 h-5" strokeWidth={2} />

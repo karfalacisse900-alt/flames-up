@@ -11,6 +11,7 @@ import { createPageUrl } from "@/utils";
 import PlaceHub from "./PlaceHub";
 import DebateCard from "./DebateCard";
 import CommunityPostCard from "./CommunityPostCard";
+import LocalPublisherCard from "./LocalPublisherCard";
 import { requireVerified } from "../auth/EmailVerificationGate";
 import { rankFeedForUser, trackPostView } from "./feedRanking";
 import { normalizePost } from "@/utils/normalizeMediaUrl";
@@ -73,6 +74,7 @@ export default function CommunityFeed({ user }) {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [showTipComposer, setShowTipComposer] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [publisherPosts, setPublisherPosts] = useState([]);
   const observerRef = useRef(null);
   const pickerRef = useRef(null);
   const qc = useQueryClient();
@@ -228,6 +230,7 @@ export default function CommunityFeed({ user }) {
 
   useEffect(() => {
     loadInitialPosts();
+    base44.entities.LocalPublisherPost.list("-created_date", 20).then(setPublisherPosts).catch(() => {});
   }, [loadInitialPosts]);
 
   const refetch = useCallback(async () => {
@@ -709,9 +712,13 @@ export default function CommunityFeed({ user }) {
             {filteredPosts.map((post, idx) => (
               <React.Fragment key={post.id}>
                 {renderPostCard(post)}
-                {/* Interleave news card every 4 community posts */}
-                {(idx + 1) % 4 === 0 && NEWS_ITEMS[(idx / 4) % NEWS_ITEMS.length] && (
-                  <NewsCard item={NEWS_ITEMS[Math.floor(idx / 4) % NEWS_ITEMS.length]} />
+                {/* Interleave local publisher posts every 4 community posts */}
+                {(idx + 1) % 4 === 0 && publisherPosts[Math.floor(idx / 4) % Math.max(publisherPosts.length, 1)] && (
+                  <LocalPublisherCard item={publisherPosts[Math.floor(idx / 4) % publisherPosts.length]} post={publisherPosts[Math.floor(idx / 4) % publisherPosts.length]} user={user} />
+                )}
+                {/* Interleave news card every 8 posts */}
+                {(idx + 1) % 8 === 0 && NEWS_ITEMS[Math.floor(idx / 8) % NEWS_ITEMS.length] && (
+                  <NewsCard item={NEWS_ITEMS[Math.floor(idx / 8) % NEWS_ITEMS.length]} />
                 )}
               </React.Fragment>
             ))}

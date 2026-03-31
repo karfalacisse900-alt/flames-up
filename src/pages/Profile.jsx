@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap, Shield, Cog } from "lucide-react";
+import { LogOut, Edit2, MessageSquare, Wallet, Gift, FolderOpen, Briefcase, Trash2, Sparkles, Clock, MoreHorizontal, Medal, Plus, X, Download, HelpCircle, Film, Heart, ShieldCheck, BarChart2, Bookmark, Library, Settings, Briefcase as BriefcaseIcon, Zap, Shield, Cog, Newspaper } from "lucide-react";
+import LocalPublisherApplyModal from "../components/community/LocalPublisherApplyModal";
 import SavedItems from "../components/profile/SavedItems";
 import ExportDataModal from "../components/profile/ExportDataModal";
 import BadgesSection, { BADGE_DEFINITIONS } from "../components/profile/BadgesSection";
@@ -44,6 +45,7 @@ export default function Profile() {
   const [showExport, setShowExport] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showAIDeleteModal, setShowAIDeleteModal] = useState(false);
+  const [showPublisherApply, setShowPublisherApply] = useState(false);
   const { isOnline } = usePresenceDetection(user?.email);
   const queryClient = useQueryClient();
   const { data: coinBalance = 0 } = useQuery({
@@ -237,16 +239,22 @@ export default function Profile() {
                   { to: createPageUrl("MyLibrary"), icon: <Library className="w-4 h-4" />, label: "My Library", color: "var(--accent-primary)" },
                   { to: createPageUrl("Referral"), icon: <Gift className="w-4 h-4" />, label: "Referrals", color: "#D98B62" },
                   { to: "/CreatorLanding", icon: <Sparkles className="w-4 h-4" />, label: "Creator Hub", color: "#E05C2A" },
+                  { to: null, icon: <Newspaper className="w-4 h-4" />, label: "Apply: Local Publisher", color: "#1D9BF0", onClick: () => { setShowMore(false); setShowPublisherApply(true); } },
                   ...(user?.role === "admin" ? [
                   { to: "/AdminCreators", icon: <Shield className="w-4 h-4" />, label: "Admin Panel", color: "#7C3AED" },
                   { to: createPageUrl("AdminContentManager"), icon: <BarChart2 className="w-4 h-4" />, label: "Content Manager", color: "#0EA5E9" }] :
                   [])].
-                  map(({ to, icon, label, color }) =>
-                  <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
+                  map(({ to, icon, label, color, onClick }) =>
+                  to ? <Link key={label} to={to} onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
                   style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
                         <span style={{ color }}>{icon}</span>
                         {label}
-                      </Link>
+                      </Link> :
+                  <button key={label} onClick={onClick || (() => setShowMore(false))} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"
+                  style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
+                        <span style={{ color }}>{icon}</span>
+                        {label}
+                      </button>
                   )}
                     <Link to="/Settings" onClick={() => setShowMore(false)} className="flex items-center gap-3 px-4 py-3 text-sm"
                   style={{ color: "var(--text-primary)", borderBottom: "1px solid var(--border-light)" }}>
@@ -450,6 +458,8 @@ export default function Profile() {
 
       {/* Export data modal */}
       <ExportDataModal open={showExport} onClose={() => setShowExport(false)} user={user} />
+
+      {showPublisherApply && <LocalPublisherApplyModal user={user} onClose={() => setShowPublisherApply(false)} />}
 
       {/* AI Assistant deletion modal */}
       <AIAssistantDeletion

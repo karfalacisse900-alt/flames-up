@@ -1,0 +1,51 @@
+{
+  "name": "LocalPublisherPost",
+  "type": "object",
+  "properties": {
+    "publisher_id": {
+      "type": "string"
+    },
+    "publisher_name": {
+      "type": "string"
+    },
+    "publisher_logo": {
+      "type": "string"
+    },
+    "website_domain": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "engagement_prompt": {
+      "type": "string"
+    },
+    "like_count": {
+      "type": "number",
+      "default": 0
+    },
+    "liked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "comment_count": {
+      "type": "number",
+      "default": 0
+    },
+    "author_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "publisher_id",
+    "headline"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "name": "LocalPublisher",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "publisher_name": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "website_domain": {
+      "type": "string",
+      "description": "e.g. bostonglobecom"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "user_email",
+    "publisher_name"
+  ]
+}
