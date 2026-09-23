@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@babel/core": "^7.25.0",
-    "@base44/sdk": "^0.8.24",
-    "@base44/vite-plugin": "^1.0.6",
+    "@base44/sdk": "^0.8.49",
+    "@base44/vite-plugin": "^1.0.42",
     "@cloudflare/realtimekit-react": "latest",
     "@cloudflare/realtimekit-react-ui": "latest",
     "@hello-pangea/dnd": "^17.0.0",
